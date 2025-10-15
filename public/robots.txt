@@ -1,0 +1,15 @@
+# ================================
+# Robots.txt - Relocation In Paris
+# ================================
+
+# General rules
+User-agent: *
+Disallow: /admin/
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /reset-password
+Disallow: /_profiler/
+Disallow: /_wdt/
+
+Sitemap: https://relocation-in-paris.fr/sitemap.xml
