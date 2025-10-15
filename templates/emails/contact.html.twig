@@ -1,0 +1,11 @@
+<h1 class="text-green-600">Nouveau contact du site internet :</h1>
+<br/>
+<p><strong>Nom/Prénom :</strong> {{ fistName }} {{ lastName }}</p>
+<p><strong>Email :</strong> {{ emailContact }}</p>
+<p><strong>Téléphone :</strong> {{ phoneNumber }}</p>
+<p><strong>Type :</strong> {{ helpType | trans }}</p>
+<p><strong>Message :</strong> {{ message }}</p>
+<p><strong>Langue :</strong> {{ lang }}</p>
+<br/>
+<p><strong>Envoyé le :</strong> {{ createdAt | date('d F Y') | format_date(locale='fr') }} à {{ createdAt | date('H:i') }}</p>
+<em>{{ ip }}</em>

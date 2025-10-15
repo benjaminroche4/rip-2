@@ -1,0 +1,296 @@
+contact:
+    title: Contactez-nous
+    subTitle: Contactez notre équipe d’experts
+    image:
+        alt: Relocation In Paris, agence de relocation à Paris
+    contactType:
+        1:
+            email:
+                label: Adresse email
+        2:
+            phone:
+                label: Téléphone
+            orContactus: Ou contactez-nous
+            whatsapp: via Whatsapp
+        3:
+            office:
+                label: Bureau
+    contactForm:
+        title: Contactez nos experts en relocation
+        firstName:
+            label: Prénom
+            placeholder: Prénom
+        lastName:
+            label: Nom
+            placeholder: Nom
+        email:
+            label: Email
+            placeholder: Email
+        phoneNumber:
+            label: Téléphone
+            placeholder: Téléphone
+        company:
+            label: Entreprise
+            placeholder: Entreprise
+        helpType:
+            label: Comment pouvons-nous vous aider ?
+            choice:
+                1: Recherche de logement
+                2: Services pour entreprises
+                3: Services pour propriétaires
+                4: Autre demande ou information
+        message:
+            label: Message
+            placeholder: Votre message...
+        accept:
+            label: En cochant cette case, j’accepte l’utilisation de mes informations pour être recontacté(e).
+        success:
+            title: Merci pour votre message !
+            text: Un expert de notre équipe vous contactera dans les plus brefs délais.
+        subButtonText: Réponse et devis sous 24 heures
+ctaFooter:
+    title: Vous avez un projet à Paris ?
+    subTitle: Nos experts vous accompagnent avec une approche personnalisée et des solutions sur mesure pour concrétiser vos ambitions.
+    button: Contacter un expert
+    image:
+        1:
+            alt: Photo de Mélanie, agent de Relocation in Paris
+        2:
+            alt: Photo de Fabien, agent de Relocation in Paris
+        3:
+            alt: Photo de Vincent, agent de Relocation in Paris
+footer:
+    logo:
+        alt: Logo Relocation in Paris
+    menu:
+        findAccommodation: Trouver un logement
+        companies: Entreprises
+        landlords: Propriétaires
+        contact: Contactez-nous
+    bottomPage:
+        rights: Relocation In Paris. Tous droits réservés.
+header:
+    action: Ouvrir le menu
+    actionClose: Fermer le menu
+    menu:
+        findAccommodation: Trouver un logement
+        companies: Entreprises
+        landlords: Propriétaires
+        contact: Contacter un expert
+    google:
+        basedOn: Basé sur
+        reviews: avis
+companies:
+    title: Pour les entreprises
+    subTitle: Mobilité et immobilier d’entreprise à Paris
+    services:
+        1:
+            title: Mobilité des collaborateurs
+            subTitle: Un accompagnement sur mesure pour faciliter la relocation professionnelle.
+            offer:
+                1: Recherche de logement adaptée
+                2: Gestion des démarches administratives
+                3: Assistance à l’installation
+                4: Suivi dédié pour le collaborateur et sa famille
+        2:
+            title: Recherche de bureaux
+            subTitle: Des espaces pensés pour votre expansion à Paris.
+            offer:
+                1: Sélection de bureaux selon vos besoins
+                2: Négociation des baux et accompagnement juridique
+                3: Coordination avec nos partenaires immobiliers
+                4: Accès à notre réseau d’espaces premium à Paris
+        3:
+            title: Accompagnement RH
+            subTitle: Un service conçu pour vos équipes et vos priorités.
+            offer:
+                1: Gestion des mobilités internes et internationales
+                2: Communication avec les départements RH
+                3: Suivi administratif et logistique complet
+                4: Reporting transparent sur chaque mission
+    faq:
+        title: Vos questions, nos réponses
+        question:
+            1:
+                title: Quels services proposez-vous pour la relocation de nos collaborateurs ?
+                text:  "Nous assurons un accompagnement complet : recherche de logement, démarches administratives et installation. Chaque mission est personnalisée pour garantir une arrivée fluide et en toute sérénité à Paris."
+            2:
+                title: Pouvez-vous vous charger de la recherche de bureaux à Paris ?
+                text:  Oui. Nous proposons un service dédié à la recherche de bureaux, espaces de travail et logements d’entreprise, entièrement adapté à vos besoins et à votre image.
+            3:
+                title: Comment se déroule la prise en charge d’un collaborateur ?
+                text:  "Un conseiller dédié suit chaque dossier de A à Z : analyse du besoin, sélection des logements, suivi administratif et installation complète."
+            4:
+                title: Travaillez-vous avec des entreprises internationales ?
+                text: Oui. Nous accompagnons des entreprises françaises et internationales, avec une expertise reconnue en mobilité et relocation à Paris.
+            5:
+                title: Pourquoi choisir Relocation in Paris pour votre entreprise ?
+                text: Pour un service premium, efficace et confidentiel, qui valorise votre image d’entreprise et garantit le bien-être de vos collaborateurs.23
+findAccommodation:
+    title: Trouver un logement
+    subTitle: Votre nouveau chez-vous à Paris
+    services:
+        1:
+            title: Recherche de logement
+            subTitle: Une recherche de logement exclusive et personnalisée.
+            offer:
+                1: Locations courte ou longue durée
+                2: Appartements meublés ou non meublés
+                3: Visites physiques ou virtuelles
+                4: Accès à notre réseau exclusif de partenaires immobiliers
+                5: Sélection et accompagnement à chaque étape
+        2:
+            title: Accompagnement administratif
+            subTitle: Une prise en charge complète de vos démarches.
+            offer:
+                1: Gestion du bail et des documents
+                2: Négociation du loyer
+                3: Vérification juridique et conformité du bail
+                4: Suivi jusqu’à la remise des clés
+        3:
+            title: Installation et services
+            subTitle: Nous orchestrons chaque étape de votre installation.
+            offer:
+                1: Gestion de l’état des lieux
+                2: Activation des services essentiels
+                3: Accès à notre réseau de partenaires
+    faq:
+        title: Vos questions, nos réponses
+        question:
+            1:
+                title: Quels types de logements proposez-vous ?
+                text: Nous proposons une sélection de biens à Paris et en proche banlieue, meublés ou non, pour des locations de courte ou longue durée. Chaque recherche est entièrement personnalisée selon vos critères, avec un accès privilégié à notre réseau exclusif de partenaires immobiliers.
+            2:
+                title: Prenez-vous en charge les démarches administratives ?
+                text: "Oui. Nous gérons l’ensemble du processus : constitution du dossier, gestion du bail, vérification juridique et suivi jusqu’à la remise des clés. Vous bénéficiez d’une prise en charge complète, dans le respect des exigences légales et de vos contraintes personnelles."
+            3:
+                title: Aidez-vous à l’installation une fois le logement trouvé ?
+                text: "Absolument. Nous orchestrons toutes les étapes de votre installation : état des lieux, activation des services essentiel et mise en relation avec nos partenaires exclusifs pour tout besoin complémentaire."
+            4:
+                title: Travaillez-vous uniquement avec des particuliers ?
+                text: "Non. Nous accompagnons aussi bien les particuliers que les entreprises et propriétaires. Nos services s’adaptent à chaque profil : relocation individuelle, mobilité professionnelle, ou gestion de biens à Paris."
+            5:
+                title: En combien de temps puis-je m’installer à Paris ?
+                text: Les délais varient selon vos besoins et la disponibilité des biens et de vos critères, mais grâce à notre réseau exclusif et notre expertise locale, nous pouvons finaliser une installation complète en quelques semaines seulement.
+landlords:
+    title: Pour les propriétaires
+    subTitle: Confiez la gestion de votre bien en toute sérénité
+    services:
+        1:
+            title: Gestion locative
+            subTitle: Une prise en charge complète de votre bien immobilier.
+            offer:
+                1: Suivi administratif
+                2: Entrée et sortie des locataires
+                3: Gestion des loyers
+                4: Coordination des interventions
+                5: Suivi administratif et reporting transparent
+        2:
+            title: Recherche de locataires
+            subTitle: Nous sélectionnons des locataires fiables grâce à notre réseau exclusif.
+            offer:
+                1: Diffusion ciblée et mise en valeur du bien
+                2: Étude rigoureuse des dossiers
+                3: Rédaction et signature du bail
+                4: Suivi à l’entrée du locataire
+    faq:
+        title: Vos questions, nos réponses
+        question:
+            1:
+                title: Comment se déroule la gestion locative avec Relocation in Paris ?
+                text: "Nous prenons en charge l’ensemble du processus : recherche du locataire, rédaction du bail, encaissement des loyers, suivi technique et administratif, jusqu’à la sortie du locataire. Vous conservez une visibilité complète grâce à nos rapports réguliers."
+            2:
+                title: Comment sélectionnez-vous les locataires ?
+                text: "Chaque dossier est soigneusement vérifié : solvabilité, stabilité professionnelle et garanties. Nous vous présentons une sélection de profils qualifiés, et la décision finale vous appartient. Vous conservez ainsi un contrôle total, tout en bénéficiant de notre expertise et de notre réseau exclusif."
+            3:
+                title:  Gérez-vous l’installation du locataire ?
+                text: "Oui, et c’est une partie essentielle de notre service. Nous organisons l’état des lieux, l’activation des contrats essentiels (énergie, internet, assurance) et coordonnons les premières démarches pour garantir une installation fluide et sans accroc."
+            4:
+                title: Quels sont les frais de gestion locative ?
+                text: Nos honoraires varient selon le type de bien et le niveau de service souhaité. Nous proposons une gestion premium transparente, sans frais cachés, avec une approche sur mesure adaptée à votre patrimoine.
+            5:
+                title: Gérez-vous les interventions techniques et la maintenance ?
+                text: Oui. Nous coordonnons directement les interventions nécessaires (entretien, réparations, dépannages) via notre réseau de prestataires de confiance, tout en vous tenant informé à chaque étape.
+meta:
+    home:
+        title: Agence de Relocation à Paris
+        description: "Agence de relocation à Paris pour particuliers et entreprises : recherche de logement, bureaux et installation complète de collaborateurs."
+    companies:
+        title: Installation de Collaborateurs et Recherche de Bureaux
+        description: "Installation de vos collaborateurs et implantation de vos bureaux à Paris avec un accompagnement sur mesure et un service haut de gamme."
+    contact:
+        title: Contactez Nos Experts en Relocation à Paris
+        description: "Échangez avec nos experts en relocation à Paris. Nous accompagnons particuliers et entreprises dans leurs projets d’installation dans la capitale."
+    findAccommodation:
+        title: Recherche de Logement à Paris
+        description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
+    landlords:
+        title: Gestion Locative et Recherche de Locataires
+        description: "Service premium pour propriétaires à Paris : gestion locative et recherche de locataires pour locations courtes ou longues durées."
+    sitemap:
+        title: Plan du site
+        description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
+home:
+    heroSection:
+        top:
+            1: Meilleure agence
+            2: 'à <span class="font-semibold">Paris en 2025</span>'
+        title: L’excellence de la relocation à Paris
+        subTitle: Un accompagnement exclusif et sur mesure pour transformer votre installation à Paris en une expérience fluide, sereine et pleinement réussie.
+        button: Contacter un expert
+        image:
+            alt: Relocation In Paris, agence de relocation à Paris
+    services:
+        title: Nos services
+        subTitle: Des services pensés pour chaque profil
+        button: Découvrir le service
+        1:
+            title: Trouver un logement
+            text: Une recherche de logement exclusive et personnalisée, pour des locations courtes ou longues durées à Paris.
+        2:
+            title: Pour les entreprises
+            text: Facilitez l’installation de vos collaborateurs et trouvez des bureaux adaptés à vos ambitions, sans perdre de temps.
+        3:
+            title: Pour les propriétaires
+            text: Confiez la gestion de votre bien à des experts et trouvez des locataires fiables, sans stress ni perte de temps.
+    faq:
+        title: FAQ
+        subTitle: Vos questions, nos réponses
+        question:
+            1:
+                title: Qu’est-ce qu’un service de relocation à Paris ?
+                text: Un service de relocation accompagne particuliers et entreprises dans leur installation à Paris. Il prend en charge la recherche de logement/bureau, les démarches administratives et l’intégration sur mesure.
+            2:
+                title: À qui s’adressent vos services de relocation ?
+                text: Nous accompagnons les particuliers, les expatriés, ainsi que les entreprises souhaitant installer leurs collaborateurs ou ouvrir un bureau à Paris.
+            3:
+                title: Proposez-vous des solutions pour les locations courte et longue durée ?
+                text: Oui, nous proposons des solutions de logement meublé ou non, adaptées à la durée de séjour, avec un accompagnement complet jusqu’à l’installation.
+            4:
+                title: Quels sont les avantages de passer par Relocation in Paris ?
+                text: "Nous offrons un service premium, personnalisé et clé en main : un seul interlocuteur dédié, un réseau exclusif de partenaires immobiliers et une installation sans stress."
+            5:
+                title: Combien de temps faut-il pour s’installer à Paris avec votre accompagnement ?
+                text: La durée dépend du profil et des besoins, mais grâce à notre réseau et à une gestion proactive, une installation complète à Paris peut être réalisée en 2 à 6 semaines seulement.
+    keyMetrics:
+        title: En quelques chiffres
+        subTitle: Une expertise reconnue à Paris
+        1:
+            value: installations réussies
+        2:
+            value: ans d'expertise combinée
+        3:
+            value: partenaires sur la capitale
+        4:
+            value: avis google verifiés
+    aboutUs:
+        title: Une arrivée sereine
+        subTitle: Paris devient votre nouveau chez-vous
+        text: Nous orchestrons chaque détail de votre relocalisation pour que votre arrivée soit fluide, confortable et sans imprévu. Vous profitez de votre nouvelle vie, nous gérons le reste.
+        subText1:
+            title: Une équipe d’experts.
+            text: Des professionnels passionnés qui connaissent l'immobilier à Paris sur le bout des doigts.
+        subText2:
+            title: Un savoir-faire depuis plus de 20 ans.
+            text: Deux décennies d’expérience au service de ceux qui s’installent à Paris.
+        button: Contacter un expert

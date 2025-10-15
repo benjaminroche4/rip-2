@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2" data-name="Calque 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.87 23.43">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #1d1d1b;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="Calque_1-2" data-name="Calque 1">
+    <g>
+      <rect class="cls-1" x="2.6" y="0" width="21.27" height="21.27" rx="2.27" ry="2.27"/>
+      <rect class="cls-2" x="1.16" y="1.07" width="21.27" height="21.27" rx="2.27" ry="2.27"/>
+      <rect class="cls-1" x="0" y="2.15" width="21.27" height="21.27" rx="2.27" ry="2.27"/>
+      <path class="cls-2" d="M8.83,17.3v-8.56h3.51c1.14,0,2.04.27,2.68.81.65.54.97,1.28.97,2.24,0,.63-.15,1.17-.44,1.62-.29.45-.71.8-1.25,1.04-.54.24-1.19.36-1.95.36h-2.64l.71-.72v3.21h-1.59ZM10.41,14.26l-.71-.76h2.57c.7,0,1.23-.15,1.58-.45.35-.3.53-.72.53-1.26s-.18-.97-.53-1.26c-.35-.29-.88-.44-1.58-.44h-2.57l.71-.78v4.95ZM14.42,17.3l-2.16-3.1h1.7l2.18,3.1h-1.71Z"/>
+      <rect class="cls-2" x="6.93" y="8.74" width=".86" height="8.55"/>
+      <rect class="cls-2" x="5.75" y="8.73" width=".33" height="8.55"/>
+    </g>
+  </g>
+</svg>

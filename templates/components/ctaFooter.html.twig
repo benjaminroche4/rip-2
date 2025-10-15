@@ -1,0 +1,25 @@
+<section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <div class="max-w-5xl mx-auto lg:py-16 py-12 rounded-2xl px-4 bg-linear-to-b from-neutral-100 to-neutral-50/70">
+        <div class="flex flex-col justify-center items-center max-w-lg mx-auto space-y-4 text-center">
+            <div class="flex -space-x-2 mb-6">
+                <img src="{{ asset('medias/website/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-100" />
+                <img src="{{ asset('medias/website/team_2.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-100" />
+                <img src="{{ asset('medias/website/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-100" />
+            </div>
+            <h2 class="text-3xl font-medium text-pretty">{{ 'ctaFooter.title'|trans }}</h2>
+            <p class="text-center text-neutral-700 text-pretty">
+                {{ 'ctaFooter.subTitle'|trans|raw }}
+            </p>
+            <div class="mt-4 flex sm:flex-row flex-col items-center justify-center lg:justify-start gap-3">
+                <a href="{{ path('app_contact') }}"
+                   class="inline-flex items-center gap-x-2 rounded-full bg-[#71172e] px-4 py-2.5 text-base font-semibold text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                    {{ 'ctaFooter.button'|trans|raw }}
+                </a>
+                <a href="tel:+33761719439" class="text-sm/6 font-semibold text-gray-900 bg-white border border-gray-900 text-gray-900 rounded-full px-4 py-2.5  flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
+                    {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
+                    07 61 71 94 39
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

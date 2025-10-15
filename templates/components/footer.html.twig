@@ -1,0 +1,23 @@
+<footer class="bg-gray-900 relative z-20 rounded-t-3xl">
+    <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 sm:py-16 lg:px-8">
+        <a href="{{ path('app_home') }}">
+            <img src="{{ asset('medias/logos/logo_white.svg') }}" width="153" height="150" loading="eager" alt="{{ 'footer.logo.alt'|trans|raw }}" class="mx-auto h-10 mb-12"/>
+        </a>
+        <nav aria-label="Footer" class="-mb-6 flex flex-wrap justify-center gap-x-12 gap-y-3 text-sm/6">
+            <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
+            <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
+            <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-white{% endif %}  text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.landlords'|trans|raw }}</a>
+            <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
+        </nav>
+        <div class="mt-16 flex justify-center gap-x-10">
+            <a href="https://www.linkedin.com/company/relocation-in-paris/" target="_blank" class="text-gray-400 hover:text-white transition duration-100">
+                <span class="sr-only">Linkedin</span>
+                {{ ux_icon('uil:linkedin', {'class':'size-6'}) }}
+            </a>
+        </div>
+        <p class="mt-10 text-center text-sm/6 text-gray-400">
+            &copy; {{ "now"|date("Y") }} {{ 'footer.bottomPage.rights'|trans|raw }}
+            <a href="{{ path('app_sitemap') }}" class="{% if app.request.attributes.get('_route') == 'app_sitemap' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">Sitemap</a>.
+        </p>
+    </div>
+</footer>

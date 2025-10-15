@@ -1,0 +1,7 @@
+presta_sitemap:
+    default_section: pages
+    timetolive: 3600
+    defaults:
+        priority: 0.7
+        changefreq: weekly
+        lastmod: now
