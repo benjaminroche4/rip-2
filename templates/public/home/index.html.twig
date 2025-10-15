@@ -256,28 +256,139 @@
         <div class="bg-neutral-100/80 py-12 px-6 rounded-2xl">
             <div class="flex flex-col space-y-3 justify-center text-center">
                 <h2 class="font-semibold text-primary font-secondary">Témoignages clients</h2>
-                <h3 class="text-3xl font-medium text-pretty">L’expérience Relocation in Paris</h3>
+                <h3 class="text-3xl font-medium text-pretty">L'expérience Relocation in Paris</h3>
             </div>
-            <figure class="mx-auto max-w-2xl mt-12">
-                <p class="sr-only">5 out of 5 stars</p>
-                <div class="flex text-indigo-600">
-                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
-                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
-                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
-                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
-                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
-                </div>
-                <blockquote class="mt-5 text-xl/8 tracking-tight text-gray-900 sm:text-2xl/9">
-                    <p>“Qui dolor enim consectetur do et non ex amet culpa sint in ea non dolore. Enim minim magna anim id minim eu cillum sunt dolore aliquip. Amet elit laborum culpa irure incididunt adipisicing culpa amet officia exercitation. Eu non aute velit id velit Lorem elit anim pariatur.”</p>
-                </blockquote>
-                <figcaption class="mt-10 flex items-center gap-x-4">
-                    <img src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80" alt="" class="size-12 rounded-full bg-gray-50" />
-                    <div class="text-sm/6">
-                        <div class="font-semibold text-gray-900">Judith Black</div>
-                        <div class="mt-0.5 text-gray-600">CEO of Workcation</div>
+
+            <div
+                x-data="{
+                    currentSlide: 0,
+                    slides: [
+                        {
+                            rating: 5,
+                            text: 'Qui dolor enim consectetur do et non ex amet culpa sint in ea non dolore. Enim minim magna anim id minim eu cillum sunt dolore aliquip. Amet elit laborum culpa irure incididunt adipisicing culpa amet officia exercitation. Eu non aute velit id velit Lorem elit anim pariatur.',
+                            name: 'Judith Black',
+                            title: 'CEO of Workcation',
+                            image: 'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                        },
+                        {
+                            rating: 5,
+                            text: 'Service exceptionnel ! L\'équipe de Relocation in Paris a rendu notre installation à Paris tellement plus facile. Ils ont géré tous les aspects administratifs avec professionnalisme et efficacité.',
+                            name: 'Pierre Dubois',
+                            title: 'Directeur Financier',
+                            image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                        },
+                        {
+                            rating: 5,
+                            text: 'Une expérience formidable du début à la fin. Ils ont trouvé l\'appartement parfait pour notre famille en un temps record. Je recommande vivement leurs services à tous les expatriés.',
+                            name: 'Sarah Johnson',
+                            title: 'Marketing Manager',
+                            image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                        },
+                        {
+                            rating: 5,
+                            text: 'Professionnalisme et attention aux détails remarquables. Grâce à Relocation in Paris, notre transition a été sans stress. Un service premium qui vaut vraiment l\'investissement.',
+                            name: 'Marco Rossi',
+                            title: 'International Business Developer',
+                            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                        },
+                        {
+                            rating: 5,
+                            text: 'Accompagnement personnalisé et réactif. L\'équipe a été à notre écoute et a répondu à tous nos besoins spécifiques. Une vraie valeur ajoutée pour notre relocation.',
+                            name: 'Emma Martinez',
+                            title: 'HR Director',
+                            image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                        }
+                    ],
+                    get totalSlides() {
+                        return this.slides.length;
+                    },
+                    nextSlide() {
+                        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+                    },
+                    prevSlide() {
+                        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+                    },
+                    goToSlide(index) {
+                        this.currentSlide = index;
+                    },
+                    autoplay: null,
+                    startAutoplay() {
+                        this.autoplay = setInterval(() => {
+                            this.nextSlide();
+                        }, 5000);
+                    },
+                    stopAutoplay() {
+                        if (this.autoplay) {
+                            clearInterval(this.autoplay);
+                        }
+                    }
+                }"
+                x-init="startAutoplay()"
+                @mouseenter="stopAutoplay()"
+                @mouseleave="startAutoplay()"
+                class="relative mx-auto max-w-2xl mt-12"
+            >
+                <button
+                    @click="prevSlide()"
+                    class="hidden lg:block  absolute -left-12 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-10 bg-white hover:bg-primary/5 text-gray-800 rounded-full p-2 lg:p-3 transition duration-100"
+                    aria-label="Avis précédent"
+                >
+                    <svg class="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div class="overflow-hidden">
+                    <div
+                        class="flex transition-transform duration-500 ease-in-out"
+                        :style="'transform: translateX(-' + (currentSlide * 100) + '%);'"
+                    >
+                        <template x-for="(slide, index) in slides" :key="index">
+                            <figure class="w-full flex-shrink-0 px-4">
+                                <p class="sr-only" x-text="slide.rating + ' out of 5 stars'"></p>
+                                <div class="flex text-indigo-600 justify-center lg:justify-start">
+                                    <template x-for="star in slide.rating">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
+                                    </template>
+                                </div>
+                                <blockquote class="mt-5 text-xl/8 tracking-tight text-gray-900 sm:text-2xl/9">
+                                    <p x-text="slide.text"></p>
+                                </blockquote>
+                                <figcaption class="mt-10 flex items-center gap-x-4">
+                                    <img
+                                        :src="slide.image"
+                                        :alt="slide.name"
+                                        class="size-12 rounded-full bg-gray-50"
+                                    />
+                                    <div class="text-sm/6">
+                                        <div class="font-semibold text-gray-900" x-text="slide.name"></div>
+                                        <div class="mt-0.5 text-gray-600" x-text="slide.title"></div>
+                                    </div>
+                                </figcaption>
+                            </figure>
+                        </template>
                     </div>
-                </figcaption>
-            </figure>
+                </div>
+                <button
+                    @click="nextSlide()"
+                    class="hidden lg:block absolute -right-12 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-10  bg-white hover:bg-primary/5 text-gray-800 rounded-full p-2 lg:p-3 transition duration-100"
+                    aria-label="Avis suivant"
+                >
+                    <svg class="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <div class="flex justify-center gap-2 mt-8">
+                    <template x-for="(slide, index) in slides" :key="index">
+                        <button
+                            @click="goToSlide(index)"
+                            :class="currentSlide === index ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
+                            class="h-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            :aria-label="'Aller au témoignage ' + (index + 1)"
+                            :aria-current="currentSlide === index ? 'true' : 'false'"
+                        ></button>
+                    </template>
+                </div>
+            </div>
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
