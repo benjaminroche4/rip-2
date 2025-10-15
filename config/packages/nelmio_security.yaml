@@ -1,0 +1,54 @@
+nelmio_security:
+    # prevents framing of the entire site
+    clickjacking:
+        paths:
+            '^/.*': DENY
+
+    # disables content type sniffing for script resources
+    content_type:
+        nosniff: true
+
+    # Send a full URL in the `Referer` header when performing a same-origin request,
+    # only send the origin of the document to secure destination (HTTPS->HTTPS),
+    # and send no header to a less secure destination (HTTPS->HTTP).
+    # If `strict-origin-when-cross-origin` is not supported, use `no-referrer` policy,
+    # no referrer information is sent along with requests.
+    referrer_policy:
+        enabled: true
+        policies:
+            - 'no-referrer'
+            - 'strict-origin-when-cross-origin'
+    csp:
+        enabled: true
+        enforce:
+            # Base sûre
+            default-src: ["'self'"]
+
+            # ➜ Ton patch pour faire tourner du code qui utilise eval/new Function
+            script-src:
+                - "'self'"
+                - "'unsafe-eval'"
+                - "'unsafe-inline'"
+
+            # ImportMap + styles inline (Tailwind/EasyAdmin)
+            style-src:
+                - "'self'"
+                - "'unsafe-inline'"
+
+            # Images & SVG inline (data:)
+            img-src:
+                - "'self'"
+                - "data:"
+
+            # Polices locales (woff/woff2) + data:
+            font-src:
+                - "'self'"
+                - "data:"
+
+            # XHR/fetch (Turbo/Stimulus, API interne)
+            connect-src: ["'self'"]
+
+            # Durscisseurs basiques
+            object-src: ["'none'"]
+            base-uri: ["'self'"]
+            frame-ancestors: ["'self'"]
