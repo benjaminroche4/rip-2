@@ -1,0 +1,314 @@
+contact:
+    title: Contact us
+    subTitle: Contact our team of experts
+    image:
+        alt: Relocation In Paris, relocation agency in Paris
+    contactType:
+        1:
+            email:
+                label: Email address
+        2:
+            phone:
+                label: Phone
+            orContactus: Or contact us
+            whatsapp: via WhatsApp
+        3:
+            office:
+                label: Office
+    contactForm:
+        title: Contact our relocation experts
+        firstName:
+            label: First name
+            placeholder: First name
+        lastName:
+            label: Last name
+            placeholder: Last name
+        email:
+            label: Email
+            placeholder: Email
+        phoneNumber:
+            label: Phone
+            placeholder: Phone
+        company:
+            label: Company
+            placeholder: Company
+        helpType:
+            label: How can we help you?
+            choice:
+                1: Housing search
+                2: Services for companies
+                3: Services for landlords
+                4: Other request or information
+        message:
+            label: Message
+            placeholder: Your message...
+        accept:
+            label: By checking this box, I agree that my information may be used to be contacted.
+        success:
+            title: Thank you for your message!
+            text: An expert from our team will contact you as soon as possible.
+        subButtonText: Response and quote within 24 hours
+ctaFooter:
+    title: Do you have a project in Paris?
+    subTitle: Our experts support you with a personalized approach and tailor-made solutions to achieve your goals.
+    button: Contact an expert
+    image:
+        1:
+            alt: Photo of Mélanie, agent at Relocation in Paris
+        2:
+            alt: Photo of Fabien, agent at Relocation in Paris
+        3:
+            alt: Photo of Vincent, agent at Relocation in Paris
+footer:
+    logo:
+        alt: Relocation in Paris logo
+    menu:
+        findAccommodation: Find accommodation
+        companies: Companies
+        landlords: Landlords
+        contact: Contact us
+    bottomPage:
+        rights: Relocation In Paris. All rights reserved.
+header:
+    action: Open menu
+    actionClose: Close menu
+    menu:
+        findAccommodation: Find accommodation
+        companies: Companies
+        landlords: Landlords
+        contact: Contact an expert
+    google:
+        basedOn: Based on
+        reviews: reviews
+companies:
+    title: For companies
+    subTitle: Corporate mobility and real estate in Paris
+    services:
+        1:
+            title: Employee mobility
+            subTitle: Tailor-made support to facilitate professional relocation.
+            offer:
+                1: Tailored housing search
+                2: Administrative management
+                3: Installation assistance
+                4: Dedicated support for employee and family
+        2:
+            title: Office search
+            subTitle: Workspaces designed for your growth in Paris.
+            offer:
+                1: Office selection according to your needs
+                2: Lease negotiation and legal assistance
+                3: Coordination with real estate partners
+                4: Access to our premium network in Paris
+        3:
+            title: HR support
+            subTitle: A service designed for your teams and priorities.
+            offer:
+                1: Management of internal and international mobility
+                2: Communication with HR departments
+                3: Complete administrative and logistical follow-up
+                4: Transparent reporting for each mission
+    faq:
+        title: Your questions, our answers
+        question:
+            1:
+                title: What services do you offer for the relocation of our employees?
+                text: "We provide complete support: housing search, administrative procedures, and installation. Each mission is personalized to ensure a smooth and stress-free arrival in Paris."
+            2:
+                title: Can you handle office searches in Paris?
+                text: Yes. We offer a dedicated service for finding offices, workspaces, and corporate housing, fully adapted to your needs and image.
+            3:
+                title: How is an employee’s relocation handled?
+                text: "A dedicated consultant manages each file from A to Z: needs analysis, housing selection, administrative follow-up, and full installation."
+            4:
+                title: Do you work with international companies?
+                text: Yes. We assist both French and international companies with recognized expertise in mobility and relocation in Paris.
+            5:
+                title: Why choose Relocation in Paris for your company?
+                text: For a premium, efficient, and confidential service that enhances your company’s image and ensures your employees’ well-being.
+findAccommodation:
+    title: Find accommodation
+    subTitle: Your new home in Paris
+    services:
+        1:
+            title: Housing search
+            subTitle: An exclusive and personalized housing search.
+            offer:
+                1: Short- or long-term rentals
+                2: Furnished or unfurnished apartments
+                3: Physical or virtual visits
+                4: Access to our exclusive real estate network
+                5: Selection and support at every step
+        2:
+            title: Administrative assistance
+            subTitle: Full management of your formalities.
+            offer:
+                1: Lease and document management
+                2: Rent negotiation
+                3: Legal verification and compliance
+                4: Follow-up until key handover
+        3:
+            title: Installation and services
+            subTitle: We coordinate every stage of your installation.
+            offer:
+                1: Inventory management
+                2: Activation of essential services
+                3: Access to our partner network
+    faq:
+        title: Your questions, our answers
+        question:
+            1:
+                title: What types of housing do you offer?
+                text: We offer a selection of properties in Paris and nearby suburbs, furnished or unfurnished, for short- or long-term rentals. Each search is fully personalized, with privileged access to our exclusive network of real estate partners.
+            2:
+                title: Do you handle administrative procedures?
+                text: "Yes. We manage the entire process: file preparation, lease management, legal verification, and follow-up until key handover. You benefit from complete support with full compliance."
+            3:
+                title: Do you help with installation after finding housing?
+                text: "Absolutely. We coordinate all installation steps: inventory, activation of essential services, and connection with our exclusive partners for any additional needs."
+            4:
+                title: Do you only work with individuals?
+                text: "No. We support individuals, companies, and property owners. Our services adapt to each profile: individual relocation, professional mobility, or property management in Paris."
+            5:
+                title: How long does it take to settle in Paris?
+                text: The timeframe varies depending on your needs and property availability, but thanks to our exclusive network and local expertise, a full installation can be completed within a few weeks.
+landlords:
+    title: For landlords
+    subTitle: Manage your property with confidence
+    services:
+        1:
+            title: Property management
+            subTitle: Full management of your property.
+            offer:
+                1: Administrative follow-up
+                2: Tenant move-in and move-out
+                3: Rent management
+                4: Coordination of maintenance
+                5: Transparent reporting
+        2:
+            title: Tenant search
+            subTitle: We select reliable tenants through our exclusive network.
+            offer:
+                1: Targeted advertising and property showcasing
+                2: Thorough tenant screening
+                3: Lease drafting and signing
+                4: Tenant move-in support
+    faq:
+        title: Your questions, our answers
+        question:
+            1:
+                title: How does property management with Relocation in Paris work?
+                text: "We handle the entire process: tenant search, lease drafting, rent collection, technical and administrative follow-up, up to tenant departure. You maintain full visibility thanks to our regular reports."
+            2:
+                title: How do you select tenants?
+                text: "Each file is carefully verified: solvency, job stability, and guarantees. We present a selection of qualified profiles, and you make the final choice — ensuring full control while benefiting from our expertise and network."
+            3:
+                title: Do you manage tenant installation?
+                text: "Yes, it’s a key part of our service. We organize the inventory, activate essential contracts (energy, internet, insurance), and coordinate first steps to ensure a seamless installation."
+            4:
+                title: What are your property management fees?
+                text: Our fees depend on the property type and desired service level. We offer transparent, premium management with no hidden costs, fully tailored to your property portfolio.
+            5:
+                title: Do you handle maintenance and repairs?
+                text: Yes. We directly coordinate necessary interventions (maintenance, repairs, troubleshooting) via our trusted network of contractors, keeping you informed at every step.
+meta:
+    home:
+        title: Relocation agency in Paris
+        description: "Relocation agency in Paris for individuals and companies: housing search, office setup, and full employee relocation."
+    companies:
+        title: Employee relocation and office search
+        description: "Relocate your employees and establish your offices in Paris with tailor-made, premium relocation services."
+    contact:
+        title: Contact our relocation experts in Paris
+        description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
+    findAccommodation:
+        title: Housing search in Paris
+        description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
+    landlords:
+        title: Property management and tenant search
+        description: "Premium service for landlords in Paris: property management and tenant search for short- or long-term rentals."
+    sitemap:
+        title: Sitemap
+        description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
+home:
+    heroSection:
+        top:
+            1: Best agency
+            2: 'in <span class="font-semibold">Paris in 2025</span>'
+        title: The excellence of relocation in Paris
+        subTitle: Exclusive, tailor-made support to make your move to Paris a smooth, serene, and truly successful experience.
+        button: Contact an expert
+        image:
+            alt: Relocation In Paris, relocation agency in Paris
+    services:
+        title: Our services
+        subTitle: Services designed for every profile
+        button: Discover the service
+        1:
+            title: Find accommodation
+            text: An exclusive and personalized housing search for short- or long-term stays in Paris.
+        2:
+            title: For companies
+            text: Simplify your employees’ relocation and find offices tailored to your ambitions, effortlessly.
+        3:
+            title: For landlords
+            text: Entrust your property to experts and find reliable tenants through a refined, efficient approach.
+    faq:
+        title: FAQ
+        subTitle: Your questions, our answers
+        question:
+            1:
+                title: What is a relocation service in Paris?
+                text: A relocation service supports individuals and companies in their move to Paris. It handles housing or office search, administrative formalities, and customized integration.
+            2:
+                title: Who are your relocation services for?
+                text: We assist individuals, expatriates, and companies looking to relocate employees or open offices in Paris.
+            3:
+                title: Do you offer short- and long-term rental solutions?
+                text: Yes, we offer furnished or unfurnished housing solutions for any duration, with complete assistance up to installation.
+            4:
+                title: What are the advantages of working with Relocation in Paris?
+                text: "We provide a premium, personalized, turnkey service: one dedicated contact, an exclusive real estate network, and a stress-free relocation experience."
+            5:
+                title: How long does it take to settle in Paris with your support?
+                text: Timelines depend on each profile, but thanks to our network and proactive management, a complete relocation to Paris can be achieved in 2 to 6 weeks.
+    keyMetrics:
+        title: In numbers
+        subTitle: Recognized expertise in Paris
+        1:
+            value: successful relocations
+        2:
+            value: years of combined expertise
+        3:
+            value: partners across the capital
+        4:
+            value: verified Google reviews
+    aboutUs:
+        title: A serene arrival
+        subTitle: Paris becomes your new home
+        text: We orchestrate every detail of your relocation to make your arrival smooth, comfortable, and effortless. Enjoy your new life — we handle the rest.
+        subText1:
+            title: A team of experts.
+            text: Passionate professionals who know Paris real estate inside out.
+        subText2:
+            title: Over 20 years of expertise.
+            text: Two decades of experience dedicated to helping newcomers settle in Paris.
+        button: Contact an expert
+    reviews:
+        title: Client testimonials
+        subTitle: The Relocation in Paris experience
+        1:
+            text: Moving from London to Paris could have been a challenge, but everything was handled seamlessly. The team found a beautiful apartment and managed all administrative formalities. A bespoke service and rare attentiveness.
+            title: Individual, Paris 10th
+        2:
+            text: A remarkably professional team. Relocation in Paris managed our employees’ mobility with precision and reactivity. Everything was executed flawlessly and on time. A trusted partner I wholeheartedly recommend.
+            title: Professional, Paris 11th
+        3:
+            text: We were supported from start to finish with great attention and an impressive sense of detail. Our relocation was fast, smooth, and stress-free. Thank you to the entire team for your efficiency and kindness.
+            title: Individual, Paris 7th
+        4:
+            text: I entrusted my property management to Relocation in Paris and couldn’t have made a better choice. The selected tenants are reliable, communication is seamless, and every step is handled with rigor and elegance.
+            title: Investor, Paris 16th
+        5:
+            text: Relocation in Paris handled the installation of several international employees. A turnkey, human, and efficient service. The team perfectly understands HR expectations and the demands of premium relocation.
+            title: Professional, Paris 14th

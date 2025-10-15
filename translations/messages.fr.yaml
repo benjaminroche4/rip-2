@@ -294,3 +294,21 @@ home:
             title: Un savoir-faire depuis plus de 20 ans.
             text: Deux décennies d’expérience au service de ceux qui s’installent à Paris.
         button: Contacter un expert
+    reviews:
+        title: Témoignages clients
+        subTitle: L'expérience Relocation in Paris
+        1:
+            text: Arriver à Paris depuis Londres aurait pu être un vrai défi, mais tout a été orchestré avec une fluidité incroyable. L’équipe a trouvé un appartement magnifique et s’est occupée de toutes les démarches. Un service sur mesure et une écoute rare.
+            title: Particulier, Paris 10ᵉ
+        2:
+            text: Une équipe d’un professionnalisme remarquable. Relocation in Paris a pris en charge la mobilité de nos collaborateurs avec une précision et une réactivité exemplaires. Tout s’est déroulé sans accroc, dans un timing parfait. Un partenaire de confiance que je recommande sans réserve.
+            title: Professionnel, Paris 11ᵉ
+        3:
+            text: Nous avons été accompagnés du début à la fin avec une attention et un sens du détail impressionnants. Notre relocation a été rapide, fluide et sans stress. Merci à toute l’équipe pour son efficacité et sa bienveillance.
+            title: Particulier, Paris 7ᵉ
+        4:
+            text: J’ai confié la gestion locative de mes biens à Relocation in Paris et je n’aurais pas pu faire un meilleur choix. Les locataires sélectionnés sont sérieux, la communication est fluide, et chaque étape est gérée avec rigueur et élégance.
+            title: Investisseuse, Paris 16ᵉ
+        5:
+            text: Relocation in Paris a pris en charge l’installation de plusieurs collaborateurs étrangers. Un accompagnement clé en main, humain et efficace. L’équipe comprend parfaitement les enjeux RH et l’exigence d’une relocation premium.
+            title: Professionnel, Paris 14ᵉ

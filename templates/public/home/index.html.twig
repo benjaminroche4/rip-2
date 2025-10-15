@@ -202,7 +202,7 @@
                             {{ ux_icon('devicon:google', {'class':'size-4'}) }}
                             {{ 'home.keyMetrics.4.value'|trans|raw }}
                         </dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">+120</dd>
+                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">+130</dd>
                     </div>
                 </dl>
             </div>
@@ -255,8 +255,8 @@
     <section class="px-6 py-12 sm:py-16 lg:px-8 max-w-7xl mx-auto">
         <div class="bg-neutral-100/80 py-12 px-6 rounded-2xl">
             <div class="flex flex-col space-y-3 justify-center text-center">
-                <h2 class="font-semibold text-primary font-secondary">Témoignages clients</h2>
-                <h3 class="text-3xl font-medium text-pretty">L'expérience Relocation in Paris</h3>
+                <h2 class="font-semibold text-primary font-secondary">{{ 'home.reviews.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-pretty">{{ 'home.reviews.subTitle'|trans|raw }}</h3>
             </div>
 
             <div
@@ -265,38 +265,33 @@
                     slides: [
                         {
                             rating: 5,
-                            text: 'Qui dolor enim consectetur do et non ex amet culpa sint in ea non dolore. Enim minim magna anim id minim eu cillum sunt dolore aliquip. Amet elit laborum culpa irure incididunt adipisicing culpa amet officia exercitation. Eu non aute velit id velit Lorem elit anim pariatur.',
-                            name: 'Judith Black',
-                            title: 'CEO of Workcation',
-                            image: 'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                            text: '{{ "home.reviews.1.text"|trans|raw }}',
+                            name: 'Vincent M.',
+                            title: '{{ "home.reviews.1.title"|trans|raw }}',
                         },
                         {
                             rating: 5,
-                            text: 'Service exceptionnel ! L\'équipe de Relocation in Paris a rendu notre installation à Paris tellement plus facile. Ils ont géré tous les aspects administratifs avec professionnalisme et efficacité.',
-                            name: 'Pierre Dubois',
-                            title: 'Directeur Financier',
-                            image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                            text: '{{ "home.reviews.2.text"|trans|raw }}',
+                            name: 'Lisa S.',
+                            title: '{{ "home.reviews.2.title"|trans|raw }}',
                         },
                         {
                             rating: 5,
-                            text: 'Une expérience formidable du début à la fin. Ils ont trouvé l\'appartement parfait pour notre famille en un temps record. Je recommande vivement leurs services à tous les expatriés.',
-                            name: 'Sarah Johnson',
-                            title: 'Marketing Manager',
-                            image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                            text: '{{ "home.reviews.3.text"|trans|raw }}',
+                            name: 'Sarah et Fabrice P.',
+                            title: '{{ "home.reviews.3.title"|trans|raw }}',
                         },
                         {
                             rating: 5,
-                            text: 'Professionnalisme et attention aux détails remarquables. Grâce à Relocation in Paris, notre transition a été sans stress. Un service premium qui vaut vraiment l\'investissement.',
-                            name: 'Marco Rossi',
-                            title: 'International Business Developer',
-                            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                            text: '{{ "home.reviews.4.text"|trans|raw }}',
+                            name: 'Marc W.',
+                            title: '{{ "home.reviews.4.title"|trans|raw }}',
                         },
                         {
                             rating: 5,
-                            text: 'Accompagnement personnalisé et réactif. L\'équipe a été à notre écoute et a répondu à tous nos besoins spécifiques. Une vraie valeur ajoutée pour notre relocation.',
-                            name: 'Emma Martinez',
-                            title: 'HR Director',
-                            image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=1024&h=1024&q=80'
+                            text: '{{ "home.reviews.5.text"|trans|raw }}',
+                            name: 'Emma M.',
+                            title: '{{ "home.reviews.5.title"|trans|raw }}',
                         }
                     ],
                     get totalSlides() {
@@ -321,12 +316,38 @@
                         if (this.autoplay) {
                             clearInterval(this.autoplay);
                         }
+                    },
+                    touchStartX: 0,
+                    touchEndX: 0,
+                    handleTouchStart(e) {
+                        this.touchStartX = e.touches[0].clientX;
+                    },
+                    handleTouchMove(e) {
+                        this.touchEndX = e.touches[0].clientX;
+                    },
+                    handleTouchEnd() {
+                        const swipeThreshold = 50;
+                        const diff = this.touchStartX - this.touchEndX;
+
+                        if (Math.abs(diff) > swipeThreshold) {
+                            if (diff > 0) {
+                                this.nextSlide();
+                            } else {
+                                this.prevSlide();
+                            }
+                        }
+
+                        this.touchStartX = 0;
+                        this.touchEndX = 0;
                     }
                 }"
                 x-init="startAutoplay()"
                 @mouseenter="stopAutoplay()"
                 @mouseleave="startAutoplay()"
-                class="relative mx-auto max-w-2xl mt-12"
+                @touchstart="handleTouchStart($event)"
+                @touchmove="handleTouchMove($event)"
+                @touchend="handleTouchEnd()"
+                class="relative mx-auto max-w-2xl mt-12 touch-pan-y"
             >
                 <button
                     @click="prevSlide()"
@@ -345,23 +366,24 @@
                         <template x-for="(slide, index) in slides" :key="index">
                             <figure class="w-full flex-shrink-0 px-4">
                                 <p class="sr-only" x-text="slide.rating + ' out of 5 stars'"></p>
-                                <div class="flex text-indigo-600 justify-center lg:justify-start">
+                                <div class="flex text-indigo-600 justify-center lg:justify-start items-center">
+                                    {{ ux_icon('devicon:google', {'class':'size-4 mr-2'}) }}
                                     <template x-for="star in slide.rating">
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-orange-500 flex-none'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-orange-500 flex-none'}) }}
                                     </template>
                                 </div>
-                                <blockquote class="mt-5 text-xl/8 tracking-tight text-gray-900 sm:text-2xl/9">
+                                <blockquote class="mt-5 text-xl/8 tracking-tight text-neutral-800 sm:text-xl/9">
                                     <p x-text="slide.text"></p>
                                 </blockquote>
                                 <figcaption class="mt-10 flex items-center gap-x-4">
                                     <img
-                                        :src="slide.image"
-                                        :alt="slide.name"
+                                        src="{{ asset('medias/website/logo-rounded.webp') }}"
+                                        alt="Logo relocation in paris"
                                         class="size-12 rounded-full bg-gray-50"
                                     />
                                     <div class="text-sm/6">
-                                        <div class="font-semibold text-gray-900" x-text="slide.name"></div>
-                                        <div class="mt-0.5 text-gray-600" x-text="slide.title"></div>
+                                        <div class="font-semibold text-neutral-900" x-text="slide.name"></div>
+                                        <div class="mt-0.5 text-neutral-600" x-text="slide.title"></div>
                                     </div>
                                 </figcaption>
                             </figure>

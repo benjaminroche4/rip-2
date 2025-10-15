@@ -233,12 +233,10 @@
                     height="0" width="0" style="display:none;visibility:hidden">
             </iframe>
         </noscript>
+        {{ component('gridBackground') }}
         {{ component('Header') }}
-        <main class="relative z-20 overflow-x-hidden relative z-10">
-            {{ component('gridBackground') }}
-            <div class="relative z-20">
-                {% block body %}{% endblock %}
-            </div>
+        <main>
+            {% block body %}{% endblock %}
         </main>
         {{ component('Footer') }}
     </body>
