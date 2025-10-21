@@ -8,11 +8,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class BlogController extends AbstractController
 {
-    #[Route('/blog', name: 'app_blog')]
-    public function blogList(): Response
-    {
-        return $this->render('public/blog/index.html.twig', [
-            'controller_name' => 'BlogController',
-        ]);
-    }
+//    #[Route('/blog', name: 'app_blog')]
+//    public function blogList(): Response
+//    {
+//        return $this->render('public/blog/index.html.twig', [
+//            'controller_name' => 'BlogController',
+//        ]);
+//    }
 }
