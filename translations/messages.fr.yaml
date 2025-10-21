@@ -44,6 +44,7 @@ contact:
             placeholder: Votre message...
         accept:
             label: En cochant cette case, j’accepte l’utilisation de mes informations pour être recontacté(e).
+        button: Être recontacté rapidement
         success:
             title: Merci pour votre message !
             text: Un expert de notre équipe vous contactera dans les plus brefs délais.
