@@ -7,6 +7,12 @@
             <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
             <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
             <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-white{% endif %}  text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.landlords'|trans|raw }}</a>
+            <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-white{% endif %}  text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
+            {% if app.user %}
+                <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('app_login') == 'app_contact' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
+            {% endif %}
             <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
         </nav>
         <div class="mt-16 flex justify-center gap-x-10">

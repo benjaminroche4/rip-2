@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+    <section class="pt-12 pb-24 lg:pt-26 lg:pb-32 flex items-center">
+        <div class="max-w-7xl mx-auto lg:px-8 px-6 w-auto">
+            <div class="space-y-6 max-w-sm mx-auto">
+                <div>
+                    <a href="{{ path('app_home') }}">
+                        <img src="{{ asset('medias/logos/logo_short.svg') }}" alt="Logo Relocation In Paris" class="w-12 mx-auto">
+                    </a>
+                </div>
+                <h1 class="text-2xl lg:text-3xl font-medium text-balance text-center">{{ 'login.title'|trans|raw }}</h1>
+            </div>
+            <form method="post" class="mt-12 flex flex-col space-y-6 max-w-sm mx-auto">
+                {% if error %}
+                    <div class="rounded-xl bg-red-50 p-4">
+                        <div class="flex items-start gap-x-3">
+                            <div class="flex-shrink-0">
+                                {{ ux_icon('si:alert-line', {'class':'text-red-800 size-5'}) }}
+                            </div>
+                            <div class="space-y-0.5">
+                                <h3 class="text-base font-medium text-red-800 -mt-0.5">Oups !</h3>
+                                <p class="text-sm text-slate-600">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="space-y-2">
+                    <label for="username" class="block text-sm/6 font-semibold text-gray-900">{{ 'login.form.email'|trans|raw }}</label>
+                    <input type="email" value="{{ last_username }}" placeholder="{{ 'login.form.placeholder'|trans|raw }}" name="_username" id="username" class="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 sm:text-sm/6" autocomplete="email" required autofocus>
+                </div>
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm/6 font-semibold text-gray-900">{{ 'login.form.password'|trans|raw }}</label>
+                    <input type="password" name="_password" id="password" placeholder="••••••••••" class="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 sm:text-sm/6" autocomplete="current-password" required>
+                </div>
+                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+                <div class="flex items-center">
+                    <input type="checkbox"
+                           name="_remember_me"
+                           id="_remember_me"
+                           class="appearance-none
+                             size-4 shrink-0 rounded-md
+                             border-1 border-gray-400 cursor-pointer
+                             transition-all duration-100
+                             checked:bg-primary checked:border-primary
+                             relative
+                             before:content-['✓'] before:absolute before:inset-0
+                             before:flex before:items-center before:justify-center
+                             before:text-white before:text-sm before:opacity-0
+                             checked:before:opacity-100
+                             focus:border-primary/80 focus:outline-primary/80"
+                    />
+                    <label for="_remember_me" class="ml-2 block text-sm leading-5 text-gray-700">{{ 'login.form.rememberMe'|trans|raw }}</label>
+                </div>
+
+                <button type="submit" class="cursor-pointer block w-full rounded-full bg-primary px-3 py-2.5 text-base text-white font-semibold hover:bg-primary/80 transition duration-100">{{ 'login.form.button'|trans|raw }}</button>
+            </form>
+        </div>
+    </section>
+{% endblock %}

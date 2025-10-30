@@ -69,6 +69,9 @@ footer:
         landlords: Landlords
         blog: Blog
         contact: Contact us
+        login: Log in
+        logout: Log out
+        aboutUs: About us
     bottomPage:
         rights: Relocation In Paris. All rights reserved.
 header:
@@ -314,3 +317,14 @@ home:
         5:
             text: Relocation in Paris handled the installation of several international employees. A turnkey, human, and efficient service. The team perfectly understands HR expectations and the demands of premium relocation.
             title: Professional, Paris 14th
+login:
+    title: Log in to our services
+    form:
+        email: Email
+        placeholder: Your email address
+        password: Password
+        button: Log in
+        rememberMe: Remember me
+adminTab:
+    logout: Log out
+    dashboard: Dashboard

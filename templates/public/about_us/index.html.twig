@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AboutUsController!{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">À propos de nous</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Ensemble depuis 10 ans</h2>
+        </div>
+    </section>
+    <section class="max-w-5xl mx-auto lg:px-8 px-6 mt-4 mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+            <div class="group max-w-sm mx-auto">
+               <img src="{{ asset('medias/team/team_1.png') }}" alt="logo" class="rounded-xl object-cover w-full">
+                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
+                    <h3 class="text-lg text-center">Marie L.</h3>
+                    <p class="text-center text-slate-700 text-sm">Responsable Clientele</p>
+                    <div class="flex items-center justify-center mt-2 space-x-2">
+                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
+                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
+                    </div>
+                </div>
+            </div>
+            <div class="group max-w-sm mx-auto">
+                <img src="{{ asset('medias/team/team_2.png') }}" alt="logo" class="rounded-xl object-cover">
+                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
+                    <h3 class="text-lg text-center">Julien M.</h3>
+                    <p class="text-center text-slate-700 text-sm">Consultante Mobilité</p>
+                    <div class="flex items-center justify-center mt-2 space-x-2">
+                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
+                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
+                        {{ ux_icon('flag:es-4x3', {'class':'size-4'}) }}
+                    </div>
+                </div>
+            </div>
+            <div class="group max-w-sm mx-auto">
+                <img src="{{ asset('medias/team/team_3.png') }}" alt="logo" class="rounded-xl object-cover">
+                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
+                    <h3 class="text-lg text-center">Edgar W.</h3>
+                    <p class="text-center text-slate-700 text-sm">Responsable logement</p>
+                    <div class="flex items-center justify-center mt-2 space-x-2">
+                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
+                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
+                        {{ ux_icon('flag:de-4x3', {'class':'size-4'}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="bg-white py-24 sm:py-32 dark:bg-gray-900">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl lg:mx-0">
+                <h2 class="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white">Stay on top of customer support</h2>
+                <p class="mt-6 text-lg/8 text-gray-600 dark:text-gray-300">Lorem ipsum dolor sit amet consect adipisicing elit. Possimus magnam voluptatum cupiditate veritatis in accusamus quisquam.</p>
+            </div>
+            <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+                    <div class="flex flex-col bg-neutral-100 p-6 rounded-2xl">
+                        <dt class="text-base/7 font-semibold text-gray-900">
+                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-white">
+                                    <path d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            Spam report
+                        </dt>
+                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
+                            <p class="flex-auto">Et quod quaerat dolorem quaerat architecto aliquam accusantium. Ex adipisci et doloremque autem quia quam. Quis eos molestiae at iure impedit.</p>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
