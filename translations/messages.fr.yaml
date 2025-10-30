@@ -328,3 +328,27 @@ login:
 adminTab:
     logout: Se déconnecter
     dashboard: Dashboard
+aboutUs:
+    title: À propos de nous
+    subTitle: Ensemble depuis 10 ans
+    team:
+        1: Responsable Clientèle
+        2: Consultante Mobilité
+        3: Chasseur de logement
+    ourValues:
+        title: Nos valeurs
+        subTitle: Une approche humaine, fondée sur la confiance
+        text: Nous plaçons le confort et la sérénité de nos clients au cœur de chaque accompagnement. Un service discret, attentif et exigeant.
+        1:
+            title: Excellence et discrétion
+            text: Nous garantissons un accompagnement sur mesure, mené avec rigueur et confidentialité, pour offrir une expérience unique.
+        2:
+            title: Confiance et transparence
+            text: Chaque échange repose sur la clarté, l’écoute et la sincérité. Nos clients savent qu’ils peuvent compter sur un service fiable.
+        3:
+            title: Confort et sérénité
+            text: De la recherche au jour de l’installation, nous prenons soin de chaque détail pour que nos clients se sentent chez eux dès leur arrivée.
+    ourStory:
+        title: Notre histoire
+        subTitle: Née d'une passion
+        text: "Depuis plus d’une décennie, Relocation in Paris accompagne celles et ceux qui choisissent de s’installer dans la capitale. Née d’une passion pour le service et d’une parfaite connaissance du marché parisien, notre équipe a su bâtir une réputation fondée sur la confiance, la discrétion et l’excellence. Aujourd’hui, nous continuons d’évoluer avec la même exigence : offrir à chaque client une expérience fluide, élégante et sans compromis sur le confort."

@@ -328,3 +328,27 @@ login:
 adminTab:
     logout: Log out
     dashboard: Dashboard
+aboutUs:
+    title: About Us
+    subTitle: Together for 10 Years
+    team:
+        1: Client Relations Manager
+        2: Mobility Consultant
+        3: Housing Specialist
+    ourValues:
+        title: Our Values
+        subTitle: A human approach built on trust
+        text: We place our clients’ comfort and peace of mind at the heart of every service. A discreet, attentive, and refined approach, designed for an effortless experience.
+        1:
+            title: Excellence & Discretion
+            text: We guarantee personalized support carried out with precision and confidentiality, to deliver a truly unique experience.
+        2:
+            title: Trust & Transparency
+            text: Every interaction is based on clarity, listening, and sincerity. Our clients know they can rely on a dependable and honest service.
+        3:
+            title: Comfort & Serenity
+            text: From the first search to the day of arrival, we take care of every detail to ensure our clients feel at home from the moment they arrive.
+    ourStory:
+        title: Our Story
+        subTitle: Born from a passion
+        text: "For over a decade, Relocation in Paris has been supporting those who choose to make the French capital their home. Born from a passion for service and a deep understanding of the Parisian market, our team has built a reputation founded on trust, discretion, and excellence. Today, we continue to grow with the same dedication: offering every client a seamless, elegant, and uncompromising relocation experience focused on comfort and peace of mind."

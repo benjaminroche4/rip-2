@@ -5,17 +5,17 @@
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary">À propos de nous</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Ensemble depuis 10 ans</h2>
+            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'aboutUs.title'|trans|raw }}</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'aboutUs.subTitle'|trans|raw }}</h2>
         </div>
     </section>
-    <section class="max-w-5xl mx-auto lg:px-8 px-6 mt-4 mb-10">
+    <section class="max-w-5xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
             <div class="group max-w-sm mx-auto">
-               <img src="{{ asset('medias/team/team_1.webp') }}" alt="logo" class="rounded-xl object-cover w-full">
+               <img src="{{ asset('medias/team/team_1.webp') }}" alt="logo" loading="eager" class="rounded-xl object-cover w-full">
                 <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
                     <h3 class="text-lg text-center">Marie L.</h3>
-                    <p class="text-center text-slate-700 text-sm">Responsable Clientele</p>
+                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.1'|trans|raw }}</p>
                     <div class="flex items-center justify-center mt-2 space-x-2">
                         {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
                         {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
@@ -23,10 +23,10 @@
                 </div>
             </div>
             <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_2.webp') }}" alt="logo" class="rounded-xl object-cover">
+                <img src="{{ asset('medias/team/team_2.webp') }}" loading="eager" alt="logo" class="rounded-xl object-cover">
                 <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
                     <h3 class="text-lg text-center">Julien M.</h3>
-                    <p class="text-center text-slate-700 text-sm">Consultante Mobilité</p>
+                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.2'|trans|raw }}</p>
                     <div class="flex items-center justify-center mt-2 space-x-2">
                         {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
                         {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
@@ -35,10 +35,10 @@
                 </div>
             </div>
             <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_3.webp') }}" alt="logo" class="rounded-xl object-cover">
+                <img src="{{ asset('medias/team/team_3.webp') }}" alt="logo" loading="eager" class="rounded-xl object-cover">
                 <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
                     <h3 class="text-lg text-center">Edgar W.</h3>
-                    <p class="text-center text-slate-700 text-sm">Chasseur de logement</p>
+                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.3'|trans|raw }}</p>
                     <div class="flex items-center justify-center mt-2 space-x-2">
                         {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
                         {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
@@ -48,27 +48,130 @@
             </div>
         </div>
     </section>
-    <section class="bg-white py-24 sm:py-32 dark:bg-gray-900">
+    <section class="bg-white py-12 lg:py-16">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto max-w-2xl lg:mx-0 space-y-4">
-                <h2 class="font-semibold text-primary font-secondary">Nos valeurs</h2>
-                <h3 class="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white">Une approche humaine, fondée sur la confiance et le soin</h3>
-                <p class="text-lg/8 text-gray-600 dark:text-gray-300">Lorem ipsum dolor sit amet consect adipisicing elit. Possimus magnam voluptatum cupiditate veritatis in accusamus quisquam.</p>
+                <h2 class="font-semibold text-primary font-secondary">{{ 'aboutUs.ourValues.title'|trans|raw }}</h2>
+                <h3 class="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{{ 'aboutUs.ourValues.subTitle'|trans|raw }}</h3>
+                <p class="text-lg/8 text-gray-600">{{ 'aboutUs.ourValues.text'|trans|raw }}</p>
             </div>
             <div class="mx-auto mt-16 max-w-2xl lg:max-w-none">
                 <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
                     <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20  p-6 rounded-2xl">
                         <dt class="text-base/7 font-semibold text-gray-900">
                             <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
-                                {{ ux_icon('lucide:briefcase', {'class':'size-6 text-white'}) }}
+                                {{ ux_icon('material-symbols:workspace-premium-outline-rounded', {'class':'size-6 text-white'}) }}
                             </div>
-                            Spam report
+                            {{ 'aboutUs.ourValues.1.title'|trans|raw }}
                         </dt>
                         <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
-                            <p class="flex-auto">Et quod quaerat dolorem quaerat architecto aliquam accusantium. Ex adipisci et doloremque autem quia quam. Quis eos molestiae at iure impedit.</p>
+                            <p class="flex-auto">{{ 'aboutUs.ourValues.1.text'|trans|raw }}</p>
+                        </dd>
+                    </div>
+                    <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20  p-6 rounded-2xl">
+                        <dt class="text-base/7 font-semibold text-gray-900">
+                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
+                                {{ ux_icon('icon-park-outline:eyes', {'class':'size-6 text-white'}) }}
+                            </div>
+                            {{ 'aboutUs.ourValues.2.title'|trans|raw }}ri:diamond-line
+                        </dt>
+                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
+                            <p class="flex-auto">{{ 'aboutUs.ourValues.2.text'|trans|raw }}</p>
+                        </dd>
+                    </div>
+                    <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20  p-6 rounded-2xl">
+                        <dt class="text-base/7 font-semibold text-gray-900">
+                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
+                                {{ ux_icon('ri:diamond-line', {'class':'size-6 text-white'}) }}
+                            </div>
+                            {{ 'aboutUs.ourValues.3.title'|trans|raw }}
+                        </dt>
+                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
+                            <p class="flex-auto">{{ 'aboutUs.ourValues.3.text'|trans|raw }}</p>
                         </dd>
                     </div>
                 </dl>
+            </div>
+        </div>
+    </section>
+    <section class="bg-white py-12 lg:py-16">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 justify-center items-center">
+            <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+                <h2 class="text-center font-semibold text-primary font-secondary">{{ 'aboutUs.ourStory.title'|trans|raw }}</h2>
+                <h3 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'aboutUs.ourStory.subTitle'|trans|raw }}</h3>
+            </div>
+            <div class="max-w-2xl mx-auto mt-6">
+                <p class="text-neutral-600 text-center text-lg">{{ 'aboutUs.ourStory.text'|trans|raw }}</p>
+            </div>
+            <div class="grid grid-cols-1 max-w-xs lg:max-w-lg lg:grid-cols-2 gap-6 mt-10 mx-auto">
+                <div class="border border-neutral-100 rounded-lg p-4">
+                    <div class="font-semibold text-gray-900 flex items-center justify-center gap-x-3.5">
+                        {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
+                        <div class="flex flex-col justify-start -space-y-1">
+                            <div class="test-base font-bold flex items-center gap-x-2">
+                                5.0
+                                <div class="flex items-center">
+                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                </div>
+                            </div>
+                            <span class="font-medium text-xs">{{ 'header.google.basedOn'|trans|raw }} <span class="underline underline-offset-2">+200 {{ 'header.google.reviews'|trans|raw }}</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="border border-neutral-100 rounded-lg p-4">
+                    <div class="flex items-center justify-center space-x-3 lg:justify-start" aria-hidden="true">
+                        <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
+                            <path d="M25.536 8.76642C24.7611 5.27811 22.8432 2.13254 21.6014 0.541938C21.3894 0.270387 20.9774 0.314194 20.8157 0.618383C19.9547 2.23801 18.4662 5.38925 18.0844 9.20474C17.648 13.5662 19.3996 17.9712 22.4676 17.5328C25.1629 17.1478 26.5859 13.4926 25.536 8.76642Z" fill="url(#g1)" />
+                            <path d="M16.016 15.6551C13.6008 13.0216 10.367 11.2564 8.49628 10.4998C8.17691 10.3706 7.842 10.6146 7.85404 10.9589C7.91818 12.792 8.20471 16.2653 9.78184 19.7605C11.5846 23.7558 15.3041 26.6949 17.7419 24.7813C19.8836 23.1001 19.2883 19.2232 16.016 15.6551Z" fill="url(#g2)" />
+                            <path d="M12.4043 26.6068C9.38973 24.6881 5.80926 23.8201 3.80649 23.5734C3.46457 23.5313 3.20421 23.8536 3.30495 24.183C3.84136 25.9371 5.01709 29.2179 7.44509 32.1858C10.2205 35.5784 14.5739 37.4546 16.4334 34.9753C18.067 32.7971 16.4886 29.2063 12.4043 26.6068Z" fill="url(#g3)" />
+                            <path d="M21.1784 39.5443C17.6471 38.9983 14.0195 39.6417 12.0863 40.2203C11.7563 40.3191 11.6473 40.7189 11.8719 40.9801C13.0678 42.3709 15.4625 44.9031 18.8782 46.6456C22.7827 48.6375 27.523 48.6068 28.2299 45.5893C28.8509 42.9384 25.963 40.2842 21.1784 39.5443Z" fill="url(#g4)" />
+                            <defs>
+                                <linearGradient id="g1" x1="21.0613" y1="0" x2="21.9505" y2="17.5631" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/>
+                                </linearGradient>
+                                <linearGradient id="g2" x1="7.75754" y1="10.3005" x2="17.3092" y2="25.066" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/>
+                                </linearGradient>
+                                <linearGradient id="g3" x1="3.04135" y1="23.5721" x2="16.0891" y2="35.3623" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/>
+                                </linearGradient>
+                                <linearGradient id="g4" x1="11.3851" y1="40.5265" x2="28.0701" y2="46.0821" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="flex flex-col text-center text-sm font-medium text-gray-900">
+                            <p>{{ 'home.heroSection.top.1'|trans|raw }}</p>
+                            <p>{{ 'home.heroSection.top.2'|trans|raw }}</p>
+                        </div>
+                        <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
+                            <path d="M4.46397 8.76642C5.23886 5.27811 7.15683 2.13254 8.39858 0.541938C8.61058 0.270387 9.02259 0.314194 9.18431 0.618383C10.0453 2.23801 11.5338 5.38925 11.9156 9.20474C12.352 13.5662 10.6004 17.9712 7.53238 17.5328C4.83705 17.1478 3.41409 13.4926 4.46397 8.76642Z" fill="url(#g1b)" />
+                            <path d="M13.984 15.6551C16.3992 13.0216 19.633 11.2564 21.5037 10.4998C21.8231 10.3706 22.158 10.6146 22.146 10.9589C22.0818 12.792 21.7953 16.2653 20.2182 19.7605C18.4154 23.7558 14.6959 26.6949 12.2581 24.7813C10.1164 23.1001 10.7117 19.2232 13.984 15.6551Z" fill="url(#g2b)" />
+                            <path d="M17.5957 26.6068C20.6103 24.6881 24.1907 23.8201 26.1935 23.5734C26.5354 23.5313 26.7958 23.8536 26.695 24.183C26.1586 25.9371 24.9829 29.2179 22.5549 32.1858C19.7795 35.5784 15.4261 37.4546 13.5666 34.9753C11.933 32.7971 13.5114 29.2063 17.5957 26.6068Z" fill="url(#g3b)" />
+                            <path d="M8.82157 39.5443C12.3529 38.9983 15.9805 39.6417 17.9137 40.2203C18.2437 40.3191 18.3527 40.7189 18.1281 40.9801C16.9322 42.3709 14.5375 44.9031 11.1218 46.6456C7.21732 48.6375 2.47695 48.6068 1.77011 45.5893C1.14913 42.9384 4.03702 40.2842 8.82157 39.5443Z" fill="url(#g4b)" />
+                            <defs>
+                                <linearGradient id="g1b" x1="8.93872" y1="0" x2="8.04949" y2="17.5631"><stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/></linearGradient>
+                                <linearGradient id="g2b" x1="22.2425" y1="10.3005" x2="12.6908" y2="25.066"><stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/></linearGradient>
+                                <linearGradient id="g3b" x1="26.9587" y1="23.5721" x2="13.9109" y2="35.3623"><stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
+                                <linearGradient id="g4b" x1="18.6149" y1="40.5265" x2="1.92991" y2="46.0821"><stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-white py-12 lg:py-16">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 justify-center items-center">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <img src="{{ asset('medias/website/paris_1.webp') }}" alt="about-us-1" loading="lazy" class="w-full h-70 rounded-lg object-cover"/>
+                <img src="{{ asset('medias/website/paris_2.webp') }}" alt="about-us-1" loading="lazy" class="w-full h-70 rounded-lg object-cover"/>
+                <img src="{{ asset('medias/website/paris_3.webp') }}" alt="about-us-1" loading="lazy" class="w-full h-70 rounded-lg object-cover"/>
+                <img src="{{ asset('medias/website/paris_4.webp') }}" alt="about-us-1" loading="lazy" class="w-full h-70 rounded-lg object-cover"/>
             </div>
         </div>
     </section>
