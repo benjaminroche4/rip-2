@@ -1,20 +1,134 @@
-{% extends '../../base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Hello LegalController!{% endblock %}
+{% block title %}{{ 'meta.privacyPolicy.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.privacyPolicy.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_privacy_policy') }}{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">
+                {{ 'privacy.title'|trans|raw }}
+            </h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">
+                {{ 'privacy.subTitle'|trans|raw }}
+            </h2>
+        </div>
+    </section>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/benjamin/Desktop/rip copie/src/Controller/LegalController.php</code></li>
-        <li>Your template at <code>/Users/benjamin/Desktop/rip copie/templates/legal/index.html.twig</code></li>
-    </ul>
-</div>
+    <section class="max-w-4xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16 space-y-12">
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.1.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.1.p1'|trans|raw }}</p>
+                <p>{{ 'privacy.sections.1.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.2.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.2.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.2.list.0','privacy.sections.2.list.1','privacy.sections.2.list.2','privacy.sections.2.list.3'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+                <p>{{ 'privacy.sections.2.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.3.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.3.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.3.list.0','privacy.sections.3.list.1','privacy.sections.3.list.2','privacy.sections.3.list.3'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.4.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.4.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.4.list.0','privacy.sections.4.list.1','privacy.sections.4.list.2','privacy.sections.4.list.3'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.5.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.5.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.5.list.0','privacy.sections.5.list.1','privacy.sections.5.list.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.6.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.6.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.6.list.0','privacy.sections.6.list.1','privacy.sections.6.list.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.7.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.7.p1'|trans|raw }}</p>
+                <p>{{ 'privacy.sections.7.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.8.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.8.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.8.list.0','privacy.sections.8.list.1','privacy.sections.8.list.2','privacy.sections.8.list.3'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+                <p>{{ 'privacy.sections.8.p2'|trans|raw }}</p>
+                <p>{{ 'privacy.sections.8.p3'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.9.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.9.p1'|trans|raw }}</p>
+                <p>{{ 'privacy.sections.9.p2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.9.list.0','privacy.sections.9.list.1','privacy.sections.9.list.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.10.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.10.p1'|trans|raw }}</p>
+                <p>{{ 'privacy.sections.10.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'privacy.sections.11.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'privacy.sections.11.p1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['privacy.sections.11.list.0','privacy.sections.11.list.1','privacy.sections.11.list.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
 {% endblock %}

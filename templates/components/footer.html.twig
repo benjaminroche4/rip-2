@@ -1,29 +1,92 @@
-<footer class="bg-gray-900 relative z-20 rounded-t-3xl">
-    <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 sm:py-16 lg:px-8">
-        <a href="{{ path('app_home') }}">
-            <img src="{{ asset('medias/logos/logo_white.svg') }}" width="153" height="150" loading="eager" alt="{{ 'footer.logo.alt'|trans|raw }}" class="mx-auto h-10 mb-12"/>
-        </a>
-        <nav aria-label="Footer" class="-mb-6 flex flex-wrap justify-center gap-x-12 gap-y-3 text-sm/6">
-            <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
-            <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
-            <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-white{% endif %}  text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.landlords'|trans|raw }}</a>
-            <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-white{% endif %}  text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
-            {% if app.user %}
-                <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
-            {% else %}
-                <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('app_login') == 'app_contact' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
-            {% endif %}
-            <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
-        </nav>
-        <div class="mt-16 flex justify-center gap-x-10">
-            <a href="https://www.linkedin.com/company/relocation-in-paris/" target="_blank" class="text-gray-400 hover:text-white transition duration-100">
-                <span class="sr-only">Linkedin</span>
-                {{ ux_icon('uil:linkedin', {'class':'size-6'}) }}
-            </a>
+<footer class="relative z-20">
+    <div class="bg-gray-900 rounded-t-3xl">
+        <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 sm:py-16 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div class="items-center lg:items-start lg:justify-start flex flex-col justify-center">
+                    <a href="{{ path('app_home') }}">
+                        <img src="{{ asset('medias/logos/logo_white.svg') }}" width="153" height="150" loading="eager" alt="{{ 'footer.logo.alt'|trans|raw }}" class="w-42"/>
+                    </a>
+                    <div class="mt-6 max-w-xs border border-gray-700 rounded-lg p-4 flex flex-row gap-6 text-white items-center outline outline-1 outline-gray-700/50">
+                        <div class="flex -space-x-2 max-[330px]:hidden">
+                            <img src="{{ asset('medias/website/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-gray-700" />
+                            <img src="{{ asset('medias/website/team_2.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-gray-700" />
+                            <img src="{{ asset('medias/website/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-gray-700" />
+                        </div>
+                        <div class="flex flex-col justify-start space-y-0.5">
+                            <p class="text-xs text-gray-200">Un expert vous répond :</p>
+                            <a href="tel:{{ phone_number }}" class="text-lg font-semibold flex items-center gap-x-2 hover:text-gray-300 transition duration-100">
+                                {{ ux_icon('line-md:phone', {'class':'shrink-0 size-5'}) }}
+                                {{ phone_number }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="https://share.google/DuM7reAcGSrmXQ65I" target="_blank" class="p-3 font-semibold flex items-center gap-x-3.5">
+                            {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
+                            <div class="flex flex-col justify-start -space-y-1">
+                                <div class="test-base font-bold flex items-center text-white gap-x-2">
+                                    5.0
+                                    <div class="flex items-center">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
+                                    </div>
+                                </div>
+                                <span class="font-medium text-white text-xs">{{ 'header.google.basedOn'|trans|raw }} <span class="underline underline-offset-2">+220 {{ 'header.google.reviews'|trans|raw }}</span></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+                        <div class="space-y-4">
+                            <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.1'|trans|raw }}</h3>
+                            <nav class="flex flex-col space-y-2 text-sm/6">
+                                <a href="{{ path('app_home') }}" class="{% if app.request.attributes.get('_route') == 'app_home' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.home'|trans|raw }}</a>
+                                <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
+                                <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
+                                <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.landlords'|trans|raw }}</a>
+                            </nav>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.2'|trans|raw }}</h3>
+                            <nav class="flex flex-col space-y-2 text-sm/6">
+                                <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
+                                {% if app.user %}
+                                    <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-slate-400{% else %}text-white{% endif %} hover:slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('_route') == 'app_login' %}text-slate-400{% else %}text-white{% endif %} hover:slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.3'|trans|raw }}</h3>
+                            <nav class="flex flex-col space-y-2 text-sm/6">
+                                <a href="{{ path('app_legal_notice') }}" class="{% if app.request.attributes.get('_route') == 'app_legal_notice' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.legalNotice'|trans|raw }}</a>
+                                <a href="{{ path('app_privacy_policy') }}" class="{% if app.request.attributes.get('_route') == 'app_privacy_policy' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.privacyPolicy'|trans|raw }}</a>
+                                <a href="{{ path('app_sitemap') }}" class="{% if app.request.attributes.get('_route') == 'app_sitemap' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">Sitemap</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="mt-10 text-center text-sm/6 text-gray-400">
-            &copy; {{ "now"|date("Y") }} {{ 'footer.bottomPage.rights'|trans|raw }}
-            <a href="{{ path('app_sitemap') }}" class="{% if app.request.attributes.get('_route') == 'app_sitemap' %}text-white{% endif %} text-gray-400 hover:text-white transition duration-100">Sitemap</a>.
-        </p>
+    </div>
+    <div class="bg-gray-800">
+        <div class="py-4 mx-auto max-w-7xl overflow-hidden px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="text-gray-400 text-xs order-2 sm:order-1 lg:text-start text-center">
+                    <p>&copy; {{ "now"|date("Y") }} {{ 'footer.bottomPage.rights'|trans|raw }}</p>
+                </div>
+                <div class="order-1 sm:order-2 justify-center lg:justify-start flex">
+                    <a href="https://www.linkedin.com/company/relocation-in-paris/" target="_blank" class="text-gray-400 hover:text-white transition duration-100">
+                        <span class="sr-only">Linkedin</span>
+                        {{ ux_icon('uil:linkedin', {'class':'size-6'}) }}
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </footer>

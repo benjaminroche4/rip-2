@@ -14,7 +14,7 @@ final class LegalController extends AbstractController
             'fr' => '/{_locale}/mentions-legales',
             'en' => '/{_locale}/legal-notice'
         ],
-        name: 'app_legal',
+        name: 'app_legal_notice',
         options: [
             'sitemap' =>
                 [
@@ -34,7 +34,7 @@ final class LegalController extends AbstractController
             'fr' => '/{_locale}/politique-de-confidentialite',
             'en' => '/{_locale}/privacy-policy'
         ],
-        name: 'app_legal',
+        name: 'app_privacy_policy',
         options: [
             'sitemap' =>
                 [

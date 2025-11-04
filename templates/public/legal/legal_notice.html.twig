@@ -1,20 +1,132 @@
-{% extends '../../base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Hello LegalController!{% endblock %}
+{% block title %}{{ 'meta.legalNotice.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.legalNotice.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_legal_notice') }}{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">
+                {{ 'legal.title'|trans|raw }}
+            </h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">
+                {{ 'legal.subTitle'|trans|raw }}
+            </h2>
+        </div>
+    </section>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/benjamin/Desktop/rip copie/src/Controller/LegalController.php</code></li>
-        <li>Your template at <code>/Users/benjamin/Desktop/rip copie/templates/legal/index.html.twig</code></li>
-    </ul>
-</div>
+    <section class="max-w-4xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16 space-y-12">
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.1.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.1.text1'|trans|raw }}</p>
+                <p>{{ 'legal.sections.1.text2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'legal.sections.1.list.phone'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.1.list.email'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.1.list.website'|trans|raw }}</li>
+                </ul>
+                <p>{{ 'legal.sections.1.director'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.2.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.2.text1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'legal.sections.2.list.name'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.2.list.address'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.2.list.website'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.2.list.siret'|trans|raw }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.3.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'legal.sections.3.list.design'|trans|raw }}</li>
+                    <li>{{ 'legal.sections.3.list.dev'|trans|raw }}</li>
+                </ul>
+                <p>{{ 'legal.sections.3.text'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.4.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.4.p1'|trans|raw }}</p>
+                <p>{{ 'legal.sections.4.p2'|trans|raw }}</p>
+                <p>{{ 'legal.sections.4.p3'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.5.title'|trans|raw }}</h3>
+            <div class="space-y-4">
+                <p>{{ 'legal.sections.5.p1'|trans|raw }}</p>
+                <p class="font-semibold">{{ 'legal.sections.5.collectedTitle'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['legal.sections.5.collected.0','legal.sections.5.collected.1','legal.sections.5.collected.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="font-semibold">{{ 'legal.sections.5.purposeTitle'|trans|raw }}</p>
+                <p>{{ 'legal.sections.5.purpose'|trans|raw }}</p>
+                <p class="font-semibold">{{ 'legal.sections.5.retentionTitle'|trans|raw }}</p>
+                <p>{{ 'legal.sections.5.retention'|trans|raw }}</p>
+                <p class="font-semibold">{{ 'legal.sections.5.rightsTitle'|trans|raw }}</p>
+                <p>{{ 'legal.sections.5.rightsIntro'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['legal.sections.5.rights.0','legal.sections.5.rights.1','legal.sections.5.rights.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+                <p>{{ 'legal.sections.5.contact'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.6.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.6.p1'|trans|raw }}</p>
+                <p class="font-semibold">{{ 'legal.sections.6.cookiesTitle'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['legal.sections.6.cookies.0','legal.sections.6.cookies.1','legal.sections.6.cookies.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.7.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.7.p1'|trans|raw }}</p>
+                <p>{{ 'legal.sections.7.p2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    {% for item in ['legal.sections.7.list.0','legal.sections.7.list.1','legal.sections.7.list.2'] %}
+                        <li>{{ item|trans|raw }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.8.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.8.p1'|trans|raw }}</p>
+                <p>{{ 'legal.sections.8.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.9.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.9.p1'|trans|raw }}</p>
+                <p>{{ 'legal.sections.9.p2'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'legal.sections.10.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'legal.sections.10.p1'|trans|raw }}</p>
+            </div>
+        </div>
+    </section>
 {% endblock %}

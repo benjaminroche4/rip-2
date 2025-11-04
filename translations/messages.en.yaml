@@ -72,6 +72,13 @@ footer:
         login: Log in
         logout: Log out
         aboutUs: About us
+        legalNotice: Legal notice
+        privacyPolicy: Privacy policy
+        home: Home
+    menuTitle:
+        1: Our Services
+        2: About Us
+        3: Legal Information
     bottomPage:
         rights: Relocation In Paris. All rights reserved.
 header:
@@ -235,6 +242,9 @@ meta:
     sitemap:
         title: Sitemap
         description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
+    aboutUs:
+        title: About Us
+        description: Discover the story and values of Relocation in Paris, a high-end relocation agency dedicated to comfort, trust, and excellence for its clients.
 home:
     heroSection:
         top:
@@ -352,3 +362,163 @@ aboutUs:
         title: Our Story
         subTitle: Born from a passion
         text: "For over a decade, Relocation in Paris has been supporting those who choose to make the French capital their home. Born from a passion for service and a deep understanding of the Parisian market, our team has built a reputation founded on trust, discretion, and excellence. Today, we continue to grow with the same dedication: offering every client a seamless, elegant, and uncompromising relocation experience focused on comfort and peace of mind."
+legal:
+    title: Legal Notice
+    subTitle: Transparency and Compliance
+    lastUpdate: "October 31, 2025"
+    sections:
+        1:
+            title: 1. Website Publisher
+            text1: "This website, accessible at <i>relocation-in-paris.fr</i>, is published by:"
+            text2: "Relocation in Paris, a registered trademark of BR Roche Consulting (CH-660.0.478.025-0)."
+            list:
+                phone: "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
+                email: "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
+                website: "<span class='font-semibold'>Website</span>: relocation-in-paris.fr"
+            director: "Publication Director: Mr Roche, Publishing Director."
+        2:
+            title: 2. Website Hosting
+            text1: "The website <i>relocation-in-paris.fr</i> is hosted by:"
+            list:
+                name: "<span class='font-semibold'>Host</span>: o2Switch"
+                address: "<span class='font-semibold'>Address</span>: Chem. des Pardiaux, 63000 Clermont-Ferrand, France"
+                website: "<span class='font-semibold'>Website</span>: www.o2switch.fr"
+                siret: "<span class='font-semibold'>SIRET</span>: 510 909 807 00032"
+        3:
+            title: 3. Design and Development
+            list:
+                design: "<span class='font-semibold'>Design and Art Direction</span>: Relocation In Paris"
+                dev: "<span class='font-semibold'>Web Development</span>: BR Roche Consulting"
+            text: "Design and integration carried out using modern web technologies."
+        4:
+            title: 4. Intellectual Property
+            p1: "All content on this website (texts, images, graphics, logo, videos, icons, structure, source code, etc.) is the exclusive property of <i>Relocation in Paris</i>, unless otherwise stated."
+            p2: "Any reproduction, representation, modification, publication, adaptation, or exploitation, in whole or in part, by any process whatsoever, is strictly prohibited without prior written consent."
+            p3: "Any unauthorized use of the site or its content may give rise to legal proceedings in accordance with Articles L.335-2 et seq. of the French Intellectual Property Code."
+        5:
+            title: 5. Personal Data and Privacy (GDPR)
+            p1: "<i>Relocation In Paris</i> ensures that the collection and processing of your personal data comply with the General Data Protection Regulation (GDPR) and the French Data Protection Act."
+            collectedTitle: "Data collected:"
+            collected:
+                - "Contact form (first name, last name, email address, message)"
+                - "Newsletter subscription form"
+                - "Browsing data (anonymous analytical cookies)"
+            purposeTitle: "Purpose:"
+            purpose: "The data collected is used exclusively to respond to your inquiries, manage client relationships, and provide a personalized relocation experience."
+            retentionTitle: "Retention:"
+            retention: "Data is retained for a maximum of 3 years from the last interaction with the client."
+            rightsTitle: "Your rights:"
+            rightsIntro: "In accordance with the GDPR, you have the following rights:"
+            rights:
+                - "Right of access, rectification, deletion, or restriction of processing,"
+                - "Right to data portability,"
+                - "Right to object to processing."
+            contact: "To exercise your rights, please contact: <i>contact@relocation-in-paris.fr</i>"
+        6:
+            title: 6. Cookies
+            p1: "This website may use cookies required for its proper functioning and audience measurement. You can adjust your preferences via the consent banner or your browser settings."
+            cookiesTitle: "Types of cookies used:"
+            cookies:
+                - "Technical cookies (essential for website operation)"
+                - "Analytical cookies (anonymous statistics via Google Analytics or equivalent)"
+                - "Marketing cookies (if applicable, for targeted advertising or newsletters)"
+        7:
+            title: 7. Liability
+            p1: "<i>Relocation In Paris</i> strives to ensure the accuracy and regular updating of the information provided on this site."
+            p2: "However, the company cannot be held responsible for:"
+            list:
+                - "Unintentional errors or omissions."
+                - "Temporary unavailability of the website."
+                - "Direct or indirect damages resulting from the consultation or use of the website."
+        8:
+            title: 8. External Links
+            p1: "This website may contain links to external sites."
+            p2: "<i>Relocation In Paris</i> declines all responsibility for the content or privacy practices of these third-party sites."
+        9:
+            title: 9. Applicable Law
+            p1: "These legal notices are governed by French law."
+            p2: "Any dispute related to the use of the website shall fall under the exclusive jurisdiction of the courts of Paris."
+        10:
+            title: 10. Last Update
+            p1: "<span class='font-semibold'>Last update:</span> October 31, 2025"
+privacy:
+    title: Privacy Policy
+    subTitle: Protection of your personal data
+    lastUpdate: "October 31, 2025"
+    sections:
+        1:
+            title: 1. Introduction
+            p1: "This Privacy Policy aims to inform users of the website <i>relocation-in-paris.fr</i> about how their personal data is collected, used, and protected by <i>Relocation In Paris</i>."
+            p2: "<i>Relocation In Paris</i> is committed to ensuring the security, confidentiality, and transparency of data processing, in compliance with the General Data Protection Regulation (GDPR) and applicable French legislation."
+        2:
+            title: 2. Personal data collected
+            p1: "We only collect data strictly necessary for the proper execution of our services. This data may include:"
+            list:
+                - "Identification information (name, surname, email address, phone number)."
+                - "Professional data (position, company, country of origin or destination, where applicable)."
+                - "Messages sent through the contact or newsletter subscription forms."
+                - "Browsing data (IP address, device type, browser, anonymous statistics)."
+            p2: "This data is provided voluntarily by the user or collected automatically while browsing the site."
+        3:
+            title: 3. Purpose of processing
+            p1: "The data collected is used solely within the scope of services offered by <i>Relocation In Paris</i> and for internal communication purposes. The main purposes are:"
+            list:
+                - "To respond to your contact requests or inquiries."
+                - "To manage relocation and concierge services."
+                - "To send news, tips, or offers, subject to your consent."
+                - "To analyze website traffic and improve performance and user experience."
+        4:
+            title: 4. Legal basis for processing
+            p1: "The processing of personal data is based on the following legal grounds:"
+            list:
+                - "Performance of a contract or pre-contractual measures at your request."
+                - "Compliance with a legal obligation."
+                - "Free, specific, and informed consent from the user (particularly for newsletters)."
+                - "The legitimate interest of <i>Relocation In Paris</i> in improving its services and client relations."
+        5:
+            title: 5. Data retention period
+            p1: "Your data is retained only for as long as necessary to fulfill the purposes for which it was collected."
+            list:
+                - "Contact data: up to 3 years after the last interaction."
+                - "Client data: for the duration of the contract, then archived for 5 years for legal purposes."
+                - "Cookie-related data: up to 13 months from the date of collection."
+        6:
+            title: 6. Data sharing
+            p1: "<i>Relocation In Paris</i> does not sell or rent your personal data. It may be shared only with:"
+            list:
+                - "Technical providers and hosting partners ensuring the website’s proper operation (o2Switch)."
+                - "Relocation or concierge partners involved in service delivery, only with your consent."
+                - "Administrative or legal authorities, upon lawful request."
+        7:
+            title: 7. Security and confidentiality
+            p1: "We implement all necessary technical and organizational measures to ensure the security of your data (firewalls, SSL protocols, access control, secure backups, etc.)."
+            p2: "<i>Relocation In Paris</i> ensures that all its service providers meet the same high data protection standards."
+        8:
+            title: 8. Your rights
+            p1: "In accordance with the GDPR, you have the following rights:"
+            list:
+                - "Right of access to your personal data."
+                - "Right to rectification or deletion of your data."
+                - "Right to restriction or objection to processing."
+                - "Right to data portability."
+            p2: "To exercise these rights, please contact <i>contact@relocation-in-paris.fr</i>. We undertake to respond within 30 days."
+            p3: "You may also file a complaint with the <i>CNIL</i> (www.cnil.fr) if you believe your rights are not being respected."
+        9:
+            title: 9. Cookies and tracking
+            p1: "This website uses cookies to enhance your browsing experience and measure audience engagement."
+            p2: "When you first visit, a banner allows you to accept, refuse, or customize the use of cookies. You can change your preferences at any time through your browser settings."
+            list:
+                - "Technical cookies: essential for the operation of the website."
+                - "Analytical cookies: used for anonymous statistics via Google Analytics or equivalent."
+                - "Marketing cookies: used only with your consent for targeted communication."
+        10:
+            title: 10. Policy modifications
+            p1: "<i>Relocation In Paris</i> reserves the right to modify this Privacy Policy at any time, particularly to comply with legislative changes."
+            p2: "Users will be informed of any significant updates via the website or by email, where applicable."
+        11:
+            title: 11. Contact
+            p1: "For any questions regarding this policy or the management of your personal data, you can contact us at:"
+            list:
+                - "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
+                - "<span class='font-semibold'>Postal address</span>: Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
+                - "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
