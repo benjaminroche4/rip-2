@@ -60,6 +60,23 @@ ctaFooter:
             alt: Photo de Fabien, agent de Relocation in Paris
         3:
             alt: Photo de Vincent, agent de Relocation in Paris
+sitemap:
+    title: Plan du site
+    subTitle: Découvrez nos services
+    general: Général
+    menu:
+        findAccommodation: Trouver un logement
+        companies: Entreprises
+        landlords: Propriétaires
+        blog: Blog
+        contact: Contactez-nous
+        login: Connexion
+        logout: Déconnexion
+        aboutUs: À propos
+        legalNotice: Mentions légales
+        privacyPolicy: Politique de confidentialité
+        home: Accueil
+        estimation: Obtenez votre estimation
 footer:
     logo:
         alt: Logo Relocation in Paris
@@ -75,6 +92,7 @@ footer:
         legalNotice: Mentions légales
         privacyPolicy: Politique de confidentialité
         home: Accueil
+        estimation: Obtenez votre estimation
     menuTitle:
         1: Nos services
         2: À propos
@@ -314,7 +332,7 @@ home:
         subText2:
             title: Un savoir-faire depuis plus de 20 ans.
             text: Deux décennies d’expérience au service de ceux qui s’installent à Paris.
-        button: Contacter un expert
+        button: Découvrez nos experts
     reviews:
         title: Témoignages clients
         subTitle: L'expérience Relocation in Paris

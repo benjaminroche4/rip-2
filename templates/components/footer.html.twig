@@ -54,6 +54,7 @@
                             <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.2'|trans|raw }}</h3>
                             <nav class="flex flex-col space-y-2 text-sm/6">
                                 <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
+                                <a href="{{ path('app_estimation') }}" class="{% if app.request.attributes.get('_route') == 'app_estimation' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.estimation'|trans|raw }}</a>
                                 {% if app.user %}
                                     <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-slate-400{% else %}text-white{% endif %} hover:slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
                                 {% else %}

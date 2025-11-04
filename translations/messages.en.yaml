@@ -60,6 +60,23 @@ ctaFooter:
             alt: Photo of Fabien, agent at Relocation in Paris
         3:
             alt: Photo of Vincent, agent at Relocation in Paris
+sitemap:
+    title: Sitemap
+    subTitle: Explore our services
+    general: General
+    menu:
+        findAccommodation: Find accommodation
+        companies: Companies
+        landlords: Landlords
+        blog: Blog
+        contact: Contact us
+        login: Log in
+        logout: Log out
+        aboutUs: About us
+        legalNotice: Legal notice
+        privacyPolicy: Privacy policy
+        home: Home
+        estimation: Get your estimate
 footer:
     logo:
         alt: Relocation in Paris logo
@@ -75,6 +92,7 @@ footer:
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
         home: Home
+        estimation: Get your estimate
     menuTitle:
         1: Our Services
         2: About Us
@@ -308,7 +326,7 @@ home:
         subText2:
             title: Over 20 years of expertise.
             text: Two decades of experience dedicated to helping newcomers settle in Paris.
-        button: Contact an expert
+        button: Discover our experts
     reviews:
         title: Client testimonials
         subTitle: The Relocation in Paris experience
