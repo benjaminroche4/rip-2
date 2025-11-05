@@ -546,3 +546,35 @@ privacy:
                 - "<span class='font-semibold'>E-mail</span> : contact@relocation-in-paris.fr"
                 - "<span class='font-semibold'>Adresse postale</span> : Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
                 - "<span class='font-semibold'>Téléphone</span> : +33 (0)1 84 80 43 44"
+estimation:
+    title: Estimation de loyer à Paris
+    header:
+        title: Estimation de loyer
+        subtitle: Ajustez le montant et sélectionnez vos services pour obtenir votre estimation personnalisée
+    amount:
+        label: Montant total estimé
+    base:
+        label: Budget de base
+    slider:
+        label: Curseur de montant
+    services:
+        title: Services additionnels
+        subtitle: Sélectionnez les services dont vous avez besoin
+        perMonth: par mois
+        schooling:
+            title: Service de Schooling
+            description: Accompagnement scolaire et inscription dans les meilleures écoles
+        account:
+            title: Gestion des comptes
+            description: Ouverture de comptes bancaires et gestion administrative
+        admin:
+            title: Support administratif
+            description: Aide aux démarches administratives et documents officiels
+        concierge:
+            title: Service de conciergerie
+            description: Conciergerie premium pour faciliter votre quotidien
+    breakdown:
+        title: Détail de l'estimation
+        base: Budget de base
+        services: Services additionnels
+        total: Total mensuel
