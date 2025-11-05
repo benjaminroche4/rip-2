@@ -34,9 +34,8 @@
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end ">
             <div class="flex items-center gap-x-4">
-                <a href="tel:{{ phone_number }}" class="text-sm/6 font-semibold text-gray-900 bg-white border border-gray-900 text-gray-900 rounded-full py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100 max-[1227px]:hidden">
-                    {{ ux_icon('line-md:phone', {'class':'size-4'}) }}
-                    {{ phone_number }}
+                <a href="{{ path('app_estimation') }}" class="text-sm/6 font-semibold text-gray-900 underline underline-offset-8">
+                    {{ 'header.menu.estimation'|trans|raw }}
                 </a>
                 <a href="{{ path('app_contact') }}" class="text-sm/6 font-semibold text-gray-900 bg-[#71172e] text-white rounded-full py-2.5 px-3.5 flex items-center gap-x-2 hover:bg-primary/80 transition duration-100">
                     {{ 'header.menu.contact'|trans|raw }}

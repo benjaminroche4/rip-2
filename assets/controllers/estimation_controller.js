@@ -89,7 +89,7 @@ export default class extends Controller {
         const value = parseInt(this.sliderTarget.value, 10);
         const percentage = ((value - this.minValue) / (this.maxValue - this.minValue)) * 100;
 
-        this.sliderTarget.style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`;
+        this.sliderTarget.style.background = `linear-gradient(to right, #71172e 0%, #71172e ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`;
     }
 
     /**

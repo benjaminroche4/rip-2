@@ -107,6 +107,7 @@ header:
         companies: Companies
         landlords: Landlords
         contact: Contact an expert
+        estimation: Get your estimate
     google:
         basedOn: Based on
         reviews: reviews

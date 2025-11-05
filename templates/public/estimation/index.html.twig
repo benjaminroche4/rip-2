@@ -3,6 +3,60 @@
 {% block title %}{{ 'estimation.title'|trans }}{% endblock %}
 
 {% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">Obtenez votre estimation</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Estimez le coût de votre relocation à Paris</h2>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
+        <div
+            class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4"
+            data-controller="estimation"
+            data-estimation-min-value="800"
+            data-estimation-max-value="10000"
+            data-estimation-step-value="100"
+            data-estimation-initial-value="800"
+        >
+            <div class="text-center">
+                <div
+                    data-estimation-target="display"
+                    class="text-5xl md:text-7xl font-bold text-primary leading-none mb-3"
+                >
+                    800 €
+                </div>
+                <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
+                    Montant de votre loyer estimer
+                </div>
+            </div>
+
+            {# Slider Section #}
+            <div class="mt-12">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    {{ 'estimation.base.label'|trans }}
+                </label>
+                <input
+                    data-estimation-target="slider"
+                    data-action="input->estimation#update"
+                    type="range"
+                    min="800"
+                    max="10000"
+                    step="100"
+                    value="800"
+                    aria-label="{{ 'estimation.slider.label'|trans }}"
+                    class="estimation-slider w-full h-2 rounded-lg outline-none cursor-pointer appearance-none"
+                />
+
+                {# Min/Max Labels #}
+                <div class="flex justify-between items-center mt-3">
+                    <span class="text-sm font-medium text-gray-600">800 €</span>
+                    <span class="text-sm font-medium text-gray-600">+10 000 €</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
     <div
         data-controller="estimation"
         data-estimation-min-value="800"
