@@ -9,7 +9,7 @@
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Estimez le coût de votre relocation à Paris</h2>
         </div>
     </section>
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 overflow-x-hidden">
         <div
             class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4"
             data-controller="estimation"
@@ -32,9 +32,6 @@
 
             {# Slider Section #}
             <div class="mt-12">
-                <label class="block text-sm font-semibold text-gray-700 mb-3">
-                    {{ 'estimation.base.label'|trans }}
-                </label>
                 <input
                     data-estimation-target="slider"
                     data-action="input->estimation#update"

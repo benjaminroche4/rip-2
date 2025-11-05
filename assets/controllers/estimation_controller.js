@@ -51,13 +51,16 @@ export default class extends Controller {
         const baseValue = parseInt(this.sliderTarget.value, 10);
         const servicesTotal = this.calculateServicesTotal();
         const totalValue = baseValue + servicesTotal;
+        const isMaxValue = baseValue >= this.maxValue;
 
-        // Mise à jour du montant principal
-        this.displayTarget.textContent = this.formatCurrency(totalValue);
+        // Mise à jour du montant principal avec "+" si au maximum
+        const formattedTotal = this.formatCurrency(totalValue);
+        this.displayTarget.textContent = isMaxValue ? `+${formattedTotal}` : formattedTotal;
 
         // Mise à jour des détails si les targets existent
         if (this.hasBaseAmountTarget) {
-            this.baseAmountTarget.textContent = this.formatCurrency(baseValue);
+            const formattedBase = this.formatCurrency(baseValue);
+            this.baseAmountTarget.textContent = isMaxValue ? `+${formattedBase}` : formattedBase;
         }
 
         if (this.hasServicesAmountTarget) {
@@ -84,12 +87,14 @@ export default class extends Controller {
 
     /**
      * Met à jour le gradient de fond du slider
+     * Dégradé progressif du bordeaux clair vers le bordeaux foncé
      */
     updateSliderBackground() {
         const value = parseInt(this.sliderTarget.value, 10);
         const percentage = ((value - this.minValue) / (this.maxValue - this.minValue)) * 100;
 
-        this.sliderTarget.style.background = `linear-gradient(to right, #71172e 0%, #71172e ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`;
+        // Gradient du bordeaux clair (#d1a3b0) vers le bordeaux foncé (#71172e)
+        this.sliderTarget.style.background = `linear-gradient(to right, #d1a3b0 0%, #a85572 ${percentage * 0.5}%, #71172e ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`;
     }
 
     /**

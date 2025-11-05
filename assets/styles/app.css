@@ -39,7 +39,7 @@ h1, h2, h3, h4, h5, h6 {
 .estimation-slider {
     -webkit-appearance: none;
     appearance: none;
-    background: linear-gradient(to right, #71172e 0%, #71172e 0%, #e5e7eb 0%, #e5e7eb 100%);
+    background: linear-gradient(to right, #d1a3b0 0%, #a85572 0%, #71172e 0%, #e5e7eb 0%, #e5e7eb 100%);
 }
 
 /* Chrome, Safari, Edge */
