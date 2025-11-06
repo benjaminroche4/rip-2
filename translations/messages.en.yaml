@@ -165,7 +165,7 @@ findAccommodation:
             title: Housing search
             subTitle: An exclusive and personalized housing search.
             offer:
-                1: Short- or long-term rentals
+                1: Short or long-term rentals
                 2: Furnished or unfurnished apartments
                 3: Physical or virtual visits
                 4: Access to our exclusive real estate network
@@ -192,8 +192,8 @@ findAccommodation:
                 title: What types of housing do you offer?
                 text: We offer a selection of properties in Paris and nearby suburbs, furnished or unfurnished, for short- or long-term rentals. Each search is fully personalized, with privileged access to our exclusive network of real estate partners.
             2:
-                title: Do you handle administrative procedures?
-                text: "Yes. We manage the entire process: file preparation, lease management, legal verification, and follow-up until key handover. You benefit from complete support with full compliance."
+                title: Do you always find a home?
+                text: Yes. Thanks to our network and a precise selection process, we find the home that truly fits your needs.
             3:
                 title: Do you help with installation after finding housing?
                 text: "Absolutely. We coordinate all installation steps: inventory, activation of essential services, and connection with our exclusive partners for any additional needs."
@@ -541,35 +541,3 @@ privacy:
                 - "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
                 - "<span class='font-semibold'>Postal address</span>: Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
                 - "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
-estimation:
-    title: Rent Estimation in Paris
-    header:
-        title: Rent Estimation
-        subtitle: Adjust the amount and select your services to get your personalized estimate
-    amount:
-        label: Total estimated amount
-    base:
-        label: Base budget
-    slider:
-        label: Amount slider
-    services:
-        title: Additional services
-        subtitle: Select the services you need
-        perMonth: per month
-        schooling:
-            title: Schooling Service
-            description: School support and enrollment in the best schools
-        account:
-            title: Account Management
-            description: Bank account opening and administrative management
-        admin:
-            title: Administrative Support
-            description: Help with administrative procedures and official documents
-        concierge:
-            title: Concierge Service
-            description: Premium concierge service to facilitate your daily life
-    breakdown:
-        title: Estimate breakdown
-        base: Base budget
-        services: Additional services
-        total: Monthly total

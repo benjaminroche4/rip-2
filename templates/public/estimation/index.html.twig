@@ -9,14 +9,14 @@
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Estimez le coût de votre relocation à Paris</h2>
         </div>
     </section>
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 overflow-x-hidden">
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 relative">
         <div
-            class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4"
+            class="max-w-2xl mx-auto flex flex-col justify-center space-y-4 pb-6"
             data-controller="estimation"
             data-estimation-min-value="800"
             data-estimation-max-value="10000"
             data-estimation-step-value="100"
-            data-estimation-initial-value="800"
+            data-estimation-initial-value="1300"
         >
             <div class="text-center">
                 <div
@@ -29,8 +29,6 @@
                     Montant de votre loyer estimer
                 </div>
             </div>
-
-            {# Slider Section #}
             <div class="mt-12">
                 <input
                     data-estimation-target="slider"
@@ -39,226 +37,282 @@
                     min="800"
                     max="10000"
                     step="100"
-                    value="800"
+                    value="1300"
                     aria-label="{{ 'estimation.slider.label'|trans }}"
                     class="estimation-slider w-full h-2 rounded-lg outline-none cursor-pointer appearance-none"
                 />
-
-                {# Min/Max Labels #}
                 <div class="flex justify-between items-center mt-3">
                     <span class="text-sm font-medium text-gray-600">800 €</span>
                     <span class="text-sm font-medium text-gray-600">+10 000 €</span>
                 </div>
+                <div class="mt-8 bg-slate-50 rounded-lg p-4 flex gap-x-4">
+                    <div class="inline-flex flex-none items-center shrink-0 justify-center h-6 w-6 rounded-full bg-gray-200">
+                        {{ ux_icon('mynaui:info-solid', {'class':'size-4 text-gray-700'}) }}
+                    </div>
+                    <p class="text-sm text-gray-500">
+                        Nos honoraires correspondent à un mois de loyer.
+                        Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
+                        <a href="{{ path('app_service_find_accommodation') }}" class="text-gray-500 underline-offset-4 hover:text-gray-600 transition duration-100 underline">Découvrir l'offre en détail</a>.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-12 pt-12 border-t border-slate-300">
+                <div class="mb-2 items-center flex item-center gap-x-2">
+                    <div class="flex size-6 items-center justify-center rounded-lg bg-primary">
+                        {{ ux_icon('lucide:plus', {'class':'size-5 text-white'}) }}
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Services additionnels
+                    </h2>
+                </div>
+                <p class="text-gray-600 mb-6">
+                    Sélectionnez les services dont vous avez besoin
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="200"
+                            class="sr-only"
+                            id="service-schooling"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Service de Schooling
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Accompagnement scolaire et inscription dans les meilleures écoles.
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <span class="text-lg font-bold text-primary">+200 €</span>
+                                <span class="text-xs text-gray-500">par enfant</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Service 2: Account Management #}
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="150"
+                            class="sr-only"
+                            id="service-account"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Service de Déménagement
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Sélection et coordination de votre déménagement pour une installation sans stress à Paris.
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+150 €</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Service 3: Administrative Support #}
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="100"
+                            class="sr-only"
+                            id="service-admin"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Support administratif
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Aide aux démarches administratives (CAF, impôts, comptes bancaires).
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+100 €</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Service 4: Conciergerie #}
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="250"
+                            class="sr-only"
+                            id="service-concierge"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Inventaire et Installation
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Accueil sur place, relevé des compteurs, contrôle du mobilier et vérification des équipements.
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Service 4: Conciergerie #}
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="250"
+                            class="sr-only"
+                            id="service-concierge"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Accompagnement carte de séjour
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Assistance complète dans la constitution et le suivi de votre demande
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Service 4: Conciergerie #}
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="250"
+                            class="sr-only"
+                            id="service-concierge"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Accompagnement carte de séjour
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Assistance complète dans la constitution et le suivi de votre demande
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="250"
+                            class="sr-only"
+                            id="service-concierge"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Assistance fiscale
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Orientation vers nos partenaires experts-comptables et fiscalistes si besoin.
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        data-estimation-target="service"
+                        data-action="click->estimation#toggleService"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                    >
+                        <input
+                            type="checkbox"
+                            data-price="250"
+                            class="sr-only"
+                            id="service-concierge"
+                        />
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    Conciergerie Premium
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    Accès privilégié aux meilleures tables, aux événements culturels et aux clubs privés.
+                                </p>
+                            </div>
+                            <div class="ml-4 flex flex-col items-end">
+                                <p class="text-md font-semibold text-gray-400">Sur Devis</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="mt-12 pt-12 border-t border-slate-300">
+                <div class="mb-2 items-center flex item-center gap-x-2">
+                    <div class="flex size-6 items-center justify-center rounded-lg bg-primary">
+                        {{ ux_icon('material-symbols:euro', {'class':'size-4 text-white'}) }}
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Montant estimé du devis
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="sticky max-w-2xl bottom-5 mx-auto z-30 py-2 rounded-xl w-full px-4 bg-white border-1 border-primary/50">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
+                    <p>Montant estimer :</p>
+                </div>
+                <div
+                    class="text-xl font-bold text-primary bg-slate-50 rounded-lg px-4 py-2"
+                    data-estimation-target="display"
+                >
+                    1520€<span class="font-light text-xs ml-0.5 text-gray-500">/TTC</span>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-10">
+            <div class="border border-slate-100 rounded-xl p-4">
+            </div>
+            <div class="border border-slate-100 rounded-xl p-4">
             </div>
         </div>
     </section>
-
-
-    <div
-        data-controller="estimation"
-        data-estimation-min-value="800"
-        data-estimation-max-value="10000"
-        data-estimation-step-value="100"
-        data-estimation-initial-value="800"
-        class="container mx-auto px-4 py-16"
-    >
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-                {# Header Section #}
-                <div class="text-center mb-12">
-                    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
-                        {{ 'estimation.header.title'|trans }}
-                    </h1>
-                    <p class="text-lg text-gray-600">
-                        {{ 'estimation.header.subtitle'|trans }}
-                    </p>
-                </div>
-
-                {# Amount Display #}
-                <div class="text-center my-12">
-                    <div
-                        data-estimation-target="display"
-                        class="text-6xl md:text-7xl font-bold text-blue-500 leading-none mb-3"
-                    >
-                        800 €
-                    </div>
-                    <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
-                        {{ 'estimation.amount.label'|trans }}
-                    </div>
-                </div>
-
-                {# Slider Section #}
-                <div class="mt-12">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">
-                        {{ 'estimation.base.label'|trans }}
-                    </label>
-                    <input
-                        data-estimation-target="slider"
-                        data-action="input->estimation#update"
-                        type="range"
-                        min="800"
-                        max="10000"
-                        step="100"
-                        value="800"
-                        aria-label="{{ 'estimation.slider.label'|trans }}"
-                        class="estimation-slider w-full h-2 rounded-lg outline-none cursor-pointer appearance-none"
-                    />
-
-                    {# Min/Max Labels #}
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="text-sm font-medium text-gray-600">800 €</span>
-                        <span class="text-sm font-medium text-gray-600">10 000 €</span>
-                    </div>
-                </div>
-
-                {# Services Section #}
-                <div class="mt-12 pt-8 border-t border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">
-                        {{ 'estimation.services.title'|trans }}
-                    </h2>
-                    <p class="text-gray-600 mb-6">
-                        {{ 'estimation.services.subtitle'|trans }}
-                    </p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {# Service 1: Schooling #}
-                        <div
-                            data-estimation-target="service"
-                            data-action="click->estimation#toggleService"
-                            class="relative border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-lg"
-                        >
-                            <input
-                                type="checkbox"
-                                data-price="200"
-                                class="sr-only"
-                                id="service-schooling"
-                            />
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 mb-1">
-                                        {{ 'estimation.services.schooling.title'|trans }}
-                                    </h3>
-                                    <p class="text-sm text-gray-600">
-                                        {{ 'estimation.services.schooling.description'|trans }}
-                                    </p>
-                                </div>
-                                <div class="ml-4 flex flex-col items-end">
-                                    <span class="text-lg font-bold text-blue-600">+200 €</span>
-                                    <span class="text-xs text-gray-500">{{ 'estimation.services.perMonth'|trans }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {# Service 2: Account Management #}
-                        <div
-                            data-estimation-target="service"
-                            data-action="click->estimation#toggleService"
-                            class="relative border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-lg"
-                        >
-                            <input
-                                type="checkbox"
-                                data-price="150"
-                                class="sr-only"
-                                id="service-account"
-                            />
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 mb-1">
-                                        {{ 'estimation.services.account.title'|trans }}
-                                    </h3>
-                                    <p class="text-sm text-gray-600">
-                                        {{ 'estimation.services.account.description'|trans }}
-                                    </p>
-                                </div>
-                                <div class="ml-4 flex flex-col items-end">
-                                    <span class="text-lg font-bold text-blue-600">+150 €</span>
-                                    <span class="text-xs text-gray-500">{{ 'estimation.services.perMonth'|trans }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {# Service 3: Administrative Support #}
-                        <div
-                            data-estimation-target="service"
-                            data-action="click->estimation#toggleService"
-                            class="relative border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-lg"
-                        >
-                            <input
-                                type="checkbox"
-                                data-price="100"
-                                class="sr-only"
-                                id="service-admin"
-                            />
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 mb-1">
-                                        {{ 'estimation.services.admin.title'|trans }}
-                                    </h3>
-                                    <p class="text-sm text-gray-600">
-                                        {{ 'estimation.services.admin.description'|trans }}
-                                    </p>
-                                </div>
-                                <div class="ml-4 flex flex-col items-end">
-                                    <span class="text-lg font-bold text-blue-600">+100 €</span>
-                                    <span class="text-xs text-gray-500">{{ 'estimation.services.perMonth'|trans }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {# Service 4: Conciergerie #}
-                        <div
-                            data-estimation-target="service"
-                            data-action="click->estimation#toggleService"
-                            class="relative border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:shadow-lg"
-                        >
-                            <input
-                                type="checkbox"
-                                data-price="250"
-                                class="sr-only"
-                                id="service-concierge"
-                            />
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 mb-1">
-                                        {{ 'estimation.services.concierge.title'|trans }}
-                                    </h3>
-                                    <p class="text-sm text-gray-600">
-                                        {{ 'estimation.services.concierge.description'|trans }}
-                                    </p>
-                                </div>
-                                <div class="ml-4 flex flex-col items-end">
-                                    <span class="text-lg font-bold text-blue-600">+250 €</span>
-                                    <span class="text-xs text-gray-500">{{ 'estimation.services.perMonth'|trans }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# Breakdown Section #}
-                <div class="mt-12 pt-8 border-t border-gray-200">
-                    <div class="bg-gray-50 rounded-xl p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                            {{ 'estimation.breakdown.title'|trans }}
-                        </h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center text-gray-700">
-                                <span>{{ 'estimation.breakdown.base'|trans }}</span>
-                                <span class="font-medium" data-estimation-target="baseAmount">800 €</span>
-                            </div>
-                            <div class="flex justify-between items-center text-gray-700">
-                                <span>{{ 'estimation.breakdown.services'|trans }}</span>
-                                <span class="font-medium" data-estimation-target="servicesAmount">0 €</span>
-                            </div>
-                            <div class="h-px bg-gray-300 my-3"></div>
-                            <div class="flex justify-between items-center text-gray-900">
-                                <span class="text-lg font-bold">{{ 'estimation.breakdown.total'|trans }}</span>
-                                <span class="text-2xl font-bold text-blue-600" data-estimation-target="display">800 €</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}

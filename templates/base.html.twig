@@ -238,7 +238,9 @@
         {{ component('header') }}
         <main class="relative z-20">
             {% block body %}{% endblock %}
-            {{ component('whatsappButton') }}
+            {% if app.request.attributes.get('_route') != 'app_estimation' %}
+                {{ component('whatsappButton') }}
+            {% endif %}
         </main>
         {{ component('footer') }}
     </body>
