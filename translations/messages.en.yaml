@@ -264,6 +264,9 @@ meta:
     aboutUs:
         title: About Us
         description: Discover the story and values of Relocation in Paris, a high-end relocation agency dedicated to comfort, trust, and excellence for its clients.
+    estimation:
+        title: Get Your Estimate
+        description: Estimate the cost of your relocation to Paris in just a few clicks. Discover our personalized services to find your new home and make your move smooth and stress-free.
 home:
     heroSection:
         top:

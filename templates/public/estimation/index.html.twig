@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'estimation.title'|trans }}{% endblock %}
+{% block title %}{{ 'meta.estimation.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.estimation.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_estimation') }}{% endblock %}
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">

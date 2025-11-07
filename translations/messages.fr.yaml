@@ -270,6 +270,9 @@ meta:
     privacyPolicy:
         title: Politique de confidentialité
         description: "Politique de confidentialité de Relocation in Paris : protection et gestion de vos données personnelles conformément au RGPD."
+    estimation:
+        title: Obtenez votre estimation
+        description: Estimez le coût de votre relocation à Paris en quelques clics. Découvrez nos services sur mesure pour trouver votre logement et faciliter votre installation.
 home:
     heroSection:
         top:
