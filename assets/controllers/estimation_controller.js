@@ -7,13 +7,13 @@ import { Controller } from '@hotwired/stimulus';
  * services additionnels, sticky price et formatage en temps réel
  */
 export default class extends Controller {
-    static targets = ['slider', 'display', 'baseAmount', 'servicesAmount', 'service'];
+    static targets = ['slider', 'display', 'rentDisplay', 'baseAmount', 'servicesAmount', 'service'];
 
     static values = {
         min: { type: Number, default: 800 },
         max: { type: Number, default: 10000 },
         step: { type: Number, default: 100 },
-        initial: { type: Number, default: 800 }
+        initial: { type: Number, default: 1300 }
     };
 
     /**
@@ -64,24 +64,36 @@ export default class extends Controller {
         const totalValue = baseValue + servicesTotal;
         const isMaxValue = baseValue >= this.maxValue;
 
-        // Mise à jour du montant principal avec "+" si au maximum
+        // Formate les montants
+        const formattedBase = this.formatCurrency(baseValue);
         const formattedTotal = this.formatCurrency(totalValue);
-        const displayText = isMaxValue ? `+${formattedTotal}` : formattedTotal;
+
+        // Ajoute le "+" si la valeur est au maximum
+        const baseDisplayText = isMaxValue ? `+${formattedBase}` : formattedBase;
+        const totalDisplayText = isMaxValue ? `+${formattedTotal}` : formattedTotal;
 
         // Ajoute l'animation pulse si la valeur a changé
         if (this.previousValue !== null && this.previousValue !== totalValue) {
             this.animatePriceUpdate();
         }
 
-        // Mise à jour de tous les displays
-        this.displayTargets.forEach(target => {
-            target.textContent = displayText;
-        });
+        // Mise à jour du montant du loyer (affichage en haut)
+        if (this.hasRentDisplayTarget) {
+            this.rentDisplayTargets.forEach(target => {
+                target.textContent = baseDisplayText;
+            });
+        }
+
+        // Mise à jour du montant total (affichage dans la barre sticky)
+        if (this.hasDisplayTarget) {
+            this.displayTargets.forEach(target => {
+                target.textContent = totalDisplayText;
+            });
+        }
 
         // Mise à jour des détails si les targets existent
         if (this.hasBaseAmountTarget) {
-            const formattedBase = this.formatCurrency(baseValue);
-            this.baseAmountTarget.textContent = isMaxValue ? `+${formattedBase}` : formattedBase;
+            this.baseAmountTarget.textContent = baseDisplayText;
         }
 
         if (this.hasServicesAmountTarget) {
@@ -95,17 +107,35 @@ export default class extends Controller {
      * Anime les changements de prix
      */
     animatePriceUpdate() {
-        this.displayTargets.forEach(target => {
-            target.classList.remove('price-update');
-            // Force reflow
-            void target.offsetWidth;
-            target.classList.add('price-update');
-
-            // Retire la classe après l'animation
-            setTimeout(() => {
+        // Anime les displays de loyer
+        if (this.hasRentDisplayTarget) {
+            this.rentDisplayTargets.forEach(target => {
                 target.classList.remove('price-update');
-            }, 300);
-        });
+                // Force reflow
+                void target.offsetWidth;
+                target.classList.add('price-update');
+
+                // Retire la classe après l'animation
+                setTimeout(() => {
+                    target.classList.remove('price-update');
+                }, 300);
+            });
+        }
+
+        // Anime les displays de total
+        if (this.hasDisplayTarget) {
+            this.displayTargets.forEach(target => {
+                target.classList.remove('price-update');
+                // Force reflow
+                void target.offsetWidth;
+                target.classList.add('price-update');
+
+                // Retire la classe après l'animation
+                setTimeout(() => {
+                    target.classList.remove('price-update');
+                }, 300);
+            });
+        }
     }
 
     /**
@@ -135,6 +165,38 @@ export default class extends Controller {
 
         // Gradient du bordeaux clair (#d1a3b0) vers le bordeaux foncé (#71172e)
         this.sliderTarget.style.background = `linear-gradient(to right, #d1a3b0 0%, #a85572 ${percentage * 0.5}%, #71172e ${percentage}%, #e5e7eb ${percentage}%, #e5e7eb 100%)`;
+    }
+
+    /**
+     * Configure l'observateur pour la barre sticky
+     * Observer l'élément sticky pour ajouter des effets visuels
+     */
+    setupStickyObserver() {
+        // Trouve l'élément sticky dans le DOM
+        const stickyElement = this.element.querySelector('.sticky');
+
+        if (!stickyElement) {
+            console.warn('Sticky element not found');
+            return;
+        }
+
+        // Crée un observer pour détecter quand l'élément devient sticky
+        this.observer = new IntersectionObserver(
+            ([entry]) => {
+                // Ajoute une ombre quand l'élément est sticky
+                if (entry.intersectionRatio < 1) {
+                    stickyElement.classList.add('shadow-lg');
+                } else {
+                    stickyElement.classList.remove('shadow-lg');
+                }
+            },
+            {
+                threshold: [1],
+                rootMargin: '-1px 0px 0px 0px'
+            }
+        );
+
+        this.observer.observe(stickyElement);
     }
 
     /**

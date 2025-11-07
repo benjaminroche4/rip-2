@@ -20,13 +20,13 @@
         >
             <div class="text-center">
                 <div
-                    data-estimation-target="display"
+                    data-estimation-target="rentDisplay"
                     class="text-5xl md:text-7xl font-bold text-primary leading-none mb-3"
                 >
-                    800 €
+                    1 300 €
                 </div>
                 <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
-                    Montant de votre loyer estimer
+                    Montant de votre loyer estimé
                 </div>
             </div>
             <div class="mt-12">
@@ -45,19 +45,21 @@
                     <span class="text-sm font-medium text-gray-600">800 €</span>
                     <span class="text-sm font-medium text-gray-600">+10 000 €</span>
                 </div>
-                <div class="mt-8 bg-slate-50 rounded-lg p-4 flex gap-x-4">
-                    <div class="inline-flex flex-none items-center shrink-0 justify-center h-6 w-6 rounded-full bg-gray-200">
-                        {{ ux_icon('mynaui:info-solid', {'class':'size-4 text-gray-700'}) }}
+                <div class="mt-8 space-y-6">
+                    <div class="bg-slate-50 rounded-lg p-4 flex gap-x-4">
+                        <div class="inline-flex flex-none items-center shrink-0 justify-center h-6 w-6 rounded-full bg-gray-200">
+                            {{ ux_icon('mynaui:info-solid', {'class':'size-4 text-gray-700'}) }}
+                        </div>
+                        <p class="text-sm text-gray-500">
+                            Nos honoraires correspondent à un mois de loyer hors charge.
+                            Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
+                            <a href="{{ path('app_service_find_accommodation') }}" class="text-gray-500 underline-offset-4 hover:text-gray-600 transition duration-100 underline">Découvrir l'offre en détail</a>.
+                        </p>
                     </div>
-                    <p class="text-sm text-gray-500">
-                        Nos honoraires correspondent à un mois de loyer.
-                        Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
-                        <a href="{{ path('app_service_find_accommodation') }}" class="text-gray-500 underline-offset-4 hover:text-gray-600 transition duration-100 underline">Découvrir l'offre en détail</a>.
-                    </p>
                 </div>
             </div>
             <div class="mt-12 pt-12 border-t border-slate-300">
-                <div class="mb-2 items-center flex item-center gap-x-2">
+                <div class="mb-2 min-[290px]:items-center flex max-[290px]:flex-col item-center gap-2">
                     <div class="flex size-6 items-center justify-center rounded-lg bg-primary">
                         {{ ux_icon('lucide:plus', {'class':'size-5 text-white'}) }}
                     </div>
@@ -75,23 +77,24 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
+                        <label class="sr-only" for="service-schooling">Service de schooling</label>
                         <input
                             type="checkbox"
                             data-price="200"
                             class="sr-only"
                             id="service-schooling"
                         />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Service de Schooling
+                                    Service de schooling
                                 </h3>
                                 <p class="text-sm text-gray-600">
                                     Accompagnement scolaire et inscription dans les meilleures écoles.
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <span class="text-lg font-bold text-primary">+200 €</span>
+                            <div class="flex flex-col items-end">
+                                <span class="text-lg font-bold text-primary">+200€</span>
                                 <span class="text-xs text-gray-500">par enfant</span>
                             </div>
                         </div>
@@ -103,23 +106,24 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
+                        <label class="sr-only" for="service-account">Service de déménagement</label>
                         <input
                             type="checkbox"
-                            data-price="150"
+                            data-price="250"
                             class="sr-only"
                             id="service-account"
                         />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Service de Déménagement
+                                    Service de déménagement
                                 </h3>
                                 <p class="text-sm text-gray-600">
                                     Sélection et coordination de votre déménagement pour une installation sans stress à Paris.
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+150 €</p>
+                            <div class="flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250€</p>
                             </div>
                         </div>
                     </div>
@@ -130,13 +134,14 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
+                        <label class="sr-only" for="service-admin">Support administratif</label>
                         <input
                             type="checkbox"
-                            data-price="100"
+                            data-price="150"
                             class="sr-only"
                             id="service-admin"
                         />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
                                     Support administratif
@@ -145,129 +150,73 @@
                                     Aide aux démarches administratives (CAF, impôts, comptes bancaires).
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+100 €</p>
+                            <div class="flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+150€</p>
                             </div>
                         </div>
                     </div>
 
-                    {# Service 4: Conciergerie #}
+                    {# Service 4: Mise en service du logement #}
                     <div
                         data-estimation-target="service"
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
+                        <label class="sr-only" for="service-inventory">Mise en service du logement</label>
                         <input
                             type="checkbox"
-                            data-price="250"
+                            data-price="300"
                             class="sr-only"
-                            id="service-concierge"
+                            id="service-inventory"
                         />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Inventaire et Installation
+                                    Mise en service du logement
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Accueil sur place, relevé des compteurs, contrôle du mobilier et vérification des équipements.
+                                    Ouverture de l’eau, de l’électricité et de l’assurance habitation, avec relevé des compteurs.
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            <div class="flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+300€</p>
                             </div>
                         </div>
                     </div>
 
-                    {# Service 4: Conciergerie #}
+                    {# Service 5: Accompagnement carte de séjour #}
                     <div
                         data-estimation-target="service"
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
+                        <label class="sr-only" for="service-residence-permit">Accompagnement carte de séjour</label>
                         <input
                             type="checkbox"
                             data-price="250"
                             class="sr-only"
-                            id="service-concierge"
+                            id="service-residence-permit"
                         />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
                                     Accompagnement carte de séjour
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Assistance complète dans la constitution et le suivi de votre demande
+                                    Support complet pour la préparation et le suivi de votre dossier de carte de séjour.
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+250 €</p>
+                            <div class="flex flex-col items-end">
+                                <p class="text-lg font-bold text-primary">+250€</p>
                             </div>
                         </div>
                     </div>
 
-                    {# Service 4: Conciergerie #}
+                    {# Service 7: Conciergerie Premium (Sur Devis - pas de prix calculé) #}
                     <div
-                        data-estimation-target="service"
-                        data-action="click->estimation#toggleService"
-                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
+                        class="relative border border-slate-200 bg-white rounded-xl p-4 opacity-75"
                     >
-                        <input
-                            type="checkbox"
-                            data-price="250"
-                            class="sr-only"
-                            id="service-concierge"
-                        />
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 mb-1">
-                                    Accompagnement carte de séjour
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    Assistance complète dans la constitution et le suivi de votre demande
-                                </p>
-                            </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+250 €</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        data-estimation-target="service"
-                        data-action="click->estimation#toggleService"
-                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
-                    >
-                        <input
-                            type="checkbox"
-                            data-price="250"
-                            class="sr-only"
-                            id="service-concierge"
-                        />
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 mb-1">
-                                    Assistance fiscale
-                                </h3>
-                                <p class="text-sm text-gray-600">
-                                    Orientation vers nos partenaires experts-comptables et fiscalistes si besoin.
-                                </p>
-                            </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-lg font-bold text-primary">+250 €</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        data-estimation-target="service"
-                        data-action="click->estimation#toggleService"
-                        class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
-                    >
-                        <input
-                            type="checkbox"
-                            data-price="250"
-                            class="sr-only"
-                            id="service-concierge"
-                        />
-                        <div class="flex items-start justify-between">
+                        <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
                                     Conciergerie Premium
@@ -276,8 +225,8 @@
                                     Accès privilégié aux meilleures tables, aux événements culturels et aux clubs privés.
                                 </p>
                             </div>
-                            <div class="ml-4 flex flex-col items-end">
-                                <p class="text-md font-semibold text-gray-400">Sur Devis</p>
+                            <div class="flex flex-col items-end">
+                                <p class="text-md font-medium text-gray-400">Sur Devis</p>
                             </div>
                         </div>
                     </div>
@@ -285,7 +234,7 @@
                 </div>
             </div>
             <div class="mt-12 pt-12 border-t border-slate-300">
-                <div class="mb-2 items-center flex item-center gap-x-2">
+                <div class="mb-2 min-[290px]:items-center flex max-[290px]:flex-col item-center gap-2">
                     <div class="flex size-6 items-center justify-center rounded-lg bg-primary">
                         {{ ux_icon('material-symbols:euro', {'class':'size-4 text-white'}) }}
                     </div>
@@ -294,24 +243,50 @@
                     </h2>
                 </div>
             </div>
-        </div>
-        <div class="sticky max-w-2xl bottom-5 mx-auto z-30 py-2 rounded-xl w-full px-4 bg-white border-1 border-primary/50">
-            <div class="flex items-center justify-between">
-                <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
-                    <p>Montant estimer :</p>
-                </div>
-                <div
-                    class="text-xl font-bold text-primary bg-slate-50 rounded-lg px-4 py-2"
-                    data-estimation-target="display"
-                >
-                    1520€<span class="font-light text-xs ml-0.5 text-gray-500">/TTC</span>
+            <div class="sticky max-w-2xl bottom-5 mx-auto z-30 py-2 rounded-xl w-full px-4 bg-white border-1 border-primary/50">
+                <div class="flex items-center min-[290px]:justify-between gap-2 max-[290px]:flex-col">
+                    <div>
+                        <p class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-medium">Montant estimé :</p>
+                    </div>
+                    <div class="text-xl font-bold text-primary bg-slate-50 rounded-lg px-4 py-2 flex items-baseline gap-1">
+                        <span data-estimation-target="display">1 300 €</span>
+                        <span class="font-light text-xs text-gray-500">/TTC</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-10">
-            <div class="border border-slate-100 rounded-xl p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-8">
+            <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100">
+                <div class="flex flex-col justify-center items-center">
+                    <div class="bg-primary/10 rounded-full p-4">
+                        {{ ux_icon('lucide:phone', {'class':'size-6 text-primary'}) }}
+                    </div>
+                    <div class="mt-4 text-center space-y-2">
+                        <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.2.phone.label'|trans|raw }}</h3>
+                        <a href="tel:{{ phone_number }}" class="text-primary font-medium hover:text-primary/80 transition duration-100">
+                            01 84 80 43 44
+                        </a>
+                        <p class="text-xs mt-2 text-neutral-500 uppercase">
+                            {{ 'contact.contactType.2.orContactus'|trans|raw }}
+                            <a href="https://wa.me/33761719439" target="_blank" class="underline underline-offset-4 decoration-dotted hover:text-green-600 transition duration-100">
+                                {{ 'contact.contactType.2.whatsapp'|trans|raw }}
+                            </a>
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="border border-slate-100 rounded-xl p-4">
+            <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100">
+                <div class="flex flex-col justify-center items-center">
+                    <div class="bg-primary/10 rounded-full p-4">
+                        {{ ux_icon('mingcute:send-line', {'class':'size-6 text-primary'}) }}
+                    </div>
+                    <div class="mt-4 text-center space-y-2">
+                        <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">Formulaire de contact</h3>
+                        <a href="{{ path('app_contact') }}" class="text-primary font-medium hover:text-primary/80 transition duration-100 underline decoration-dotted underline-offset-6">
+                            Être recontacté rapidement
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
