@@ -544,3 +544,46 @@ privacy:
                 - "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
                 - "<span class='font-semibold'>Postal address</span>: Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
                 - "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
+estimation:
+    title: Rent estimation in Paris
+    hero:
+        title: Get your estimate
+        subtitle: Estimate the cost of your relocation to Paris
+    rent:
+        label: Your estimated monthly rent
+    slider:
+        label: Amount slider
+    info:
+        fees: Our fees correspond to one month's rent excluding charges.
+        description: We search and select the best properties for you in Paris (within and outside the city limits).
+        link: Discover the offer in detail
+    services:
+        title: Additional services
+        subtitle: Select the services you need
+        schooling:
+            title: Schooling service
+            description: Educational support and enrollment in the best schools.
+            perChild: per child
+        moving:
+            title: Moving service
+            description: Selection and coordination of your move for a stress-free installation in Paris.
+        administrative:
+            title: Administrative support
+            description: Help with administrative procedures (CAF, taxes, bank accounts).
+        setup:
+            title: Property activation service
+            description: Opening of water, electricity, and home insurance, with meter readings.
+        residencePermit:
+            title: Residence permit assistance
+            description: Complete support for preparing and tracking your residence permit application.
+        concierge:
+            title: Premium concierge
+            description: Privileged access to the best restaurants, cultural events, and private clubs.
+            onQuote: On quote
+    total:
+        title: Estimated quote amount
+        label: "Estimated amount:"
+    contact:
+        form:
+            title: Contact form
+            link: Be contacted quickly

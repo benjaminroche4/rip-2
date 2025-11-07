@@ -7,8 +7,8 @@
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary">Obtenez votre estimation</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Estimez le coût de votre relocation à Paris</h2>
+            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'estimation.hero.title'|trans }}</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'estimation.hero.subtitle'|trans }}</h2>
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 relative">
@@ -28,7 +28,7 @@
                     1 300 €
                 </div>
                 <div class="text-sm text-gray-500 uppercase tracking-widest font-medium">
-                    Montant de votre loyer estimé
+                    {{ 'estimation.rent.label'|trans }}
                 </div>
             </div>
             <div class="mt-12">
@@ -53,9 +53,9 @@
                             {{ ux_icon('mynaui:info-solid', {'class':'size-4 text-gray-700'}) }}
                         </div>
                         <p class="text-sm text-gray-500">
-                            Nos honoraires correspondent à un mois de loyer hors charges.
-                            Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
-                            <a href="{{ path('app_service_find_accommodation') }}" class="text-gray-500 underline-offset-4 hover:text-gray-600 transition duration-100 underline">Découvrir l'offre en détail</a>.
+                            {{ 'estimation.info.fees'|trans }}
+                            {{ 'estimation.info.description'|trans }}
+                            <a href="{{ path('app_service_find_accommodation') }}" class="text-gray-500 underline-offset-4 hover:text-gray-600 transition duration-100 underline">{{ 'estimation.info.link'|trans }}</a>.
                         </p>
                     </div>
                 </div>
@@ -66,11 +66,11 @@
                         {{ ux_icon('lucide:plus', {'class':'size-5 text-white'}) }}
                     </div>
                     <h2 class="text-2xl font-bold text-gray-900">
-                        Services additionnels
+                        {{ 'estimation.services.title'|trans }}
                     </h2>
                 </div>
                 <p class="text-gray-600 mb-6">
-                    Sélectionnez les services dont vous avez besoin
+                    {{ 'estimation.services.subtitle'|trans }}
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +79,7 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
-                        <label class="sr-only" for="service-schooling">Service de schooling</label>
+                        <label class="sr-only" for="service-schooling">{{ 'estimation.services.schooling.title'|trans }}</label>
                         <input
                             type="checkbox"
                             data-price="200"
@@ -89,15 +89,15 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Service de schooling
+                                    {{ 'estimation.services.schooling.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Accompagnement scolaire et inscription dans les meilleures écoles.
+                                    {{ 'estimation.services.schooling.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
                                 <span class="text-lg font-bold text-primary">+200€</span>
-                                <span class="text-xs text-gray-500">par enfant</span>
+                                <span class="text-xs text-gray-500">{{ 'estimation.services.schooling.perChild'|trans }}</span>
                             </div>
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
-                        <label class="sr-only" for="service-account">Service de déménagement</label>
+                        <label class="sr-only" for="service-account">{{ 'estimation.services.moving.title'|trans }}</label>
                         <input
                             type="checkbox"
                             data-price="250"
@@ -118,10 +118,10 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Service de déménagement
+                                    {{ 'estimation.services.moving.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Sélection et coordination de votre déménagement pour une installation sans stress à Paris.
+                                    {{ 'estimation.services.moving.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
@@ -136,7 +136,7 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
-                        <label class="sr-only" for="service-admin">Support administratif</label>
+                        <label class="sr-only" for="service-admin">{{ 'estimation.services.administrative.title'|trans }}</label>
                         <input
                             type="checkbox"
                             data-price="150"
@@ -146,10 +146,10 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Support administratif
+                                    {{ 'estimation.services.administrative.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Aide aux démarches administratives (CAF, impôts, comptes bancaires).
+                                    {{ 'estimation.services.administrative.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
@@ -164,7 +164,7 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
-                        <label class="sr-only" for="service-inventory">Mise en service du logement</label>
+                        <label class="sr-only" for="service-inventory">{{ 'estimation.services.setup.title'|trans }}</label>
                         <input
                             type="checkbox"
                             data-price="300"
@@ -174,10 +174,10 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Mise en service du logement
+                                    {{ 'estimation.services.setup.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Ouverture de l’eau, de l’électricité et de l’assurance habitation, avec relevé des compteurs.
+                                    {{ 'estimation.services.setup.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
@@ -192,7 +192,7 @@
                         data-action="click->estimation#toggleService"
                         class="relative border border-slate-200 bg-white rounded-xl p-4 cursor-pointer transition-all duration-100 hover:border-primary/40 has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5"
                     >
-                        <label class="sr-only" for="service-residence-permit">Accompagnement carte de séjour</label>
+                        <label class="sr-only" for="service-residence-permit">{{ 'estimation.services.residencePermit.title'|trans }}</label>
                         <input
                             type="checkbox"
                             data-price="250"
@@ -202,10 +202,10 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Accompagnement carte de séjour
+                                    {{ 'estimation.services.residencePermit.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Support complet pour la préparation et le suivi de votre dossier de carte de séjour.
+                                    {{ 'estimation.services.residencePermit.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
@@ -221,14 +221,14 @@
                         <div class="flex max-[290px]:flex-col items-start justify-between gap-4">
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-1">
-                                    Conciergerie Premium
+                                    {{ 'estimation.services.concierge.title'|trans }}
                                 </h3>
                                 <p class="text-sm text-gray-600">
-                                    Accès privilégié aux meilleures tables, aux événements culturels et aux clubs privés.
+                                    {{ 'estimation.services.concierge.description'|trans }}
                                 </p>
                             </div>
                             <div class="flex flex-col items-end">
-                                <p class="text-md font-medium text-gray-400">Sur Devis</p>
+                                <p class="text-md font-medium text-gray-400">{{ 'estimation.services.concierge.onQuote'|trans }}</p>
                             </div>
                         </div>
                     </div>
@@ -241,14 +241,14 @@
                         {{ ux_icon('material-symbols:euro', {'class':'size-4 text-white'}) }}
                     </div>
                     <h2 class="text-2xl font-bold text-gray-900">
-                        Montant estimé du devis
+                        {{ 'estimation.total.title'|trans }}
                     </h2>
                 </div>
             </div>
             <div class="sticky max-w-2xl bottom-5 mx-auto z-30 py-2 rounded-xl w-full px-4 bg-white border-1 border-primary/50">
                 <div class="flex items-center min-[290px]:justify-between gap-2 max-[290px]:flex-col">
                     <div>
-                        <p class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-medium">Montant estimé :</p>
+                        <p class="text-xs sm:text-sm text-gray-500 uppercase tracking-widest font-medium">{{ 'estimation.total.label'|trans }}</p>
                     </div>
                     <div class="text-xl font-bold text-primary bg-slate-50 rounded-lg px-4 py-2 flex items-baseline gap-1">
                         <span data-estimation-target="display">1 300 €</span>
@@ -283,9 +283,9 @@
                         {{ ux_icon('mingcute:send-line', {'class':'size-6 text-primary'}) }}
                     </div>
                     <div class="mt-4 text-center space-y-2">
-                        <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">Formulaire de contact</h3>
+                        <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'estimation.contact.form.title'|trans }}</h3>
                         <a href="{{ path('app_contact') }}" class="text-primary font-medium hover:text-primary/80 transition duration-100 underline decoration-dotted underline-offset-6">
-                            Être recontacté rapidement
+                            {{ 'estimation.contact.form.link'|trans }}
                         </a>
                     </div>
                 </div>

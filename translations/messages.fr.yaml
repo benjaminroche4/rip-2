@@ -552,33 +552,44 @@ privacy:
                 - "<span class='font-semibold'>Téléphone</span> : +33 (0)1 84 80 43 44"
 estimation:
     title: Estimation de loyer à Paris
-    header:
-        title: Estimation de loyer
-        subtitle: Ajustez le montant et sélectionnez vos services pour obtenir votre estimation personnalisée
-    amount:
-        label: Montant total estimé
-    base:
-        label: Budget de base
+    hero:
+        title: Obtenez votre estimation
+        subtitle: Estimez le coût de votre relocation à Paris
+    rent:
+        label: Montant de votre loyer estimé
     slider:
         label: Curseur de montant
+    info:
+        fees: Nos honoraires correspondent à un mois de loyer hors charges.
+        description: Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
+        link: Découvrir l'offre en détail
     services:
         title: Services additionnels
         subtitle: Sélectionnez les services dont vous avez besoin
-        perMonth: par mois
         schooling:
-            title: Service de Schooling
-            description: Accompagnement scolaire et inscription dans les meilleures écoles
-        account:
-            title: Gestion des comptes
-            description: Ouverture de comptes bancaires et gestion administrative
-        admin:
+            title: Service de schooling
+            description: Accompagnement scolaire et inscription dans les meilleures écoles.
+            perChild: par enfant
+        moving:
+            title: Service de déménagement
+            description: Sélection et coordination de votre déménagement pour une installation sans stress à Paris.
+        administrative:
             title: Support administratif
-            description: Aide aux démarches administratives et documents officiels
+            description: Aide aux démarches administratives (CAF, impôts, comptes bancaires).
+        setup:
+            title: Mise en service du logement
+            description: Ouverture de l'eau, de l'électricité et de l'assurance habitation, avec relevé des compteurs.
+        residencePermit:
+            title: Accompagnement carte de séjour
+            description: Support complet pour la préparation et le suivi de votre dossier de carte de séjour.
         concierge:
-            title: Service de conciergerie
-            description: Conciergerie premium pour faciliter votre quotidien
-    breakdown:
-        title: Détail de l'estimation
-        base: Budget de base
-        services: Services additionnels
-        total: Total mensuel
+            title: Conciergerie Premium
+            description: Accès privilégié aux meilleures tables, aux événements culturels et aux clubs privés.
+            onQuote: Sur Devis
+    total:
+        title: Montant estimé du devis
+        label: "Montant estimé :"
+    contact:
+        form:
+            title: Formulaire de contact
+            link: Être recontacté rapidement
