@@ -201,8 +201,33 @@ findAccommodation:
                 title: Travaillez-vous uniquement avec des particuliers ?
                 text: "Non. Nous accompagnons aussi bien les particuliers que les entreprises et propriétaires. Nos services s’adaptent à chaque profil : relocation individuelle, mobilité professionnelle, ou gestion de biens à Paris."
             5:
-                title: En combien de temps puis-je m’installer à Paris ?
+                title: En combien de temps puis-je m'installer à Paris ?
                 text: Les délais varient selon vos besoins et la disponibilité des biens et de vos critères, mais grâce à notre réseau exclusif et notre expertise locale, nous pouvons finaliser une installation complète en quelques semaines seulement.
+    timeline:
+        title: Votre parcours en 7 étapes
+        subtitle: De la première prise de contact jusqu'à votre installation complète, découvrez notre processus d'accompagnement
+        steps:
+            1:
+                title: Premier échange
+                description: Nous prenons le temps de comprendre vos besoins, vos critères de recherche et vos délais pour vous proposer un accompagnement parfaitement adapté.
+            2:
+                title: Définition du projet
+                description: Nous établissons ensemble votre budget, votre localisation idéale, le type de bien recherché et toutes vos exigences spécifiques.
+            3:
+                title: Recherche ciblée
+                description: Notre équipe active son réseau exclusif de partenaires immobiliers et sélectionne les biens correspondant précisément à vos attentes.
+            4:
+                title: Organisation des visites
+                description: Nous planifions et coordonnons les visites de logements (physiques ou virtuelles) selon votre emploi du temps et vous accompagnons dans votre sélection.
+            5:
+                title: Montage du dossier
+                description: Nous constituons votre dossier de location complet, négocions les meilleures conditions avec le propriétaire et gérons toutes les formalités administratives.
+            6:
+                title: Signature du bail
+                description: Nous vous accompagnons lors de la signature du contrat de location, vérifions tous les documents et assurons le respect de vos intérêts.
+            7:
+                title: Remise des clés et suivi
+                description: Nous organisons la remise des clés, l'état des lieux d'entrée et restons disponibles pour tout accompagnement complémentaire dont vous pourriez avoir besoin.
 landlords:
     title: Pour les propriétaires
     subTitle: Confiez la gestion de votre bien en toute sérénité

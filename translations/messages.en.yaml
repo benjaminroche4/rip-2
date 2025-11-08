@@ -203,6 +203,31 @@ findAccommodation:
             5:
                 title: How long does it take to settle in Paris?
                 text: The timeframe varies depending on your needs and property availability, but thanks to our exclusive network and local expertise, a full installation can be completed within a few weeks.
+    timeline:
+        title: Your journey in 7 steps
+        subtitle: From first contact to complete installation, discover our comprehensive support process
+        steps:
+            1:
+                title: Initial consultation
+                description: We take the time to understand your needs, search criteria, and timeline to provide perfectly tailored support.
+            2:
+                title: Project definition
+                description: Together, we establish your budget, ideal location, desired property type, and all your specific requirements.
+            3:
+                title: Targeted search
+                description: Our team activates its exclusive network of real estate partners and selects properties that precisely match your expectations.
+            4:
+                title: Visit coordination
+                description: We plan and coordinate property viewings (physical or virtual) according to your schedule and guide you in your selection.
+            5:
+                title: Application preparation
+                description: We compile your complete rental application, negotiate the best terms with the landlord, and handle all administrative formalities.
+            6:
+                title: Lease signing
+                description: We accompany you during the signing of the rental agreement, verify all documents, and ensure your interests are protected.
+            7:
+                title: Key handover and follow-up
+                description: We organize the key handover, move-in inspection, and remain available for any additional support you may need.
 landlords:
     title: For landlords
     subTitle: Manage your property with confidence

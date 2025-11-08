@@ -114,6 +114,161 @@
             </div>
         </div>
     </section>
+
+    {# Vertical Timeline Section #}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <div class="pb-12 lg:pb-16 text-center">
+                <h2 class="text-3xl lg:text-4xl font-medium text-gray-900 mb-4">{{ 'findAccommodation.timeline.title'|trans|raw }}</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">{{ 'findAccommodation.timeline.subtitle'|trans|raw }}</p>
+            </div>
+
+            <div
+                data-controller="vertical-timeline"
+                data-vertical-timeline-threshold-value="0.5"
+                class="relative"
+            >
+                {# Vertical Progress Rail #}
+                <div class="absolute left-4 lg:left-8 top-0 bottom-0 w-0.5 bg-gray-200" data-vertical-timeline-target="rail">
+                    <div
+                        data-vertical-timeline-target="progressBar"
+                        class="absolute top-0 left-0 w-full bg-gradient-to-b from-primary via-primary/90 to-primary/80 transition-all duration-500 ease-out"
+                        style="height: 0%;"
+                    ></div>
+                </div>
+
+                {# Timeline Steps #}
+                <div class="relative space-y-12 lg:space-y-16">
+                    {# Step 1 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">01</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.1.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.1.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 2 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">02</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.2.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.2.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 3 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">03</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.3.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.3.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 4 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">04</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.4.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.4.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 5 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">05</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.5.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.5.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 6 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">06</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.6.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.6.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 7 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-2.5 lg:left-5.5 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">07</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.7.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.7.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">
             <div class="pb-12 lg:pb-16">
