@@ -22,7 +22,6 @@ export default class extends Controller {
     connect() {
         console.log('Vertical timeline controller connected');
         this.activeSteps = new Set();
-        this.highestActiveIndex = -1;
         this.setupIntersectionObserver();
         this.setupScrollListener();
     }
@@ -58,13 +57,8 @@ export default class extends Controller {
                     // Activer l'étape
                     this.activateStep(entry.target, stepIndex);
                     this.activeSteps.add(stepIndex);
-
-                    // Mettre à jour l'indice le plus haut
-                    if (stepIndex > this.highestActiveIndex) {
-                        this.highestActiveIndex = stepIndex;
-                    }
                 } else {
-                    // Désactiver l'étape si elle sort du viewport
+                    // Désactiver l'étape quand elle sort du viewport
                     this.deactivateStep(entry.target, stepIndex);
                     this.activeSteps.delete(stepIndex);
                 }
@@ -114,7 +108,7 @@ export default class extends Controller {
         // Animer le numéro
         if (stepNumber) {
             stepNumber.style.color = 'rgb(113, 23, 46)'; // primary color
-            stepNumber.style.opacity = '1';
+            stepNumber.style.backgroundColor = 'rgb(254, 242, 242)'; // red-50 / primary light
         }
 
         // Animer le contenu
@@ -132,11 +126,6 @@ export default class extends Controller {
      * @param {number} index - L'indice de l'étape
      */
     deactivateStep(step, index) {
-        // Ne désactiver que si ce n'est pas une étape déjà visitée
-        if (index <= this.highestActiveIndex) {
-            return; // Garder les étapes passées actives
-        }
-
         const dot = this.dotTargets[index];
         const dotInner = this.dotInnerTargets[index];
         const stepNumber = this.stepNumberTargets[index];
@@ -157,7 +146,7 @@ export default class extends Controller {
         // Réinitialiser le numéro
         if (stepNumber) {
             stepNumber.style.color = 'rgba(113, 23, 46, 0.4)'; // primary/40
-            stepNumber.style.opacity = '0.4';
+            stepNumber.style.backgroundColor = 'rgb(249, 250, 251)'; // gray-50
         }
 
         // Réinitialiser le contenu
@@ -175,15 +164,18 @@ export default class extends Controller {
     updateProgressBar() {
         if (!this.hasProgressBarTarget || !this.hasRailTarget) return;
 
-        // Calculer la position basée sur l'étape la plus haute active
+        // Calculer la position basée sur l'étape la plus haute actuellement active
         let progress = 0;
 
-        if (this.activeSteps.size > 0 && this.highestActiveIndex >= 0) {
+        if (this.activeSteps.size > 0) {
             const totalSteps = this.stepTargets.length;
+
+            // Trouver l'indice de l'étape active la plus haute
+            const highestActiveIndex = Math.max(...Array.from(this.activeSteps));
 
             // Calculer le pourcentage de progression
             // On ajoute 1 car l'indice commence à 0
-            progress = ((this.highestActiveIndex + 1) / totalSteps) * 100;
+            progress = ((highestActiveIndex + 1) / totalSteps) * 100;
 
             // Limiter à 100%
             progress = Math.min(100, progress);

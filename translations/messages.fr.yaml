@@ -601,6 +601,7 @@ estimation:
         administrative:
             title: Support administratif
             description: Aide aux démarches administratives (CAF, impôts, comptes bancaires).
+            perPerson: par personne
         setup:
             title: Mise en service du logement
             description: Ouverture de l'eau, de l'électricité et de l'assurance habitation, avec relevé des compteurs.

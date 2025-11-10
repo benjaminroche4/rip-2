@@ -595,6 +595,7 @@ estimation:
         administrative:
             title: Administrative support
             description: Help with administrative procedures (CAF, taxes, bank accounts).
+            perPerson: per person
         setup:
             title: Property activation service
             description: Opening of water, electricity, and home insurance, with meter readings.
