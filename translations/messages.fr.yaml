@@ -160,74 +160,47 @@ companies:
 findAccommodation:
     title: Trouver un logement
     subTitle: Votre nouveau chez-vous à Paris
-    services:
-        1:
-            title: Recherche de logement
-            subTitle: Une recherche de logement exclusive et personnalisée.
-            offer:
-                1: Locations courte ou longue durée
-                2: Appartements meublés ou non meublés
-                3: Visites physiques ou virtuelles
-                4: Accès à notre réseau exclusif de partenaires immobiliers
-                5: Sélection et accompagnement à chaque étape
-        2:
-            title: Accompagnement administratif
-            subTitle: Une prise en charge complète de vos démarches.
-            offer:
-                1: Gestion du bail et des documents
-                2: Négociation du loyer
-                3: Vérification juridique et conformité du bail
-                4: Suivi jusqu’à la remise des clés
-        3:
-            title: Installation et services
-            subTitle: Nous orchestrons chaque étape de votre installation.
-            offer:
-                1: Gestion de l’état des lieux
-                2: Activation des services essentiels
-                3: Accès à notre réseau de partenaires
     faq:
         title: Vos questions, nos réponses
         question:
             1:
                 title: Quels types de logements proposez-vous ?
-                text: Nous proposons une sélection de biens à Paris et en proche banlieue, meublés ou non, pour des locations de courte ou longue durée. Chaque recherche est entièrement personnalisée selon vos critères, avec un accès privilégié à notre réseau exclusif de partenaires immobiliers.
+                text: Nous proposons une sélection de biens à Paris et en proche banlieue, meublés ou non, pour des locations de courte ou longue durée. Chaque recherche est entièrement personnalisée selon vos critères.
             2:
                 title: Trouvez-vous toujours un logement ?
-                text: Oui. Grâce à notre réseau et à une sélection précise, nous trouvons le logement qui vous correspond.
+                text: Oui nous avons un taux de réussite de 100%. Grâce à notre réseau et à une sélection précise, nous trouvons le logement qui vous correspond.
             3:
-                title: Aidez-vous à l’installation une fois le logement trouvé ?
-                text: "Absolument. Nous orchestrons toutes les étapes de votre installation : état des lieux, activation des services essentiel et mise en relation avec nos partenaires exclusifs pour tout besoin complémentaire."
+                title: Puis-je effectuer tout le processus à distance (depuis l’étranger) ?
+                text: Oui ! Nous accompagnons régulièrement des clients expatriés ou en mobilité professionnelle. Les visites peuvent être réalisées en visioconférence, et la signature du bail ainsi que la constitution du dossier se font entièrement en ligne et en toute sécurité. Vous pouvez donc réserver et emménager sans vous déplacer avant votre arrivée à Paris.
             4:
-                title: Travaillez-vous uniquement avec des particuliers ?
-                text: "Non. Nous accompagnons aussi bien les particuliers que les entreprises et propriétaires. Nos services s’adaptent à chaque profil : relocation individuelle, mobilité professionnelle, ou gestion de biens à Paris."
-            5:
                 title: En combien de temps puis-je m'installer à Paris ?
                 text: Les délais varient selon vos besoins et la disponibilité des biens et de vos critères, mais grâce à notre réseau exclusif et notre expertise locale, nous pouvons finaliser une installation complète en quelques semaines seulement.
+            5:
+                title: Quel est le prix de vos services ?
+                text: "Nous facturons des honoraires équivalents à un mois de loyer hors charges pour un accompagnement complet jusqu’à la remise des clés. Nous proposons également des services complémentaires sur mesure. <a href='{{ path('app_estimation') }}' class='underline underline-offset-4 hover:text-primary transition duration-100'>Obtenez votre estimation via le calculateur</a>."
     timeline:
-        title: Votre parcours en 7 étapes
-        subtitle: De la première prise de contact jusqu'à votre installation complète, découvrez notre processus d'accompagnement
         steps:
             1:
                 title: Premier échange
-                description: Nous prenons le temps de comprendre vos besoins, vos critères de recherche et vos délais pour vous proposer un accompagnement parfaitement adapté.
+                description: Nous prenons le temps de comprendre vos besoins, vos délais et vos priorités pour bâtir un accompagnement 100 % sur-mesure.
             2:
                 title: Définition du projet
-                description: Nous établissons ensemble votre budget, votre localisation idéale, le type de bien recherché et toutes vos exigences spécifiques.
+                description: Ensemble, nous définissons votre budget, la localisation idéale et vos critères essentiels pour cibler uniquement les biens qui vous correspondent.
             3:
                 title: Recherche ciblée
-                description: Notre équipe active son réseau exclusif de partenaires immobiliers et sélectionne les biens correspondant précisément à vos attentes.
+                description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne.
             4:
                 title: Organisation des visites
-                description: Nous planifions et coordonnons les visites de logements (physiques ou virtuelles) selon votre emploi du temps et vous accompagnons dans votre sélection.
+                description: Nous planifions les visites selon votre emploi du temps – en présentiel ou virtuellement – et vous conseillons à chaque étape de votre sélection.
             5:
-                title: Montage du dossier
-                description: Nous constituons votre dossier de location complet, négocions les meilleures conditions avec le propriétaire et gérons toutes les formalités administratives.
+                title: Préparation et finalisation du dossier
+                description: Nous préparons votre dossier locatif dès le début du processus afin d’être réactifs sur le marché. Après sélection du bien, nous finalisons les pièces nécessaires, négocions les meilleures conditions et gérons les formalités administratives.
             6:
                 title: Signature du bail
-                description: Nous vous accompagnons lors de la signature du contrat de location, vérifions tous les documents et assurons le respect de vos intérêts.
+                description: Nous vous accompagnons lors de la signature, vérifions chaque document et assurons la conformité du contrat.
             7:
                 title: Remise des clés et suivi
-                description: Nous organisons la remise des clés, l'état des lieux d'entrée et restons disponibles pour tout accompagnement complémentaire dont vous pourriez avoir besoin.
+                description: Nous organisons la remise des clés, l’état des lieux d’entrée, et restons à vos côtés pour toute assistance post-installation.
 landlords:
     title: Pour les propriétaires
     subTitle: Confiez la gestion de votre bien en toute sérénité

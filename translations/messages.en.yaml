@@ -160,74 +160,47 @@ companies:
 findAccommodation:
     title: Find accommodation
     subTitle: Your new home in Paris
-    services:
-        1:
-            title: Housing search
-            subTitle: An exclusive and personalized housing search.
-            offer:
-                1: Short or long-term rentals
-                2: Furnished or unfurnished apartments
-                3: Physical or virtual visits
-                4: Access to our exclusive real estate network
-                5: Selection and support at every step
-        2:
-            title: Administrative assistance
-            subTitle: Full management of your formalities.
-            offer:
-                1: Lease and document management
-                2: Rent negotiation
-                3: Legal verification and compliance
-                4: Follow-up until key handover
-        3:
-            title: Installation and services
-            subTitle: We coordinate every stage of your installation.
-            offer:
-                1: Inventory management
-                2: Activation of essential services
-                3: Access to our partner network
     faq:
         title: Your questions, our answers
         question:
             1:
-                title: What types of housing do you offer?
-                text: We offer a selection of properties in Paris and nearby suburbs, furnished or unfurnished, for short- or long-term rentals. Each search is fully personalized, with privileged access to our exclusive network of real estate partners.
+                title: What types of properties do you offer ?
+                text: We offer a selection of properties in Paris and the surrounding areas, furnished or unfurnished, for both short and long-term rentals. Each search is entirely personalized according to your specific criteria.
             2:
-                title: Do you always find a home?
-                text: Yes. Thanks to our network and a precise selection process, we find the home that truly fits your needs.
+                title: Do you always find a property ?
+                text: Yes, we have a 100% success rate. Thanks to our network and a precise selection process, we always find the property that fits your needs.
             3:
-                title: Do you help with installation after finding housing?
-                text: "Absolutely. We coordinate all installation steps: inventory, activation of essential services, and connection with our exclusive partners for any additional needs."
+                title: Can I complete the entire process remotely (from abroad) ?
+                text: Yes ! We regularly assist expatriates and professionals relocating for work. Property viewings can be done via video call, and both the lease signing and file preparation are handled entirely online and securely. You can reserve and move into your new home before even arriving in Paris.
             4:
-                title: Do you only work with individuals?
-                text: "No. We support individuals, companies, and property owners. Our services adapt to each profile: individual relocation, professional mobility, or property management in Paris."
+                title: How long does it take to settle in Paris ?
+                text: Timelines vary depending on your needs and property availability, but thanks to our exclusive network and local expertise, we can complete a full relocation in just a few weeks.
             5:
-                title: How long does it take to settle in Paris?
-                text: The timeframe varies depending on your needs and property availability, but thanks to our exclusive network and local expertise, a full installation can be completed within a few weeks.
+                title: Is the rental market in Paris really that competitive ?
+                text: Yes, demand is high but navigating it is our expertise. With our strong network of partners and thorough preparation, we make sure you are among the first candidates for the best properties.
     timeline:
-        title: Your journey in 7 steps
-        subtitle: From first contact to complete installation, discover our comprehensive support process
         steps:
             1:
-                title: Initial consultation
-                description: We take the time to understand your needs, search criteria, and timeline to provide perfectly tailored support.
+                title: Initial Consultation
+                description: We take the time to understand your needs, timelines, and priorities in order to build a 100% tailor-made relocation plan.
             2:
-                title: Project definition
-                description: Together, we establish your budget, ideal location, desired property type, and all your specific requirements.
+                title: Project Definition
+                description: Together, we define your budget, ideal location, and key criteria to focus only on properties that truly match your expectations.
             3:
-                title: Targeted search
-                description: Our team activates its exclusive network of real estate partners and selects properties that precisely match your expectations.
+                title: Targeted Search
+                description: Thanks to our exclusive network of real estate partners, we quickly identify the best opportunities, often before they go public.
             4:
-                title: Visit coordination
-                description: We plan and coordinate property viewings (physical or virtual) according to your schedule and guide you in your selection.
+                title: Visit Coordination
+                description: We schedule property visits at your convenience — either in person or virtually — and advise you throughout your selection process.
             5:
-                title: Application preparation
-                description: We compile your complete rental application, negotiate the best terms with the landlord, and handle all administrative formalities.
+                title: File Preparation and Finalization
+                description: We prepare your rental file early in the process to ensure quick reactivity. Once you select a property, we finalize all required documents, negotiate the best terms, and manage all administrative formalities.
             6:
-                title: Lease signing
-                description: We accompany you during the signing of the rental agreement, verify all documents, and ensure your interests are protected.
+                title: Lease Signing
+                description: We assist you during the lease signing, review all documents, and ensure the contract fully complies with your interests.
             7:
-                title: Key handover and follow-up
-                description: We organize the key handover, move-in inspection, and remain available for any additional support you may need.
+                title: Key Handover and Ongoing Support
+                description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
 landlords:
     title: For landlords
     subTitle: Manage your property with confidence

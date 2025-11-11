@@ -98,6 +98,26 @@
                                 <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.4.title'|trans|raw }}</h3>
                             </div>
                             <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.4.description'|trans|raw }}</p>
+                            <div
+                                data-vertical-timeline-target="expandableContent"
+                                class="max-w-sm mt-8 overflow-hidden transition-all duration-500 ease-in-out"
+                                style="max-height: 0; opacity: 0;"
+                            >
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20">
+                                        {{ ux_icon('lineicons:phone', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600">
+                                            Visioconférence
+                                        </h4>
+                                    </div>
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2">
+                                        {{ ux_icon('icon-park-outline:eyes', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600">
+                                            Sur place
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -116,11 +136,6 @@
                                 <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.5.title'|trans|raw }}</h3>
                             </div>
                             <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.5.description'|trans|raw }}</p>
-                            <div class="max-w-3xl mx-auto mt-4">
-                                <div class="bg-gray-100 rounded-xl p-4">
-                                    dee
-                                </div>
-                            </div>
                         </div>
                     </div>
 
