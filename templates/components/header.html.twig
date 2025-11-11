@@ -34,7 +34,7 @@
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end ">
             <div class="flex items-center gap-x-4">
-                <a href="{{ path('app_estimation') }}" class="text-sm/6 font-semibold text-gray-900 underline underline-offset-8">
+                <a href="{{ path('app_estimation') }}" class="text-sm/6 font-semibold text-gray-900 underline underline-offset-8 max-[1257px]:hidden block hover:text-gray-600">
                     {{ 'header.menu.estimation'|trans|raw }}
                 </a>
                 <a href="{{ path('app_contact') }}" class="text-sm/6 font-semibold text-gray-900 bg-[#71172e] text-white rounded-full py-2.5 px-3.5 flex items-center gap-x-2 hover:bg-primary/80 transition duration-100">
@@ -155,9 +155,8 @@
                                     <a href="{{ path('app_contact') }}" class="-mx-3 text-center block rounded-full px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-primary/80 transition duration-100 bg-primary">
                                         {{ 'header.menu.contact'|trans|raw }}
                                     </a>
-                                    <a href="tel:{{ phone_number }}" class="-mx-3 text-sm/6 font-semibold h-10 justify-center text-gray-900 bg-white border border-gray-900 text-gray-900 rounded-full py-2.5 px-3 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
-                                        {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
-                                        {{ phone_number }}
+                                    <a href="{{ path('app_estimation') }}" class="-mx-3 text-center text-sm/6 font-semibold text-gray-900 underline underline-offset-8 hover:text-gray-600 flex justify-center items-center">
+                                        {{ 'header.menu.estimation'|trans|raw }}
                                     </a>
                                 </div>
                             </div>

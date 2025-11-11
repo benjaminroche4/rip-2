@@ -174,24 +174,31 @@ findAccommodation:
                 text: Yes ! We regularly assist expatriates and professionals relocating for work. Property viewings can be done via video call, and both the lease signing and file preparation are handled entirely online and securely. You can reserve and move into your new home before even arriving in Paris.
             4:
                 title: How long does it take to settle in Paris ?
-                text: Timelines vary depending on your needs and property availability, but thanks to our exclusive network and local expertise, we can complete a full relocation in just a few weeks.
+                text: On average, we complete a full relocation in just a few weeks. Timelines may vary depending on your needs, property availability, and criteria. Thanks to our exclusive network and in-depth knowledge of the local market, we ensure a smooth and fast relocation with no unexpected issues.
             5:
-                title: Is the rental market in Paris really that competitive ?
-                text: Yes, demand is high but navigating it is our expertise. With our strong network of partners and thorough preparation, we make sure you are among the first candidates for the best properties.
+                title: What is the cost of your services ?
+                text: Our service fee is equivalent to one month’s rent (excluding charges) for full support up to the handover of the keys. We also offer tailor-made additional services to meet your specific needs.
     timeline:
         steps:
             1:
                 title: Initial Consultation
-                description: We take the time to understand your needs, timelines, and priorities in order to build a 100% tailor-made relocation plan.
+                description: We take the time to understand your needs, timelines, and priorities in order to build a tailor-made relocation plan.
             2:
                 title: Project Definition
                 description: Together, we define your budget, ideal location, and key criteria to focus only on properties that truly match your expectations.
+                cards:
+                    1: Paris and surrounding areas
+                    2: Short or long-term rental
+                    3: Furnished or unfurnished
             3:
                 title: Targeted Search
                 description: Thanks to our exclusive network of real estate partners, we quickly identify the best opportunities, often before they go public.
             4:
                 title: Visit Coordination
-                description: We schedule property visits at your convenience — either in person or virtually — and advise you throughout your selection process.
+                description: We schedule property visits at your convenience, either in person or virtually, and advise you throughout your selection process.
+                cards:
+                    1: Video call
+                    2: In person
             5:
                 title: File Preparation and Finalization
                 description: We prepare your rental file early in the process to ensure quick reactivity. Once you select a property, we finalize all required documents, negotiate the best terms, and manage all administrative formalities.

@@ -116,13 +116,6 @@ export default class extends Controller {
             content.style.opacity = '1';
         }
 
-        // Gérer les expandable contents dans ce step
-        const expandables = step.querySelectorAll('[data-vertical-timeline-target="expandableContent"]');
-        expandables.forEach(expandable => {
-            expandable.style.maxHeight = expandable.scrollHeight + 'px';
-            expandable.style.opacity = '1';
-        });
-
         // Ajouter l'attribut ARIA
         step.setAttribute('aria-current', 'step');
     }
@@ -160,13 +153,6 @@ export default class extends Controller {
         if (content) {
             content.style.opacity = '0.4';
         }
-
-        // Gérer les expandable contents dans ce step
-        const expandables = step.querySelectorAll('[data-vertical-timeline-target="expandableContent"]');
-        expandables.forEach(expandable => {
-            expandable.style.maxHeight = '0';
-            expandable.style.opacity = '0';
-        });
 
         // Retirer l'attribut ARIA
         step.removeAttribute('aria-current');

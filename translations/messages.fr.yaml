@@ -174,33 +174,40 @@ findAccommodation:
                 text: Oui ! Nous accompagnons régulièrement des clients expatriés ou en mobilité professionnelle. Les visites peuvent être réalisées en visioconférence, et la signature du bail ainsi que la constitution du dossier se font entièrement en ligne et en toute sécurité. Vous pouvez donc réserver et emménager sans vous déplacer avant votre arrivée à Paris.
             4:
                 title: En combien de temps puis-je m'installer à Paris ?
-                text: Les délais varient selon vos besoins et la disponibilité des biens et de vos critères, mais grâce à notre réseau exclusif et notre expertise locale, nous pouvons finaliser une installation complète en quelques semaines seulement.
+                text: En moyenne, nous finalisons une installation complète en quelques semaines seulement. Les délais peuvent varier selon vos besoins, la disponibilité des biens et vos critères. Grâce à notre réseau exclusif et notre parfaite connaissance du marché local, nous assurons une installation rapide et sans le moindre imprévu.
             5:
                 title: Quel est le prix de vos services ?
-                text: "Nous facturons des honoraires équivalents à un mois de loyer hors charges pour un accompagnement complet jusqu’à la remise des clés. Nous proposons également des services complémentaires sur mesure. <a href='{{ path('app_estimation') }}' class='underline underline-offset-4 hover:text-primary transition duration-100'>Obtenez votre estimation via le calculateur</a>."
+                text: Nous facturons des honoraires équivalents à un mois de loyer hors charges pour un accompagnement complet jusqu’à la remise des clés. Nous proposons également des services complémentaires sur mesure.
     timeline:
         steps:
             1:
                 title: Premier échange
-                description: Nous prenons le temps de comprendre vos besoins, vos délais et vos priorités pour bâtir un accompagnement 100 % sur-mesure.
+                description: Nous prenons le temps de comprendre vos besoins, vos délais et vos priorités pour bâtir un accompagnement sur-mesure.
             2:
                 title: Définition du projet
                 description: Ensemble, nous définissons votre budget, la localisation idéale et vos critères essentiels pour cibler uniquement les biens qui vous correspondent.
+                cards:
+                    1: Paris intra/extra muros
+                    2: Courte ou longue durée
+                    3: Meublé ou non meublé
             3:
                 title: Recherche ciblée
                 description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne.
             4:
                 title: Organisation des visites
-                description: Nous planifions les visites selon votre emploi du temps – en présentiel ou virtuellement – et vous conseillons à chaque étape de votre sélection.
+                description: Nous planifions les visites selon votre emploi du temps, en présentiel ou virtuellement, et vous conseillons à chaque étape de votre sélection.
+                cards:
+                    1: Visioconférence
+                    2: Sur place
             5:
                 title: Préparation et finalisation du dossier
-                description: Nous préparons votre dossier locatif dès le début du processus afin d’être réactifs sur le marché. Après sélection du bien, nous finalisons les pièces nécessaires, négocions les meilleures conditions et gérons les formalités administratives.
+                description: Nous préparons votre dossier locatif dès le début du processus afin d'être réactifs sur le marché. Après sélection du bien, nous finalisons les pièces nécessaires, négocions les meilleures conditions et gérons les formalités administratives.
             6:
                 title: Signature du bail
                 description: Nous vous accompagnons lors de la signature, vérifions chaque document et assurons la conformité du contrat.
             7:
                 title: Remise des clés et suivi
-                description: Nous organisons la remise des clés, l’état des lieux d’entrée, et restons à vos côtés pour toute assistance post-installation.
+                description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
 landlords:
     title: Pour les propriétaires
     subTitle: Confiez la gestion de votre bien en toute sérénité
