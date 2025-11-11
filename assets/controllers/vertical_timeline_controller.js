@@ -10,7 +10,7 @@ import { Controller } from '@hotwired/stimulus';
  * - Support ARIA pour l'accessibilité
  */
 export default class extends Controller {
-    static targets = ['step', 'dot', 'dotInner', 'stepNumber', 'progressBar', 'rail', 'expandableContent'];
+    static targets = ['step', 'dot', 'dotInner', 'stepNumber', 'progressBar', 'rail'];
 
     static values = {
         threshold: { type: Number, default: 0.5 }
@@ -116,12 +116,12 @@ export default class extends Controller {
             content.style.opacity = '1';
         }
 
-        // Gérer l'expandable content pour le step 4 (index 3)
-        if (index === 3 && this.hasExpandableContentTarget) {
-            const expandable = this.expandableContentTarget;
+        // Gérer les expandable contents dans ce step
+        const expandables = step.querySelectorAll('[data-vertical-timeline-target="expandableContent"]');
+        expandables.forEach(expandable => {
             expandable.style.maxHeight = expandable.scrollHeight + 'px';
             expandable.style.opacity = '1';
-        }
+        });
 
         // Ajouter l'attribut ARIA
         step.setAttribute('aria-current', 'step');
@@ -161,12 +161,12 @@ export default class extends Controller {
             content.style.opacity = '0.4';
         }
 
-        // Gérer l'expandable content pour le step 4 (index 3)
-        if (index === 3 && this.hasExpandableContentTarget) {
-            const expandable = this.expandableContentTarget;
+        // Gérer les expandable contents dans ce step
+        const expandables = step.querySelectorAll('[data-vertical-timeline-target="expandableContent"]');
+        expandables.forEach(expandable => {
             expandable.style.maxHeight = '0';
             expandable.style.opacity = '0';
-        }
+        });
 
         // Retirer l'attribut ARIA
         step.removeAttribute('aria-current');
