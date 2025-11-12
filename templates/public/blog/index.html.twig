@@ -3,5 +3,28 @@
 {% block title %}Hello BlogController!{% endblock %}
 
 {% block body %}
-    Blog
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">Blog</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">Le blog pour vivre et s’installer à Paris</h2>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
+        {% set hero = posts|first %}
+        {% set isFr = app.request.locale == 'fr' %}
+
+        {% if hero %}
+            <article class="hero">
+                <h2>{{ isFr ? hero.titleFr : hero.titleEn }}</h2>
+            </article>
+        {% endif %}
+
+        {% for blog in posts %}
+            <h2>    {{ app.request.locale == 'fr' ? blog.titleFr : blog.titleEn }}
+            </h2>
+            <hr>
+        {% else %}
+            <p>No blog posts found.</p>
+        {% endfor %}
+    </section>
 {% endblock %}

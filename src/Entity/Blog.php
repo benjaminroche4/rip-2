@@ -50,6 +50,9 @@ class Blog
     #[ORM\JoinColumn(nullable: false)]
     private ?BlogRedactor $redactor = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $mainPhoto = null;
+
     public function __construct()
     {
         $this->category = new ArrayCollection();
@@ -188,6 +191,18 @@ class Blog
     public function setRedactor(?BlogRedactor $redactor): static
     {
         $this->redactor = $redactor;
+
+        return $this;
+    }
+
+    public function getMainPhoto(): ?string
+    {
+        return $this->mainPhoto;
+    }
+
+    public function setMainPhoto(string $mainPhoto): static
+    {
+        $this->mainPhoto = $mainPhoto;
 
         return $this;
     }
