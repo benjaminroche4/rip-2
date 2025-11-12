@@ -2,18 +2,21 @@
 
 namespace App\Factory;
 
-use App\Entity\Contact;
-use App\Repository\ContactRepository;
+use App\Entity\BlogRedactor;
+use App\Repository\BlogRedactorRepository;
 use Doctrine\ORM\EntityRepository;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 use Zenstruck\Foundry\Persistence\Proxy;
 use Zenstruck\Foundry\Persistence\ProxyRepositoryDecorator;
 
 /**
- * @extends PersistentProxyObjectFactory<Contact>
+ * @extends PersistentProxyObjectFactory<BlogRedactor>
  */
-final class ContactFactory extends PersistentProxyObjectFactory{
-    const HELP_TYPES = ['Question', 'Suggestion', 'Other'];
+final class BlogRedactorFactory extends PersistentProxyObjectFactory{
+    const BIO_FR = "Bienvenue sur notre blog dédié à la vie à Paris. Nous partageons des conseils pratiques.";
+
+    const BIO_EN = "Welcome to our blog dedicated to life in Paris. We share practical advice, insights and real stories to help you settle in.";
+
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
      *
@@ -25,7 +28,7 @@ final class ContactFactory extends PersistentProxyObjectFactory{
 
     #[\Override]    public static function class(): string
     {
-        return Contact::class;
+        return BlogRedactor::class;
     }
 
         /**
@@ -35,16 +38,10 @@ final class ContactFactory extends PersistentProxyObjectFactory{
      */
     #[\Override]    protected function defaults(): array|callable    {
         return [
-            'firstName' => self::faker()->firstName(),
-            'lastName' => self::faker()->lastName(),
-            'email' => self::faker()->email(),
-            'phoneNumber' => self::faker()->phoneNumber(),
-            'company' => self::faker()->company(),
-            'helpType' => self::faker()->randomElement(self::HELP_TYPES),
-            'message' => self::faker()->text(1000),
-            'lang' => self::faker()->languageCode(),
-            'ip' => self::faker()->ipv4(),
-            'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime('-6 month')),
+            'fullName' => self::faker()->firstName() . ' ' . self::faker()->lastName(),
+            'bioFr' => self::BIO_FR,
+            'bioEn' => self::BIO_EN,
+            'photo' => 'https://api.dicebear.com/9.x/big-ears-neutral/svg'
         ];
     }
 
@@ -54,7 +51,7 @@ final class ContactFactory extends PersistentProxyObjectFactory{
     #[\Override]    protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(Contact $contact): void {})
+            // ->afterInstantiate(function(BlogRedactor $blogRedactor): void {})
         ;
     }
 }
