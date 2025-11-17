@@ -53,6 +53,15 @@ class Blog
     #[ORM\Column(length: 255)]
     private ?string $mainPhoto = null;
 
+    #[ORM\Column(length: 160)]
+    private ?string $shortDescFr = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $mainPhotoAlt = null;
+
+    #[ORM\Column(length: 160)]
+    private ?string $shortDescEn = null;
+
     public function __construct()
     {
         $this->category = new ArrayCollection();
@@ -203,6 +212,42 @@ class Blog
     public function setMainPhoto(string $mainPhoto): static
     {
         $this->mainPhoto = $mainPhoto;
+
+        return $this;
+    }
+
+    public function getShortDescFr(): ?string
+    {
+        return $this->shortDescFr;
+    }
+
+    public function setShortDescFr(string $shortDesc): static
+    {
+        $this->shortDescFr = $shortDesc;
+
+        return $this;
+    }
+
+    public function getMainPhotoAlt(): ?string
+    {
+        return $this->mainPhotoAlt;
+    }
+
+    public function setMainPhotoAlt(string $mainPhotoAlt): static
+    {
+        $this->mainPhotoAlt = $mainPhotoAlt;
+
+        return $this;
+    }
+
+    public function getShortDescEn(): ?string
+    {
+        return $this->shortDescEn;
+    }
+
+    public function setShortDescEn(string $shortDescEn): static
+    {
+        $this->shortDescEn = $shortDescEn;
 
         return $this;
     }
