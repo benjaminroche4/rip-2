@@ -4,6 +4,8 @@
 {% block description %}{{ 'meta.sitemap.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_sitemap') }}{% endblock %}
 
+{% set isFr = app.request.locale == 'fr' %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
@@ -11,7 +13,7 @@
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-pretty">{{ 'sitemap.subTitle'|trans }}</h2>
             <p></p>
         </div>
-        <div class="max-w-4xl mx-auto py-12">
+        <div class="max-w-4xl mx-auto py-12 space-y-6">
             <div class="space-y-6">
                 <h3 class="bg-neutral-100 inline-block text-lg font-medium font-secondary px-3 py-2.5 rounded-lg">{{ 'sitemap.general'|trans }}</h3>
                 <div>
@@ -33,7 +35,17 @@
                         <li><a href="{{ path('app_estimation') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.estimation'|trans }}</a></li>
                     </ul>
                 </div>
-
+            </div>
+            <div class="space-y-6">
+                <h3 class="bg-neutral-100 inline-block text-lg font-medium font-secondary px-3 py-2.5 rounded-lg">{{ 'sitemap.blog'|trans }}</h3>
+                <div>
+                    <ul class="list list-disc ml-12 space-y-3">
+                        <li><a href="{{ path('app_blog') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.blogMenu.blog'|trans }}</a></li>
+                        {% for post in posts %}
+                            <li><a href="{{ path('app_blog_show', isFr ? {'slugFr': post.slugFr} : {'slugEn': post.slugEn}) }}" class="hover:text-primary transition duration-100">{{ isFr ? post.titleFr : post.titleEn }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </section>

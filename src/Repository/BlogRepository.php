@@ -19,8 +19,8 @@ class BlogRepository extends ServiceEntityRepository
     public function findAllVisible()
     {
         return $this->createQueryBuilder('b')
-            ->andWhere('b.isVisible = :isVisible')
-            ->setParameter('isVisible', true)
+            ->where('b.isVisible = :isVisible')
+            ->setParameter('isVisible', 1)
             ->orderBy('b.createdAt', 'DESC')
             ->getQuery()
             ->getResult()

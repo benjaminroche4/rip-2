@@ -64,6 +64,7 @@ sitemap:
     title: Plan du site
     subTitle: Découvrez nos services
     general: Général
+    blog: Blog
     menu:
         findAccommodation: Trouver un logement
         companies: Entreprises
@@ -77,6 +78,8 @@ sitemap:
         privacyPolicy: Politique de confidentialité
         home: Accueil
         estimation: Obtenez votre estimation
+    blogMenu:
+        blog: Blog
 footer:
     logo:
         alt: Logo Relocation in Paris

@@ -64,6 +64,7 @@ sitemap:
     title: Sitemap
     subTitle: Explore our services
     general: General
+    blog: Blog
     menu:
         findAccommodation: Find accommodation
         companies: Companies
@@ -77,6 +78,8 @@ sitemap:
         privacyPolicy: Privacy policy
         home: Home
         estimation: Get your estimate
+    blogMenu:
+        blog: Blog
 footer:
     logo:
         alt: Relocation in Paris logo

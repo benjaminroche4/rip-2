@@ -2,6 +2,7 @@
 
 namespace App\Controller\Public;
 
+use App\Repository\BlogRepository;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,6 +10,12 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class SitemapController extends AbstractController
 {
+    public function __construct(
+        private readonly BlogRepository $blogRepository,
+    )
+    {
+    }
+
     #[Route(
         path: [
             'fr' => '/{_locale}/sitemap',
@@ -26,6 +33,10 @@ final class SitemapController extends AbstractController
     )]
     public function index(): Response
     {
-        return $this->render('public/sitemap/index.html.twig');
+        $posts = $this->blogRepository->findAllVisible();
+
+        return $this->render('public/sitemap/index.html.twig', [
+            'posts' => $posts,
+        ]);
     }
 }

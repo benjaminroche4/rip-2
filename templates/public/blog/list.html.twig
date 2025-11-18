@@ -4,6 +4,9 @@
 {% block description %}{{ 'meta.blog.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_blog') }}{% endblock %}
 
+{% set hero = posts|first %}
+{% set isFr = app.request.locale == 'fr' %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
@@ -12,11 +15,8 @@
         </div>
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
-        {% set hero = posts|first %}
-        {% set isFr = app.request.locale == 'fr' %}
-
         {% if hero %}
-            <article class="bg-linear-to-b from-primary to-primary/30 p-2 rounded-3xl hover:from-primary/85 hover:to-primary/20 transition duration-100">
+            <a href="{{ path('app_blog_show', isFr ? {'slugFr': hero.slugFr} : {'slugEn': hero.slugEn}) }}" class="bg-linear-to-b from-primary to-primary/30 p-2 rounded-3xl hover:from-primary/85 hover:to-primary/20 transition duration-100 block">
                 <div class="pb-2">
                     <p class="text-sm text-white uppercase tracking-normal font-medium text-center">
                         {{ 'blog.list.lastArticle'|trans|raw }}
@@ -40,7 +40,7 @@
                                 {% endif %}
                             </div>
                             <h2 class="font-semibold text-xl lg:text-3xl">{{ isFr ? hero.titleFr : hero.titleEn }}</h2>
-                            <p class="text-neutral-800/70">{{ isFr ? hero.shortDescFr : hero.shortDescEn }}</p>
+                            <p class="text-neutral-800/70 leading-7">{{ isFr ? hero.shortDescFr : hero.shortDescEn }}</p>
                         </div>
                         <div class="flex items-end justify-between">
                             <div class="flex items-center space-x-3">
@@ -61,7 +61,7 @@
                         <img src="{{ hero.mainPhoto }}" alt="{{ hero.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
                     </div>
                 </div>
-            </article>
+            </a>
         {% endif %}
         <section class="py-12">
             <div class="flex justify-between items-center">
@@ -72,7 +72,7 @@
         </section>
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for blog in posts|slice(1) %}
-                <a href="{{  }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
+                <a href="{{ path('app_blog_show', isFr ? {'slugFr': blog.slugFr} : {'slugEn': blog.slugEn}) }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
                     <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
                     <div class="p-6 flex flex-col justify-between gap-4 flex-grow">
                         <div class="space-y-6">
@@ -91,20 +91,20 @@
                                 {% endif %}
                             </div>
                             <h2 class="font-semibold text-xl">{{ isFr ? blog.titleFr : blog.titleEn }}</h2>
-                            <p class="text-neutral-800/70">{{ isFr ? blog.shortDescFr : blog.shortDescEn }}</p>
+                            <p class="text-neutral-800/70 leading-7">{{ isFr ? blog.shortDescFr : blog.shortDescEn }}</p>
                         </div>
                         <div class="flex items-end justify-between mt-4">
                             <div class="flex items-center space-x-3">
                                 <div>
-                                    <img src="{{ hero.redactor.photo }}" alt="{{ hero.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
+                                    <img src="{{ blog.redactor.photo }}" alt="{{ blog.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
                                 </div>
                                 <div class="flex flex-col space-x-0.5 text-sm">
-                                    <p class="capitalize text-primary font-semibold">{{ hero.redactor.fullName }}</p>
-                                    <time class="text-slate-500" datetime="{{ hero.createdAt | date('d F Y') }}" class="mr-8">{{ hero.createdAt | date('d F Y') | format_date(locale=app.request.locale) }}</time>
+                                    <p class="capitalize text-primary font-semibold">{{ blog.redactor.fullName }}</p>
+                                    <time class="text-slate-500" datetime="{{ blog.createdAt | date('d F Y') }}" class="mr-8">{{ blog.createdAt | date('d F Y') | format_date(locale=app.request.locale) }}</time>
                                 </div>
                             </div>
                             <div class="max-[420px]:hidden text-sm text-neutral-800/70">
-                                <p>{{ hero.timeToRead }} {{ 'blog.list.timeToRead'|trans|raw }}</p>
+                                <p>{{ blog.timeToRead }} {{ 'blog.list.timeToRead'|trans|raw }}</p>
                             </div>
                         </div>
                     </div>
