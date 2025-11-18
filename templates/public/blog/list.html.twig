@@ -45,7 +45,7 @@
                         <div class="flex items-end justify-between">
                             <div class="flex items-center space-x-3">
                                 <div>
-                                    <img src="{{ hero.redactor.photo }}" alt="{{ hero.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
+                                    <img src="{{ asset('medias/blog/redactor/'~hero.redactor.photo) }}" alt="{{ hero.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
                                 </div>
                                 <div class="flex flex-col space-x-0.5 text-sm">
                                     <p class="capitalize text-primary font-semibold">{{ hero.redactor.fullName }}</p>
@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="col-span-3 lg:order-2 order-1">
-                        <img src="{{ hero.mainPhoto }}" alt="{{ hero.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
+                        <img src="{{ asset('medias/blog/cover/'~hero.mainPhoto) }}" alt="{{ hero.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
                     </div>
                 </div>
             </a>
@@ -73,7 +73,7 @@
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for blog in posts|slice(1) %}
                 <a href="{{ path('app_blog_show', isFr ? {'slugFr': blog.slugFr} : {'slugEn': blog.slugEn}) }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
-                    <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
+                    <img src="{{ asset('medias/blog/cover/'~blog.mainPhoto) }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
                     <div class="p-6 flex flex-col justify-between gap-4 flex-grow">
                         <div class="space-y-6">
                             <div class="flex flex-wrap gap-2">
@@ -96,7 +96,7 @@
                         <div class="flex items-end justify-between mt-4">
                             <div class="flex items-center space-x-3">
                                 <div>
-                                    <img src="{{ blog.redactor.photo }}" alt="{{ blog.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
+                                    <img src="{{ asset('medias/blog/redactor/'~blog.redactor.photo) }}" alt="{{ blog.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
                                 </div>
                                 <div class="flex flex-col space-x-0.5 text-sm">
                                     <p class="capitalize text-primary font-semibold">{{ blog.redactor.fullName }}</p>

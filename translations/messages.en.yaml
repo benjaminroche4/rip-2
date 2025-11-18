@@ -606,3 +606,7 @@ blog:
         lastArticle: Latest article
         timeToRead: min read
         allArticles: All articles
+    show:
+        redactionBy: Written by
+        aboutAuthor: About the author
+        published: Published on

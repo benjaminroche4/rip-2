@@ -54,12 +54,15 @@ final class BlogController extends AbstractController
 
         $post = $this->blogRepository->findOneBy($criteria);
 
+        $lastedBlog = $this->blogRepository->findLatestVisible();
+
         if (!$post || !$post->isVisible()) {
             throw $this->createNotFoundException('The blog post does not exist');
         }
 
         return $this->render('public/blog/show.html.twig', [
             'post' => $post,
+            'lastedBlog' => $lastedBlog,
         ]);
     }
 }

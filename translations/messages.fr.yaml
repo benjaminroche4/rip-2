@@ -612,3 +612,7 @@ blog:
         lastArticle: Dernier article
         timeToRead: min de lecture
         allArticles: Tous les articles
+    show:
+        redactionBy: Rédigé par
+        aboutAuthor: À propos de l'auteur
+        published: Publié le

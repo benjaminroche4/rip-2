@@ -26,4 +26,16 @@ class BlogRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function findLatestVisible(): array
+    {
+        return $this->createQueryBuilder('b')
+            ->where('b.isVisible = :isVisible')
+            ->setParameter('isVisible', 1)
+            ->orderBy('b.createdAt', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

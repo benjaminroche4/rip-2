@@ -28,11 +28,15 @@ readonly class SiteMapEventListener
         $urlContainer = $event->getUrlContainer();
         $urlGenerator = $event->getUrlGenerator();
 
+        // Generate French URLs
         foreach ($posts as $post) {
             $url = new UrlConcrete(
                 $urlGenerator->generate(
                     'app_blog_show',
-                    ['slugFr' => $post->getSlugFr()],
+                    [
+                        '_locale' => 'fr',
+                        'slugFr' => $post->getSlugFr()
+                    ],
                     UrlGeneratorInterface::ABSOLUTE_URL)
             );
             $url->setChangefreq(UrlConcrete::CHANGEFREQ_MONTHLY);
@@ -43,11 +47,15 @@ readonly class SiteMapEventListener
             );
         }
 
+        // Generate English URLs
         foreach ($posts as $post) {
             $url = new UrlConcrete(
                 $urlGenerator->generate(
                     'app_blog_show',
-                    ['slugEn' => $post->getSlugEn()],
+                    [
+                        '_locale' => 'en',
+                        'slugEn' => $post->getSlugEn()
+                    ],
                     UrlGeneratorInterface::ABSOLUTE_URL)
             );
             $url->setChangefreq(UrlConcrete::CHANGEFREQ_MONTHLY);
