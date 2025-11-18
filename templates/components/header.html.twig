@@ -1,6 +1,13 @@
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentParameters = app.request.attributes.get('_route_params') %}
 
+{% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
+    {% set blogSwitchParams = {
+        'fr': {'_locale': 'fr', 'slugFr': post.slugFr},
+        'en': {'_locale': 'en', 'slugEn': post.slugEn}
+    } %}
+{% endif %}
+
 <header class="relative z-10">
     <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div class="flex lg:flex-2 items-center justify-start gap-x-2 gap-x-4">
@@ -42,12 +49,12 @@
                 </a>
             </div>
             {% if app.request.locale == 'en' %}
-                <a href="{{ path(currentRoute, currentParameters|merge({'_locale': 'fr'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
+                <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
                     {{ ux_icon('flag:bl-4x3', {'class':'size-5'}) }}
                 </a>
             {% endif %}
             {% if app.request.locale == 'fr' %}
-                <a href="{{ path(currentRoute, currentParameters|merge({'_locale': 'en'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
+                <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
                     {{ ux_icon('flag:gb-4x3', {'class':'size-5'}) }}
                 </a>
             {% endif %}
@@ -128,7 +135,7 @@
                                             </svg>
                                         </button>
                                         <el-disclosure id="lang" hidden class="mt-2 [&:not([hidden])]:block">
-                                            <a href="{{ path(currentRoute, currentParameters|merge({'_locale': 'fr'})) }}"
+                                            <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}"
                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center">
                                             <span class="flex items-center gap-x-4">
                                                 {{ ux_icon('circle-flags:fr', {'class':'size-5 rounded-full'}) }}
@@ -138,7 +145,7 @@
                                                     {{ ux_icon('lucide:check', {'class':'text-primary size-4.5 shrink-0'}) }}
                                                 {% endif %}
                                             </a>
-                                            <a href="{{ path(currentRoute, currentParameters|merge({'_locale': 'en'})) }}"
+                                            <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}"
                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center">
                                             <span class="flex items-center gap-x-4">
                                                 {{ ux_icon('circle-flags:en', {'class':'size-5 rounded-full'}) }}

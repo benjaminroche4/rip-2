@@ -72,7 +72,7 @@
         </section>
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for blog in posts|slice(1) %}
-                <article class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
+                <a href="{{  }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
                     <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
                     <div class="p-6 flex flex-col justify-between gap-4 flex-grow">
                         <div class="space-y-6">
@@ -108,7 +108,7 @@
                             </div>
                         </div>
                     </div>
-                </article>
+                </a>
             {% endfor %}
         </section>
         {{ component('ctaFooter') }}

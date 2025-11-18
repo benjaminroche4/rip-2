@@ -235,7 +235,7 @@
         </noscript>
         {{ component('adminTab') }}
         {{ component('gridBackground') }}
-        {{ component('header') }}
+        {{ component('header', {post: post|default(null)}) }}
         <main class="relative z-20">
             {% block body %}{% endblock %}
             {% if app.request.attributes.get('_route') != 'app_estimation' %}
