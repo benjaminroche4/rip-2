@@ -248,6 +248,9 @@ landlords:
                 title: Gérez-vous les interventions techniques et la maintenance ?
                 text: Oui. Nous coordonnons directement les interventions nécessaires (entretien, réparations, dépannages) via notre réseau de prestataires de confiance, tout en vous tenant informé à chaque étape.
 meta:
+    blog:
+        title: Le blog pour vivre et s’installer à Paris
+        description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
     home:
         title: Agence de Relocation à Paris
         description: "Agence de relocation à Paris pour particuliers et entreprises : recherche de logement, bureaux et installation complète de collaborateurs."
@@ -599,3 +602,10 @@ estimation:
         form:
             title: Formulaire de contact
             link: Être recontacté rapidement
+blog:
+    list:
+        title: blog
+        subTitle: Le blog pour vivre et s’installer à Paris
+        lastArticle: Dernier article
+        timeToRead: min de lecture
+        allArticles: Tous les articles

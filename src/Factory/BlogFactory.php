@@ -94,12 +94,13 @@ final class BlogFactory extends PersistentProxyObjectFactory{
             'slugFr' => self::faker()->randomElement(self::SLUG_FR),
             'titleEn' => self::faker()->randomElement(self::TITLE_EN),
             'titleFr' => self::faker()->randomElement(self::TITLE_FR),
-            'shortDescFr' => 'FR_' .self::faker()->text(160),
-            'shortDescEn' => 'EN_' .self::faker()->text(160),
+            'shortDescFr' => 'FR_' .self::faker()->text(150),
+            'shortDescEn' => 'EN_' .self::faker()->text(150),
             'redactor' => BlogRedactorFactory::new(),
             'category' => BlogCategoryFactory::randomRange(1, 3),
             'mainPhoto' => 'https://fastly.picsum.photos/id/652/200/300.jpg?hmac=yJT5T1Ugojp0HlslsxDN_nNnIIk4lsFXcV_5rq9FCTw',
             'mainPhotoAlt' => self::faker()->text(160),
+            'timeToRead' => self::faker()->numberBetween(1, 60)
         ];
     }
 

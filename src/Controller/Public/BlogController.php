@@ -27,6 +27,7 @@ final class BlogController extends AbstractController
                 [
                     'priority' => 0.8,
                     'changefreq' => UrlConcrete::CHANGEFREQ_DAILY,
+                    'section' => 'blog',
                 ]
         ]
     )]
@@ -34,8 +35,31 @@ final class BlogController extends AbstractController
     {
         $posts = $this->blogRepository->findAllVisible();
 
-        return $this->render('public/blog/index.html.twig', [
+        return $this->render('public/blog/list.html.twig', [
             'posts' => $posts,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/{_locale}/blog/{slugFr}',
+            'en' => '/{_locale}/blog/{slugEn}',
+        ],
+        name: 'app_blog_show',
+    )]
+    public function blogPost(string $slugFr = null, string $slugEn = null, string $_locale): Response
+    {
+        $slug = $_locale === 'fr' ? $slugFr : $slugEn;
+        $criteria = $_locale === 'fr' ? ['slugFr' => $slug] : ['slugEn' => $slug];
+
+        $post = $this->blogRepository->findOneBy($criteria);
+
+        if (!$post || !$post->isVisible()) {
+            throw $this->createNotFoundException('The blog post does not exist');
+        }
+
+        return $this->render('public/blog/show.html.twig', [
+            'post' => $post,
         ]);
     }
 }

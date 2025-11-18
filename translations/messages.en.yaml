@@ -248,6 +248,9 @@ landlords:
                 title: Do you handle maintenance and repairs?
                 text: Yes. We directly coordinate necessary interventions (maintenance, repairs, troubleshooting) via our trusted network of contractors, keeping you informed at every step.
 meta:
+    blog:
+        title: The blog for living and settling in Paris
+        description: "The essential blog for living, working, and settling in Paris: practical tips, neighborhoods, housing, paperwork, and everyday life insights."
     home:
         title: Relocation agency in Paris
         description: "Relocation agency in Paris for individuals and companies: housing search, office setup, and full employee relocation."
@@ -593,3 +596,10 @@ estimation:
         form:
             title: Contact form
             link: Be contacted quickly
+blog:
+    list:
+        title: blog
+        subTitle: The blog for living and settling in Paris
+        lastArticle: Latest article
+        timeToRead: min read
+        allArticles: All articles

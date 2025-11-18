@@ -62,6 +62,9 @@ class Blog
     #[ORM\Column(length: 160)]
     private ?string $shortDescEn = null;
 
+    #[ORM\Column]
+    private ?int $timeToRead = null;
+
     public function __construct()
     {
         $this->category = new ArrayCollection();
@@ -248,6 +251,18 @@ class Blog
     public function setShortDescEn(string $shortDescEn): static
     {
         $this->shortDescEn = $shortDescEn;
+
+        return $this;
+    }
+
+    public function getTimeToRead(): ?int
+    {
+        return $this->timeToRead;
+    }
+
+    public function setTimeToRead(int $timeToRead): static
+    {
+        $this->timeToRead = $timeToRead;
 
         return $this;
     }
