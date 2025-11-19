@@ -49,6 +49,9 @@ class BlogCrudController extends AbstractCrudController
                         'default' => ['tagName' => 'p'],
                         'heading1' => ['tagName' => 'h2'],
                     ],
+                    'css' => [
+                        'attachment' => 'admin_file_field_attachment',
+                    ],
                 ])
             ,
             TextEditorField::new('contentEn', '🇬🇧 Contenu de l\'article EN')->setTrixEditorConfig(
