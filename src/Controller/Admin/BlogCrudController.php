@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -73,7 +74,8 @@ class BlogCrudController extends AbstractCrudController
             TextField::new('mainPhotoAlt', 'Balise ALT photo article'),
             AssociationField::new('category', 'Catégorie')->autocomplete(),
             AssociationField::new('redactor', 'Rédacteur')->autocomplete(),
-            BooleanField::new('visible', 'Publié l\'article'),
+            NumberField::new('timeToRead', 'Temps de lecture (min)'),
+            BooleanField::new('isVisible', 'Publié l\'article'),
         ];
     }
 
