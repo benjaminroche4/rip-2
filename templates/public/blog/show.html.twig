@@ -23,7 +23,7 @@
             <img src="{{ asset('medias/blog/cover/'~post.mainPhoto) }}" alt="{{ post.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-2xl object-cover">
         </div>
         <div class="max-w-3xl mx-auto">
-            <div class="mt-10 text-slate-700 leading-7" id="content">
+            <div class="mt-10 text-slate-700 leading-7 prose" id="content">
                 {{ isFr ? post.contentFr|raw : post.contentEn|raw }}
             </div>
             <div class="border-t border-slate-200 mt-10 pt-10">

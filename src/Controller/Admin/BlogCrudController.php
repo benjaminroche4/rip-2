@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Blog;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -64,6 +65,7 @@ class BlogCrudController extends AbstractCrudController
                 ->setUploadedFileNamePattern('[slug]-[uuid].[extension]')
                 ->setFileConstraints(new Image(maxSize: '160K',mimeTypes: ['image/webp']))
                 ->setHelp('Max 160K, format webp seulement')
+                ->setRequired($pageName === Crud::PAGE_NEW)
             ,
             TextField::new('mainPhotoAlt', 'Balise ALT photo article'),
             AssociationField::new('category', 'Catégorie')->autocomplete(),
