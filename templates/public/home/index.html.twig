@@ -52,14 +52,18 @@
                 <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
                     {{ 'home.heroSection.subTitle'|trans|raw }}
                 </p>
-                <div class="mt-10 flex items-center justify-center lg:justify-start">
+                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
                     <a href="{{ path('app_contact') }}"
-                       class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-2.5 text-base font-semibold text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                       class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-2.5 text-base font-semibold text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
                         <span class="relative flex size-3">
                           <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                           <span class="relative inline-flex size-3 rounded-full bg-green-500"></span>
                         </span>
                         {{ 'home.heroSection.button'|trans|raw }}
+                    </a>
+                    <a href="tel:{{ phone_number }}" class="flex shrink-0 items-center gap-x-2 font-semibold underline underline-offset-6 hover:text-slate-600 transition duration-100 text-pretty">
+                        {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
+                        {{ phone_number }}
                     </a>
                 </div>
             </div>
