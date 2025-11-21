@@ -29,7 +29,7 @@
                                 {% set categories = hero.category %}
                                 {% set total = categories|length %}
                                 {% for category in categories|slice(0, 1) %}
-                                    <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10">
+                                    <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10 capitalize">
                                         {{ isFr ? category.titleFr : category.titleEn }}
                                     </div>
                                 {% endfor %}
@@ -80,7 +80,7 @@
                                 {% set categories = blog.category %}
                                 {% set total = categories|length %}
                                 {% for category in categories|slice(0, 1) %}
-                                    <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10">
+                                    <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10 capitalize">
                                         {{ isFr ? category.titleFr : category.titleEn }}
                                     </div>
                                 {% endfor %}
