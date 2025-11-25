@@ -195,7 +195,7 @@ findAccommodation:
                     3: Meublé ou non meublé
             3:
                 title: Recherche ciblée
-                description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne.
+                description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne (off market).
             4:
                 title: Organisation des visites
                 description: Nous planifions les visites selon votre emploi du temps, en présentiel ou virtuellement, et vous conseillons à chaque étape de votre sélection.
