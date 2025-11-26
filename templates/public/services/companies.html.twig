@@ -20,8 +20,8 @@
                             <div class="flex size-13 items-center justify-center rounded-full bg-primary/10">
                                 {{ ux_icon('lucide:briefcase', {'class':'size-6 text-primary'}) }}
                             </div>
-                            <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10 capitalize">
-                                +220 entreprises
+                            <div class="max-[290px]:hidden inline-block lowercase px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10">
+                                +100 {{ 'companies.services.1.companies'|trans|raw }}
                             </div>
                         </div>
                         <h3 class="font-semibold text-gray-900 text-xl">
@@ -46,7 +46,7 @@
                                 <p>{{ 'companies.services.1.offer.3'|trans|raw }}</p>
                             </div>
                             <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-green-600'}) }}
+                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
                                 <p>{{ 'companies.services.1.offer.4'|trans|raw }}</p>
                             </div>
                         </div>
@@ -54,37 +54,39 @@
                 </div>
             </div>
             <div class="bg-white border border-neutral-100 rounded-xl p-6 bg-neutral-100 transition duration-100 hover:border-primary/20 group">
-                <dl class="flex flex-col">
-                    <dt class="text-base/7 font-semibold text-gray-900 text-lg">
-                        <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
-                            {{ ux_icon('lucide:building', {'class':'size-6 text-white'}) }}
+                <div class="flex flex-col">
+                    <div class="space-y-2">
+                        <div class="flex size-13 mb-6 items-center justify-center rounded-full bg-primary/10">
+                            {{ ux_icon('lucide:building', {'class':'size-6 text-primary'}) }}
                         </div>
-                        {{ 'companies.services.2.title'|trans|raw }}
-                    </dt>
-                    <dd class="mt-3 flex flex-auto flex-col text-base/7">
+                        <h3 class="font-semibold text-gray-900 text-xl">
+                            {{ 'companies.services.2.title'|trans|raw }}
+                        </h3>
                         <p class="flex-auto text-neutral-800/70">
                             {{ 'companies.services.2.subTitle'|trans|raw }}
                         </p>
-                        <div class="mt-5 space-y-3 text-neutral-800/90">
-                            <div class="flex flex-row gap-x-2.5 items-center bg-neutral-100/40 text-sm rounded-lg p-2.5">
+                    </div>
+                    <div class="mt-3 flex flex-auto flex-col text-base/7 bg-neutral-100/40 rounded-lg mt-5 p-2">
+                        <div class="space-y-3 text-neutral-800/90">
+                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
                                 {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
                                 <p>{{ 'companies.services.2.offer.1'|trans|raw }}</p>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center bg-neutral-100/40 text-sm rounded-lg p-2.5">
+                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
                                 {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
                                 <p>{{ 'companies.services.2.offer.2'|trans|raw }}</p>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center bg-neutral-100/40 text-sm rounded-lg p-2.5">
+                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
                                 {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
                                 <p>{{ 'companies.services.2.offer.3'|trans|raw }}</p>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center bg-neutral-100/40 text-sm rounded-lg p-2.5">
+                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
                                 {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
                                 <p>{{ 'companies.services.2.offer.4'|trans|raw }}</p>
                             </div>
                         </div>
-                    </dd>
-                </dl>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

@@ -91,4 +91,15 @@ class BlogCrudController extends AbstractCrudController
 
         parent::persistEntity($entityManager, $entityInstance);
     }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $slugFr = $this->slugger->slug($entityInstance->getTitleFr())->lower();
+        $slugEn = $this->slugger->slug($entityInstance->getTitleEn())->lower();
+
+        $entityInstance->setSlugFr($slugFr);
+        $entityInstance->setSlugEn($slugEn);
+
+        parent::updateEntity($entityManager, $entityInstance);
+    }
 }

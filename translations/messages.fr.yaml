@@ -111,6 +111,9 @@ header:
         landlords: Propriétaires
         contact: Contacter un expert
         estimation: Obtenez votre estimation
+        blog: Blog
+        aboutUs: À propos
+        ourServices: Nos services
     google:
         basedOn: Basé sur
         reviews: avis
@@ -120,7 +123,8 @@ companies:
     services:
         1:
             title: Mobilité des collaborateurs
-            subTitle: Un accompagnement sur mesure pour faciliter la relocation professionnelle.
+            subTitle: Un accompagnement sur mesure pour simplifier et sécuriser la mobilité de vos collaborateurs.
+            companies: Entreprises
             offer:
                 1: Recherche de logement adaptée
                 2: Gestion des démarches administratives
@@ -128,10 +132,10 @@ companies:
                 4: Suivi dédié pour le collaborateur et sa famille
         2:
             title: Recherche de bureaux
-            subTitle: Des espaces pensés pour votre expansion à Paris.
+            subTitle: Un service clé en main pour identifier les meilleurs espaces professionnels à Paris.
             offer:
                 1: Sélection de bureaux selon vos besoins
-                2: Négociation des baux et accompagnement juridique
+                2: Négociation et accompagnement juridique
                 3: Coordination avec nos partenaires immobiliers
                 4: Accès à notre réseau d’espaces premium à Paris
         3:
@@ -294,6 +298,10 @@ home:
         button: Contacter un expert
         image:
             alt: Relocation In Paris, agence de relocation à Paris
+        service:
+            1: Recherche rapide
+            2: 100% à distance
+            3: Service clé-en-main
     services:
         title: Nos services
         subTitle: Des services pensés pour chaque profil

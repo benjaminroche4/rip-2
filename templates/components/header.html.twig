@@ -23,7 +23,7 @@
             </el-popover-group>
         </div>
         <div class="flex lg:hidden gap-x-2">
-            <a href="tel:{{ phone_number }}" class="max-[310px]:hidden text-sm/6 h-10 font-semibold text-gray-900 bg-white border border-gray-900 text-gray-900 rounded-full py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
+            <a href="tel:{{ phone_number }}" class="max-[310px]:hidden bg-[#FAE9EE] text-sm/6 rounded-full h-10 font-semibold text-gray-900 py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
                 {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
                 {{ phone_number }}
             </a>
@@ -40,11 +40,12 @@
             </button>
         </div>
         <div class="hidden lg:flex lg:flex-1 lg:justify-end ">
-            <div class="flex items-center gap-x-4">
-                <a href="{{ path('app_estimation') }}" class="text-sm/6 font-semibold text-gray-900 underline underline-offset-8 max-[1257px]:hidden block hover:text-gray-600">
-                    {{ 'header.menu.estimation'|trans|raw }}
+            <div class="flex items-center gap-x-3">
+                <a href="tel:{{ phone_number }}" class="max-[1300px]:hidden text-sm/6 rounded-full h-10 font-semibold text-gray-900 py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
+                    {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
+                    {{ phone_number }}
                 </a>
-                <a href="{{ path('app_contact') }}" class="text-sm/6 font-semibold text-gray-900 bg-[#71172e] text-white rounded-full py-2.5 px-3.5 flex items-center gap-x-2 hover:bg-primary/80 transition duration-100">
+                <a href="{{ path('app_contact') }}" class="text-xs font-light uppercase text-gray-900 bg-primary text-white rounded-full py-3 px-4 flex items-center gap-x-2 hover:bg-primary/80 transition duration-100">
                     {{ 'header.menu.contact'|trans|raw }}
                 </a>
             </div>
@@ -71,7 +72,7 @@
                                 <img src="{{ asset('medias/logos/logo_short.svg') }}" width="153" height="150" loading="eager" alt="Relocation In Paris Logo Mobile" class="h-8 w-auto" />
                             </a>
                             <div class="flex items-center gap-x-2 lg:hidden">
-                                <a href="tel:{{ phone_number }}" class="max-[300px]:hidden text-sm/6 font-semibold h-10 text-gray-900 bg-white border border-gray-900 text-gray-900 rounded-full py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
+                                <a href="tel:{{ phone_number }}" class="max-[300px]:hidden text-sm/6 font-semibold h-10 bg-[#FAE9EE] text-gray-900 rounded-full py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
                                     {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
                                     {{ phone_number }}
                                 </a>
@@ -98,26 +99,39 @@
                         <div class="mt-6 flow-root">
                             <div class="-my-6 divide-y divide-gray-500/10">
                                 <div class="space-y-2 py-6">
-                                    <a href="{{ path('app_service_find_accommodation') }}" class="group {% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-neutral-100/80{% endif %} -mx-3 flex items-center gap-x-6 rounded-lg p-3 text-base/7 font-semibold text-gray-900 hover:bg-neutral-100">
-                                        <div class="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white {% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-white{% endif %}">
-                                            {{ ux_icon('mynaui:home', {'class':'size-5 text-gray-600 group-hover:text-primary'}) }}
-                                        </div>
-                                        {{ 'header.menu.findAccommodation'|trans|raw }}
-                                    </a>
-                                    <a href="{{ path('app_service_companies') }}" class="group {% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-neutral-100/80{% endif %} -mx-3 flex items-center gap-x-6 rounded-lg p-3 text-base/7 font-semibold text-gray-900 hover:bg-neutral-100">
-                                        <div class="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white {% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-white{% endif %}">
-                                            {{ ux_icon('clarity:building-line', {'class':'size-5 text-gray-600 group-hover:text-primary'}) }}
-                                        </div>
-                                        {{ 'header.menu.companies'|trans|raw }}
-                                    </a>
-                                    <a href="{{ path('app_service_landlords') }}" class="group {% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100/80{% endif %} -mx-3 flex items-center gap-x-6 rounded-lg p-3 text-base/7 font-semibold text-gray-900 hover:bg-neutral-100">
-                                        <div class="flex size-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white {% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-white{% endif %}">
-                                            {{ ux_icon('meteor-icons:key', {'class':'size-5 text-gray-600 group-hover:text-primary'}) }}
-                                        </div>
-                                        {{ 'header.menu.landlords'|trans|raw }}
-                                    </a>
+                                    <div class="-mx-3">
+                                        <button type="button" command="--toggle" commandfor="products" class="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 uppercase text-gray-900 hover:bg-gray-50 text-base">
+                                            {{ 'header.menu.ourServices'|trans|raw }}
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 flex-none [[aria-expanded='true']_&]:rotate-180">
+                                                <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        <el-disclosure id="products" hidden class="mt-2 space-y-2 [&:not([hidden])]:block">
+                                            <a href="{{ path('app_service_find_accommodation') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
+                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
+                                                    {{ ux_icon('mynaui:home', {'class':'size-5 text-primary'}) }}
+                                                </div>
+                                                {{ 'header.menu.findAccommodation'|trans|raw }}
+                                            </a>
+                                            <a href="{{ path('app_service_companies') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
+                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
+                                                    {{ ux_icon('clarity:building-line', {'class':'size-5 text-primary'}) }}
+                                                </div>
+                                                {{ 'header.menu.companies'|trans|raw }}
+                                            </a>
+                                            <a href="{{ path('app_service_landlords') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
+                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
+                                                    {{ ux_icon('meteor-icons:key', {'class':'size-5 text-primary'}) }}
+                                                </div>
+                                                {{ 'header.menu.landlords'|trans|raw }}
+                                            </a>
+                                        </el-disclosure>
+                                    </div>
+                                    <a href="{{ path('app_estimation') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.estimation'|trans|raw }}</a>
+                                    <a href="{{ path('app_about_us') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.aboutUs'|trans|raw }}</a>
+                                    <a href="{{ path('app_blog') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.blog'|trans|raw }}</a>
                                 </div>
-                                <div class="py-6 space-y-4">
+                                <div class="py-3 space-y-4">
                                     <div class="-mx-3">
                                         <button type="button" command="--toggle" commandfor="lang" class="flex aria-expanded:bg-neutral-100 cursor-pointer w-full items-center justify-between rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 transition duration-100">
                                         <span class="flex items-center gap-x-4">
@@ -159,33 +173,16 @@
                                     </div>
                                 </div>
                                 <div class="py-6 space-y-4">
-                                    <a href="{{ path('app_contact') }}" class="-mx-3 text-center block rounded-full px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-primary/80 transition duration-100 bg-primary">
+                                    <a href="{{ path('app_contact') }}" class="-mx-3 text-center block rounded-full px-4 py-3 text-sm font-light uppercase text-white hover:bg-primary/80 transition duration-100 bg-primary">
                                         {{ 'header.menu.contact'|trans|raw }}
                                     </a>
-                                    <a href="{{ path('app_estimation') }}" class="-mx-3 text-center text-sm/6 font-semibold text-gray-900 underline underline-offset-8 hover:text-gray-600 flex justify-center items-center">
-                                        {{ 'header.menu.estimation'|trans|raw }}
+                                    <a href="{{ path('app_contact') }}" class="-mx-3 flex justify-center items-center gap-x-2 text-center block rounded-full px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-neutral-100 transition duration-100 border border-gray-900">
+                                        {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
+                                        {{ phone_number }}
                                     </a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="sticky bottom-0 grid grid-cols-1 divide-x divide-gray-900/5 bg-gray-50 justify-center">
-                        <a href="https://share.google/DuM7reAcGSrmXQ65I" target="_blank" class="p-3 font-semibold text-gray-900 hover:bg-neutral-100 transition duration-100 flex items-center justify-center gap-x-3.5">
-                            {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
-                            <div class="flex flex-col justify-start -space-y-1">
-                                <div class="test-base font-bold flex items-center gap-x-2">
-                                    5.0
-                                    <div class="flex items-center">
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                    </div>
-                                </div>
-                                <span class="font-medium text-xs">{{ 'header.google.basedOn'|trans|raw }} <span class="underline underline-offset-2">+220 {{ 'header.google.reviews'|trans|raw }}</span></span>
-                            </div>
-                        </a>
                     </div>
                 </el-dialog-panel>
             </div>

@@ -16,7 +16,7 @@
                 <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100">
                     <div class="flex flex-col justify-center items-center">
                         <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:mail', {'class':'size-6 text-primary'}) }}
+                            {{ ux_icon('lucide:mail', {'class':'size-6 text-primary shrink-0'}) }}
                         </div>
                         <div class="mt-4 text-center space-y-2">
                             <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.1.email.label'|trans|raw }}</h3>
@@ -29,7 +29,7 @@
                 <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100">
                     <div class="flex flex-col justify-center items-center">
                         <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:phone', {'class':'size-6 text-primary'}) }}
+                            {{ ux_icon('lucide:phone', {'class':'size-6 text-primary shrink-0'}) }}
                         </div>
                         <div class="mt-4 text-center space-y-2">
                             <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.2.phone.label'|trans|raw }}</h3>
@@ -48,7 +48,7 @@
                 <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100">
                     <div class="flex flex-col justify-center items-center">
                         <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:building', {'class':'size-6 text-primary'}) }}
+                            {{ ux_icon('lucide:building', {'class':'size-6 text-primary shrink-0'}) }}
                         </div>
                         <div class="mt-4 text-center space-y-2">
                             <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.3.office.label'|trans|raw }}</h3>
@@ -199,7 +199,11 @@
                         <label class="ml-3 block text-sm leading-5 text-neutral-900">{{ form_label(contactForm.accept, 'contact.contactForm.accept.label'|trans) }}</label>
                     </div>
                     <div class="pt-4">
-                        <button type="submit" class="cursor-pointer block w-full rounded-full bg-primary px-3 py-2.5 text-base text-white font-semibold hover:bg-primary/80 transition duration-100">{{ 'contact.contactForm.button'|trans|raw }}</button>
+                        <button type="submit"
+                                class="flex items-center justify-center gap-x-2 cursor-pointer block w-full rounded-full bg-primary px-4 py-3 text-sm text-white font-light uppercase hover:bg-primary/80 transition duration-100">
+                            {{ ux_icon('lucide:check', {'class':'text-white shrink-0 size-5'}) }}
+                            {{ 'contact.contactForm.button'|trans|raw }}
+                        </button>
                     </div>
                 {{ form_end(contactForm) }}
                 <div>

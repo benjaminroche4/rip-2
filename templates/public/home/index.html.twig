@@ -52,19 +52,25 @@
                 <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
                     {{ 'home.heroSection.subTitle'|trans|raw }}
                 </p>
-                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
                     <a href="{{ path('app_contact') }}"
-                       class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-2.5 text-base font-semibold text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                        <span class="relative flex size-3">
-                          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                          <span class="relative inline-flex size-3 rounded-full bg-green-500"></span>
-                        </span>
-                        {{ 'home.heroSection.button'|trans|raw }}
+                       class="rounded-full bg-primary px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                        {{ 'home.heroSection.button'|trans|raw }} →
                     </a>
-                    <a href="tel:{{ phone_number }}" class="flex shrink-0 items-center gap-x-2 font-semibold underline underline-offset-6 hover:text-slate-600 transition duration-100 text-pretty">
-                        {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
-                        {{ phone_number }}
-                    </a>
+                </div>
+                <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
+                    <div class="flex items-center gap-3 justify-center lg:justify-start">
+                        {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.1'|trans|raw }}</p>
+                    </div>
+                    <div class="flex items-center gap-3  justify-center lg:justify-start">
+                        {{ ux_icon('mdi:world', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.2'|trans|raw }}</p>
+                    </div>
+                    <div class="flex items-center gap-3 justify-center lg:justify-start min-[390px]:col-span-2 lg:col-span-1">
+                        {{ ux_icon('humbleicons:key', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.3'|trans|raw }}</p>
+                    </div>
                 </div>
             </div>
             <div class="h-[300px] lg:h-[600px]">
@@ -246,7 +252,7 @@
                         </dl>
                         <div class="mt-10 flex items-center justify-start">
                             <a href="{{ path('app_about_us') }}"
-                               class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-2.5 text-base font-semibold text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                               class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
                                 {{ 'home.aboutUs.button'|trans|raw }}
                             </a>
                         </div>
