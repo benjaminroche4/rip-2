@@ -374,6 +374,9 @@ home:
         5:
             text: Relocation in Paris a pris en charge l’installation de plusieurs collaborateurs étrangers. Un accompagnement clé en main, humain et efficace. L’équipe comprend parfaitement les enjeux RH et l’exigence d’une relocation premium.
             title: Professionnel, Paris 14ᵉ
+    blog:
+        title: Blog
+        subTitle: Nos derniers articles
 login:
     title: Connectez-vous à nos services
     form:

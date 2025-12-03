@@ -368,6 +368,9 @@ home:
         5:
             text: Relocation in Paris handled the installation of several international employees. A turnkey, human, and efficient service. The team perfectly understands HR expectations and the demands of premium relocation.
             title: Professional, Paris 14th
+    blog:
+        title: Blog
+        subTitle: Our lastest articles
 login:
     title: Log in to our services
     form:
