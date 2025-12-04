@@ -304,7 +304,7 @@ home:
             3: Service clé-en-main
     services:
         title: Nos services
-        subTitle: Des services pensés pour chaque profil
+        subTitle: Un accompagnement dédié à chaque besoin
         button: Découvrir le service
         1:
             title: Trouver un logement
@@ -378,8 +378,20 @@ home:
         title: Blog
         subTitle: Nos derniers articles
     profile:
-        title:
-        subTitle: Des services adaptés pour chaque profil
+        title: Votre profil, nos solutions
+        subTitle: Des services pensés pour chaque profil
+        1:
+            title: Couple et expatriés
+            text: Un accompagnement complet pour vous installer à Paris sereinement, étape après étape.
+        2:
+            title: Familles
+            text: Nous trouvons le quartier, l'école et le logement idéal pour une arrivée en famille réussie.
+        3:
+            title: Étudiants et jeunes actifs
+            text: Un soutien fiable pour trouver un logement adapté et débuter votre vie parisienne en confiance.
+        4:
+            title: Entreprises
+            text: Nous facilitons l'installation de vos collaborateurs grâce à un service rapide et personnalisé.
 login:
     title: Connectez-vous à nos services
     form:

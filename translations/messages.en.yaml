@@ -298,7 +298,7 @@ home:
             3: Turnkey service
     services:
         title: Our services
-        subTitle: Services designed for every profile
+        subTitle: A tailored service for every need
         button: Discover the service
         1:
             title: Find accommodation
@@ -372,8 +372,20 @@ home:
         title: Blog
         subTitle: Our lastest articles
     profile:
-        title: Meet our team
-        subTitle: Our dedicated experts in Paris
+        title: Your profile, our solutions
+        subTitle: Services designed for every profile
+        1:
+            title: Couples & expats
+            text: Comprehensive support to help you settle in Paris smoothly, every step of the way.
+        2:
+            title: Families
+            text: We find the right neighbourhood, schools, and home to ensure a seamless family relocation.
+        3:
+            title: Students & young professionals
+            text: Reliable guidance to secure suitable housing and begin your Parisian life with confidence.
+        4:
+            title: Companies
+            text: We streamline the relocation of your employees with fast, tailored, and professional support.
 login:
     title: Log in to our services
     form:
