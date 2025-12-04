@@ -371,6 +371,9 @@ home:
     blog:
         title: Blog
         subTitle: Our lastest articles
+    profile:
+        title: Meet our team
+        subTitle: Our dedicated experts in Paris
 login:
     title: Log in to our services
     form:

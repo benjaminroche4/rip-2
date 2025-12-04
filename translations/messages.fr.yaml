@@ -377,6 +377,9 @@ home:
     blog:
         title: Blog
         subTitle: Nos derniers articles
+    profile:
+        title:
+        subTitle: Des services adaptés pour chaque profil
 login:
     title: Connectez-vous à nos services
     form:

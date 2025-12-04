@@ -142,3 +142,13 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.7;
     border-radius: 0 6px 6px 0;
 }
+
+/* === Hide Scrollbar === */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}

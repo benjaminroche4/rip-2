@@ -429,6 +429,91 @@
             </div>
         </div>
     </section>
+    <section class="max-w-7xl mx-auto lg:px-8 lg:py-16 py-12">
+        <div class="max-w-xl justify-center mx-auto px-6 lg:mx-0">
+            <div class="pb-12 lg:pb-16 flex flex-col space-y-3">
+                <h2 class="font-semibold text-primary font-secondary">{{ 'home.profile.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-pretty">{{ 'home.profilew.subTitle'|trans|raw }}</h3>
+            </div>
+        </div>
+        <div
+            x-data="{
+                isDragging: false,
+                startX: 0,
+                scrollLeft: 0,
+                startDrag(e) {
+                    this.isDragging = true;
+                    this.startX = e.pageX - $refs.slider.offsetLeft;
+                    this.scrollLeft = $refs.slider.scrollLeft;
+                    $refs.slider.style.cursor = 'grabbing';
+                    $refs.slider.style.scrollBehavior = 'auto';
+                },
+                endDrag() {
+                    this.isDragging = false;
+                    $refs.slider.style.cursor = 'grab';
+                    $refs.slider.style.scrollBehavior = 'smooth';
+                },
+                drag(e) {
+                    if (!this.isDragging) return;
+                    e.preventDefault();
+                    const x = e.pageX - $refs.slider.offsetLeft;
+                    const walk = (x - this.startX) * 2;
+                    $refs.slider.scrollLeft = this.scrollLeft - walk;
+                }
+            }"
+            x-ref="slider"
+            @mousedown="startDrag($event)"
+            @mouseup="endDrag()"
+            @mouseleave="endDrag()"
+            @mousemove="drag($event)"
+            class="flex overflow-x-auto lg:grid lg:grid-cols-4 gap-4 px-6 lg:px-0 snap-x snap-mandatory scrollbar-hide cursor-auto select-none"
+        >
+            <div class="relative rounded-2xl overflow-hidden min-w-[55vw] lg:min-w-0 snap-center pointer-events-none group">
+                <img src="{{ asset('medias/website/profile_4.webp') }}"
+                     class="block w-full h-120 object-cover min-w-[55vw] lg:min-w-0 snap-center pointer-events-none"
+                     draggable="false"
+                     alt="Profile photo"/>
+                <div class="absolute inset-0 bg-linear-to-t from-gray-900/40 to-gray-100/20 z-10 pointer-events-none group-hover:bg-primary"></div>
+                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2">
+                    <h3 class="text-xl font-medium">Couple et expatriés</h3>
+                    <p class="text-light text-sm text-gray-200">Un accompagnement complet pour vous installer à Paris sereinement, étape après étape.</p>
+                </div>
+            </div>
+            <div class="relative rounded-2xl overflow-hidden min-w-[55vw] lg:min-w-0 snap-center pointer-events-none group">
+                <img src="{{ asset('medias/website/profile_3.webp') }}"
+                     class="block w-full h-120 object-cover min-w-[55vw] lg:min-w-0 snap-center pointer-events-none"
+                     draggable="false"
+                     alt="Profile photo"/>
+                <div class="absolute inset-0 bg-linear-to-t from-gray-900/40 to-gray-100/20 z-10 pointer-events-none group-hover:bg-primary"></div>
+                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2">
+                    <h3 class="text-xl font-medium">Familles</h3>
+                    <p class="text-light text-sm text-gray-200">Nous trouvons le quartier, l’école et le logement idéal pour une arrivée en famille réussie.</p>
+                </div>
+            </div>
+            <div class="relative rounded-2xl overflow-hidden min-w-[55vw] lg:min-w-0 snap-center pointer-events-none group">
+                <img src="{{ asset('medias/website/profile_2.webp') }}"
+                     class="block w-full h-120 object-cover min-w-[55vw] lg:min-w-0 snap-center pointer-events-none"
+                     draggable="false"
+                     alt="Profile photo"/>
+                <div class="absolute inset-0 bg-linear-to-t from-gray-900/40 to-gray-100/20 z-10 pointer-events-none group-hover:bg-primary"></div>
+                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2">
+                    <h3 class="text-xl font-medium">Étudiants et jeunes actifs</h3>
+                    <p class="text-light text-sm text-gray-200">Un soutien fiable pour trouver un logement adapté et débuter votre vie parisienne en confiance. </p>
+                </div>
+            </div>
+            <div class="relative rounded-2xl overflow-hidden min-w-[55vw] lg:min-w-0 snap-center pointer-events-none group">
+                <img src="{{ asset('medias/website/profile_1.webp') }}"
+                     class="block w-full h-120 object-cover min-w-[55vw] lg:min-w-0 snap-center pointer-events-none"
+                     draggable="false"
+                     alt="Profile photo"/>
+                <div class="absolute inset-0 bg-linear-to-t from-gray-900/40 to-gray-100/20 z-10 pointer-events-none group-hover:bg-primary"></div>
+                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2">
+                    <h3 class="text-xl font-medium">Entreprises</h3>
+                    <p class="text-light text-sm text-gray-200">Nous facilitons l’installation de vos collaborateurs grâce à un service rapide et personnalisé.</p>
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">
             <div class="pb-12 lg:pb-16 flex flex-col space-y-3 text-center">
