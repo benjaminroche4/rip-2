@@ -76,7 +76,18 @@
                 </div>
             </div>
             <div class="h-[300px] lg:h-[600px]">
-                <img src="{{ asset('medias/website/rip_paris.webp') }}" alt="{{ 'home.heroSection.image.alt'|trans|raw }}" loading="eager" class="w-full h-full object-cover rounded-2xl" width="382" height="600">
+                <video
+                    class="w-full h-full object-cover rounded-2xl"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="metadata"
+                    poster="{{ asset('medias/website/rip_paris.webp') }}"
+                >
+                    <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" class="object-cover" type="video/webm">
+                    <source src="{{ asset('medias/videos/relocation-in-paris.mp4') }}" class="object-cover" type="video/mp4">
+                </video>
             </div>
         </div>
     </section>
