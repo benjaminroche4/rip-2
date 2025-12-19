@@ -7,9 +7,6 @@ start:
 clean:
 	php bin/console cache:clear
 
-.ONESHELL:
-SHELL := /bin/bash
-
 deploy:
 	set -e
 	echo "→ Pull Git (main)"
@@ -19,3 +16,11 @@ deploy:
 	echo "→ Clear cache (prod)"
 	php bin/console cache:clear --env=prod
 	echo "✓ Déploiement terminé"
+
+version:
+	echo "→ Symfony Version"
+	php bin/console --version
+	echo "→ Symfony CLI Version"
+	symfony -v
+	echo "→ PHP Version"
+	php -v

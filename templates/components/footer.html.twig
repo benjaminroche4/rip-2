@@ -61,6 +61,7 @@
                                     <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('_route') == 'app_login' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
                                 {% endif %}
                                 <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
+                                <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
                                 <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
                             </nav>
                         </div>
