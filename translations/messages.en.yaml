@@ -78,6 +78,7 @@ sitemap:
         privacyPolicy: Privacy policy
         home: Home
         estimation: Get your estimate
+        faq: FAQ
     blogMenu:
         blog: Blog
 footer:
@@ -402,9 +403,14 @@ aboutUs:
     title: About Us
     subTitle: Together for 10 Years
     team:
-        1: Client Relations Manager
-        2: Mobility Consultant
-        3: Housing Specialist
+        1: Housing Consultant
+        2: International Mobility Consultant
+        3: Housing Consultant
+        4: International Mobility Consultant
+        5: Client Relations Manager
+        6: Housing Consultant
+        7: Housing Consultant
+        8: Housing Consultant
     ourValues:
         title: Our Values
         subTitle: A human approach built on trust

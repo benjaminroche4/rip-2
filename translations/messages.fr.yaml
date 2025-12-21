@@ -78,6 +78,7 @@ sitemap:
         privacyPolicy: Politique de confidentialité
         home: Accueil
         estimation: Obtenez votre estimation
+        faq: FAQ
     blogMenu:
         blog: Blog
 footer:
@@ -408,9 +409,14 @@ aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans
     team:
-        1: Responsable Clientèle
-        2: Consultante Mobilité
-        3: Chasseur de logement
+        1: Consultant logement
+        2: Consultante mobilité internationale
+        3: Consultante logement
+        4: Consultante mobilité internationale
+        5: Responsable relation clients
+        6: Consultant logement
+        7: Consultant logement
+        8: Consultante logement
     ourValues:
         title: Nos valeurs
         subTitle: Une approche humaine, fondée sur la confiance
