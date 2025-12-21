@@ -101,7 +101,8 @@ footer:
     menuTitle:
         1: Nos services
         2: À propos
-        3: Informations légales
+        3: Support
+        4: Informations légales
     bottomPage:
         rights: Relocation In Paris. Tous droits réservés.
 header:
@@ -290,6 +291,9 @@ meta:
     estimation:
         title: Obtenez votre estimation
         description: Estimez le coût de votre relocation à Paris en quelques clics. Découvrez nos services sur mesure pour trouver votre logement et faciliter votre installation.
+    faq:
+        title: Questions fréquentes (FAQ)
+        description: Découvrez nos réponses aux questions les plus posées sur la relocation à Paris. Locataires, entreprises et propriétaires.
 home:
     heroSection:
         top:
@@ -649,3 +653,88 @@ blog:
         redactionBy: Rédigé par
         aboutAuthor: À propos de l'auteur
         published: Publié le
+faq:
+    title: FAQ
+    subTitle: Vous avez des questions ?
+    tabs:
+        1: Locataires
+        2: Entreprises
+        3: Propriétaires
+    tenant:
+        question:
+            1:
+                title: Quels documents sont nécessaires pour louer un appartement à Paris ?
+                text: Pour louer un logement à Paris, les propriétaires demandent généralement un dossier complet comprenant une pièce d’identité, un contrat de travail ou une attestation professionnelle, des justificatifs de revenus, ainsi que des relevés bancaires. Pour les expatriés, des garanties alternatives (entreprise, assurance, dossier international) peuvent être mises en place. Nous vous constituons un dossier conforme aux exigences du marché parisien.
+            2:
+                title: Combien de temps faut-il pour trouver un logement à Paris ?
+                text: Le délai moyen varie entre 2 et 6 semaines, selon le budget, le quartier et la période de l’année. Grâce à notre réseau et à notre connaissance du marché (off/on market), nous optimisons ce délai et ciblons uniquement des biens adaptés à votre profil, afin d’accélérer la recherche.
+            3:
+                title: Quel budget prévoir pour un logement à Paris ?
+                text: Le budget dépend fortement du quartier, de la surface et du type de bien (meublé ou non). À Paris, les loyers commencent généralement autour de 800 € pour un studio et peuvent dépasser 4 000 € pour un appartement familial. Nous vous aidons à définir un budget réaliste en fonction de vos attentes.
+            4:
+                title: Quels arrondissements sont les plus adaptés à mon profil ?
+                text: Chaque arrondissement de Paris a son identité. Certains sont idéaux pour les familles, d’autres pour les jeunes actifs ou les couples. Lors de notre accompagnement, nous analysons votre mode de vie, vos priorités (transports, travail, écoles, environnement) et vous conseillons les quartiers les plus adaptés.
+            5:
+                title: Ai-je besoin d’un garant français ?
+                text: Un garant français est souvent demandé, mais ce n’est pas toujours obligatoire. Des solutions alternatives existent, comme les garanties d’entreprise, les assurances loyers impayés ou les garanties internationales. Nous vous guidons vers la solution la plus adaptée à votre situation.
+            6:
+                title: Puis-je louer un logement avant mon arrivée en France ?
+                text: Oui, c’est tout à fait possible. Nous organisons des visites à distance, sélectionnons les biens et sécurisons le processus pour que vous puissiez arriver à Paris l’esprit tranquille.
+            7:
+                title: Quelle est la durée minimale d’un bail ?
+                text: "La durée dépend du type de contrat: Bail meublé (1 an ou 9 mois pour les étudiants), Bail non meublé (3 ans), Bail mobilité (de 1 à 10 mois). Nous vous aidons à choisir le bail le plus adapté à votre situation."
+            8:
+                title: Les charges sont-elles incluses dans le loyer ?
+                text: Les annonces précisent généralement si les charges sont incluses. Elles couvrent souvent l’entretien de l’immeuble, l’eau ou le chauffage collectif. Nous veillons à ce que tout soit clairement défini avant la signature.
+            9:
+                title: Proposez-vous un accompagnement après l’emménagement ?
+                text: Oui. Notre service ne s’arrête pas à la remise des clés. Nous vous accompagnons également pour les démarches administratives, l’ouverture de comptes, les assurances et votre installation quotidienne.
+    company:
+        question:
+            1:
+                title: Comment accompagnez-vous les collaborateurs ?
+                text: "Nous prenons en charge l’ensemble du parcours de relocation : logement, démarches administratives, intégration locale et accompagnement familial, afin de garantir une installation fluide et rapide."
+            2:
+                title: Quels services proposez-vous aux entreprises ?
+                text: "Nous proposons des services sur mesure : recherche de logement, orientation quartiers, accompagnement administratif, scolarité, installation et suivi post-arrivée pour vos collaborateurs. Nous offrons aussi un service de recherche de vos bureaux à Paris."
+            3:
+                title: Combien de temps faut-il pour reloger un collaborateur ?
+                text: Le délai dépend du profil et du budget, mais notre approche ciblée permet généralement de reloger un collaborateur en quelques semaines.
+            4:
+                title: Travaillez-vous avec des budgets plafonnés ?
+                text: Oui, nous adaptons notre recherche aux contraintes budgétaires définies par l’entreprise tout en maintenant un haut niveau de qualité.
+            5:
+                title: Fournissez-vous des rapports de suivi ?
+                text: Nous proposons un reporting clair pour les équipes RH afin de suivre l’avancement de chaque dossier.
+            6:
+                title: Gérez-vous les démarches administratives ?
+                text: "Oui, nous accompagnons les collaborateurs pour les démarches essentielles : banque, assurance, sécurité sociale, abonnements, etc."
+    landlord:
+        question:
+            1:
+                title: Comment sélectionnez-vous les locataires ?
+                text: Nous sélectionnons des profils sérieux, souvent expatriés ou collaborateurs d’entreprises internationales, avec des garanties solides.
+            2:
+                title: Vérifiez-vous la solvabilité ?
+                text: Oui, chaque dossier est rigoureusement analysé avant toute proposition.
+            3:
+                title: Quel est l’avantage de travailler avec un service de relocation ?
+                text: Vous bénéficiez d’un accès à des locataires qualifiés, stables et accompagnés, réduisant les risques et les vacances locatives.
+            4:
+                title: Travaillez-vous avec des baux mobilité ?
+                text: Oui, nous maîtrisons parfaitement les différents types de baux, y compris le bail mobilité.
+            5:
+                title: Comment sécurisez-vous les paiements ?
+                text: Nous privilégions des profils disposant de garanties solides et travaillons en lien avec des entreprises internationales.
+            6:
+                title: Travaillez-vous avec des entreprises internationales ?
+                text: Oui, nous collaborons régulièrement avec des groupes internationaux.
+            7:
+                title: Mon bien sera-t-il proposé à des profils fiables ?
+                text: Oui, notre priorité est la qualité des profils, la stabilité et le respect du bien.
+            8:
+                title: Gérez-vous l’état des lieux et l’installation ?
+                text: Nous pouvons coordonner ces étapes pour assurer une transition fluide.
+            9:
+                title: Comment démarrer une collaboration ?
+                text: Il suffit de nous contacter. Nous étudierons votre bien et définirons ensemble les modalités de collaboration.

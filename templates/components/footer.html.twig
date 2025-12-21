@@ -34,13 +34,13 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
                                     </div>
                                 </div>
-                                <span class="font-medium text-white text-xs">{{ 'header.google.basedOn'|trans|raw }} <span class="underline underline-offset-2">+220 {{ 'header.google.reviews'|trans|raw }}</span></span>
+                                <span class="font-medium text-white text-xs">{{ 'header.google.basedOn'|trans|raw }} <span class="underline underline-offset-2">+300 {{ 'header.google.reviews'|trans|raw }}</span></span>
                             </div>
                         </a>
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
                         <div class="space-y-4">
                             <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.1'|trans|raw }}</h3>
                             <nav class="flex flex-col space-y-2 text-sm/6">
@@ -55,18 +55,23 @@
                             <nav class="flex flex-col space-y-2 text-sm/6">
                                 <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
                                 <a href="{{ path('app_estimation') }}" class="{% if app.request.attributes.get('_route') == 'app_estimation' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.estimation'|trans|raw }}</a>
-                                {% if app.user %}
-                                    <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
-                                {% else %}
-                                    <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('_route') == 'app_login' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
-                                {% endif %}
-                                <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
-                                <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
                                 <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
                             </nav>
                         </div>
                         <div class="space-y-4">
                             <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.3'|trans|raw }}</h3>
+                            <nav class="flex flex-col space-y-2 text-sm/6">
+                                <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
+                                {% if app.user %}
+                                    <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('_route') == 'app_login' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
+                                {% endif %}
+                                <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
+                            </nav>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="text-gray-300 text-sm">{{ 'footer.menuTitle.4'|trans|raw }}</h3>
                             <nav class="flex flex-col space-y-2 text-sm/6">
                                 <a href="{{ path('app_legal_notice') }}" class="{% if app.request.attributes.get('_route') == 'app_legal_notice' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.legalNotice'|trans|raw }}</a>
                                 <a href="{{ path('app_privacy_policy') }}" class="{% if app.request.attributes.get('_route') == 'app_privacy_policy' %}text-slate-400{% else %}text-white{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.privacyPolicy'|trans|raw }}</a>
