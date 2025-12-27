@@ -46,11 +46,11 @@ contact:
             label: By checking this box, I agree that my information may be used to be contacted.
         button: Be contacted quickly
         success:
-            title: Thank you for your message!
+            title: Thank you for your message !
             text: An expert from our team will contact you as soon as possible.
         subButtonText: Response and quote within 24 hours
 ctaFooter:
-    title: Do you have a project in Paris?
+    title: Do you have a project in Paris ?
     subTitle: Our experts support you with a personalized approach and tailor-made solutions to achieve your goals.
     button: Contact an expert
     image:
@@ -122,7 +122,7 @@ header:
         reviews: reviews
 companies:
     title: For companies
-    subTitle: Corporate mobility and real estate in Paris
+    subTitle: Corporate housing in Paris, made simple
     services:
         1:
             title: Employee mobility
@@ -311,7 +311,7 @@ home:
             text: An exclusive and personalized housing search for short- or long-term stays in Paris.
         2:
             title: For companies
-            text: Simplify your employees’ relocation and find offices tailored to your ambitions, effortlessly.
+            text: Free your team from administrative burdens with our turnkey solutions.
         3:
             title: For landlords
             text: Entrust your property to experts and find reliable tenants through a refined, efficient approach.

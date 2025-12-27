@@ -122,7 +122,7 @@ header:
         reviews: avis
 companies:
     title: Pour les entreprises
-    subTitle: Mobilité et immobilier d’entreprise à Paris
+    subTitle: Loger vos collaborateurs facilement à Paris
     services:
         1:
             title: Mobilité des collaborateurs
@@ -317,7 +317,7 @@ home:
             text: Une recherche de logement exclusive et personnalisée, pour des locations courtes ou longues durées à Paris.
         2:
             title: Pour les entreprises
-            text: Facilitez l’installation de vos collaborateurs et trouvez des bureaux adaptés à vos ambitions, sans perdre de temps.
+            text: Libérez vos collaborateurs des contraintes administratives avec nos solutions clés en main.
         3:
             title: Pour les propriétaires
             text: Confiez la gestion de votre bien à des experts et trouvez des locataires fiables, sans stress ni perte de temps.
