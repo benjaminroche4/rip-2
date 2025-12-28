@@ -9,6 +9,18 @@
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
             <h1 class="text-center font-semibold text-primary font-secondary">{{ 'companies.title'|trans|raw }}</h1>
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'companies.subTitle'|trans|raw }}</h2>
+            <div class="border border-neutral-100 rounded-full px-4 py-1.5 flex items-center justify-center gap-x-2
+            text-sm text-slate-600  mx-auto bg-white shadow-lg shadow-gray-300/30">
+                <div class="flex justify-center items-center -space-x-1">
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span>{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                </div>
+                <p>5.0 basé sur <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 avis</a></p>
+                <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>
+            </div>
         </div>
     </section>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
@@ -39,8 +51,8 @@
         </div>
         <div class="mt-10 flex items-center justify-center">
             <a href="{{ path('app_contact') }}"
-               class="inline-flex items-center gap-x-4 rounded-full text-sm bg-[#71172e] px-4 py-3 text-md font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                Contacter un expert
+               class="rounded-full bg-primary px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                {{ 'home.heroSection.button'|trans|raw }} →
             </a>
         </div>
     </section>
@@ -140,40 +152,111 @@
     </section>
     <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
         <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
-            <div class="max-w-xl mb-8">
-                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'home.aboutUs.title'|trans|raw }}</h2>
-                <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'home.aboutUs.subTitle'|trans|raw }}</h3>
+            <div class="max-w-xl mb-8 mx-auto lg:mx-0">
+                <h2 class="text-sm font-semibold text-primary font-secondary">Une experience unique</h2>
+                <h3 class="mt-3 text-pretty text-3xl font-medium">Faites de Paris l'atout majeur de vos recrutements</h3>
                 <p class="mt-6 text-neutral-600">
-                    Nous orchestrons chaque détail de votre relocalisation pour que votre arrivée soit fluide.
+                    Déléguez la complexité de la mobilité géographique à un partenaire expert.
                 </p>
             </div>
             <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
-                <div class="px-6 lg:px-0 lg:pr-4 bg-red-100/80">
-                    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-                        <dl class="max-w-xl space-y-8 text-base/7 text-neutral-600 lg:max-w-none">
-                            <div class="relative pl-8">
-                                <dt class="inline font-semibold text-gray-900">
-                                    {{ ux_icon('mingcute:check-line', {'class':'absolute left-1 top-1.5 size-4 text-primary'}) }}
-                                    {{ 'home.aboutUs.subText1.title'|trans|raw }}
-                                </dt>
-                                <dd class="inline">
-                                    {{ 'home.aboutUs.subText1.text'|trans|raw }}
-                                </dd>
+                <div class="lg:px-0 lg:pr-4">
+                    <div class="mx-auto max-w-2xl lg:mx-0 max-w-lg">
+                        <div
+                            data-controller="features-list"
+                            class="relative bg-white"
+                        >
+                            {# Features list #}
+                            <div class="relative">
+                                {# Feature 1 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        Gain de temps stratégique
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        Déléguez la complexité logistique et restez concentrés sur l’essentiel : la réussite de votre recrutement.
+                                    </p>
+                                </div>
+
+                                {# Feature 2 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        Attractivité renforcée
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        Augmentez vos chances de convaincre les meilleurs profils grâce à une expérience d'accueil d'exception.
+                                    </p>
+                                </div>
+
+                                {# Feature 3 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        Expertise immobilière
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        Bénéficiez d’un accès privilégié au marché parisien (off-market) et d’une sécurité totale dans la constitution de vos dossiers.
+                                    </p>
+                                </div>
+
+                                {# Feature 4 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        Sérénité et confiance
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        Un accompagnement sur-mesure et un interlocuteur dédié pour garantir une intégration sereine et immédiate.
+                                    </p>
+                                </div>
                             </div>
-                            <div class="relative pl-8">
-                                <dt class="inline font-semibold text-gray-900">
-                                    {{ ux_icon('mingcute:check-line', {'class':'absolute left-1 top-1.5 size-4 text-primary'}) }}
-                                    {{ 'home.aboutUs.subText2.title'|trans|raw }}
-                                </dt>
-                                <dd class="inline">
-                                    {{ 'home.aboutUs.subText2.text'|trans|raw }}
-                                </dd>
-                            </div>
-                        </dl>
+                        </div>
                     </div>
                 </div>
                 <div class="h-full">
-                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-in-paris-1.webp') }}" alt="Product screenshot" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
+                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-paris-5.webp') }}" alt="Product screenshot" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
                 </div>
             </div>
         </div>
