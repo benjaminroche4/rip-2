@@ -5,7 +5,7 @@
 {% block url %}{{ path('app_service_companies') }}{% endblock %}
 
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
             <h1 class="text-center font-semibold text-primary font-secondary">{{ 'companies.title'|trans|raw }}</h1>
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'companies.subTitle'|trans|raw }}</h2>
@@ -18,7 +18,7 @@
                     <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
                     <span>{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
                 </div>
-                <p>5.0 basé sur <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 avis</a></p>
+                <p>{{ 'companies.trust.1'|trans|raw }} <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 {{ 'companies.trust.2'|trans|raw }} </a></p>
                 <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>
             </div>
         </div>
@@ -35,7 +35,7 @@
                 Your browser does not support the video tag.
             </video>
         </div>
-        <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto">
+        <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto max-w-xl">
             <div class="flex items-center gap-3 justify-center col-span-1">
                 {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}
                 <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.1'|trans|raw }}</p>
@@ -89,8 +89,8 @@
     <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="rounded-2xl bg-neutral-100/80 p-8">
             <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
-                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'home.aboutUs.title'|trans|raw }}</h2>
-                <h2 class="text-3xl font-medium text-pretty text-center">Nos solutions pour vos talents</h2>
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'companies.service.title'|trans|raw }}</h2>
+                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'companies.service.subTitle'|trans|raw }}</h2>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
@@ -98,54 +98,54 @@
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('gg:search', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Recherche sur-mesure</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.1.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Une sélection de biens premium adaptée aux besoins de vos talents.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.1.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('bx:chat', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Pilotage et reporting RH dédié</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.2.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Un interlocuteur unique pour un suivi de vos dossiers en temps réel.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.2.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('mdi:paper-check-outline', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Support administratif</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.3.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Vos services et abonnements activés dès le premier jour.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.3.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('humbleicons:key', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Installation clés en main</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.4.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Installation fluide pour des talents opérationnels dès le premier jour.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.4.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('material-symbols:box-outline-sharp', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Coordination logistique</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.5.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Nous orchestrons chaque prestataire pour un emménagement sans accroc.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.5.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
                             {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">Immersion locale</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.6.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Une intégration locale réussie grâce à une prise de marques rapide.</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.6.text'|trans|raw }}</p>
                 </div>
             </div>
         </div>
@@ -153,10 +153,10 @@
     <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
         <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
             <div class="max-w-xl mb-8 mx-auto lg:mx-0">
-                <h2 class="text-sm font-semibold text-primary font-secondary">Une experience unique</h2>
-                <h3 class="mt-3 text-pretty text-3xl font-medium">Faites de Paris l'atout majeur de vos recrutements</h3>
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'companies.advantage.title'|trans|raw }}</h2>
+                <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'companies.advantage.subtitle'|trans|raw }}</h3>
                 <p class="mt-6 text-neutral-600">
-                    Déléguez la complexité de la mobilité géographique à un partenaire expert.
+                    {{ 'companies.advantage.text'|trans|raw }}
                 </p>
             </div>
             <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
@@ -180,12 +180,11 @@
                                         class="absolute left-0 top-0 w-1 bg-primary rounded-full"
                                         style="height: 0;"
                                     ></div>
-
                                     <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        Gain de temps stratégique
+                                        {{ 'companies.advantage.features.1.title'|trans|raw }}
                                     </h4>
                                     <p class="text-sm text-slate-600">
-                                        Déléguez la complexité logistique et restez concentrés sur l’essentiel : la réussite de votre recrutement.
+                                        {{ 'companies.advantage.features.1.text'|trans|raw }}
                                     </p>
                                 </div>
 
@@ -201,12 +200,11 @@
                                         class="absolute left-0 top-0 w-1 bg-primary rounded-full"
                                         style="height: 0;"
                                     ></div>
-
                                     <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        Attractivité renforcée
+                                        {{ 'companies.advantage.features.2.title'|trans|raw }}
                                     </h4>
                                     <p class="text-sm text-slate-600">
-                                        Augmentez vos chances de convaincre les meilleurs profils grâce à une expérience d'accueil d'exception.
+                                        {{ 'companies.advantage.features.2.text'|trans|raw }}
                                     </p>
                                 </div>
 
@@ -222,12 +220,11 @@
                                         class="absolute left-0 top-0 w-1 bg-primary rounded-full"
                                         style="height: 0;"
                                     ></div>
-
                                     <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        Expertise immobilière
+                                        {{ 'companies.advantage.features.3.title'|trans|raw }}
                                     </h4>
                                     <p class="text-sm text-slate-600">
-                                        Bénéficiez d’un accès privilégié au marché parisien (off-market) et d’une sécurité totale dans la constitution de vos dossiers.
+                                        {{ 'companies.advantage.features.3.text'|trans|raw }}
                                     </p>
                                 </div>
 
@@ -243,12 +240,11 @@
                                         class="absolute left-0 top-0 w-1 bg-primary rounded-full"
                                         style="height: 0;"
                                     ></div>
-
                                     <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        Sérénité et confiance
+                                        {{ 'companies.advantage.features.4.title'|trans|raw }}
                                     </h4>
                                     <p class="text-sm text-slate-600">
-                                        Un accompagnement sur-mesure et un interlocuteur dédié pour garantir une intégration sereine et immédiate.
+                                        {{ 'companies.advantage.features.4.text'|trans|raw }}
                                     </p>
                                 </div>
                             </div>
@@ -256,7 +252,7 @@
                     </div>
                 </div>
                 <div class="h-full">
-                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-paris-5.webp') }}" alt="Product screenshot" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
+                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-paris-5.webp') }}" alt="Relocation In Paris, agence de relocation à Paris" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
                 </div>
             </div>
         </div>
@@ -325,6 +321,17 @@
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
                             {{ 'companies.faq.question.5.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'companies.faq.question.6.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'companies.faq.question.6.text'|trans|raw }}
                         </div>
                     </div>
                 </div>
