@@ -61,25 +61,35 @@
                                 {{ form_widget(form.propertyCondition, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6'}}) }}
                             </div>
                             <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div>
+                                <div data-controller="number-stepper" data-number-stepper-min-value="0" data-number-stepper-max-value="20">
                                     <div class="flex items-center gap-x-1 mb-2">
                                         {{ ux_icon('ph:bed', {'class':'size-5 text-primary shrink-0'}) }}
                                         {{ form_label(form.bedroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block'}}) }}
                                     </div>
-                                    {{ form_widget(form.bedroom, {'attr': {
-                                        'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
-                                        'placeholder': 'propertyEstimation.form.bedroom.placeholder'|trans
-                                    }}) }}
+                                    <div class="relative">
+                                        <button type="button" data-action="click->number-stepper#decrement" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
+                                        {{ form_widget(form.bedroom, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
+                                            'placeholder': 'propertyEstimation.form.bedroom.placeholder'|trans,
+                                            'data-number-stepper-target': 'input'
+                                        }}) }}
+                                        <button type="button" data-action="click->number-stepper#increment" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
+                                    </div>
                                 </div>
-                                <div>
+                                <div data-controller="number-stepper" data-number-stepper-min-value="0" data-number-stepper-max-value="10">
                                     <div class="flex items-center gap-x-1 mb-2">
                                         {{ ux_icon('mdi:shower', {'class':'size-5 text-primary shrink-0'}) }}
                                         {{ form_label(form.bathroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block'}}) }}
                                     </div>
-                                    {{ form_widget(form.bathroom, {'attr': {
-                                        'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
-                                        'placeholder': 'propertyEstimation.form.bathroom.placeholder'|trans
-                                    }}) }}
+                                    <div class="relative">
+                                        <button type="button" data-action="click->number-stepper#decrement" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
+                                        {{ form_widget(form.bathroom, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
+                                            'placeholder': 'propertyEstimation.form.bathroom.placeholder'|trans,
+                                            'data-number-stepper-target': 'input'
+                                        }}) }}
+                                        <button type="button" data-action="click->number-stepper#increment" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
+                                    </div>
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-x-1 mb-2">
