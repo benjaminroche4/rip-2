@@ -4,6 +4,7 @@ namespace App\Controller\Public;
 
 use App\Entity\PropertyEstimation;
 use App\Form\PropertyEstimationType;
+use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +29,7 @@ final class PropertyEstimationController extends AbstractController
                 ]
         ]
     )]
-    public function index(Request $request): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PropertyEstimationType::class, new PropertyEstimation());
         $form->handleRequest($request);
@@ -38,9 +39,13 @@ final class PropertyEstimationController extends AbstractController
             $task->setCreatedAt(new \DateTimeImmutable());
             $task->setIp($request->getClientIp());
 
+            // Persister en base de données
+            $entityManager->persist($task);
+            $entityManager->flush();
+
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
-                return $this->renderBlock('public/property_estimation/task.html.twig', 'success_stream', ['task' => $task]);
+                return $this->render('public/property_estimation/task.stream.html.twig', ['task' => $task]);
             }
 
             return $this->redirectToRoute('task_success', [], Response::HTTP_SEE_OTHER);

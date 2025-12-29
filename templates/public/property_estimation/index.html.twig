@@ -135,9 +135,11 @@
                 </div>
             </div>
         </div>
-        {{ form_start(form) }}
-            <button type="submit">Envoyer</button>
-        {{ form_end(form) }}
+        <div id="estimation-form">
+            {{ form_start(form, {'attr': {'data-turbo': 'true'}}) }}
+                <button type="submit">Envoyer</button>
+            {{ form_end(form) }}
+        </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">

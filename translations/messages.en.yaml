@@ -807,6 +807,11 @@ propertyEstimation:
         propertyCondition:
             label: Property condition
             notBlank: The property condition must not be empty.
+            choice:
+                1: Newly renovated
+                2: Very good condition
+                3: Some work required
+                4: Full renovation needed
         bedroom:
             label: Bedrooms
             notBlank: The number of bedrooms must not be empty.

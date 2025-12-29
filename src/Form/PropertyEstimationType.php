@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\PropertyEstimation;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -33,8 +34,15 @@ class PropertyEstimationType extends AbstractType
                     )
                 ],
             ])
-            ->add('propertyCondition',TextType::class, [
+            ->add('propertyCondition', ChoiceType::class, [
                 'label' => 'propertyEstimation.form.propertyCondition.label',
+                'choices' => [
+                    'propertyEstimation.form.propertyCondition.choice.1' => 'propertyEstimation.form.propertyCondition.choice.1',
+                    'propertyEstimation.form.propertyCondition.choice.2' => 'propertyEstimation.form.propertyCondition.choice.2',
+                    'propertyEstimation.form.propertyCondition.choice.3' => 'propertyEstimation.form.propertyCondition.choice.3',
+                    'propertyEstimation.form.propertyCondition.choice.4' => 'propertyEstimation.form.propertyCondition.choice.4',
+                ],
+                'placeholder' => '',
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyEstimation.form.propertyCondition.notBlank',

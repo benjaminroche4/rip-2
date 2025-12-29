@@ -810,6 +810,11 @@ propertyEstimation:
         propertyCondition:
             label: État du logement
             notBlank: L'état du logement ne doit pas être vide.
+            choice:
+                1: Récemment rénové
+                2: Très bon état
+                3: Quelques travaux à prévoir
+                4: Rénovation complète à prévoir
         bedroom:
             label: Chambres
             notBlank: Le nombre de chambre ne doit pas être vide.
