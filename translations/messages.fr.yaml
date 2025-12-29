@@ -799,3 +799,26 @@ faq:
             9:
                 title: Comment démarrer une collaboration ?
                 text: Il suffit de nous contacter. Nous étudierons votre bien et définirons ensemble les modalités de collaboration.
+propertyEstimation:
+    form:
+        address:
+            label: Adresse
+            notBlank: L'adresse ne doit pas être vide.
+        surface:
+            label: Surface (m2)
+            notBlank: La surface ne doit pas être vide.
+        propertyCondition:
+            label: État du logement
+            notBlank: L'état du logement ne doit pas être vide.
+        bedroom:
+            label: Chambres
+            notBlank: Le nombre de chambre ne doit pas être vide.
+        bathroom:
+            label: Salles de bain
+            notBlank: Le nombre de salles de baon ne doit pas être vide.
+        phoneNumber:
+            label: Téléphone
+            notBlank: Le numéro de téléphone ne doit pas être vide.
+        email:
+            label: Email
+            notBlank: L'email ne doit pas être vide.

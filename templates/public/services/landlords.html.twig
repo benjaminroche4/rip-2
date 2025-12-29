@@ -5,84 +5,131 @@
 {% block url %}{{ path('app_service_landlords') }}{% endblock %}
 
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'landlords.title'|trans|raw }}</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'landlords.subTitle'|trans|raw }}</h2>
-        </div>
-    </section>
-    <section class="max-w-6xl mx-auto lg:px-8 px-6 pt-4 lg:pb-16 pb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 gap-6 justify-center max-w-xl lg:max-w-4xl mx-auto">
-            <div class="bg-white border border-neutral-100 rounded-xl p-6 bg-neutral-100 transition duration-100 hover:border-primary/20 group shadow-lg shadow-lg shadow-gray-300/30">
-                <div class="flex flex-col">
-                    <div class="space-y-2">
-                        <div class="flex size-13 mb-6 items-center justify-center rounded-full bg-primary/10">
-                            {{ ux_icon('lucide:key-round', {'class':'size-6 text-primary'}) }}
+    <section class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-8 lg:py-12 gap-y-12">
+            <div class="mx-auto flex h-full w-full max-w-xl flex-col justify-center">
+                <div class="pb-10 w-fit mx-auto lg:mx-0" aria-hidden="true">
+                    <div class="border border-neutral-100 rounded-full px-4 py-1.5 flex items-center justify-center gap-x-2
+                        text-sm text-slate-600  mx-auto bg-white shadow-lg shadow-gray-300/30">
+                        <div class="flex justify-center items-center -space-x-1">
+                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                            <span>{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
                         </div>
-                        <h3 class="font-semibold text-gray-900 text-xl">
-                            {{ 'landlords.services.1.title'|trans|raw }}
-                        </h3>
-                        <p class="flex-auto text-neutral-800/70">
-                            {{ 'landlords.services.1.subTitle'|trans|raw }}
-                        </p>
+                        <p>{{ 'findAccommodation.trust.1'|trans|raw }} <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 {{ 'findAccommodation.trust.2'|trans|raw }} </a></p>
+                        <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>
                     </div>
-                    <div class="mt-3 flex flex-auto flex-col text-base/7 bg-neutral-100/40 rounded-lg mt-5 p-2">
-                        <div class="space-y-3 text-neutral-800/90">
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.1.offer.1'|trans|raw }}</p>
-                            </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.1.offer.2'|trans|raw }}</p>
-                            </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.1.offer.3'|trans|raw }}</p>
-                            </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.1.offer.4'|trans|raw }}</p>
-                            </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.1.offer.5'|trans|raw }}</p>
-                            </div>
-                        </div>
+                </div>
+                <h1 class="mx-auto max-w-2xl text-center text-5xl font-medium tracking-tight text-gray-900 lg:text-start lg:text-6xl/16 text-pretty">
+                    Confiez-nous la gestion de votre bien
+                </h1>
+                <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
+                    {{ 'home.heroSection.subTitle'|trans|raw }}
+                </p>
+                <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
+                    <div class="flex items-center gap-3 justify-center lg:justify-start">
+                        {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.1'|trans|raw }}</p>
+                    </div>
+                    <div class="flex items-center gap-3  justify-center lg:justify-start">
+                        {{ ux_icon('mdi:world', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.2'|trans|raw }}</p>
+                    </div>
+                    <div class="flex items-center gap-3 justify-center lg:justify-start min-[390px]:col-span-2 sm:col-span-1">
+                        {{ ux_icon('humbleicons:key', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.3'|trans|raw }}</p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white border border-neutral-100 rounded-xl p-6 bg-neutral-100 transition duration-100 hover:border-primary/20 group shadow-lg shadow-lg shadow-gray-300/30">
-                <div class="flex flex-col">
-                    <div class="space-y-2">
-                        <div class="flex size-13 mb-6 items-center justify-center rounded-full bg-primary/10">
-                            {{ ux_icon('lucide:user-round-check', {'class':'size-6 text-primary'}) }}
-                        </div>
-                        <h3 class="font-semibold text-gray-900 text-xl">
-                            {{ 'landlords.services.2.title'|trans|raw }}
-                        </h3>
-                        <p class="flex-auto text-neutral-800/70">
-                            {{ 'landlords.services.2.subTitle'|trans|raw }}
+            <div>
+                <div class="max-w-lg mx-auto p-2 rounded-3xl bg-linear-to-b from-primary to-primary/30">
+                    <div class="p-2">
+                        <p class="text-sm text-white uppercase tracking-normal font-medium text-center">
+                            Estimation gratuit
                         </p>
                     </div>
-                    <div class="mt-3 flex flex-auto flex-col text-base/7 bg-neutral-100/40 rounded-lg mt-5 p-2">
-                        <div class="space-y-3 text-neutral-800/90">
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.2.offer.1'|trans|raw }}</p>
+                    <div class="p-6 bg-white rounded-2xl mt-2 space-y-6">
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                            <div class="mt-2 grid grid-cols-1">
+                                <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                    <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                    <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                </svg>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.2.offer.2'|trans|raw }}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                            <div class="mt-2 grid grid-cols-1">
+                                <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                    <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                    <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                </svg>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.2.offer.3'|trans|raw }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                                <div class="mt-2 grid grid-cols-1">
+                                    <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                        <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                        <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="flex flex-row gap-x-2.5 items-center text-sm p-2.5">
-                                {{ ux_icon('gg:check-o', {'class':'size-4 shrink-0 text-primary'}) }}
-                                <p>{{ 'landlords.services.2.offer.4'|trans|raw }}</p>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                                <div class="mt-2 grid grid-cols-1">
+                                    <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                        <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                        <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                    </svg>
+                                </div>
                             </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                                <div class="mt-2 grid grid-cols-1">
+                                    <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                        <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                        <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                                <div class="mt-2 grid grid-cols-1">
+                                    <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                    <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                        <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                        <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900 text-sm">Who I am ?</p>
+                            <div class="mt-2 grid grid-cols-1">
+                                <input id="email" type="email" name="email" placeholder="you@example.com" class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pl-10 pr-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:pl-9 sm:text-sm/6" />
+                                <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 sm:size-4 dark:text-gray-500">
+                                    <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                                    <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                    class="flex items-center justify-center gap-x-2 cursor-pointer block w-full rounded-full bg-primary px-4 py-2 text-sm text-white font-medium hover:bg-primary/80 transition duration-100">
+                                Recevoir mon estimation
+                            </button>
                         </div>
                     </div>
                 </div>

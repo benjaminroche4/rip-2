@@ -14,6 +14,7 @@ use Zenstruck\Foundry\Persistence\ProxyRepositoryDecorator;
  */
 final class ContactFactory extends PersistentProxyObjectFactory{
     const HELP_TYPES = ['Question', 'Suggestion', 'Other'];
+
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
      *

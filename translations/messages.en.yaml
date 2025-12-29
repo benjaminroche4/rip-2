@@ -796,3 +796,26 @@ faq:
             10:
                 title: How do I start a collaboration ?
                 text: Simply contact us. We will study your property and define the terms of collaboration together.
+propertyEstimation:
+    form:
+        address:
+            label: Address
+            notBlank: The address must not be empty.
+        surface:
+            label: Surface (sqm)
+            notBlank: The surface area must not be empty.
+        propertyCondition:
+            label: Property condition
+            notBlank: The property condition must not be empty.
+        bedroom:
+            label: Bedrooms
+            notBlank: The number of bedrooms must not be empty.
+        bathroom:
+            label: Bathrooms
+            notBlank: The number of bathrooms must not be empty.
+        phoneNumber:
+            label: Phone number
+            notBlank: The phone number must not be empty.
+        email:
+            label: Email
+            notBlank: The email address must not be empty.
