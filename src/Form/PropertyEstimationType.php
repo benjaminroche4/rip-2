@@ -48,6 +48,7 @@ class PropertyEstimationType extends AbstractType
             ])
             ->add('bedroom',IntegerType::class, [
                 'label' => 'propertyEstimation.form.bedroom.label',
+                'data' => 1,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyEstimation.form.bedroom.notBlank',
@@ -61,6 +62,7 @@ class PropertyEstimationType extends AbstractType
             ])
             ->add('bathroom',IntegerType::class, [
                 'label' => 'propertyEstimation.form.bathroom.label',
+                'data' => 1,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyEstimation.form.bathroom.notBlank',
@@ -74,6 +76,7 @@ class PropertyEstimationType extends AbstractType
             ])
             ->add('surface',IntegerType::class, [
                 'label' => 'propertyEstimation.form.surface.label',
+                'data' => 30,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyEstimation.form.surface.notBlank',

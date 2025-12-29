@@ -5,6 +5,7 @@ import { Controller } from '@hotwired/stimulus';
  *
  * Permet d'augmenter ou diminuer la valeur d'un champ numérique
  * avec des boutons + et -
+ * Supporte le maintien du bouton pour incrémenter/décrémenter en continu
  */
 export default class extends Controller {
     static targets = ['input'];
@@ -18,8 +19,16 @@ export default class extends Controller {
     connect() {
         console.log('Number stepper controller connected');
 
+        // Variables pour le hold
+        this.holdTimer = null;
+        this.holdInterval = null;
+
         // S'assurer que la valeur initiale est valide
         this.ensureValidValue();
+    }
+
+    disconnect() {
+        this.stopHold();
     }
 
     /**
@@ -45,6 +54,56 @@ export default class extends Controller {
         if (newValue >= this.minValue) {
             this.inputTarget.value = newValue;
             this.triggerChangeEvent();
+        }
+    }
+
+    /**
+     * Commence à incrémenter en continu au maintien du bouton
+     */
+    startIncrementHold(event) {
+        // Premier incrémentation immédiat
+        this.increment();
+
+        // Attendre 300ms avant de commencer la répétition
+        this.holdTimer = setTimeout(() => {
+            this.holdInterval = setInterval(() => {
+                this.increment();
+            }, 100); // Répéter toutes les 100ms
+        }, 300);
+
+        // Empêcher la sélection de texte
+        event.preventDefault();
+    }
+
+    /**
+     * Commence à décrémenter en continu au maintien du bouton
+     */
+    startDecrementHold(event) {
+        // Premier décrémentation immédiat
+        this.decrement();
+
+        // Attendre 300ms avant de commencer la répétition
+        this.holdTimer = setTimeout(() => {
+            this.holdInterval = setInterval(() => {
+                this.decrement();
+            }, 100); // Répéter toutes les 100ms
+        }, 300);
+
+        // Empêcher la sélection de texte
+        event.preventDefault();
+    }
+
+    /**
+     * Arrête l'incrémentation/décrémentation continue
+     */
+    stopHold() {
+        if (this.holdTimer) {
+            clearTimeout(this.holdTimer);
+            this.holdTimer = null;
+        }
+        if (this.holdInterval) {
+            clearInterval(this.holdInterval);
+            this.holdInterval = null;
         }
     }
 
