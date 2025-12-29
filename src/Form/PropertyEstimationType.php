@@ -25,6 +25,11 @@ class PropertyEstimationType extends AbstractType
                         message: 'propertyEstimation.form.address.notBlank',
                     )
                 ],
+                'attr' => [
+                    'data-controller' => 'google-places',
+                    'data-google-places-target' => 'input',
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('surface',IntegerType::class, [
                 'label' => 'propertyEstimation.form.surface.label',

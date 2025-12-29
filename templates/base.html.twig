@@ -36,6 +36,11 @@
             {{ encore_entry_script_tags('app') }}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
 
+            {# Google Maps #}
+            <script async defer
+                    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&language=fr">
+            </script>
+
             <!-- Schema.org -->
             <script type="application/ld+json">
                 {
