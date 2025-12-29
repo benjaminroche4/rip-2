@@ -48,24 +48,4 @@ final class ServiceController extends AbstractController
     {
         return $this->render('public/services/companies.html.twig');
     }
-
-    #[Route(
-        path: [
-            'fr' => '/{_locale}/services/pour-les-proprietaires',
-            'en' => '/{_locale}/services/for-landlords',
-        ],
-        name: 'app_service_landlords',
-        options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2025-10-09')
-                ]
-        ]
-    )]
-    public function owner(): Response
-    {
-        return $this->render('public/services/landlords.html.twig');
-    }
 }
