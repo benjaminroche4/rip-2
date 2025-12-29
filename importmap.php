@@ -34,4 +34,19 @@ return [
     '@tailwindplus/elements' => [
         'version' => '1.0.16',
     ],
+    '@tailwindcss/forms' => [
+        'version' => '0.5.11',
+    ],
+    'mini-svg-data-uri' => [
+        'version' => '1.4.4',
+    ],
+    'tailwindcss/plugin' => [
+        'version' => '4.1.18',
+    ],
+    'tailwindcss/defaultTheme' => [
+        'version' => '4.1.18',
+    ],
+    'tailwindcss/colors' => [
+        'version' => '4.1.18',
+    ],
 ];

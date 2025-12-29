@@ -805,12 +805,15 @@ propertyEstimation:
         address:
             label: Adresse
             notBlank: L'adresse ne doit pas être vide.
+            placeholder: Indiquez une adresse
         surface:
-            label: Surface (m2)
+            label: Surface
             notBlank: La surface ne doit pas être vide.
+            placeholder: "Ex: 30"
         propertyCondition:
             label: État du logement
             notBlank: L'état du logement ne doit pas être vide.
+            placeholder: Choisissez un état
             choice:
                 1: Récemment rénové
                 2: Très bon état
@@ -819,12 +822,16 @@ propertyEstimation:
         bedroom:
             label: Chambres
             notBlank: Le nombre de chambre ne doit pas être vide.
+            placeholder: 1
         bathroom:
             label: Salles de bain
             notBlank: Le nombre de salles de baon ne doit pas être vide.
+            placeholder: 1
         phoneNumber:
             label: Téléphone
             notBlank: Le numéro de téléphone ne doit pas être vide.
+            placeholder: Téléphone
         email:
             label: Email
             notBlank: L'email ne doit pas être vide.
+            placeholder: Email

@@ -31,14 +31,6 @@ class PropertyEstimationType extends AbstractType
                     'autocomplete' => 'off',
                 ],
             ])
-            ->add('surface',IntegerType::class, [
-                'label' => 'propertyEstimation.form.surface.label',
-                'constraints' => [
-                    new NotBlank(
-                        message: 'propertyEstimation.form.surface.notBlank',
-                    )
-                ],
-            ])
             ->add('propertyCondition', ChoiceType::class, [
                 'label' => 'propertyEstimation.form.propertyCondition.label',
                 'choices' => [
@@ -47,7 +39,7 @@ class PropertyEstimationType extends AbstractType
                     'propertyEstimation.form.propertyCondition.choice.3' => 'propertyEstimation.form.propertyCondition.choice.3',
                     'propertyEstimation.form.propertyCondition.choice.4' => 'propertyEstimation.form.propertyCondition.choice.4',
                 ],
-                'placeholder' => '',
+                'placeholder' => 'propertyEstimation.form.propertyCondition.placeholder',
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyEstimation.form.propertyCondition.notBlank',
@@ -61,6 +53,11 @@ class PropertyEstimationType extends AbstractType
                         message: 'propertyEstimation.form.bedroom.notBlank',
                     )
                 ],
+                'attr' => [
+                    'min' => 0,
+                    'max' => 10,
+                    'step' => 1,
+                ],
             ])
             ->add('bathroom',IntegerType::class, [
                 'label' => 'propertyEstimation.form.bathroom.label',
@@ -68,6 +65,24 @@ class PropertyEstimationType extends AbstractType
                     new NotBlank(
                         message: 'propertyEstimation.form.bathroom.notBlank',
                     )
+                ],
+                'attr' => [
+                    'min' => 0,
+                    'max' => 10,
+                    'step' => 1,
+                ],
+            ])
+            ->add('surface',IntegerType::class, [
+                'label' => 'propertyEstimation.form.surface.label',
+                'constraints' => [
+                    new NotBlank(
+                        message: 'propertyEstimation.form.surface.notBlank',
+                    )
+                ],
+                'attr' => [
+                    'min' => 8,
+                    'max' => 900,
+                    'step' => 1,
                 ],
             ])
             ->add('phoneNumber', TextType::class, [

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
 
 @theme {
     --color-primary: #71172e;
@@ -8,6 +9,16 @@
 select {
     -webkit-appearance: none;
     appearance: none;
+}
+
+/* Placeholder */
+select:invalid,
+select option[value=""] {
+    color: #9ca3af; /* text-gray-400 */
+}
+
+select:valid {
+    color: #111827; /* text-gray-900 */
 }
 
 h1, h2, h3, h4, h5, h6 {

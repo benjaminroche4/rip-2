@@ -802,26 +802,33 @@ propertyEstimation:
         address:
             label: Address
             notBlank: The address must not be empty.
+            placeholder: Enter an address
         surface:
-            label: Surface (sqm)
+            label: Surface area
             notBlank: The surface area must not be empty.
+            placeholder: "e.g. 30"
         propertyCondition:
             label: Property condition
             notBlank: The property condition must not be empty.
+            placeholder: Select a condition
             choice:
                 1: Newly renovated
                 2: Very good condition
                 3: Some work required
-                4: Full renovation needed
+                4: Full renovation required
         bedroom:
             label: Bedrooms
             notBlank: The number of bedrooms must not be empty.
+            placeholder: 1
         bathroom:
             label: Bathrooms
             notBlank: The number of bathrooms must not be empty.
+            placeholder: 1
         phoneNumber:
             label: Phone number
             notBlank: The phone number must not be empty.
+            placeholder: Phone number
         email:
             label: Email
             notBlank: The email address must not be empty.
+            placeholder: Email
