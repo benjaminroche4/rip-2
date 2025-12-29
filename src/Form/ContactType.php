@@ -66,7 +66,7 @@ class ContactType extends AbstractType
                     'contact.contactForm.helpType.choice.3' => 'contact.contactForm.helpType.choice.3',
                     'contact.contactForm.helpType.choice.4' => 'contact.contactForm.helpType.choice.4',
                 ],
-                'placeholder' => '',
+                'placeholder' => 'contact.contactForm.helpType.placeholder',
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.helpType.notBlank',

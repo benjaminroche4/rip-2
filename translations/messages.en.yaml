@@ -34,6 +34,7 @@ contact:
             placeholder: Company
         helpType:
             label: How can we help you?
+            placeholder: Choose your request
             choice:
                 1: Housing search
                 2: Services for companies

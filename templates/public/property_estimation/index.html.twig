@@ -50,64 +50,99 @@
                             Estimation gratuite
                         </p>
                     </div>
-                    <div class="p-6 bg-white rounded-2xl mt-2 space-y-6">
+                    <div class="p-6 bg-white rounded-2xl mt-2">
                         {{ form_start(form, {'attr': {'data-turbo': 'true', 'novalidate': 'novalidate', 'class': 'space-y-6'}}) }}
-                        {# Adresse avec Google Places Autocomplete #}
-                        <div>
-                            {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                            {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                            {{ form_errors(form.address) }}
-                        </div>
-
-                        {# Surface #}
-                        <div>
-                            {{ form_label(form.surface, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                            {{ form_widget(form.surface, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                            {{ form_errors(form.surface) }}
-                        </div>
-
-                        {# État du bien #}
-                        <div>
-                            {{ form_label(form.propertyCondition, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                            {{ form_widget(form.propertyCondition, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                            {{ form_errors(form.propertyCondition) }}
-                        </div>
-
-                        {# Chambres et Salles de bain #}
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
-                                {{ form_label(form.bedroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                                {{ form_widget(form.bedroom, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                                {{ form_errors(form.bedroom) }}
+                                {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-md bg-white py-2.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
                             </div>
+
+                            {# État du bien #}
                             <div>
-                                {{ form_label(form.bathroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                                {{ form_widget(form.bathroom, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                                {{ form_errors(form.bathroom) }}
+                                {{ form_label(form.propertyCondition, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                {{ form_widget(form.propertyCondition, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
+                                {{ form_errors(form.propertyCondition) }}
                             </div>
-                        </div>
 
-                        {# Téléphone #}
-                        <div>
-                            {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                            {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                            {{ form_errors(form.phoneNumber) }}
-                        </div>
+                            {# Chambres et Salles de bain #}
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div data-controller="number-stepper" data-number-stepper-min-value="0" data-number-stepper-max-value="20" data-number-stepper-step-value="1">
+                                    {{ form_label(form.bedroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                    <div class="relative">
+                                        <button type="button"
+                                                data-action="click->number-stepper#decrement"
+                                                class="absolute left-0 top-0 bottom-0 flex items-center justify-center w-10 text-primary hover:text-primary/80 transition duration-100 z-10">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                            </svg>
+                                        </button>
+                                        {{ form_widget(form.bedroom, {'attr': {
+                                            'class': 'block w-full rounded-md bg-white py-1.5 px-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6 text-center',
+                                            'data-number-stepper-target': 'input'
+                                        }}) }}
+                                        <button type="button"
+                                                data-action="click->number-stepper#increment"
+                                                class="absolute right-0 top-0 bottom-0 flex items-center justify-center w-10 text-primary hover:text-primary/80 transition duration-100 z-10">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {{ form_errors(form.bedroom) }}
+                                </div>
+                                <div data-controller="number-stepper" data-number-stepper-min-value="0" data-number-stepper-max-value="10" data-number-stepper-step-value="1">
+                                    {{ form_label(form.bathroom, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                    <div class="relative">
+                                        <button type="button"
+                                                data-action="click->number-stepper#decrement"
+                                                class="absolute left-0 top-0 bottom-0 flex items-center justify-center w-10 text-primary hover:text-primary/80 transition duration-100 z-10">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                            </svg>
+                                        </button>
+                                        {{ form_widget(form.bathroom, {'attr': {
+                                            'class': 'block w-full rounded-md bg-white py-1.5 px-12 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6 text-center',
+                                            'data-number-stepper-target': 'input'
+                                        }}) }}
+                                        <button type="button"
+                                                data-action="click->number-stepper#increment"
+                                                class="absolute right-0 top-0 bottom-0 flex items-center justify-center w-10 text-primary hover:text-primary/80 transition duration-100 z-10">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {{ form_errors(form.bathroom) }}
+                                </div>
+                                {# Surface #}
+                                <div>
+                                    {{ form_label(form.surface, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                    <div class="flex items-center rounded-md bg-white px-3 outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-primary">
+                                        {{ form_widget(form.surface, {'attr': {'aria-describedby': 'area-type', 'class': 'block min-w-0 grow bg-white py-2.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6'}}) }}
+                                        <div id="area-type" class="shrink-0 select-none text-base text-gray-500 sm:text-sm/6">m2</div>
+                                    </div>
+                                </div>
 
-                        {# Email #}
-                        <div>
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                            {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
-                            {{ form_errors(form.email) }}
-                        </div>
+                            </div>
 
-                        <div>
+                            {# Téléphone #}
+                            <div>
+                                {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
+                                {{ form_errors(form.phoneNumber) }}
+                            </div>
+
+                            {# Email #}
+                            <div>
+                                {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-md bg-white py-1.5 px-3 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+
                             <button type="submit"
                                     class="flex items-center justify-center gap-x-2 cursor-pointer block w-full rounded-full bg-primary px-4 py-2 text-sm text-white font-medium hover:bg-primary/80 transition duration-100">
                                 Recevoir mon estimation
                             </button>
-                        </div>
-
                         {{ form_end(form) }}
                     </div>
                 </div>
