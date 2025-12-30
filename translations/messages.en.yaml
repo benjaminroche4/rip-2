@@ -799,12 +799,13 @@ faq:
                 text: Simply contact us. We will study your property and define the terms of collaboration together.
 propertyEstimation:
     form:
+        title: Free estimate
         address:
             label: Address
             notBlank: The address must not be empty.
             placeholder: Enter an address
         surface:
-            label: Surface area
+            label: Surface
             notBlank: The surface area must not be empty.
             placeholder: "e.g. 30"
         propertyCondition:
@@ -832,3 +833,10 @@ propertyEstimation:
             label: Email
             notBlank: The email address must not be empty.
             placeholder: Email
+        button: Estimate my rent in Paris
+        trust:
+            1: Response in 2h
+            2: Data protected
+        success:
+            title: Request sent successfully!
+            text: Your estimate is being processed. An expert will contact you shortly.

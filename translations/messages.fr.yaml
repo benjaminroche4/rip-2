@@ -802,6 +802,7 @@ faq:
                 text: Il suffit de nous contacter. Nous étudierons votre bien et définirons ensemble les modalités de collaboration.
 propertyEstimation:
     form:
+        title: Estimation gratuite
         address:
             label: Adresse
             notBlank: L'adresse ne doit pas être vide.
@@ -835,3 +836,10 @@ propertyEstimation:
             label: Email
             notBlank: L'email ne doit pas être vide.
             placeholder: Email
+        button:  Estimer mon loyer à Paris
+        trust:
+            1: Réponse sous 2h
+            2: Données confidentielles
+        success:
+            title: Demande envoyée avec succès !
+            text: Votre estimation est en cours de traitement. Un expert vous contactera très prochainement.

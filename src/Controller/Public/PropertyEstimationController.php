@@ -85,12 +85,13 @@ final class PropertyEstimationController extends AbstractController
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
 
-            if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            if ($request->isXmlHttpRequest() || TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
                 return $this->render('public/property_estimation/success.stream.html.twig', ['success' => $data]);
             }
 
-            return $this->redirectToRoute('success', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'Votre demande d\'estimation a été envoyée avec succès.');
+            return $this->redirectToRoute('app_service_landlords', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('public/property_estimation/index.html.twig', [
