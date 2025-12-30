@@ -45,6 +45,7 @@ final class PropertyEstimationFactory extends PersistentObjectFactory
             'phoneNumber' => self::faker()->phoneNumber(),
             'propertyCondition' => self::faker()->randomElement(self::PROPERTY_CONDITION),
             'surface' => self::faker()->numberBetween(100, 300),
+            'lang' => self::faker()->languageCode(),
         ];
     }
 

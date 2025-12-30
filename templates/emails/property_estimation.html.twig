@@ -1,0 +1,13 @@
+<h1 class="text-green-600">Demande d'estimation de logement :</h1>
+<br/>
+<p><strong>Adresse :</strong> {{ address }}</p>
+<p><strong>État du logement :</strong> {{ propertyCondition | trans }}</p>
+<p><strong>Nombre de chambres :</strong> {{ bedroom }}</p>
+<p><strong>Nombre de salles de bain :</strong> {{ bathroom }}</p>
+<p><strong>Surface (m2) :</strong> {{ surface }}</p>
+<p><strong>Téléphone :</strong> {{ phoneNumber }}</p>
+<p><strong>Email :</strong> {{ emailLead }}</p>
+<p><strong>Langue :</strong> {{ lang }}</p>
+<br/>
+<p><strong>Envoyé le :</strong> {{ createdAt | date('d F Y') | format_date(locale='fr') }} à {{ createdAt | date('H:i') }}</p>
+<em>{{ ip }}</em>

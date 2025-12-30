@@ -40,6 +40,9 @@ class PropertyEstimation
     #[ORM\Column(length: 255)]
     private ?string $ip = null;
 
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $lang = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -149,6 +152,18 @@ class PropertyEstimation
     public function setIp(string $ip): static
     {
         $this->ip = $ip;
+
+        return $this;
+    }
+
+    public function getLang(): ?string
+    {
+        return $this->lang;
+    }
+
+    public function setLang(?string $lang): static
+    {
+        $this->lang = $lang;
 
         return $this;
     }
