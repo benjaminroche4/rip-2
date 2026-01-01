@@ -25,10 +25,10 @@ contact:
             placeholder: Nom
         email:
             label: Email
-            placeholder: Email
+            placeholder: "Email: john@doe.com"
         phoneNumber:
             label: Téléphone
-            placeholder: Téléphone
+            placeholder: "Téléphone: +33"
         company:
             label: Entreprise
             placeholder: Entreprise
@@ -69,7 +69,7 @@ sitemap:
     menu:
         findAccommodation: Trouver un logement
         companies: Entreprises
-        landlords: Propriétaires
+        landlords: Gestion locative
         blog: Blog
         contact: Contactez-nous
         login: Connexion
@@ -88,7 +88,7 @@ footer:
     menu:
         findAccommodation: Trouver un logement
         companies: Entreprises
-        landlords: Propriétaires
+        landlords: Gestion locative
         blog: Blog
         contact: Contactez-nous
         login: Connexion
@@ -112,7 +112,7 @@ header:
     menu:
         findAccommodation: Trouver un logement
         companies: Entreprises
-        landlords: Propriétaires
+        landlords: Gestion locative
         contact: Contacter un expert
         estimation: Obtenez votre estimation
         blog: Blog
@@ -831,12 +831,12 @@ propertyEstimation:
         phoneNumber:
             label: Téléphone
             notBlank: Le numéro de téléphone ne doit pas être vide.
-            placeholder: Téléphone
+            placeholder: "Téléphone: +33"
         email:
             label: Email
             notBlank: L'email ne doit pas être vide.
-            placeholder: Email
-        button:  Estimer mon loyer à Paris
+            placeholder: "Email: john@doe.com"
+        button:  Estimer mes revenus locatifs
         trust:
             1: Réponse sous 2h
             2: Données confidentielles

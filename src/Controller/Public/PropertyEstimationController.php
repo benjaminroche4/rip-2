@@ -31,8 +31,8 @@ final class PropertyEstimationController extends AbstractController
 
     #[Route(
         path: [
-            'fr' => '/{_locale}/services/pour-les-proprietaires',
-            'en' => '/{_locale}/services/for-landlords',
+            'fr' => '/{_locale}/services/gestion-locative-paris',
+            'en' => '/{_locale}/services/property-management-paris',
         ],
         name: 'app_service_landlords',
         options: [
@@ -85,12 +85,14 @@ final class PropertyEstimationController extends AbstractController
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
 
-            if ($request->isXmlHttpRequest() || TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
-                return $this->render('public/property_estimation/success.stream.html.twig', ['success' => $data]);
+                return $this->render('public/property_estimation/success.stream.html.twig', [
+                    'success' => $data
+                ]);
             }
 
-            $this->addFlash('success', 'Votre demande d\'estimation a été envoyée avec succès.');
+            $this->addFlash('success', $this->translator->trans('propertyEstimation.form.success.title'));
             return $this->redirectToRoute('app_service_landlords', [], Response::HTTP_SEE_OTHER);
         }
 

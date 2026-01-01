@@ -25,10 +25,10 @@ contact:
             placeholder: Last name
         email:
             label: Email
-            placeholder: Email
+            placeholder: "Email: john@doe.com"
         phoneNumber:
             label: Phone
-            placeholder: Phone
+            placeholder: "Phone: +33"
         company:
             label: Company
             placeholder: Company
@@ -47,11 +47,11 @@ contact:
             label: By checking this box, I agree that my information may be used to be contacted.
         button: Be contacted quickly
         success:
-            title: Thank you for your message !
+            title: Thank you for your message!
             text: An expert from our team will contact you as soon as possible.
         subButtonText: Response and quote within 24 hours
 ctaFooter:
-    title: Do you have a project in Paris ?
+    title: Do you have a project in Paris?
     subTitle: Our experts support you with a personalized approach and tailor-made solutions to achieve your goals.
     button: Contact an expert
     image:
@@ -69,7 +69,7 @@ sitemap:
     menu:
         findAccommodation: Find accommodation
         companies: Companies
-        landlords: Landlords
+        landlords: Property management
         blog: Blog
         contact: Contact us
         login: Log in
@@ -88,7 +88,7 @@ footer:
     menu:
         findAccommodation: Find accommodation
         companies: Companies
-        landlords: Landlords
+        landlords: Property management
         blog: Blog
         contact: Contact us
         login: Log in
@@ -112,7 +112,7 @@ header:
     menu:
         findAccommodation: Find accommodation
         companies: Companies
-        landlords: Landlords
+        landlords: Property management
         contact: Contact an expert
         estimation: Get your estimate
         blog: Blog
@@ -169,22 +169,22 @@ companies:
         title: Your questions, our answers
         question:
             1:
-                title: What relocation services do you offer for our employees ?
+                title: What relocation services do you offer for our employees?
                 text: "We provide end-to-end support, including housing search, administrative procedures, and move-in coordination. Each assignment is fully tailored to ensure a smooth and stress-free arrival in Paris for your employees."
             2:
-                title: How does the employee onboarding process work ?
+                title: How does the employee onboarding process work?
                 text: "A dedicated consultant manages each case through to key handover. The process begins with a needs assessment, followed by file preparation and the selection of suitable apartments."
             3:
-                title: Do you work with international companies ?
+                title: Do you work with international companies?
                 text: "Yes. We support both French and international companies, with recognized expertise in employee mobility and relocation in Paris."
             4:
-                title: How long does it take to relocate an employee ?
+                title: How long does it take to relocate an employee?
                 text: "The timeline primarily depends on the employee’s specific needs (family situation, profile, preferred neighborhoods, etc.). In most cases, relocation can be completed within 2 to 4 weeks."
             5:
-                title: How is HR follow-up handled ?
+                title: How is HR follow-up handled?
                 text: "At every stage, you are kept informed by your dedicated consultant via email, WhatsApp, or phone. You benefit from transparent and continuous HR follow-up, just like your employee."
             6:
-                title: Why work with a relocation agency ?
+                title: Why work with a relocation agency?
                 text: "Working with a relocation agency simplifies employee relocation, strengthens your employer brand, and saves valuable time. We collaborate with over 80 partners in Paris and provide access to a unique off-market housing network across the city."
 findAccommodation:
     title: Find a home
@@ -233,22 +233,22 @@ findAccommodation:
         title: Your questions, our answers
         question:
             1:
-                title: Do you always find a property ?
+                title: Do you always find a property?
                 text: Thanks to an exclusive network of over 80 partners and privileged access to off-market listings, we find a suitable property in the vast majority of cases.
             2:
-                title: What types of properties do you offer ?
+                title: What types of properties do you offer?
                 text: We offer a curated selection of properties in Paris and the surrounding suburbs, furnished or unfurnished, for short- or long-term rentals. Each search is fully tailored to your criteria.
             3:
-                title: Can the entire process be handled remotely (from abroad) ?
+                title: Can the entire process be handled remotely (from abroad)?
                 text: Yes. We regularly support clients remotely, with a fully online process including virtual viewings, signatures, and administrative procedures.
             4:
-                title: How long does it take to settle in Paris ?
+                title: How long does it take to settle in Paris?
                 text: On average, we complete a full relocation within just a few weeks. Timelines may vary depending on your needs, property availability, and criteria. Thanks to our exclusive network and deep local market knowledge, we ensure a fast and smooth installation.
             5:
-                title: What types of profiles do you support ?
+                title: What types of profiles do you support?
                 text: "We support all types of profiles: families, expatriates, executives, students, and young professionals. Our services are available to both French and international clients."
             6:
-                title: Do you create the rental application file ?
+                title: Do you create the rental application file?
                 text: Yes. Our service is fully turnkey. We provide you with the list of required documents and take care of the entire rental application process through to validation.
     timeline:
         steps:
@@ -711,7 +711,7 @@ blog:
         published: Published on
 faq:
     title: FAQ
-    subTitle: Need more information ?
+    subTitle: Need more information?
     tabs:
         1: Tenants
         2: Companies
@@ -719,83 +719,83 @@ faq:
     tenant:
         question:
             1:
-                title: What documents are required to rent an apartment in Paris ?
+                title: What documents are required to rent an apartment in Paris?
                 text: To rent a property in Paris, landlords generally require a complete file including ID, an employment contract or professional certificate, proof of income, and bank statements. For expatriates, alternative guarantees (corporate, insurance, international files) can be implemented. We help you build a file that meets the requirements of the Parisian market.
             2:
-                title: How long does it take to find accommodation in Paris ?
+                title: How long does it take to find accommodation in Paris?
                 text: The average timeframe varies between 2 and 6 weeks, depending on the budget, the neighborhood, and the time of year. Thanks to our network and market knowledge (off/on market), we optimize this timeframe and target only properties suited to your profile to speed up the search.
             3:
-                title: What budget should I plan for housing in Paris ?
+                title: What budget should I plan for housing in Paris?
                 text: The budget depends heavily on the neighborhood, the size, and the type of property (furnished or unfurnished). In Paris, rents generally start around 800€ for a studio and can exceed 4 000€ for a family apartment. We help you define a realistic budget based on your expectations.
             4:
-                title: Which districts are best suited to my profile ?
+                title: Which districts are best suited to my profile?
                 text: Each arrondissement in Paris has its own identity. Some are ideal for families, others for young professionals or couples. During our guidance, we analyze your lifestyle, your priorities (transport, work, schools, environment) and advise you on the most suitable neighborhoods.
             5:
-                title: Do I need a French guarantor ?
+                title: Do I need a French guarantor?
                 text: A French guarantor is often requested, but it is not always mandatory. Alternative solutions exist, such as corporate guarantees, unpaid rent insurance, or international guarantees. We guide you toward the solution best suited to your situation.
             6:
-                title: Can I rent a property before arriving in France ?
+                title: Can I rent a property before arriving in France?
                 text: Yes, it is entirely possible. We organize remote viewings, select properties on your behalf, and secure the process so you can arrive in Paris with peace of mind.
             7:
-                title: What is the minimum lease duration ?
+                title: What is the minimum lease duration?
                 text: "The duration depends on the type of contract: Furnished lease (1 year or 9 months for students), Unfurnished lease (3 years), Mobility lease (from 1 to 10 months). We help you choose the lease most suited to your situation."
             8:
-                title: Are utilities included in the rent ?
+                title: Are utilities included in the rent?
                 text: Listings generally specify if charges are included. They often cover building maintenance, water, or collective heating. We ensure everything is clearly defined before signing.
             9:
-                title: Do you offer support after move-in ?
+                title: Do you offer support after move-in?
                 text: Yes. Our service does not stop at handing over the keys. We also support you with administrative procedures, opening accounts, insurance, and your daily setup.
     company:
         question:
             1:
-                title: How do you support employees ?
+                title: How do you support employees?
                 text: "We handle the entire relocation journey: housing, administrative procedures, local integration, and family support, to ensure a smooth and rapid installation."
             2:
-                title: What services do you offer to companies ?
+                title: What services do you offer to companies?
                 text: "We offer tailor-made services: home search, neighborhood orientation, administrative support, schooling, installation, and post-arrival follow-up for your employees. We also offer a search service for your office space in Paris."
             3:
                 title: How long does it take to relocate an employee?
                 text: The timeframe depends on the profile and budget, but our targeted approach generally allows an employee to be relocated within a few weeks.
             4:
-                title: Do you work with capped budgets ?
+                title: Do you work with capped budgets?
                 text: Yes, we adapt our search to the budgetary constraints defined by the company while maintaining a high level of quality.
             5:
-                title: Do you provide follow-up reports ?
+                title: Do you provide follow-up reports?
                 text: We offer clear reporting for HR teams to track the progress of each case.
             6:
-                title: Do you manage administrative procedures ?
+                title: Do you manage administrative procedures?
                 text: "Yes, we support employees with essential steps: banking, insurance, social security, subscriptions, etc."
     landlord:
         question:
             1:
-                title: How do you select tenants ?
+                title: How do you select tenants?
                 text: We select serious profiles, often expatriates or employees of international companies, with solid guarantees.
             2:
-                title: Do you verify solvency ?
+                title: Do you verify solvency?
                 text: Yes, every file is rigorously analyzed before any proposal is made.
             3:
-                title: How long does it take to find a tenant ?
+                title: How long does it take to find a tenant?
                 text: Thanks to our network of corporate employees and executives in mobility, we generally find a tenant in less than 15 days, thereby limiting rental vacancy.
             4:
-                title: What is the advantage of working with a relocation service ?
+                title: What is the advantage of working with a relocation service?
                 text: You benefit from access to qualified, stable, and supported tenants, reducing risks and rental vacancies.
             5:
-                title: Do you work with mobility leases ?
+                title: Do you work with mobility leases?
                 text: Yes, we have perfect command of the different types of leases, including the mobility lease.
             6:
-                title: How do you secure payments ?
+                title: How do you secure payments?
                 text: We prioritize profiles with solid guarantees and work closely with international companies.
             7:
-                title: Do you work with international companies ?
+                title: Do you work with international companies?
                 text: Yes, we regularly collaborate with international groups.
             8:
-                title: Will my property be offered to reliable profiles ?
+                title: Will my property be offered to reliable profiles?
                 text: Yes, our priority is the quality of profiles, stability, and respect for the property.
             9:
-                title: Do you manage the move-in inspection and installation ?
+                title: Do you manage the move-in inspection and installation?
                 text: We can coordinate these steps to ensure a smooth transition.
             10:
-                title: How do I start a collaboration ?
+                title: How do I start a collaboration?
                 text: Simply contact us. We will study your property and define the terms of collaboration together.
 propertyEstimation:
     form:
@@ -826,14 +826,14 @@ propertyEstimation:
             notBlank: The number of bathrooms must not be empty.
             placeholder: 1
         phoneNumber:
-            label: Phone number
+            label: Phone
             notBlank: The phone number must not be empty.
-            placeholder: Phone number
+            placeholder: "Phone: +33"
         email:
             label: Email
             notBlank: The email address must not be empty.
-            placeholder: Email
-        button: Estimate my rent in Paris
+            placeholder: "Email: john@doe.com"
+        button: Estimate my rental income
         trust:
             1: Response in 2h
             2: Data protected

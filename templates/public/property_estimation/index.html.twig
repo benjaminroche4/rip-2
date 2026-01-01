@@ -26,32 +26,68 @@
                     Confiez-nous la gestion de votre bien
                 </h1>
                 <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
-                    {{ 'home.heroSection.subTitle'|trans|raw }}
+                    Un service de gestion locative sur mesure pour sécuriser et optimiser votre investissement à Paris.
                 </p>
                 <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
                     <div class="flex items-center gap-3 justify-center lg:justify-start">
-                        {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.1'|trans|raw }}</p>
+                        {{ ux_icon('ic:outline-shield', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">Gestion sereine</p>
                     </div>
                     <div class="flex items-center gap-3  justify-center lg:justify-start">
-                        {{ ux_icon('mdi:world', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.2'|trans|raw }}</p>
+                        {{ ux_icon('mi:user-check', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">Locataires fiables</p>
                     </div>
                     <div class="flex items-center gap-3 justify-center lg:justify-start min-[390px]:col-span-2 sm:col-span-1">
-                        {{ ux_icon('humbleicons:key', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.3'|trans|raw }}</p>
+                        {{ ux_icon('mingcute:trending-up-line', {'class':'size-5 text-primary shrink-0'}) }}
+                        <p class="text-slate-800 text-sm font-medium">Valeur optimisée</p>
+                    </div>
+                </div>
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start">
+                    <div>
+                        <a href="#"
+                           class="flex items-center gap-x-3 group rounded-full bg-primary border-2 border-primary px-6 py-3 text-sm uppercase font-semibold text-white hover:text-primary transition duration-100 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                            <div class="bg-white group-hover:bg-primary rounded-full p-1.5">
+                                {{ ux_icon('ix:support', {'class':'size-5 text-primary shrink-0 group-hover:text-white transition duration-100'}) }}
+                            </div>
+                            01 59 58 58 58
+                        </a>
+                        <div>
+                            <p class="text-xs text-slate-500 font-light text-center mt-2">
+                                Ligne direct - Appel gratuit
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div>
                 <div class="max-w-lg mx-auto p-2 rounded-3xl bg-linear-to-b from-primary to-primary/30">
-                    <div class="p-2">
+                    <div class="p-2 flex items-center justify-center gap-x-2">
+                        <div class="flex -space-x-2 max-[330px]:hidden">
+                            <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                            <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                            <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        </div>
                         <p class="text-sm text-white uppercase tracking-normal font-medium text-center">
                             {{ 'propertyEstimation.form.title'|trans|raw }}
                         </p>
                     </div>
-                    <div class="px-6 pt-6 pb-1 bg-white rounded-2xl mt-2" >
+                    <div class="px-6 pt-6 pb-1 bg-white rounded-2xl mt-2" id="estimation-form">
                         {{ form_start(form, {'attr': {'data-turbo': 'true', 'novalidate': 'novalidate', 'class': 'space-y-6'}}) }}
+                            {% for message in app.flashes('success') %}
+                                <div class="rounded-xl bg-green-50 p-4">
+                                    <div class="flex items-start gap-x-3">
+                                        <div class="flex-shrink-0">
+                                            {{ ux_icon('lucide:circle-check', {'class':'text-green-600 size-5'}) }}
+                                        </div>
+                                        <div class="space-y-0.5">
+                                            <h3 class="text-base font-medium text-green-800 -mt-0.5">{{ message }}</h3>
+                                            <p class="text-sm text-slate-600">
+                                                {{ 'propertyEstimation.form.success.text'|trans|raw }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
                             <div>
                                 {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
                                 {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyEstimation.form.address.placeholder'|trans }}) }}
@@ -121,7 +157,7 @@
                                 {{ 'propertyEstimation.form.button'|trans|raw }}
                                 {{ ux_icon('lucide:check', {'class':'text-white shrink-0 size-5'}) }}
                             </button>
-                            <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 mx-auto max-w-sm">
+                            <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 items-center mx-auto max-w-sm">
                                 <p class="text-xs text-gray-500 text-center mx-0.5">
                                     {{ 'propertyEstimation.form.trust.1'|trans|raw }}
                                 </p>
@@ -135,6 +171,247 @@
             </div>
         </div>
     </section>
+    <section class="relative w-full bg-white container-block py-6 lg:py-12">
+        <div
+            x-data="{ init() { $nextTick(() => { const content = $refs.content; const item = $refs.item; content.appendChild(item.cloneNode(true)); }); } }"
+            class="relative w-full py-3 mx-auto overflow-hidden bg-white max-w-7xl"
+        >
+            <!-- Gradients de bordure -->
+            <div class="absolute left-0 z-20 w-20 md:w-40 h-full bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            <div class="absolute right-0 z-20 w-20 md:w-40 h-full bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+
+            <!-- Container du marquee -->
+            <div x-ref="content" class="flex animate-marquee gap-6">
+                <div x-ref="item" class="flex items-center flex-shrink-0 gap-6">
+                    <img
+                        src="{{ asset('medias/website/flat_1.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                    <img
+                        src="{{ asset('medias/website/flat_2.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                    <img
+                        src="{{ asset('medias/website/flat_3.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                    <img
+                        src="{{ asset('medias/website/flat_4.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                    <img
+                        src="{{ asset('medias/website/flat_5.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                    <img
+                        src="{{ asset('medias/website/flat_6.webp') }}"
+                        class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
+                        width="493"
+                        height="493"
+                        alt="Relocation Paris"
+                        loading="lazy"
+                    />
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="rounded-2xl bg-neutral-100/80 p-8">
+            <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'companies.service.title'|trans|raw }}</h2>
+                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'companies.service.subTitle'|trans|raw }}</h2>
+            </div>
+            <div class="max-w-4xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
+                <div class="relative overflow-hidden rounded-2xl bg-primary/5 p-2 ring-1 ring-inset ring-primary/10">
+                    <video
+                        class="w-full h-auto rounded-xl"
+                        controls
+                        preload="metadata"
+                        playsinline
+                    >
+                        <source src="{{ asset('medias/videos/test.mp4') }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('gg:search', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.1.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.1.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('bx:chat', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.2.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.2.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mdi:paper-check-outline', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.3.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.3.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('humbleicons:key', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.4.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.4.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('material-symbols:box-outline-sharp', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.5.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.5.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.6.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.6.text'|trans|raw }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
+        <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
+                <div class="px-6 lg:px-0 lg:pr-4 lg:pt-4">
+                    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
+                        <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'home.aboutUs.title'|trans|raw }}</h2>
+                        <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'home.aboutUs.subTitle'|trans|raw }}</h3>
+                        <p class="mt-6 text-neutral-600">
+                            {{ 'home.aboutUs.text'|trans|raw }}
+                        </p>
+                        <dl class="mt-16 grid max-w-xl grid-cols-2 gap-8 sm:mt-20 sm:grid-cols-2 xl:mt-16">
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
+                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Creators on the platform</dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">8,000+</dd>
+                            </div>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
+                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Flat platform fee</dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">3%</dd>
+                            </div>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
+                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Uptime guarantee</dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">99.9%</dd>
+                            </div>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
+                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Paid out to creators</dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">$70M</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-10 flex items-center justify-start">
+                            <a href="{{ path('app_estimation') }}"
+                               class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                                {{ 'home.aboutUs.button'|trans|raw }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-full">
+                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-paris-8.webp') }}" alt="Product screenshot" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="bg-white py-24 sm:py-32 dark:bg-gray-900">
+        <div class="mx-auto max-w-5xl px-6 lg:px-8">
+            <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">
+                <h2 class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-pretty">{{ 'home.faq.subTitle'|trans|raw }}</h3>
+            </div>
+            <div class="mx-auto max-w-xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none dark:bg-gray-800/50 dark:ring-white/10">
+                <div class="p-8 sm:p-10 lg:flex-auto">
+                    <h3 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">Lifetime membership</h3>
+                    <p class="mt-6 text-base/7 text-gray-600 dark:text-gray-300">Lorem ipsum dolor sit amet consect etur adipisicing elit. Itaque amet indis perferendis blanditiis repellendus etur quidem assumenda.</p>
+                    <div class="mt-10 flex items-center gap-x-4">
+                        <h4 class="flex-none text-sm/6 font-semibold text-primary">Ce qui est inclus</h4>
+                        <div class="h-px flex-auto bg-gray-100 dark:bg-white/10"></div>
+                    </div>
+                    <ul role="list" class="mt-8 grid gap-4 text-sm/6 text-gray-600 grid-cols-2 sm:gap-6">
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                        <li class="flex gap-x-3">
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
+                            Private forum access
+                        </li>
+                    </ul>
+                </div>
+                <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">
+                    <div class="rounded-2xl bg-gray-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16 dark:bg-gray-900 dark:ring-white/10">
+                        <div class="mx-auto max-w-xs px-8">
+                            <p class="text-base font-semibold text-gray-600 dark:text-gray-400">Pay once, own it forever</p>
+                            <p class="mt-6 flex items-baseline justify-center gap-x-2">
+                                <span class="text-5xl font-semibold tracking-tight text-gray-900 dark:text-white">$349</span>
+                                <span class="text-sm/6 font-semibold tracking-wide text-gray-600 dark:text-gray-400">USD</span>
+                            </p>
+                            <a href="#" class="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">Get access</a>
+                            <p class="mt-6 text-xs/5 text-gray-600 dark:text-gray-400">Invoices and receipts available for easy company reimbursement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">
             <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">
