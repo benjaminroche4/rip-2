@@ -19,10 +19,10 @@ class PropertyEstimationType extends AbstractType
     {
         $builder
             ->add('address',TextType::class, [
-                'label' => 'propertyEstimation.form.address.label',
+                'label' => 'propertyManagement.form.address.label',
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.address.notBlank',
+                        message: 'propertyManagement.form.address.notBlank',
                     )
                 ],
                 'attr' => [
@@ -32,26 +32,26 @@ class PropertyEstimationType extends AbstractType
                 ],
             ])
             ->add('propertyCondition', ChoiceType::class, [
-                'label' => 'propertyEstimation.form.propertyCondition.label',
+                'label' => 'propertyManagement.form.propertyCondition.label',
                 'choices' => [
-                    'propertyEstimation.form.propertyCondition.choice.1' => 'propertyEstimation.form.propertyCondition.choice.1',
-                    'propertyEstimation.form.propertyCondition.choice.2' => 'propertyEstimation.form.propertyCondition.choice.2',
-                    'propertyEstimation.form.propertyCondition.choice.3' => 'propertyEstimation.form.propertyCondition.choice.3',
-                    'propertyEstimation.form.propertyCondition.choice.4' => 'propertyEstimation.form.propertyCondition.choice.4',
+                    'propertyManagement.form.propertyCondition.choice.1' => 'propertyManagement.form.propertyCondition.choice.1',
+                    'propertyManagement.form.propertyCondition.choice.2' => 'propertyManagement.form.propertyCondition.choice.2',
+                    'propertyManagement.form.propertyCondition.choice.3' => 'propertyManagement.form.propertyCondition.choice.3',
+                    'propertyManagement.form.propertyCondition.choice.4' => 'propertyManagement.form.propertyCondition.choice.4',
                 ],
-                'placeholder' => 'propertyEstimation.form.propertyCondition.placeholder',
+                'placeholder' => 'propertyManagement.form.propertyCondition.placeholder',
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.propertyCondition.notBlank',
+                        message: 'propertyManagement.form.propertyCondition.notBlank',
                     )
                 ],
             ])
             ->add('bedroom',IntegerType::class, [
-                'label' => 'propertyEstimation.form.bedroom.label',
+                'label' => 'propertyManagement.form.bedroom.label',
                 'data' => 1,
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.bedroom.notBlank',
+                        message: 'propertyManagement.form.bedroom.notBlank',
                     )
                 ],
                 'attr' => [
@@ -61,11 +61,11 @@ class PropertyEstimationType extends AbstractType
                 ],
             ])
             ->add('bathroom',IntegerType::class, [
-                'label' => 'propertyEstimation.form.bathroom.label',
+                'label' => 'propertyManagement.form.bathroom.label',
                 'data' => 1,
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.bathroom.notBlank',
+                        message: 'propertyManagement.form.bathroom.notBlank',
                     )
                 ],
                 'attr' => [
@@ -75,11 +75,11 @@ class PropertyEstimationType extends AbstractType
                 ],
             ])
             ->add('surface',IntegerType::class, [
-                'label' => 'propertyEstimation.form.surface.label',
+                'label' => 'propertyManagement.form.surface.label',
                 'data' => 30,
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.surface.notBlank',
+                        message: 'propertyManagement.form.surface.notBlank',
                     )
                 ],
                 'attr' => [
@@ -89,20 +89,20 @@ class PropertyEstimationType extends AbstractType
                 ],
             ])
             ->add('phoneNumber', TextType::class, [
-                'label' => 'propertyEstimation.form.phoneNumber.label',
+                'label' => 'propertyManagement.form.phoneNumber.label',
                 'required' => false,
                 'constraints' => [
                     new Regex([
                         'pattern' => '/^[0-9+()]+$/',
-                        'message' => 'propertyEstimation.form.email.pattern',
+                        'message' => 'propertyManagement.form.email.pattern',
                     ]),
                 ],
             ])
             ->add('email', EmailType::class, [
-                'label' => 'propertyEstimation.form.email.label',
+                'label' => 'propertyManagement.form.email.label',
                 'constraints' => [
                     new NotBlank(
-                        message: 'propertyEstimation.form.email.notBlank',
+                        message: 'propertyManagement.form.email.notBlank',
                     )
                 ],
             ])

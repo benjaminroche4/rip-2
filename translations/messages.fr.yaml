@@ -381,8 +381,8 @@ home:
             title: Pour les entreprises
             text: Libérez vos collaborateurs des contraintes administratives avec nos solutions clés en main.
         3:
-            title: Pour les propriétaires
-            text: Confiez la gestion de votre bien à des experts et trouvez des locataires fiables, sans stress ni perte de temps.
+            title: Gestion locative
+            text: Confiez-nous la gestion locative de votre bien et bénéficiez d’une location sereine, rentable et parfaitement maîtrisée.
     faq:
         title: FAQ
         subTitle: Vos questions, nos réponses
@@ -800,7 +800,15 @@ faq:
             9:
                 title: Comment démarrer une collaboration ?
                 text: Il suffit de nous contacter. Nous étudierons votre bien et définirons ensemble les modalités de collaboration.
-propertyEstimation:
+propertyManagement:
+    hero:
+        title: Confiez-nous la gestion de votre bien
+        text: Un service de gestion locative sur mesure pour sécuriser et optimiser votre investissement à Paris.
+        service:
+            1: Gestion sereine
+            2: Locataires fiables
+            3: Valeur optimisée
+        subButton: Ligne direct - Appel gratuit
     form:
         title: Estimation gratuite
         address:
@@ -843,3 +851,42 @@ propertyEstimation:
         success:
             title: Demande envoyée avec succès !
             text: Votre estimation est en cours de traitement. Un expert vous contactera très prochainement.
+    service:
+        title: Nos expertises
+        subTitle: Gestion et valorisation de votre bien
+        1:
+            title: Stratégie locative
+            text: Une approche sur mesure pour maximiser la performance.
+        2:
+            title: Valorisation du bien
+            text: Une mise en valeur professionnelle pour attirer les meilleurs profils.
+        3:
+            title: Sélection locataire
+            text: Une sélection rigoureuse pour une location sécurisée.
+        4:
+            title: Gestion intégrale
+            text: Une prise en charge complète pour une tranquillité absolue.
+        5:
+            title: Entretien continu
+            text: Un suivi rigoureux pour préserver la qualité et la valeur du bien.
+        6:
+            title: Revenus sécurisés
+            text: Un pilotage clair et fiable de vos loyers et revenus.
+    about:
+        title: Une gestion en toute sérénité
+        subTitle: Votre investissement, parfaitement maîtrisé
+        text: Nous gérons chaque étape de la location avec rigueur, pour sécuriser vos revenus et valoriser durablement votre bien. Vous conservez le contrôle, nous gérons le reste.
+        keyPoints:
+            1:
+                text: Diffusion sur les principales plateformes internationales.
+            2:
+                number: +250
+                text: biens en gérés à Paris et en Île-de-France.
+            3:
+                number: +25
+                text: ans d’expertise en gestion locative.
+            4:
+                number: 8
+                text: experts engagés dans la gestion de votre patrimoine.
+        button: Contactez un expert
+

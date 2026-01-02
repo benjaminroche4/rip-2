@@ -1,6 +1,6 @@
 contact:
     title: Contact us
-    subTitle: Contact our team of experts
+    subTitle: Contact Our Team of Experts
     image:
         alt: Relocation In Paris, relocation agency in Paris
     contactType:
@@ -63,7 +63,7 @@ ctaFooter:
             alt: Photo of Vincent, agent at Relocation in Paris
 sitemap:
     title: Sitemap
-    subTitle: Explore our services
+    subTitle: Explore Our Services
     general: General
     blog: Blog
     menu:
@@ -123,7 +123,7 @@ header:
         reviews: reviews
 companies:
     title: For companies
-    subTitle: Corporate housing in Paris, made simple
+    subTitle: Corporate Housing in Paris, Made Simple
     trust:
         1: 5.0 based on
         2: reviews
@@ -188,7 +188,7 @@ companies:
                 text: "Working with a relocation agency simplifies employee relocation, strengthens your employer brand, and saves valuable time. We collaborate with over 80 partners in Paris and provide access to a unique off-market housing network across the city."
 findAccommodation:
     title: Find a home
-    subTitle: Your turnkey housing solution in Paris
+    subTitle: Your Turnkey Housing Solution in Paris
     trust:
         1: 5.0 based on
         2: reviews
@@ -355,7 +355,7 @@ home:
         top:
             1: Best agency
             2: 'in <span class="font-semibold">Paris in 2025</span>'
-        title: The excellence of relocation in Paris
+        title: The Excellence of Relocation in Paris
         subTitle: Exclusive, tailor-made support to make your move to Paris a smooth, serene, and truly successful experience.
         button: Contact an expert
         image:
@@ -375,8 +375,8 @@ home:
             title: For companies
             text: Free your team from administrative burdens with our turnkey solutions.
         3:
-            title: For landlords
-            text: Entrust your property to experts and find reliable tenants through a refined, efficient approach.
+            title: Property Management
+            text: Entrust us with your property for a smooth and profitable rental experience.
     faq:
         title: FAQ
         subTitle: Your questions, our answers
@@ -467,7 +467,7 @@ adminTab:
     dashboard: Dashboard
 aboutUs:
     title: About Us
-    subTitle: Together for 10 Years
+    subTitle: Together For 10 Years
     team:
         1: Housing Consultant
         2: International Mobility Consultant
@@ -575,7 +575,7 @@ legal:
             p1: "<span class='font-semibold'>Last update:</span> October 31, 2025"
 privacy:
     title: Privacy Policy
-    subTitle: Protection of your personal data
+    subTitle: Protection of Your Personal Data
     lastUpdate: "October 31, 2025"
     sections:
         1:
@@ -658,7 +658,7 @@ estimation:
     title: Rent estimation in Paris
     hero:
         title: Get your estimate
-        subtitle: Estimate the cost of your relocation to Paris
+        subtitle: Estimate The Cost of Your Relocation to Paris
     rent:
         label: Your estimated monthly rent
     slider:
@@ -701,7 +701,7 @@ estimation:
 blog:
     list:
         title: blog
-        subTitle: The blog for living and settling in Paris
+        subTitle: The Blog for Living and Settling in Paris
         lastArticle: Latest article
         timeToRead: min read
         allArticles: All articles
@@ -711,7 +711,7 @@ blog:
         published: Published on
 faq:
     title: FAQ
-    subTitle: Need more information?
+    subTitle: Need More Information?
     tabs:
         1: Tenants
         2: Companies
@@ -797,7 +797,15 @@ faq:
             10:
                 title: How do I start a collaboration?
                 text: Simply contact us. We will study your property and define the terms of collaboration together.
-propertyEstimation:
+propertyManagement:
+    hero:
+        title: Your Property, Perfectly Managed
+        text: A tailored property management service to secure and optimize your investment in Paris.
+        service:
+            1: Seamless care
+            2: Reliable tenants
+            3: Optimized value
+        subButton: Direct line – Free call
     form:
         title: Free estimate
         address:
@@ -840,3 +848,41 @@ propertyEstimation:
         success:
             title: Request sent successfully!
             text: Your estimate is being processed. An expert will contact you shortly.
+    service:
+        title: Our Expertise
+        subTitle: Management and enhancement of your property
+        1:
+            title: Rental Strategy
+            text: A tailored approach to maximize performance.
+        2:
+            title: Property Enhancement
+            text: Professional presentation designed to attract the right profiles.
+        3:
+            title: Tenant Selection
+            text: A rigorous selection process for a secure rental.
+        4:
+            title: Full Management
+            text: Comprehensive management for complete peace of mind.
+        5:
+            title: Ongoing Maintenance
+            text: Careful oversight to preserve quality and long-term value.
+        6:
+            title: Secured Income
+            text: Clear and reliable management of your rental income.
+    about:
+        title: Peace of mind, guaranteed
+        subTitle: Your investment, perfectly managed
+        text: We manage every stage of the rental process with rigor, securing your income and enhancing the long-term value of your property. You stay in control — we take care of the rest.
+        keyPoints:
+            1:
+                text: Exposure across leading international property platforms.
+            2:
+                number: 250+
+                text: properties managed in Paris and the Île-de-France region.
+            3:
+                number: 25+
+                text: years of expertise in property management.
+            4:
+                number: 8
+                text: experts dedicated to managing your assets.
+        button: Speak with an expert

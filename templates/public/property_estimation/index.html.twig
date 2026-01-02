@@ -23,37 +23,43 @@
                     </div>
                 </div>
                 <h1 class="mx-auto max-w-2xl text-center text-5xl font-medium tracking-tight text-gray-900 lg:text-start lg:text-6xl/16 text-pretty">
-                    Confiez-nous la gestion de votre bien
+                    {{ 'propertyManagement.hero.title'|trans|raw }}
                 </h1>
                 <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
-                    Un service de gestion locative sur mesure pour sécuriser et optimiser votre investissement à Paris.
+                    {{ 'propertyManagement.hero.text'|trans|raw }}
                 </p>
                 <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
                     <div class="flex items-center gap-3 justify-center lg:justify-start">
                         {{ ux_icon('ic:outline-shield', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">Gestion sereine</p>
+                        <p class="text-slate-800 text-sm font-medium">
+                            {{ 'propertyManagement.hero.service.1'|trans|raw }}
+                        </p>
                     </div>
                     <div class="flex items-center gap-3  justify-center lg:justify-start">
                         {{ ux_icon('mi:user-check', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">Locataires fiables</p>
+                        <p class="text-slate-800 text-sm font-medium">
+                            {{ 'propertyManagement.hero.service.2'|trans|raw }}
+                        </p>
                     </div>
                     <div class="flex items-center gap-3 justify-center lg:justify-start min-[390px]:col-span-2 sm:col-span-1">
                         {{ ux_icon('mingcute:trending-up-line', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">Valeur optimisée</p>
+                        <p class="text-slate-800 text-sm font-medium">
+                            {{ 'propertyManagement.hero.service.3'|trans|raw }}
+                        </p>
                     </div>
                 </div>
                 <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start">
                     <div>
-                        <a href="#"
+                        <a href="tel:{{ phone_number }}"
                            class="flex items-center gap-x-3 group rounded-full bg-primary border-2 border-primary px-6 py-3 text-sm uppercase font-semibold text-white hover:text-primary transition duration-100 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
                             <div class="bg-white group-hover:bg-primary rounded-full p-1.5">
                                 {{ ux_icon('ix:support', {'class':'size-5 text-primary shrink-0 group-hover:text-white transition duration-100'}) }}
                             </div>
-                            01 59 58 58 58
+                            {{ phone_number }}
                         </a>
                         <div>
                             <p class="text-xs text-slate-500 font-light text-center mt-2">
-                                Ligne direct - Appel gratuit
+                                {{ 'propertyManagement.hero.subButton'|trans|raw }}
                             </p>
                         </div>
                     </div>
@@ -68,7 +74,7 @@
                             <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                         </div>
                         <p class="text-sm text-white uppercase tracking-normal font-medium text-center">
-                            {{ 'propertyEstimation.form.title'|trans|raw }}
+                            {{ 'propertyManagement.form.title'|trans|raw }}
                         </p>
                     </div>
                     <div class="px-6 pt-6 pb-1 bg-white rounded-2xl mt-2" id="estimation-form">
@@ -82,7 +88,7 @@
                                         <div class="space-y-0.5">
                                             <h3 class="text-base font-medium text-green-800 -mt-0.5">{{ message }}</h3>
                                             <p class="text-sm text-slate-600">
-                                                {{ 'propertyEstimation.form.success.text'|trans|raw }}
+                                                {{ 'propertyManagement.form.success.text'|trans|raw }}
                                             </p>
                                         </div>
                                     </div>
@@ -90,7 +96,7 @@
                             {% endfor %}
                             <div>
                                 {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                                {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyEstimation.form.address.placeholder'|trans }}) }}
+                                {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.address.placeholder'|trans }}) }}
                             </div>
                             <div>
                                 {{ form_label(form.propertyCondition, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
@@ -106,7 +112,7 @@
                                         <button type="button" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
                                         {{ form_widget(form.bedroom, {'attr': {
                                             'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
-                                            'placeholder': 'propertyEstimation.form.bedroom.placeholder'|trans,
+                                            'placeholder': 'propertyManagement.form.bedroom.placeholder'|trans,
                                             'data-number-stepper-target': 'input'
                                         }}) }}
                                         <button type="button" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
@@ -121,7 +127,7 @@
                                         <button type="button" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
                                         {{ form_widget(form.bathroom, {'attr': {
                                             'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
-                                            'placeholder': 'propertyEstimation.form.bathroom.placeholder'|trans,
+                                            'placeholder': 'propertyManagement.form.bathroom.placeholder'|trans,
                                             'data-number-stepper-target': 'input'
                                         }}) }}
                                         <button type="button" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
@@ -137,7 +143,7 @@
                                         <button type="button" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
                                         {{ form_widget(form.surface, {'attr': {
                                             'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
-                                            'placeholder': 'propertyEstimation.form.bathroom.placeholder'|trans,
+                                            'placeholder': 'propertyManagement.form.bathroom.placeholder'|trans,
                                             'data-number-stepper-target': 'input'
                                         }}) }}
                                         <button type="button" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
@@ -146,23 +152,23 @@
                             </div>
                             <div>
                                 {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                                {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyEstimation.form.phoneNumber.placeholder'|trans}}) }}
+                                {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.phoneNumber.placeholder'|trans}}) }}
                             </div>
                             <div>
                                 {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-                                {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyEstimation.form.email.placeholder'|trans}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.email.placeholder'|trans}}) }}
                             </div>
                             <button type="submit"
                                     class="flex items-center justify-center gap-x-1 cursor-pointer block w-full rounded-full bg-primary px-4 py-3.5 text-sm text-white font-medium hover:bg-primary/80 transition duration-100">
-                                {{ 'propertyEstimation.form.button'|trans|raw }}
+                                {{ 'propertyManagement.form.button'|trans|raw }}
                                 {{ ux_icon('lucide:check', {'class':'text-white shrink-0 size-5'}) }}
                             </button>
                             <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 items-center mx-auto max-w-sm">
                                 <p class="text-xs text-gray-500 text-center mx-0.5">
-                                    {{ 'propertyEstimation.form.trust.1'|trans|raw }}
+                                    {{ 'propertyManagement.form.trust.1'|trans|raw }}
                                 </p>
                                 <p class="text-xs text-gray-500 text-center mx-0.5">
-                                    {{ 'propertyEstimation.form.trust.2'|trans|raw }}
+                                    {{ 'propertyManagement.form.trust.2'|trans|raw }}
                                 </p>
                             </div>
                         {{ form_end(form) }}
@@ -238,8 +244,8 @@
     <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="rounded-2xl bg-neutral-100/80 p-8">
             <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
-                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'companies.service.title'|trans|raw }}</h2>
-                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'companies.service.subTitle'|trans|raw }}</h2>
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'propertyManagement.service.title'|trans|raw }}</h2>
+                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'propertyManagement.service.subTitle'|trans|raw }}</h2>
             </div>
             <div class="max-w-4xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
                 <div class="relative overflow-hidden rounded-2xl bg-primary/5 p-2 ring-1 ring-inset ring-primary/10">
@@ -258,56 +264,56 @@
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('gg:search', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('ri:target-fill', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.1.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.1.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.1.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.1.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('bx:chat', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('tabler:home-plus', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.2.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.2.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.2.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.2.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mdi:paper-check-outline', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('mi:user-check', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.3.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.3.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.3.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.3.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('humbleicons:key', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('ph:sliders-duotone', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.4.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.4.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.4.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.4.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('material-symbols:box-outline-sharp', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('mynaui:wrench', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.5.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.5.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.5.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.5.text'|trans|raw }}</p>
                 </div>
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
                     <div class="flex items-center flex-col gap-3">
                         <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                            {{ ux_icon('akar-icons:wallet', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
                         </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'companies.service.6.title'|trans|raw }}</h3>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'propertyManagement.service.6.title'|trans|raw }}</h3>
                     </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'companies.service.6.text'|trans|raw }}</p>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'propertyManagement.service.6.text'|trans|raw }}</p>
                 </div>
             </div>
         </div>
@@ -317,33 +323,53 @@
             <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
                 <div class="px-6 lg:px-0 lg:pr-4 lg:pt-4">
                     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-                        <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'home.aboutUs.title'|trans|raw }}</h2>
-                        <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'home.aboutUs.subTitle'|trans|raw }}</h3>
+                        <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'propertyManagement.about.title'|trans|raw }}</h2>
+                        <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'propertyManagement.about.subTitle'|trans|raw }}</h3>
                         <p class="mt-6 text-neutral-600">
-                            {{ 'home.aboutUs.text'|trans|raw }}
+                            {{ 'propertyManagement.about.text'|trans|raw }}
                         </p>
-                        <dl class="mt-16 grid max-w-xl grid-cols-2 gap-8 sm:mt-20 sm:grid-cols-2 xl:mt-16">
-                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
-                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Creators on the platform</dt>
-                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">8,000+</dd>
+                        <dl class="mt-16 grid max-w-xl grid-cols-1 gap-8 sm:mt-20 sm:grid-cols-2 xl:mt-16">
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6">
+                                <dt class="text-sm/6 text-gray-600">
+                                    {{ 'propertyManagement.about.keyPoints.1.text'|trans|raw }}
+                                </dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900">
+                                    <div class="flex items-center gap-x-2">
+                                        {{ ux_icon('logos:airbnb-icon', {'class':'size-9 shrink-0'}) }}
+                                        {{ ux_icon('simple-icons:bookingdotcom', {'class':'size-9 text-[#103979] shrink-0'}) }}
+                                        {{ ux_icon('simple-icons:tripdotcom', {'class':'size-9 text-blue-500 shrink-0'}) }}
+                                    </div>
+                                </dd>
                             </div>
-                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
-                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Flat platform fee</dt>
-                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">3%</dd>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6">
+                                <dt class="text-sm/6 text-gray-600">
+                                    {{ 'propertyManagement.about.keyPoints.2.text'|trans|raw }}
+                                </dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-primary">
+                                    {{ 'propertyManagement.about.keyPoints.2.number'|trans|raw }}
+                                </dd>
                             </div>
-                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
-                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Uptime guarantee</dt>
-                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">99.9%</dd>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6">
+                                <dt class="text-sm/6 text-gray-600">
+                                    {{ 'propertyManagement.about.keyPoints.3.text'|trans|raw }}
+                                </dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-primary">
+                                    {{ 'propertyManagement.about.keyPoints.3.number'|trans|raw }}
+                                </dd>
                             </div>
-                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6 dark:border-white/10">
-                                <dt class="text-sm/6 text-gray-600 dark:text-gray-400">Paid out to creators</dt>
-                                <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">$70M</dd>
+                            <div class="flex flex-col gap-y-3 border-l border-gray-900/10 pl-6">
+                                <dt class="text-sm/6 text-gray-600">
+                                    {{ 'propertyManagement.about.keyPoints.4.text'|trans|raw }}
+                                </dt>
+                                <dd class="order-first text-3xl font-semibold tracking-tight text-primary">
+                                    {{ 'propertyManagement.about.keyPoints.4.number'|trans|raw }}
+                                </dd>
                             </div>
                         </dl>
                         <div class="mt-10 flex items-center justify-start">
-                            <a href="{{ path('app_estimation') }}"
+                            <a href="{{ path('app_contact') }}"
                                class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                                {{ 'home.aboutUs.button'|trans|raw }}
+                                {{ 'propertyManagement.about.button'|trans|raw }}
                             </a>
                         </div>
                     </div>
@@ -356,55 +382,63 @@
     </section>
     <div class="bg-white py-24 sm:py-32 dark:bg-gray-900">
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
-            <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-pretty">{{ 'home.faq.subTitle'|trans|raw }}</h3>
+            <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center max-w-xl">
+                <h2 class="font-semibold text-primary font-secondary">Honoraires</h2>
+                <h3 class="text-3xl font-medium text-balance">Une rémunération alignée sur la performance de votre bien</h3>
             </div>
-            <div class="mx-auto max-w-xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none dark:bg-gray-800/50 dark:ring-white/10">
+            <div class="mx-auto max-w-xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none">
                 <div class="p-8 sm:p-10 lg:flex-auto">
-                    <h3 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">Lifetime membership</h3>
-                    <p class="mt-6 text-base/7 text-gray-600 dark:text-gray-300">Lorem ipsum dolor sit amet consect etur adipisicing elit. Itaque amet indis perferendis blanditiis repellendus etur quidem assumenda.</p>
+                    <h3 class="text-2xl font-semibold tracking-tight text-gray-900">
+                        Un partenariat durable
+                    </h3>
+                    <p class="mt-6 text-base/7 text-gray-600">
+                        Plus votre bien performe, plus notre accompagnement crée de la valeur.
+                        Un partenariat transparent, aligné sur vos intérêts.
+                    </p>
                     <div class="mt-10 flex items-center gap-x-4">
-                        <h4 class="flex-none text-sm/6 font-semibold text-primary">Ce qui est inclus</h4>
+                        <h4 class="flex-none text-sm/6 font-semibold text-primary">Vos garanties</h4>
                         <div class="h-px flex-auto bg-gray-100 dark:bg-white/10"></div>
                     </div>
                     <ul role="list" class="mt-8 grid gap-4 text-sm/6 text-gray-600 grid-cols-2 sm:gap-6">
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Aucun frais de mise en place
                         </li>
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Sans engagement de durée
                         </li>
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Aucun coût à avancer
                         </li>
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Honoraires transparents
                         </li>
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Revenus suivis chaque mois
                         </li>
                         <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-primary'}) }}
-                            Private forum access
+                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
+                            Aucune mauvaise surprise
                         </li>
                     </ul>
                 </div>
                 <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">
-                    <div class="rounded-2xl bg-gray-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16 dark:bg-gray-900 dark:ring-white/10">
+                    <div class="rounded-2xl bg-slate-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
                         <div class="mx-auto max-w-xs px-8">
-                            <p class="text-base font-semibold text-gray-600 dark:text-gray-400">Pay once, own it forever</p>
-                            <p class="mt-6 flex items-baseline justify-center gap-x-2">
-                                <span class="text-5xl font-semibold tracking-tight text-gray-900 dark:text-white">$349</span>
-                                <span class="text-sm/6 font-semibold tracking-wide text-gray-600 dark:text-gray-400">USD</span>
+                            <p class="text-base font-semibold text-gray-600">Pay once, own it forever</p>
+                            <p class="mt-6 flex items-baseline justify-center gap-x-0.5">
+                                <span class="text-5xl font-semibold tracking-tight text-gray-900">15</span>
+                                <span class="text-4xl font-semibold tracking-wide text-gray-900">%</span>
                             </p>
-                            <a href="#" class="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">Get access</a>
-                            <p class="mt-6 text-xs/5 text-gray-600 dark:text-gray-400">Invoices and receipts available for easy company reimbursement</p>
+                            <p class="mt-6 text-sm/5 text-gray-600 uppercase">sur les revenus générés</p>
+                            <a href="{{ path('app_contact') }}"
+                               class="inline-flex items-center gap-x-4 mt-6 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                                {{ 'propertyManagement.about.button'|trans|raw }}
+                            </a>
                         </div>
                     </div>
                 </div>
