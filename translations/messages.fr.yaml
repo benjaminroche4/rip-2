@@ -803,7 +803,7 @@ faq:
 propertyManagement:
     hero:
         title: Confiez-nous la gestion de votre bien
-        text: Un service de gestion locative sur mesure pour sécuriser et optimiser votre investissement à Paris.
+        text: Un service de gestion locative sur mesure, en court et moyen terme, pour sécuriser et optimiser votre investissement à Paris.
         service:
             1: Gestion sereine
             2: Locataires fiables
@@ -868,7 +868,7 @@ propertyManagement:
             text: Une prise en charge complète pour une tranquillité absolue.
         5:
             title: Entretien continu
-            text: Un suivi rigoureux pour préserver la qualité et la valeur du bien.
+            text: Un suivi journalier pour préserver la qualité et la valeur du bien.
         6:
             title: Revenus sécurisés
             text: Un pilotage clair et fiable de vos loyers et revenus.
