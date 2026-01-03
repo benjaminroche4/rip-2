@@ -18,6 +18,10 @@ export default class extends Controller {
         this.totalCards = this.cardTargets.length;
         this.visibleCards = 3; // Desktop par défaut
 
+        // Cache pour les dimensions
+        this.cardWidth = 0;
+        this.gap = 24;
+
         this.handleResize();
         this.updateCarousel(false);
 
@@ -46,6 +50,7 @@ export default class extends Controller {
             this.visibleCards = 3;
         }
         this.currentIndexValue = 0; // Reset à 0 lors du resize
+        this.cardWidth = 0; // Forcer le recalcul
         this.updateCarousel(false);
     }
 
@@ -120,35 +125,33 @@ export default class extends Controller {
     updateCarousel(animate = true) {
         if (!this.hasTrackTarget || this.cardTargets.length === 0) return;
 
-        // Récupérer la largeur d'une carte + gap
-        const firstCard = this.cardTargets[0];
-        const cardStyle = window.getComputedStyle(firstCard);
-        const cardWidth = firstCard.offsetWidth;
-        const gap = parseFloat(window.getComputedStyle(this.trackTarget).gap) || 24;
+        // Calculer les dimensions si nécessaire
+        if (!animate || this.cardWidth === 0) {
+            const containerWidth = this.trackTarget.parentElement.offsetWidth;
+            this.gap = parseFloat(window.getComputedStyle(this.trackTarget).gap) || 24;
+            this.cardWidth = (containerWidth - (this.gap * (this.visibleCards - 1))) / this.visibleCards;
+
+            // Appliquer la largeur aux cartes
+            this.cardTargets.forEach(card => {
+                card.style.width = `${this.cardWidth}px`;
+            });
+        }
 
         // Calculer le décalage total
-        const offset = -(this.currentIndexValue * (cardWidth + gap));
+        const offset = -(this.currentIndexValue * (this.cardWidth + this.gap));
 
         if (animate) {
             this.isTransitioning = true;
-            this.trackTarget.style.transition = 'transform 600ms cubic-bezier(0.4, 0, 0.2, 1)';
+            this.trackTarget.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
 
             setTimeout(() => {
                 this.isTransitioning = false;
-            }, 600);
+            }, 400);
         } else {
             this.trackTarget.style.transition = 'none';
         }
 
         this.trackTarget.style.transform = `translateX(${offset}px)`;
-
-        // Calculer la largeur de chaque carte en fonction de l'espace disponible
-        const containerWidth = this.trackTarget.parentElement.offsetWidth;
-        const calculatedCardWidth = (containerWidth - (gap * (this.visibleCards - 1))) / this.visibleCards;
-
-        this.cardTargets.forEach(card => {
-            card.style.width = `${calculatedCardWidth}px`;
-        });
 
         // Mettre à jour les indicateurs
         this.updateIndicators();
