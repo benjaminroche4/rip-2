@@ -471,16 +471,16 @@
     <section class="py-12 lg:py-16 bg-white lg:px-8 px-6">
         <div class="bg-slate-50 rounded-2xl max-w-7xl mx-auto p-8">
             <div class="pb-6 lg:pb-12 space-y-3 mx-auto text-center max-w-xl mt-5">
-                <h2 class="font-semibold text-primary font-secondary">Témoignages</h2>
-                <h3 class="text-3xl font-medium text-balance">Ce que disent nos clients</h3>
+                <h2 class="font-semibold text-primary font-secondary">{{ 'propertyManagement.testimonial.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-balance">{{ 'propertyManagement.testimonial.subTitle'|trans|raw }}</h3>
             </div>
-            <div class="relative lg:max-w-6xl mx-auto">
+            <div class="relative max-w-lg lg:max-w-6xl mx-auto">
                 <div data-controller="reviews-swiper" data-reviews-swiper-autoplay-value="true" class="relative">
                     <div class="overflow-hidden py-4">
                         <div data-reviews-swiper-target="track" class="flex gap-6">
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -488,22 +488,22 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "Service exceptionnel ! Notre appartement n'a jamais été aussi bien géré. L'équipe est réactive et professionnelle."
+                                        "{{ 'propertyManagement.testimonial.review.1.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">MC</span>
+                                            <span class="text-primary font-semibold text-sm">CD</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Marie Chapuis</p>
-                                            <p class="text-xs text-gray-500">Paris 16ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.1.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.1.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -511,22 +511,22 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "Grâce à leur expertise, mes revenus locatifs ont augmenté de 30%. Je recommande vivement leurs services."
+                                        "{{ 'propertyManagement.testimonial.review.2.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">JD</span>
+                                            <span class="text-primary font-semibold text-sm">JL</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Jean Dupont</p>
-                                            <p class="text-xs text-gray-500">Paris 8ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.2.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.2.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -534,22 +534,22 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "Une gestion transparente et des résultats au-delà de mes espérances. Je peux enfin profiter de mon bien sans soucis."
+                                        "{{ 'propertyManagement.testimonial.review.3.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">SL</span>
+                                            <span class="text-primary font-semibold text-sm">TB</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Sophie Laurent</p>
-                                            <p class="text-xs text-gray-500">Paris 11ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.3.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.3.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -557,22 +557,22 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "La meilleure décision que j'ai prise pour mon investissement locatif. Professionnalisme et efficacité au rendez-vous."
+                                        "{{ 'propertyManagement.testimonial.review.4.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">PM</span>
+                                            <span class="text-primary font-semibold text-sm">SW</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Pierre Martin</p>
-                                            <p class="text-xs text-gray-500">Paris 17ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.4.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.4.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -580,22 +580,22 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "Suivi impeccable, communication fluide. Je me sens vraiment accompagnée dans la gestion de mon bien."
+                                        "{{ 'propertyManagement.testimonial.review.5.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">CB</span>
+                                            <span class="text-primary font-semibold text-sm">MR</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Claire Bernard</p>
-                                            <p class="text-xs text-gray-500">Paris 9ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.5.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.5.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
-                                    <div class="flex items-center gap-x-1 mb-4">
+                                    <div class="flex items-center -gap-x-0.5 mb-4">
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
@@ -603,15 +603,15 @@
                                         {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
                                     </div>
                                     <p class="text-gray-700 text-base/6 flex-grow mb-4">
-                                        "Des experts qui connaissent vraiment le marché parisien. Mon bien est toujours bien loué et optimisé."
+                                        "{{ 'propertyManagement.testimonial.review.6.text'|trans|raw }}"
                                     </p>
                                     <div class="flex items-center gap-x-3 mt-auto">
                                         <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                            <span class="text-primary font-semibold text-sm">TR</span>
+                                            <span class="text-primary font-semibold text-sm">DK</span>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-900 text-sm">Thomas Rousseau</p>
-                                            <p class="text-xs text-gray-500">Paris 15ème</p>
+                                            <p class="font-semibold text-gray-900 text-sm">{{ 'propertyManagement.testimonial.review.6.name'|trans|raw }}</p>
+                                            <p class="text-xs text-gray-500">{{ 'propertyManagement.testimonial.review.6.place'|trans|raw }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -621,12 +621,12 @@
                     <div class="flex items-center justify-center gap-x-6 mt-8">
                         <button
                             data-action="click->reviews-swiper#prev"
-                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-200 shadow-md hover:shadow-lg">
+                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-100 shadow-md hover:shadow-lg">
                             {{ ux_icon('material-symbols:arrow-back-ios-new-rounded', {'class':'size-5'}) }}
                         </button>
                         <button
                             data-action="click->reviews-swiper#next"
-                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-200 shadow-md hover:shadow-lg">
+                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-100 shadow-md hover:shadow-lg">
                             {{ ux_icon('material-symbols:arrow-forward-ios-rounded', {'class':'size-5'}) }}
                         </button>
                     </div>

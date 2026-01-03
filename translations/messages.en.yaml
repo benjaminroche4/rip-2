@@ -680,84 +680,186 @@ faq:
     tenant:
         question:
             1:
-                title: What documents are required to rent an apartment in Paris?
-                text: To rent a property in Paris, landlords generally require a complete file including ID, an employment contract or professional certificate, proof of income, and bank statements. For expatriates, alternative guarantees (corporate, insurance, international files) can be implemented. We help you build a file that meets the requirements of the Parisian market.
+                title: What does your relocation service include exactly?
+                text: Our service covers every step of your relocation, from property search to move-in. It includes property selection, visit organization, lease negotiation and signing, check-in inspection, and the setup of utilities (energy, internet, home insurance). Our goal is to provide a smooth, secure and stress-free relocation experience, with a single dedicated point of contact throughout the process.
             2:
-                title: How long does it take to find accommodation in Paris?
-                text: The average timeframe varies between 2 and 6 weeks, depending on the budget, the neighborhood, and the time of year. Thanks to our network and market knowledge (off/on market), we optimize this timeframe and target only properties suited to your profile to speed up the search.
+                title: What is the difference between Relocation In Paris and a traditional real estate agency?
+                text: A traditional agency works for the landlord and aims to rent its inventory as quickly as possible. We act exclusively on behalf of tenants as apartment hunters. We scan the entire market (agencies, private owners, off-market listings) to find the property that truly matches your criteria and to actively defend your application.
             3:
-                title: What budget should I plan for housing in Paris?
-                text: The budget depends heavily on the neighborhood, the size, and the type of property (furnished or unfurnished). In Paris, rents generally start around 800€ for a studio and can exceed 4 000€ for a family apartment. We help you define a realistic budget based on your expectations.
+                title: Do you have access to off-market properties?
+                text: Yes. Thanks to our long-standing presence and a network of over 80 partners in Paris and the Île-de-France region, we have access to off-market and pre-listed properties before they are published on major real estate platforms. This is a key advantage in a highly competitive market.
             4:
-                title: Which districts are best suited to my profile?
-                text: Each arrondissement in Paris has its own identity. Some are ideal for families, others for young professionals or couples. During our guidance, we analyze your lifestyle, your priorities (transport, work, schools, environment) and advise you on the most suitable neighborhoods.
+                title: What happens if you cannot find an apartment?
+                text: This situation is extremely rare, as we validate the feasibility of your project before starting any assignment. Since our creation, 100% of our searches have been successful. Until a property is secured, we continue searching or adjust the strategy together. Moreover, 50% of our fees are only due upon success, at lease signing.
             5:
-                title: Do I need a French guarantor?
-                text: A French guarantor is often requested, but it is not always mandatory. Alternative solutions exist, such as corporate guarantees, unpaid rent insurance, or international guarantees. We guide you toward the solution best suited to your situation.
+                title: Can I rent a property remotely before arriving in France?
+                text: Absolutely. This is one of our core specialties. Most of our clients rent remotely. We visit on your behalf, inspect every detail, provide detailed visit reports and manage the lease signing. You arrive in Paris simply to collect the keys, with complete peace of mind.
             6:
-                title: Can I rent a property before arriving in France?
-                text: Yes, it is entirely possible. We organize remote viewings, select properties on your behalf, and secure the process so you can arrive in Paris with peace of mind.
+                title: What documents are required to rent an apartment in Paris?
+                text: Landlords usually require an ID, the last three payslips, the latest tax notice, proof of current address and an employment certificate. For more complex profiles, we help you build a strong and reassuring application.
             7:
-                title: What is the minimum lease duration?
-                text: "The duration depends on the type of contract: Furnished lease (1 year or 9 months for students), Unfurnished lease (3 years), Mobility lease (from 1 to 10 months). We help you choose the lease most suited to your situation."
+                title: Do you assist freelancers or profiles without a permanent contract?
+                text: Yes. We regularly support freelancers, trial-period employees and profiles without permanent contracts. We know how to present these profiles to landlords and insurers and can guide you toward suitable guarantee solutions.
             8:
-                title: Are utilities included in the rent?
-                text: Listings generally specify if charges are included. They often cover building maintenance, water, or collective heating. We ensure everything is clearly defined before signing.
+                title: Do I need a French guarantor?
+                text: A guarantor is often required, especially for students and young professionals. If you do not have one, we work with recognized guarantor institutions that can act as a trusted guarantor for Parisian landlords and agencies.
             9:
-                title: Do you offer support after move-in?
-                text: Yes. Our service does not stop at handing over the keys. We also support you with administrative procedures, opening accounts, insurance, and your daily setup.
+                title: Do you assist students and shared housing projects?
+                text: Yes. We support French and international students as well as shared housing projects. Depending on the strength of the application and defined criteria, we adapt our strategy to identify the best opportunities available.
+            10:
+                title: How long does it take to find an apartment in Paris?
+                text: Once your application file is complete and the mandate signed, the average timeframe is around 20 days. For urgent requests, our responsiveness can sometimes secure a lease in under one week.
+            11:
+                title: What budget should I expect when renting in Paris?
+                text: In 2026, the average budget ranges between €35 and €45 per sqm for quality furnished rentals in central Paris. Studios typically start around €800–900, while one-bedroom apartments range from €1,400–1,700. A precise estimate is provided during our first consultation.
+            12:
+                title: Which districts are best suited to my profile?
+                text: Each Paris district has its own identity. The right choice depends on your lifestyle, work location, family situation and priorities. During our consultation, we guide you toward the districts best suited to your profile.
+            13:
+                title: Do you offer furnished and unfurnished rentals?
+                text: Yes. We search for both furnished and unfurnished properties. Furnished apartments offer flexibility and immediate move-in, while unfurnished properties are better suited for long-term installations.
+            14:
+                title: What is the minimum lease duration?
+                text: For furnished apartments, leases are generally one year renewable. For unfurnished properties, leases are three years. Mobility leases also exist, ranging from 1 to 10 months. In Paris, tenant notice periods are one month.
+            15:
+                title: Are charges included in the rent?
+                text: Rental charges generally include cold water, common area maintenance and elevator costs. Electricity, gas and internet are usually at the tenant’s expense unless a specific all-inclusive package is mentioned.
+            16:
+                title: How do your fees work?
+                text: Our fees are transparent and performance-based. 50% is paid at the start of the mission to activate the search, and the remaining 50% is only due upon success, at lease signing.
+            17:
+                title: Do your fees include agency fees for the rented property?
+                text: Our fees cover exclusively our search and relocation support service. Any agency fees related to the property itself are separate and regulated by law. When renting directly from a private landlord, no additional agency fees apply.
+            18:
+                title: Do you provide post-move-in support?
+                text: Yes. We assist with utility activation, internet installation and home insurance, and remain available to support your settlement after arrival.
+            19:
+                title: Do you assist with visa or residence permit procedures?
+                text: We work with specialized immigration partners and can coordinate your housing setup alongside your administrative procedures to ensure a smooth arrival in France.
     company:
         question:
             1:
-                title: How do you support employees?
-                text: "We handle the entire relocation journey: housing, administrative procedures, local integration, and family support, to ensure a smooth and rapid installation."
+                title: Why should companies use a relocation agency for their employees?
+                text: Using a relocation agency saves time, secures recruitment and ensures a smooth arrival for talents. An employee struggling with housing is stressed and less productive. By delegating this mission, you enhance your employer brand and free HR teams from time-consuming administrative tasks.
             2:
-                title: What services do you offer to companies?
-                text: "We offer tailor-made services: home search, neighborhood orientation, administrative support, schooling, installation, and post-arrival follow-up for your employees. We also offer a search service for your office space in Paris."
+                title: What is the cost of the service for the company?
+                text: Our services are based on customized quotations. Pricing depends on mission complexity and volume. This cost should be viewed as an investment, far lower than the cost of a failed recruitment or early resignation due to housing issues.
             3:
-                title: How long does it take to relocate an employee?
-                text: The timeframe depends on the profile and budget, but our targeted approach generally allows an employee to be relocated within a few weeks.
+                title: Is the service paid by the company or the employee?
+                text: This depends on your HR policy. Most companies cover relocation fees as part of the onboarding package, while others reimburse expenses or opt for partial coverage. We adapt to your internal processes.
             4:
-                title: Do you work with capped budgets?
-                text: Yes, we adapt our search to the budgetary constraints defined by the company while maintaining a high level of quality.
+                title: What workload does this represent for HR teams?
+                text: Almost none. Once connected with the employee, we manage the entire process. HR teams receive regular reporting without operational involvement.
             5:
-                title: Do you provide follow-up reports?
-                text: We offer clear reporting for HR teams to track the progress of each case.
+                title: Do you work with startups and small companies?
+                text: Yes. Whether it is your first international hire or multiple relocations per year, our service adapts. For startups, relocation is often a decisive factor in attracting international talent.
             6:
-                title: Do you manage administrative procedures?
-                text: "Yes, we support employees with essential steps: banking, insurance, social security, subscriptions, etc."
+                title: Do you manage international employee arrivals?
+                text: Yes. This is our core expertise. We act as a trusted third party to secure applications, reassure landlords and ensure a smooth installation in Paris.
+            7:
+                title: Do you support employees’ families as well?
+                text: Yes. Successful mobility includes the entire family. We assist with school searches, daycare enrollment and spouse integration.
+            8:
+                title: Can you provide temporary or corporate housing?
+                text: Yes. For short-term missions or transitional housing, we offer access to fully furnished, ready-to-live apartments with included services.
+            9:
+                title: Do you organize property visits for employees?
+                text: Yes. We pre-select suitable properties and conduct all visits, providing detailed reports to secure decision-making.
+            10:
+                title: Do you assist with administrative procedures?
+                text: Yes. We coordinate housing-related steps and work with immigration partners for visas, residence permits and social security affiliation.
+            11:
+                title: What is your geographical coverage?
+                text: We cover Paris intra-muros as well as the entire inner and outer suburbs, optimizing commute times.
+            12:
+                title: How are HR teams informed about progress?
+                text: We work autonomously with employees while providing HR with regular updates at each key stage, ensuring visibility without workload.
+            13:
+                title: Do you manage interns and junior profiles?
+                text: Yes. Through partnerships with residences and private landlords, we provide adapted solutions for interns and junior professionals.
+            14:
+                title: How does billing work?
+                text: A 50% deposit is paid at mission launch, with the remaining 50% due only upon success. Periodic billing can be arranged for high volumes.
+            15:
+                title: Do you support company headquarters relocations?
+                text: Yes. We can deploy a dedicated relocation unit to manage multiple employee moves simultaneously.
+            16:
+                title: What are your timelines for relocating an employee?
+                text: On average, employees are housed within 20 days. For urgent or strategic profiles, timelines can be accelerated through our off-market network.
+            17:
+                title: Do you assist with utilities and internet setup?
+                text: Yes. Employees arrive in fully operational homes with electricity, gas and internet active.
+            18:
+                title: How do you ensure data confidentiality?
+                text: Confidentiality is absolute. Only strictly necessary information is shared through secure channels. Enhanced discretion protocols apply for sensitive profiles.
+            19:
+                title: Do you have professional insurance?
+                text: Yes. We hold Professional Civil Liability insurance covering all advisory and search activities.
+            20:
+                title: How can a company start working with Relocation In Paris?
+                text: Simply contact us via our form or by phone. After a needs assessment, we can launch the mission immediately upon mandate signature.
     landlord:
         question:
             1:
-                title: How do you select tenants?
-                text: We select serious profiles, often expatriates or employees of international companies, with solid guarantees.
+                title: How are you different from a traditional property management agency?
+                text: Traditional agencies publish listings and wait for applications. At Relocation In Paris, we already have a steady flow of qualified tenants from our corporate and mobility network, significantly reducing vacancy periods.
             2:
-                title: Do you verify solvency?
-                text: Yes, every file is rigorously analyzed before any proposal is made.
+                title: What type of tenants do you place in properties?
+                text: We select premium, reliable tenants such as executives, expatriates, diplomats and consultants on long-term assignments, often backed by corporate guarantees.
             3:
-                title: How long does it take to find a tenant?
-                text: Thanks to our network of corporate employees and executives in mobility, we generally find a tenant in less than 15 days, thereby limiting rental vacancy.
+                title: What types of properties do you prioritize?
+                text: We focus on quality properties in Paris and the western suburbs, from studios to family apartments, provided they meet high standards of location and condition.
             4:
-                title: What is the advantage of working with a relocation service?
-                text: You benefit from access to qualified, stable, and supported tenants, reducing risks and rental vacancies.
+                title: Do I have to rent my property furnished?
+                text: We manage both furnished and unfurnished rentals. Furnished properties are often preferred by mobile tenants, while unfurnished rentals suit long-term strategies.
             5:
-                title: Do you work with mobility leases?
-                text: Yes, we have perfect command of the different types of leases, including the mobility lease.
+                title: What types of leases do you offer?
+                text: We work with mobility leases, civil code leases signed with companies, and standard furnished leases, depending on your objectives.
             6:
-                title: How do you secure payments?
-                text: We prioritize profiles with solid guarantees and work closely with international companies.
+                title: What are the benefits of a civil code lease?
+                text: Civil code leases provide greater contractual flexibility and enhanced security, as the tenant is a legal entity rather than an individual.
             7:
-                title: Do you work with international companies?
-                text: Yes, we regularly collaborate with international groups.
+                title: How do you select tenant applications?
+                text: We thoroughly verify identity, income, professional status and guarantees. Only fully validated applications are presented.
             8:
-                title: Will my property be offered to reliable profiles?
-                text: Yes, our priority is the quality of profiles, stability, and respect for the property.
+                title: What happens in case of unpaid rent?
+                text: The risk is minimal with corporate tenants. Additional safeguards such as rent guarantee insurance can be implemented if required.
             9:
-                title: Do you manage the move-in inspection and installation?
-                text: We can coordinate these steps to ensure a smooth transition.
+                title: What does your property management service include?
+                text: We handle everything from tenant search to rent collection, lease management, inspections, charge adjustments and maintenance coordination.
             10:
-                title: How do I start a collaboration?
-                text: Simply contact us. We will study your property and define the terms of collaboration together.
+                title: Who handles maintenance and repairs?
+                text: We coordinate trusted contractors and manage interventions after your approval.
+            11:
+                title: Do you manage cleaning between tenancies?
+                text: Yes. Professional cleaning and linen management ensure consistent property standards.
+            12:
+                title: Can I use your services only to find a tenant?
+                text: Yes. We offer tenant-finding mandates without ongoing management.
+            13:
+                title: How is key handover managed?
+                text: We personally welcome tenants and ensure full autonomy from day one.
+            14:
+                title: How are management fees calculated?
+                text: Fees are based on a percentage of collected rents and are fully tax-deductible.
+            15:
+                title: Do you assist with rent pricing?
+                text: Yes. We provide market-based rental valuations while ensuring regulatory compliance.
+            16:
+                title: How do you manage rent control regulations?
+                text: We strictly comply with regulations while leveraging legal optimization options when applicable.
+            17:
+                title: Can you furnish an empty apartment?
+                text: Yes. We assist with furnishing, decoration and home staging.
+            18:
+                title: Which diagnostics are required?
+                text: Mandatory diagnostics include energy performance, lead exposure and risk assessments. We verify and organize them if needed.
+            19:
+                title: How quickly can you find a tenant?
+                text: Typically within 2 to 3 weeks for well-priced properties, sometimes sooner.
+            20:
+                title: Can I reclaim my property for personal use?
+                text: Yes. We anticipate recovery clauses during lease drafting to ensure legal compliance.
 propertyManagement:
     hero:
         title: Your Property, Perfectly Managed
@@ -896,3 +998,31 @@ propertyManagement:
             8:
                 title: Do I need to pay any upfront fees?
                 text: No. There are no setup fees or upfront costs. Our remuneration is aligned with your property’s performance.
+    testimonial:
+        title: Testimonials
+        subTitle: The experience shared by our clients
+        review:
+            1:
+                text: Impeccable service. Management is smooth, professional, and perfectly organized. True peace of mind.
+                name: Claire D.
+                place: Paris 10th
+            2:
+                text: Excellent service. My property is optimized and I no longer have anything to manage. Very responsive team.
+                name: Jean-Marc L.
+                place: Paris 4th
+            3:
+                text: A serious and reliable service. Communication is excellent and tenants are of high quality.
+                name: Thomas B.
+                place: Paris 16th
+            4:
+                text: Flawless management from start to finish. I highly recommend.
+                name: Sarah W.
+                place: Paris 11th
+            5:
+                text: High-end support and genuine peace of mind.
+                name: Michael R.
+                place: Paris 8th
+            6:
+                text: Professionalism, rigor, and transparency. My property is in very good hands.
+                name: Daniel K.
+                place: Paris 7th

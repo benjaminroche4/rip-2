@@ -52,7 +52,7 @@
                             this.activeAccordion = (this.activeAccordion == id) ? '' : id
                         }
                     }" class="relative w-full mx-auto overflow-hidden space-y-4">
-                    {% for i in 1..9 %}
+                    {% for i in 1..19 %}
                     <div x-data="{ id: $id('accordion-tenants') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                         <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
                             <span>{{ ('faq.tenant.question.' ~ i ~ '.title')|trans|raw }}</span>
@@ -79,7 +79,7 @@
                             this.activeAccordion = (this.activeAccordion == id) ? '' : id
                         }
                     }" class="relative w-full mx-auto overflow-hidden space-y-4">
-                    {% for i in 1..6 %}
+                    {% for i in 1..20 %}
                     <div x-data="{ id: $id('accordion-companies') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                         <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
                             <span>{{ ('faq.company.question.' ~ i ~ '.title')|trans|raw }}</span>
@@ -106,7 +106,7 @@
                             this.activeAccordion = (this.activeAccordion == id) ? '' : id
                         }
                     }" class="relative w-full mx-auto overflow-hidden space-y-4">
-                    {% for i in 1..9 %}
+                    {% for i in 1..20 %}
                     <div x-data="{ id: $id('accordion-landlords') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                         <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
                             <span>{{ ('faq.landlord.question.' ~ i ~ '.title')|trans|raw }}</span>
