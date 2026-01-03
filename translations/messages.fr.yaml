@@ -280,45 +280,6 @@ findAccommodation:
             7:
                 title: Remise des clés et suivi
                 description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
-landlords:
-    title: Pour les propriétaires
-    subTitle: Confiez la gestion de votre bien en toute sérénité
-    services:
-        1:
-            title: Gestion locative
-            subTitle: Une prise en charge complète de votre bien immobilier.
-            offer:
-                1: Suivi administratif
-                2: Entrée et sortie des locataires
-                3: Gestion des loyers
-                4: Coordination des interventions
-                5: Suivi administratif et reporting transparent
-        2:
-            title: Recherche de locataires
-            subTitle: Nous sélectionnons des locataires fiables grâce à notre réseau exclusif.
-            offer:
-                1: Diffusion ciblée et mise en valeur du bien
-                2: Étude rigoureuse des dossiers
-                3: Rédaction et signature du bail
-                4: Suivi à l’entrée du locataire
-    faq:
-        title: Vos questions, nos réponses
-        question:
-            1:
-                title: Comment se déroule la gestion locative avec Relocation in Paris ?
-                text: "Nous prenons en charge l’ensemble du processus : recherche du locataire, rédaction du bail, encaissement des loyers, suivi technique et administratif, jusqu’à la sortie du locataire. Vous conservez une visibilité complète grâce à nos rapports réguliers."
-            2:
-                title: Comment sélectionnez-vous les locataires ?
-                text: "Chaque dossier est soigneusement vérifié : solvabilité, stabilité professionnelle et garanties. Nous vous présentons une sélection de profils qualifiés, et la décision finale vous appartient. Vous conservez ainsi un contrôle total, tout en bénéficiant de notre expertise et de notre réseau exclusif."
-            3:
-                title:  Gérez-vous l’installation du locataire ?
-                text: "Oui, et c’est une partie essentielle de notre service. Nous organisons l’état des lieux, l’activation des contrats essentiels (énergie, internet, assurance) et coordonnons les premières démarches pour garantir une installation fluide et sans accroc."
-            4:
-                title: Quels sont les frais de gestion locative ?
-                text: Nos honoraires varient selon le type de bien et le niveau de service souhaité. Nous proposons une gestion premium transparente, sans frais cachés, avec une approche sur mesure adaptée à votre patrimoine.
-            5:
-                title: Gérez-vous les interventions techniques et la maintenance ?
-                text: Oui. Nous coordonnons directement les interventions nécessaires (entretien, réparations, dépannages) via notre réseau de prestataires de confiance, tout en vous tenant informé à chaque étape.
 meta:
     blog:
         title: Le blog pour vivre et s’installer à Paris
@@ -336,8 +297,8 @@ meta:
         title: Recherche de Logement à Paris
         description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
     landlords:
-        title: Gestion Locative et Recherche de Locataires
-        description: "Service premium pour propriétaires à Paris : gestion locative et recherche de locataires pour locations courtes ou longues durées."
+        title: Gestion Locative à Paris
+        description: "Service de gestion locative sur mesure à Paris, en court et moyen terme. Sécurisez et optimisez votre investissement immobilier grâce à une expertise dédiée."
     sitemap:
         title: Plan du site
         description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
@@ -867,7 +828,7 @@ propertyManagement:
             title: Gestion intégrale
             text: Une prise en charge complète pour une tranquillité absolue.
         5:
-            title: Entretien continu
+            title: Entretien continules
             text: Un suivi journalier pour préserver la qualité et la valeur du bien.
         6:
             title: Revenus sécurisés
@@ -889,4 +850,52 @@ propertyManagement:
                 number: 8
                 text: experts engagés dans la gestion de votre patrimoine.
         button: Contactez un expert
-
+    price:
+        title: Honoraires
+        subTitle: Une rémunération alignée sur la performance de votre bien
+        text1: Un partenariat durable
+        text2: Plus votre bien performe, plus notre accompagnement crée de la valeur. Un partenariat transparent, aligné sur vos intérêts.
+        guarantee:
+            title: Vos garanties
+            1: Aucun frais de mise en place
+            2: Sans engagement de durée
+            3: Aucun coût à avancer
+            4: Honoraires transparents
+            5: Revenus suivis chaque mois
+            6: Aucune mauvaise surprise
+        fees:
+            shortTerm:
+                title: Court terme
+                text: sur les revenus générés
+            longTerm:
+                title: Moyen terme
+                text: sur le chiffre d'affaires généré
+            button: Contactez un expert
+    faq:
+        title: FAQ
+        subTitle: Vos questions, nos réponses
+        question:
+            1:
+                title: Gérez-vous les biens en courte et moyenne durée ?
+                text: Oui. Nous assurons la gestion locative en courte durée (jusqu’à 30 jours) et en moyenne durée (de 1 à 12 mois), avec une approche adaptée à chaque typologie de location.
+            2:
+                title: Mettez-vous en valeur le bien avant la mise en location ?
+                text: Oui. Nous travaillons la valorisation du bien (présentation, positionnement, diffusion) afin d’attirer des profils de qualité et d’optimiser la performance locative.
+            3:
+                title: Gérez-vous tout de bout en bout ?
+                text: "Absolument. Nous prenons en charge l’intégralité de la gestion : stratégie, diffusion, relation locataire, suivi opérationnel et gestion des revenus. Vous conservez le contrôle, nous gérons le reste."
+            4:
+                title: Étudiez-vous une stratégie pour optimiser mes revenus ?
+                text: Oui. Chaque bien fait l’objet d’une analyse personnalisée afin de définir la stratégie locative la plus pertinente, en fonction de sa localisation, de la demande et de vos objectifs.
+            5:
+                title: Gérez-vous la communication avec les voyageurs ou locataires ?
+                text: Oui. Nous assurons l’ensemble des échanges avant, pendant et après le séjour ou la location, avec un suivi professionnel et réactif.
+            6:
+                title: Puis-je suivre les revenus générés ?
+                text: Oui. Vous bénéficiez d’un suivi clair et régulier de vos revenus locatifs, avec une visibilité complète sur la performance de votre bien.
+            7:
+                title: Y a-t-il un engagement de durée ?
+                text: Non. Notre accompagnement est sans engagement de durée, dans une logique de partenariat basé sur la confiance et la transparence.
+            8:
+                title: Dois-je avancer des frais ?
+                text: Non. Aucun frais de mise en place ni de coût à avancer. Notre rémunération est alignée sur la performance de votre bien.

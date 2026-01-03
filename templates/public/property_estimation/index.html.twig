@@ -380,49 +380,50 @@
             </div>
         </div>
     </section>
-    <div class="bg-white py-24 sm:py-32 dark:bg-gray-900">
+    <section class="bg-white py-24 sm:py-32">
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
             <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center max-w-xl">
-                <h2 class="font-semibold text-primary font-secondary">Honoraires</h2>
-                <h3 class="text-3xl font-medium text-balance">Une rémunération alignée sur la performance de votre bien</h3>
+                <h2 class="font-semibold text-primary font-secondary">{{ 'propertyManagement.price.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-balance">{{ 'propertyManagement.price.subTitle'|trans|raw }}</h3>
             </div>
             <div class="mx-auto max-w-xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none">
                 <div class="p-8 sm:p-10 lg:flex-auto">
-                    <h3 class="text-2xl font-semibold tracking-tight text-gray-900">
-                        Un partenariat durable
-                    </h3>
+                    <h4 class="text-2xl font-semibold tracking-tight text-gray-900">
+                        {{ 'propertyManagement.price.text1'|trans|raw }}
+                    </h4>
                     <p class="mt-6 text-base/7 text-gray-600">
-                        Plus votre bien performe, plus notre accompagnement crée de la valeur.
-                        Un partenariat transparent, aligné sur vos intérêts.
+                        {{ 'propertyManagement.price.text2'|trans|raw }}
                     </p>
                     <div class="mt-10 flex items-center gap-x-4">
-                        <h4 class="flex-none text-sm/6 font-semibold text-primary">Vos garanties</h4>
-                        <div class="h-px flex-auto bg-gray-100 dark:bg-white/10"></div>
+                        <h4 class="flex-none text-sm/6 font-semibold text-primary">
+                            {{ 'propertyManagement.price.guarantee.title'|trans|raw }}
+                        </h4>
+                        <div class="h-px flex-auto bg-gray-100"></div>
                     </div>
                     <ul role="list" class="mt-8 grid gap-4 text-sm/6 text-gray-600 grid-cols-2 sm:gap-6">
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Aucun frais de mise en place
+                            {{ 'propertyManagement.price.guarantee.1'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Sans engagement de durée
+                            {{ 'propertyManagement.price.guarantee.2'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Aucun coût à avancer
+                            {{ 'propertyManagement.price.guarantee.3'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Honoraires transparents
+                            {{ 'propertyManagement.price.guarantee.4'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Revenus suivis chaque mois
+                            {{ 'propertyManagement.price.guarantee.5'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            Aucune mauvaise surprise
+                            {{ 'propertyManagement.price.guarantee.6'|trans|raw }}
                         </li>
                     </ul>
                 </div>
@@ -431,8 +432,8 @@
                          data-controller="pricing-tabs"
                          data-pricing-tabs-short-term-rate-value="20"
                          data-pricing-tabs-long-term-rate-value="15"
-                         data-pricing-tabs-short-term-text-value="sur les revenus générés"
-                         data-pricing-tabs-long-term-text-value="sur le chiffre d'affaires généré">
+                         data-pricing-tabs-short-term-text-value="{{ 'propertyManagement.price.fees.shortTerm.text'|trans|raw }}"
+                         data-pricing-tabs-long-term-text-value="{{ 'propertyManagement.price.fees.longTerm.text'|trans|raw }}">
                         <div class="mx-auto max-w-xs px-8">
                             <!-- Tabs -->
                             <div class="inline-flex rounded-lg bg-gray-100 p-1 gap-x-1">
@@ -441,14 +442,14 @@
                                         data-tab="shortTerm"
                                         data-action="click->pricing-tabs#switchTab"
                                         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200">
-                                    Court terme
+                                    {{ 'propertyManagement.price.fees.shortTerm.title'|trans|raw }}
                                 </button>
                                 <button type="button"
                                         data-pricing-tabs-target="tab"
                                         data-tab="longTerm"
                                         data-action="click->pricing-tabs#switchTab"
                                         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200">
-                                    Long terme
+                                    {{ 'propertyManagement.price.fees.longTerm.title'|trans|raw }}
                                 </button>
                             </div>
 
@@ -456,23 +457,188 @@
                                 <span data-pricing-tabs-target="percentage" class="text-5xl font-semibold tracking-tight text-gray-900">20</span>
                                 <span class="text-4xl font-semibold tracking-wide text-gray-900">%</span>
                             </p>
-                            <p data-pricing-tabs-target="description" class="mt-6 text-sm/5 text-gray-600 uppercase">sur les revenus générés</p>
+                            <p data-pricing-tabs-target="description" class="mt-6 text-balance text-sm/5 text-gray-600 uppercase"></p>
                             <a href="{{ path('app_contact') }}"
                                class="inline-flex items-center gap-x-4 mt-6 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                                {{ 'propertyManagement.about.button'|trans|raw }}
+                                {{ 'propertyManagement.price.fees.button'|trans|raw }}
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
+    </section>
+    <section class="py-12 lg:py-16 bg-white lg:px-8 px-6">
+        <div class="bg-slate-50 rounded-2xl max-w-7xl mx-auto p-8">
+            <div class="pb-6 lg:pb-12 space-y-3 mx-auto text-center max-w-xl mt-5">
+                <h2 class="font-semibold text-primary font-secondary">Témoignages</h2>
+                <h3 class="text-3xl font-medium text-balance">Ce que disent nos clients</h3>
+            </div>
+            <div class="relative lg:max-w-6xl mx-auto">
+                <div data-controller="reviews-swiper" data-reviews-swiper-autoplay-value="true" class="relative">
+                    <div class="overflow-hidden py-4">
+                        <div data-reviews-swiper-target="track" class="flex gap-6">
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "Service exceptionnel ! Notre appartement n'a jamais été aussi bien géré. L'équipe est réactive et professionnelle."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">MC</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Marie Chapuis</p>
+                                            <p class="text-xs text-gray-500">Paris 16ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "Grâce à leur expertise, mes revenus locatifs ont augmenté de 30%. Je recommande vivement leurs services."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">JD</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Jean Dupont</p>
+                                            <p class="text-xs text-gray-500">Paris 8ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "Une gestion transparente et des résultats au-delà de mes espérances. Je peux enfin profiter de mon bien sans soucis."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">SL</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Sophie Laurent</p>
+                                            <p class="text-xs text-gray-500">Paris 11ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "La meilleure décision que j'ai prise pour mon investissement locatif. Professionnalisme et efficacité au rendez-vous."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">PM</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Pierre Martin</p>
+                                            <p class="text-xs text-gray-500">Paris 17ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "Suivi impeccable, communication fluide. Je me sens vraiment accompagnée dans la gestion de mon bien."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">CB</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Claire Bernard</p>
+                                            <p class="text-xs text-gray-500">Paris 9ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-reviews-swiper-target="card" class="flex-shrink-0">
+                                <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
+                                    <div class="flex items-center gap-x-1 mb-4">
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500'}) }}
+                                    </div>
+                                    <p class="text-gray-700 text-base/6 flex-grow mb-4">
+                                        "Des experts qui connaissent vraiment le marché parisien. Mon bien est toujours bien loué et optimisé."
+                                    </p>
+                                    <div class="flex items-center gap-x-3 mt-auto">
+                                        <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                            <span class="text-primary font-semibold text-sm">TR</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900 text-sm">Thomas Rousseau</p>
+                                            <p class="text-xs text-gray-500">Paris 15ème</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center gap-x-6 mt-8">
+                        <button
+                            data-action="click->reviews-swiper#prev"
+                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-200 shadow-md hover:shadow-lg">
+                            {{ ux_icon('material-symbols:arrow-back-ios-new-rounded', {'class':'size-5'}) }}
+                        </button>
+                        <button
+                            data-action="click->reviews-swiper#next"
+                            class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition duration-200 shadow-md hover:shadow-lg">
+                            {{ ux_icon('material-symbols:arrow-forward-ios-rounded', {'class':'size-5'}) }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">
             <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-pretty">{{ 'home.faq.subTitle'|trans|raw }}</h3>
+                <h2 class="font-semibold text-primary font-secondary">{{ 'propertyManagement.faq.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-pretty">{{ 'propertyManagement.faq.subTitle'|trans|raw }}</h3>
             </div>
             <div x-data="{
                     activeAccordion: '',
@@ -482,56 +648,89 @@
                 }" class="relative w-full mx-auto overflow-hidden space-y-4">
                 <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                     <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'landlords.faq.question.1.title'|trans|raw }}</span>
+                        <span>{{ 'propertyManagement.faq.question.1.title'|trans|raw }}</span>
                         <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'landlords.faq.question.1.text'|trans|raw }}
+                            {{ 'propertyManagement.faq.question.1.text'|trans|raw }}
                         </div>
                     </div>
                 </div>
                 <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                     <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'landlords.faq.question.2.title'|trans|raw }}</span>
+                        <span>{{ 'propertyManagement.faq.question.2.title'|trans|raw }}</span>
                         <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'landlords.faq.question.2.text'|trans|raw }}
+                            {{ 'propertyManagement.faq.question.2.text'|trans|raw }}
                         </div>
                     </div>
                 </div>
                 <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                     <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'landlords.faq.question.3.title'|trans|raw }}</span>
+                        <span>{{ 'propertyManagement.faq.question.3.title'|trans|raw }}</span>
                         <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'landlords.faq.question.3.text'|trans|raw }}
+                            {{ 'propertyManagement.faq.question.3.text'|trans|raw }}
                         </div>
                     </div>
                 </div>
                 <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                     <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'landlords.faq.question.4.title'|trans|raw }}</span>
+                        <span>{{ 'propertyManagement.faq.question.4.title'|trans|raw }}</span>
                         <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'landlords.faq.question.4.text'|trans|raw }}
+                            {{ 'propertyManagement.faq.question.4.text'|trans|raw }}
                         </div>
                     </div>
                 </div>
                 <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
                     <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'landlords.faq.question.5.title'|trans|raw }}</span>
+                        <span>{{ 'propertyManagement.faq.question.5.title'|trans|raw }}</span>
                         <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     <div x-show="activeAccordion==id" x-collapse x-cloak>
                         <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'landlords.faq.question.5.text'|trans|raw }}
+                            {{ 'propertyManagement.faq.question.5.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'propertyManagement.faq.question.6.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'propertyManagement.faq.question.6.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'propertyManagement.faq.question.7.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'propertyManagement.faq.question.7.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'propertyManagement.faq.question.8.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'propertyManagement.faq.question.8.text'|trans|raw }}
                         </div>
                     </div>
                 </div>

@@ -280,64 +280,25 @@ findAccommodation:
             7:
                 title: Key Handover and Ongoing Support
                 description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
-landlords:
-    title: For landlords
-    subTitle: Manage your property with confidence
-    services:
-        1:
-            title: Property management
-            subTitle: Full management of your property.
-            offer:
-                1: Administrative follow-up
-                2: Tenant move-in and move-out
-                3: Rent management
-                4: Coordination of maintenance
-                5: Transparent reporting
-        2:
-            title: Tenant search
-            subTitle: We select reliable tenants through our exclusive network.
-            offer:
-                1: Targeted advertising and property showcasing
-                2: Thorough tenant screening
-                3: Lease drafting and signing
-                4: Tenant move-in support
-    faq:
-        title: Your questions, our answers
-        question:
-            1:
-                title: How does property management with Relocation in Paris work?
-                text: "We handle the entire process: tenant search, lease drafting, rent collection, technical and administrative follow-up, up to tenant departure. You maintain full visibility thanks to our regular reports."
-            2:
-                title: How do you select tenants?
-                text: "Each file is carefully verified: solvency, job stability, and guarantees. We present a selection of qualified profiles, and you make the final choice — ensuring full control while benefiting from our expertise and network."
-            3:
-                title: Do you manage tenant installation?
-                text: "Yes, it’s a key part of our service. We organize the inventory, activate essential contracts (energy, internet, insurance), and coordinate first steps to ensure a seamless installation."
-            4:
-                title: What are your property management fees?
-                text: Our fees depend on the property type and desired service level. We offer transparent, premium management with no hidden costs, fully tailored to your property portfolio.
-            5:
-                title: Do you handle maintenance and repairs?
-                text: Yes. We directly coordinate necessary interventions (maintenance, repairs, troubleshooting) via our trusted network of contractors, keeping you informed at every step.
 meta:
     blog:
-        title: The blog for living and settling in Paris
+        title: The Blog For Living And Settling in Paris
         description: "The essential blog for living, working, and settling in Paris: practical tips, neighborhoods, housing, paperwork, and everyday life insights."
     home:
-        title: Relocation agency in Paris
+        title: Relocation Agency in Paris
         description: "Relocation agency in Paris for individuals and companies: housing search, office setup, and full employee relocation."
     companies:
-        title: Corporate housing in Paris made simple
+        title: Corporate Housing in Paris Made Simple
         description: "Easily house your employees in Paris. End-to-end relocation, tailored property search, administrative support and expert guidance."
     contact:
-        title: Contact our relocation experts in Paris
+        title: Contact Our Relocation Experts in Paris
         description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
     findAccommodation:
-        title: Housing search in Paris
+        title: Housing Search in Paris
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
     landlords:
-        title: Property management and tenant search
-        description: "Premium service for landlords in Paris: property management and tenant search for short- or long-term rentals."
+        title: Property Management in Paris
+        description: "Tailored property management services in Paris for short- and medium-term rentals. Secure and optimize your real estate investment with dedicated expertise."
     sitemap:
         title: Sitemap
         description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
@@ -886,3 +847,52 @@ propertyManagement:
                 number: 8
                 text: experts dedicated to managing your assets.
         button: Speak with an expert
+    price:
+        title: Fees
+        subTitle: A remuneration model aligned with your property’s performance
+        text1: A long-term partnership
+        text2: The better your property performs, the more value our support creates. A transparent partnership, fully aligned with your interests.
+        guarantee:
+            title: Your guarantees
+            1: No setup fees
+            2: No long-term commitment
+            3: No upfront costs
+            4: Transparent fees
+            5: Monthly income tracking
+            6: No unpleasant surprises
+        fees:
+            shortTerm:
+                title: Short-term
+                text: based on generated rental income
+            longTerm:
+                title: Medium-term
+                text: based on generated turnover
+            button: Speak with an expert
+    faq:
+        title: FAQ
+        subTitle: Your questions, our answers
+        question:
+            1:
+                title: Do you manage short- and medium-term rentals?
+                text: Yes. We provide property management services for short-term rentals (up to 30 days) and medium-term rentals (from 1 to 12 months), with an approach tailored to each rental type.
+            2:
+                title: Do you enhance the property before it is listed?
+                text: Yes. We focus on property enhancement (presentation, positioning and distribution) to attract high-quality tenants and optimize rental performance.
+            3:
+                title: Do you handle everything from start to finish?
+                text: "Absolutely. We take care of the entire management process: strategy, listing, tenant relations, operational follow-up and income management. You stay in control, we handle the rest."
+            4:
+                title: Do you develop a strategy to optimize my income?
+                text: Yes. Each property is analyzed individually to define the most relevant rental strategy, based on its location, market demand and your objectives.
+            5:
+                title: Do you manage communication with tenants or guests?
+                text: Yes. We handle all communication before, during and after the stay or rental, ensuring professional and responsive follow-up.
+            6:
+                title: Can I track the income generated?
+                text: Yes. You benefit from clear and regular income tracking, with full visibility on your property’s performance.
+            7:
+                title: Is there a minimum commitment period?
+                text: No. Our service comes with no minimum commitment, within a partnership built on trust and transparency.
+            8:
+                title: Do I need to pay any upfront fees?
+                text: No. There are no setup fees or upfront costs. Our remuneration is aligned with your property’s performance.
