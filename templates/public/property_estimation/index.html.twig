@@ -477,7 +477,7 @@
             <div class="relative max-w-lg lg:max-w-6xl mx-auto">
                 <div data-controller="reviews-swiper" data-reviews-swiper-autoplay-value="true" class="relative">
                     <div class="overflow-hidden py-4">
-                        <div data-reviews-swiper-target="track" class="flex gap-6">
+                        <div data-reviews-swiper-target="track" class="flex gap-6 select-none cursor-grab active:cursor-grabbing">
                             <div data-reviews-swiper-target="card" class="flex-shrink-0">
                                 <div class="bg-white rounded-xl p-6 shadow-lg shadow-gray-300/30 h-full flex flex-col">
                                     <div class="flex items-center -gap-x-0.5 mb-4">
@@ -626,7 +626,7 @@
                         </button>
 
                         <!-- Indicators -->
-                        <div class="flex items-center gap-x-2">
+                        <div class=" items-center gap-x-2 lg:flex hidden">
                             <button
                                 data-reviews-swiper-target="indicator"
                                 data-index="0"

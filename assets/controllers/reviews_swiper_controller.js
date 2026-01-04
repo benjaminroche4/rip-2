@@ -22,6 +22,13 @@ export default class extends Controller {
         this.cardWidth = 0;
         this.gap = 24;
 
+        // Variables pour le swipe
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+        this.touchStartY = 0;
+        this.touchEndY = 0;
+        this.minSwipeDistance = 50;
+
         this.handleResize();
         this.updateCarousel(false);
 
@@ -29,12 +36,78 @@ export default class extends Controller {
             this.startAutoplay();
         }
 
+        // Gestion du swipe tactile
+        this.setupTouchEvents();
+
         window.addEventListener('resize', () => this.handleResize());
     }
 
     disconnect() {
         this.stopAutoplay();
         window.removeEventListener('resize', () => this.handleResize());
+
+        // Nettoyer les événements tactiles
+        if (this.hasTrackTarget) {
+            this.trackTarget.removeEventListener('touchstart', this.boundHandleTouchStart);
+            this.trackTarget.removeEventListener('touchend', this.boundHandleTouchEnd);
+        }
+    }
+
+    /**
+     * Configure les événements tactiles
+     */
+    setupTouchEvents() {
+        if (!this.hasTrackTarget) return;
+
+        // Bind des méthodes pour pouvoir les remove plus tard
+        this.boundHandleTouchStart = this.handleTouchStart.bind(this);
+        this.boundHandleTouchEnd = this.handleTouchEnd.bind(this);
+
+        this.trackTarget.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true });
+        this.trackTarget.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true });
+    }
+
+    /**
+     * Gère le début du touch
+     */
+    handleTouchStart(event) {
+        this.touchStartX = event.changedTouches[0].screenX;
+        this.touchStartY = event.changedTouches[0].screenY;
+    }
+
+    /**
+     * Gère la fin du touch et détecte le swipe
+     */
+    handleTouchEnd(event) {
+        this.touchEndX = event.changedTouches[0].screenX;
+        this.touchEndY = event.changedTouches[0].screenY;
+
+        this.handleSwipe();
+    }
+
+    /**
+     * Détermine la direction du swipe et navigue
+     */
+    handleSwipe() {
+        const diffX = this.touchStartX - this.touchEndX;
+        const diffY = Math.abs(this.touchStartY - this.touchEndY);
+
+        // Vérifier que c'est un swipe horizontal (et pas vertical)
+        if (Math.abs(diffX) < this.minSwipeDistance) return;
+        if (diffY > Math.abs(diffX)) return; // Swipe vertical, on ignore
+
+        // Arrêter l'autoplay si l'utilisateur swipe manuellement
+        if (this.autoplayValue) {
+            this.stopAutoplay();
+        }
+
+        if (diffX > 0) {
+            // Swipe vers la gauche -> suivant
+            this.next();
+        } else {
+            // Swipe vers la droite -> précédent
+            this.prev();
+        }
     }
 
     /**
