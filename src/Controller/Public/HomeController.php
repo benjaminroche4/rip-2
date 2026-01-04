@@ -27,7 +27,7 @@ final class HomeController extends AbstractController
                 [
                     'priority' => 1,
                     'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2025-10-09')
+                    'lastmod' => new \DateTime('2026-01-04')
                 ]
         ]
     )]

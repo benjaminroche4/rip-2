@@ -20,7 +20,7 @@ final class ServiceController extends AbstractController
                 [
                     'priority' => 0.8,
                     'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2025-10-09')
+                    'lastmod' => new \DateTime('2026-01-04')
                 ]
         ]
     )]
@@ -40,7 +40,7 @@ final class ServiceController extends AbstractController
                 [
                     'priority' => 0.8,
                     'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2025-10-09')
+                    'lastmod' => new \DateTime('2026-01-04')
                 ]
         ]
     )]
