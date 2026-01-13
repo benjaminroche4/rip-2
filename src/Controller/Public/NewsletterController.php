@@ -6,7 +6,6 @@ use App\Entity\Newsletter;
 use App\Form\NewsletterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +16,6 @@ final class NewsletterController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly LoggerInterface $logger,
         private readonly TranslatorInterface $translator,
     )
     {
@@ -40,7 +38,7 @@ final class NewsletterController extends AbstractController
     )]
     public function index(Request $request): Response
     {
-        $resend = \Resend::client('re_erqYXDWJ_CYNima1DVyELRkRGGVfsudwr');
+        $resend = \Resend::client($_ENV['RESEND_API_KEY']);
 
         $newsletter = new Newsletter();
         $form = $this->createForm(NewsletterType::class, $newsletter);
@@ -53,8 +51,12 @@ final class NewsletterController extends AbstractController
             $this->entityManager->persist($newsletter);
             $this->entityManager->flush();
 
+            $contact = $resend->contacts->create([
+                'email' => $newsletter->getEmail(),
+            ]);
+
             $resend->contacts->segments->add(
-                contact: 'test@gmao.com',
+                contact: $contact->id,
                 segmentId: '52a39bfb-e0fe-4aa6-8838-4555bc24f108'
             );
 
