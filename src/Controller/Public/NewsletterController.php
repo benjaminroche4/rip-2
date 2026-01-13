@@ -26,8 +26,6 @@ final class NewsletterController extends AbstractController
     )]
     public function index(): Response
     {
-        return $this->render('newsletter/index.html.twig', [
-            'controller_name' => 'NewsletterController',
-        ]);
+        return $this->render('public/newsletter/index.html.twig');
     }
 }

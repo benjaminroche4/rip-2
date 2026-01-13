@@ -80,6 +80,8 @@ sitemap:
         home: Accueil
         estimation: Obtenez votre estimation
         faq: FAQ
+        newsletter: Newsletter
+        termsConditions: Conditions générales de vente
     blogMenu:
         blog: Blog
 footer:
@@ -99,6 +101,8 @@ footer:
         home: Accueil
         estimation: Obtenez votre estimation
         faq: FAQ
+        newsletter: Newsletter
+        termsConditions: CGV
     menuTitle:
         1: Nos services
         2: À propos
@@ -305,6 +309,9 @@ meta:
     aboutUs:
         title: À propos de nous
         description: Découvrez l’histoire et les valeurs de Relocation in Paris, une agence de relocation haut de gamme dédiée au confort, à la confiance et à l’excellence de ses clients.
+    termsConditions:
+        title: Conditions générales de vente
+        description: "Conditions générales de vente de Relocation In Paris : modalités applicables à nos prestations de services."
     legalNotice:
         title: Mentions légales
         description: "Mentions légales de Relocation in Paris : informations sur l’éditeur, l’hébergeur, la propriété intellectuelle et la responsabilité."
@@ -1032,3 +1039,60 @@ propertyManagement:
                 text: Professionnalisme, rigueur et transparence. Mon bien est entre de très bonnes mains.
                 name: Daniel K.
                 place: Paris 7ᵉ
+newsletter:
+    form:
+        email:
+            label: Votre email
+            notBlank: L'email ne doit pas être vide.
+termsConditions:
+    title: Conditions générales de vente
+    subTitle: Conditions de vente de nos services.
+    1:
+        title: Article 1 – Champ d’application et Objet
+        text1: "Les présentes Conditions Générales de Vente (ci-après « CGV ») régissent l’ensemble des relations contractuelles entre la société <span class='font-semibold'>BR Roche Consulting</span>, immatriculée au RCS de Genève sous le numéro <span class='font-semibold'>CH-660.0.478.025-0</span>, exploitant la marque commerciale Relocation In Paris (ci-après « le Prestataire »), et toute personne physique ou morale (ci-après « le Client ») souhaitant bénéficier de ses services."
+        text2: "Le Prestataire exerce une activité de conseil en mobilité internationale et d’accompagnement à l’installation (relocation). Les prestations proposées incluent notamment, sans que cette liste soit exhaustive :"
+        bullets:
+            1: La recherche de logement,
+            2: L’accompagnement à l’emménagement,
+            3: L’assistance aux démarches administratives (banque, assurances, abonnements),
+            4: L’accompagnement à la scolarité.
+        text4: Le Prestataire agit exclusivement en qualité de Prestataire de services d’accompagnement à la mobilité et à l’installation. Il est expressément stipulé qu’il n’intervient pas en qualité d’agent immobilier, de gestionnaire de biens, ni d’intermédiaire financier au sens de la loi Hoguet.
+        text5: La signature du bail et des contrats annexes relève en principe de la responsabilité exclusive du Client.
+        text6: Toutefois, à titre exceptionnel, et notamment lorsque le Client réside à l’étranger et ne peut être présent, le Prestataire pourra signer le bail au nom et pour le compte du Client, sous réserve de la remise préalable d’une procuration écrite, datée et signée.
+        text7: Dans ce cas, le Prestataire agit uniquement en qualité de mandataire et ne saurait être considéré comme locataire, colocataire ou garant. Il ne peut en aucun cas être tenu des obligations financières résultant du bail (loyers, charges, réparations, dégradations).
+    2:
+        title: Article 2 – Formation du Contrat
+        text1: "Le contrat est réputé formé à la première des dates suivantes :"
+        bullets:
+            1: la signature par le Client d’un devis, d’une lettre de mission ou de tout autre document contractuel transmis par le Prestataire ;
+            2: la validation d’une commande ou d’une prestation par écrit (email, message ou tout autre support durable) ;
+            3: le règlement total ou partiel du prix par le Client (notamment via Stripe, virement bancaire ou tout autre moyen de paiement), valant acceptation des présentes CGV.
+        text2: Une confirmation de commande, un accusé de réception, ou une facture pourra être adressé(e) au Client.
+        text3: Pour les contrats conclus à distance, le Client reconnaît avoir pu consulter les présentes CGV avant toute validation de commande et/ou avant tout paiement (notamment via un lien accessible sur le site ou transmis par le Prestataire). Le règlement total ou partiel du prix, ainsi que la validation de la commande, emportent acceptation pleine et entière des présentes CGV.
+    3:
+        title: Article 3 – Obligations du Prestataire (Obligation de moyens)
+        text1: Le Prestataire est tenu à une obligation de moyens. Il s’engage à mobiliser son expertise, son réseau et sa diligence afin de satisfaire les besoins du Client tels que définis dans le Devis ou la Lettre de Mission.
+        text2: "Dans le cadre de la recherche de logement :"
+        text3: Le Prestataire est tenu à une obligation de moyens. Il s’engage à mobiliser son expertise, son réseau et sa diligence afin de satisfaire les besoins du Client tels que définis dans le Devis ou la Lettre de Mission, et/ou tels que convenus lors des échanges entre les Parties (échanges écrits ou oraux), notamment par email, message, formulaire, ou tout autre support durable.
+        text4: Les critères communiqués par le Client sont pris en compte par le Prestataire dans le cadre de la mission. Toutefois, le Client reconnaît que la réalité du marché immobilier (disponibilité des biens, niveau des loyers, conditions des bailleurs) ainsi que les délais souhaités peuvent conduire le Prestataire à proposer des biens ne correspondant pas en tous points au cahier des charges initial. Le Prestataire s’engage, dans la mesure du possible, à se rapprocher au mieux des critères du Client, sans pouvoir garantir une adéquation parfaite à 100%.
+    4:
+        title: Article 4 – Obligations et Collaboration du Client
+        text1: "Afin de permettre la bonne exécution de la mission, le Client s’engage à :"
+        text2: "<span class='font-semibold'>Loyauté et information :</span> fournir des informations exactes, complètes et à jour, notamment concernant sa situation personnelle, professionnelle et financière ;"
+        text3: "<span class='font-semibold'>Réactivité :</span> répondre aux sollicitations du Prestataire dans un délai maximal de 24 heures ;"
+        text4: "<span class='font-semibold'>Exclusivité :</span> ne pas mandater un autre prestataire pour une mission identique pendant la durée du contrat."
+        text5: Le Prestataire se réserve le droit de suspendre ou résilier la mission en cas de transmission de documents falsifiés, inexacts ou incomplets.
+    5:
+        title: Article 5 – Conditions financières
+        text1: Les tarifs et modalités de paiement sont définis dans le Devis ou la Lettre de Mission.
+        text2: "Sauf stipulation contraire :"
+        bullet:
+            1: un acompte est exigible à la commande, le solde étant dû à la signature du bail ou à l’issue de la mission ;
+            2: tout retard de paiement entraîne la suspension immédiate des prestations, l’application de pénalités de retard calculées sur la base de trois fois le taux d’intérêt légal, ainsi qu’une indemnité forfaitaire de 40 € pour frais de recouvrement pour les clients professionnels.
+        text3: Clause d’acompte non remboursable. L’acompte versé correspond à des frais administratifs, d’analyse de dossier et de lancement de mission, exécutés dès validation du contrat.
+        text4: En cas d’annulation de la mission par le Client après le démarrage des recherches, ou de modification substantielle des critères rendant la mission initiale caduque, l’acompte reste définitivement acquis au Prestataire, à titre d’indemnisation du travail engagé.
+    6:
+        title: Article 6 – Durée du contrat
+        text1: La prestation débute à réception du dossier complet et de l’acompte.
+        text2: Sauf mention contraire, la mission de recherche de logement est conclue pour une durée initiale de trois (3) mois.
+        text3: À l’issue de cette période, si aucun logement n’a été trouvé, le contrat pourra être renouvelé par avenant ou prendre fin sans indemnité. Dans tous les cas, l'acompte reste acquis au Prestataire.

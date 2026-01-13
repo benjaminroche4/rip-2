@@ -3,18 +3,58 @@
 {% block title %}Hello NewsletterController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/benjamin/Desktop/RIP/src/Controller/NewsletterController.php</code></li>
-        <li>Your template at <code>/Users/benjamin/Desktop/RIP/templates/newsletter/index.html.twig</code></li>
-    </ul>
-</div>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">Newsletter</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">S'inscrire à notre newsletter</h2>
+        </div>
+    </section>
+    <section class="max-w-xl lg:max-w-xl mx-auto lg:px-8 px-6 py-12">
+        <div class="w-full mx-auto space-y-6">
+            <div>
+                <div class="flex items-center gap-x-0.5">
+                    <label for="email" class="block text-sm/6 font-semibold text-gray-900">Email</label>
+                    <span class="text-red-600">*</span>
+                </div>
+                <div class="mt-2 flex flex-col sm:flex-row gap-2">
+                    <input id="email" type="email" name="email" placeholder="Enter your email" aria-label="Email" class="block w-full rounded-full bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6" />
+                    <a href="{{ path('app_contact') }}"
+                       class="rounded-full bg-primary text-center px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                        S'inscrire
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="max-w-xl lg:max-w-5xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">Biens immobiliers</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Accédez aux nouvelles offres en priorité.</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">Actualités parisiennes</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">L’essentiel de la vie et du marché parisien.</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mynaui:book-open', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">Guides et conseils</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">Des clés concrètes pour bien s’installer.</p>
+                </div>
+            </div>
+        </section>
 {% endblock %}

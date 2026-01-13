@@ -48,4 +48,24 @@ final class LegalController extends AbstractController
     {
         return $this->render('public/legal/privacy_policy.html.twig');
     }
+
+    #[Route(
+        path: [
+            'fr' => '/{_locale}/conditions-generales-de-vente',
+            'en' => '/{_locale}/terms-and-conditions'
+        ],
+        name: 'app_terms_and_conditions',
+        options: [
+            'sitemap' =>
+                [
+                    'priority' => 0.1,
+                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                    'lastmod' => new \DateTime('2025-01-12')
+                ]
+        ]
+    )]
+    public function termsAndConditions(): Response
+    {
+        return $this->render('public/legal/terms_conditions.html.twig');
+    }
 }

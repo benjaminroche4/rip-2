@@ -80,6 +80,8 @@ sitemap:
         home: Home
         estimation: Get your estimate
         faq: FAQ
+        newsletter: Newsletter
+        termsConditions: Terms and Conditions
     blogMenu:
         blog: Blog
 footer:
@@ -99,6 +101,8 @@ footer:
         home: Home
         estimation: Get your estimate
         faq: FAQ
+        newsletter: Newsletter
+        termsConditions: Terms and Conditions
     menuTitle:
         1: Our Services
         2: About Us
@@ -305,6 +309,15 @@ meta:
     aboutUs:
         title: About Us
         description: Discover the story and values of Relocation in Paris, a high-end relocation agency dedicated to comfort, trust, and excellence for its clients.
+    termsConditions:
+        title: Terms & Conditions
+        description: "Relocation In Paris Terms & Conditions: terms governing the sale and provision of our services."
+    legalNotice:
+        title: Legal Notice
+        description: "Relocation In Paris legal notice: information about the publisher, hosting provider, intellectual property, and liability."
+    privacyPolicy:
+        title: Privacy Policy
+        description: "Relocation In Paris privacy policy: how we collect, use, and protect your personal data in accordance with the GDPR."
     estimation:
         title: Get Your Estimate
         description: Estimate the cost of your relocation to Paris in just a few clicks. Discover our personalized services to find your new home and make your move smooth and stress-free.
@@ -1026,3 +1039,60 @@ propertyManagement:
                 text: Professionalism, rigor, and transparency. My property is in very good hands.
                 name: Daniel K.
                 place: Paris 7th
+newsletter:
+    form:
+        email:
+            label: Your email
+            notBlank: Email must not be empty.
+termsConditions:
+    title: Terms & Conditions
+    subTitle: Terms of sale for our services.
+    1:
+        title: Article 1 – Scope and Purpose
+        text1: "These General Terms and Conditions of Sale (hereinafter the “GTC”) govern all contractual relationships between <span class='font-semibold'>BR Roche Consulting</span>, registered with the Geneva Commercial Register under number <span class='font-semibold'>CH-660.0.478.025-0</span>, operating under the trade name Relocation In Paris (hereinafter the “Service Provider”), and any natural or legal person (hereinafter the “Client”) wishing to benefit from its services."
+        text2: "The Service Provider carries out an international mobility consulting and relocation support activity. The services offered include, without limitation:"
+        bullets:
+            1: Housing search,
+            2: Move-in assistance,
+            3: Assistance with administrative procedures (bank, insurance, subscriptions),
+            4: School-related support.
+        text4: "The Service Provider acts exclusively as a relocation and settlement support service provider. It is expressly stated that it does not act as a real estate agent, property manager, or financial intermediary within the meaning of the French Hoguet Law."
+        text5: "The signing of the lease and any related contracts remains, in principle, the sole responsibility of the Client."
+        text6: "However, on an exceptional basis, in particular when the Client resides abroad and cannot be present, the Service Provider may sign the lease in the name and on behalf of the Client, subject to prior delivery of a written, dated, and signed power of attorney."
+        text7: "In such case, the Service Provider acts solely as an agent (mandatary) and shall not be considered a tenant, co-tenant, or guarantor. It may under no circumstances be held liable for any financial obligations arising from the lease (rent, service charges, repairs, damages)."
+    2:
+        title: Article 2 – Contract Formation
+        text1: "The contract shall be deemed formed on the first of the following dates:"
+        bullets:
+            1: "the Client’s signature of a quotation, engagement letter, or any other contractual document sent by the Service Provider;"
+            2: "the Client’s written confirmation of an order or service (email, message, or any other durable medium);"
+            3: "the Client’s full or partial payment of the price (in particular via Stripe, bank transfer, or any other payment method), which constitutes acceptance of these GTC."
+        text2: "An order confirmation, acknowledgement of receipt, and/or an invoice may be sent to the Client."
+        text3: "For distance contracts, the Client acknowledges having been able to review these GTC before any order validation and/or before any payment (in particular via a link available on the website or provided by the Service Provider). Any full or partial payment, as well as order validation, constitutes full and unconditional acceptance of these GTC."
+    3:
+        title: Article 3 – Service Provider’s Obligations (Best Efforts Obligation)
+        text1: "The Service Provider is bound by a best-efforts obligation. It undertakes to use its expertise, network, and diligence to meet the Client’s needs as defined in the quotation or engagement letter."
+        text2: "As part of the housing search:"
+        text3: "The Service Provider is bound by a best-efforts obligation. It undertakes to use its expertise, network, and diligence to meet the Client’s needs as defined in the quotation or engagement letter, and/or as agreed during exchanges between the Parties (written or oral), including via email, message, form, or any other durable medium."
+        text4: "The criteria communicated by the Client shall be taken into account in the performance of the mission. However, the Client acknowledges that market conditions (property availability, rental levels, landlords’ requirements) as well as the desired timeframe may lead the Service Provider to propose properties that do not fully match the initial specifications. The Service Provider undertakes, as far as possible, to meet the Client’s criteria as closely as possible, without being able to guarantee a 100% match."
+    4:
+        title: Article 4 – Client’s Obligations and Cooperation
+        text1: "In order to enable proper performance of the mission, the Client undertakes to:"
+        text2: "<span class='font-semibold'>Loyalty and information:</span> provide accurate, complete, and up-to-date information, in particular regarding the Client’s personal, professional, and financial situation;"
+        text3: "<span class='font-semibold'>Responsiveness:</span> respond to the Service Provider’s requests within a maximum of 24 hours;"
+        text4: "<span class='font-semibold'>Exclusivity:</span> not appoint another service provider for an identical mission during the term of the contract."
+        text5: "The Service Provider reserves the right to suspend or terminate the mission in the event of transmission of falsified, inaccurate, or incomplete documents."
+    5:
+        title: Article 5 – Financial Terms
+        text1: "Prices and payment terms are defined in the quotation or engagement letter."
+        text2: "Unless otherwise specified:"
+        bullets:
+            1: "a deposit is due upon order, with the balance due upon signing of the lease or at the end of the mission;"
+            2: "any late payment shall result in immediate suspension of the services, the application of late-payment penalties calculated on the basis of three times the statutory interest rate, as well as a fixed compensation of €40 for collection costs for business clients."
+        text3: "Non-refundable deposit clause: the deposit corresponds to administrative fees, file review, and mission launch costs, carried out as soon as the contract is validated."
+        text4: "In the event the Client cancels the mission after the start of the search, or substantially modifies the criteria such that the initial mission becomes void, the deposit shall remain fully due to the Service Provider as compensation for the work already performed."
+    6:
+        title: Article 6 – Contract Duration
+        text1: "The service begins upon receipt of the complete file and the deposit."
+        text2: "Unless otherwise stated, the housing search mission is entered into for an initial period of three (3) months."
+        text3: "At the end of this period, if no accommodation has been found, the contract may be renewed by amendment or shall end without compensation. In all cases, the deposit shall remain due to the Service Provider."

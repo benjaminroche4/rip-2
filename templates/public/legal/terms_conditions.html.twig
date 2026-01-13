@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'meta.termsConditions.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.termsConditions.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_terms_and_conditions') }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">
+                {{ 'termsConditions.title'|trans|raw }}
+            </h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">
+                {{ 'termsConditions.subTitle'|trans|raw }}
+            </h2>
+        </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16 space-y-12">
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.1.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'termsConditions.1.text1'|trans|raw }}</p>
+                <p>{{ 'termsConditions.1.text2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'termsConditions.1.bullets.1'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.1.bullets.2'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.1.bullets.3'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.1.bullets.4'|trans|raw }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.2.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'termsConditions.2.text1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'termsConditions.2.bullets.1'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.2.bullets.2'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.2.bullets.3'|trans|raw }}</li>
+                </ul>
+                <p>{{ 'termsConditions.2.text2'|trans|raw }}</p>
+                <p>{{ 'termsConditions.2.text3'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.3.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'termsConditions.3.text1'|trans|raw }}</p>
+                <p>{{ 'termsConditions.3.text2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'termsConditions.3.text3'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.3.text4'|trans|raw }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.4.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'termsConditions.4.text1'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'termsConditions.4.text2'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.4.text3'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.4.text4'|trans|raw }}</li>
+                </ul>
+                <p>{{ 'termsConditions.4.text5'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.5.title'|trans|raw }}</h3>
+            <div class="space-y-4">
+                <p>{{ 'termsConditions.5.text1'|trans|raw }}</p>
+                <p>{{ 'termsConditions.5.text2'|trans|raw }}</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>{{ 'termsConditions.5.bullet.1'|trans|raw }}</li>
+                    <li>{{ 'termsConditions.5.bullet.2'|trans|raw }}</li>
+                </ul>
+                <p>{{ 'termsConditions.5.text3'|trans|raw }}</p>
+                <p>{{ 'termsConditions.5.text4'|trans|raw }}</p>
+            </div>
+        </div>
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">{{ 'termsConditions.6.title'|trans|raw }}</h3>
+            <div class="space-y-2">
+                <p>{{ 'termsConditions.6.text1'|trans|raw }}</p>
+                <p>{{ 'termsConditions.6.text2'|trans|raw }}</p>
+                <p>{{ 'termsConditions.6.text3'|trans|raw }}</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}

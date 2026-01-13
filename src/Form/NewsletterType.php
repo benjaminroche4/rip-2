@@ -15,10 +15,10 @@ class NewsletterType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'contact.contactForm.email.label',
+                'label' => 'newsletter.form.email.label',
                 'constraints' => [
                     new NotBlank(
-                        message: 'contact.contactForm.email.notBlank',
+                        message: 'newsletter.form.email.notBlank',
                     )
                 ],
             ])
