@@ -51,14 +51,12 @@ final class NewsletterController extends AbstractController
             $this->entityManager->persist($newsletter);
             $this->entityManager->flush();
 
-            $contact = $resend->contacts->create([
+            $resend->contacts->create([
                 'email' => $newsletter->getEmail(),
+                'segments' => [
+                    ['id' => '52a39bfb-e0fe-4aa6-8838-4555bc24f108'],
+                ],
             ]);
-
-            $resend->contacts->segments->add(
-                contact: $contact->id,
-                segmentId: '52a39bfb-e0fe-4aa6-8838-4555bc24f108'
-            );
 
             $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
             return $this->redirectToRoute('app_newsletter');

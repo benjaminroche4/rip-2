@@ -4,8 +4,11 @@ namespace App\Entity;
 
 use App\Repository\NewsletterRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: NewsletterRepository::class)]
+#[UniqueEntity(fields: ['email'], message: 'This email address is already in use.')]
 class Newsletter
 {
     #[ORM\Id]

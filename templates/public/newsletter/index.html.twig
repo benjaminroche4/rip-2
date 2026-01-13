@@ -25,7 +25,9 @@
                     </div>
                 </div>
             {% endfor %}
-                <div class="flex items-center gap-x-0.5">
+            {{ form_errors(newsletterForm.email) }}
+
+            <div class="flex items-center gap-x-0.5">
                     {{ form_label(newsletterForm.email, null, {
                         'label_attr': {
                             'class': 'block text-sm/6 font-semibold text-gray-900'
