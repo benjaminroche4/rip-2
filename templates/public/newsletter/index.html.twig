@@ -11,17 +11,34 @@
     </section>
     <section class="max-w-xl lg:max-w-xl mx-auto lg:px-8 px-6 py-6">
         <div class="w-full mx-auto space-y-6">
-            <div>
+            {{ form_start(newsletterForm) }}
+            {% for message in app.flashes('newsletterSuccess') %}
+                <div class="rounded-xl bg-green-50 p-4 mb-5">
+                    <div class="flex items-start gap-x-3">
+                        <div class="flex-shrink-0">
+                            {{ ux_icon('lucide:circle-check', {'class':'text-green-600 size-5'}) }}
+                        </div>
+                        <div class="space-y-0.5">
+                            <h3 class="text-base font-medium text-green-800 -mt-0.5">{{ message }}</h3>
+                            <p class="text-sm text-slate-600">{{ 'newsletter.form.success.text'|trans }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
                 <div class="flex items-center gap-x-0.5">
-                    <label for="email" class="block text-sm/6 font-semibold text-gray-900">Email</label>
+                    {{ form_label(newsletterForm.email, null, {
+                        'label_attr': {
+                            'class': 'block text-sm/6 font-semibold text-gray-900'
+                        }
+                    }) }}
                     <span class="text-red-600">*</span>
                 </div>
                 <div class="mt-2 flex flex-col sm:flex-row gap-2">
-                    <input id="email" type="email" name="email" placeholder="Enter your email" aria-label="Email" class="block w-full rounded-full bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6" />
-                    <a href="{{ path('app_contact') }}"
+                    {{ form_widget(newsletterForm.email, {'attr': {'class': 'block w-full rounded-full bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans }}) }}
+                    <button type="submit"
                        class="rounded-full bg-primary text-center px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
                         S'inscrire
-                    </a>
+                    </button>
                 </div>
                 <div class="text-xs text-gray-600/90 mt-5 text-left flex items-center gap-x-2">
                     {{ ux_icon('fluent:alert-48-regular', {'class':'size-5 shrink-0'}) }}
@@ -29,7 +46,7 @@
                         {{ 'newsletter.nextNewsletter'|trans({'%date%': format_next_monday(app.request.locale) })|raw }}
                     </p>
                 </div>
-            </div>
+            {{ form_end(newsletterForm) }}
         </div>
     </section>
     <section class="max-w-xl lg:max-w-5xl mx-auto lg:px-8 px-6 lg:py-16 py-12">

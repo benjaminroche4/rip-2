@@ -1044,6 +1044,10 @@ newsletter:
         email:
             label: Votre email
             notBlank: L'email ne doit pas être vide.
+            placeholder: "Votre address email"
+        success:
+            title: Inscription confirmée !
+            text: "Merci de vous être inscrit(e) à notre newsletter. Surveillez votre boîte de réception, vous recevrez bientôt notre prochain email."
     nextNewsletter: "Recevez votre prochaine newsletter <span class='font-semibold underline underline-offset-2 decoration-dotted'>%date%</span>."
 termsConditions:
     title: Conditions générales de vente

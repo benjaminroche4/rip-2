@@ -12,6 +12,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Bridge\Resend\Transport\ResendApiTransport;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -43,8 +44,11 @@ final class ContactController extends AbstractController
                 ]
         ]
     )]
-    public function index(Request $request): Response
+    public function index(Request $request, Resend $transport): Response
     {
+        //appel resend ici pour test
+        $resend = Resend
+
         $contact = new Contact();
         $form = $this->createForm(ContactType::class, $contact);
         $form->handleRequest($request);
@@ -83,7 +87,7 @@ final class ContactController extends AbstractController
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
 
-            $this->addFlash('contactSuccess', $this->translator->trans('contact.contactForm.success.title'));
+            $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
             return $this->redirectToRoute('app_contact');
         }
         return $this->render('public/contact/index.html.twig', [

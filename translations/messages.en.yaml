@@ -1044,6 +1044,10 @@ newsletter:
         email:
             label: Your email
             notBlank: Email must not be empty.
+            placeholder: "Your email address"
+        success:
+            title: You're subscribed!
+            text: Thanks for joining our newsletter. Keep an eye on your inbox, your first update will arrive soon.
     nextNewsletter: "Receive your next newsletter on <span class='font-semibold underline underline-offset-2 decoration-dotted'>%date%</span>."
 termsConditions:
     title: Terms & Conditions
