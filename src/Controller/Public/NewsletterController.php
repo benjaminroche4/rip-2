@@ -62,8 +62,15 @@ final class NewsletterController extends AbstractController
             return $this->redirectToRoute('app_newsletter');
         }
 
-        return $this->render('public/newsletter/index.html.twig', [
+        // Si le formulaire a été soumis mais invalide, retourner un status 422 pour Turbo
+        $response = $this->render('public/newsletter/index.html.twig', [
             'newsletterForm' => $form->createView(),
         ]);
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return $response;
     }
 }
