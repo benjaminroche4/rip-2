@@ -44,11 +44,8 @@ final class ContactController extends AbstractController
                 ]
         ]
     )]
-    public function index(Request $request, Resend $transport): Response
+    public function index(Request $request): Response
     {
-        //appel resend ici pour test
-        $resend = Resend
-
         $contact = new Contact();
         $form = $this->createForm(ContactType::class, $contact);
         $form->handleRequest($request);
