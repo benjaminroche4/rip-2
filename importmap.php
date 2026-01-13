@@ -49,4 +49,7 @@ return [
     'tailwindcss/colors' => [
         'version' => '4.1.18',
     ],
+    'canvas-confetti' => [
+        'version' => '1.9.4',
+    ],
 ];
