@@ -40,6 +40,8 @@ final class NewsletterController extends AbstractController
     )]
     public function index(Request $request): Response
     {
+        $resend = \Resend::client('re_erqYXDWJ_CYNima1DVyELRkRGGVfsudwr');
+
         $newsletter = new Newsletter();
         $form = $this->createForm(NewsletterType::class, $newsletter);
         $form->handleRequest($request);
@@ -50,6 +52,11 @@ final class NewsletterController extends AbstractController
 
             $this->entityManager->persist($newsletter);
             $this->entityManager->flush();
+
+            $resend->contacts->segments->add(
+                contact: 'test@gmao.com',
+                segmentId: '52a39bfb-e0fe-4aa6-8838-4555bc24f108'
+            );
 
             $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
             return $this->redirectToRoute('app_newsletter');
