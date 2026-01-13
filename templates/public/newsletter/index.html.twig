@@ -23,6 +23,10 @@
                         S'inscrire
                     </a>
                 </div>
+                <p class="text-xs text-gray-600/90 mt-5 text-left flex items-center gap-x-1">
+                    {{ ux_icon('fluent:alert-48-regular', {'class':'size-5 shrink-0'}) }}
+                    {{ 'newsletter.nextNewsletter'|trans({'%date%': format_next_monday(app.request.locale) })|raw }}
+                </p>
             </div>
         </div>
     </section>
