@@ -1,0 +1,3 @@
+newsletter:
+    email:
+        unique: "This email address is already subscribed to the newsletter."

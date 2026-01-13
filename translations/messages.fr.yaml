@@ -1045,6 +1045,7 @@ newsletter:
             label: Votre email
             notBlank: L'email ne doit pas être vide.
             placeholder: "Votre address email"
+        error: Erreur
         success:
             title: Inscription confirmée !
             text: "Merci de vous être inscrit(e) à notre newsletter. Surveillez votre boîte de réception, vous recevrez bientôt notre prochain email."

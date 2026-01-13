@@ -33,7 +33,7 @@
                                 {{ ux_icon('lucide:circle-x', {'class':'text-red-600 size-5'}) }}
                             </div>
                             <div class="space-y-0.5">
-                                <h3 class="text-base font-medium text-red-800 -mt-0.5">Error</h3>
+                                <h3 class="text-base font-medium text-red-800 -mt-0.5">{{ 'newsletter.form.error'|trans }}</h3>
                                 <div class="text-sm text-slate-600">
                                     {% for error in newsletterForm.email.vars.errors %}
                                         <p>{{ error.message }}</p>
