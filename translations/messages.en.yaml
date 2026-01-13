@@ -1044,7 +1044,7 @@ newsletter:
         email:
             label: Your email
             notBlank: Email must not be empty.
-    nextNewsletter: "Receive your next newsletter on <span class='font-semibold'>%date%</span>"
+    nextNewsletter: "Receive your next newsletter on <span class='font-semibold underline underline-offset-2 decoration-dotted'>%date%</span>."
 termsConditions:
     title: Terms & Conditions
     subTitle: Terms of sale for our services.
