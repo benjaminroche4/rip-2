@@ -7,6 +7,7 @@ use App\Form\NewsletterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Psr\Log\LoggerInterface;
+use Resend;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,7 +42,7 @@ final class NewsletterController extends AbstractController
     )]
     public function index(Request $request): Response
     {
-        $resend = \Resend::client($_ENV['RESEND_API_KEY']);
+        $resend = Resend::client($_ENV['RESEND_API_KEY']);
 
         $newsletter = new Newsletter();
         $form = $this->createForm(NewsletterType::class, $newsletter);
