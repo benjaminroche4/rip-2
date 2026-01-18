@@ -324,6 +324,9 @@ meta:
     faq:
         title: Questions fréquentes (FAQ)
         description: Découvrez nos réponses aux questions les plus posées sur la relocation à Paris. Locataires, entreprises et propriétaires.
+    newsletter:
+        title: Inscrivez-vous à notre newsletter
+        description: "Recevez chaque semaine nos nouveaux biens, les actualités parisiennes et des guides pour réussir votre installation à Paris."
 home:
     heroSection:
         top:
@@ -1040,7 +1043,20 @@ propertyManagement:
                 name: Daniel K.
                 place: Paris 7ᵉ
 newsletter:
+    title: Newsletter
+    subTitle: Rejoignez +10 000 inscrits
+    card:
+        1:
+            title: Biens immobiliers
+            text: Accédez aux nouvelles offres en priorité.
+        2:
+            title: Actualités parisiennes
+            text: L’essentiel de la vie et du marché parisien.
+        3:
+            title: Guides et conseils
+            text: Des clés concrètes pour bien s’installer.
     form:
+        button: S'inscrire
         email:
             label: Votre email
             notBlank: L'email ne doit pas être vide.

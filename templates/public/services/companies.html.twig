@@ -5,7 +5,7 @@
 {% block url %}{{ path('app_service_companies') }}{% endblock %}
 
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pt-16 pt-8">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
             <h1 class="text-center font-semibold text-primary font-secondary">{{ 'companies.title'|trans|raw }}</h1>
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'companies.subTitle'|trans|raw }}</h2>
@@ -24,17 +24,6 @@
         </div>
     </section>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
-        <div class="relative overflow-hidden rounded-2xl bg-primary/5 p-2 ring-1 ring-inset ring-primary/10">
-            <video
-                class="w-full h-auto rounded-xl"
-                controls
-                preload="metadata"
-                playsinline
-            >
-                <source src="{{ asset('medias/videos/test.mp4') }}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
         <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto max-w-xl">
             <div class="flex items-center gap-3 justify-center col-span-1">
                 {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}

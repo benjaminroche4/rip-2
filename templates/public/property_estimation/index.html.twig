@@ -182,11 +182,9 @@
             x-data="{ init() { $nextTick(() => { const content = $refs.content; const item = $refs.item; content.appendChild(item.cloneNode(true)); }); } }"
             class="relative w-full py-3 mx-auto overflow-hidden bg-white max-w-7xl"
         >
-            <!-- Gradients de bordure -->
             <div class="absolute left-0 z-20 w-20 md:w-40 h-full bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
             <div class="absolute right-0 z-20 w-20 md:w-40 h-full bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
 
-            <!-- Container du marquee -->
             <div x-ref="content" class="flex animate-marquee gap-6">
                 <div x-ref="item" class="flex items-center flex-shrink-0 gap-6">
                     <img
@@ -194,7 +192,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 1"
                         loading="lazy"
                     />
                     <img
@@ -202,7 +200,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 2"
                         loading="lazy"
                     />
                     <img
@@ -210,7 +208,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 3"
                         loading="lazy"
                     />
                     <img
@@ -218,7 +216,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 4"
                         loading="lazy"
                     />
                     <img
@@ -226,7 +224,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 5"
                         loading="lazy"
                     />
                     <img
@@ -234,7 +232,7 @@
                         class="w-auto h-32 sm:h-40 md:h-44 lg:h-48 aspect-square object-cover rounded-xl shadow-lg shadow-gray-300/30"
                         width="493"
                         height="493"
-                        alt="Relocation Paris"
+                        alt="Relocation Paris 6"
                         loading="lazy"
                     />
                 </div>
@@ -246,19 +244,6 @@
             <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
                 <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'propertyManagement.service.title'|trans|raw }}</h2>
                 <h2 class="text-3xl font-medium text-pretty text-center">{{ 'propertyManagement.service.subTitle'|trans|raw }}</h2>
-            </div>
-            <div class="max-w-4xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
-                <div class="relative overflow-hidden rounded-2xl bg-primary/5 p-2 ring-1 ring-inset ring-primary/10">
-                    <video
-                        class="w-full h-auto rounded-xl"
-                        controls
-                        preload="metadata"
-                        playsinline
-                    >
-                        <source src="{{ asset('medias/videos/test.mp4') }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
                 <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
