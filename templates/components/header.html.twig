@@ -119,6 +119,12 @@
                                                 </div>
                                                 {{ 'header.menu.companies'|trans|raw }}
                                             </a>
+                                            <a href="{{ path('app_service_find_tenant') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
+                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
+                                                    {{ ux_icon('tabler:search', {'class':'size-5 text-primary'}) }}
+                                                </div>
+                                                {{ 'header.menu.findTenant'|trans|raw }}
+                                            </a>
                                             <a href="{{ path('app_service_landlords') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
                                                 <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
                                                     {{ ux_icon('meteor-icons:key', {'class':'size-5 text-primary'}) }}

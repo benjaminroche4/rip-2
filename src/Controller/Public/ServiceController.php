@@ -48,4 +48,24 @@ final class ServiceController extends AbstractController
     {
         return $this->render('public/services/companies.html.twig');
     }
+
+    #[Route(
+        path: [
+            'fr' => '/{_locale}/services/trouver-un-locataire',
+            'en' => '/{_locale}/services/find-a-tenant',
+            ],
+        name: 'app_service_find_tenant',
+        options: [
+            'sitemap' =>
+                [
+                    'priority' => 0.8,
+                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                    'lastmod' => new \DateTime('2026-01-18')
+                ]
+        ]
+    )]
+    public function findTenant(): Response
+    {
+        return $this->render('public/services/findTenant.html.twig');
+    }
 }

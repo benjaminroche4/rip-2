@@ -91,12 +91,6 @@ class PropertyEstimationType extends AbstractType
             ->add('phoneNumber', TextType::class, [
                 'label' => 'propertyManagement.form.phoneNumber.label',
                 'required' => false,
-                'constraints' => [
-                    new Regex([
-                        'pattern' => '/^[0-9+()]+$/',
-                        'message' => 'propertyManagement.form.email.pattern',
-                    ]),
-                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'propertyManagement.form.email.label',

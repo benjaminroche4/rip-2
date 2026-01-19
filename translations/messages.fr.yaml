@@ -82,6 +82,7 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Conditions générales de vente
+        findTenant: Trouver un locataire
     blogMenu:
         blog: Blog
 footer:
@@ -103,6 +104,7 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: CGV
+        findTenant: Trouver un locataire
     menuTitle:
         1: Nos services
         2: À propos
@@ -117,6 +119,7 @@ header:
         findAccommodation: Trouver un logement
         companies: Entreprises
         landlords: Gestion locative
+        findTenant: Trouver un locataire
         contact: Contacter un expert
         estimation: Obtenez votre estimation
         blog: Blog
@@ -1118,3 +1121,23 @@ termsConditions:
         text1: La prestation débute à réception du dossier complet et de l’acompte.
         text2: Sauf mention contraire, la mission de recherche de logement est conclue pour une durée initiale de trois (3) mois.
         text3: À l’issue de cette période, si aucun logement n’a été trouvé, le contrat pourra être renouvelé par avenant ou prendre fin sans indemnité. Dans tous les cas, l'acompte reste acquis au Prestataire.
+findTenant:
+    title: Trouver un locataire
+    subTitle: Des candidats soigneusement sélectionnés, en toute sérénité
+    step:
+        1:
+            title: Analyse du bien
+            text: Estimation locative, positionnement et définition du profil de locataire idéal.
+        2:
+            title: Mise en valeur
+            text: Photos professionnelles, home staging et optimisation de la présentation. Nous nous occupons de tout.
+        3:
+            title: Diffusion ciblée
+            text: Présentation du bien à notre réseau exclusif de clients qualifiés, puis diffusion sur des plateformes premium en France et à l’international.
+        4:
+            title: Sélection & validation
+            text: Préqualification, vérification des dossiers et présentation des meilleurs profils. La validation finale reste entre vos mains.
+        5:
+            title: Installation du locataire
+            text: Accompagnement complet jusqu’à l’entrée dans les lieux, pour une installation fluide et sereine.
+

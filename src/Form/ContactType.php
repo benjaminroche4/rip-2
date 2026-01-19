@@ -47,12 +47,6 @@ class ContactType extends AbstractType
             ->add('phoneNumber', TextType::class, [
                 'label' => 'contact.contactForm.phoneNumber.label',
                 'required' => false,
-                'constraints' => [
-                    new Regex([
-                        'pattern' => '/^[0-9+()]+$/',
-                        'message' => 'contact.contactForm.email.pattern',
-                    ]),
-                ],
             ])
             ->add('company', TextType::class, [
                 'label' => 'contact.contactForm.company.label',

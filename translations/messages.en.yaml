@@ -82,6 +82,7 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
+        findTenant: Find a tenant
     blogMenu:
         blog: Blog
 footer:
@@ -103,6 +104,7 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
+        findTenant: Find a tenant
     menuTitle:
         1: Our Services
         2: About Us
@@ -117,6 +119,7 @@ header:
         findAccommodation: Find accommodation
         companies: Companies
         landlords: Property management
+        findTenant: Find a tenant
         contact: Contact an expert
         estimation: Get your estimate
         blog: Blog
@@ -1115,3 +1118,6 @@ termsConditions:
         text1: "The service begins upon receipt of the complete file and the deposit."
         text2: "Unless otherwise stated, the housing search mission is entered into for an initial period of three (3) months."
         text3: "At the end of this period, if no accommodation has been found, the contract may be renewed by amendment or shall end without compensation. In all cases, the deposit shall remain due to the Service Provider."
+findTenant:
+    title: Find a Tenant
+    subTitle:

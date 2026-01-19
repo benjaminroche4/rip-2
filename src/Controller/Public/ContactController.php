@@ -84,7 +84,7 @@ final class ContactController extends AbstractController
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
 
-            $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
+            $this->addFlash('contactSuccess', $this->translator->trans('contact.contactForm.success.title'));
             return $this->redirectToRoute('app_contact');
         }
         return $this->render('public/contact/index.html.twig', [

@@ -1,0 +1,470 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'meta.findAccommodation.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.findAccommodation.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_service_find_accommodation') }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
+        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'findAccommodation.title'|trans|raw }}</h1>
+            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'findAccommodation.subTitle'|trans|raw }}</h2>
+            <div class="border border-neutral-100 rounded-full px-4 py-1.5 flex items-center justify-center gap-x-2
+            text-sm text-slate-600  mx-auto bg-white shadow-lg shadow-gray-300/30">
+                <div class="flex justify-center items-center -space-x-1">
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                    <span>{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
+                </div>
+                <p>{{ 'findAccommodation.trust.1'|trans|raw }} <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 {{ 'findAccommodation.trust.2'|trans|raw }} </a></p>
+                <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>
+            </div>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <div
+                data-controller="vertical-timeline"
+                data-vertical-timeline-threshold-value="0.5"
+                class="relative"
+            >
+                {# Vertical Progress Rail #}
+                <div class="absolute left-4 lg:left-8 top-0 bottom-0 w-0.5 bg-gray-200" data-vertical-timeline-target="rail">
+                    <div
+                        data-vertical-timeline-target="progressBar"
+                        class="absolute top-0 left-0 w-full bg-gradient-to-b from-primary via-primary/90 to-primary/80 transition-all duration-500 ease-out"
+                        style="height: 0%;"
+                    ></div>
+                </div>
+
+                {# Timeline Steps #}
+                <div class="relative space-y-12 lg:space-y-16">
+                    {# Step 1 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-0 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">01</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.1.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.1.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 2 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">02</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.2.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.2.description'|trans|raw }}</p>
+                            <div class="max-w-lg mt-8">
+                                <div class="grid max-[331px]:grid-cols-1 min-[331px]:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
+                                        {{ ux_icon('mdi:paris', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
+                                            {{ 'findAccommodation.timeline.steps.2.cards.1'|trans }}
+                                        </h4>
+                                    </div>
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
+                                        {{ ux_icon('solar:calendar-outline', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
+                                            {{ 'findAccommodation.timeline.steps.2.cards.2'|trans }}
+                                        </h4>
+                                    </div>
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
+                                        {{ ux_icon('cil:couch', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
+                                            {{ 'findAccommodation.timeline.steps.2.cards.3'|trans }}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Step 3 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">03</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.3.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.3.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 4 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">04</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.4.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.4.description'|trans|raw }}</p>
+                            <div class="max-w-sm mt-8">
+                                <div class="grid max-[331px]:grid-cols-1 min-[331px]:grid-cols-2 gap-4">
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
+                                        {{ ux_icon('lineicons:phone', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
+                                            {{ 'findAccommodation.timeline.steps.4.cards.1'|trans }}
+                                        </h4>
+                                    </div>
+                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
+                                        {{ ux_icon('icon-park-outline:eyes', {'class':'size-8 text-primary'}) }}
+                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
+                                            {{ 'findAccommodation.timeline.steps.4.cards.2'|trans }}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Step 5 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">05</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.5.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.5.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 6 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">06</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.6.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.6.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+
+                    {# Step 7 #}
+                    <div
+                        data-vertical-timeline-target="step"
+                        class="relative pl-12 lg:pl-20 transition-all duration-400"
+                    >
+                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+                             data-vertical-timeline-target="dot">
+                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
+                        </div>
+                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
+                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
+                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">07</div>
+                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.7.title'|trans|raw }}</h3>
+                            </div>
+                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.7.description'|trans|raw }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-12 lg:mt-20 flex items-center justify-center">
+            <a href="{{ path('app_contact') }}"
+               class="rounded-full bg-primary px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                {{ 'home.heroSection.button'|trans|raw }} →
+            </a>
+        </div>
+    </section>
+    <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="rounded-2xl bg-neutral-100/80 p-8">
+            <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'findAccommodation.solution.title'|trans|raw }}</h2>
+                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'findAccommodation.solution.subTitle'|trans|raw }}</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('gg:search', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.1.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.1.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('hugeicons:diamond-02', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.2.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.2.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mdi:paper-check-outline', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.3.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.3.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('humbleicons:key', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.4.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.4.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('icon-park-outline:people', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.5.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.5.text'|trans|raw }}</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
+                    <div class="flex items-center flex-col gap-3">
+                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
+                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
+                        </div>
+                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.6.title'|trans|raw }}</h3>
+                    </div>
+                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.6.text'|trans|raw }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
+        <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
+            <div class="max-w-xl mb-8 mx-auto lg:mx-0">
+                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'findAccommodation.advantage.title'|trans|raw }}</h2>
+                <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'findAccommodation.advantage.subTitle'|trans|raw }}</h3>
+                <p class="mt-6 text-neutral-600">
+                    {{ 'findAccommodation.advantage.text'|trans|raw }}
+                </p>
+            </div>
+            <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
+                <div class="lg:px-0 lg:pr-4">
+                    <div class="mx-auto max-w-2xl lg:mx-0 max-w-lg">
+                        <div
+                            data-controller="features-list"
+                            class="relative bg-white"
+                        >
+                            {# Features list #}
+                            <div class="relative">
+                                {# Feature 1 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        {{ 'findAccommodation.advantage.1.title'|trans|raw }}
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        {{ 'findAccommodation.advantage.1.text'|trans|raw }}
+                                    </p>
+                                </div>
+
+                                {# Feature 2 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        {{ 'findAccommodation.advantage.2.title'|trans|raw }}
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        {{ 'findAccommodation.advantage.2.text'|trans|raw }}
+                                    </p>
+                                </div>
+
+                                {# Feature 3 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        {{ 'findAccommodation.advantage.3.title'|trans|raw }}
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        {{ 'findAccommodation.advantage.3.text'|trans|raw }}
+                                    </p>
+                                </div>
+
+                                {# Feature 4 #}
+                                <div
+                                    data-features-list-target="item"
+                                    data-action="click->features-list#activate"
+                                    class="relative pl-6 pr-4 py-4 rounded-xl cursor-pointer transition-colors duration-200"
+                                >
+                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
+                                    <div
+                                        data-features-list-target="indicator"
+                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
+                                        style="height: 0;"
+                                    ></div>
+                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
+                                        {{ 'findAccommodation.advantage.4.title'|trans|raw }}
+                                    </h4>
+                                    <p class="text-sm text-slate-600">
+                                        {{ 'findAccommodation.advantage.4.text'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-full">
+                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-paris-6.webp') }}" alt="Relocation In Paris, votre agence de relocation à Paris" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="max-w-3xl mx-auto">
+            <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">
+                <h2 class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</h2>
+                <h3 class="text-3xl font-medium text-pretty">{{ 'home.faq.subTitle'|trans|raw }}</h3>
+            </div>
+            <div x-data="{
+                    activeAccordion: '',
+                    setActiveAccordion(id) {
+                        this.activeAccordion = (this.activeAccordion == id) ? '' : id
+                    }
+                }" class="relative w-full mx-auto overflow-hidden space-y-4">
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.1.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.1.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.2.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.2.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.3.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.3.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.4.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.4.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.5.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.5.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                        <span>{{ 'findAccommodation.faq.question.6.title'|trans|raw }}</span>
+                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div x-show="activeAccordion==id" x-collapse x-cloak>
+                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                            {{ 'findAccommodation.faq.question.6.text'|trans|raw }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{ component('ctaFooter') }}
+{% endblock %}
