@@ -9,7 +9,7 @@
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
             <h1 class="text-center font-semibold text-primary font-secondary">{{ 'findTenant.title'|trans|raw }}</h1>
             <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'findTenant.subTitle'|trans|raw }}</h2>
-            <p class="mx-auto max-w-lg text-center font-normal text-neutral-600 text-pretty justify-center">
+            <p class="mx-auto max-w-lg text-center font-normal text-neutral-600 text-pretty justify-center text-pretty">
                 {{ 'findTenant.text'|trans|raw }}
             </p>
             <div class="border border-neutral-100 rounded-full px-4 py-1.5 flex items-center justify-center gap-x-2
@@ -26,7 +26,7 @@
             </div>
         </div>
         <div class="max-w-5xl mx-auto mt-12">
-            <img width="546" height="350" loading="eager" src="{{ asset('medias/website/relocation-in-paris-8.webp') }}" alt="Relocation In Paris, trouver un locataire" class="w-full h-24 object-cover rounded-2xl" />
+            <img width="546" height="350" loading="eager" src="{{ asset('medias/website/relocation-in-paris-10.webp') }}" alt="Relocation In Paris, trouver un locataire à Paris" class="w-full aspect-3/2 lg:h-[400px] object-cover rounded-2xl" />
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12 bg-white">
@@ -372,68 +372,45 @@
                     </p>
                     <div class="mt-10 flex items-center gap-x-4">
                         <h4 class="flex-none text-sm/6 font-semibold text-primary">
-                            {{ 'propertyManagement.price.guarantee.title'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.title'|trans|raw }}
                         </h4>
                         <div class="h-px flex-auto bg-gray-100"></div>
                     </div>
                     <ul role="list" class="mt-8 grid gap-4 text-sm/6 text-gray-600 grid-cols-2 sm:gap-6">
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.1'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.1'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.2'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.2'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.3'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.3'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.4'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.4'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.5'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.5'|trans|raw }}
                         </li>
                         <li class="flex gap-x-3">
                             {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'propertyManagement.price.guarantee.6'|trans|raw }}
+                            {{ 'findTenant.price.guarantee.6'|trans|raw }}
                         </li>
                     </ul>
                 </div>
                 <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">
-                    <div class="rounded-2xl bg-slate-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16"
-                         data-controller="pricing-tabs"
-                         data-pricing-tabs-short-term-rate-value="20"
-                         data-pricing-tabs-long-term-rate-value="15"
-                         data-pricing-tabs-short-term-text-value="{{ 'propertyManagement.price.fees.shortTerm.text'|trans|raw }}"
-                         data-pricing-tabs-long-term-text-value="{{ 'propertyManagement.price.fees.longTerm.text'|trans|raw }}">
+                    <div class="rounded-2xl bg-slate-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
                         <div class="mx-auto max-w-xs px-8">
-                            <!-- Tabs -->
-                            <div class="inline-flex rounded-lg bg-gray-100 p-1 gap-x-1">
-                                <button type="button"
-                                        data-pricing-tabs-target="tab"
-                                        data-tab="shortTerm"
-                                        data-action="click->pricing-tabs#switchTab"
-                                        class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200">
-                                    {{ 'propertyManagement.price.fees.shortTerm.title'|trans|raw }}
-                                </button>
-                                <button type="button"
-                                        data-pricing-tabs-target="tab"
-                                        data-tab="longTerm"
-                                        data-action="click->pricing-tabs#switchTab"
-                                        class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200">
-                                    {{ 'propertyManagement.price.fees.longTerm.title'|trans|raw }}
-                                </button>
-                            </div>
-
                             <p class="mt-6 flex items-baseline justify-center gap-x-0.5">
-                                <span data-pricing-tabs-target="percentage" class="text-5xl font-semibold tracking-tight text-gray-900">20</span>
+                                <span data-pricing-tabs-target="percentage" class="text-5xl font-semibold tracking-tight text-gray-900">80</span>
                                 <span class="text-4xl font-semibold tracking-wide text-gray-900">%</span>
                             </p>
-                            <p data-pricing-tabs-target="description" class="mt-6 text-balance text-sm/5 text-gray-600 uppercase"></p>
+                            <p class="mt-6 text-balance text-sm/5 text-gray-600 uppercase">{{ 'findTenant.price.text3'|trans|raw }}</p>
                             <a href="{{ path('app_contact') }}"
                                class="inline-flex items-center gap-x-4 mt-6 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
                                 {{ 'propertyManagement.price.fees.button'|trans|raw }}

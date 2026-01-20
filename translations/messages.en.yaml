@@ -1124,5 +1124,102 @@ termsConditions:
         text2: "Unless otherwise stated, the housing search mission is entered into for an initial period of three (3) months."
         text3: "At the end of this period, if no accommodation has been found, the contract may be renewed by amendment or shall end without compensation. In all cases, the deposit shall remain due to the Service Provider."
 findTenant:
-    title: Find a Tenant
-    subTitle:
+    title: Find a tenant
+    subTitle: Delegate The Search For Your Next Tenant
+    text: "Find the right tenant in Paris with complete peace of mind thanks to our turnkey service."
+    steps:
+        1:
+            title: Property assessment
+            text: Rental valuation, property positioning, and definition of the ideal tenant profile to ensure a coherent and attractive listing, perfectly aligned with market expectations.
+        2:
+            title: Property showcasing
+            text: Professional photography, home staging, and presentation optimization. We take care of everything to maximize its appeal.
+            cards:
+                1:
+                    text: Pro photos
+                2:
+                    text: Home staging
+                3:
+                    text: Photo editing
+        3:
+            title: Targeted exposure
+            text: Presentation to our exclusive network of qualified clients, followed by distribution on premium platforms in France and internationally.
+            cards:
+                1:
+                    text: Private candidate network
+                2:
+                    text: Premium listing platforms
+        4:
+            title: Screening & approval
+            text: "Pre-screening, file verification, and presentation of the best candidates. <span class='underline underline-offset-4'>Final approval remains in your hands</span>."
+        5:
+            title: Tenant move-in
+            text: "Support through move-in: coordination of key handover, follow-up on final administrative steps, and organization of practical details for a smooth and stress-free installation."
+    solution:
+        title: A controlled letting process
+        subTitle: Our solutions to find the right tenant
+        1:
+            title: Assessment & strategy
+            text: Rent valuation and positioning to attract the right profiles.
+        2:
+            title: Property showcasing
+            text: Pro photos, home staging, and polished presentation to maximize impact.
+        3:
+            title: Premium exposure
+            text: Maximum visibility through multi-posting across international property portals.
+        4:
+            title: Qualified candidate network
+            text: Access to our exclusive network of relocating executives and international clients.
+        5:
+            title: Viewings & selection
+            text: Viewings organized and the best application shortlisted. You approve with confidence.
+        6:
+            title: Move-in coordination
+            text: Coordination through key handover and move-in.
+    advantage:
+        title: Wealth & property expertise
+        subTitle: Exceptional tenant selection
+        text: Delegate the rigorous search for your next tenant to an expert partner and enjoy a smooth, secure letting process with zero hassle.
+        1:
+            title: Real time savings
+            text: We handle calls, screen enquiries, and organize viewings so you stay free of constraints. You avoid time-consuming tasks while keeping the final say.
+        2:
+            title: Protect your asset
+            text: We review every supporting document to reduce the risk of non-payment. We target profiles with proven strong financial capacity.
+        3:
+            title: Respect for your property
+            text: We prioritize tenants known for their care and stability, ensuring your asset is well maintained.
+        4:
+            title: Exclusive network
+            text: We share your listing with our private network and international relocation agencies, giving you access to premium candidates often absent from traditional portals.
+    faq:
+        question:
+            1:
+                title: Do I still have the final say in choosing the tenant?
+                text: Absolutely. Our role is to screen, pre-qualify, and present the 2 or 3 strongest applications. We share our analysis, but the final decision to sign the lease remains entirely yours.
+            2:
+                title: What is the average time to find the right tenant?
+                text: "Thanks to our pool of already qualified candidates, we typically find the ideal tenant <span class='font-semibold'>in under 10 days</span>."
+            3:
+                title: What exactly is included in your “turnkey” service?
+                text: "We handle everything: valuation, professional photography, targeted distribution, viewings, and rigorous screening. You simply approve the final candidate and prepare your lease."
+            4:
+                title: What do you need to get started?
+                text: "It’s very simple: we only need the signed search mandate and a set of keys."
+            5:
+                title: Do you require an exclusivity mandate on the property?
+                text: "Our service includes a 15-day exclusivity period to ensure immediate action and maximum mobilization of our network."
+    price:
+        title: Our fees
+        subTitle: Clear pricing, aligned with the success of the mission
+        text1: Tenant search
+        text2: We select the best candidates for you with maximum responsiveness.
+        guarantee:
+            title: Our commitments
+            1: No upfront fees
+            2: Success-based payment
+            3: Qualified tenants
+            4: Short mandate
+            5: Professional photography
+            6: Multichannel distribution
+        text3: of the rent excluding charges

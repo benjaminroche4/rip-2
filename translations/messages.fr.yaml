@@ -1216,5 +1216,14 @@ findTenant:
     price:
         title: Nos honoraires
         subTitle: Une tarification claire, alignée sur la réussite de la mission
-        text1:
-        text2:
+        text1: Recherche de locataire
+        text2: Nous sélectionnons pour vous les meilleurs profils avec une réactivité maximale.
+        guarantee:
+            title: Nos engagements
+            1: Aucun frais initial
+            2: Paiement à la réussite
+            3: Locataires qualifiés
+            4: Mandat court
+            5: Photos professionnelles
+            6: Diffusion multicanal
+        text3: du loyer hors charge
