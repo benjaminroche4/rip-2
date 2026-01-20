@@ -131,6 +131,7 @@ header:
 companies:
     title: Pour les entreprises
     subTitle: Loger vos collaborateurs facilement à Paris
+    text: "Un service clé en main pour loger vos talents à Paris : recherche, visites, dossiers et installation, avec un accompagnement dédié."
     trust:
         1: 5.0 basé sur
         2: avis
@@ -196,6 +197,7 @@ companies:
 findAccommodation:
     title: Trouver un logement
     subTitle: Votre logement clé en main à Paris
+    text: "Confiez-nous la recherche de votre logement à Paris : un service clé en main, simple et sur-mesure."
     trust:
         1: 5.0 basé sur
         2: avis
@@ -294,6 +296,9 @@ meta:
     home:
         title: Agence de Relocation à Paris
         description: "Agence de relocation à Paris pour particuliers et entreprises : recherche de logement, bureaux et installation complète de collaborateurs."
+    findTenant:
+        title: Trouver un locataire à Paris
+        description: "Service premium pour trouver un locataire à Paris : sélection rigoureuse, réseau exclusif, dossiers vérifiés et accompagnement sur-mesure jusqu’à l’installation."
     companies:
         title: Loger vos collaborateurs facilement à Pari
         description: "Logez vos collaborateurs à Paris facilement. Relocation clé-en-main, recherche sur-mesure, support administratif et accompagnement expert."
@@ -1123,21 +1128,93 @@ termsConditions:
         text3: À l’issue de cette période, si aucun logement n’a été trouvé, le contrat pourra être renouvelé par avenant ou prendre fin sans indemnité. Dans tous les cas, l'acompte reste acquis au Prestataire.
 findTenant:
     title: Trouver un locataire
-    subTitle: Des candidats soigneusement sélectionnés, en toute sérénité
-    step:
+    subTitle: Déléguez la recherche de votre futur locataire
+    text: "Trouvez le bon locataire en toute confiance à Paris grâce à notre service clé en main."
+    steps:
         1:
             title: Analyse du bien
-            text: Estimation locative, positionnement et définition du profil de locataire idéal.
+            text: Estimation locative, positionnement du bien et définition du profil de locataire idéal, afin d’assurer une mise en location cohérente, attractive et parfaitement alignée avec les attentes du marché.
         2:
             title: Mise en valeur
-            text: Photos professionnelles, home staging et optimisation de la présentation. Nous nous occupons de tout.
+            text: Photos professionnelles, home staging et optimisation de la présentation. Nous nous occupons de tout pour maximiser son attractivité.
+            cards:
+                1:
+                    text: Photos pro
+                2:
+                    text: Home staging
+                3:
+                    text: Retouches photos
         3:
             title: Diffusion ciblée
             text: Présentation du bien à notre réseau exclusif de clients qualifiés, puis diffusion sur des plateformes premium en France et à l’international.
+            cards:
+                1:
+                    text: Réseau privé de candidats
+                2:
+                    text: Plateformes et annonces premium
         4:
             title: Sélection & validation
-            text: Préqualification, vérification des dossiers et présentation des meilleurs profils. La validation finale reste entre vos mains.
+            text: "Préqualification, vérification des dossiers et présentation des meilleurs profils. <span class='underline underline-offset-4'>La validation finale reste entre vos mains</span>."
         5:
             title: Installation du locataire
-            text: Accompagnement complet jusqu’à l’entrée dans les lieux, pour une installation fluide et sereine.
+            text: 'Accompagnement jusqu’à l’entrée dans les lieux : coordination de la remise des clés, suivi des dernières étapes administratives et organisation des éléments pratiques pour une installation simple et sereine.'
 
+    solution:
+        title: Une mise en location maîtrisée
+        subTitle: Nos solutions pour trouver le bon locataire
+        1:
+            title: Analyse et stratégie
+            text: Estimation du loyer et positionnement pour attirer les bons profils.
+        2:
+            title: Mise en valeur du bien
+            text: Photos pro, home staging et présentation soignée pour maximiser l’impact.
+        3:
+            title: Annonces premium
+            text: Visibilité maximale via une multidiffusion sur les portails immobiliers internationaux.
+        4:
+            title: Réseau de candidats qualifiés
+            text: Accès à notre réseau exclusif de cadres en mobilité et clients internationaux.
+        5:
+            title: Visites et sélection
+            text: Visites organisées et sélection du meilleur dossier. Vous validez en toute sérénité.
+        6:
+            title: Entrée dans les lieux
+            text: Coordination jusqu’à la remise des clés et l’installation.
+    advantage:
+        title: Expertise patrimoniale
+        subTitle: Sélection de locataires d'exception
+        text: Déléguez la recherche rigoureuse de votre futur locataire à un partenaire expert et profitez d'une mise en location sereine, parfaitement sécurisée et sans aucune contrainte.
+        1:
+            title: Gain de temps réel
+            text: Nous filtrons les appels et organisons les visites pour vous libérer de toute contrainte. Vous évitez les tâches chronophages et gardez uniquement le dernier mot.
+        2:
+            title: Protection de votre patrimoine
+            text: Nous analysons chaque pièce justificative pour réduire les risques d'impayés. Nous ciblons des profils à haute capacité financière démontrée.
+        3:
+            title: Respect du logement
+            text: Nous privilégions des locataires reconnus pour leur soin et leur stabilité. Une exigence forte sur le profil pour garantir le bon entretien de votre patrimoine.
+        4:
+            title: Réseau exclusif
+            text: Nous diffusons votre bien auprès de notre réseau privé et d'agences de relocation internationales. Vous accédez à des candidats premium souvent absents des plateformes classiques.
+    faq:
+        question:
+            1:
+                title: Est-ce que j'ai toujours le dernier mot sur le choix du locataire ?
+                text: Absolument. Notre rôle est de filtrer, pré-qualifier et vous présenter les 2 ou 3 meilleurs dossiers. Nous vous transmettons notre analyse, mais la décision finale de signer le bail vous appartient exclusivement.
+            2:
+                title: Quel est le délai moyen pour trouver le bon locataire ?
+                text: "Grâce à notre vivier de candidats déjà qualifiés, nous trouvons généralement le locataire idéal <span class='font-semibold'>en moins de 10 jours</span>."
+            3:
+                title: Que comprend exactement votre service "clé en main" ?
+                text: "Nous prenons tout en charge : l'estimation, la mise en valeur photo, la diffusion ciblée, les visites et la sélection rigoureuse du dossier. Vous n'avez qu'à valider le candidat final et préparer votre bail."
+            4:
+                title: De quoi avez-vous besoin pour démarrer la recherche ?
+                text: "C’est très simple : nous avons uniquement besoin de la signature du mandat de recherche et d’un jeu de clés."
+            5:
+                title: Avez-vous un mandat d'exclusivité sur le bien ?
+                text: "Notre service s'appuie sur une exclusivité de 15 jours pour garantir une mobilisation immédiate et maximale de notre réseau."
+    price:
+        title: Nos honoraires
+        subTitle: Une tarification claire, alignée sur la réussite de la mission
+        text1:
+        text2:
