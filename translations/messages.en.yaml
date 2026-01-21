@@ -646,7 +646,6 @@ estimation:
     slider:
         label: Amount slider
     info:
-        fees: Our fees correspond to one month's rent excluding charges.
         description: We search and select the best properties for you in Paris (within and outside the city limits).
         link: Discover the offer in detail
     services:
@@ -974,7 +973,7 @@ propertyManagement:
         title: Fees
         subTitle: A remuneration model aligned with your property’s performance
         text1: A long-term partnership
-        text2: The better your property performs, the more value our support creates. A transparent partnership, fully aligned with your interests.
+        text2: The better your property performs, thse more value our support creates. A transparent partnership, fully aligned with your interests.
         guarantee:
             title: Your guarantees
             1: No setup fees

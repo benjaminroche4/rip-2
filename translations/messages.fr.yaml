@@ -649,7 +649,6 @@ estimation:
     slider:
         label: Curseur de montant
     info:
-        fees: Nos honoraires correspondent à un mois de loyer hors charges.
         description: Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
         link: Découvrir l'offre en détail
     services:
