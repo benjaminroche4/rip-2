@@ -112,6 +112,9 @@ footer:
         4: Legal Information
     bottomPage:
         rights: Relocation In Paris. All rights reserved.
+    callback:
+        text: An expert will get back to you
+        open: Open
 header:
     action: Open menu
     actionClose: Close menu

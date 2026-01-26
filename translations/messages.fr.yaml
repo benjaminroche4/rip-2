@@ -112,6 +112,9 @@ footer:
         4: Informations légales
     bottomPage:
         rights: Relocation In Paris. Tous droits réservés.
+    callback:
+        text: Un expert vous répond
+        open: Ouvert
 header:
     action: Ouvrir le menu
     actionClose: Fermer le menu
