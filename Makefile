@@ -24,3 +24,14 @@ version:
 	symfony -v
 	echo "→ PHP Version"
 	php -v
+
+.PHONY: tailwind
+
+tailwind:
+	@mkdir -p ~/tmp
+	@chmod 700 ~/tmp
+	@export TMPDIR=~/tmp && export TEMP=~/tmp && export TMP=~/tmp && \
+	php bin/console tailwind:build --minify
+	php bin/console asset-map:compile
+	php bin/console cache:clear
+	echo "→ Tailwind CSS build complete. Do not forget : chmod 711 . (Source)"
