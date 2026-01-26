@@ -90,7 +90,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="hidden md:flex items-center justify-center space-x-2">
+                    <div class="max-[810px]:hidden flex items-center justify-center space-x-2">
                         <a href="https://www.instagram.com/relocation_in_paris/" rel="noopener noreferrer" target="_blank" class="p-1.5 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:text-white text-zinc-200 transition duration-100">
                             <span class="sr-only">Instagram</span>
                             {{ ux_icon('uil:instagram', {'class':'size-6'}) }}
@@ -127,6 +127,10 @@
                         </svg>
                         <a href="tel:+(33)184804344" class="flex max-[214px]:text-xs max-[230px]:text-sm max-[365px]:text-base  items-center gap-x-4 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white transition duration-100 text-lg font-regular py-2 px-4">
                             +(33) 1 84 80 43 44
+                            {% set currentDay = "now"|date("N", "Europe/Paris") %}
+                            {% set currentHour = "now"|date("G", "Europe/Paris") %}
+                            {% set isOpen = (currentDay >= 1 and currentDay <= 5 and currentHour >= 8 and currentHour < 20) or (currentDay == 6 and currentHour >= 8 and currentHour < 12) %}
+                            {% if isOpen %}
                             <div class="max-[330px]:hidden bg-[#ECFDF5] text-[#059669] py-1.5 px-2 rounded-full text-xs font-medium flex items-center gap-x-1 justify-center">
                                 <span class="relative flex size-2">
                                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
@@ -134,6 +138,7 @@
                                 </span>
                                 {{ 'footer.callback.open'|trans|raw }}
                             </div>
+                            {% endif %}
                         </a>
                     </div>
                 </div>
@@ -210,6 +215,16 @@
                 </div>
             </section>
             <div class="h-[1px] bg-gradient-to-r from-white/20 via-white to-white/20 opacity-20"></div>
+            <div class="min-[810px]:hidden flex items-center justify-center space-x-2">
+                <a href="https://www.instagram.com/relocation_in_paris/" rel="noopener noreferrer" target="_blank" class="p-1.5 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:text-white text-zinc-200 transition duration-100">
+                    <span class="sr-only">Instagram</span>
+                    {{ ux_icon('uil:instagram', {'class':'size-6'}) }}
+                </a>
+                <a href="https://www.linkedin.com/company/relocation-in-paris/" rel="noopener noreferrer" target="_blank" class="p-1.5 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:text-white text-zinc-200 transition duration-100">
+                    <span class="sr-only">Linkedin</span>
+                    {{ ux_icon('uil:linkedin', {'class':'size-6'}) }}
+                </a>
+            </div>
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="text-gray-300 text-sm lg:text-start text-center">
                     <p>&copy; {{ "now"|date("Y") }} {{ 'footer.bottomPage.rights'|trans|raw }}</p>
