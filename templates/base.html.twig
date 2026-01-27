@@ -238,15 +238,14 @@
                     height="0" width="0" style="display:none;visibility:hidden">
             </iframe>
         </noscript>
-        {{ component('adminTab') }}
-        {{ component('gridBackground') }}
-        {{ component('header', {post: post|default(null)}) }}
+        {{ component('block/gridBackground') }}
+        {{ component('layout/header', {post: post|default(null)}) }}
         <main class="relative z-20">
             {% block body %}{% endblock %}
             {% if app.request.attributes.get('_route') != 'app_estimation' %}
-                {{ component('whatsappButton') }}
+                {{ component('blocks/whatsappButton') }}
             {% endif %}
         </main>
-        {{ component('footer') }}
+        {{ component('layout/footer') }}
     </body>
 </html>
