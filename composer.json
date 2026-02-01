@@ -50,7 +50,9 @@
         "symfony/web-link": "7.3.*",
         "symfony/yaml": "7.3.*",
         "symfonycasts/tailwind-bundle": "^0.12.0",
-        "twig/extra-bundle": "^2.12|^3.0",
+        "tales-from-a-dev/twig-tailwind-extra": "^1.0.0",
+        "twig/extra-bundle": "^3.23",
+        "twig/html-extra": "^3.12.0",
         "twig/intl-extra": "^3.21",
         "twig/twig": "^2.12|^3.0"
     },
@@ -113,6 +115,7 @@
         "symfony/debug-bundle": "7.3.*",
         "symfony/maker-bundle": "^1.0",
         "symfony/stopwatch": "7.3.*",
+        "symfony/ux-toolkit": "^2.32",
         "symfony/web-profiler-bundle": "7.3.*",
         "zenstruck/foundry": "^2.7"
     }

@@ -1,0 +1,14 @@
+{# @prop id string Unique suffix identifier for generating AlertDialog internal IDs #}
+{# @block content The default block #}
+{%- props id -%}
+
+{%- set _alert_dialog_id = 'alert-dialog-' ~ id -%}
+{%- set _alert_dialog_title_id = _alert_dialog_id ~ '-title' -%}
+{%- set _alert_dialog_description_id = _alert_dialog_id ~ '-description' -%}
+<div {{ attributes.defaults({
+    'data-controller': 'alert-dialog',
+    'aria-labelledby': _alert_dialog_title_id,
+    'aria-describedby': _alert_dialog_description_id,
+}) }}>
+    {% block content %}{% endblock %}
+</div>

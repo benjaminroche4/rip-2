@@ -13,13 +13,13 @@
         <div class="flex lg:flex-2 items-center justify-start gap-x-2 gap-x-4">
             <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5">
                 <span class="sr-only">Relocation In Paris</span>
-                <img src="{{ asset('medias/logos/logo.svg') }}" width="300" height="68" loading="eager" alt="Logo Relocation In Paris Desktop" class="hidden shrink-0 lg:block h-8 w-auto" />
+                <img src="{{ asset('medias/logos/logo_red.svg') }}" width="300" height="68" loading="eager" alt="Logo Relocation In Paris Desktop" class="hidden shrink-0 lg:block h-8 w-auto" />
                 <img src="{{ asset('medias/logos/logo_short.svg') }}" width="153" height="150" loading="eager" alt="Logo Relocation In Paris Mobile" class="block lg:hidden h-8 w-auto" />
             </a>
-            <el-popover-group class="hidden lg:flex lg:gap-x-6">
-                <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-neutral-100{% endif %} text-sm/6 font-semibold text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">{{ 'header.menu.findAccommodation'|trans|raw }}</a>
-                <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-neutral-100{% endif %} text-sm/6 font-semibold text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">{{ 'header.menu.companies'|trans|raw }}</a>
-                <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100{% endif %}  text-sm/6 font-semibold text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">{{ 'header.menu.landlords'|trans|raw }}</a>
+            <el-popover-group class="hidden lg:flex lg:gap-x-3">
+                <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-neutral-100{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Recherche de logement</a>
+                <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-neutral-100{% endif %} text-sm/6 font-medium  text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Solutions entreprises</a>
+                <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100{% endif %}  text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Gestion et services</a>
             </el-popover-group>
         </div>
         <div class="flex lg:hidden gap-x-2">
@@ -39,26 +39,32 @@
                 </svg>
             </button>
         </div>
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end ">
+        <div class="hidden lg:flex lg:flex-1 lg:justify-end items-center gap-x-2">
+            <twig:AlertDialog id="delete_account">
+                <twig:AlertDialog:Trigger>
+                    <twig:Button variant="ghost" class="hover:bg-neutral-100 cursor-pointer h-full" {{ ...trigger_attrs }}>{{ ux_icon('lucide:globe', {'class':'size-6'}) }}</twig:Button>
+                </twig:AlertDialog:Trigger>
+                <twig:AlertDialog:Content class="max-w-4xl">
+                    <twig:AlertDialog:Header>
+                        <div class="flex items-center gap-x-2 justify-between">
+                            <twig:AlertDialog:Title>Are you absolutely sure?</twig:AlertDialog:Title>
+                            <twig:AlertDialog:Cancel>Cancel</twig:AlertDialog:Cancel>
+                        </div>
+                    </twig:AlertDialog:Header>
+                    <twig:AlertDialog:Content>
+                        This action cannot be undone. This will permanently delete your
+                        account and remove your data from our servers.
+                    </twig:AlertDialog:Content>
+                    <twig:AlertDialog:Footer>
+                        <twig:AlertDialog:Cancel>Cancel</twig:AlertDialog:Cancel>
+                        <twig:AlertDialog:Action>Continue</twig:AlertDialog:Action>
+                    </twig:AlertDialog:Footer>
+                </twig:AlertDialog:Content>
+            </twig:AlertDialog>
+
             <div class="flex items-center gap-x-3">
-                <a href="tel:{{ phone_number }}" class="max-[1300px]:hidden text-sm/6 rounded-full h-10 font-semibold text-gray-900 py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
-                    {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
-                    {{ phone_number }}
-                </a>
-                <a href="{{ path('app_contact') }}" class="text-xs font-light uppercase text-gray-900 bg-primary text-white rounded-full py-3 px-4 flex items-center gap-x-2 hover:bg-primary/80 transition duration-100">
-                    {{ 'header.menu.contact'|trans|raw }}
-                </a>
+                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">Lancer mon projet</twig:Button>
             </div>
-            {% if app.request.locale == 'en' %}
-                <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
-                    {{ ux_icon('flag:bl-4x3', {'class':'size-5'}) }}
-                </a>
-            {% endif %}
-            {% if app.request.locale == 'fr' %}
-                <a href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}" class="text-sm/6 font-semibold text-gray-900 py-2.5 px-3.5 flex items-center gap-x-2">
-                    {{ ux_icon('flag:gb-4x3', {'class':'size-5'}) }}
-                </a>
-            {% endif %}
         </div>
     </nav>
     <el-dialog>

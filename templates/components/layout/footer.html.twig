@@ -148,7 +148,6 @@
                 <div class="space-y-4 text-sm">
                     <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.1'|trans|raw }}</h3>
                     <nav class="flex flex-col space-y-4">
-                        <a href="{{ path('app_home') }}" class="{% if app.request.attributes.get('_route') == 'app_home' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.home'|trans|raw }}</a>
                         <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
                         <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findTenant'|trans|raw }}</a>
