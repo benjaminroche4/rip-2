@@ -36,10 +36,10 @@ contact:
             label: How can we help you?
             placeholder: Choose your request
             choice:
-                1: Housing search
-                2: Services for companies
-                3: Services for landlords
-                4: Other request or information
+                1: Housing Search
+                2: Solutions for Businesses
+                3: Property Management and Rental Services
+                4: Other Requests or Information
         message:
             label: Message
             placeholder: Your message...

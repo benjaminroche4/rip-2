@@ -37,8 +37,8 @@ contact:
             placeholder: Choisissez un type de demande
             choice:
                 1: Recherche de logement
-                2: Services pour entreprises
-                3: Services pour propriétaires
+                2: Solutions pour entreprises
+                3: Gestion locative et service de location
                 4: Autre demande ou information
         message:
             label: Message

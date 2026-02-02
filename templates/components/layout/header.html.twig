@@ -9,24 +9,101 @@
 {% endif %}
 
 <header class="relative z-10">
-    <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
-        <div class="flex lg:flex-2 items-center justify-start gap-x-2 gap-x-4">
+    <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8 gap-x-3">
+        <div class="flex lg:flex-2 items-center justify-start gap-x-4">
             <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5">
                 <span class="sr-only">Relocation In Paris</span>
-                <img src="{{ asset('medias/logos/logo_red.svg') }}" width="300" height="68" loading="eager" alt="Logo Relocation In Paris Desktop" class="hidden shrink-0 lg:block h-8 w-auto" />
-                <img src="{{ asset('medias/logos/logo_short.svg') }}" width="153" height="150" loading="eager" alt="Logo Relocation In Paris Mobile" class="block lg:hidden h-8 w-auto" />
+                <img src="{{ asset('medias/logos/logo_red.svg') }}" width="300" height="68" loading="eager" alt="Logo Relocation In Paris Desktop" class="shrink-0 h-8 w-auto" />
             </a>
             <el-popover-group class="hidden lg:flex lg:gap-x-3">
-                <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-neutral-100{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Recherche de logement</a>
-                <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-neutral-100{% endif %} text-sm/6 font-medium  text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Solutions entreprises</a>
-                <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100{% endif %}  text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 py-2.5 px-3 rounded-lg transition duration-100">Gestion et services</a>
+                <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100">Recherche de logement</a>
+                <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium  text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100">Solutions entreprises</a>
+                <button data-controller="popover" data-popover-popover-id-value="desktop-menu-solutions" popovertarget="desktop-menu-solutions" class="{% if app.request.attributes.get('_route') in ['app_service_landlords', 'app_service_find_tenant'] %} bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary cursor-pointer py-2.5 px-3 rounded-lg transition duration-100 inline-flex items-center gap-x-1">
+                    Gestion et services
+                    <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 transition-transform duration-200">
+                        <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                    </svg>
+                </button>
             </el-popover-group>
+            <el-popover id="desktop-menu-solutions" popover class="absolute top-18 m-0 w-full overflow-visible bg-white p-0
+             transition [transition-behavior:allow-discrete] backdrop:bg-transparent open:block data-[closed]:-translate-y-1
+              data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in">
+                <div aria-hidden="true" class="absolute inset-0 top-1/2 bg-white shadow-lg ring-1 ring-gray-900/5"></div>
+                <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                <div class="relative bg-white">
+                    <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-10 pb-5">
+                        <h3 class="text-base font-medium text-primary">
+                            Gestion et services
+                        </h3>
+                    </div>
+                    <div class="mx-auto grid max-w-7xl grid-cols-3 gap-x-4 px-6 pb-10 lg:px-8 xl:gap-x-8">
+                        <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100">
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-white{% endif %}">
+                                    {{ ux_icon('lucide:home', {'class':'size-6 text-gray-600 text-primary'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            Gestion locative
+                                        </p>
+                                        <div>
+                                            <div class="flex -space-x-1">
+                                                <div class="inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#2446FF] items-center justify-center">
+                                                    {{ ux_icon('simple-icons:tripdotcom', {'class':'size-4 brightness-0 invert'}) }}
+                                                </div>
+                                                <div class="z-10 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#133B95] items-center justify-center">
+                                                    {{ ux_icon('tabler:brand-booking', {'class':'size-4 brightness-0 invert'}) }}
+                                                </div>
+                                                <div class="z-20 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#F5385D] items-center justify-center">
+                                                    {{ ux_icon('logos:airbnb-icon', {'class':'size-4 brightness-0 invert'}) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">Get a better understanding of where your traffic is coming from</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100">
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}bg-white{% endif %}">
+                                    {{ ux_icon('lucide:user-check', {'class':'size-6 text-gray-600 text-primary'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            Trouver un locataire
+                                        </p>
+                                        <div>
+                                            <div class="flex -space-x-1">
+                                                <img src="{{ asset('medias/team/team_1.webp') }}" alt="Trouver un locataire" loading="lazy" width="24" height="24" class="inline-block size-6 bg-white rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">Get a better understanding of where your traffic is coming from</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/50">
+                        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                            <div class="grid grid-cols-2 divide-x divide-gray-900/5 border-x border-gray-900/5">
+                                <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100">
+                                    {{ ux_icon('lucide:phone-call', {'class':'size-5 flex-none text-gray-400'}) }}
+                                    Contacter un expert
+                                </a>
+                                <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}bg-gray-100{% endif %}  flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100">
+                                    {{ ux_icon('lucide:newspaper', {'class':'size-5 flex-none text-gray-400'}) }}
+                                    Nos actualités
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </el-popover>
         </div>
         <div class="flex lg:hidden gap-x-2">
-            <a href="tel:{{ phone_number }}" class="max-[310px]:hidden bg-[#FAE9EE] text-sm/6 rounded-full h-10 font-semibold text-gray-900 py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
-                {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
-                {{ phone_number }}
-            </a>
             <button
                 type="button"
                 command="show-modal"
@@ -39,7 +116,7 @@
                 </svg>
             </button>
         </div>
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end items-center gap-x-2">
+        <div class="hidden lg:flex lg:justify-end items-center gap-x-2">
             <twig:AlertDialog id="delete_account">
                 <twig:AlertDialog:Trigger>
                     <twig:Button variant="ghost" class="hover:bg-neutral-100 cursor-pointer h-full" {{ ...trigger_attrs }}>{{ ux_icon('lucide:globe', {'class':'size-6'}) }}</twig:Button>
@@ -75,13 +152,9 @@
                         <div class="flex items-center justify-between">
                             <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5">
                                 <span class="sr-only">Relocation In Paris</span>
-                                <img src="{{ asset('medias/logos/logo_short.svg') }}" width="153" height="150" loading="eager" alt="Relocation In Paris Logo Mobile" class="h-8 w-auto" />
+                                <img src="{{ asset('medias/logos/logo_red.svg') }}" width="153" height="150" loading="eager" alt="Relocation In Paris Logo Mobile" class="h-8 w-auto" />
                             </a>
                             <div class="flex items-center gap-x-2 lg:hidden">
-                                <a href="tel:{{ phone_number }}" class="max-[300px]:hidden text-sm/6 font-semibold h-10 bg-[#FAE9EE] text-gray-900 rounded-full py-1 px-3.5 flex items-center gap-x-2 hover:bg-neutral-100 transition duration-100">
-                                    {{ ux_icon('line-md:phone', {'class':'shrink-0 size-4'}) }}
-                                    {{ phone_number }}
-                                </a>
                                 <button
                                     type="button"
                                     command="close"
@@ -103,45 +176,69 @@
                             </div>
                         </div>
                         <div class="mt-6 flow-root">
+                            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 mb-4"></div>
                             <div class="-my-6 divide-y divide-gray-500/10">
                                 <div class="space-y-2 py-6">
+                                    <a href="{{ path('app_estimation') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50">Recherche de logement</a>
+                                    <a href="{{ path('app_estimation') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50">Solutions entreprises</a>
                                     <div class="-mx-3">
-                                        <button type="button" command="--toggle" commandfor="products" class="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 uppercase text-gray-900 hover:bg-gray-50 text-base">
-                                            {{ 'header.menu.ourServices'|trans|raw }}
-                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 flex-none [[aria-expanded='true']_&]:rotate-180">
+                                        <button type="button" command="--toggle" commandfor="products" class="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 font-medium text-gray-900 hover:bg-gray-50 text-base">
+                                            Gestion et services
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 flex-none transition-transform duration-200 [[aria-expanded='true']_&]:rotate-180">
                                                 <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
                                             </svg>
                                         </button>
                                         <el-disclosure id="products" hidden class="mt-2 space-y-2 [&:not([hidden])]:block">
-                                            <a href="{{ path('app_service_find_accommodation') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
-                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
-                                                    {{ ux_icon('mynaui:home', {'class':'size-5 text-primary'}) }}
+                                            <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block">
+                                                    <div class="flex items-start justify-start gap-x-4">
+                                                        <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if app.request.attributes.get('_route') == 'app_service_landlords' %}bg-white{% endif %}">
+                                                            {{ ux_icon('lucide:home', {'class':'size-6 text-gray-600 text-primary'}) }}
+                                                        </div>
+                                                        <div class="flex flex-col">
+                                                            <div class="flex items-center justify-between">
+                                                                <p class="block font-semibold text-gray-900">
+                                                                    Gestion locative
+                                                                </p>
+                                                                <div>
+                                                                    <div class="flex -space-x-1">
+                                                                        <div class="inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#2446FF] items-center justify-center">
+                                                                            {{ ux_icon('simple-icons:tripdotcom', {'class':'size-4 brightness-0 invert'}) }}
+                                                                        </div>
+                                                                        <div class="z-10 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#133B95] items-center justify-center">
+                                                                            {{ ux_icon('tabler:brand-booking', {'class':'size-4 brightness-0 invert'}) }}
+                                                                        </div>
+                                                                        <div class="z-20 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#F5385D] items-center justify-center">
+                                                                            {{ ux_icon('logos:airbnb-icon', {'class':'size-4 brightness-0 invert'}) }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <p class="mt-2 text-neutral-600">Get a better understanding of where your traffic is coming from</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block">
+                                                <div class="flex items-start justify-start gap-x-4">
+                                                    <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}bg-white{% endif %}">
+                                                        {{ ux_icon('lucide:user-check', {'class':'size-6 text-gray-600 text-primary'}) }}
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <div class="flex items-center justify-between">
+                                                            <p class="block font-semibold text-gray-900">
+                                                                Trouver un locataire
+                                                            </p>
+                                                            <div>
+                                                                <div class="flex -space-x-1">
+                                                                    <img src="{{ asset('medias/team/team_1.webp') }}" alt="Trouver un locataire" loading="lazy" width="24" height="24" class="inline-block size-6 bg-white rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p class="mt-2 text-neutral-600">Get a better understanding of where your traffic is coming from</p>
+                                                    </div>
                                                 </div>
-                                                {{ 'header.menu.findAccommodation'|trans|raw }}
-                                            </a>
-                                            <a href="{{ path('app_service_companies') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
-                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
-                                                    {{ ux_icon('clarity:building-line', {'class':'size-5 text-primary'}) }}
-                                                </div>
-                                                {{ 'header.menu.companies'|trans|raw }}
-                                            </a>
-                                            <a href="{{ path('app_service_find_tenant') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
-                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
-                                                    {{ ux_icon('tabler:search', {'class':'size-5 text-primary'}) }}
-                                                </div>
-                                                {{ 'header.menu.findTenant'|trans|raw }}
-                                            </a>
-                                            <a href="{{ path('app_service_landlords') }}" class="block rounded-lg py-2 pl-3 pr-3 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center gap-x-3">
-                                                <div class="bg-primary/5 rounded-md flex items-center justify-center p-2">
-                                                    {{ ux_icon('meteor-icons:key', {'class':'size-5 text-primary'}) }}
-                                                </div>
-                                                {{ 'header.menu.landlords'|trans|raw }}
                                             </a>
                                         </el-disclosure>
                                     </div>
-                                    <a href="{{ path('app_estimation') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.estimation'|trans|raw }}</a>
-                                    <a href="{{ path('app_about_us') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.aboutUs'|trans|raw }}</a>
-                                    <a href="{{ path('app_blog') }}" class="-mx-3 block rounded-lg px-3 py-2 text-base uppercase text-gray-900 hover:bg-gray-50">{{ 'header.menu.blog'|trans|raw }}</a>
                                 </div>
                                 <div class="py-3 space-y-4">
                                     <div class="-mx-3">
@@ -156,7 +253,7 @@
                                                 EN
                                             {% endif %}
                                         </span>
-                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 flex-none [[aria-expanded='true']_&]:rotate-180">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 flex-none transition-transform duration-200 [[aria-expanded='true']_&]:rotate-180">
                                                 <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
                                             </svg>
                                         </button>
