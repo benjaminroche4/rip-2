@@ -118,16 +118,35 @@ footer:
 header:
     action: Ouvrir le menu
     actionClose: Fermer le menu
+    lang:
+        select: Choisir une langue
+        type:
+            fr: Français
+            en: English
+    logo:
+        alt: Logo de Relocation In Pars, Agence de Relocation à Paris.
     menu:
-        findAccommodation: Trouver un logement
-        companies: Entreprises
-        landlords: Gestion locative
-        findTenant: Trouver un locataire
-        contact: Contacter un expert
-        estimation: Obtenez votre estimation
-        blog: Blog
-        aboutUs: À propos
-        ourServices: Nos services
+        findAccommodation: Recherche de logement
+        companies: Solutions entreprises
+        propertyManagement: Gestion et services
+        management:
+            title: Gestion locative
+            text: Une gestion sur mesure pour vos locations courte et moyenne durée à Paris.
+        findTenant:
+            title: Trouver un locataire
+            text: Nous sélectionnons le locataire idéal et sécurisons votre mise en location.
+            imgAlt: Expert en recherche de locataires
+        contactExpert: Contacter un expert
+        blog: Nos actualités
+    cta:
+        title: Lancer mon projet
+        whatsapp:
+            title: WhatsApp
+            text: Contactez-nous via WhatsApp
+    badge:
+        tailorMade: Sur-mesure
+    text:
+        partners: Plateformes partenaires
     google:
         basedOn: Basé sur
         reviews: avis

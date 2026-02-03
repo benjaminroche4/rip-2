@@ -118,16 +118,35 @@ footer:
 header:
     action: Open menu
     actionClose: Close menu
+    lang:
+        select: Select language
+        type:
+            fr: Français
+            en: English
+    logo:
+        alt: Relocation In Paris logo, relocation agency in Paris.
     menu:
-        findAccommodation: Find accommodation
-        companies: Companies
-        landlords: Property management
-        findTenant: Find a tenant
-        contact: Contact an expert
-        estimation: Get your estimate
+        findAccommodation: Property search
+        companies: Corporate services
+        propertyManagement: Management & services
+        management:
+            title: Rental management
+            text: Tailor-made management for your short and medium-term rentals in Paris.
+        findTenant:
+            title: Find a tenant
+            text: We find the ideal tenant and secure your rental process.
+            imgAlt: Expert tenant search services
+        contactExpert: Talk to an expert
         blog: Blog
-        aboutUs: About us
-        ourServices: Our services
+    cta:
+        title: Start my project
+        whatsapp:
+            title: WhatsApp
+            text: Message us on WhatsApp
+    badge:
+        tailorMade: Tailor-made
+    text:
+        partners: Partner platforms
     google:
         basedOn: Based on
         reviews: reviews
