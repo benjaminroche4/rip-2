@@ -55,11 +55,10 @@
                     <span class="text-red-600">*</span>
                 </div>
                 <div class="mt-2 flex flex-col sm:flex-row gap-2">
-                    {{ form_widget(newsletterForm.email, {'attr': {'class': 'block w-full rounded-full bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans }}) }}
-                    <button type="submit"
-                       class="rounded-full bg-primary text-center px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                    {{ form_widget(newsletterForm.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans }}) }}
+                    <twig:Button variant="default" size="lg" class="h-auto cursor-pointer">
                         {{ 'newsletter.form.button'|trans }}
-                    </button>
+                    </twig:Button>
                 </div>
                 <div class="text-xs text-gray-600/90 mt-5 flex items-center gap-x-2">
                     {{ ux_icon('fluent:alert-48-regular', {'class':'size-5 shrink-0'}) }}

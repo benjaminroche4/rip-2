@@ -204,14 +204,12 @@
                         <label class="ml-3 block text-sm leading-5 text-neutral-900">{{ form_label(contactForm.accept, 'contact.contactForm.accept.label'|trans) }}</label>
                     </div>
                     <div class="pt-4">
-                        <button type="submit"
-                                class="flex items-center justify-center gap-x-2 cursor-pointer block w-full rounded-full bg-primary px-4 py-3 text-sm text-white font-light uppercase hover:bg-primary/80 transition duration-100">
-                            {{ ux_icon('lucide:check', {'class':'text-white shrink-0 size-5'}) }}
+                        <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
                             {{ 'contact.contactForm.button'|trans|raw }}
-                        </button>
+                        </twig:Button>
                     </div>
                 {{ form_end(contactForm) }}
-                <div>
+                <div class="-mt-2">
                     <p class="text-neutral-500 text-center italic text-sm">{{ 'contact.contactForm.subButtonText'|trans|raw }}</p>
                 </div>
             </div>

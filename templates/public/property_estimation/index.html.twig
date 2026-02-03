@@ -48,21 +48,10 @@
                         </p>
                     </div>
                 </div>
-                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start">
-                    <div>
-                        <a href="tel:{{ phone_number }}"
-                           class="flex items-center gap-x-3 group rounded-full bg-primary border-2 border-primary px-6 py-3 text-sm uppercase font-semibold text-white hover:text-primary transition duration-100 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                            <div class="bg-white group-hover:bg-primary rounded-full p-1.5">
-                                {{ ux_icon('ix:support', {'class':'size-5 text-primary shrink-0 group-hover:text-white transition duration-100'}) }}
-                            </div>
-                            {{ phone_number }}
-                        </a>
-                        <div>
-                            <p class="text-xs text-slate-500 font-light text-center mt-2">
-                                {{ 'propertyManagement.hero.subButton'|trans|raw }}
-                            </p>
-                        </div>
-                    </div>
+                <div class="mt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start">
+                    <twig:Button variant="default" as="a" size="lg" class="mt-6" href="{{ path('app_contact') }}">
+                        {{ 'propertyManagement.price.fees.button'|trans|raw }}
+                    </twig:Button>
                 </div>
             </div>
             <div>
@@ -158,11 +147,9 @@
                                 {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
                                 {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.email.placeholder'|trans}}) }}
                             </div>
-                            <button type="submit"
-                                    class="flex items-center justify-center gap-x-1 cursor-pointer block w-full rounded-full bg-primary px-4 py-3.5 text-sm text-white font-medium hover:bg-primary/80 transition duration-100">
+                            <twig:Button variant="default" class="w-full" size="lg">
                                 {{ 'propertyManagement.form.button'|trans|raw }}
-                                {{ ux_icon('lucide:check', {'class':'text-white shrink-0 size-5'}) }}
-                            </button>
+                            </twig:Button>
                             <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 items-center mx-auto max-w-sm">
                                 <p class="text-xs text-gray-500 text-center mx-0.5">
                                     {{ 'propertyManagement.form.trust.1'|trans|raw }}
@@ -352,10 +339,9 @@
                             </div>
                         </dl>
                         <div class="mt-10 flex items-center justify-start">
-                            <a href="{{ path('app_contact') }}"
-                               class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                            <twig:Button variant="default" as="a" size="lg" class="mt-6" href="{{ path('app_contact') }}">
                                 {{ 'propertyManagement.about.button'|trans|raw }}
-                            </a>
+                            </twig:Button>
                         </div>
                     </div>
                 </div>
@@ -443,10 +429,9 @@
                                 <span class="text-4xl font-semibold tracking-wide text-gray-900">%</span>
                             </p>
                             <p data-pricing-tabs-target="description" class="mt-6 text-balance text-sm/5 text-gray-600 uppercase"></p>
-                            <a href="{{ path('app_contact') }}"
-                               class="inline-flex items-center gap-x-4 mt-6 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                            <twig:Button variant="default" as="a" size="lg" class="mt-6" href="{{ path('app_contact') }}">
                                 {{ 'propertyManagement.price.fees.button'|trans|raw }}
-                            </a>
+                            </twig:Button>
                         </div>
                     </div>
                 </div>

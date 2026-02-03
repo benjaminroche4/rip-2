@@ -39,10 +39,9 @@
             </div>
         </div>
         <div class="mt-10 flex items-center justify-center">
-            <a href="{{ path('app_contact') }}"
-               class="rounded-full bg-primary px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                {{ 'home.heroSection.button'|trans|raw }} →
-            </a>
+            <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                {{ 'home.heroSection.button'|trans|raw }}
+            </twig:Button>
         </div>
     </section>
     <section

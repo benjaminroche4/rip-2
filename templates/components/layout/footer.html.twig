@@ -104,7 +104,7 @@
                 <div>
                     <div class="flex items-center space-x-3 md:flex-row flex-col space-y-6 md:space-y-0">
                         <div class="flex items-center max-[375px]:flex-col gap-3">
-                            <div class="flex -space-x-3">
+                            <div class="flex -space-x-1.5">
                                 <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                 <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                 <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
@@ -150,8 +150,8 @@
                     <nav class="flex flex-col space-y-4">
                         <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
+                        <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.management'|trans|raw }}</a>
                         <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findTenant'|trans|raw }}</a>
-                        <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.landlords'|trans|raw }}</a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">

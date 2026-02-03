@@ -1,5 +1,5 @@
 contact:
-    title: Contact us
+    title: Contact Us
     subTitle: Contact Our Team of Experts
     image:
         alt: Relocation In Paris, relocation agency in Paris
@@ -67,9 +67,10 @@ sitemap:
     general: General
     blog: Blog
     menu:
-        findAccommodation: Find accommodation
-        companies: Companies
-        landlords: Property management
+        findAccommodation: Property search
+        companies: Corporate services
+        management: Property management
+        findTenant: Find a tenant
         blog: Blog
         contact: Contact us
         login: Log in
@@ -82,16 +83,16 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
-        findTenant: Find a tenant
     blogMenu:
         blog: Blog
 footer:
     logo:
         alt: Relocation in Paris logo
     menu:
-        findAccommodation: Find accommodation
-        companies: Companies
-        landlords: Property management
+        findAccommodation: Property search
+        companies: Corporate services
+        findTenant: Find a tenant
+        management: Property management
         blog: Blog
         contact: Contact us
         login: Log in
@@ -104,7 +105,6 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
-        findTenant: Find a tenant
     menuTitle:
         1: Our Services
         2: About Us
@@ -130,7 +130,7 @@ header:
         companies: Corporate services
         propertyManagement: Management & services
         management:
-            title: Rental management
+            title: Property management
             text: Tailor-made management for your short and medium-term rentals in Paris.
         findTenant:
             title: Find a tenant
@@ -151,7 +151,7 @@ header:
         basedOn: Based on
         reviews: reviews
 companies:
-    title: For companies
+    title: Corporate Services
     subTitle: Corporate Housing in Paris, Made Simple
     text: "A turnkey service to relocate your talent to Paris: search, viewings, applications, and move-in support with dedicated assistance."
     trust:
@@ -217,7 +217,7 @@ companies:
                 title: Why work with a relocation agency?
                 text: "Working with a relocation agency simplifies employee relocation, strengthens your employer brand, and saves valuable time. We collaborate with over 80 partners in Paris and provide access to a unique off-market housing network across the city."
 findAccommodation:
-    title: Find a home
+    title: Property Search
     subTitle: Your Turnkey Housing Solution in Paris
     text: "Let us handle your home search in Paris: a turnkey service that is simple and tailored to you."
     trust:
@@ -322,13 +322,13 @@ meta:
         title: Find a Tenant in Paris
         description: "Premium service to find a tenant in Paris: rigorous selection, exclusive network, verified applications, and tailored support through to move-in."
     companies:
-        title: Corporate Housing in Paris Made Simple
+        title: Property Search in Paris for Your Employees
         description: "Easily house your employees in Paris. End-to-end relocation, tailored property search, administrative support and expert guidance."
     contact:
         title: Contact Our Relocation Experts in Paris
         description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
     findAccommodation:
-        title: Housing Search in Paris
+        title: Property Search in Paris
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
     landlords:
         title: Property Management in Paris
@@ -349,7 +349,7 @@ meta:
         title: Privacy Policy
         description: "Relocation In Paris privacy policy: how we collect, use, and protect your personal data in accordance with the GDPR."
     estimation:
-        title: Get Your Estimate
+        title: Get Your Relocation Estimate in Paris
         description: Estimate the cost of your relocation to Paris in just a few clicks. Discover our personalized services to find your new home and make your move smooth and stress-free.
     newsletter:
         title: Subscribe to Our Newsletter
@@ -373,13 +373,13 @@ home:
         subTitle: A tailored service for every need
         button: Discover the service
         1:
-            title: Find accommodation
-            text: An exclusive and personalized housing search for short- or long-term stays in Paris.
+            title: Property search
+            text: An exclusive, personalized property search for short or long-term rentals in Paris.
         2:
-            title: For companies
+            title: Corporate solutions
             text: Free your team from administrative burdens with our turnkey solutions.
         3:
-            title: Property Management
+            title: Property management
             text: Entrust us with your property for a smooth and profitable rental experience.
     faq:
         title: FAQ
@@ -661,7 +661,7 @@ privacy:
 estimation:
     title: Rent estimation in Paris
     hero:
-        title: Get your estimate
+        title: Get Your Estimate
         subtitle: Estimate The Cost of Your Relocation to Paris
     rent:
         label: Your estimated monthly rent
@@ -1145,7 +1145,7 @@ termsConditions:
         text2: "Unless otherwise stated, the housing search mission is entered into for an initial period of three (3) months."
         text3: "At the end of this period, if no accommodation has been found, the contract may be renewed by amendment or shall end without compensation. In all cases, the deposit shall remain due to the Service Provider."
 findTenant:
-    title: Find a tenant
+    title: Find a Tenant
     subTitle: Delegate The Search For Your Next Tenant
     text: "Find the right tenant in Paris with complete peace of mind thanks to our turnkey service."
     steps:

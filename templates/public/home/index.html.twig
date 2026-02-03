@@ -55,10 +55,9 @@
                     {{ 'home.heroSection.subTitle'|trans|raw }}
                 </p>
                 <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
-                    <a href="{{ path('app_contact') }}"
-                       class="rounded-full bg-primary px-6 py-3 text-sm uppercase font-light text-white transition duration-100 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
-                        {{ 'home.heroSection.button'|trans|raw }} →
-                    </a>
+                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                        {{ 'home.heroSection.button'|trans|raw }}
+                    </twig:Button>
                 </div>
                 <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
                     <div class="flex items-center gap-3 justify-center lg:justify-start">
@@ -264,10 +263,9 @@
                             </div>
                         </dl>
                         <div class="mt-10 flex items-center justify-start">
-                            <a href="{{ path('app_estimation') }}"
-                               class="inline-flex items-center gap-x-4 rounded-full bg-[#71172e] px-4 py-3 text-xs font-light uppercase text-white transition duration-150 hover:bg-[#71172e]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#71172e]">
+                            <twig:Button variant="default" as="a" size="lg" href="{{ path('app_estimation') }}">
                                 {{ 'home.aboutUs.button'|trans|raw }}
-                            </a>
+                            </twig:Button>
                         </div>
                     </div>
                 </div>

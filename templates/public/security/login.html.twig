@@ -55,7 +55,9 @@
                     />
                     <label for="_remember_me" class="ml-2 block text-sm leading-5 text-gray-700">{{ 'login.form.rememberMe'|trans|raw }}</label>
                 </div>
-                <button type="submit" class="cursor-pointer block w-full rounded-full bg-primary px-4 py-3 text-xs text-white font-light uppercase hover:bg-primary/80 transition duration-100">{{ 'login.form.button'|trans|raw }}</button>
+                <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
+                    {{ 'login.form.button'|trans|raw }}
+                </twig:Button>
             </form>
         </div>
     </section>

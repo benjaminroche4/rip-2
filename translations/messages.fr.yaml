@@ -67,9 +67,10 @@ sitemap:
     general: Général
     blog: Blog
     menu:
-        findAccommodation: Trouver un logement
-        companies: Entreprises
-        landlords: Gestion locative
+        findAccommodation: Recherche de logement
+        companies: Solutions entreprises
+        management: Gestion locative
+        findTenant: Trouver un locataire
         blog: Blog
         contact: Contactez-nous
         login: Connexion
@@ -82,16 +83,16 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Conditions générales de vente
-        findTenant: Trouver un locataire
     blogMenu:
         blog: Blog
 footer:
     logo:
         alt: Logo Relocation in Paris
     menu:
-        findAccommodation: Trouver un logement
-        companies: Entreprises
-        landlords: Gestion locative
+        findAccommodation: Recherche de logement
+        companies: Solutions entreprises
+        findTenant: Trouver un locataire
+        management: Gestion locative
         blog: Blog
         contact: Contactez-nous
         login: Connexion
@@ -104,7 +105,6 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: CGV
-        findTenant: Trouver un locataire
     menuTitle:
         1: Nos services
         2: À propos
@@ -151,7 +151,7 @@ header:
         basedOn: Basé sur
         reviews: avis
 companies:
-    title: Pour les entreprises
+    title: Solutions pour les entreprises
     subTitle: Loger vos collaborateurs facilement à Paris
     text: "Un service clé en main pour loger vos talents à Paris : recherche, visites, dossiers et installation, avec un accompagnement dédié."
     trust:
@@ -217,7 +217,7 @@ companies:
                 title: Pourquoi passer par une agence de relocation ?
                 text: Faire appel à une agence de relocation facilite l’installation de vos collaborateurs, renforce votre attractivité auprès des meilleurs profils et vous fait gagner un temps précieux. Nous travaillons avec plus de 80 partenaires à Paris et disposons d’un réseau unique de logements off-market sur la capitale.
 findAccommodation:
-    title: Trouver un logement
+    title: Recherche de logement
     subTitle: Votre logement clé en main à Paris
     text: "Confiez-nous la recherche de votre logement à Paris : un service clé en main, simple et sur-mesure."
     trust:
@@ -313,16 +313,16 @@ findAccommodation:
                 description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
 meta:
     blog:
-        title: Le blog pour vivre et s’installer à Paris
+        title: Le Blog pour Vivre et S’installer à Paris
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
     home:
         title: Agence de Relocation à Paris
         description: "Agence de relocation à Paris pour particuliers et entreprises : recherche de logement, bureaux et installation complète de collaborateurs."
     findTenant:
-        title: Trouver un locataire à Paris
+        title: Trouver un Locataire à Paris
         description: "Service premium pour trouver un locataire à Paris : sélection rigoureuse, réseau exclusif, dossiers vérifiés et accompagnement sur-mesure jusqu’à l’installation."
     companies:
-        title: Loger vos collaborateurs facilement à Pari
+        title: Recherche de Logement Pour Vos Collaborateurs à Paris
         description: "Logez vos collaborateurs à Paris facilement. Relocation clé-en-main, recherche sur-mesure, support administratif et accompagnement expert."
     contact:
         title: Contactez Nos Experts en Relocation à Paris
@@ -334,28 +334,28 @@ meta:
         title: Gestion Locative à Paris
         description: "Service de gestion locative sur mesure à Paris, en court et moyen terme. Sécurisez et optimisez votre investissement immobilier grâce à une expertise dédiée."
     sitemap:
-        title: Plan du site
+        title: Plan du Site
         description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
     aboutUs:
-        title: À propos de nous
+        title: À Propos de Nous
         description: Découvrez l’histoire et les valeurs de Relocation in Paris, une agence de relocation haut de gamme dédiée au confort, à la confiance et à l’excellence de ses clients.
     termsConditions:
-        title: Conditions générales de vente
+        title: Conditions Générales de Vente
         description: "Conditions générales de vente de Relocation In Paris : modalités applicables à nos prestations de services."
     legalNotice:
-        title: Mentions légales
+        title: Mentions Légales
         description: "Mentions légales de Relocation in Paris : informations sur l’éditeur, l’hébergeur, la propriété intellectuelle et la responsabilité."
     privacyPolicy:
-        title: Politique de confidentialité
+        title: Politique de Confidentialité
         description: "Politique de confidentialité de Relocation in Paris : protection et gestion de vos données personnelles conformément au RGPD."
     estimation:
-        title: Obtenez votre estimation
+        title: Obtenez Votre Estimation de Relocation à Paris
         description: Estimez le coût de votre relocation à Paris en quelques clics. Découvrez nos services sur mesure pour trouver votre logement et faciliter votre installation.
     faq:
-        title: Questions fréquentes (FAQ)
+        title: Questions Fréquentes (FAQ)
         description: Découvrez nos réponses aux questions les plus posées sur la relocation à Paris. Locataires, entreprises et propriétaires.
     newsletter:
-        title: Inscrivez-vous à notre newsletter
+        title: Inscription Newsletter
         description: "Recevez chaque semaine nos nouveaux biens, les actualités parisiennes et des guides pour réussir votre installation à Paris."
 home:
     heroSection:
@@ -376,10 +376,10 @@ home:
         subTitle: Un accompagnement dédié à chaque besoin
         button: Découvrir le service
         1:
-            title: Trouver un logement
+            title: Recherche de logement
             text: Une recherche de logement exclusive et personnalisée, pour des locations courtes ou longues durées à Paris.
         2:
-            title: Pour les entreprises
+            title: Solutions pour les entreprises
             text: Libérez vos collaborateurs des contraintes administratives avec nos solutions clés en main.
         3:
             title: Gestion locative
