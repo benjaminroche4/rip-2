@@ -184,21 +184,7 @@
                     <div class="flex items-center">
                         {{ form_widget(contactForm.accept, {
                             'attr': {
-                                'class': '
-                                    appearance-none
-                                    size-5 shrink-0 rounded-full
-                                    border-2 border-gray-900 cursor-pointer
-                                    transition-all duration-100
-                                    checked:bg-primary checked:border-primary
-                                    relative
-                                    before:content-["✓"] before:absolute before:inset-0
-                                    before:flex before:items-center before:justify-center
-                                    before:text-white before:text-sm before:opacity-0
-                                    checked:before:opacity-100
-                                    focus:border-primary/80
-                                    focus:outline-primary/80
-                                    focus:rimg-primary/60
-                                '
+                                'class': 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50'
                             }
                         }) }}
                         <label class="ml-3 block text-sm leading-5 text-neutral-900">{{ form_label(contactForm.accept, 'contact.contactForm.accept.label'|trans) }}</label>

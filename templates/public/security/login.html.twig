@@ -1,64 +1,154 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_auth.html.twig' %}
 
 {% block title %}Log in!{% endblock %}
 
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
+    {% set blogSwitchParams = {
+        'fr': {'_locale': 'fr', 'slugFr': post.slugFr},
+        'en': {'_locale': 'en', 'slugEn': post.slugEn}
+    } %}
+{% endif %}
+
 {% block body %}
-    <section class="pt-12 pb-24 lg:pt-26 lg:pb-32 flex items-center">
-        <div class="max-w-7xl mx-auto lg:px-8 px-6 w-auto">
-            <div class="space-y-6 max-w-sm mx-auto">
-                <div>
-                    <a href="{{ path('app_home') }}">
-                        <img src="{{ asset('medias/logos/logo_short.svg') }}" alt="Logo Relocation In Paris" class="w-12 mx-auto">
-                    </a>
-                </div>
-                <h1 class="text-2xl lg:text-3xl font-medium text-balance text-center">{{ 'login.title'|trans|raw }}</h1>
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        {{ component('blocks/gridBackground', {auth: true}) }}
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div
+                        class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                        </a>
+                    </div>
+                </el-popover>
             </div>
-            <form method="post" class="mt-12 flex flex-col space-y-6 max-w-sm mx-auto">
-                {% if error %}
-                    <div class="rounded-xl bg-red-50 p-4">
-                        <div class="flex items-start gap-x-3">
-                            <div class="flex-shrink-0">
-                                {{ ux_icon('si:alert-line', {'class':'text-red-800 size-5'}) }}
-                            </div>
-                            <div class="space-y-0.5">
-                                <h3 class="text-base font-medium text-red-800 -mt-0.5">Oups !</h3>
-                                <p class="text-sm text-slate-600">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
-                            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <h2 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">Connexion</h2>
+                <p class="font-light text-neutral-400 text-pretty text-center">
+                    Your move to Paris, made simple.
+                </p>
+            </div>
+        </div>
+        <div class="mt-10 mx-auto w-full max-w-sm">
+            <div>
+                <form method="POST" class="space-y-6">
+                    {% if error %}
+                        <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+                            {{ ux_icon('si:alert-line', {'class':'text-red-800 size-5'}) }}
+                            <twig:Alert:Title>Erreur</twig:Alert:Title>
+                            <twig:Alert:Description>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </twig:Alert:Description>
+                        </twig:Alert>
+                    {% endif %}
+                    <div>
+                        <twig:Label for="username">Adresse email</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input type="email" value="{{ last_username }}" placeholder="{{ 'login.form.placeholder'|trans|raw }}" name="_username" id="username" placeholder="Email" class="max-w-sm" />
                         </div>
                     </div>
-                {% endif %}
-                <div class="space-y-2">
-                    <label for="username" class="block text-sm/6 font-semibold text-gray-900">{{ 'login.form.email'|trans|raw }}</label>
-                    <input type="email" value="{{ last_username }}" placeholder="{{ 'login.form.placeholder'|trans|raw }}" name="_username" id="username" class="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 sm:text-sm/6" autocomplete="email" required autofocus>
-                </div>
-                <div class="space-y-2">
-                    <label for="password" class="block text-sm/6 font-semibold text-gray-900">{{ 'login.form.password'|trans|raw }}</label>
-                    <input type="password" name="_password" id="password" placeholder="••••••••••" class="block w-full rounded-md bg-white px-3 py-2.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 sm:text-sm/6" autocomplete="current-password" required>
-                </div>
-                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                    <div>
+                        <twig:Label for="password">{{ 'login.form.password'|trans|raw }}</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input type="password" id="password" name="_password" placeholder="Mot de passe" class="max-w-sm" />
+                        </div>
+                    </div>
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                    <div class="flex max-[344px]:flex-col max-[344px]:justify-start gap-2 max-[344px]:items-start items-center justify-between">
+                        <div class="flex gap-3 items-center">
+                            <twig:Checkbox id="_remember_me" name="_remember_me" checked />
+                            <label for="_remember_me" class="block text-sm/6 font-light text-gray-900">
+                                {{ 'login.form.rememberMe'|trans|raw }}
+                            </label>
+                        </div>
+                        <div class="text-sm/6">
+                            <a href="#"
+                               class="font-medium text-gray-800 hover:text-primary transition duration-100">Mot de passe oublié ?</a>
+                        </div>
+                    </div>
 
-                <div class="flex items-center">
-                    <input type="checkbox"
-                           name="_remember_me"
-                           id="_remember_me"
-                           class="appearance-none
-                             size-4 shrink-0 rounded-md
-                             border-1 border-gray-400 cursor-pointer
-                             transition-all duration-100
-                             checked:bg-primary checked:border-primary
-                             relative
-                             before:content-['✓'] before:absolute before:inset-0
-                             before:flex before:items-center before:justify-center
-                             before:text-white before:text-sm before:opacity-0
-                             checked:before:opacity-100
-                             focus:border-primary/80 focus:outline-primary/80"
-                    />
-                    <label for="_remember_me" class="ml-2 block text-sm leading-5 text-gray-700">{{ 'login.form.rememberMe'|trans|raw }}</label>
+                    <div>
+                        <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
+                            {{ 'login.form.button'|trans|raw }}
+                        </twig:Button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="mt-8">
+                <div class="relative">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                        <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm/6 font-medium">
+                        <span
+                            class="bg-white px-6 text-gray-900 dark:bg-gray-900 dark:text-gray-300">Or continue with</span>
+                    </div>
                 </div>
-                <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
-                    {{ 'login.form.button'|trans|raw }}
-                </twig:Button>
-            </form>
+
+                <div class="mt-6 grid grid-cols-1 gap-4">
+                    <a href="#"
+                       class="flex h-10 w-full items-center justify-center transition duration-100 gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80">
+                        {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
+                        <span class="text-sm/6 font-semibold">Se connecter avec Google</span>
+                    </a>
+                </div>
+            </div>
         </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_login.webp') }}"
+            alt=""
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"/>
+        <div class="absolute inset-0 bg-black/10"></div>
     </section>
 {% endblock %}
