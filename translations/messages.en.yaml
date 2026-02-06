@@ -459,13 +459,24 @@ home:
             title: Companies
             text: We streamline the relocation of your employees with fast, tailored, and professional support.
 login:
-    title: Log in to our services
+    title: Sign in
+    subTitle: Your move to Paris, made simple.
     form:
-        email: Email
-        placeholder: Your email address
-        password: Password
-        button: Log in
+        email:
+            label: Email
+            placeholder: Your email address
+        password:
+            label: Password
+            placeholder: Your password
+        button: Sign in
         rememberMe: Remember me
+        forgotPassword: Forgot your password?
+        error:
+            title: Error
+    continueWith:
+        title: Or sign in with
+    provider:
+        google: Sign in with Google
 adminTab:
     logout: Log out
     dashboard: Dashboard

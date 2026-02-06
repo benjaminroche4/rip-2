@@ -462,16 +462,24 @@ home:
             title: Entreprises
             text: Nous facilitons l'installation de vos collaborateurs grâce à un service rapide et personnalisé.
 login:
-    title: Connectez-vous à nos services
+    title: Connexion
+    subTitle: Votre installation à Paris, en toute simplicité.
     form:
-        email: Email
-        placeholder: Votre adresse email
-        password: Mot de passe
+        email:
+            label: Email
+            placeholder: Votre adresse email
+        password:
+            label: Mot de passe
+            placeholder: Votre mot de passe
         button: Se connecter
         rememberMe: Se souvenir de moi
-adminTab:
-    logout: Se déconnecter
-    dashboard: Dashboard
+        forgotPassword: Mot de passe oublié ?
+        error:
+            title: Erreur
+    continueWith:
+        title: Ou connectez-vous avec
+    provider:
+        google: Se connecter avec Google
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans
