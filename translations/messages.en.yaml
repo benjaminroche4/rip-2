@@ -354,6 +354,9 @@ meta:
     newsletter:
         title: Subscribe to Our Newsletter
         description: "Receive our latest listings, Paris news, and practical guides each week to help you settle in Paris."
+    login:
+        title: Login
+        description: Log in to your Relocation in Paris account to track your relocation, access your documents, and manage your housing search in Paris.
 home:
     heroSection:
         top:

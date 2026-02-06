@@ -357,6 +357,9 @@ meta:
     newsletter:
         title: Inscription Newsletter
         description: "Recevez chaque semaine nos nouveaux biens, les actualités parisiennes et des guides pour réussir votre installation à Paris."
+    login:
+        title: Connexion
+        description: Connectez-vous à votre espace Relocation in Paris pour suivre votre installation, accéder à vos documents et gérer votre recherche de logement à Paris.
 home:
     heroSection:
         top:

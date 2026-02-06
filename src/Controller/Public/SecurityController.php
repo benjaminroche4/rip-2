@@ -21,7 +21,7 @@ class SecurityController extends AbstractController
                 [
                     'priority' => 0.2,
                     'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-10-29')
+                    'lastmod' => new \DateTime('2026-03-06')
                 ]
         ]
     )]

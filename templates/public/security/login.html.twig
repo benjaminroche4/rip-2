@@ -1,6 +1,8 @@
 {% extends 'base_auth.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}{{ 'meta.login.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.login.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_login') }}{% endblock %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentParameters = app.request.attributes.get('_route_params') %}
