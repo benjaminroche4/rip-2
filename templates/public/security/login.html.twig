@@ -2,17 +2,9 @@
 
 {% block title %}{{ 'meta.login.title'|trans }}{% endblock %}
 {% block description %}{{ 'meta.login.description'|trans }}{% endblock %}
-{% block url %}{{ path('app_login') }}{% endblock %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentParameters = app.request.attributes.get('_route_params') %}
-
-{% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
-    {% set blogSwitchParams = {
-        'fr': {'_locale': 'fr', 'slugFr': post.slugFr},
-        'en': {'_locale': 'en', 'slugEn': post.slugEn}
-    } %}
-{% endif %}
 
 {% block body %}
     <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
@@ -93,13 +85,13 @@
                     <div>
                         <twig:Label for="username">{{ 'login.form.email.label'|trans|raw }}</twig:Label>
                         <div class="mt-2">
-                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" class="max-w-sm" />
+                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" class="max-w-sm" />
                         </div>
                     </div>
                     <div>
                         <twig:Label for="password">{{ 'login.form.password.label'|trans|raw }}</twig:Label>
                         <div class="mt-2">
-                            <twig:Input type="password" id="password" name="_password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" class="max-w-sm" />
+                            <twig:Input type="password" id="password" name="_password" autocomplete="current-password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" class="max-w-sm" />
                         </div>
                     </div>
                     <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
