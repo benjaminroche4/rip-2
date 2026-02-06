@@ -7,6 +7,9 @@ start:
 clean:
 	php bin/console cache:clear
 
+warm:
+	php bin/console cache:warmup --env=prod
+
 deploy:
 	set -e
 	echo "→ Pull Git (main)"
@@ -15,6 +18,8 @@ deploy:
 	php bin/console asset-map:compile --env=prod
 	echo "→ Clear cache (prod)"
 	php bin/console cache:clear --env=prod
+	echo "✓ Cache warmup (prod)"
+	php bin/console cache:warmup --env=prod
 	echo "✓ Déploiement terminé"
 
 version:
@@ -34,4 +39,5 @@ tailwind:
 	php bin/console tailwind:build --minify
 	php bin/console asset-map:compile
 	php bin/console cache:clear
+	php bin/console cache:warmup --env=prod
 	echo "→ Tailwind CSS build complete. Do not forget : chmod 711 . (Source)"
