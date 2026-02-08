@@ -1,12 +1,130 @@
 {% extends 'base_auth.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}{{ 'meta.resetPassword.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.resetPassword.description'|trans }}{% endblock %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
 
 {% block body %}
-    <h1>Reset your password</h1>
-
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">Reset password</button>
-    {{ form_end(resetForm) }}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        {{ component('blocks/gridBackground', {auth: true}) }}
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div
+                        class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                        </a>
+                    </div>
+                </el-popover>
+            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900 text-center">
+                    {{ 'login.newForm.title'|trans|raw }}
+                </h1>
+            </div>
+        </div>
+        <div class="mt-10 mx-auto w-full max-w-sm">
+            <div class="gap-6">
+                {{ form_start(resetForm) }}
+                <div class="flex items-center gap-x-0.5">
+                    {{ form_label(resetForm.plainPassword.first, null, {
+                        'label_attr': {
+                            'class': 'block text-sm/6 font-semibold text-gray-900'
+                        }
+                    }) }}
+                </div>
+                <div class="mt-2">
+                    {{ form_widget(resetForm.plainPassword.first, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'login.newForm.form.placeholder.password'|trans }}) }}
+                </div>
+                {% if resetForm.plainPassword.first.vars.errors|length > 0 %}
+                <div class="mt-2 text-xs text-red-600 flex items-start gap-x-1">
+                    {{ ux_icon('jam:alert', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ form_errors(resetForm.plainPassword.first) }}
+                </div>
+                {% endif %}
+                <div class="mt-4 flex items-center gap-x-0.5">
+                    {{ form_label(resetForm.plainPassword.second, null, {
+                        'label_attr': {
+                            'class': 'block text-sm/6 font-semibold text-gray-900'
+                        }
+                    }) }}
+                </div>
+                <div class="mt-2">
+                    {{ form_widget(resetForm.plainPassword.second, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'login.newForm.form.placeholder.repeatPassword'|trans }}) }}
+                </div>
+                {% if resetForm.plainPassword.second.vars.errors|length > 0 or resetForm.plainPassword.vars.errors|length > 0 %}
+                <div class="mt-2 text-xs text-red-600 flex items-start gap-x-1">
+                    {{ ux_icon('jam:alert', {'class': 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ form_errors(resetForm.plainPassword.second) }}
+                    {{ form_errors(resetForm.plainPassword) }}
+                </div>
+                {% endif %}
+                <div class="pt-4">
+                    <twig:Button variant="default" size="lg" class="w-full">
+                        {{ 'login.newForm.form.button'|trans|raw }}
+                    </twig:Button>
+                </div>
+                {{ form_end(resetForm) }}
+            </div>
+        </div>
+        <div class="mt-8 flex justify-center">
+            <a href="{{ path('app_login') }}" class="text-gray-800 font-semibold hover:text-primary transition duration-100 text-sm underline underline-offset-4">
+                {{ 'login.resetPassword.backToLogin'|trans|raw }}
+            </a>
+        </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_login.webp') }}"
+            alt="Relocation In Paris, agence de relocation à Paris"
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"/>
+        <div class="absolute inset-0 bg-black/10"></div>
+    </section>
 {% endblock %}

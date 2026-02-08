@@ -1,3 +1,7 @@
 newsletter:
     email:
         unique: "This email address is already subscribed to the newsletter."
+resetPassword:
+    empty: "Please enter a password."
+    minLength: "Your password should be at least {{ limit }} characters."
+    notMatch: "The password fields must match."

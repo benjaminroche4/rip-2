@@ -360,6 +360,12 @@ meta:
     forgotPassword:
         title: Forgot Password
         description: "Reset your password for your Relocation in Paris account. Enter your email address, and we will send you a link to create a new password."
+    checkEmail:
+        title: Check Your Email
+        description: "An email with a password reset link has just been sent to you. Follow the instructions to create a new password and regain access to your account."
+    resetPassword:
+        title: Reset Your Password
+        description: "Create a new password for your Relocation in Paris account. Enter your new password, confirm it, and click the button to reset your password and regain access to your account."
 home:
     heroSection:
         top:
@@ -497,6 +503,16 @@ login:
         to: to
         duration: Link valid for
         spam: Check your spam folder or try again.
+    newForm:
+        title: New password
+        form:
+            button: Reset password
+            label:
+                password: Password
+                repeatPassword: Repeat password
+            placeholder:
+                password: Your new password
+                repeatPassword: Repeat your new password
 adminTab:
     logout: Log out
     dashboard: Dashboard

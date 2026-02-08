@@ -363,6 +363,12 @@ meta:
     forgotPassword:
         title: Mot de Passe Oublié
         description: "Réinitialisez votre mot de passe pour accéder à votre espace Relocation in Paris et suivre votre projet d’installation à Paris."
+    checkEmail:
+        title: Email Envoyé
+        description: "Un email avec un lien pour réinitialiser votre mot de passe vient de vous être envoyé. Vérifiez votre boîte de réception et vos spams."
+    resetPassword:
+        title: Réinitialisation du mot de passe
+        description: "Créez un nouveau mot de passe pour accéder à votre espace Relocation in Paris et suivre votre projet d’installation à Paris."
 home:
     heroSection:
         top:
@@ -500,6 +506,16 @@ login:
         to: à
         duration: Lien valable
         spam: Pensez à vérifier vos spams ou réessayez.
+    newForm:
+        title: Nouveau mot de passe
+        form:
+            button: Réinitialiser
+            label:
+                password: Mot de passe
+                repeatPassword: Répétez le mot de passe
+            placeholder:
+                password: Votre nouveau mot de passe
+                repeatPassword: Répétez votre nouveau mot de passe
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans

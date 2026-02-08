@@ -1,3 +1,7 @@
 newsletter:
     email:
         unique: "Cette adresse e-mail est déjà inscrite à la newsletter."
+resetPassword:
+    empty: "Veuillez entrer un mot de passe."
+    minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."
+    notMatch: "Les mots de passe ne correspondent pas."
