@@ -360,6 +360,9 @@ meta:
     login:
         title: Connexion
         description: Connectez-vous à votre espace Relocation in Paris pour suivre votre installation, accéder à vos documents et gérer votre recherche de logement à Paris.
+    forgotPassword:
+        title: Mot de Passe Oublié
+        description: "Réinitialisez votre mot de passe pour accéder à votre espace Relocation in Paris et suivre votre projet d’installation à Paris."
 home:
     heroSection:
         top:
@@ -483,6 +486,20 @@ login:
         title: Ou connectez-vous avec
     provider:
         google: Se connecter avec Google
+    resetPassword:
+        title: Mot de passe oublié
+        subTitle: Un email avec un lien pour réinitialiser le mot de passe va vous être envoyé.
+        form:
+            label: Email
+            placeholder: Votre adresse email
+            button: Envoyer l'email
+        backToLogin: Retour à la connexion
+    checkEmail:
+        title: Email envoyé
+        subTitle: Un email avec un lien pour réinitialiser le mot de passe vient de vous être envoyé
+        to: à
+        duration: Lien valable
+        spam: Pensez à vérifier vos spams ou réessayez.
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans

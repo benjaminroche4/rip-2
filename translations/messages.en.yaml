@@ -357,6 +357,9 @@ meta:
     login:
         title: Login
         description: Log in to your Relocation in Paris account to track your relocation, access your documents, and manage your housing search in Paris.
+    forgotPassword:
+        title: Forgot Password
+        description: "Reset your password for your Relocation in Paris account. Enter your email address, and we will send you a link to create a new password."
 home:
     heroSection:
         top:
@@ -480,6 +483,20 @@ login:
         title: Or sign in with
     provider:
         google: Sign in with Google
+    resetPassword:
+        title: Reset your password
+        subTitle: Enter your email address, and we will send you a link to reset your password.
+        form:
+            label: Email
+            placeholder: Your email address
+            button: Send reset link
+        backToLogin: Back to login
+    checkEmail:
+        title: Email sent
+        subTitle: An email with a password reset link has just been sent to you
+        to: to
+        duration: Link valid for
+        spam: Check your spam folder or try again.
 adminTab:
     logout: Log out
     dashboard: Dashboard

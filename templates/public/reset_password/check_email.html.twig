@@ -1,0 +1,102 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}{{ 'meta.checkEmail.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.checkEmail.description'|trans }}{% endblock %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% block body %}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        {{ component('blocks/gridBackground', {auth: true}) }}
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div
+                        class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                        </a>
+                    </div>
+                </el-popover>
+            </div>
+            <div class="mt-12  flex flex-col justify-center items-center w-full space-y-6">
+                <div class="p-4 bg-primary/10 rounded-full">
+                    {{ ux_icon('fa:send-o', {'class': 'size-9 text-primary', 'aria-hidden': 'true'}) }}
+                </div>
+                <h1 class="text-2xl/9 font-semibold tracking-tight text-gray-900 text-center">
+                    {{ 'login.checkEmail.title'|trans|raw }}
+                </h1>
+            </div>
+        </div>
+        <div class="mt-4 mx-auto w-full max-w-sm space-y-2">
+            {% set emails = app.flashes('check_email_address') %}
+            <p class="font-light text-neutral-600 text-balance text-center max-w-md">
+                {{ 'login.checkEmail.subTitle'|trans|raw }}
+                {%- if emails|length > 0 %} {{ 'login.checkEmail.to'|trans|raw }}
+                    <span class="font-medium text-neutral-800">{{ emails|first }}</span>
+                {%- endif %}.
+            </p>
+            <p class="font-light text-neutral-600 text-balance text-center max-w-md">
+                {{ 'login.checkEmail.duration'|trans|raw }} {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.
+                {{ 'login.checkEmail.spam'|trans|raw }}
+            </p>
+        </div>
+        <div class="mt-8 flex justify-center">
+            <a href="{{ path('app_login') }}" class="text-gray-800 font-semibold hover:text-primary transition duration-100 text-sm underline underline-offset-4">
+                {{ 'login.resetPassword.backToLogin'|trans|raw }}
+            </a>
+        </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_login.webp') }}"
+            alt="Relocation In Paris, agence de relocation à Paris"
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"/>
+        <div class="absolute inset-0 bg-black/10"></div>
+    </section>
+{% endblock %}

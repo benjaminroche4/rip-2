@@ -1,7 +1,7 @@
 {% extends 'base_auth.html.twig' %}
 
-{% block title %}{{ 'meta.login.title'|trans }}{% endblock %}
-{% block description %}{{ 'meta.login.description'|trans }}{% endblock %}
+{% block title %}{{ 'meta.forgotPassword.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.forgotPassword.description'|trans }}{% endblock %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentParameters = app.request.attributes.get('_route_params') %}
@@ -64,76 +64,49 @@
                 </el-popover>
             </div>
             <div class="flex flex-col justify-center items-center w-full space-y-2">
-                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">{{ 'login.title'|trans|raw }}</h1>
-                <p class="font-light text-neutral-400 text-pretty text-center">
-                    {{ 'login.subTitle'|trans|raw }}
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900 text-center">
+                    {{ 'login.resetPassword.title'|trans|raw }}
+                </h1>
+                <p class="font-light text-neutral-400 text-balance text-center max-w-md">
+                    {{ 'login.resetPassword.subTitle'|trans|raw }}
                 </p>
             </div>
         </div>
         <div class="mt-10 mx-auto w-full max-w-sm">
-            <div>
-                <form method="POST" class="space-y-6">
-                    {% if error %}
-                        <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
-                            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
-                            <twig:Alert:Title>{{ 'login.form.error.title'|trans|raw }}</twig:Alert:Title>
-                            <twig:Alert:Description>
-                                {{ error.messageKey|trans(error.messageData, 'security') }}
-                            </twig:Alert:Description>
-                        </twig:Alert>
-                    {% endif %}
-                    <div>
-                        <twig:Label for="username">{{ 'login.form.email.label'|trans|raw }}</twig:Label>
-                        <div class="mt-2">
-                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" class="max-w-sm" />
-                        </div>
-                    </div>
-                    <div>
-                        <twig:Label for="password">{{ 'login.form.password.label'|trans|raw }}</twig:Label>
-                        <div class="mt-2">
-                            <twig:Input type="password" id="password" name="_password" autocomplete="current-password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" class="max-w-sm" />
-                        </div>
-                    </div>
-                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-                    <div class="flex max-[344px]:flex-col max-[344px]:justify-start gap-2 max-[344px]:items-start items-center justify-between">
-                        <div class="flex gap-3 items-center">
-                            <twig:Checkbox id="_remember_me" name="_remember_me" checked />
-                            <label for="_remember_me" class="block text-sm/6 font-light text-gray-900">
-                                {{ 'login.form.rememberMe'|trans|raw }}
-                            </label>
-                        </div>
-                        <div class="text-sm/6">
-                            <a href="{{ path('app_forgot_password_request') }}"
-                               class="font-medium text-gray-800 hover:text-primary transition duration-100">{{ 'login.form.forgotPassword'|trans|raw }}</a>
-                        </div>
-                    </div>
+            <div class="gap-6">
+                {% for flash_error in app.flashes('reset_password_error') %}
+                    <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
+                        <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                        <twig:Alert:Title>{{ 'login.form.error.title'|trans|raw }}</twig:Alert:Title>
+                        <twig:Alert:Description>
+                            {{ flash_error }}
+                        </twig:Alert:Description>
+                    </twig:Alert>
+                {% endfor %}
 
-                    <div>
-                        <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
-                            {{ 'login.form.button'|trans|raw }}
+                {{ form_start(requestForm) }}
+                    <div class="flex items-center gap-x-0.5">
+                        {{ form_label(requestForm.email, null, {
+                            'label_attr': {
+                                'class': 'block text-sm/6 font-semibold text-gray-900'
+                            }
+                        }) }}
+                    </div>
+                    <div class="mt-2">
+                        {{ form_widget(requestForm.email, {'attr': {'rows':'5','class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'login.resetPassword.form.placeholder'|trans }}) }}
+                    </div>
+                    <div class="pt-4">
+                        <twig:Button variant="default" size="lg" class="w-full">
+                            {{ 'login.resetPassword.form.button'|trans|raw }}
                         </twig:Button>
                     </div>
-                </form>
+                {{ form_end(requestForm) }}
             </div>
-
-            <div class="mt-8">
-                <div class="relative">
-                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                        <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm/6 font-medium">
-                        <span
-                            class="bg-white px-6 text-gray-900 text-center">{{ 'login.continueWith.title'|trans|raw }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-4">
-                    <span class="flex h-10 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm/6 font-semibold text-gray-400 cursor-not-allowed opacity-60">
-                        {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
-                        <span class="text-sm/6 font-semibold">{{ 'login.provider.google'|trans|raw }}</span>
-                    </span>
-                </div>
-            </div>
+        </div>
+        <div class="mt-8 flex justify-center">
+            <a href="{{ path('app_login') }}" class="text-gray-800 font-semibold hover:text-primary transition duration-100 text-sm underline underline-offset-4">
+                {{ 'login.resetPassword.backToLogin'|trans|raw }}
+            </a>
         </div>
     </section>
     <section class="relative hidden w-0 flex-1 lg:block">
