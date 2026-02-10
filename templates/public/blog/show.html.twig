@@ -118,11 +118,11 @@
                     {% if block._type == 'wysiwygBlock' %}
                         <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="{{ block.background ? 'bg-neutral-50 rounded-2xl p-8' : '' }} scroll-mt-24">
                             {% if block.title %}
-                                <h2 class="text-2xl font-semibold mb-6">{{ block.title }}</h2>
+                                <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
                             {% endif %}
                             {% for segment in sanity_segments(block.content) %}
                                 {% if segment.type == 'text' %}
-                                    <div class="text-neutral-700 font-regular leading-7 prose max-w-none">
+                                    <div class="text-neutral-700 font-regular leading-7">
                                         {{ segment.html|raw }}
                                     </div>
                                 {% elseif segment.type == 'image' and segment.url %}
@@ -144,7 +144,7 @@
                     {% elseif block._type == 'faqBlock' %}
                         <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-24">
                             {% if block.title %}
-                                <h2 class="text-2xl font-semibold mb-6">{{ block.title }}</h2>
+                                <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
                             {% endif %}
                             <div class="space-y-4">
                                 {% for item in block.items %}
@@ -163,7 +163,7 @@
                     {% elseif block._type == 'ctaBlock' %}
                         <div class="bg-primary/5 rounded-2xl p-8 text-center">
                             {% if block.title %}
-                                <h2 class="text-2xl font-semibold mb-2">{{ block.title }}</h2>
+                                <h2 class="text-3xl font-semibold mb-2">{{ block.title }}</h2>
                             {% endif %}
                             {% if block.description %}
                                 <p class="text-neutral-700 mb-6">{{ block.description }}</p>
