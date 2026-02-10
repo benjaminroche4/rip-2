@@ -2,8 +2,7 @@
 
 namespace App\Controller\Public;
 
-use App\Repository\BlogRepository;
-use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
+use App\Service\SanityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -11,7 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class BlogController extends AbstractController
 {
     public function __construct(
-        private readonly BlogRepository $blogRepository,
+        private readonly SanityService $sanityService,
     )
     {
     }
@@ -22,18 +21,22 @@ final class BlogController extends AbstractController
             'en' => '/{_locale}/blog',
         ],
         name: 'app_blog',
-        options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_DAILY,
-                    'section' => 'blog',
-                ]
-        ]
     )]
-    public function blogList(): Response
+    public function blogList(string $_locale): Response
     {
-        $posts = $this->blogRepository->findAllVisible();
+        $posts = $this->sanityService->query(
+            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+                title,
+                "slug": slug.current,
+                "mainPhoto": mainPhoto.asset->url,
+                "mainPhotoAlt": mainPhoto.alt,
+                readTime,
+                _createdAt,
+                "category": category->{name, "color": color.hex},
+                "authors": authors[]->{fullName, "photo": photo.asset->url}
+            }',
+            ['locale' => $_locale]
+        );
 
         return $this->render('public/blog/list.html.twig', [
             'posts' => $posts,
@@ -42,27 +45,68 @@ final class BlogController extends AbstractController
 
     #[Route(
         path: [
-            'fr' => '/{_locale}/blog/{slugFr}',
-            'en' => '/{_locale}/blog/{slugEn}',
+            'fr' => '/{_locale}/blog/{slug}',
+            'en' => '/{_locale}/blog/{slug}',
         ],
         name: 'app_blog_show',
     )]
-    public function blogPost(string $slugFr = null, string $slugEn = null, string $_locale): Response
+    public function blogPost(string $slug, string $_locale): Response
     {
-        $slug = $_locale === 'fr' ? $slugFr : $slugEn;
-        $criteria = $_locale === 'fr' ? ['slugFr' => $slug] : ['slugEn' => $slug];
+        $post = $this->sanityService->query(
+            '*[_type == "blog" && language == $locale && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+                title,
+                shortDescription,
+                "slug": slug.current,
+                "mainPhoto": mainPhoto.asset->url,
+                "mainPhotoAlt": mainPhoto.alt,
+                readTime,
+                body[]{
+                    ...,
+                    _type == "wysiwygBlock" => {
+                        ...,
+                        content[]{
+                            ...,
+                            _type == "image" => {
+                                ...,
+                                "url": asset->url
+                            }
+                        }
+                    }
+                },
+                _createdAt,
+                "category": category->{name, "color": color.hex},
+                "authors": authors[]->{fullName, "photo": photo.asset->url},
+                "alternateSlug": *[_type == "translation.metadata" && references(^._id)]{
+                    translations[_key != $locale]{
+                        _key,
+                        "slug": value->slug.current
+                    }
+                }[0].translations[0]
+            }',
+            ['locale' => $_locale, 'slug' => $slug]
+        );
 
-        $post = $this->blogRepository->findOneBy($criteria);
-
-        $lastedBlog = $this->blogRepository->findLatestVisible();
-
-        if (!$post || !$post->isVisible()) {
+        if (!$post) {
             throw $this->createNotFoundException('The blog post does not exist');
         }
 
+        $latestPosts = $this->sanityService->query(
+            '*[_type == "blog" && language == $locale && slug.current != $slug && !(_id in path("drafts.**"))] | order(_createdAt desc)[0...3] {
+                title,
+                "slug": slug.current,
+                "mainPhoto": mainPhoto.asset->url,
+                "mainPhotoAlt": mainPhoto.alt,
+                readTime,
+                _createdAt,
+                "category": category->{name, "color": color.hex},
+                "authors": authors[]->{fullName, "photo": photo.asset->url}
+            }',
+            ['locale' => $_locale, 'slug' => $slug]
+        );
+
         return $this->render('public/blog/show.html.twig', [
             'post' => $post,
-            'lastedBlog' => $lastedBlog,
+            'latestPosts' => $latestPosts,
         ]);
     }
 }

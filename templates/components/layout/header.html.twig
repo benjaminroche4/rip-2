@@ -3,8 +3,8 @@
 
 {% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
     {% set blogSwitchParams = {
-        'fr': {'_locale': 'fr', 'slugFr': post.slugFr},
-        'en': {'_locale': 'en', 'slugEn': post.slugEn}
+        'fr': {'_locale': 'fr', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug},
+        'en': {'_locale': 'en', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug}
     } %}
 {% endif %}
 

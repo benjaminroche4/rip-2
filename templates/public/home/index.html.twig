@@ -602,40 +602,40 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:max-w-full max-w-xl mx-auto">
             {% for blog in posts %}
-                <a href="{{ path('app_blog_show', isFr ? {'slugFr': blog.slugFr} : {'slugEn': blog.slugEn}) }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
-                    <img src="{{ asset('medias/blog/cover/'~blog.mainPhoto) }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
+                <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" class="border border-neutral-100 rounded-2xl lg:min-h-[400px] flex flex-col hover:border-primary/20 transition duration-300">
+                    {% if blog.mainPhoto %}
+                        <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" class="w-full h-[200px] rounded-xl object-cover">
+                    {% endif %}
                     <div class="p-6 flex flex-col justify-between gap-4 flex-grow">
                         <div class="space-y-6">
-                            <div class="flex flex-wrap gap-2">
-                                {% set categories = blog.category %}
-                                {% set total = categories|length %}
-                                {% for category in categories|slice(0, 1) %}
+                            {% if blog.category %}
+                                <div class="flex flex-wrap gap-2">
                                     <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10 capitalize">
-                                        {{ isFr ? category.titleFr : category.titleEn }}
+                                        {{ blog.category.name }}
                                     </div>
-                                {% endfor %}
-                                {% if total > 1 %}
-                                    <div class="inline-block px-2.5 py-1 bg-primary/5 rounded-full text-xs text-primary border border-primary/10">
-                                        +{{ total - 1 }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <h2 class="font-semibold text-xl">{{ isFr ? blog.titleFr : blog.titleEn }}</h2>
-                            <p class="text-neutral-800/70 leading-7">{{ isFr ? blog.shortDescFr : blog.shortDescEn }}</p>
+                                </div>
+                            {% endif %}
+                            <h2 class="font-semibold text-xl">{{ blog.title }}</h2>
                         </div>
                         <div class="flex items-end justify-between mt-4">
-                            <div class="flex items-center space-x-3">
-                                <div>
-                                    <img src="{{ asset('medias/blog/redactor/'~blog.redactor.photo) }}" alt="{{ blog.redactor.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100">
+                            {% if blog.authors|length > 0 %}
+                                <div class="flex items-center space-x-3">
+                                    {% if blog.authors[0].photo %}
+                                        <div>
+                                            <img src="{{ blog.authors[0].photo }}" alt="{{ blog.authors[0].fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex flex-col space-x-0.5 text-sm">
+                                        <p class="capitalize text-primary font-semibold">{{ blog.authors[0].fullName }}</p>
+                                        <time class="text-slate-500" datetime="{{ blog._createdAt }}">{{ blog._createdAt|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col space-x-0.5 text-sm">
-                                    <p class="capitalize text-primary font-semibold">{{ blog.redactor.fullName }}</p>
-                                    <time class="text-slate-500" datetime="{{ blog.createdAt | date('d F Y') }}" class="mr-8">{{ blog.createdAt | date('d F Y') | format_date(locale=app.request.locale) }}</time>
+                            {% endif %}
+                            {% if blog.readTime %}
+                                <div class="max-[420px]:hidden text-sm text-neutral-800/70">
+                                    <p>{{ blog.readTime }} {{ 'blog.list.timeToRead'|trans|raw }}</p>
                                 </div>
-                            </div>
-                            <div class="max-[420px]:hidden text-sm text-neutral-800/70">
-                                <p>{{ blog.timeToRead }} {{ 'blog.list.timeToRead'|trans|raw }}</p>
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </a>

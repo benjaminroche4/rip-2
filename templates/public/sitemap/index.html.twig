@@ -46,7 +46,7 @@
                     <ul class="list list-disc ml-12 space-y-3">
                         <li><a href="{{ path('app_blog') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.blogMenu.blog'|trans }}</a></li>
                         {% for post in posts %}
-                            <li><a href="{{ path('app_blog_show', isFr ? {'slugFr': post.slugFr} : {'slugEn': post.slugEn}) }}" class="hover:text-primary transition duration-100">{{ isFr ? post.titleFr : post.titleEn }}</a></li>
+                            <li><a href="{{ path('app_blog_show', {'slug': post.slug}) }}" class="hover:text-primary transition duration-100">{{ post.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>

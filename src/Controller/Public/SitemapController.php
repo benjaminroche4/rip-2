@@ -2,7 +2,7 @@
 
 namespace App\Controller\Public;
 
-use App\Repository\BlogRepository;
+use App\Service\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class SitemapController extends AbstractController
 {
     public function __construct(
-        private readonly BlogRepository $blogRepository,
+        private readonly SanityService $sanityService,
     )
     {
     }
@@ -31,9 +31,15 @@ final class SitemapController extends AbstractController
                 ]
         ]
     )]
-    public function index(): Response
+    public function index(string $_locale): Response
     {
-        $posts = $this->blogRepository->findAllVisible();
+        $posts = $this->sanityService->query(
+            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+                title,
+                "slug": slug.current
+            }',
+            ['locale' => $_locale]
+        );
 
         return $this->render('public/sitemap/index.html.twig', [
             'posts' => $posts,
