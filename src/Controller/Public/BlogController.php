@@ -56,6 +56,7 @@ final class BlogController extends AbstractController
             '*[_type == "blog" && language == $locale && slug.current == $slug && !(_id in path("drafts.**"))][0] {
                 title,
                 shortDescription,
+                metaDescription,
                 "slug": slug.current,
                 "mainPhoto": mainPhoto.asset->url,
                 "mainPhotoAlt": mainPhoto.alt,
@@ -76,6 +77,7 @@ final class BlogController extends AbstractController
                 _createdAt,
                 "category": category->{name, "color": color.hex},
                 "authors": authors[]->{fullName, "photo": photo.asset->url},
+                "tags": tags[],
                 "alternateSlug": *[_type == "translation.metadata" && references(^._id)]{
                     translations[_key != $locale]{
                         _key,

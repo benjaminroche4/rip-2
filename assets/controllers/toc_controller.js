@@ -13,29 +13,32 @@ export default class extends Controller {
             }
         });
 
-        this.observer = new IntersectionObserver(
-            (entries) => this.onIntersect(entries),
-            { rootMargin: '-80px 0px -40% 0px', threshold: 0 }
-        );
-
-        this.sections.forEach(({ section }) => this.observer.observe(section));
+        this.onScroll = this.onScroll.bind(this);
+        window.addEventListener('scroll', this.onScroll, { passive: true });
+        this.onScroll();
     }
 
     disconnect() {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
+        window.removeEventListener('scroll', this.onScroll);
     }
 
-    onIntersect(entries) {
-        entries.forEach(entry => {
-            const item = this.sections.find(s => s.section === entry.target);
-            if (!item) return;
+    onScroll() {
+        const offset = 120;
+        let activeId = null;
 
-            if (entry.isIntersecting) {
-                this.activate(item.id);
+        for (let i = this.sections.length - 1; i >= 0; i--) {
+            const { id, section } = this.sections[i];
+            if (section.getBoundingClientRect().top <= offset) {
+                activeId = id;
+                break;
             }
-        });
+        }
+
+        if (!activeId && this.sections.length > 0) {
+            activeId = this.sections[0].id;
+        }
+
+        this.activate(activeId);
     }
 
     activate(id) {
