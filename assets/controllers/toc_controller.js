@@ -43,14 +43,14 @@ export default class extends Controller {
 
     activate(id) {
         this.sections.forEach(({ link }) => {
-            link.classList.remove('text-primary', 'font-medium');
-            link.classList.add('text-neutral-600', 'font-light');
+            link.classList.remove('text-primary', 'font-medium', 'border-primary');
+            link.classList.add('text-neutral-600', 'font-light', 'border-transparent');
         });
 
         const active = this.sections.find(s => s.id === id);
         if (active) {
-            active.link.classList.remove('text-neutral-600', 'font-light');
-            active.link.classList.add('text-primary', 'font-medium');
+            active.link.classList.remove('text-neutral-600', 'font-light', 'border-transparent');
+            active.link.classList.add('text-primary', 'font-medium', 'border-primary');
         }
     }
 }
