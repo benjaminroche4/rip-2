@@ -5,130 +5,224 @@
 {% block url %}/{{ app.request.locale }}/blog/{{ post.slug }}{% endblock %}
 
 {% block body %}
-    <article class="max-w-7xl mx-auto lg:px-8 px-6 lg:pt-8 lg:pb-16 pt-6 pb-12">
-        <nav aria-label="Breadcrumb" class="flex">
-            <ol role="list" class="flex items-center space-x-3 min-w-0">
-                <li>
-                    <div>
-                        <a href="{{ path('app_home') }}" class="text-neutral-500 hover:text-primary transition duration-100">
-                            {{ ux_icon('material-symbols:home-outline-rounded', {'class': 'size-5'}) }}
-                            <span class="sr-only">Home</span>
-                        </a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
-                            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
-                        </svg>
-                        <a href="{{ path('app_blog') }}" class="ml-4 text-sm font-medium text-neutral-500 hover:text-primary transition duration-100">Blog</a>
-                    </div>
-                </li>
-                <li class="min-w-0">
-                    <div class="flex items-center min-w-0">
-                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
-                            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
-                        </svg>
-                        <span aria-current="page" class="ml-4 text-sm font-regular text-neutral-400 truncate">{{ post.title }}</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-12 items-center">
-            <div class="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
-                {% if post.category %}
-                    <div class="items-center rounded-md text-xs bg-gray-50 inline-block p-1">
-                        <div class="flex items-center max-[300px]:flex-col gap-1">
+    <div class="max-w-7xl mx-auto lg:px-8 px-6">
+        <article class="lg:pt-8 pt-6">
+            <nav aria-label="Breadcrumb" class="flex">
+                <ol role="list" class="flex items-center space-x-3 min-w-0">
+                    <li>
+                        <div>
+                            <a href="{{ path('app_home') }}" class="text-neutral-500 hover:text-primary transition duration-100">
+                                {{ ux_icon('material-symbols:home-outline-rounded', {'class': 'size-5'}) }}
+                                <span class="sr-only">Home</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
+                                <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                            </svg>
+                            <a href="{{ path('app_blog') }}" class="ml-4 text-sm font-medium text-neutral-500 hover:text-primary transition duration-100">Blog</a>
+                        </div>
+                    </li>
+                    <li class="min-w-0">
+                        <div class="flex items-center min-w-0">
+                            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
+                                <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                            </svg>
+                            <span aria-current="page" class="ml-4 text-sm font-regular text-neutral-400 truncate">{{ post.title }}</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-12 items-center">
+                <div class="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
+                    {% if post.category %}
+                        <div class="items-center rounded-md text-xs bg-gray-50 inline-block p-1">
+                            <div class="flex items-center max-[300px]:flex-col gap-1">
                             <span class="px-2.5 py-1 bg-white rounded-sm text-neutral-600 font-medium flex items-center gap-x-1.5">
                                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
                                     <circle cx="4" cy="4" r="3" fill="{{ post.category.color|e('html_attr') }}"/>
                                 </svg>
                                 {{ post.category.name }}
                             </span>
-                            <div class="px-2.5 py-1">
+                                <div class="px-2.5 py-1">
                                 <span class="text-neutral-600">
                                     {{ post.readTime }} {{ 'blog.list.timeToRead'|trans }}
                                 </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endif %}
-                <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance break-words">{{ post.title }}</h1>
-                {% if post.shortDescription %}
-                    <div class="max-w-lg">
-                        <p class="text-neutral-600 leading-7 text-pretty">{{ post.shortDescription }}</p>
-                    </div>
-                {% endif %}
-            </div>
-            {% if post.mainPhoto %}
-                <div class="mt-4">
-                    <img src="{{ post.mainPhoto }}" alt="{{ post.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 rounded-2xl object-cover">
+                    {% endif %}
+                    <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance break-words">{{ post.title }}</h1>
+                    {% if post.shortDescription %}
+                        <div class="max-w-lg">
+                            <p class="text-neutral-600 leading-7 text-pretty">{{ post.shortDescription }}</p>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-        </section>
-        <section class="grid md:grid-cols-6 lg:py-16 py-8 lg:gap-20 gap-8">
-            <div class="md:col-span-2 min-w-0">
-                <div data-controller="menu-toggle" class="rounded-2xl border border-neutral-200 p-4 sticky top-6">
-                    <button type="button" data-action="click->menu-toggle#toggle" data-menu-toggle-target="button" aria-expanded="true" class="w-full cursor-pointer group">
-                        <div class="flex justify-between items-center gap-x-2">
-                            <span class="font-semibold text-lg font-secondary">Menu</span>
-                            <div class="transition duration-200 group-hover:bg-slate-100 p-1 rounded-full">
-                                {{ ux_icon('iconamoon:arrow-down-2', {'class': 'size-5 shrink-0 transition duration-200', 'data-menu-toggle-target': 'icon'}) }}
+                {% if post.mainPhoto %}
+                    <div class="mt-4">
+                        <img src="{{ post.mainPhoto }}" alt="{{ post.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 rounded-2xl object-cover">
+                    </div>
+                {% endif %}
+            </section>
+            <section class="grid md:grid-cols-6 lg:py-16 py-8 lg:gap-20 gap-8">
+                <div class="md:col-span-2 min-w-0">
+                    <div data-controller="menu-toggle" class="rounded-2xl border border-neutral-200 p-4 sticky top-6">
+                        <button type="button" data-action="click->menu-toggle#toggle" data-menu-toggle-target="button" aria-expanded="true" class="w-full cursor-pointer group">
+                            <div class="flex justify-between items-center gap-x-2">
+                                <span class="font-semibold text-lg font-secondary">Menu</span>
+                                <div class="transition duration-200 group-hover:bg-slate-100 p-1 rounded-full">
+                                    {{ ux_icon('iconamoon:arrow-down-2', {'class': 'size-5 shrink-0 transition duration-200', 'data-menu-toggle-target': 'icon'}) }}
+                                </div>
+                            </div>
+                        </button>
+                        <div data-menu-toggle-target="content" class="overflow-clip transition-all duration-300">
+                            <div class="pt-6 space-y-6">
+                                <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <span class="font-semibold text-lg font-secondary">Table of contents</span>
+                                    </div>
+                                    <nav class="space-y-3" data-controller="toc">
+                                        {% for block in post.body %}
+                                            {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock'] and block.title %}
+                                                <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
+                                                    {{ block.title }}
+                                                </a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </nav>
+                                </div>
+                                <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <span class="font-semibold text-lg font-secondary">Contributors</span>
+                                    </div>
+                                    {% for author in post.authors %}
+                                        <div class="flex items-center space-x-3">
+                                            {% if author.photo %}
+                                                <div>
+                                                    <img src="{{ author.photo }}" alt="{{ author.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                                                </div>
+                                            {% endif %}
+                                            <div class="flex flex-col text-sm">
+                                                <p class="font-semibold">{{ author.fullName }}</p>
+                                                <p class="flex-auto text-neutral-800/70">Expert en Relocation</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div>
+                                    {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
+                                    <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                </div>
                             </div>
                         </div>
-                    </button>
-                    <div data-menu-toggle-target="content" class="overflow-clip transition-all duration-300">
-                        <div class="pt-6 space-y-6">
-                            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                            <div class="space-y-4">
-                               <div>
-                                   <span class="font-semibold text-lg font-secondary">Table of contents</span>
-                               </div>
-                                <nav class="space-y-3" data-controller="toc">
-                                    {% for block in post.body %}
-                                        {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock'] and block.title %}
-                                            <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
-                                                {{ block.title }}
-                                            </a>
+                    </div>
+                </div>
+                <div class="md:col-span-4 min-w-0 lg:space-y-12 space-y-8">
+                    {% for block in post.body %}
+                        {% if block._type == 'wysiwygBlock' %}
+                            {% if block.background %}
+                                <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-slate-100 rounded-2xl scroll-mt-6">
+                                    {% if block.title %}
+                                        <div class="py-3 px-6">
+                                            <h2 class="text-2xl font-semibold">{{ block.title }}</h2>
+                                        </div>
+                                    {% endif %}
+                                    {% for segment in sanity_segments(block.content) %}
+                                        {% if segment.type == 'text' %}
+                                            <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
+                                                {{ segment.html|raw }}
+                                            </div>
+                                        {% elseif segment.type == 'image' and segment.url %}
+                                            <figure class="p-6 bg-white rounded-lg">
+                                                <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
+                                                {% if segment.alt %}
+                                                    <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.alt }}</figcaption>
+                                                {% endif %}
+                                            </figure>
+                                        {% elseif segment.type == 'youtube' and segment.videoId %}
+                                            <figure class="p-6 bg-white rounded-lg">
+                                                <div class="relative w-full aspect-video">
+                                                    <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? post.title }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
+                                                </div>
+                                                {% if segment.shortDescription %}
+                                                    <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.shortDescription }}</figcaption>
+                                                {% endif %}
+                                            </figure>
                                         {% endif %}
                                     {% endfor %}
-                                </nav>
-                            </div>
-                            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                            <div class="space-y-4">
-                                <div>
-                                    <span class="font-semibold text-lg font-secondary">Contributors</span>
                                 </div>
-                                {% for author in post.authors %}
-                                    <div class="flex items-center space-x-3">
-                                        {% if author.photo %}
-                                            <div>
-                                                <img src="{{ author.photo }}" alt="{{ author.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                            {% else %}
+                                <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                                    {% if block.title %}
+                                        <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
+                                    {% endif %}
+                                    {% for segment in sanity_segments(block.content) %}
+                                        {% if segment.type == 'text' %}
+                                            <div class="text-neutral-700 font-regular leading-7 break-words">
+                                                {{ segment.html|raw }}
                                             </div>
+                                        {% elseif segment.type == 'image' and segment.url %}
+                                            <figure class="my-6">
+                                                <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
+                                                {% if segment.alt %}
+                                                    <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
+                                                        {{ ux_icon('meteor-icons:link', {'class': 'size-4 shrink-0'}) }}
+                                                        {{ segment.alt }}
+                                                    </figcaption>
+                                                {% endif %}
+                                            </figure>
+                                        {% elseif segment.type == 'youtube' and segment.videoId %}
+                                            <figure class="my-6">
+                                                <div class="relative w-full aspect-video">
+                                                    <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? post.title }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
+                                                </div>
+                                                {% if segment.shortDescription %}
+                                                    <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
+                                                        {{ ux_icon('tabler:video', {'class': 'size-4 shrink-0'}) }}
+                                                        {{ segment.shortDescription }}
+                                                    </figcaption>
+                                                {% endif %}
+                                            </figure>
                                         {% endif %}
-                                        <div class="flex flex-col text-sm">
-                                            <p class="font-semibold">{{ author.fullName }}</p>
-                                            <p class="flex-auto text-neutral-800/70">Expert en Relocation</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% elseif block._type == 'faqBlock' %}
+                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                                {% if block.title %}
+                                    <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
+                                {% endif %}
+                                <div x-data="{
+                                activeAccordion: '',
+                                setActiveAccordion(id) {
+                                    this.activeAccordion = (this.activeAccordion == id) ? '' : id
+                                }
+                            }" class="relative w-full mx-auto overflow-hidden space-y-4">
+                                    {% for item in block.items %}
+                                        <div x-data="{ id: $id('accordion') }" x-init="{% if loop.first %}setActiveAccordion(id){% endif %}" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
+                                            <button @click="setActiveAccordion(id)" :aria-expanded="activeAccordion==id" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
+                                                <span>{{ item.question }}</span>
+                                                <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            </button>
+                                            <div x-show="activeAccordion==id" x-collapse x-cloak>
+                                                <div class="p-4 pt-0 opacity-70 text-neutral-800 break-words">
+                                                    {{ item.answer }}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                </div>
                             </div>
-                            <div>
-                                {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
-                                <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="md:col-span-4 min-w-0 lg:space-y-12 space-y-8">
-                {% for block in post.body %}
-                    {% if block._type == 'wysiwygBlock' %}
-                        {% if block.background %}
-                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-slate-100 rounded-2xl scroll-mt-6">
+                        {% elseif block._type == 'quickAnswerBlock' %}
+                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-[#FFEEF2] rounded-2xl scroll-mt-6">
                                 {% if block.title %}
                                     <div class="py-3 px-6">
-                                        <h2 class="text-2xl font-semibold">{{ block.title }}</h2>
+                                        <h2 class="text-2xl font-semibold text-primary">{{ block.title }}</h2>
                                     </div>
                                 {% endif %}
                                 {% for segment in sanity_segments(block.content) %}
@@ -136,135 +230,116 @@
                                         <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
                                             {{ segment.html|raw }}
                                         </div>
-                                    {% elseif segment.type == 'image' and segment.url %}
-                                        <figure class="p-6 bg-white rounded-lg">
-                                            <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
-                                            {% if segment.alt %}
-                                                <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.alt }}</figcaption>
-                                            {% endif %}
-                                        </figure>
-                                    {% elseif segment.type == 'youtube' and segment.videoId %}
-                                        <figure class="p-6 bg-white rounded-lg">
-                                            <div class="relative w-full aspect-video">
-                                                <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? post.title }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
-                                            </div>
-                                            {% if segment.shortDescription %}
-                                                <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.shortDescription }}</figcaption>
-                                            {% endif %}
-                                        </figure>
                                     {% endif %}
                                 {% endfor %}
                             </div>
-                        {% else %}
-                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
-                                {% if block.title %}
-                                    <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
-                                {% endif %}
-                                {% for segment in sanity_segments(block.content) %}
-                                    {% if segment.type == 'text' %}
-                                        <div class="text-neutral-700 font-regular leading-7 break-words">
-                                            {{ segment.html|raw }}
-                                        </div>
-                                    {% elseif segment.type == 'image' and segment.url %}
-                                        <figure class="my-6">
-                                            <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
-                                            {% if segment.alt %}
-                                                <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
-                                                    {{ ux_icon('meteor-icons:link', {'class': 'size-4 shrink-0'}) }}
-                                                    {{ segment.alt }}
-                                                </figcaption>
-                                            {% endif %}
-                                        </figure>
-                                    {% elseif segment.type == 'youtube' and segment.videoId %}
-                                        <figure class="my-6">
-                                            <div class="relative w-full aspect-video">
-                                                <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? post.title }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
-                                            </div>
-                                            {% if segment.shortDescription %}
-                                                <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
-                                                    {{ ux_icon('tabler:video', {'class': 'size-4 shrink-0'}) }}
-                                                    {{ segment.shortDescription }}
-                                                </figcaption>
-                                            {% endif %}
-                                        </figure>
+                        {% elseif block._type == 'ctaBlock' %}
+                            <div class="bg-white bg-linear-to-b from-neutral-100 to-neutral-50/70 rounded-2xl mx-auto p-8 text-center">
+                                <div class="max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
+                                    <div class="flex -space-x-2 mb-6">
+                                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
+                                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
+                                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
+                                    </div>
+                                    {% if block.title %}
+                                        <p class="text-2xl font-semibold text-pretty">{{ block.title }}</p>
                                     {% endif %}
-                                {% endfor %}
+                                    {% if block.description %}
+                                        <p class="text-neutral-700 text-balance">{{ block.description }}</p>
+                                    {% endif %}
+                                    {% if block.btnText %}
+                                        <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                                            {{ 'home.heroSection.button'|trans|raw }}
+                                        </twig:Button>
+                                    {% endif %}
+                                </div>
                             </div>
                         {% endif %}
-                    {% elseif block._type == 'faqBlock' %}
-                        <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
-                            {% if block.title %}
-                                <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
-                            {% endif %}
-                            <div x-data="{
-                                activeAccordion: '',
-                                setActiveAccordion(id) {
-                                    this.activeAccordion = (this.activeAccordion == id) ? '' : id
-                                }
-                            }" class="relative w-full mx-auto overflow-hidden space-y-4">
-                                {% for item in block.items %}
-                                    <div x-data="{ id: $id('accordion') }" x-init="{% if loop.first %}setActiveAccordion(id){% endif %}" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                                        <button @click="setActiveAccordion(id)" :aria-expanded="activeAccordion==id" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                                            <span>{{ item.question }}</span>
-                                            <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                        </button>
-                                        <div x-show="activeAccordion==id" x-collapse x-cloak>
-                                            <div class="p-4 pt-0 opacity-70 text-neutral-800 break-words">
-                                                {{ item.answer }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% elseif block._type == 'quickAnswerBlock' %}
-                        <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-[#FFEEF2] rounded-2xl scroll-mt-6">
-                            {% if block.title %}
-                                <div class="py-3 px-6">
-                                    <h2 class="text-2xl font-semibold text-primary">{{ block.title }}</h2>
-                                </div>
-                            {% endif %}
-                            {% for segment in sanity_segments(block.content) %}
-                                {% if segment.type == 'text' %}
-                                    <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
-                                        {{ segment.html|raw }}
-                                    </div>
-                                {% endif %}
+                    {% endfor %}
+                    {% if post.tags is defined and post.tags is not empty %}
+                        <div class="flex flex-wrap gap-4">
+                            {% for tag in post.tags %}
+                                <twig:Badge variant="secondary">
+                                    {{ tag }}
+                                </twig:Badge>
                             {% endfor %}
                         </div>
-                    {% elseif block._type == 'ctaBlock' %}
-                        <div class="bg-white bg-linear-to-b from-neutral-100 to-neutral-50/70 rounded-2xl mx-auto p-8 text-center">
-                            <div class="max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
-                                <div class="flex -space-x-2 mb-6">
-                                    <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
-                                    <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
-                                    <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
-                                </div>
-                                {% if block.title %}
-                                    <p class="text-2xl font-semibold text-pretty">{{ block.title }}</p>
-                                {% endif %}
-                                {% if block.description %}
-                                    <p class="text-neutral-700 text-balance">{{ block.description }}</p>
-                                {% endif %}
-                                {% if block.btnText %}
-                                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                                        {{ 'home.heroSection.button'|trans|raw }}
-                                    </twig:Button>
-                                {% endif %}
-                            </div>
-                        </div>
                     {% endif %}
-                {% endfor %}
-                {% if post.tags is defined and post.tags is not empty %}
-                    <div class="flex flex-wrap gap-4">
-                        {% for tag in post.tags %}
-                            <twig:Badge variant="secondary">
-                                {{ tag }}
-                            </twig:Badge>
-                        {% endfor %}
+                </div>
+            </section>
+        </article>
+        <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+        <section class="lg:py-16 py-8" aria-labelledby="related-articles-heading">
+            <div class="space-y-8 lg:space-y-16">
+                <div class="flex flex-row items-end gap-5 justify-between">
+                    <div class="space-y-3 ">
+                        <span class="font-semibold text-primary font-secondary">Articles</span>
+                        <h2 id="related-articles-heading" class="text-3xl font-medium text-pretty">Continuer votre lecture</h2>
                     </div>
-                {% endif %}
+                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_contact') }}" class="hidden sm:inline-flex">
+                        {{ 'home.heroSection.button'|trans|raw }}
+                        {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                    </twig:Button>
+                </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for latestPost in latestPosts %}
+                        {% set latestPostDate = latestPost.publishedAt is defined and latestPost.publishedAt ? latestPost.publishedAt : latestPost._createdAt %}
+                        <a href="{{ path('app_blog_show', { '_locale': app.request.locale, 'slug': latestPost.slug }) }}" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2 {{ loop.index == 3 ? 'sm:hidden lg:flex' : '' }}">
+                            {% if latestPost.mainPhoto %}
+                                <div class="relative rounded-lg overflow-hidden">
+                                    <img src="{{ latestPost.mainPhoto }}" alt="{{ latestPost.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 object-cover rounded-lg"/>
+                                    {% if latestPost.category is defined and latestPost.category %}
+                                        <div class="absolute top-3 left-3">
+                                            <twig:Badge variant="secondary" class="gap-x-1.5">
+                                                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                                                    <circle cx="4" cy="4" r="3" fill="{{ latestPost.category.color|e('html_attr') }}"/>
+                                                </svg>
+                                                {{ latestPost.category.name }}
+                                            </twig:Badge>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="p-3 flex flex-col flex-1">
+                                <div class="flex min-[359px]:items-center min-[359px]:flex-row flex-col gap-x-2 text-sm text-neutral-600">
+                                    {% if latestPost.authors is defined and latestPost.authors|length > 0 %}
+                                        <div class="flex items-center gap-x-2">
+                                            {% if latestPost.authors[0].photo %}
+                                                <img src="{{ latestPost.authors[0].photo }}" alt="{{ latestPost.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
+                                            {% endif %}
+                                            <p class="truncate">{{ latestPost.authors[0].fullName }}</p>
+                                        </div>
+                                        <svg width="4" height="4" viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0 min-[359px]:block hidden">
+                                            <circle cx="2" cy="2" r="2" fill="#525252"/>
+                                        </svg>
+                                    {% endif %}
+                                    <div class="min-[359px]:mt-0 mt-2">
+                                        <time class="truncate" datetime="{{ latestPostDate }}">{{ latestPostDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    </div>
+                                </div>
+                                <div class="mt-4 space-y-2">
+                                    <h3 class="font-medium text-xl break-words" title="{{ latestPost.title }}">{{ latestPost.title }}</h3>
+                                    {% if latestPost.shortDescription %}
+                                        <p class="text-neutral-600 font-light">{{ latestPost.shortDescription|u.truncate(120, '...') }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="pt-5 mt-auto">
+                                    <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
+                                        Lire l'article
+                                        {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="flex justify-center sm:hidden mt-5">
+                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_contact') }}">
+                        {{ 'home.heroSection.button'|trans|raw }}
+                        {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                    </twig:Button>
+                </div>
             </div>
         </section>
-    </article>
+    </div>
 {% endblock %}
