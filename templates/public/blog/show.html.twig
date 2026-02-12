@@ -111,7 +111,8 @@
                         {% endfor %}
                     </div>
                     <div>
-                        <time class="text-neutral-500 text-sm" datetime="{{ post._createdAt }}">{{ 'blog.show.published'|trans|raw }} {{ post._createdAt|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                        {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
+                        <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                     </div>
                 </div>
             </div>

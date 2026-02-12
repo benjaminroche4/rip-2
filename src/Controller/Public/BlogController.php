@@ -75,6 +75,7 @@ final class BlogController extends AbstractController
                     }
                 },
                 _createdAt,
+                publishedAt,
                 "category": category->{name, "color": color.hex},
                 "authors": authors[]->{fullName, "photo": photo.asset->url},
                 "tags": tags[],
