@@ -53,7 +53,7 @@
                         </div>
                     </div>
                 {% endif %}
-                <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ post.title }}</h1>
+                <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance break-words">{{ post.title }}</h1>
                 {% if post.shortDescription %}
                     <div class="max-w-lg">
                         <p class="text-neutral-600 leading-7 text-pretty">{{ post.shortDescription }}</p>
@@ -67,56 +67,69 @@
             {% endif %}
         </section>
         <section class="grid md:grid-cols-6 lg:py-16 py-12 lg:gap-20 gap-8">
-            <div class="md:col-span-2">
-                <div class="rounded-2xl border border-neutral-200 p-6 space-y-6 sticky top-6">
-                    <div class="space-y-4">
-                       <div>
-                           <p class="font-semibold text-lg font-secondary">Menu</p>
-                       </div>
-                        <nav class="space-y-3" data-controller="toc">
-                            {% for block in post.body %}
-                                {% if block._type == 'wysiwygBlock' and block.title %}
-                                    <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block text-neutral-600 font-light hover:text-primary transition duration-100">
-                                        {{ block.title }}
-                                    </a>
-                                {% elseif block._type == 'faqBlock' and block.title %}
-                                    <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block text-neutral-600 font-light hover:text-primary transition duration-100">
-                                        {{ block.title }}
-                                    </a>
-                                {% elseif block._type == 'quickAnswerBlock' and block.title %}
-                                    <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block text-neutral-600 font-light hover:text-primary transition duration-100">
-                                        {{ block.title }}
-                                    </a>
-                                {% endif %}
-                            {% endfor %}
-                        </nav>
-                    </div>
-                    <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="font-semibold text-lg font-secondary">Contributors</p>
-                        </div>
-                        {% for author in post.authors %}
-                            <div class="flex items-center space-x-3">
-                                {% if author.photo %}
-                                    <div>
-                                        <img src="{{ author.photo }}" alt="{{ author.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
-                                    </div>
-                                {% endif %}
-                                <div class="flex flex-col space-x-0.5 text-sm">
-                                    <p class="font-semibold">{{ author.fullName }}</p>
-                                    <p class="flex-auto text-neutral-800/70">Expert en Relocation</p>
-                                </div>
+            <div class="md:col-span-2 min-w-0">
+                <div data-controller="menu-toggle" class="rounded-2xl border border-neutral-200 p-6 sticky top-6">
+                    <div data-action="click->menu-toggle#toggle" class="cursor-pointer group">
+                        <div class="flex justify-between items-center gap-x-2">
+                            <p class="font-semibold text-lg font-secondary">Menu</p>
+                            <div class="transition duration-200 group-hover:bg-slate-100 p-1 rounded-full">
+                                {{ ux_icon('iconamoon:arrow-down-2', {'class': 'size-5 shrink-0 transition duration-200', 'data-menu-toggle-target': 'icon'}) }}
                             </div>
-                        {% endfor %}
+                        </div>
                     </div>
-                    <div>
-                        {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
-                        <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                    <div data-menu-toggle-target="content" class="overflow-clip transition-all duration-300">
+                        <div class="pt-6 space-y-6">
+                            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                            <div class="space-y-4">
+                               <div>
+                                   <p class="font-semibold text-lg font-secondary">Table of contents</p>
+                               </div>
+                                <nav class="space-y-3" data-controller="toc">
+                                    {% for block in post.body %}
+                                        {% if block._type == 'wysiwygBlock' and block.title %}
+                                            <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
+                                                {{ block.title }}
+                                            </a>
+                                        {% elseif block._type == 'faqBlock' and block.title %}
+                                            <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
+                                                {{ block.title }}
+                                            </a>
+                                        {% elseif block._type == 'quickAnswerBlock' and block.title %}
+                                            <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
+                                                {{ block.title }}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </nav>
+                            </div>
+                            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="font-semibold text-lg font-secondary">Contributors</p>
+                                </div>
+                                {% for author in post.authors %}
+                                    <div class="flex items-center space-x-3">
+                                        {% if author.photo %}
+                                            <div>
+                                                <img src="{{ author.photo }}" alt="{{ author.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                                            </div>
+                                        {% endif %}
+                                        <div class="flex flex-col space-x-0.5 text-sm">
+                                            <p class="font-semibold">{{ author.fullName }}</p>
+                                            <p class="flex-auto text-neutral-800/70">Expert en Relocation</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
+                                <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="md:col-span-4 lg:space-y-12 space-y-6">
+            <div class="md:col-span-4 min-w-0 lg:space-y-12 space-y-6">
                 {% for block in post.body %}
                     {% if block._type == 'wysiwygBlock' %}
                         {% if block.background %}
@@ -128,7 +141,7 @@
                                 {% endif %}
                                 {% for segment in sanity_segments(block.content) %}
                                     {% if segment.type == 'text' %}
-                                        <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg">
+                                        <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
                                             {{ segment.html|raw }}
                                         </div>
                                     {% elseif segment.type == 'image' and segment.url %}
@@ -157,7 +170,7 @@
                                 {% endif %}
                                 {% for segment in sanity_segments(block.content) %}
                                     {% if segment.type == 'text' %}
-                                        <div class="text-neutral-700 font-regular leading-7">
+                                        <div class="text-neutral-700 font-regular leading-7 break-words">
                                             {{ segment.html|raw }}
                                         </div>
                                     {% elseif segment.type == 'image' and segment.url %}
@@ -204,7 +217,7 @@
                                             <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                         </button>
                                         <div x-show="activeAccordion==id" x-collapse x-cloak>
-                                            <div class="p-4 pt-0 opacity-70 text-neutral-800">
+                                            <div class="p-4 pt-0 opacity-70 text-neutral-800 break-words">
                                                 {{ item.answer }}
                                             </div>
                                         </div>
@@ -221,7 +234,7 @@
                             {% endif %}
                             {% for segment in sanity_segments(block.content) %}
                                 {% if segment.type == 'text' %}
-                                    <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg">
+                                    <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
                                         {{ segment.html|raw }}
                                     </div>
                                 {% endif %}
@@ -251,18 +264,15 @@
                     {% endif %}
                 {% endfor %}
                 {% if post.tags is defined and post.tags is not empty %}
-                    <div class="pb-12">
-                        <div class="flex flex-wrap gap-4">
-                            {% for tag in post.tags %}
-                                <twig:Badge variant="secondary">
-                                    {{ tag }}
-                                </twig:Badge>
-                            {% endfor %}
-                        </div>
+                    <div class="flex flex-wrap gap-4">
+                        {% for tag in post.tags %}
+                            <twig:Badge variant="secondary">
+                                {{ tag }}
+                            </twig:Badge>
+                        {% endfor %}
                     </div>
                 {% endif %}
             </div>
         </section>
     </article>
-    {{ component('blocks/ctaFooter') }}
 {% endblock %}
