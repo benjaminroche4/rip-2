@@ -2,10 +2,7 @@
 
 {% block title %}{{ 'meta.blog.title'|trans }}{% endblock %}
 {% block description %}{{ 'meta.blog.description'|trans }}{% endblock %}
-{% block url %}{{ path('app_blog') }}{% endblock %}
-
-{% set hero = posts|first %}
-{% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
+{% block url %}{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}{% endblock %}
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
@@ -15,23 +12,101 @@
         </div>
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
-        {% if hero %}
-            <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
-                <div class="pb-2">
-                    <p class="text-sm text-primary uppercase tracking-normal font-semibold text-center">
-                        {{ 'blog.list.lastArticle'|trans|raw }}
-                    </p>
+        {% set hero = posts|first %}
+        {% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
+        {% if hero and isFirstPage %}
+                <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
+                    <div class="pb-2">
+                        <p class="text-sm text-primary uppercase tracking-normal font-semibold text-center">
+                            {{ 'blog.list.lastArticle'|trans|raw }}
+                        </p>
+                    </div>
+                    <div class="rounded-2xl bg-white grid grid-cols-1 lg:grid-cols-5 lg:gap-4">
+                        <div class="col-span-2 flex flex-col justify-between space-y-6 p-6 lg:order-1 order-2">
+                            <div class="space-y-2">
+                                <div class="flex min-[359px]:items-center min-[359px]:flex-row flex-col gap-x-2 text-sm text-neutral-600">
+                                    {% if hero.authors is defined and hero.authors|length > 0 %}
+                                        <div class="flex items-center gap-x-2">
+                                            {% if hero.authors[0].photo %}
+                                                <img src="{{ hero.authors[0].photo }}" alt="{{ hero.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
+                                            {% endif %}
+                                            <p class="truncate">{{ hero.authors[0].fullName }}</p>
+                                        </div>
+                                        <svg width="4" height="4" viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0 min-[359px]:block hidden">
+                                            <circle cx="2" cy="2" r="2" fill="#525252"/>
+                                        </svg>
+                                    {% endif %}
+                                    <div class="min-[359px]:mt-0 mt-2">
+                                        <time class="truncate" datetime="{{ blogDate }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    </div>
+                                </div>
+                                <h2 class="mt-4 lg:mt-8 font-semibold text-xl lg:text-3xl text-pretty">{{ hero.title }}</h2>
+                                {% if hero.shortDescription %}
+                                    <p class="text-neutral-600 font-light">{{ hero.shortDescription|u.truncate(120, '...') }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="pt-5 mt-auto">
+                                <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
+                                    {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-span-3 lg:order-2 order-1 p-2 relative">
+                            {% if hero.mainPhoto %}
+                                <img src="{{ hero.mainPhoto }}" alt="{{ hero.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
+                            {% endif %}
+                            {% if hero.category is defined and hero.category %}
+                                <div class="absolute top-5 left-5">
+                                    <twig:Badge variant="secondary" class="gap-x-1.5">
+                                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                                            <circle cx="4" cy="4" r="3" fill="{{ hero.category.color|e('html_attr') }}"/>
+                                        </svg>
+                                        {{ hero.category.name }}
+                                    </twig:Badge>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+        {% endif %}
+
+        <turbo-frame id="blog-list" data-turbo-action="advance" autoscroll data-autoscroll-block="start">
+            <section class="py-7 lg:py-12">
+                <div class="flex justify-between items-center">
+                    <div class="bg-neutral-100 rounded-lg px-4 py-2 text-sm font-medium text-primary">
+                        {{ 'blog.list.allArticles'|trans|raw }} ({{ totalCount }})
+                    </div>
                 </div>
-                <div class="rounded-2xl bg-white grid grid-cols-1 lg:grid-cols-5 lg:gap-4">
-                    <div class="col-span-2 flex flex-col justify-between space-y-6 p-6 lg:order-1 order-2">
-                        <div class="space-y-2">
+            </section>
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% set gridPosts = isFirstPage ? posts|slice(1) : posts %}
+                {% for blog in gridPosts %}
+                    {% set blogDate = blog.publishedAt is defined and blog.publishedAt ? blog.publishedAt : blog._createdAt %}
+                    <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
+                        {% if blog.mainPhoto %}
+                            <div class="relative rounded-lg overflow-hidden">
+                                <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 object-cover rounded-lg"/>
+                                {% if blog.category is defined and blog.category %}
+                                    <div class="absolute top-3 left-3">
+                                        <twig:Badge variant="secondary" class="gap-x-1.5">
+                                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                                                <circle cx="4" cy="4" r="3" fill="{{ blog.category.color|e('html_attr') }}"/>
+                                            </svg>
+                                            {{ blog.category.name }}
+                                        </twig:Badge>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <div class="p-3 flex flex-col flex-1">
                             <div class="flex min-[359px]:items-center min-[359px]:flex-row flex-col gap-x-2 text-sm text-neutral-600">
-                                {% if hero.authors is defined and hero.authors|length > 0 %}
+                                {% if blog.authors is defined and blog.authors|length > 0 %}
                                     <div class="flex items-center gap-x-2">
-                                        {% if hero.authors[0].photo %}
-                                            <img src="{{ hero.authors[0].photo }}" alt="{{ hero.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
+                                        {% if blog.authors[0].photo %}
+                                            <img src="{{ blog.authors[0].photo }}" alt="{{ blog.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
                                         {% endif %}
-                                        <p class="truncate">{{ hero.authors[0].fullName }}</p>
+                                        <p class="truncate">{{ blog.authors[0].fullName }}</p>
                                     </div>
                                     <svg width="4" height="4" viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0 min-[359px]:block hidden">
                                         <circle cx="2" cy="2" r="2" fill="#525252"/>
@@ -41,95 +116,30 @@
                                     <time class="truncate" datetime="{{ blogDate }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                 </div>
                             </div>
-                            <h2 class="mt-4 lg:mt-8 font-semibold text-xl lg:text-3xl text-pretty">{{ hero.title }}</h2>
-                            {% if hero.shortDescription %}
-                                <p class="text-neutral-600 font-light">{{ hero.shortDescription|u.truncate(120, '...') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="pt-5 mt-auto">
-                            <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
-                                {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-span-3 lg:order-2 order-1 p-2 relative">
-                        {% if hero.mainPhoto %}
-                            <img src="{{ hero.mainPhoto }}" alt="{{ hero.mainPhotoAlt }}" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
-                        {% endif %}
-                        {% if hero.category is defined and hero.category %}
-                            <div class="absolute top-5 left-5">
-                                <twig:Badge variant="secondary" class="gap-x-1.5">
-                                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-                                        <circle cx="4" cy="4" r="3" fill="{{ hero.category.color|e('html_attr') }}"/>
-                                    </svg>
-                                    {{ hero.category.name }}
-                                </twig:Badge>
+                            <div class="mt-4 space-y-2">
+                                <h2 class="font-medium text-xl break-words" title="{{ blog.title }}">{{ blog.title }}</h2>
+                                {% if blog.shortDescription %}
+                                    <p class="text-neutral-600 font-light">{{ blog.shortDescription|u.truncate(120, '...') }}</p>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </a>
-        {% endif %}
-        <section class="py-7 lg:py-12">
-            <div class="flex justify-between items-center">
-                <div class="bg-neutral-100 rounded-lg px-4 py-2 text-sm font-medium text-primary">
-                    {{ 'blog.list.allArticles'|trans|raw }} ({{ posts|length }})
-                </div>
-            </div>
-        </section>
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for blog in posts|slice(1) %}
-                {% set blogDate = blog.publishedAt is defined and blog.publishedAt ? blog.publishedAt : blog._createdAt %}
-                <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
-                    {% if blog.mainPhoto %}
-                        <div class="relative rounded-lg overflow-hidden">
-                            <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 object-cover rounded-lg"/>
-                            {% if blog.category is defined and blog.category %}
-                                <div class="absolute top-3 left-3">
-                                    <twig:Badge variant="secondary" class="gap-x-1.5">
-                                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-                                            <circle cx="4" cy="4" r="3" fill="{{ blog.category.color|e('html_attr') }}"/>
-                                        </svg>
-                                        {{ blog.category.name }}
-                                    </twig:Badge>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                    <div class="p-3 flex flex-col flex-1">
-                        <div class="flex min-[359px]:items-center min-[359px]:flex-row flex-col gap-x-2 text-sm text-neutral-600">
-                            {% if blog.authors is defined and blog.authors|length > 0 %}
-                                <div class="flex items-center gap-x-2">
-                                    {% if blog.authors[0].photo %}
-                                        <img src="{{ blog.authors[0].photo }}" alt="{{ blog.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
-                                    {% endif %}
-                                    <p class="truncate">{{ blog.authors[0].fullName }}</p>
-                                </div>
-                                <svg width="4" height="4" viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0 min-[359px]:block hidden">
-                                    <circle cx="2" cy="2" r="2" fill="#525252"/>
-                                </svg>
-                            {% endif %}
-                            <div class="min-[359px]:mt-0 mt-2">
-                                <time class="truncate" datetime="{{ blogDate }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                            <div class="pt-5 mt-auto">
+                                <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
+                                    {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                                </span>
                             </div>
                         </div>
-                        <div class="mt-4 space-y-2">
-                            <h2 class="font-medium text-xl break-words" title="{{ blog.title }}">{{ blog.title }}</h2>
-                            {% if blog.shortDescription %}
-                                <p class="text-neutral-600 font-light">{{ blog.shortDescription|u.truncate(120, '...') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="pt-5 mt-auto">
-                            <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
-                                {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
-                            </span>
-                        </div>
-                    </div>
-                </a>
-            {% endfor %}
-        </section>
-        {{ component('blocks/ctaFooter') }}
+                    </a>
+                {% endfor %}
+            </section>
+
+            <twig:Pagination
+                :currentPage="currentPage"
+                :totalPages="totalPages"
+                route="app_blog"
+            />
+        </turbo-frame>
+
     </section>
+    {{ component('blocks/ctaFooter') }}
 {% endblock %}

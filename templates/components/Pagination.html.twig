@@ -1,0 +1,62 @@
+{%- props currentPage = 1, totalPages = 1, route = '', routeParams = {} -%}
+
+{% if totalPages > 1 %}
+    {% set prevPage = currentPage - 1 %}
+    {% set nextPage = currentPage + 1 %}
+
+    <nav aria-label="Pagination" class="flex justify-center items-center gap-2 mt-12">
+        {# Previous #}
+        {% if currentPage > 1 %}
+            <a href="{{ path(route, routeParams|merge(prevPage > 1 ? {page: prevPage} : {})) }}"
+               rel="prev"
+               class="inline-flex items-center justify-center size-10 rounded-lg border border-slate-200 hover:bg-slate-50 transition duration-100">
+                {{ ux_icon('ci:chevron-left', {'class': 'size-4'}) }}
+            </a>
+        {% else %}
+            <span class="inline-flex items-center justify-center size-10 rounded-lg border border-slate-100 text-slate-300 cursor-not-allowed">
+                {{ ux_icon('ci:chevron-left', {'class': 'size-4'}) }}
+            </span>
+        {% endif %}
+
+        {# Page numbers with ellipsis #}
+        {% set pages = [] %}
+        {% for p in 1..totalPages %}
+            {% if p == 1 or p == totalPages or (p >= currentPage - 1 and p <= currentPage + 1) %}
+                {% set pages = pages|merge([p]) %}
+            {% endif %}
+        {% endfor %}
+
+        {% set lastShown = 0 %}
+        {% for p in pages %}
+            {% if lastShown and p > lastShown + 1 %}
+                <span class="inline-flex items-center justify-center size-10 text-sm text-slate-400">...</span>
+            {% endif %}
+
+            {% if p == currentPage %}
+                <span class="inline-flex items-center justify-center size-10 rounded-lg bg-primary text-white text-sm font-medium">
+                    {{ p }}
+                </span>
+            {% else %}
+                <a href="{{ path(route, routeParams|merge(p > 1 ? {page: p} : {})) }}"
+                   class="inline-flex items-center justify-center size-10 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-100 text-sm font-medium transition duration-100">
+                    {{ p }}
+                </a>
+            {% endif %}
+
+            {% set lastShown = p %}
+        {% endfor %}
+
+        {# Next #}
+        {% if currentPage < totalPages %}
+            <a href="{{ path(route, routeParams|merge({page: nextPage})) }}"
+               rel="next"
+               class="inline-flex items-center justify-center size-10 rounded-lg border border-slate-200 hover:bg-slate-50 transition duration-100">
+                {{ ux_icon('ci:chevron-right', {'class': 'size-4'}) }}
+            </a>
+        {% else %}
+            <span class="inline-flex items-center justify-center size-10 rounded-lg border border-slate-100 text-slate-300 cursor-not-allowed">
+                {{ ux_icon('ci:chevron-right', {'class': 'size-4'}) }}
+            </span>
+        {% endif %}
+    </nav>
+{% endif %}

@@ -4,6 +4,7 @@ namespace App\Controller\Public;
 
 use App\Service\SanityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -22,10 +23,33 @@ final class BlogController extends AbstractController
         ],
         name: 'app_blog',
     )]
-    public function blogList(string $_locale): Response
+    public function blogList(Request $request, string $_locale): Response
     {
+        $perPage = 2;
+        $page = max(1, $request->query->getInt('page', 1));
+        $isFirstPage = $page === 1;
+
+        $totalCount = $this->sanityService->query(
+            'count(*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))])',
+            ['locale' => $_locale]
+        );
+
+        // Page 1: fetch 10 items (1 hero + 9 grid), Page 2+: fetch 9 items skipping the hero
+        $limit = $isFirstPage ? $perPage + 1 : $perPage;
+        $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
+        $end = $offset + $limit;
+
+        // Total pages: 1 hero on page 1, rest in pages of 9
+        $totalPages = $totalCount <= 1 ? 1 : (int) ceil(($totalCount - 1) / $perPage);
+
+        if ($page > $totalPages) {
+            $page = $totalPages;
+            $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
+            $end = $offset + $limit;
+        }
+
         $posts = $this->sanityService->query(
-            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) [$offset...$end] {
                 title,
                 shortDescription,
                 "slug": slug.current,
@@ -37,11 +61,15 @@ final class BlogController extends AbstractController
                 "category": category->{name, "color": color.hex},
                 "authors": authors[]->{fullName, "photo": photo.asset->url}
             }',
-            ['locale' => $_locale]
+            ['locale' => $_locale, 'offset' => $offset, 'end' => $end]
         );
 
         return $this->render('public/blog/list.html.twig', [
             'posts' => $posts,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCount' => $totalCount,
+            'isFirstPage' => $isFirstPage,
         ]);
     }
 
