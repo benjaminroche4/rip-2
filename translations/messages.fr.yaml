@@ -752,8 +752,9 @@ blog:
     list:
         title: blog
         subTitle: Le blog pour vivre et s’installer à Paris
+        text: Découvrez nos guides et conseils pour vous informer et vous accompagner à chaque étape de vos projets à Paris.
         lastArticle: Dernier article
-        timeToRead: min de lecture
+        readArticle: Lire l'article
         allArticles: Tous les articles
     show:
         breadcrumb:

@@ -752,8 +752,9 @@ blog:
     list:
         title: blog
         subTitle: The Blog for Living and Settling in Paris
+        text: Discover our guides and expert advice to inform and support you at every stage of your projects in Paris.
         lastArticle: Latest article
-        timeToRead: min read
+        readArticle: Read the article
         allArticles: All articles
     show:
         breadcrumb:

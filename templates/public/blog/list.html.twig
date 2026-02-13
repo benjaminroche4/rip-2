@@ -7,15 +7,18 @@
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary capitalize">{{ 'blog.list.title'|trans|raw }}</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'blog.list.subTitle'|trans|raw }}</h2>
+            <p class="text-center font-semibold text-primary font-secondary capitalize">{{ 'blog.list.title'|trans|raw }}</p>
+            <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'blog.list.subTitle'|trans|raw }}</h1>
+            <p class="text-center max-w-lg mx-auto text-neutral-600 text-pretty">
+                {{ 'blog.list.text'|trans|raw }}
+            </p>
         </div>
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
         {% set hero = posts|first %}
         {% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
         {% if hero and isFirstPage %}
-                <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
+                <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] group to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
                     <div class="pb-2">
                         <p class="text-sm text-primary uppercase tracking-normal font-semibold text-center">
                             {{ 'blog.list.lastArticle'|trans|raw }}
@@ -47,7 +50,7 @@
                             </div>
                             <div class="pt-5 mt-auto">
                                 <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                    {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ 'blog.list.readArticle'|trans|default('Lire l\'article') }}
                                     {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                                 </span>
                             </div>
@@ -83,7 +86,7 @@
                 {% set gridPosts = isFirstPage ? posts|slice(1) : posts %}
                 {% for blog in gridPosts %}
                     {% set blogDate = blog.publishedAt is defined and blog.publishedAt ? blog.publishedAt : blog._createdAt %}
-                    <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
+                    <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" data-turbo-frame="_top" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
                         {% if blog.mainPhoto %}
                             <div class="relative rounded-lg overflow-hidden">
                                 <img src="{{ blog.mainPhoto }}" alt="{{ blog.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 object-cover rounded-lg"/>
@@ -124,7 +127,7 @@
                             </div>
                             <div class="pt-5 mt-auto">
                                 <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                    {{ 'blog.show.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ 'blog.list.readArticle'|trans|default('Lire l\'article') }}
                                     {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                                 </span>
                             </div>
