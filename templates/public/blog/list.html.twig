@@ -15,9 +15,9 @@
         </div>
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
-        {% set hero = posts|first %}
-        {% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
-        {% if hero and isFirstPage %}
+        {% if hasHero and posts|length > 0 %}
+            {% set hero = posts|first %}
+            {% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
                 <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] group to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
                     <div class="pb-2">
                         <p class="text-sm text-primary uppercase tracking-normal font-semibold text-center">
@@ -76,14 +76,24 @@
 
         <turbo-frame id="blog-list" data-turbo-action="advance" autoscroll data-autoscroll-block="start">
             <section class="py-7 lg:py-12">
-                <div class="flex justify-between items-center">
-                    <div class="bg-neutral-100 rounded-lg px-4 py-2 text-sm font-medium text-primary">
+                <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                    <a href="{{ path('app_blog') }}"
+                       class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ not activeCategory ? 'bg-primary text-white' : 'bg-neutral-100 text-primary hover:bg-neutral-200' }}">
                         {{ 'blog.list.allArticles'|trans|raw }} ({{ totalCount }})
-                    </div>
+                    </a>
+                    {% for cat in categories %}
+                        <a href="{{ path('app_blog', {category: cat.slug}) }}"
+                           class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 flex items-center gap-1.5 {{ activeCategory == cat.slug ? 'bg-primary text-white' : 'bg-neutral-100 text-primary hover:bg-neutral-200' }}">
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                                <circle cx="4" cy="4" r="3" fill="{{ activeCategory == cat.slug ? 'white' : cat.color|e('html_attr') }}"/>
+                            </svg>
+                            {{ cat.name }} ({{ cat.count }})
+                        </a>
+                    {% endfor %}
                 </div>
             </section>
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% set gridPosts = isFirstPage ? posts|slice(1) : posts %}
+                {% set gridPosts = hasHero ? posts|slice(1) : posts %}
                 {% for blog in gridPosts %}
                     {% set blogDate = blog.publishedAt is defined and blog.publishedAt ? blog.publishedAt : blog._createdAt %}
                     <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" data-turbo-frame="_top" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
@@ -140,6 +150,7 @@
                 :currentPage="currentPage"
                 :totalPages="totalPages"
                 route="app_blog"
+                :routeParams="activeCategory ? {category: activeCategory} : {}"
             />
         </turbo-frame>
 

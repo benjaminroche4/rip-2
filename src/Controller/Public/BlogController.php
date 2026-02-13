@@ -27,29 +27,61 @@ final class BlogController extends AbstractController
     {
         $perPage = 2;
         $page = max(1, $request->query->getInt('page', 1));
-        $isFirstPage = $page === 1;
+        $activeCategory = $request->query->get('category');
 
-        $totalCount = $this->sanityService->query(
-            'count(*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))])',
+        // Categories with at least 1 article
+        $categories = $this->sanityService->query(
+            '*[_type == "category"] {
+                name,
+                "slug": slug.current,
+                "color": color.hex,
+                "count": count(*[_type == "blog" && language == $locale && references(^._id) && !(_id in path("drafts.**"))])
+            } [count > 0] | order(name asc)',
             ['locale' => $_locale]
         );
 
-        // Page 1: fetch 10 items (1 hero + 9 grid), Page 2+: fetch 9 items skipping the hero
-        $limit = $isFirstPage ? $perPage + 1 : $perPage;
-        $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
-        $end = $offset + $limit;
+        // Build filter
+        $categoryFilter = $activeCategory ? ' && category->slug.current == $category' : '';
+        $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))' . $categoryFilter . ']';
 
-        // Total pages: 1 hero on page 1, rest in pages of 9
-        $totalPages = $totalCount <= 1 ? 1 : (int) ceil(($totalCount - 1) / $perPage);
+        $params = ['locale' => $_locale];
+        if ($activeCategory) {
+            $params['category'] = $activeCategory;
+        }
+
+        $totalCount = $this->sanityService->query(
+            'count(' . $baseFilter . ')',
+            $params
+        );
+
+        // With category filter: no hero, simple pagination
+        // Without filter: page 1 has hero + grid, page 2+ grid only
+        $hasHero = !$activeCategory && $page === 1;
+        $isFirstPage = $page === 1;
+
+        if ($activeCategory) {
+            $offset = ($page - 1) * $perPage;
+            $limit = $perPage;
+            $totalPages = max(1, (int) ceil($totalCount / $perPage));
+        } else {
+            $limit = $hasHero ? $perPage + 1 : $perPage;
+            $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
+            $totalPages = $totalCount <= 1 ? 1 : (int) ceil(($totalCount - 1) / $perPage);
+        }
 
         if ($page > $totalPages) {
             $page = $totalPages;
-            $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
-            $end = $offset + $limit;
+            if ($activeCategory) {
+                $offset = ($page - 1) * $perPage;
+            } else {
+                $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
+            }
         }
 
+        $end = $offset + $limit;
+
         $posts = $this->sanityService->query(
-            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) [$offset...$end] {
+            $baseFilter . ' | order(_createdAt desc) [$offset...$end] {
                 title,
                 shortDescription,
                 "slug": slug.current,
@@ -58,10 +90,10 @@ final class BlogController extends AbstractController
                 readTime,
                 _createdAt,
                 publishedAt,
-                "category": category->{name, "color": color.hex},
+                "category": category->{name, "slug": slug.current, "color": color.hex},
                 "authors": authors[]->{fullName, "photo": photo.asset->url}
             }',
-            ['locale' => $_locale, 'offset' => $offset, 'end' => $end]
+            array_merge($params, ['offset' => $offset, 'end' => $end])
         );
 
         return $this->render('public/blog/list.html.twig', [
@@ -70,6 +102,9 @@ final class BlogController extends AbstractController
             'totalPages' => $totalPages,
             'totalCount' => $totalCount,
             'isFirstPage' => $isFirstPage,
+            'hasHero' => $hasHero,
+            'categories' => $categories,
+            'activeCategory' => $activeCategory,
         ]);
     }
 
