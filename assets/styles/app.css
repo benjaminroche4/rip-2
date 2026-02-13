@@ -119,6 +119,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* === Blog List Turbo Frame Transition === */
+turbo-frame#blog-list {
+    transition: opacity 0.15s ease;
+}
+
+turbo-frame#blog-list[busy] {
+    opacity: 0.4;
+}
+
 /* === Hide Scrollbar === */
 .scrollbar-hide {
     -ms-overflow-style: none;
