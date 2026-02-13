@@ -13,7 +13,9 @@
                         <div>
                             <a href="{{ path('app_home') }}" class="text-neutral-500 hover:text-primary transition duration-100">
                                 {{ ux_icon('material-symbols:home-outline-rounded', {'class': 'size-5'}) }}
-                                <span class="sr-only">Home</span>
+                                <span class="sr-only">
+                                    {{ 'blog.show.breadcrumb.home'|trans|raw }}
+                                </span>
                             </a>
                         </div>
                     </li>
@@ -22,7 +24,9 @@
                             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
                                 <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                             </svg>
-                            <a href="{{ path('app_blog') }}" class="ml-4 text-sm font-medium text-neutral-500 hover:text-primary transition duration-100">Blog</a>
+                            <a href="{{ path('app_blog') }}" class="ml-4 text-sm font-medium text-neutral-500 hover:text-primary transition duration-100">
+                                {{ 'blog.show.breadcrumb.blog'|trans|raw }}
+                            </a>
                         </div>
                     </li>
                     <li class="min-w-0">
@@ -30,7 +34,9 @@
                             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300 dark:text-gray-600">
                                 <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                             </svg>
-                            <span aria-current="page" class="ml-4 text-sm font-regular text-neutral-400 truncate">{{ post.title }}</span>
+                            <span aria-current="page" class="ml-4 text-sm font-regular text-neutral-400 truncate">
+                                {{ post.title }}
+                            </span>
                         </div>
                     </li>
                 </ol>
@@ -48,7 +54,7 @@
                             </span>
                                 <div class="px-2.5 py-1">
                                 <span class="text-neutral-600">
-                                    {{ post.readTime }} {{ 'blog.list.timeToRead'|trans }}
+                                    {{ post.readTime }}{{ 'blog.show.timeToRead'|trans }}
                                 </span>
                                 </div>
                             </div>
@@ -72,7 +78,9 @@
                     <div data-controller="menu-toggle" class="rounded-2xl border border-neutral-200 p-4 sticky top-6">
                         <button type="button" data-action="click->menu-toggle#toggle" data-menu-toggle-target="button" aria-expanded="true" class="w-full cursor-pointer group">
                             <div class="flex justify-between items-center gap-x-2">
-                                <span class="font-semibold text-lg font-secondary">Menu</span>
+                                <span class="font-semibold text-lg font-secondary">
+                                    {{ 'blog.show.menu.title'|trans|raw }}
+                                </span>
                                 <div class="transition duration-200 group-hover:bg-slate-100 p-1 rounded-full">
                                     {{ ux_icon('iconamoon:arrow-down-2', {'class': 'size-5 shrink-0 transition duration-200', 'data-menu-toggle-target': 'icon'}) }}
                                 </div>
@@ -83,7 +91,9 @@
                                 <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
                                 <div class="space-y-4">
                                     <div>
-                                        <span class="font-semibold text-lg font-secondary">Table of contents</span>
+                                        <span class="font-semibold text-lg font-secondary">
+                                            {{ 'blog.show.menu.table'|trans|raw }}
+                                        </span>
                                     </div>
                                     <nav class="space-y-3" data-controller="toc">
                                         {% for block in post.body %}
@@ -98,7 +108,9 @@
                                 <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
                                 <div class="space-y-4">
                                     <div>
-                                        <span class="font-semibold text-lg font-secondary">Contributors</span>
+                                        <span class="font-semibold text-lg font-secondary">
+                                            {{ post.authors|length > 1 ? 'blog.show.menu.redactors'|trans : 'blog.show.menu.redactor'|trans }}
+                                        </span>
                                     </div>
                                     {% for author in post.authors %}
                                         <div class="flex items-center space-x-3">
@@ -109,14 +121,14 @@
                                             {% endif %}
                                             <div class="flex flex-col text-sm">
                                                 <p class="font-semibold">{{ author.fullName }}</p>
-                                                <p class="flex-auto text-neutral-800/70">Expert en Relocation</p>
+                                                <p class="flex-auto text-neutral-800/70">{{ 'blog.show.menu.job'|trans|raw }}</p>
                                             </div>
                                         </div>
                                     {% endfor %}
                                 </div>
                                 <div>
                                     {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
-                                    <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.menu.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                 </div>
                             </div>
                         </div>
@@ -272,12 +284,14 @@
         <section class="lg:py-16 py-8" aria-labelledby="related-articles-heading">
             <div class="space-y-8 lg:space-y-16">
                 <div class="flex flex-row items-end gap-5 justify-between">
-                    <div class="space-y-3 ">
-                        <span class="font-semibold text-primary font-secondary">Articles</span>
-                        <h2 id="related-articles-heading" class="text-3xl font-medium text-pretty">Continuer votre lecture</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="font-semibold text-primary font-secondary">{{ 'blog.show.otherArticles.title'|trans|raw }}</span>
+                        </div>
+                        <h2 id="related-articles-heading" class="text-3xl font-medium text-pretty">{{ 'blog.show.otherArticles.subTitle'|trans|raw }}</h2>
                     </div>
-                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_contact') }}" class="hidden sm:inline-flex">
-                        {{ 'home.heroSection.button'|trans|raw }}
+                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_blog') }}" class="hidden sm:inline-flex">
+                        {{ 'blog.show.otherArticles.button'|trans|raw }}
                         {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                     </twig:Button>
                 </div>
@@ -334,8 +348,8 @@
                     {% endfor %}
                 </div>
                 <div class="flex justify-center sm:hidden mt-5">
-                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_contact') }}">
-                        {{ 'home.heroSection.button'|trans|raw }}
+                    <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_blog') }}">
+                        {{ 'blog.show.otherArticles.button'|trans|raw }}
                         {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                     </twig:Button>
                 </div>

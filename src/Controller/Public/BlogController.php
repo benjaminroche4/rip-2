@@ -27,11 +27,13 @@ final class BlogController extends AbstractController
         $posts = $this->sanityService->query(
             '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) {
                 title,
+                shortDescription,
                 "slug": slug.current,
                 "mainPhoto": mainPhoto.asset->url,
                 "mainPhotoAlt": mainPhoto.alt,
                 readTime,
                 _createdAt,
+                publishedAt,
                 "category": category->{name, "color": color.hex},
                 "authors": authors[]->{fullName, "photo": photo.asset->url}
             }',

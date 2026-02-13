@@ -756,9 +756,21 @@ blog:
         timeToRead: min de lecture
         allArticles: Tous les articles
     show:
-        redactionBy: Rédigé par
-        aboutAuthor: À propos de l'auteur
-        published: Publié le
+        breadcrumb:
+            home: Accueil
+            blog: Blog
+        timeToRead: min de lecture
+        menu:
+            title: Menu
+            table: Sommaire
+            redactor: Rédacteur
+            redactors: Rédacteurs
+            job: Expert en relocation
+            published: Publié le
+        otherArticles:
+            title: Autres articles
+            subTitle: À lire également
+            button: Explorer le blog
 faq:
     title: FAQ
     subTitle: Vous avez des questions ?

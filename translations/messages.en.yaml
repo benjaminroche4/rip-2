@@ -756,9 +756,21 @@ blog:
         timeToRead: min read
         allArticles: All articles
     show:
-        redactionBy: Written by
-        aboutAuthor: About the author
-        published: Published on
+        breadcrumb:
+            home: Home
+            blog: Blog
+        timeToRead: min read
+        menu:
+            title: Menu
+            table: Table of contents
+            redactor: Author
+            redactors: Authors
+            job: Relocation Expert
+            published: Published on
+        otherArticles:
+            title: Other articles
+            subTitle: You may also like
+            button: Explore the blog
 faq:
     title: FAQ
     subTitle: Need More Information?
