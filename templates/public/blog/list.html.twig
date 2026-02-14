@@ -15,9 +15,8 @@
         </div>
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
-        {% if hasHero and posts|length > 0 %}
-            {% set hero = posts|first %}
-            {% set blogDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
+        {% if hero %}
+            {% set heroDate = hero.publishedAt is defined and hero.publishedAt ? hero.publishedAt : hero._createdAt %}
                 <a href="{{ path('app_blog_show', {'slug': hero.slug}) }}" class="bg-linear-to-b from-[#FFE5EB] group to-[#FFF7F9] border border-primary/20 p-2 rounded-3xl hover:border-primary/40 transition duration-100 block">
                     <div class="pb-2">
                         <p class="text-sm text-primary uppercase tracking-normal font-semibold text-center">
@@ -40,7 +39,7 @@
                                         </svg>
                                     {% endif %}
                                     <div class="min-[359px]:mt-0 mt-2">
-                                        <time class="truncate" datetime="{{ blogDate }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                        <time class="truncate" datetime="{{ heroDate }}">{{ heroDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                     </div>
                                 </div>
                                 <h2 class="mt-4 lg:mt-8 font-semibold text-xl lg:text-3xl text-pretty">{{ hero.title }}</h2>
@@ -79,7 +78,7 @@
                 <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide whitespace-nowrap">
                     <a href="{{ path('app_blog') }}"
                        class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ not activeCategory ? 'bg-primary text-white' : 'bg-neutral-100 text-primary hover:bg-neutral-200' }}">
-                        {{ 'blog.list.allArticles'|trans|raw }} ({{ totalCount }})
+                        {{ 'blog.list.allArticles'|trans|raw }} ({{ totalArticles }})
                     </a>
                     {% for cat in categories %}
                         <a href="{{ path('app_blog', {category: cat.slug}) }}"
@@ -93,8 +92,7 @@
                 </div>
             </section>
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% set gridPosts = hasHero ? posts|slice(1) : posts %}
-                {% for blog in gridPosts %}
+                {% for blog in posts %}
                     {% set blogDate = blog.publishedAt is defined and blog.publishedAt ? blog.publishedAt : blog._createdAt %}
                     <a href="{{ path('app_blog_show', {'slug': blog.slug}) }}" data-turbo-frame="_top" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
                         {% if blog.mainPhoto %}

@@ -25,9 +25,28 @@ final class BlogController extends AbstractController
     )]
     public function blogList(Request $request, string $_locale): Response
     {
-        $perPage = 2;
+        $perPage = 9;
         $page = max(1, $request->query->getInt('page', 1));
         $activeCategory = $request->query->get('category');
+
+        $fields = '{
+            title,
+            shortDescription,
+            "slug": slug.current,
+            "mainPhoto": mainPhoto.asset->url,
+            "mainPhotoAlt": mainPhoto.alt,
+            readTime,
+            _createdAt,
+            publishedAt,
+            "category": category->{name, "slug": slug.current, "color": color.hex},
+            "authors": authors[]->{fullName, "photo": photo.asset->url}
+        }';
+
+        // Hero: always the latest article, independent of pagination/category
+        $hero = $this->sanityService->query(
+            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) [0] ' . $fields,
+            ['locale' => $_locale]
+        );
 
         // Categories with at least 1 article
         $categories = $this->sanityService->query(
@@ -40,11 +59,17 @@ final class BlogController extends AbstractController
             ['locale' => $_locale]
         );
 
-        // Build filter
-        $categoryFilter = $activeCategory ? ' && category->slug.current == $category' : '';
-        $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))' . $categoryFilter . ']';
+        // Total articles (including hero, no category filter) — for "All articles" pill
+        $totalArticles = $this->sanityService->query(
+            'count(*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))])',
+            ['locale' => $_locale]
+        );
 
-        $params = ['locale' => $_locale];
+        // Grid: always exclude hero, optionally filter by category
+        $categoryFilter = $activeCategory ? ' && category->slug.current == $category' : '';
+        $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))' . $categoryFilter . ' && slug.current != $heroSlug]';
+
+        $params = ['locale' => $_locale, 'heroSlug' => $hero ? $hero['slug'] : ''];
         if ($activeCategory) {
             $params['category'] = $activeCategory;
         }
@@ -54,55 +79,28 @@ final class BlogController extends AbstractController
             $params
         );
 
-        // With category filter: no hero, simple pagination
-        // Without filter: page 1 has hero + grid, page 2+ grid only
-        $hasHero = !$activeCategory && $page === 1;
-        $isFirstPage = $page === 1;
-
-        if ($activeCategory) {
-            $offset = ($page - 1) * $perPage;
-            $limit = $perPage;
-            $totalPages = max(1, (int) ceil($totalCount / $perPage));
-        } else {
-            $limit = $hasHero ? $perPage + 1 : $perPage;
-            $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
-            $totalPages = $totalCount <= 1 ? 1 : (int) ceil(($totalCount - 1) / $perPage);
-        }
+        $offset = ($page - 1) * $perPage;
+        $totalPages = max(1, (int) ceil($totalCount / $perPage));
 
         if ($page > $totalPages) {
             $page = $totalPages;
-            if ($activeCategory) {
-                $offset = ($page - 1) * $perPage;
-            } else {
-                $offset = $isFirstPage ? 0 : ($page - 1) * $perPage + 1;
-            }
+            $offset = ($page - 1) * $perPage;
         }
 
-        $end = $offset + $limit;
+        $end = $offset + $perPage;
 
         $posts = $this->sanityService->query(
-            $baseFilter . ' | order(_createdAt desc) [$offset...$end] {
-                title,
-                shortDescription,
-                "slug": slug.current,
-                "mainPhoto": mainPhoto.asset->url,
-                "mainPhotoAlt": mainPhoto.alt,
-                readTime,
-                _createdAt,
-                publishedAt,
-                "category": category->{name, "slug": slug.current, "color": color.hex},
-                "authors": authors[]->{fullName, "photo": photo.asset->url}
-            }',
+            $baseFilter . ' | order(_createdAt desc) [$offset...$end] ' . $fields,
             array_merge($params, ['offset' => $offset, 'end' => $end])
         );
 
         return $this->render('public/blog/list.html.twig', [
             'posts' => $posts,
+            'hero' => $hero,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'totalCount' => $totalCount,
-            'isFirstPage' => $isFirstPage,
-            'hasHero' => $hasHero,
+            'totalArticles' => $totalArticles,
             'categories' => $categories,
             'activeCategory' => $activeCategory,
         ]);
