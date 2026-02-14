@@ -75,17 +75,14 @@
 
         <turbo-frame id="blog-list" data-turbo-action="advance" autoscroll data-autoscroll-block="start">
             <section class="py-7 lg:py-12">
-                <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide whitespace-nowrap">
+                <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide whitespace-nowrap">
                     <a href="{{ path('app_blog') }}"
-                       class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ not activeCategory ? 'bg-primary text-white' : 'bg-neutral-100 text-primary hover:bg-neutral-200' }}">
+                       class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ not activeCategory ? 'text-primary bg-slate-100' : 'text-neutral-600' }}">
                         {{ 'blog.list.allArticles'|trans|raw }} ({{ totalArticles }})
                     </a>
                     {% for cat in categories %}
                         <a href="{{ path('app_blog', {category: cat.slug}) }}"
-                           class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 flex items-center gap-1.5 {{ activeCategory == cat.slug ? 'bg-primary text-white' : 'bg-neutral-100 text-primary hover:bg-neutral-200' }}">
-                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-                                <circle cx="4" cy="4" r="3" fill="{{ activeCategory == cat.slug ? 'white' : cat.color|e('html_attr') }}"/>
-                            </svg>
+                           class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ activeCategory == cat.slug ? 'text-primary bg-slate-100' : 'text-neutral-600' }}">
                             {{ cat.name }} ({{ cat.count }})
                         </a>
                     {% endfor %}
