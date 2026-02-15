@@ -4,6 +4,11 @@
 {% block description %}{{ 'meta.home.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_home') }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="preload" as="image" href="{{ asset('medias/website/rip_paris.webp') }}" fetchpriority="high">
+{% endblock %}
+
 {% set isFr = app.request.locale == 'fr' %}
 
 {% block schema_page %}
@@ -98,7 +103,8 @@
                     muted
                     loop
                     playsinline
-                    preload="metadata"
+                    fetchpriority="high"
+                    preload="auto"
                     poster="{{ asset('medias/website/rip_paris.webp') }}"
                 >
                     <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" class="object-cover" type="video/webm">

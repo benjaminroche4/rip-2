@@ -7,7 +7,6 @@ controllers:
     type: attribute
 root:
     path: /
-    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    controller: App\Controller\Public\HomeController::index
     defaults:
-        route: app_home
         _locale: fr
