@@ -4,6 +4,21 @@
 {% block description %}{{ 'meta.findTenant.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_service_find_tenant') }}{% endblock %}
 
+{% block schema_page %}
+    ,{
+        "@type": "Service",
+        "@id": "https://relocation-in-paris.fr{{ path('app_service_find_tenant') }}/#service",
+        "url": "https://relocation-in-paris.fr{{ path('app_service_find_tenant') }}",
+        "name": "{{ 'meta.findTenant.title'|trans|e('js') }}",
+        "description": "{{ 'meta.findTenant.description'|trans|e('js') }}",
+        "provider": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "areaServed": {
+            "@type": "City",
+            "name": "Paris"
+        }
+    }
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">

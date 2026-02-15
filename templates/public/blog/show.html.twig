@@ -3,6 +3,85 @@
 {% block title %}{{ post.title }}{% endblock %}
 {% block description %}{{ post.metaDescription ?? post.shortDescription ?? post.title }}{% endblock %}
 {% block url %}/{{ app.request.locale }}/blog/{{ post.slug }}{% endblock %}
+{% block og_image %}{{ post.mainPhoto }}{% endblock %}
+
+{% set postDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
+{% block schema_page %}
+    ,{
+        "@type": "BlogPosting",
+        "@id": "https://relocation-in-paris.fr/{{ app.request.locale }}/blog/{{ post.slug }}/#article",
+        "url": "https://relocation-in-paris.fr/{{ app.request.locale }}/blog/{{ post.slug }}",
+        "headline": "{{ post.title|e('js') }}",
+        "description": "{{ (post.metaDescription ?? post.shortDescription ?? post.title)|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "datePublished": "{{ postDate }}",
+        "dateModified": "{{ postDate }}",
+        {% if post.category is defined and post.category %}
+        "articleSection": "{{ post.category.name|e('js') }}",
+        {% endif %}
+        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
+        "publisher": { "@id": "https://relocation-in-paris.fr/#organization" }
+        {% if post.mainPhoto is defined and post.mainPhoto %}
+        ,"image": {
+            "@type": "ImageObject",
+            "url": "{{ post.mainPhoto }}"
+        }
+        {% endif %}
+        {% if post.authors is defined and post.authors|length > 0 %}
+        ,"author": {
+            "@type": "Person",
+            "name": "{{ post.authors[0].fullName|e('js') }}"
+        }
+        {% endif %}
+    }
+    {% set faqItems = [] %}
+    {% if post.body is defined %}
+        {% for block in post.body %}
+            {% if block._type == 'faqBlock' and block.items is defined %}
+                {% set faqItems = faqItems|merge(block.items) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    ,{
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+                "item": "https://relocation-in-paris.fr/{{ app.request.locale }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'blog.show.breadcrumb.blog'|trans|e('js') }}",
+                "item": "https://relocation-in-paris.fr/{{ app.request.locale }}/blog"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ post.title|e('js') }}"
+            }
+        ]
+    }
+    {% if faqItems|length > 0 %}
+    ,{
+        "@type": "FAQPage",
+        "mainEntity": [
+            {% for item in faqItems %}
+            {
+                "@type": "Question",
+                "name": "{{ item.question|e('js') }}",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "{{ item.answer|e('js') }}"
+                }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+    {% endif %}
+{% endblock %}
 
 {% block body %}
     <div class="max-w-7xl mx-auto lg:px-8 px-6">

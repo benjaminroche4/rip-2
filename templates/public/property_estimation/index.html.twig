@@ -4,6 +4,21 @@
 {% block description %}{{ 'meta.landlords.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_service_landlords') }}{% endblock %}
 
+{% block schema_page %}
+    ,{
+        "@type": "Service",
+        "@id": "https://relocation-in-paris.fr{{ path('app_service_landlords') }}/#service",
+        "url": "https://relocation-in-paris.fr{{ path('app_service_landlords') }}",
+        "name": "{{ 'meta.landlords.title'|trans|e('js') }}",
+        "description": "{{ 'meta.landlords.description'|trans|e('js') }}",
+        "provider": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "areaServed": {
+            "@type": "City",
+            "name": "Paris"
+        }
+    }
+{% endblock %}
+
 {% block google_maps %}
     <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&language=fr"></script>
 {% endblock %}

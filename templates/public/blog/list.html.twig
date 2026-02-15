@@ -6,18 +6,31 @@
 
 {% block schema_page %}
     ,{
-    "@type": "WebPage",
-    "@id": "https://relocation-in-paris.fr/{{ app.request.locale }}/#homepage",
-    "url": "https://relocation-in-paris.fr/{{ app.request.locale }}",
-    "name": "{{ 'meta.home.title'|trans|e('js') }}",
-    "description": "{{ 'meta.home.description'|trans|e('js') }}",
-    "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
-    "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
-    "about": { "@id": "https://relocation-in-paris.fr/#organization" },
-    "primaryImageOfPage": {
-    "@type": "ImageObject",
-    "url": "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+        "@type": "CollectionPage",
+        "@id": "https://relocation-in-paris.fr{{ path('app_blog') }}/#bloglist",
+        "url": "https://relocation-in-paris.fr{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}",
+        "name": "{{ 'meta.blog.title'|trans|e('js') }}",
+        "description": "{{ 'meta.blog.description'|trans|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
+        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "numberOfItems": {{ totalArticles }}
     }
+    ,{
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+                "item": "https://relocation-in-paris.fr/{{ app.request.locale }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'blog.show.breadcrumb.blog'|trans|e('js') }}"
+            }
+        ]
     }
 {% endblock %}
 

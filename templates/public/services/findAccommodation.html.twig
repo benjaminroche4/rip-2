@@ -4,6 +4,22 @@
 {% block description %}{{ 'meta.findAccommodation.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_service_find_accommodation') }}{% endblock %}
 
+{% block schema_page %}
+    ,{
+        "@type": "Service",
+        "@id": "https://relocation-in-paris.fr{{ path('app_service_find_accommodation') }}/#service",
+        "url": "https://relocation-in-paris.fr{{ path('app_service_find_accommodation') }}",
+        "name": "{{ 'meta.findAccommodation.title'|trans|e('js') }}",
+        "description": "{{ 'meta.findAccommodation.description'|trans|e('js') }}",
+        "provider": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "areaServed": {
+            "@type": "City",
+            "name": "Paris"
+        },
+        "image": "https://relocation-in-paris.fr/medias/website/relocation-in-paris-9.webp"
+    }
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">

@@ -4,6 +4,19 @@
 {% block description %}{{ 'meta.aboutUs.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_about_us') }}{% endblock %}
 
+{% block schema_page %}
+    ,{
+        "@type": "AboutPage",
+        "@id": "https://relocation-in-paris.fr{{ path('app_about_us') }}/#aboutpage",
+        "url": "https://relocation-in-paris.fr{{ path('app_about_us') }}",
+        "name": "{{ 'meta.aboutUs.title'|trans|e('js') }}",
+        "description": "{{ 'meta.aboutUs.description'|trans|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
+        "about": { "@id": "https://relocation-in-paris.fr/#organization" }
+    }
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
