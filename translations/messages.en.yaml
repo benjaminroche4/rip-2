@@ -348,6 +348,9 @@ meta:
     privacyPolicy:
         title: Privacy Policy
         description: "Relocation In Paris privacy policy: how we collect, use, and protect your personal data in accordance with the GDPR."
+    faq:
+        title: Frequently Asked Questions (FAQ)
+        description: Discover answers to the most common questions about relocation in Paris for tenants, companies, and landlords.
     estimation:
         title: Get Your Relocation Estimate in Paris
         description: Estimate the cost of your relocation to Paris in just a few clicks. Discover our personalized services to find your new home and make your move smooth and stress-free.
