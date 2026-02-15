@@ -18,11 +18,19 @@
         <meta name="description" content="{% block description %}{% endblock %}">
         <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
 
+        <!-- Hreflang -->
+        {% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
+        <link rel="alternate" hreflang="fr" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+        <link rel="alternate" hreflang="en" href="https://relocation-in-paris.fr/en{{ currentPath }}" />
+        <link rel="alternate" hreflang="x-default" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+
         <link rel="icon" type="image/jpg" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
 
         <!-- Og Meta Tags -->
         <meta property="og:type" content="website">
+        <meta property="og:locale" content="{{ app.request.locale == 'fr' ? 'fr_FR' : 'en_GB' }}">
+        <meta property="og:locale:alternate" content="{{ app.request.locale == 'fr' ? 'en_GB' : 'fr_FR' }}">
         <meta property="og:title" content="Relocation In Paris - {{ block('title') }}">
         <meta property="og:url" content="https://relocation-in-paris.fr{{ block('url') }}">
         <meta property="og:image" content="{{ asset('medias/banner/relocation-in-paris-banner.webp') }}">
@@ -38,7 +46,94 @@
 
             {% block google_maps %}{% endblock %}
 
-            {% include 'components/blocks/schemaOrg.html.twig' %}
+            <!-- Schema.org -->
+            <script type="application/ld+json">
+                {
+                  "@context": "https://schema.org",
+                  "@graph": [
+                    {
+                      "@type": "ProfessionalService",
+                      "@id": "https://relocation-in-paris.fr/#organization",
+                      "name": "Relocation in Paris",
+                      "legalName": "SARL Relocation in Paris",
+                      "url": "https://relocation-in-paris.fr",
+                      "description": "Relocation agency in Paris supporting individuals and companies with housing search and full employee and expat relocation services.",
+                      "telephone": "+33184804344",
+                      "email": "contact@relocation-in-paris.fr",
+                      "inLanguage": ["fr-FR", "en-GB"],
+                      "areaServed": {
+                        "@type": "City",
+                        "name": "Paris"
+                      },
+                      "logo": {
+                        "@type": "ImageObject",
+                        "url": "https://relocation-in-paris.fr/medias/logos/logo_red.svg"
+                      },
+                      "image": [
+                        "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+                      ],
+                      "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "155 Rue du Faubourg Saint-Denis",
+                        "addressLocality": "Paris",
+                        "postalCode": "75010",
+                        "addressRegion": "Île-de-France",
+                        "addressCountry": "FR"
+                      },
+                      "geo": {
+                        "@type": "GeoCoordinates",
+                        "latitude": 48.878,
+                        "longitude": 2.355
+                      },
+                      "openingHoursSpecification": [
+                        {
+                          "@type": "OpeningHoursSpecification",
+                          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                          "opens": "08:00",
+                          "closes": "20:00"
+                        },
+                        {
+                          "@type": "OpeningHoursSpecification",
+                          "dayOfWeek": "Saturday",
+                          "opens": "08:00",
+                          "closes": "12:00"
+                        }
+                      ],
+                      "sameAs": [
+                        "https://www.linkedin.com/company/relocation-in-paris/",
+                        "https://www.instagram.com/relocation_in_paris/"
+                      ],
+                      "contactPoint": [
+                        {
+                          "@type": "ContactPoint",
+                          "contactType": "customer service",
+                          "telephone": "+33184804344",
+                          "email": "contact@relocation-in-paris.fr",
+                          "availableLanguage": ["French", "English"]
+                        },
+                        {
+                          "@type": "ContactPoint",
+                          "contactType": "customer service",
+                          "telephone": "+33761719439",
+                          "url": "https://wa.me/33761719439",
+                          "availableLanguage": ["French", "English"]
+                        }
+                      ]
+                    },
+                    {
+                      "@type": "WebSite",
+                      "@id": "https://relocation-in-paris.fr/#website",
+                      "url": "https://relocation-in-paris.fr",
+                      "name": "Relocation in Paris",
+                      "publisher": {
+                        "@id": "https://relocation-in-paris.fr/#organization"
+                      },
+                      "inLanguage": ["fr-FR", "en-GB"]
+                    }
+                    {% block schema_page %}{% endblock %}
+                  ]
+                }
+            </script>
         {% endblock %}
     </head>
     <body>
