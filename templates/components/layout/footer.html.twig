@@ -72,7 +72,7 @@
                             </defs>
                         </svg>
                         <div>
-                            <a href="https://share.google/DuM7reAcGSrmXQ65I" rel="noopener noreferrer" target="_blank" class="p-3 font-semibold flex items-center gap-x-3.5">
+                            <a href="https://share.google/DuM7reAcGSrmXQ65I" rel="noopener noreferrer" target="_blank" aria-label="{{ 'footer.google.ariaLabel'|trans|raw }}" class="p-3 font-semibold flex items-center gap-x-3.5">
                                 {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
                                 <div class="flex flex-col justify-start -space-y-1">
                                     <div class="test-base font-bold flex items-center text-white gap-x-2">
@@ -125,7 +125,7 @@
                                 </linearGradient>
                             </defs>
                         </svg>
-                        <a href="tel:+(33)184804344" class="flex max-[214px]:text-xs max-[230px]:text-sm max-[365px]:text-base  items-center gap-x-4 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white transition duration-100 text-lg font-regular py-2 px-4">
+                        <a href="tel:+(33)184804344" aria-label="{{ 'footer.phone.ariaLabel'|trans|raw }}" class="flex max-[214px]:text-xs max-[230px]:text-sm max-[365px]:text-base  items-center gap-x-4 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white transition duration-100 text-lg font-regular py-2 px-4">
                             +(33) 1 84 80 43 44
                             {% set currentDay = "now"|date("N", "Europe/Paris") %}
                             {% set currentHour = "now"|date("G", "Europe/Paris") %}

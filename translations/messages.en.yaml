@@ -115,6 +115,10 @@ footer:
     callback:
         text: An expert will get back to you
         open: Open
+    google:
+        ariaLabel: Google Reviews - 5 stars from over 350 reviews
+    phone:
+        ariaLabel: Call us at +33 1 84 80 43 44
 header:
     action: Open menu
     actionClose: Close menu

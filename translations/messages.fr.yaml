@@ -115,6 +115,10 @@ footer:
     callback:
         text: Un expert vous répond
         open: Ouvert
+    google:
+        ariaLabel: Avis Google - 5 étoiles sur plus de 350 avis
+    phone:
+        ariaLabel: Appelez-nous au +33 1 84 80 43 44
 header:
     action: Ouvrir le menu
     actionClose: Fermer le menu
