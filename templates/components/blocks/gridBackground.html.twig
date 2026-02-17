@@ -1,9 +1,5 @@
-<img
-    src="{{ asset('medias/images/grid-background.svg') }}?v=3"
-    alt="Grid Background Image"
+<div
     aria-hidden="true"
-    loading="lazy"
-    decoding="async"
-    fetchpriority="low"
-    class="absolute top-0 left-1/2 -translate-x-1/2 z-0 pointer-events-none w-full max-w-7xl h-auto {{ auth|default(false) ? '' : 'mt-18' }}"
->
+    class="absolute top-0 left-1/2 -translate-x-1/2 z-0 pointer-events-none w-full max-w-7xl h-full {{ auth|default(false) ? '' : 'mt-18' }}"
+    style="background-image: url('{{ asset('medias/images/grid-background.svg') }}?v=3'); background-repeat: no-repeat; background-position: top center; background-size: 100% auto;"
+></div>
