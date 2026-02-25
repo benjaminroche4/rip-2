@@ -5,8 +5,3 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
-root:
-    path: /
-    controller: App\Controller\Public\HomeController::index
-    defaults:
-        _locale: fr

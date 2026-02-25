@@ -18,7 +18,7 @@ final class HomeController extends AbstractController
 
     #[Route(
         path: [
-            'fr' => '/{_locale}',
+            'fr' => '/',
             'en' => '/{_locale}',
         ],
         name: 'app_home',

@@ -350,7 +350,7 @@
                     {% if post.tags is defined and post.tags is not empty %}
                         <div class="flex flex-wrap gap-4">
                             {% for tag in post.tags %}
-                                <twig:Badge variant="secondary">
+                                <twig:Badge variant="secondary" class="capitalize">
                                     {{ tag }}
                                 </twig:Badge>
                             {% endfor %}
