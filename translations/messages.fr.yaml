@@ -359,7 +359,7 @@ meta:
         title: Questions Fréquentes (FAQ)
         description: Découvrez nos réponses aux questions les plus posées sur la relocation à Paris. Locataires, entreprises et propriétaires.
     newsletter:
-        title: Inscription Newsletter
+        title: Inscrivez-Vous à Notre Newsletter
         description: "Recevez chaque semaine nos nouveaux biens, les actualités parisiennes et des guides pour réussir votre installation à Paris."
     login:
         title: Connexion
@@ -1134,17 +1134,18 @@ propertyManagement:
                 place: Paris 7ᵉ
 newsletter:
     title: Newsletter
-    subTitle: Rejoignez +10 000 inscrits
+    subTitle: Rejoindre la newsletter
+    text: Nos appartements off-market et conseils d’experts, directement dans votre boîte mail.
     card:
         1:
-            title: Biens immobiliers
-            text: Accédez aux nouvelles offres en priorité.
+            title: Opportunités exclusives
+            text: Accédez en avant-première à nos appartements exclusifs et opportunités off-market.
         2:
-            title: Actualités parisiennes
-            text: L’essentiel de la vie et du marché parisien.
+            title: Marché et vie parisienne
+            text: Les tendances du marché et les informations clés pour comprendre la vie à Paris.
         3:
-            title: Guides et conseils
-            text: Des clés concrètes pour bien s’installer.
+            title: Guides d’installation à Paris
+            text: Des conseils pratiques et stratégiques pour réussir votre installation à Paris.
     form:
         button: S'inscrire
         email:
@@ -1156,6 +1157,8 @@ newsletter:
             title: Inscription confirmée !
             text: "Merci de vous être inscrit(e) à notre newsletter. Surveillez votre boîte de réception, vous recevrez bientôt notre prochain email."
     nextNewsletter: "Recevez votre prochaine newsletter <span class='font-semibold underline underline-offset-2 decoration-dotted'>%date%</span>."
+    noSpam: Pas de spam. Vous pouvez vous désinscrire à tout moment.
+    whySubscribe: Pourquoi s'inscrire à notre newsletter ?
 termsConditions:
     title: Conditions générales de vente
     subTitle: Conditions de vente de nos services.

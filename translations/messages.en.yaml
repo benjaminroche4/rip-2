@@ -1137,17 +1137,18 @@ propertyManagement:
                 place: Paris 7th
 newsletter:
     title: Newsletter
-    subTitle: Join 10,000+ subscribers
+    subTitle: Join our newsletter
+    text: Exclusive off-market apartments and expert relocation insights, delivered straight to your inbox.
     card:
         1:
-            title: Property listings
-            text: Get early access to new listings every week.
+            title: Exclusive Opportunities
+            text: Get early access to our exclusive apartments and off-market properties.
         2:
-            title: Paris updates
-            text: The essentials of life in Paris and the local market.
+            title: Paris Market & Lifestyle
+            text: Key market trends and essential insights into life in Paris.
         3:
-            title: Guides and tips
-            text: Practical advice to help you settle in smoothly.
+            title: Paris Relocation Guides
+            text: Practical and strategic advice to successfully settle in Paris.
     form:
         button: Subscribe
         email:
@@ -1159,6 +1160,8 @@ newsletter:
             title: You're subscribed!
             text: Thanks for joining our newsletter. Keep an eye on your inbox, your first update will arrive soon.
     nextNewsletter: "Receive your next newsletter on <span class='font-semibold underline underline-offset-2 decoration-dotted'>%date%</span>."
+    noSpam: No spam. You can unsubscribe at any time.
+    whySubscribe: Why subscribe to our newsletter?
 termsConditions:
     title: Terms & Conditions
     subTitle: Terms of sale for our services.

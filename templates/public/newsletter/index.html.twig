@@ -6,10 +6,10 @@
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'newsletter.title'|trans }}</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'newsletter.subTitle'|trans }}</h2>
-            <p class="text-center font-normal text-neutral-600 text-pretty">Curated relocation tips, housing advice, and local insights.</p>
+        <div class="max-w-xl mx-auto flex flex-col justify-center text-center space-y-4">
+            <p class="text-center font-semibold text-primary font-secondary">{{ 'newsletter.title'|trans }}</p>
+            <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'newsletter.subTitle'|trans }}</h1>
+            <p class="text-center font-normal text-neutral-600 text-balance">{{ 'newsletter.text'|trans }}</p>
         </div>
     </section>
     <section class="max-w-xl lg:max-w-xl mx-auto lg:px-8 px-6 py-6">
@@ -57,48 +57,66 @@
                 </div>
                 <div class="mt-2 flex flex-col sm:flex-row gap-2">
                     {{ form_widget(newsletterForm.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans }}) }}
-                    <twig:Button variant="default" size="lg" class="h-auto cursor-pointer">
+                    <twig:Button variant="default" size="lg" class="md:h-auto cursor-pointer">
                         {{ 'newsletter.form.button'|trans }}
                     </twig:Button>
                 </div>
-                <div class="text-xs text-gray-600/90 mt-5 flex items-center gap-x-2">
-                    {{ ux_icon('fluent:alert-48-regular', {'class':'size-5 shrink-0'}) }}
-                    <p>
+                <div class="mt-5 flex items-center gap-x-2">
+                    <img
+                        src="{{ asset('medias/team/team_1.webp') }}"
+                        alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                        loading="lazy"
+                        width="24"
+                        height="24"
+                        class="size-6 bg-white rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white"
+                    />
+                    <p class="text-light text-sm text-neutral-600 ">
                         {{ 'newsletter.nextNewsletter'|trans({'%date%': format_next_monday(app.request.locale) })|raw }}
                     </p>
                 </div>
             {{ form_end(newsletterForm) }}
-        </div>
-    </section>
-    <section class="max-w-xl lg:max-w-5xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'newsletter.card.1.title'|trans }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'newsletter.card.1.text'|trans }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'newsletter.card.2.title'|trans }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'newsletter.card.2.text'|trans }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mynaui:book-open', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'newsletter.card.3.title'|trans }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'newsletter.card.3.text'|trans }}</p>
+            <div class="flex justify-center pt-2">
+                <div class="flex items-center gap-x-3 text-sm text-neutral-600 bg-gray-50 px-4 py-2 rounded-lg text-sm">
+                    {{ ux_icon('heroicons:bell-alert', {'class':'size-5 shrink-0'}) }}
+                    <p class="font-light">{{ 'newsletter.noSpam'|trans }}</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
+    <section class="max-w-xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <h2 class="sr-only">{{ 'newsletter.whySubscribe'|trans }}</h2>
+        <div class="flex flex-col lg:flex-row items-stretch">
+            <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
+                <div class="flex items-center flex-col gap-3">
+                    <div class="p-3 bg-gray-100 block rounded-lg w-fit">
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                    </div>
+                    <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.1.title'|trans }}</h3>
+                </div>
+                <p class="text-neutral-600 text-sm text-center font-light text-balance max-w-md">{{ 'newsletter.card.1.text'|trans }}</p>
+            </div>
+            <div class="block lg:hidden h-[1px] w-full bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 shrink-0"></div>
+            <div class="hidden lg:block w-[1px] self-stretch bg-gradient-to-b from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 shrink-0"></div>
+            <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
+                <div class="flex items-center flex-col gap-3">
+                    <div class="p-3 bg-gray-100 block rounded-lg w-fit">
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                    </div>
+                    <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.2.title'|trans }}</h3>
+                </div>
+                <p class="text-neutral-600 text-sm text-center font-light text-balance max-w-md">{{ 'newsletter.card.2.text'|trans }}</p>
+            </div>
+            <div class="block lg:hidden h-[1px] w-full bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 shrink-0"></div>
+            <div class="hidden lg:block w-[1px] self-stretch bg-gradient-to-b from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 shrink-0"></div>
+            <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
+                <div class="flex items-center flex-col gap-3">
+                    <div class="p-3 bg-gray-100 block rounded-lg w-fit">
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                    </div>
+                    <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.3.title'|trans }}</h3>
+                </div>
+                <p class="text-neutral-600 text-sm text-center font-light text-balance max-w-md">{{ 'newsletter.card.3.text'|trans }}</p>
+            </div>
+        </div>
+    </section>
 {% endblock %}
