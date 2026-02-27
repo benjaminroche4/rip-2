@@ -299,250 +299,30 @@
         </div>
     </section>
     <section class="px-6 py-12 sm:py-16 lg:px-8 max-w-7xl mx-auto">
-        <div class="bg-neutral-100/80 py-12 px-6 rounded-2xl">
+        <div class="border border-neutral-200 py-12 px-6 rounded-2xl bg-neutral-50">
             <div class="flex flex-col space-y-3 justify-center text-center">
                 <h2 class="font-semibold text-primary font-secondary">{{ 'home.reviews.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-pretty">{{ 'home.reviews.subTitle'|trans|raw }}</h3>
+                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'home.reviews.subTitle'|trans|raw }}</h3>
+                <div class="flex items-center justify-center mt-3 gap-x-3">
+                    {{ ux_icon('devicon:google', {'class':'size-5 shrink-0'}) }}
+                    <p class="text-neutral-600 font-light text-pretty"><span class="font-semibold">+370 avis</span> reviews <span class="underline underline-offset-4">on Google</span></p>
+                </div>
             </div>
-            <div
-                x-data="{
-                    currentSlide: 0,
-                    slides: [
-                        {
-                            rating: 5,
-                            text: '{{ "home.reviews.1.text"|trans|raw }}',
-                            name: 'Vincent M.',
-                            title: '{{ "home.reviews.1.title"|trans|raw }}',
-                        },
-                        {
-                            rating: 5,
-                            text: '{{ "home.reviews.2.text"|trans|raw }}',
-                            name: 'Lisa S.',
-                            title: '{{ "home.reviews.2.title"|trans|raw }}',
-                        },
-                        {
-                            rating: 5,
-                            text: '{{ "home.reviews.3.text"|trans|raw }}',
-                            name: 'Sarah et Fabrice P.',
-                            title: '{{ "home.reviews.3.title"|trans|raw }}',
-                        },
-                        {
-                            rating: 5,
-                            text: '{{ "home.reviews.4.text"|trans|raw }}',
-                            name: 'Marc W.',
-                            title: '{{ "home.reviews.4.title"|trans|raw }}',
-                        },
-                        {
-                            rating: 5,
-                            text: '{{ "home.reviews.5.text"|trans|raw }}',
-                            name: 'Emma M.',
-                            title: '{{ "home.reviews.5.title"|trans|raw }}',
-                        }
-                    ],
-                    get totalSlides() {
-                        return this.slides.length;
-                    },
-                    nextSlide() {
-                        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
-                    },
-                    prevSlide() {
-                        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
-                    },
-                    goToSlide(index) {
-                        this.currentSlide = index;
-                    },
-                    autoplay: null,
-                    startAutoplay() {
-                        this.autoplay = setInterval(() => {
-                            this.nextSlide();
-                        }, 5000);
-                    },
-                    stopAutoplay() {
-                        if (this.autoplay) {
-                            clearInterval(this.autoplay);
-                        }
-                    },
-                    touchStartX: 0,
-                    touchEndX: 0,
-                    handleTouchStart(e) {
-                        this.touchStartX = e.touches[0].clientX;
-                    },
-                    handleTouchMove(e) {
-                        this.touchEndX = e.touches[0].clientX;
-                    },
-                    handleTouchEnd() {
-                        const swipeThreshold = 50;
-                        const diff = this.touchStartX - this.touchEndX;
+            <div>
 
-                        if (Math.abs(diff) > swipeThreshold) {
-                            if (diff > 0) {
-                                this.nextSlide();
-                            } else {
-                                this.prevSlide();
-                            }
-                        }
-
-                        this.touchStartX = 0;
-                        this.touchEndX = 0;
-                    }
-                }"
-                x-init="startAutoplay()"
-                @mouseenter="stopAutoplay()"
-                @mouseleave="startAutoplay()"
-                @touchstart="handleTouchStart($event)"
-                @touchmove="handleTouchMove($event)"
-                @touchend="handleTouchEnd()"
-                class="relative mx-auto max-w-2xl mt-12 touch-pan-y"
-            >
-                <button
-                    @click="prevSlide()"
-                    class="hidden lg:block  absolute -left-12 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-10 bg-white hover:bg-primary/5 text-gray-800 rounded-full p-2 lg:p-3 transition duration-100"
-                    aria-label="Avis précédent"
-                >
-                    <svg class="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <div class="overflow-hidden">
-                    <div
-                        class="flex transition-transform duration-500 ease-in-out"
-                        :style="'transform: translateX(-' + (currentSlide * 100) + '%);'"
-                    >
-                        <template x-for="(slide, index) in slides" :key="index">
-                            <figure class="w-full flex-shrink-0 px-4">
-                                <p class="sr-only" x-text="slide.rating + ' out of 5 stars'"></p>
-                                <div class="flex text-indigo-600 justify-center lg:justify-start items-center">
-                                    {{ ux_icon('devicon:google', {'class':'size-4 mr-2'}) }}
-                                    <template x-for="star in slide.rating">
-                                        {{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-orange-500 flex-none'}) }}
-                                    </template>
-                                </div>
-                                <blockquote class="mt-5 text-xl/8 tracking-tight text-neutral-800 sm:text-xl/9">
-                                    <p x-text="slide.text"></p>
-                                </blockquote>
-                                <figcaption class="mt-10 flex items-center gap-x-4">
-                                    <img
-                                        src="{{ asset('medias/website/logo-rounded.webp') }}"
-                                        loading="lazy"
-                                        width="40"
-                                        height="40"
-                                        alt="Logo relocation in paris"
-                                        class="size-12 rounded-full bg-gray-50"
-                                    />
-                                    <div class="text-sm/6">
-                                        <div class="font-semibold text-neutral-900" x-text="slide.name"></div>
-                                        <div class="mt-0.5 text-neutral-600" x-text="slide.title"></div>
-                                    </div>
-                                </figcaption>
-                            </figure>
-                        </template>
-                    </div>
-                </div>
-                <button
-                    @click="nextSlide()"
-                    class="hidden lg:block absolute -right-12 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-10  bg-white hover:bg-primary/5 text-gray-800 rounded-full p-2 lg:p-3 transition duration-100"
-                    aria-label="Avis suivant"
-                >
-                    <svg class="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
-                <div class="flex justify-center gap-2 mt-8">
-                    <template x-for="(slide, index) in slides" :key="index">
-                        <button
-                            @click="goToSlide(index)"
-                            :class="currentSlide === index ? 'bg-primary w-8' : 'bg-gray-300 w-2'"
-                            class="h-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                            :aria-label="'Aller au témoignage ' + (index + 1)"
-                            :aria-current="currentSlide === index ? 'true' : 'false'"
-                        ></button>
-                    </template>
-                </div>
             </div>
-        </div>
-    </section>
-    <section class="max-w-7xl mx-auto lg:px-8 lg:py-16 py-12">
-        <div class="max-w-2xl justify-center mx-auto px-6 lg:mx-0">
-            <div class="pb-12 lg:pb-16 flex flex-col space-y-3">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.profile.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-pretty">{{ 'home.profile.subTitle'|trans|raw }}</h3>
-            </div>
-        </div>
-        <div
-            x-data="{
-                isDragging: false,
-                startX: 0,
-                scrollLeft: 0,
-                startDrag(e) {
-                    this.isDragging = true;
-                    this.startX = e.pageX - $refs.slider.offsetLeft;
-                    this.scrollLeft = $refs.slider.scrollLeft;
-                    $refs.slider.style.cursor = 'grabbing';
-                    $refs.slider.style.scrollBehavior = 'auto';
-                },
-                endDrag() {
-                    this.isDragging = false;
-                    $refs.slider.style.cursor = 'grab';
-                    $refs.slider.style.scrollBehavior = 'smooth';
-                },
-                drag(e) {
-                    if (!this.isDragging) return;
-                    e.preventDefault();
-                    const x = e.pageX - $refs.slider.offsetLeft;
-                    const walk = (x - this.startX) * 2;
-                    $refs.slider.scrollLeft = this.scrollLeft - walk;
-                }
-            }"
-            x-ref="slider"
-            @mousedown="startDrag($event)"
-            @mouseup="endDrag()"
-            @mouseleave="endDrag()"
-            @mousemove="drag($event)"
-            class="flex overflow-x-auto lg:grid lg:grid-cols-4 gap-4 px-6 lg:px-0 snap-x snap-mandatory scrollbar-hide cursor-auto select-none"
-        >
-            <div class="relative rounded-2xl overflow-hidden min-w-[60vw] lg:min-w-0 snap-center group">
-                <img src="{{ asset('medias/website/profile_4.webp') }}"
-                     class="block w-full h-120 object-cover"
-                     draggable="false"
-                     alt="Profile photo"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-gray-100/20 z-10 group-hover:bg-primary/80 transition-colors duration-300"></div>
-                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2 pointer-events-none">
-                    <h3 class="text-xl font-medium">{{ 'home.profile.1.title'|trans|raw }}</h3>
-                    <p class="text-light text-sm text-gray-200">{{ 'home.profile.1.text'|trans|raw }}</p>
-                </div>
-            </div>
-            <div class="relative rounded-2xl overflow-hidden min-w-[60vw] lg:min-w-0 snap-center group">
-                <img src="{{ asset('medias/website/profile_3.webp') }}"
-                     class="block w-full h-120 object-cover"
-                     draggable="false"
-                     alt="Profile photo"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-gray-100/20 z-10 group-hover:bg-primary/80 transition-colors duration-300"></div>
-                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2 pointer-events-none">
-                    <h3 class="text-xl font-medium">{{ 'home.profile.2.title'|trans|raw }}</h3>
-                    <p class="text-light text-sm text-gray-200">{{ 'home.profile.2.text'|trans|raw }}</p>
-                </div>
-            </div>
-            <div class="relative rounded-2xl overflow-hidden min-w-[60vw] lg:min-w-0 snap-center group">
-                <img src="{{ asset('medias/website/profile_2.webp') }}"
-                     class="block w-full h-120 object-cover"
-                     draggable="false"
-                     alt="Profile photo"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-gray-100/20 z-10 group-hover:bg-primary/80 transition-colors duration-300"></div>
-                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2 pointer-events-none">
-                    <h3 class="text-xl font-medium">{{ 'home.profile.3.title'|trans|raw }}</h3>
-                    <p class="text-light text-sm text-gray-200">{{ 'home.profile.3.text'|trans|raw }}</p>
-                </div>
-            </div>
-            <div class="relative rounded-2xl overflow-hidden min-w-[60vw] lg:min-w-0 snap-center group">
-                <img src="{{ asset('medias/website/profile_1.webp') }}"
-                     class="block w-full h-120 object-cover"
-                     draggable="false"
-                     alt="Profile photo"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-gray-100/20 z-10 group-hover:bg-primary/80 transition-colors duration-300"></div>
-                <div class="absolute bottom-0 left-0 w-full p-5 text-white z-20 space-y-2 pointer-events-none">
-                    <h3 class="text-xl font-medium">{{ 'home.profile.4.title'|trans|raw }}</h3>
-                    <p class="text-light text-sm text-gray-200">{{ 'home.profile.4.text'|trans|raw }}</p>
-                </div>
+            <div class="mt-10 flex items-center justify-center">
+                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                    <img
+                        src="{{ asset('medias/team/team_1.webp') }}"
+                        alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                        loading="lazy"
+                        width="24"
+                        height="24"
+                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                    />
+                    {{ 'ctaFooter.button'|trans|raw }}
+                </twig:Button>
             </div>
         </div>
     </section>
