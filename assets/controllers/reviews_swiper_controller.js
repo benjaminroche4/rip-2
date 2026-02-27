@@ -200,13 +200,17 @@ export default class extends Controller {
 
         // Calculer les dimensions si nécessaire
         if (!animate || this.cardWidth === 0) {
-            const containerWidth = this.trackTarget.parentElement.offsetWidth;
-            this.gap = parseFloat(window.getComputedStyle(this.trackTarget).gap) || 24;
+            const trackStyle = window.getComputedStyle(this.trackTarget);
+            const trackPaddingLeft = parseFloat(trackStyle.paddingLeft) || 0;
+            const trackPaddingRight = parseFloat(trackStyle.paddingRight) || 0;
+            const containerWidth = this.element.offsetWidth - trackPaddingLeft - trackPaddingRight;
+            this.gap = parseFloat(trackStyle.gap) || 24;
             this.cardWidth = (containerWidth - (this.gap * (this.visibleCards - 1))) / this.visibleCards;
 
             // Appliquer la largeur aux cartes
             this.cardTargets.forEach(card => {
                 card.style.width = `${this.cardWidth}px`;
+                card.style.minWidth = `${this.cardWidth}px`;
             });
         }
 
@@ -236,13 +240,21 @@ export default class extends Controller {
     updateIndicators() {
         if (!this.hasIndicatorTarget) return;
 
+        const maxIndex = this.totalCards - this.visibleCards;
+
         this.indicatorTargets.forEach((indicator, index) => {
+            if (index > maxIndex) {
+                indicator.style.display = 'none';
+                return;
+            }
+            indicator.style.display = '';
+
             if (index === this.currentIndexValue) {
-                indicator.classList.remove('bg-gray-300');
-                indicator.classList.add('bg-primary');
+                indicator.classList.remove('bg-neutral-300', 'w-2');
+                indicator.classList.add('bg-primary', 'w-4');
             } else {
-                indicator.classList.remove('bg-primary');
-                indicator.classList.add('bg-gray-300');
+                indicator.classList.remove('bg-primary', 'w-4');
+                indicator.classList.add('bg-neutral-300', 'w-2');
             }
         });
     }

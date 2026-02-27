@@ -308,8 +308,35 @@
                     <p class="text-neutral-600 font-light text-pretty"><span class="font-semibold">+370 avis</span> reviews <span class="underline underline-offset-4">on Google</span></p>
                 </div>
             </div>
-            <div>
-
+            <div
+                class="mt-10 -mx-6 overflow-hidden"
+                data-controller="reviews-swiper"
+                data-reviews-swiper-autoplay-value="true"
+                data-reviews-swiper-autoplay-delay-value="4000"
+            >
+                <div class="flex gap-6 px-6" data-reviews-swiper-target="track">
+                    {% for i in 1..5 %}
+                    <div class="shrink-0 flex flex-col gap-4 bg-white rounded-2xl p-6 border border-neutral-100 shadow-xs" data-reviews-swiper-target="card">
+                        <div class="flex gap-1">
+                            {% for s in 1..5 %}
+                            {{ ux_icon('lucide:star', {'class': 'size-4 fill-yellow-400 text-yellow-400'}) }}
+                            {% endfor %}
+                        </div>
+                        <p class="text-neutral-700 text-sm text-pretty leading-relaxed flex-1">{{ ('home.reviews.' ~ i ~ '.text')|trans|raw }}</p>
+                        <p class="font-semibold text-sm text-neutral-900">{{ ('home.reviews.' ~ i ~ '.title')|trans|raw }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex justify-center gap-2 mt-6">
+                    {% for d in 0..4 %}
+                    <button
+                        class="h-2 rounded-full transition-all duration-200 {{ d == 0 ? 'w-4 bg-primary' : 'w-2 bg-neutral-300' }}"
+                        data-reviews-swiper-target="indicator"
+                        data-action="click->reviews-swiper#goTo"
+                        data-index="{{ d }}"
+                    ></button>
+                    {% endfor %}
+                </div>
             </div>
             <div class="mt-10 flex items-center justify-center">
                 <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
