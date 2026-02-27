@@ -10,12 +10,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
-    public function __construct(
-        private readonly SanityService $sanityService,
-    )
-    {
-    }
-
     #[Route(
         path: [
             'fr' => '/',
@@ -31,24 +25,8 @@ final class HomeController extends AbstractController
                 ]
         ]
     )]
-    public function index(string $_locale): Response
+    public function index(): Response
     {
-        $posts = $this->sanityService->query(
-            '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc)[0...3] {
-                title,
-                "slug": slug.current,
-                "mainPhoto": mainPhoto.asset->url,
-                "mainPhotoAlt": mainPhoto.alt,
-                readTime,
-                _createdAt,
-                "category": category->{name, "color": color.hex},
-                "authors": authors[]->{fullName, "photo": photo.asset->url}
-            }',
-            ['locale' => $_locale]
-        );
-
-        return $this->render('public/home/index.html.twig', [
-            'posts' => $posts,
-        ]);
+        return $this->render('public/home/index.html.twig');
     }
 }
