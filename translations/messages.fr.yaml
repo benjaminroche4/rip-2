@@ -403,22 +403,26 @@ home:
     faq:
         title: FAQ
         subTitle: Vos questions, nos réponses
+        text: "Nos réponses aux questions les plus fréquentes. Consultez notre <a href='%url%' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>FAQ générale</a> pour plus de détails."
         question:
             1:
                 title: Qu’est-ce qu’un service de relocation à Paris ?
-                text: Un service de relocation accompagne particuliers et entreprises dans leur installation à Paris. Il prend en charge la recherche de logement/bureau, les démarches administratives et l’intégration sur mesure.
+                text: Un service de relocation accompagne les particuliers et les professionnels dans leur recherche de logement et leur installation à Paris, de manière simple et clé en main.
             2:
                 title: À qui s’adressent vos services de relocation ?
-                text: Nous accompagnons les particuliers, les expatriés, ainsi que les entreprises souhaitant installer leurs collaborateurs ou ouvrir un bureau à Paris.
+                text: Nos services s’adressent aux professionnels, aux entreprises et aux particuliers souhaitant s’installer ou déménager à Paris.
             3:
-                title: Proposez-vous des solutions pour les locations courte et longue durée ?
-                text: Oui, nous proposons des solutions de logement meublé ou non, adaptées à la durée de séjour, avec un accompagnement complet jusqu’à l’installation.
+                title: Combien de temps faut-il pour trouver un logement à Paris ?
+                text: Le délai dépend du budget et des critères, mais en moyenne la recherche prend entre quelques jours et quelques semaines.
             4:
-                title: Quels sont les avantages de passer par Relocation in Paris ?
-                text: "Nous offrons un service premium, personnalisé et clé en main : un seul interlocuteur dédié, un réseau exclusif de partenaires immobiliers et une installation sans stress."
+                title: Comment fonctionne votre accompagnement ?
+                text: Nous analysons vos besoins, sélectionnons des biens adaptés, organisons les visites et vous accompagnons jusqu’à la signature du bail.
             5:
-                title: Combien de temps faut-il pour s’installer à Paris avec votre accompagnement ?
-                text: La durée dépend du profil et des besoins, mais grâce à notre réseau et à une gestion proactive, une installation complète à Paris peut être réalisée en 2 à 6 semaines seulement.
+                title: Pourquoi passer par votre service plutôt que chercher seul ?
+                text: Nous vous faisons gagner du temps, sécurisons votre dossier et vous donnons accès à des opportunités souvent indisponibles sur le marché public.
+            6:
+                title: Trouvez-vous toujours un logement ?
+                text: Grâce à notre expertise du marché parisien et à notre réseau, nous maximisons fortement vos chances de trouver un logement adapté à vos critères dans les meilleurs délais.
     keyMetrics:
         title: En quelques chiffres
         subTitle: Une expertise reconnue à Paris

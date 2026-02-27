@@ -546,131 +546,55 @@
             </div>
         </div>
     </section>
-    <div class="bg-white dark:bg-gray-900">
-        <div class="mx-auto max-w-7xl px-6 py-24 sm:pt-32 lg:px-8 lg:py-40">
+    <section class="bg-white">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 lg:py-16 py-12">
             <div class="lg:grid lg:grid-cols-12 lg:gap-8">
                 <div class="lg:col-span-5">
                     <div class="space-y-3 max-w-md">
                         <p class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</p>
-                        <h2 class="text-pretty text-3xl font-semibold font-secondary tracking-tight text-gray-900 sm:text-4xl dark:text-white">Your questions, Our answers</h2>
-                        <p class="text-neutral-600">You boil the hell out of it. Lorem ipsum dolor sit amet <a href="{{ path('app_blog') }}" class="underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100">consectetur adipisicing elit</a>.</p>
+                        <h2 class="text-pretty text-3xl font-semibold font-secondary tracking-tight text-gray-900 sm:text-4xl">{{ 'home.faq.subTitle'|trans|raw }}</h2>
+                        <p class="text-neutral-600">{{ 'home.faq.text'|trans({'%url%': path('app_faq')})|raw }}</p>
                     </div>
                 </div>
                 <div class="mt-10 lg:col-span-7 lg:mt-0">
-                    <dl class="space-y-10">
-                        <div class="space-y-4">
-                            <twig:Accordion id="accordion-1" defaultValue="{{ ['item-1'] }}">
-                                <twig:Accordion:Item value="item-1">
-                                    <twig:Accordion:Trigger>How do you make holy water?</twig:Accordion:Trigger>
-                                    <twig:Accordion:Content>
-                                        Yes. It adheres to the WAI-ARIA design pattern.
-                                    </twig:Accordion:Content>
-                                </twig:Accordion:Item>
-                            </twig:Accordion>
-                            <twig:Accordion id="accordion-2">
-                                <twig:Accordion:Item value="item-1">
-                                    <twig:Accordion:Trigger>How do you make holy water?</twig:Accordion:Trigger>
-                                    <twig:Accordion:Content>
-                                        Yes. It adheres to the WAI-ARIA design pattern.
-                                    </twig:Accordion:Content>
-                                </twig:Accordion:Item>
-                            </twig:Accordion>
-                            <twig:Accordion id="accordion-3">
-                                <twig:Accordion:Item value="item-1">
-                                    <twig:Accordion:Trigger>How do you make holy water?</twig:Accordion:Trigger>
-                                    <twig:Accordion:Content>
-                                        Yes. It adheres to the WAI-ARIA design pattern.
-                                    </twig:Accordion:Content>
-                                </twig:Accordion:Item>
-                            </twig:Accordion>
-
-                            <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">How do you make holy water?</dt>
-                            <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-400">You boil the hell out of it. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.</dd>
-                        </div>
-                        <div>
-                            <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">What&#039;s the best thing about Switzerland?</dt>
-                            <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-400">I don&#039;t know, but the flag is a big plus. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.</dd>
-                        </div>
-                        <div>
-                            <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">What do you call someone with no body and no nose?</dt>
-                            <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-400">Nobody knows. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.</dd>
-                        </div>
-                        <div>
-                            <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">Why do you never see elephants hiding in trees?</dt>
-                            <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-400">Because they&#039;re so good at it. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas cupiditate laboriosam fugiat.</dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="max-w-3xl mx-auto">
-            <div class="pb-12 lg:pb-16 flex flex-col space-y-3 text-center">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.faq.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-pretty">{{ 'home.faq.subTitle'|trans|raw }}</h3>
-            </div>
-            <div x-data="{
-                    activeAccordion: '',
-                    setActiveAccordion(id) {
-                        this.activeAccordion = (this.activeAccordion == id) ? '' : id
-                    }
-                }" class="relative w-full mx-auto overflow-hidden space-y-4">
-                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'home.faq.question.1.title'|trans|raw }}</span>
-                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div x-show="activeAccordion==id" x-collapse x-cloak>
-                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'home.faq.question.1.text'|trans|raw }}
-                        </div>
-                    </div>
-                </div>
-                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'home.faq.question.2.title'|trans|raw }}</span>
-                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div x-show="activeAccordion==id" x-collapse x-cloak>
-                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'home.faq.question.2.text'|trans|raw }}
-                        </div>
-                    </div>
-                </div>
-                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'home.faq.question.3.title'|trans|raw }}</span>
-                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div x-show="activeAccordion==id" x-collapse x-cloak>
-                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'home.faq.question.3.text'|trans|raw }}
-                        </div>
-                    </div>
-                </div>
-                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'home.faq.question.4.title'|trans|raw }}</span>
-                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div x-show="activeAccordion==id" x-collapse x-cloak>
-                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'home.faq.question.4.text'|trans|raw }}
-                        </div>
-                    </div>
-                </div>
-                <div x-data="{ id: $id('accordion') }" class="cursor-pointer group border border-neutral-100 bg-white rounded-lg hover:border-primary/20 transition duration-100">
-                    <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 text-left select-none font-semibold gap-x-2">
-                        <span>{{ 'home.faq.question.5.title'|trans|raw }}</span>
-                        <svg class="w-4 h-4 duration-200 ease-out shrink-0" :class="{ 'rotate-180': activeAccordion==id }" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div x-show="activeAccordion==id" x-collapse x-cloak>
-                        <div class="p-4 pt-0 opacity-70 text-neutral-800">
-                            {{ 'home.faq.question.5.text'|trans|raw }}
-                        </div>
-                    </div>
+                    <twig:Accordion id="accordion-1" defaultValue="{{ ['item-1'] }}">
+                        <twig:Accordion:Item value="item-1">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.1.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.1.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                        <twig:Accordion:Item value="item-2">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.2.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.2.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                        <twig:Accordion:Item value="item-3">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.3.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.3.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                        <twig:Accordion:Item value="item-4">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.4.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.4.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                        <twig:Accordion:Item value="item-5">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.5.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.5.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                        <twig:Accordion:Item value="item-6">
+                            <twig:Accordion:Trigger>{{ 'home.faq.question.6.title'|trans|raw }}</twig:Accordion:Trigger>
+                            <twig:Accordion:Content>
+                                {{ 'home.faq.question.6.text'|trans|raw }}
+                            </twig:Accordion:Content>
+                        </twig:Accordion:Item>
+                    </twig:Accordion>
                 </div>
             </div>
         </div>

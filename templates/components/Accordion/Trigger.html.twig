@@ -14,7 +14,7 @@
             'aria-controls': _accordion_item_content_id,
         }) }}
     >
-        <h3 class="text-base/7 font-semibold">{%- block content %}{% endblock -%}</h3>
+        <h3 class="text-base/7 font-semibold transition-colors duration-100 group-data-[open=true]:text-primary">{%- block content %}{% endblock -%}</h3>
         <twig:ux:icon name="lucide:chevron-down" data-slot="accordion-trigger-icon" class="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
         <twig:ux:icon name="lucide:chevron-up" data-slot="accordion-trigger-icon" class="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
     </button>

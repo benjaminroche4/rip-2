@@ -403,22 +403,26 @@ home:
     faq:
         title: FAQ
         subTitle: Your questions, our answers
+        text: "Our answers to the most frequently asked questions. Visit our <a href='%url%' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>General FAQ</a> for more details."
         question:
             1:
                 title: What is a relocation service in Paris?
-                text: A relocation service supports individuals and companies in their move to Paris. It handles housing or office search, administrative formalities, and customized integration.
+                text: A relocation service supports individuals and professionals in finding accommodation and settling in Paris through a seamless, turnkey approach.
             2:
                 title: Who are your relocation services for?
-                text: We assist individuals, expatriates, and companies looking to relocate employees or open offices in Paris.
+                text: Our services are designed for professionals, companies, and individuals looking to move or settle in Paris.
             3:
-                title: Do you offer short- and long-term rental solutions?
-                text: Yes, we offer furnished or unfurnished housing solutions for any duration, with complete assistance up to installation.
+                title: How long does it take to find an apartment in Paris?
+                text: The timeline depends on your budget and criteria, but on average the search takes anywhere from a few days to several weeks.
             4:
-                title: What are the advantages of working with Relocation in Paris?
-                text: "We provide a premium, personalized, turnkey service: one dedicated contact, an exclusive real estate network, and a stress-free relocation experience."
+                title: How does your service work?
+                text: We assess your needs, shortlist suitable properties, organize viewings, and support you through to lease signing.
             5:
-                title: How long does it take to settle in Paris with your support?
-                text: Timelines depend on each profile, but thanks to our network and proactive management, a complete relocation to Paris can be achieved in 2 to 6 weeks.
+                title: Why use your service instead of searching on my own?
+                text: We save you time, strengthen your application, and provide access to opportunities often unavailable on the public market.
+            6:
+                title: Do you always find an apartment?
+                text: Thanks to our in-depth knowledge of the Paris market and our network, we significantly increase your chances of securing a property that matches your criteria within a short timeframe.
     keyMetrics:
         title: In numbers
         subTitle: Recognized expertise in Paris
