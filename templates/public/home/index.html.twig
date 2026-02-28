@@ -317,7 +317,7 @@
                 <div class="flex gap-6 px-6" data-reviews-swiper-target="track">
                     {% for i in 1..5 %}
                     <div class="shrink-0 flex flex-col gap-5 bg-white rounded-2xl p-6 border border-neutral-200" data-reviews-swiper-target="card">
-                        <div class="flex gap-x-2 items-center justify-between">
+                        <div class="flex flex-col min-[410px]:flex-row gap-2 min-[410px]:items-center justify-between">
                             <div class="flex items-center gap-x-4">
                                 <img
                                     src="{{ asset('medias/team/team_1.webp') }}"
@@ -332,9 +332,11 @@
                                     <p class="text-slate-600 text-xs">25 Juin 2025</p>
                                 </div>
                             </div>
-                            <twig:Badge variant="secondary" class="rounded-full text-primary font-medium gap-x-1">
-                                Etudiant
-                            </twig:Badge>
+                            <div class="inline-block">
+                                <twig:Badge variant="secondary" class="rounded-full text-primary font-medium gap-x-1">
+                                    Etudiant
+                                </twig:Badge>
+                            </div>
                         </div>
                         <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
                         <div class="flex gap-2 items-center">

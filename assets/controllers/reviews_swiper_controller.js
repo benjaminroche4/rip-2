@@ -252,8 +252,37 @@ export default class extends Controller {
 
         this.trackTarget.style.transform = `translateX(${offset}px)`;
 
+        // Mettre en avant la carte du milieu
+        this.updateActiveCards();
+
         // Mettre à jour les indicateurs
         this.updateIndicators();
+    }
+
+    /**
+     * Met en avant la carte centrale (scale + opacité)
+     */
+    updateActiveCards() {
+        if (this.visibleCards !== 3) {
+            this.cardTargets.forEach(card => {
+                card.style.transform = '';
+                card.style.opacity = '';
+            });
+            return;
+        }
+
+        const centerIndex = this.currentIndexValue + 1;
+
+        this.cardTargets.forEach((card, index) => {
+            card.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 400ms ease';
+            if (index === centerIndex) {
+                card.style.transform = 'scale(1)';
+                card.style.opacity = '1';
+            } else {
+                card.style.transform = 'scale(0.93)';
+                card.style.opacity = '0.5';
+            }
+        });
     }
 
     /**
