@@ -50,11 +50,14 @@ export default class extends Controller {
             this.trackTarget.removeEventListener('touchstart', this.boundHandleTouchStart);
             this.trackTarget.removeEventListener('touchmove', this.boundHandleTouchMove);
             this.trackTarget.removeEventListener('touchend', this.boundHandleTouchEnd);
+            this.trackTarget.removeEventListener('mousedown', this.boundHandleMouseDown);
         }
+        window.removeEventListener('mousemove', this.boundHandleMouseMove);
+        window.removeEventListener('mouseup', this.boundHandleMouseUp);
     }
 
     /**
-     * Configure les événements tactiles
+     * Configure les événements tactiles et souris
      */
     setupTouchEvents() {
         if (!this.hasTrackTarget) return;
@@ -66,6 +69,58 @@ export default class extends Controller {
         this.trackTarget.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true });
         this.trackTarget.addEventListener('touchmove', this.boundHandleTouchMove, { passive: false });
         this.trackTarget.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true });
+
+        this.boundHandleMouseDown = this.handleMouseDown.bind(this);
+        this.boundHandleMouseMove = this.handleMouseMove.bind(this);
+        this.boundHandleMouseUp = this.handleMouseUp.bind(this);
+
+        this.trackTarget.addEventListener('mousedown', this.boundHandleMouseDown);
+    }
+
+    handleMouseDown(event) {
+        if (this.isTransitioning) return;
+        event.preventDefault();
+
+        this.touchStartX = event.clientX;
+        this.isDragging = false;
+        this.baseOffset = -(this.currentIndexValue * (this.cardWidth + this.gap));
+        this.trackTarget.style.transition = 'none';
+        this.trackTarget.style.cursor = 'grabbing';
+
+        window.addEventListener('mousemove', this.boundHandleMouseMove);
+        window.addEventListener('mouseup', this.boundHandleMouseUp);
+    }
+
+    handleMouseMove(event) {
+        const deltaX = event.clientX - this.touchStartX;
+
+        if (!this.isDragging && Math.abs(deltaX) > 5) {
+            this.isDragging = true;
+        }
+        if (!this.isDragging) return;
+
+        this.trackTarget.style.transform = `translateX(${this.baseOffset + deltaX}px)`;
+    }
+
+    handleMouseUp(event) {
+        window.removeEventListener('mousemove', this.boundHandleMouseMove);
+        window.removeEventListener('mouseup', this.boundHandleMouseUp);
+        this.trackTarget.style.cursor = '';
+
+        if (!this.isDragging) return;
+
+        const deltaX = event.clientX - this.touchStartX;
+        const threshold = this.cardWidth * 0.2;
+
+        if (this.autoplayValue) this.stopAutoplay();
+
+        if (deltaX < -threshold) {
+            this.next();
+        } else if (deltaX > threshold) {
+            this.prev();
+        } else {
+            this.updateCarousel(true);
+        }
     }
 
     /**
