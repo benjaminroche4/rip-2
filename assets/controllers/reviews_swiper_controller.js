@@ -22,12 +22,12 @@ export default class extends Controller {
         this.cardWidth = 0;
         this.gap = 24;
 
-        // Variables pour le swipe
+        // Variables pour le drag
         this.touchStartX = 0;
-        this.touchEndX = 0;
         this.touchStartY = 0;
-        this.touchEndY = 0;
-        this.minSwipeDistance = 50;
+        this.baseOffset = 0;
+        this.isDragging = false;
+        this.isVerticalScroll = false;
 
         this.handleResize();
         this.updateCarousel(false);
@@ -36,19 +36,19 @@ export default class extends Controller {
             this.startAutoplay();
         }
 
-        // Gestion du swipe tactile
         this.setupTouchEvents();
 
-        window.addEventListener('resize', () => this.handleResize());
+        this.boundHandleResize = () => this.handleResize();
+        window.addEventListener('resize', this.boundHandleResize);
     }
 
     disconnect() {
         this.stopAutoplay();
-        window.removeEventListener('resize', () => this.handleResize());
+        window.removeEventListener('resize', this.boundHandleResize);
 
-        // Nettoyer les événements tactiles
         if (this.hasTrackTarget) {
             this.trackTarget.removeEventListener('touchstart', this.boundHandleTouchStart);
+            this.trackTarget.removeEventListener('touchmove', this.boundHandleTouchMove);
             this.trackTarget.removeEventListener('touchend', this.boundHandleTouchEnd);
         }
     }
@@ -59,54 +59,77 @@ export default class extends Controller {
     setupTouchEvents() {
         if (!this.hasTrackTarget) return;
 
-        // Bind des méthodes pour pouvoir les remove plus tard
         this.boundHandleTouchStart = this.handleTouchStart.bind(this);
+        this.boundHandleTouchMove = this.handleTouchMove.bind(this);
         this.boundHandleTouchEnd = this.handleTouchEnd.bind(this);
 
         this.trackTarget.addEventListener('touchstart', this.boundHandleTouchStart, { passive: true });
+        this.trackTarget.addEventListener('touchmove', this.boundHandleTouchMove, { passive: false });
         this.trackTarget.addEventListener('touchend', this.boundHandleTouchEnd, { passive: true });
     }
 
     /**
-     * Gère le début du touch
+     * Gère le début du touch — mémorise la position de départ
      */
     handleTouchStart(event) {
-        this.touchStartX = event.changedTouches[0].screenX;
-        this.touchStartY = event.changedTouches[0].screenY;
+        if (this.isTransitioning) return;
+
+        this.touchStartX = event.changedTouches[0].clientX;
+        this.touchStartY = event.changedTouches[0].clientY;
+        this.isDragging = false;
+        this.isVerticalScroll = false;
+
+        // Mémoriser l'offset courant comme base du drag
+        this.baseOffset = -(this.currentIndexValue * (this.cardWidth + this.gap));
+        this.trackTarget.style.transition = 'none';
     }
 
     /**
-     * Gère la fin du touch et détecte le swipe
+     * Suit le doigt en temps réel
+     */
+    handleTouchMove(event) {
+        const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+        const deltaY = Math.abs(event.changedTouches[0].clientY - this.touchStartY);
+
+        // Détecter la direction dominante au premier mouvement significatif
+        if (!this.isDragging && !this.isVerticalScroll) {
+            if (deltaY > Math.abs(deltaX) && deltaY > 8) {
+                this.isVerticalScroll = true;
+                return;
+            }
+            if (Math.abs(deltaX) > 8) {
+                this.isDragging = true;
+            }
+        }
+
+        if (this.isVerticalScroll) return;
+        if (!this.isDragging) return;
+
+        event.preventDefault();
+
+        this.trackTarget.style.transform = `translateX(${this.baseOffset + deltaX}px)`;
+    }
+
+    /**
+     * Snap vers la carte la plus proche au relâchement
      */
     handleTouchEnd(event) {
-        this.touchEndX = event.changedTouches[0].screenX;
-        this.touchEndY = event.changedTouches[0].screenY;
+        if (this.isVerticalScroll || !this.isDragging) return;
 
-        this.handleSwipe();
-    }
+        const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+        const threshold = this.cardWidth * 0.2;
 
-    /**
-     * Détermine la direction du swipe et navigue
-     */
-    handleSwipe() {
-        const diffX = this.touchStartX - this.touchEndX;
-        const diffY = Math.abs(this.touchStartY - this.touchEndY);
-
-        // Vérifier que c'est un swipe horizontal (et pas vertical)
-        if (Math.abs(diffX) < this.minSwipeDistance) return;
-        if (diffY > Math.abs(diffX)) return; // Swipe vertical, on ignore
-
-        // Arrêter l'autoplay si l'utilisateur swipe manuellement
         if (this.autoplayValue) {
             this.stopAutoplay();
         }
 
-        if (diffX > 0) {
-            // Swipe vers la gauche -> suivant
+        if (deltaX < -threshold) {
             this.next();
-        } else {
-            // Swipe vers la droite -> précédent
+        } else if (deltaX > threshold) {
             this.prev();
+        } else {
+            // Snap back
+            this.updateCarousel(true);
         }
     }
 
@@ -151,10 +174,9 @@ export default class extends Controller {
     prev() {
         if (this.isTransitioning) return;
 
-        if (this.currentIndexValue > 0) {
-            this.currentIndexValue--;
-            this.updateCarousel(true);
-        }
+        const maxIndex = this.totalCards - this.visibleCards;
+        this.currentIndexValue = this.currentIndexValue > 0 ? this.currentIndexValue - 1 : maxIndex;
+        this.updateCarousel(true);
     }
 
     /**

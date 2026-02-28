@@ -316,14 +316,36 @@
             >
                 <div class="flex gap-6 px-6" data-reviews-swiper-target="track">
                     {% for i in 1..5 %}
-                    <div class="shrink-0 flex flex-col gap-4 bg-white rounded-2xl p-6 border border-neutral-100 shadow-xs" data-reviews-swiper-target="card">
-                        <div class="flex gap-1">
-                            {% for s in 1..5 %}
-                            {{ ux_icon('lucide:star', {'class': 'size-4 fill-yellow-400 text-yellow-400'}) }}
-                            {% endfor %}
+                    <div class="shrink-0 flex flex-col gap-5 bg-white rounded-2xl p-6 border border-neutral-200" data-reviews-swiper-target="card">
+                        <div class="flex gap-x-2 items-center justify-between">
+                            <div class="flex items-center gap-x-4">
+                                <img
+                                    src="{{ asset('medias/team/team_1.webp') }}"
+                                    alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                    loading="lazy"
+                                    width="24"
+                                    height="24"
+                                    class="size-10 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                />
+                                <div class="flex flex-col">
+                                    <p class="font-medium">Anna Variant</p>
+                                    <p class="text-slate-600 text-xs">25 Juin 2025</p>
+                                </div>
+                            </div>
+                            <twig:Badge variant="secondary" class="rounded-full text-primary font-medium gap-x-1">
+                                Etudiant
+                            </twig:Badge>
                         </div>
-                        <p class="text-neutral-700 text-sm text-pretty leading-relaxed flex-1">{{ ('home.reviews.' ~ i ~ '.text')|trans|raw }}</p>
-                        <p class="font-semibold text-sm text-neutral-900">{{ ('home.reviews.' ~ i ~ '.title')|trans|raw }}</p>
+                        <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                        <div class="flex gap-2 items-center">
+                            <div class="flex gap-1 items-center">
+                                {% for s in 1..5 %}
+                                    {{ ux_icon('iconamoon:star-fill', {'class': 'size-4 fill-yellow-400 text-yellow-400'}) }}
+                                {% endfor %}
+                            </div>
+                            <p class="font-semibold">5.0</p>
+                        </div>
+                        <p class="text-neutral-900 text-pretty leading-relaxed flex-1">{{ ('home.reviews.' ~ i ~ '.text')|trans|raw }}</p>
                     </div>
                     {% endfor %}
                 </div>
