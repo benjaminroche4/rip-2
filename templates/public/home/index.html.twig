@@ -222,161 +222,84 @@
             </a>
         </div>
     </section>
-    <section class="bg-white py-12 sm:py-16">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl lg:max-w-none">
-                <div class="flex flex-col space-y-3 justify-center text-center">
-                    <h2 class="font-semibold text-primary font-secondary">{{ 'home.keyMetrics.title'|trans|raw }}</h2>
-                    <h3 class="text-3xl font-medium text-pretty">{{ 'home.keyMetrics.subTitle'|trans|raw }}</h3>
-                </div>
-                <dl class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="flex flex-col bg-neutral-100/80 p-8">
-                        <dt class="text-sm/6 font-medium text-gray-600">{{ 'home.keyMetrics.1.value'|trans|raw }}</dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">+350</dd>
-                    </div>
-                    <div class="flex flex-col bg-neutral-100/80 p-8">
-                        <dt class="text-sm/6 font-medium text-gray-600">{{ 'home.keyMetrics.2.value'|trans|raw }}</dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">25</dd>
-                    </div>
-                    <div class="flex flex-col bg-neutral-100/80 p-8">
-                        <dt class="text-sm/6 font-medium text-gray-600">{{ 'home.keyMetrics.3.value'|trans|raw }}</dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">80</dd>
-                    </div>
-                    <div class="flex flex-col bg-neutral-100/80 p-8">
-                        <dt class="text-sm/6 flex items-center justify-center gap-x-2 font-medium text-gray-600">
-                            {{ ux_icon('devicon:google', {'class':'size-4'}) }}
-                            <a href="https://share.google/irkl480KnnOePsndl" class="hover:underline underline-offset-4" target="_blank">
-                                {{ 'home.keyMetrics.4.value'|trans|raw }}
-                            </a>
-                        </dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-primary">+300</dd>
-                    </div>
-                </dl>
+    <section class="lg:py-16 py-12">
+        <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
+            <div class="text-center space-y-3">
+                <h2 class="font-semibold text-primary font-secondary">{{ 'reviews.title'|trans|raw }}</h2>
+                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'reviews.subTitle'|trans|raw }}</h3>
             </div>
-        </div>
-    </section>
-    <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
-        <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
-                <div class="px-6 lg:px-0 lg:pr-4 lg:pt-4">
-                    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-lg">
-                        <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'home.aboutUs.title'|trans|raw }}</h2>
-                        <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'home.aboutUs.subTitle'|trans|raw }}</h3>
-                        <p class="mt-6 text-neutral-600">
-                            {{ 'home.aboutUs.text'|trans|raw }}
-                        </p>
-                        <dl class="mt-10 max-w-xl space-y-8 text-base/7 text-neutral-600 lg:max-w-none">
-                            <div class="relative pl-8">
-                                <dt class="inline font-semibold text-gray-900">
-                                    {{ ux_icon('mingcute:check-line', {'class':'absolute left-1 top-1.5 size-4 text-primary'}) }}
-                                    {{ 'home.aboutUs.subText1.title'|trans|raw }}
-                                </dt>
-                                <dd class="inline">
-                                    {{ 'home.aboutUs.subText1.text'|trans|raw }}
-                                </dd>
+            <div class="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
+                <div class="relative lg:row-span-2">
+                    <div class="absolute inset-px rounded-lg bg-white lg:rounded-l-[2rem]"></div>
+                    <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
+                        <div class="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10">
+                            <p class="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center dark:text-white">Mobile friendly</p>
+                            <p class="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center dark:text-gray-400">Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.</p>
+                        </div>
+                        <div class="relative min-h-[30rem] w-full grow [container-type:inline-size] max-lg:mx-auto max-lg:max-w-sm">
+                            <div class="absolute inset-x-10 bottom-0 top-10 overflow-hidden rounded-t-[12cqw] border-x-[3cqw] border-t-[3cqw] border-gray-700 bg-gray-900 shadow-2xl dark:shadow-none dark:outline dark:outline-1 dark:outline-white/20">
+                                <img src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-mobile-friendly.png" alt="" class="size-full object-cover object-top" />
                             </div>
-                            <div class="relative pl-8">
-                                <dt class="inline font-semibold text-gray-900">
-                                    {{ ux_icon('mingcute:check-line', {'class':'absolute left-1 top-1.5 size-4 text-primary'}) }}
-                                    {{ 'home.aboutUs.subText2.title'|trans|raw }}
-                                </dt>
-                                <dd class="inline">
-                                    {{ 'home.aboutUs.subText2.text'|trans|raw }}
-                                </dd>
-                            </div>
-                        </dl>
-                        <div class="mt-10 flex items-center justify-start">
-                            <twig:Button variant="default" as="a" size="lg" href="{{ path('app_estimation') }}">
-                                {{ 'home.aboutUs.button'|trans|raw }}
-                            </twig:Button>
                         </div>
                     </div>
+                    <div class="pointer-events-none absolute inset-px rounded-lg shadow outline outline-1 outline-black/5 lg:rounded-l-[2rem] dark:outline-white/15"></div>
                 </div>
-                <div class="h-full">
-                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-in-paris-1.webp') }}" alt="Product screenshot" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
+                <div class="relative max-lg:row-start-1">
+                    <div class="absolute inset-px rounded-lg bg-white max-lg:rounded-t-[2rem] dark:bg-gray-800"></div>
+                    <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
+                        <div class="px-8 pt-8 sm:px-10 sm:pt-10">
+                            <p class="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center dark:text-white">Performance</p>
+                            <p class="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center dark:text-gray-400">Lorem ipsum, dolor sit amet consectetur adipisicing elit maiores impedit.</p>
+                        </div>
+                        <div class="flex flex-1 items-center justify-center px-8 max-lg:pb-12 max-lg:pt-10 sm:px-10 lg:pb-2">
+                            <img src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-performance.png" alt="" class="w-full max-lg:max-w-xs dark:hidden" />
+                            <img src="https://tailwindcss.com/plus-assets/img/component-images/dark-bento-03-performance.png" alt="" class="hidden w-full max-lg:max-w-xs dark:block" />
+                        </div>
+                    </div>
+                    <div class="pointer-events-none absolute inset-px rounded-lg shadow outline outline-1 outline-black/5 max-lg:rounded-t-[2rem] dark:outline-white/15"></div>
                 </div>
-            </div>
-        </div>
-    </section>
-    <section class="px-6 py-12 sm:py-16 lg:px-8 max-w-7xl mx-auto">
-        <div class="border border-neutral-200 py-12 px-6 rounded-3xl bg-neutral-50">
-            <div class="flex flex-col space-y-3 justify-center text-center">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.reviews.title'|trans|raw }}</h2>
-                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'home.reviews.subTitle'|trans|raw }}</h3>
-                <div class="flex items-center justify-center mt-3 gap-x-3">
-                    {{ ux_icon('devicon:google', {'class':'size-5 shrink-0'}) }}
-                    <p class="text-neutral-600 font-light text-pretty"><span class="font-semibold">+370 avis</span> reviews <span class="underline underline-offset-4">on Google</span></p>
+                <div class="relative max-lg:row-start-3 lg:col-start-2 lg:row-start-2">
+                    <div class="absolute inset-px rounded-lg bg-white dark:bg-gray-800"></div>
+                    <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)]">
+                        <div class="px-8 pt-8 sm:px-10 sm:pt-10">
+                            <p class="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center dark:text-white">Security</p>
+                            <p class="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center dark:text-gray-400">Morbi viverra dui mi arcu sed. Tellus semper adipiscing suspendisse semper morbi.</p>
+                        </div>
+                        <div class="flex flex-1 items-center [container-type:inline-size] max-lg:py-6 lg:pb-2">
+                            <img src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-security.png" alt="" class="h-[min(152px,40cqw)] object-cover dark:hidden" />
+                            <img src="https://tailwindcss.com/plus-assets/img/component-images/dark-bento-03-security.png" alt="" class="hidden h-[min(152px,40cqw)] object-cover dark:block" />
+                        </div>
+                    </div>
+                    <div class="pointer-events-none absolute inset-px rounded-lg shadow outline outline-1 outline-black/5 dark:outline-white/15"></div>
                 </div>
-            </div>
-            <div
-                class="mt-10 -mx-6 overflow-hidden"
-                data-controller="reviews-swiper"
-                data-reviews-swiper-autoplay-value="true"
-                data-reviews-swiper-autoplay-delay-value="4000"
-            >
-                <div class="flex gap-6 px-6" data-reviews-swiper-target="track">
-                    {% for i in 1..5 %}
-                    <div class="shrink-0 flex flex-col gap-5 bg-white rounded-2xl p-6 border border-neutral-200" data-reviews-swiper-target="card">
-                        <div class="flex flex-col min-[410px]:flex-row gap-2 min-[410px]:items-center justify-between">
-                            <div class="flex items-center gap-x-4">
-                                <img
-                                    src="{{ asset('medias/team/team_1.webp') }}"
-                                    alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
-                                    loading="lazy"
-                                    width="24"
-                                    height="24"
-                                    class="size-10 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                                />
-                                <div class="flex flex-col">
-                                    <p class="font-medium">Anna Variant</p>
-                                    <p class="text-slate-600 text-xs">25 Juin 2025</p>
+                <div class="relative lg:row-span-2">
+                    <div class="absolute inset-px rounded-lg bg-white max-lg:rounded-b-[2rem] lg:rounded-r-[2rem] dark:bg-gray-800"></div>
+                    <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-r-[calc(2rem+1px)]">
+                        <div class="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10">
+                            <p class="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center dark:text-white">Powerful APIs</p>
+                            <p class="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center dark:text-gray-400">Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget sem sodales gravida.</p>
+                        </div>
+                        <div class="relative min-h-[30rem] w-full grow">
+                            <div class="absolute bottom-0 left-10 right-0 top-10 overflow-hidden rounded-tl-xl bg-gray-900 shadow-2xl outline outline-1 outline-white/10 dark:bg-gray-900/60 dark:shadow-none">
+                                <div class="flex bg-gray-900 outline outline-1 outline-white/5">
+                                    <div class="-mb-px flex text-sm/6 font-medium text-gray-400">
+                                        <div class="border-b border-r border-b-white/20 border-r-white/10 bg-white/5 px-4 py-2 text-white">NotificationSetting.jsx</div>
+                                        <div class="border-r border-gray-600/10 px-4 py-2">App.jsx</div>
+                                    </div>
+                                </div>
+                                <div class="px-6 pb-14 pt-6">
+                                    <!-- Your code example -->
                                 </div>
                             </div>
-                            <div class="inline-block">
-                                <twig:Badge variant="secondary" class="rounded-full text-primary font-medium gap-x-1">
-                                    Etudiant
-                                </twig:Badge>
-                            </div>
                         </div>
-                        <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                        <div class="flex gap-2 items-center">
-                            <div class="flex gap-1 items-center">
-                                {% for s in 1..5 %}
-                                    {{ ux_icon('iconamoon:star-fill', {'class': 'size-4 fill-yellow-400 text-yellow-400'}) }}
-                                {% endfor %}
-                            </div>
-                            <p class="font-semibold">5.0</p>
-                        </div>
-                        <p class="text-neutral-900 text-pretty leading-relaxed flex-1">{{ ('home.reviews.' ~ i ~ '.text')|trans|raw }}</p>
                     </div>
-                    {% endfor %}
+                    <div class="pointer-events-none absolute inset-px rounded-lg shadow outline outline-1 outline-black/5 max-lg:rounded-b-[2rem] lg:rounded-r-[2rem] dark:outline-white/15"></div>
                 </div>
-                <div class="flex justify-center gap-2 mt-6">
-                    {% for d in 0..4 %}
-                    <button
-                        class="h-2 rounded-full transition-all duration-200 {{ d == 0 ? 'w-4 bg-primary' : 'w-2 bg-neutral-300' }}"
-                        data-reviews-swiper-target="indicator"
-                        data-action="click->reviews-swiper#goTo"
-                        data-index="{{ d }}"
-                    ></button>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="mt-10 flex items-center justify-center">
-                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                    <img
-                        src="{{ asset('medias/team/team_1.webp') }}"
-                        alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
-                        loading="lazy"
-                        width="24"
-                        height="24"
-                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                    />
-                    {{ 'ctaFooter.button'|trans|raw }}
-                </twig:Button>
             </div>
         </div>
     </section>
+
+    {{ component('blocks/reviewsBlock') }}
     <section class="bg-white">
         <div class="mx-auto max-w-7xl px-6 lg:px-8 lg:py-16 py-12">
             <div class="lg:grid lg:grid-cols-12 lg:gap-8">

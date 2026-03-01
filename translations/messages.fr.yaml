@@ -445,24 +445,6 @@ home:
             title: Un savoir-faire depuis plus de 20 ans.
             text: Deux décennies d’expérience au service de ceux qui s’installent à Paris.
         button: Obtenez votre estimation
-    reviews:
-        title: Témoignages clients
-        subTitle: L'expérience Relocation in Paris
-        1:
-            text: Arriver à Paris depuis Londres aurait pu être un vrai défi, mais tout a été orchestré avec une fluidité incroyable. L’équipe a trouvé un appartement magnifique et s’est occupée de toutes les démarches. Un service sur mesure et une écoute rare.
-            title: Particulier, Paris 10ᵉ
-        2:
-            text: Une équipe d’un professionnalisme remarquable. Relocation in Paris a pris en charge la mobilité de nos collaborateurs avec une précision et une réactivité exemplaires. Tout s’est déroulé sans accroc, dans un timing parfait. Un partenaire de confiance que je recommande sans réserve.
-            title: Professionnel, Paris 11ᵉ
-        3:
-            text: Nous avons été accompagnés du début à la fin avec une attention et un sens du détail impressionnants. Notre relocation a été rapide, fluide et sans stress. Merci à toute l’équipe pour son efficacité et sa bienveillance.
-            title: Particulier, Paris 7ᵉ
-        4:
-            text: J’ai confié la gestion locative de mes biens à Relocation in Paris et je n’aurais pas pu faire un meilleur choix. Les locataires sélectionnés sont sérieux, la communication est fluide, et chaque étape est gérée avec rigueur et élégance.
-            title: Investisseuse, Paris 16ᵉ
-        5:
-            text: Relocation in Paris a pris en charge l’installation de plusieurs collaborateurs étrangers. Un accompagnement clé en main, humain et efficace. L’équipe comprend parfaitement les enjeux RH et l’exigence d’une relocation premium.
-            title: Professionnel, Paris 14ᵉ
     blog:
         title: Blog
         subTitle: Nos derniers articles
@@ -1316,3 +1298,41 @@ findTenant:
             5: Photos professionnelles
             6: Diffusion multicanal
         text3: du loyer hors charge
+reviews:
+    title: Témoignages clients
+    subTitle: L'expérience Relocation in Paris
+    info:
+        number: +370 avis
+        text: clients
+        google: sur Google
+
+    1:
+        text: Installation depuis Lyon vers Paris pour un nouveau poste. Vincent a su comprendre exactement ce que je cherchais et m’a trouvé un appartement en quelques jours. Service efficace et très professionnel.
+        name: Alexandre L.
+        from: Google
+        date: 12 avril 2025
+    2:
+        text: Je viens de m’installer à Paris depuis New York et l’équipe a été incroyablement réactive. Charles m’a accompagné du début à la signature du bail, tout s’est fait à distance et sans stress. Expérience parfaite.
+        name: Noah T.
+        from: Trustpilot
+        date: 14 janvier 2026
+    3:
+        text: Nous arrivions de Londres et ne connaissions pas le marché parisien. Claire a été d’une grande aide, toujours disponible et transparente. L’emménagement s’est déroulé parfaitement.
+        name: Olivia B.
+        from: Google
+        date: 3 juillet 2025
+    4:
+        text: Arrivé de La Réunion pour m’installer à Paris, j’appréhendais un peu la recherche de logement à distance. Élodie a été très réactif et à l’écoute de mes critères. Appartement trouvé en 5 jours.
+        name: Juliette M.
+        from: Trustpilot
+        date: 17 septembre 2025
+    5:
+        text: Je me suis installé à Paris depuis Sydney pour un nouveau poste et je ne connaissais absolument pas le marché local. Tout a été organisé à distance et j’ai pu emménager dès mon arrivée. Une expérience fluide et parfaitement gérée.
+        name: Madison R.
+        from: Trustpilot
+        date: 7 février 2026
+    6:
+        text: Retour en France après plusieurs années à l’étranger. Julien a géré les visites, le dossier et la négociation avec une grande efficacité. Nous avons trouvé rapidement un appartement qui correspondait parfaitement à nos attentes.
+        name: Nicolas M.
+        from: Google
+        date: 16 décembre 2025

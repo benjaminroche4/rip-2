@@ -21,6 +21,7 @@ export default class extends Controller {
         // Cache pour les dimensions
         this.cardWidth = 0;
         this.gap = 24;
+        this.trackPaddingLeft = 0;
 
         // Variables pour le drag
         this.touchStartX = 0;
@@ -77,13 +78,21 @@ export default class extends Controller {
         this.trackTarget.addEventListener('mousedown', this.boundHandleMouseDown);
     }
 
+    /**
+     * Calcule l'offset pour centrer la carte active dans le conteneur
+     */
+    getCurrentOffset() {
+        const containerWidth = this.element.offsetWidth;
+        return (containerWidth - this.cardWidth) / 2 - this.trackPaddingLeft - this.currentIndexValue * (this.cardWidth + this.gap);
+    }
+
     handleMouseDown(event) {
         if (this.isTransitioning) return;
         event.preventDefault();
 
         this.touchStartX = event.clientX;
         this.isDragging = false;
-        this.baseOffset = -(this.currentIndexValue * (this.cardWidth + this.gap));
+        this.baseOffset = this.getCurrentOffset();
         this.trackTarget.style.transition = 'none';
         this.trackTarget.style.cursor = 'grabbing';
 
@@ -135,7 +144,7 @@ export default class extends Controller {
         this.isVerticalScroll = false;
 
         // Mémoriser l'offset courant comme base du drag
-        this.baseOffset = -(this.currentIndexValue * (this.cardWidth + this.gap));
+        this.baseOffset = this.getCurrentOffset();
         this.trackTarget.style.transition = 'none';
     }
 
@@ -229,8 +238,7 @@ export default class extends Controller {
     prev() {
         if (this.isTransitioning) return;
 
-        const maxIndex = this.totalCards - this.visibleCards;
-        this.currentIndexValue = this.currentIndexValue > 0 ? this.currentIndexValue - 1 : maxIndex;
+        this.currentIndexValue = this.currentIndexValue > 0 ? this.currentIndexValue - 1 : this.totalCards - 1;
         this.updateCarousel(true);
     }
 
@@ -240,10 +248,7 @@ export default class extends Controller {
     next() {
         if (this.isTransitioning) return;
 
-        // Limite : on ne peut pas aller plus loin que le dernier groupe complet
-        const maxIndex = this.totalCards - this.visibleCards;
-
-        if (this.currentIndexValue < maxIndex) {
+        if (this.currentIndexValue < this.totalCards - 1) {
             this.currentIndexValue++;
             this.updateCarousel(true);
         } else {
@@ -260,10 +265,8 @@ export default class extends Controller {
         if (this.isTransitioning) return;
 
         const targetIndex = parseInt(event.currentTarget.dataset.index);
-        const maxIndex = this.totalCards - this.visibleCards;
 
-        // S'assurer que l'index est dans les limites
-        if (targetIndex >= 0 && targetIndex <= maxIndex) {
+        if (targetIndex >= 0 && targetIndex < this.totalCards) {
             this.currentIndexValue = targetIndex;
             this.updateCarousel(true);
         }
@@ -278,9 +281,9 @@ export default class extends Controller {
         // Calculer les dimensions si nécessaire
         if (!animate || this.cardWidth === 0) {
             const trackStyle = window.getComputedStyle(this.trackTarget);
-            const trackPaddingLeft = parseFloat(trackStyle.paddingLeft) || 0;
+            this.trackPaddingLeft = parseFloat(trackStyle.paddingLeft) || 0;
             const trackPaddingRight = parseFloat(trackStyle.paddingRight) || 0;
-            const containerWidth = this.element.offsetWidth - trackPaddingLeft - trackPaddingRight;
+            const containerWidth = this.element.offsetWidth - this.trackPaddingLeft - trackPaddingRight;
             this.gap = parseFloat(trackStyle.gap) || 24;
             this.cardWidth = (containerWidth - (this.gap * (this.visibleCards - 1))) / this.visibleCards;
 
@@ -291,8 +294,7 @@ export default class extends Controller {
             });
         }
 
-        // Calculer le décalage total
-        const offset = -(this.currentIndexValue * (this.cardWidth + this.gap));
+        const offset = this.getCurrentOffset();
 
         if (animate) {
             this.isTransitioning = true;
@@ -326,7 +328,7 @@ export default class extends Controller {
             return;
         }
 
-        const centerIndex = this.currentIndexValue + 1;
+        const centerIndex = this.currentIndexValue;
 
         this.cardTargets.forEach((card, index) => {
             card.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 400ms ease';
@@ -346,15 +348,7 @@ export default class extends Controller {
     updateIndicators() {
         if (!this.hasIndicatorTarget) return;
 
-        const maxIndex = this.totalCards - this.visibleCards;
-
         this.indicatorTargets.forEach((indicator, index) => {
-            if (index > maxIndex) {
-                indicator.style.display = 'none';
-                return;
-            }
-            indicator.style.display = '';
-
             if (index === this.currentIndexValue) {
                 indicator.classList.remove('bg-neutral-300', 'w-2');
                 indicator.classList.add('bg-primary', 'w-4');

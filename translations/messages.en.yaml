@@ -1318,3 +1318,41 @@ findTenant:
             5: Professional photography
             6: Multichannel distribution
         text3: of the rent excluding charges
+reviews:
+    title: Client Testimonials
+    subTitle: The Relocation in Paris Experience
+    info:
+        number: 370+ reviews
+        text: clients
+        google: on Google
+
+    1:
+        text: Moving from Lyon to Paris for a new position, Vincent quickly understood exactly what I was looking for and found me an apartment within a few days. Efficient and highly professional service.
+        name: Alexandre L.
+        from: Google
+        date: April 12, 2025
+    2:
+        text: I recently moved to Paris from New York and the team was incredibly responsive. Charles supported me from the very beginning through lease signing. Everything was handled remotely and without stress. A perfect experience.
+        name: Noah T.
+        from: Trustpilot
+        date: January 14, 2026
+    3:
+        text: We were relocating from London and didn’t know the Paris market at all. Claire was extremely helpful, always available and transparent. The entire move went perfectly.
+        name: Olivia B.
+        from: Google
+        date: July 3, 2025
+    4:
+        text: Moving from La Réunion to Paris, I was concerned about finding an apartment remotely. Élodie was very responsive and attentive to my criteria. We secured an apartment within five days.
+        name: Juliette M.
+        from: Trustpilot
+        date: September 17, 2025
+    5:
+        text: I relocated to Paris from Sydney for a new role and had no knowledge of the local market. Everything was organized remotely, and I was able to move in as soon as I arrived. A smooth and perfectly managed experience.
+        name: Madison R.
+        from: Trustpilot
+        date: February 7, 2026
+    6:
+        text: Returning to France after several years abroad, Julien handled the viewings, application file, and negotiations with great efficiency. We quickly found an apartment that perfectly matched our expectations.
+        name: Nicolas M.
+        from: Google
+        date: December 16, 2025
