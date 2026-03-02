@@ -128,6 +128,11 @@ turbo-frame#blog-list[busy] {
     opacity: 0.4;
 }
 
+/* === Negative padding bottom utility === */
+@utility -pb-12 {
+    margin-bottom: -3rem;
+}
+
 /* === Hide Scrollbar === */
 .scrollbar-hide {
     -ms-overflow-style: none;
