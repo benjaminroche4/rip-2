@@ -229,20 +229,20 @@
                 <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'reviews.subTitle'|trans|raw }}</h3>
             </div>
             <div class="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
-                <div class="relative lg:row-span-2">
-                    <div class="absolute inset-px rounded-lg bg-white lg:rounded-l-[2rem]"></div>
-                    <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
-                        <div class="px-8 pb-3 pt-8 sm:px-10 sm:pb-0 sm:pt-10">
-                            <p class="mt-2 text-lg font-medium tracking-tight text-gray-950 max-lg:text-center dark:text-white">Mobile friendly</p>
-                            <p class="mt-2 max-w-lg text-sm/6 text-gray-600 max-lg:text-center dark:text-gray-400">Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.</p>
-                        </div>
-                        <div class="relative min-h-[30rem] w-full grow [container-type:inline-size] max-lg:mx-auto max-lg:max-w-sm">
-                            <div class="absolute inset-x-10 bottom-0 top-10 overflow-hidden rounded-t-[12cqw] border-x-[3cqw] border-t-[3cqw] border-gray-700 bg-gray-900 shadow-2xl dark:shadow-none dark:outline dark:outline-1 dark:outline-white/20">
-                                <img src="https://tailwindcss.com/plus-assets/img/component-images/bento-03-mobile-friendly.png" alt="" class="size-full object-cover object-top" />
+                <div class="relative lg:row-span-2 border rounded-3xl border-neutral-200 z-20">
+                    <div class="relative flex h-full flex-col overflow-hidden rounded-2xl p-2">
+                        <div class="rounded-2xl bg-linear-to-b from-neutral-100 to-neutral-100/0 px-2 z-10 relative">
+                            <div class="px-6 pb-3 pt-6 sm:pb-0">
+                                <h3 class="mt-2 text-2xl font-medium tracking-tight text-gray-950 max-lg:text-center">Virtual tour or in-person visit</h3>
+                                <p class="mt-2 max-w-lg text-base text-neutral-600 max-lg:text-center">Whether you are abroad or already in Paris, we organize visits adapted to your situation.</p>
+                            </div>
+                            <div class="relative min-h-[30rem] w-full max-lg:mx-auto max-lg:max-w-sm z-10">
+                                <div class="absolute inset-x-4 bottom-0 top-10 -mb-9 overflow-hidden rounded-t-2xl border-6 border-b-0 border-neutral-200">
+                                    <img src="{{ asset('medias/website/img-visit-1.webp') }}" alt="" class="h-full w-full object-cover object-top" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="pointer-events-none absolute inset-px rounded-lg shadow outline outline-1 outline-black/5 lg:rounded-l-[2rem] dark:outline-white/15"></div>
                 </div>
                 <div class="relative max-lg:row-start-1">
                     <div class="absolute inset-px rounded-lg bg-white max-lg:rounded-t-[2rem] dark:bg-gray-800"></div>
