@@ -35,13 +35,13 @@
                             <div class="inline-block">
                                 {% if ('reviews.' ~ i ~ '.from')|trans == 'Trustpilot' %}
                                     <twig:Badge variant="secondary" class="rounded-full font-medium gap-x-1.5">
-                                        {{ ux_icon('simple-icons:trustpilot', {'class': 'size-4 fill-[#4FAC7A] text-[#4FAC7A]'}) }}
+                                        {{ ux_icon('simple-icons:trustpilot', {'class': 'size-4 fill-[#4FAC7A] text-[#4FAC7A] srhink-0'}) }}
                                         {{ ('reviews.' ~ i ~ '.from')|trans|raw }}
                                     </twig:Badge>
                                 {% endif %}
                                 {% if ('reviews.' ~ i ~ '.from')|trans == 'Google' %}
                                     <twig:Badge variant="secondary" class="rounded-full font-medium gap-x-1.5">
-                                        {{ ux_icon('devicon:google', {'class': 'size-4'}) }}
+                                        {{ ux_icon('devicon:google', {'class': 'size-4 srhink-0'}) }}
                                         {{ ('reviews.' ~ i ~ '.from')|trans|raw }}
                                     </twig:Badge>
                                 {% endif %}
@@ -51,7 +51,7 @@
                         <div class="flex gap-2 items-center">
                             <div class="flex gap-1 items-center" role="img" aria-label="Note : 5 sur 5">
                                 {% for s in 1..5 %}
-                                    {{ ux_icon('iconamoon:star-fill', {'class': 'size-4 fill-yellow-400 text-yellow-400'}) }}
+                                    {{ ux_icon('iconamoon:star-fill', {'class': 'size-4 fill-yellow-400 text-yellow-400 srhink-0'}) }}
                                 {% endfor %}
                             </div>
                             <p class="font-semibold" aria-hidden="true">5.0</p>
