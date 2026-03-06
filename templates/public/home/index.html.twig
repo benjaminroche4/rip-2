@@ -150,7 +150,7 @@
                 <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'reviews.subTitle'|trans|raw }}</h3>
             </div>
             <div class="grid lg:grid-cols-3 gap-12 relative">
-                <div class="absolute top-8 left-[16.67%] right-[16.67%] h-px bg-primary/20 hidden lg:block"></div>
+                <div class="absolute top-6 left-[16.67%] right-[16.67%] h-px bg-primary/20 hidden lg:block"></div>
                 <div class="flex flex-row lg:flex-col justify-center items-center gap-8">
                     <div class="relative z-10 flex items-center justify-center ">
                         <div class="absolute size-12 lg:size-16 rounded-full bg-[#9B203F]/30"></div>
@@ -204,11 +204,13 @@
                 </div>
             </div>
             <div class="text-center">
-                <div class="lg:mb-7 mb-5">
-                    <p class="text-slate-600 font-light flex items-center justify-center">
-                        {{ ux_icon('ph:seal-check-fill', {'class': 'size-5 shrink-0 mr-2 text-green-600'}) }}
-                        <a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Official GarantMe partner</a>. Facilitating rental guarantees in Paris.
-                    </p>
+                <div class="lg:mb-7 mb-5 flex items-start justify-center gap-x-2 lg:items-center">
+                    {{ ux_icon('ph:seal-check-fill', {'class': 'size-5 shrink-0 text-green-600 mt-1'}) }}
+                    <div>
+                        <p class="text-slate-600 font-light lg:text-center text-left">
+                            <a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Official GarantMe partner</a>. Facilitating rental guarantees in Paris.
+                        </p>
+                    </div>
                 </div>
                 <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
                     <img
