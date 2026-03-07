@@ -29,9 +29,14 @@
 {% endblock %}
 
 {% block body %}
-    <section class="mx-auto max-w-7xl mx-auto lg:px-8 px-4 lg:py-12 py-6">
-        <div class="rounded-2xl bg-gray-900">
-            <div class="flex items-center justify-center flex-col py-16 lg:px-8 px-4">
+    <section class="mx-auto max-w-7xl mx-auto lg:px-8 lg:pt-6 lg:pb-12">
+        <div class="lg:rounded-2xl bg-gray-900 relative overflow-hidden">
+            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline>
+                <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" type="video/webm">
+                <source src="{{ asset('medias/videos/relocation-in-paris.mp4') }}" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-linear-to-b from-neutral-900/60 to-neutral-900/80 lg:rounded-2xl"></div>
+            <div class="relative z-10 flex items-center justify-center flex-col pb-10 pt-16 lg:pt-22 lg:pb-16 lg:px-8 px-4">
                 <div class="flex items-center justify-center space-x-3 pb-10 lg:justify-start" aria-hidden="true">
                     <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
                         <path d="M25.536 8.76642C24.7611 5.27811 22.8432 2.13254 21.6014 0.541938C21.3894 0.270387 20.9774 0.314194 20.8157 0.618383C19.9547 2.23801 18.4662 5.38925 18.0844 9.20474C17.648 13.5662 19.3996 17.9712 22.4676 17.5328C25.1629 17.1478 26.5859 13.4926 25.536 8.76642Z" fill="url(#g1)" />
@@ -70,30 +75,30 @@
                         </defs>
                     </svg>
                 </div>
-                <h1 class="mx-auto max-w-2xl text-center text-5xl font-medium tracking-wide text-white lg:text-6xl/16 text-pretty">
+                <h1 class="mx-auto max-w-2xl text-center text-4xl lg:text-5xl font-medium tracking-wide text-white lg:text-6xl/16 text-pretty">
                     {{ 'home.heroSection.title'|trans|raw }}
                 </h1>
                 <p class="mx-auto mt-5 max-w-lg text-center font-light text-slate-100 lg:mx-0 text-pretty">
                     For individuals, families, and professionals relocating to Paris.
                 </p>
-                <div class="mt-7 lg:mt-12 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
-                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                <div class="mt-7 lg:mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
+                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}" class="text-base">
                         {{ 'home.heroSection.button'|trans|raw }}
                         {{ ux_icon('codicon:arrow-right', {'class':'size-4 shrink-0'}) }}
                     </twig:Button>
                 </div>
-                <div class="flex items-center gap-x-2 mt-5">
+                <div class="flex items-center gap-x-2 mt-8">
                     <div class="flex -space-x-1.5">
-                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-5 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-5 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-5 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                     </div>
                     <p class="text-white font-light text-sm">
                         <span class="font-semibold">+350</span> verified Google reviews
                     </p>
                 </div>
             </div>
-            <section
+            <div
                 x-data
                 x-init="
             $nextTick(() => {
@@ -103,7 +108,7 @@
                 content.appendChild(clone);
             });
     "
-                class="relative w-full container-block lg:py-7 py-6"
+                class="relative z-10 w-full container-block lg:py-7 py-6"
             >
                 <div class="relative w-full py-3 mx-auto overflow-hidden text-lg italic tracking-wide uppercase bg-white-900 max-w-7xl sm:text-xs md:text-sm lg:text-base xl:text-xl 2xl:text-2xl">
                     <div x-ref="content" class="flex animate-marquee">
@@ -118,94 +123,84 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </div>
+    </section>
+    <section class="lg:py-16 py-12 overflow-hidden">
+        <div
+            x-data="{ current: 0, max: 3 }"
+            class="max-w-7xl mx-auto lg:px-8 px-6"
+        >
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
 
-        </div>
-    </section>
-    <section class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-8 lg:py-12 gap-y-12">
-            <div class="mx-auto flex h-full w-full max-w-xl flex-col justify-center">
-                <div class="flex items-center justify-center space-x-3 pb-10 lg:justify-start" aria-hidden="true">
-                    <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
-                        <path d="M25.536 8.76642C24.7611 5.27811 22.8432 2.13254 21.6014 0.541938C21.3894 0.270387 20.9774 0.314194 20.8157 0.618383C19.9547 2.23801 18.4662 5.38925 18.0844 9.20474C17.648 13.5662 19.3996 17.9712 22.4676 17.5328C25.1629 17.1478 26.5859 13.4926 25.536 8.76642Z" fill="url(#g1)" />
-                        <path d="M16.016 15.6551C13.6008 13.0216 10.367 11.2564 8.49628 10.4998C8.17691 10.3706 7.842 10.6146 7.85404 10.9589C7.91818 12.792 8.20471 16.2653 9.78184 19.7605C11.5846 23.7558 15.3041 26.6949 17.7419 24.7813C19.8836 23.1001 19.2883 19.2232 16.016 15.6551Z" fill="url(#g2)" />
-                        <path d="M12.4043 26.6068C9.38973 24.6881 5.80926 23.8201 3.80649 23.5734C3.46457 23.5313 3.20421 23.8536 3.30495 24.183C3.84136 25.9371 5.01709 29.2179 7.44509 32.1858C10.2205 35.5784 14.5739 37.4546 16.4334 34.9753C18.067 32.7971 16.4886 29.2063 12.4043 26.6068Z" fill="url(#g3)" />
-                        <path d="M21.1784 39.5443C17.6471 38.9983 14.0195 39.6417 12.0863 40.2203C11.7563 40.3191 11.6473 40.7189 11.8719 40.9801C13.0678 42.3709 15.4625 44.9031 18.8782 46.6456C22.7827 48.6375 27.523 48.6068 28.2299 45.5893C28.8509 42.9384 25.963 40.2842 21.1784 39.5443Z" fill="url(#g4)" />
-                        <defs>
-                            <linearGradient id="g1" x1="21.0613" y1="0" x2="21.9505" y2="17.5631" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/>
-                            </linearGradient>
-                            <linearGradient id="g2" x1="7.75754" y1="10.3005" x2="17.3092" y2="25.066" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/>
-                            </linearGradient>
-                            <linearGradient id="g3" x1="3.04135" y1="23.5721" x2="16.0891" y2="35.3623" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/>
-                            </linearGradient>
-                            <linearGradient id="g4" x1="11.3851" y1="40.5265" x2="28.0701" y2="46.0821" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div class="flex flex-col text-center text-sm font-medium text-gray-900">
-                        <p>{{ 'home.heroSection.top.1'|trans|raw }}</p>
-                        <p>{{ 'home.heroSection.top.2'|trans|raw }}</p>
+                {# Left column: text + nav buttons #}
+                <div class="relative z-10 bg-white space-y-8">
+                    <div class="space-y-4">
+                        <p class="text-sm font-semibold text-primary uppercase tracking-wide font-secondary">Our Services</p>
+                        <h2 class="text-3xl lg:text-4xl font-medium text-pretty">Tailored support for every step of your relocation</h2>
+                        <p class="text-slate-600 font-light text-pretty">From housing search to administrative formalities, we handle every detail so you can focus on what matters.</p>
                     </div>
-                    <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
-                        <path d="M4.46397 8.76642C5.23886 5.27811 7.15683 2.13254 8.39858 0.541938C8.61058 0.270387 9.02259 0.314194 9.18431 0.618383C10.0453 2.23801 11.5338 5.38925 11.9156 9.20474C12.352 13.5662 10.6004 17.9712 7.53238 17.5328C4.83705 17.1478 3.41409 13.4926 4.46397 8.76642Z" fill="url(#g1b)" />
-                        <path d="M13.984 15.6551C16.3992 13.0216 19.633 11.2564 21.5037 10.4998C21.8231 10.3706 22.158 10.6146 22.146 10.9589C22.0818 12.792 21.7953 16.2653 20.2182 19.7605C18.4154 23.7558 14.6959 26.6949 12.2581 24.7813C10.1164 23.1001 10.7117 19.2232 13.984 15.6551Z" fill="url(#g2b)" />
-                        <path d="M17.5957 26.6068C20.6103 24.6881 24.1907 23.8201 26.1935 23.5734C26.5354 23.5313 26.7958 23.8536 26.695 24.183C26.1586 25.9371 24.9829 29.2179 22.5549 32.1858C19.7795 35.5784 15.4261 37.4546 13.5666 34.9753C11.933 32.7971 13.5114 29.2063 17.5957 26.6068Z" fill="url(#g3b)" />
-                        <path d="M8.82157 39.5443C12.3529 38.9983 15.9805 39.6417 17.9137 40.2203C18.2437 40.3191 18.3527 40.7189 18.1281 40.9801C16.9322 42.3709 14.5375 44.9031 11.1218 46.6456C7.21732 48.6375 2.47695 48.6068 1.77011 45.5893C1.14913 42.9384 4.03702 40.2842 8.82157 39.5443Z" fill="url(#g4b)" />
-                        <defs>
-                            <linearGradient id="g1b" x1="8.93872" y1="0" x2="8.04949" y2="17.5631"><stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/></linearGradient>
-                            <linearGradient id="g2b" x1="22.2425" y1="10.3005" x2="12.6908" y2="25.066"><stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/></linearGradient>
-                            <linearGradient id="g3b" x1="26.9587" y1="23.5721" x2="13.9109" y2="35.3623"><stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
-                            <linearGradient id="g4b" x1="18.6149" y1="40.5265" x2="1.92991" y2="46.0821"><stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
-                        </defs>
-                    </svg>
-                </div>
-                <h1 class="mx-auto max-w-2xl text-center text-5xl font-medium tracking-tight text-gray-900 lg:text-start lg:text-6xl/16 text-pretty">
-                    {{ 'home.heroSection.title'|trans|raw }}
-                </h1>
-                <p class="mx-auto mt-5 max-w-lg text-center font-normal text-neutral-600 lg:mx-0 lg:text-start text-pretty">
-                    {{ 'home.heroSection.subTitle'|trans|raw }}
-                </p>
-                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
-                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                        {{ 'home.heroSection.button'|trans|raw }}
-                    </twig:Button>
-                </div>
-                <div class="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-3 gap-5 mt-10 mx-auto lg:mx-0">
-                    <div class="flex items-center gap-3 justify-center lg:justify-start">
-                        {{ ux_icon('gravity-ui:thunderbolt', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.1'|trans|raw }}</p>
-                    </div>
-                    <div class="flex items-center gap-3  justify-center lg:justify-start">
-                        {{ ux_icon('mdi:world', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.2'|trans|raw }}</p>
-                    </div>
-                    <div class="flex items-center gap-3 justify-center lg:justify-start min-[390px]:col-span-2 sm:col-span-1">
-                        {{ ux_icon('humbleicons:key', {'class':'size-5 text-primary shrink-0'}) }}
-                        <p class="text-slate-800 text-sm font-medium">{{ 'home.heroSection.service.3'|trans|raw }}</p>
+                    <div class="flex gap-3">
+                        <button
+                            @click="current = Math.max(0, current - 1)"
+                            :disabled="current === 0"
+                            :class="current === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary hover:text-white hover:border-primary'"
+                            class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200"
+                        >
+                            {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
+                        </button>
+                        <button
+                            @click="current = Math.min(max, current + 1)"
+                            :disabled="current === max"
+                            :class="current === max ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary hover:text-white hover:border-primary'"
+                            class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200"
+                        >
+                            {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="h-[300px] lg:h-[600px]">
-                <video
-                    class="w-full h-full object-cover rounded-2xl"
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                    fetchpriority="high"
-                    preload="auto"
-                    poster="{{ asset('medias/website/rip_paris.webp') }}"
-                >
-                    <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" class="object-cover" type="video/webm">
-                    <source src="{{ asset('medias/videos/relocation-in-paris.mp4') }}" class="object-cover" type="video/mp4">
-                </video>
+
+                {# Right column: bleeding slider #}
+                <div>
+                    <div
+                        class="flex gap-5 transition-transform duration-500 ease-in-out"
+                        :style="`transform: translateX(calc(-${current} * (288px + 1.25rem)))`"
+                    >
+                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
+                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                {{ ux_icon('ph:house-line', {'class': 'size-5 text-primary'}) }}
+                            </div>
+                            <h3 class="font-semibold">Housing Search</h3>
+                            <p class="text-sm text-slate-600 font-light leading-relaxed">We find the perfect apartment matching your budget, location, and lifestyle.</p>
+                        </div>
+                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
+                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                {{ ux_icon('ph:files', {'class': 'size-5 text-primary'}) }}
+                            </div>
+                            <h3 class="font-semibold">Administrative Support</h3>
+                            <p class="text-sm text-slate-600 font-light leading-relaxed">We guide you through every French administrative step — visas, registrations, and more.</p>
+                        </div>
+                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
+                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                {{ ux_icon('ph:map-trifold', {'class': 'size-5 text-primary'}) }}
+                            </div>
+                            <h3 class="font-semibold">City Orientation</h3>
+                            <p class="text-sm text-slate-600 font-light leading-relaxed">Discover your new neighbourhood with a personalised guided tour of Paris.</p>
+                        </div>
+                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
+                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                {{ ux_icon('ph:graduation-cap', {'class': 'size-5 text-primary'}) }}
+                            </div>
+                            <h3 class="font-semibold">School Search</h3>
+                            <p class="text-sm text-slate-600 font-light leading-relaxed">We identify the best schools for your children based on curriculum, location, and availability.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
+
     <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="rounded-2xl border border-neutral-100 bg-neutral-50 lg:p-12 p-6 lg:space-y-16 space-y-7">
             <div class="text-center space-y-3">
