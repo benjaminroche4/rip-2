@@ -128,7 +128,29 @@
     </section>
     <section class="lg:py-16 py-12 overflow-hidden">
         <div
-            x-data="{ current: 0, max: 3 }"
+            x-data="{
+                current: 0,
+                max: 3,
+                dragging: false,
+                startX: 0,
+                dragOffset: 0,
+                onDragStart(x) {
+                    this.dragging = true;
+                    this.startX = x;
+                    this.dragOffset = 0;
+                },
+                onDragMove(x) {
+                    if (!this.dragging) return;
+                    this.dragOffset = x - this.startX;
+                },
+                onDragEnd() {
+                    if (!this.dragging) return;
+                    this.dragging = false;
+                    if (this.dragOffset < -80) this.current = Math.min(this.max, this.current + 1);
+                    else if (this.dragOffset > 80) this.current = Math.max(0, this.current - 1);
+                    this.dragOffset = 0;
+                }
+            }"
             class="max-w-7xl mx-auto lg:px-8 px-6"
         >
             <div class="grid lg:grid-cols-2 gap-12 items-center">
@@ -163,8 +185,16 @@
                 {# Right column: bleeding slider #}
                 <div class="lg:[clip-path:inset(0_-100vw_0_0)]">
                     <div
-                        class="flex gap-5 transition-transform duration-500 ease-in-out"
-                        :style="`transform: translateX(calc(-${current} * (288px + 1.25rem)))`"
+                        :class="dragging ? 'cursor-grabbing select-none' : 'cursor-grab transition-transform duration-500 ease-in-out'"
+                        :style="`transform: translateX(calc(-${current} * (288px + 1.25rem) + ${dragOffset}px))`"
+                        class="flex gap-5"
+                        @mousedown="onDragStart($event.clientX)"
+                        @mousemove="onDragMove($event.clientX)"
+                        @mouseup="onDragEnd()"
+                        @mouseleave="onDragEnd()"
+                        @touchstart.passive="onDragStart($event.touches[0].clientX)"
+                        @touchmove.passive="onDragMove($event.touches[0].clientX)"
+                        @touchend="onDragEnd()"
                     >
                         <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
                             <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
