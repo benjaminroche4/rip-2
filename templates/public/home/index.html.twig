@@ -135,8 +135,8 @@
 
                 {# Left column: text + nav buttons #}
                 <div class="relative z-10 bg-white space-y-8">
-                    <div class="space-y-4">
-                        <p class="text-sm font-semibold text-primary uppercase tracking-wide font-secondary">Our Services</p>
+                    <div class="space-y-4 max-w-md">
+                        <h2 class="font-semibold text-primary font-secondary">{{ 'reviews.title'|trans|raw }}</h2>
                         <h2 class="text-3xl lg:text-4xl font-medium text-pretty">Tailored support for every step of your relocation</h2>
                         <p class="text-slate-600 font-light text-pretty">From housing search to administrative formalities, we handle every detail so you can focus on what matters.</p>
                     </div>
@@ -161,7 +161,7 @@
                 </div>
 
                 {# Right column: bleeding slider #}
-                <div>
+                <div class="lg:[clip-path:inset(0_-100vw_0_0)]">
                     <div
                         class="flex gap-5 transition-transform duration-500 ease-in-out"
                         :style="`transform: translateX(calc(-${current} * (288px + 1.25rem)))`"
