@@ -125,76 +125,19 @@
             </div>
         </div>
     </section>
-    <section class="lg:py-16 py-12 overflow-hidden">
-        <div
-            data-controller="slider"
-            data-slider-max-value="3"
-            class="max-w-7xl mx-auto lg:px-8 px-6"
-        >
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-
-                {# Left column: text + nav buttons #}
-                <div class="relative z-10 bg-white space-y-8">
-                    <div class="space-y-4 max-w-md px-6">
-                        <h2 class="font-semibold text-primary font-secondary">{{ 'reviews.title'|trans|raw }}</h2>
-                        <h2 class="text-3xl lg:text-4xl font-medium text-pretty">L'expertise du marché parisien, à votre service.</h2>
-                        <p class="text-slate-600 font-light text-pretty">From housing search to administrative formalities, we handle every detail so you can focus on what matters.</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button
-                            data-slider-target="prev"
-                            data-action="click->slider#prev"
-                            class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
-                        >
-                            {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
-                        </button>
-                        <button
-                            data-slider-target="next"
-                            data-action="click->slider#next"
-                            class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
-                        >
-                            {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
-                        </button>
-                    </div>
-                </div>
-
-                {# Right column: bleeding slider #}
-                <div class="lg:[clip-path:inset(0_-100vw_0_0)]">
-                    <div
-                        data-slider-target="track"
-                        class="flex gap-5 cursor-grab"
-                    >
-                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
-                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                {{ ux_icon('ph:house-line', {'class': 'size-5 text-primary'}) }}
-                            </div>
-                            <h3 class="font-semibold">Housing Search</h3>
-                            <p class="text-sm text-slate-600 font-light leading-relaxed">We find the perfect apartment matching your budget, location, and lifestyle.</p>
-                        </div>
-                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
-                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                {{ ux_icon('ph:files', {'class': 'size-5 text-primary'}) }}
-                            </div>
-                            <h3 class="font-semibold">Administrative Support</h3>
-                            <p class="text-sm text-slate-600 font-light leading-relaxed">We guide you through every French administrative step — visas, registrations, and more.</p>
-                        </div>
-                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
-                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                {{ ux_icon('ph:map-trifold', {'class': 'size-5 text-primary'}) }}
-                            </div>
-                            <h3 class="font-semibold">City Orientation</h3>
-                            <p class="text-sm text-slate-600 font-light leading-relaxed">Discover your new neighbourhood with a personalised guided tour of Paris.</p>
-                        </div>
-                        <div class="w-72 shrink-0 rounded-2xl bg-neutral-50 border border-neutral-100 p-6 space-y-4">
-                            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                                {{ ux_icon('ph:graduation-cap', {'class': 'size-5 text-primary'}) }}
-                            </div>
-                            <h3 class="font-semibold">School Search</h3>
-                            <p class="text-sm text-slate-600 font-light leading-relaxed">We identify the best schools for your children based on curriculum, location, and availability.</p>
-                        </div>
-                    </div>
-                </div>
-
+    <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div class="space-y-3 max-w-md">
+                <h2 class="font-semibold text-primary font-secondary">L'essentiel, sans le superflu</h2>
+                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
+                    Paris autrement
+                </h3>
+                <p class="text-slate-600 font-light text-pretty">
+                    De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
+                </p>
+            </div>
+            <div>
+                eee
             </div>
         </div>
     </section>
