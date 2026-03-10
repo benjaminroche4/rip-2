@@ -141,7 +141,7 @@
                         De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
                     </p>
                 </div>
-                <div class="hidden lg:flex gap-3">
+                <div class="hidden sm:flex gap-3">
                     <button
                         data-slider-target="prev"
                         data-action="click->slider#prev"
@@ -162,41 +162,49 @@
             {# Right column: contained carousel #}
             <div class="overflow-hidden">
                 <div data-slider-target="track" class="flex gap-6 cursor-grab">
-                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
-                        <div class="space-y-4">
-                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
-                        </div>
-                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                            Personalized property search, including on-market and off-market opportunities.
-                        </p>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
+                       <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                           <div class="space-y-4">
+                               {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                               <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                           </div>
+                           <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                               Accédez aux meilleurs biens avant tout le monde, depuis n'importe où.
+                           </p>
+                       </div>
                     </div>
-                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
-                        <div class="space-y-4">
-                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
+                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                            <div class="space-y-4">
+                                {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                                <h4 class="text-lg font-medium group-hover:text-white">Démarches administratives</h4>
+                            </div>
+                            <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                                Toutes vos démarches administratives, entièrement gérées pour vous.
+                            </p>
                         </div>
-                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                            Personalized property search, including on-market and off-market opportunities.
-                        </p>
                     </div>
-                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
-                        <div class="space-y-4">
-                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
+                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                            <div class="space-y-4">
+                                {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                                <h4 class="text-lg font-medium group-hover:text-white">Gestion du déménagement</h4>
+                            </div>
+                            <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                                Un déménagement sans effort. Vous arrivez, tout est prêt.
+                            </p>
                         </div>
-                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                            Personalized property search, including on-market and off-market opportunities.
-                        </p>
                     </div>
-                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
-                        <div class="space-y-4">
-                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
+                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                            <div class="space-y-4">
+                                {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                                <h4 class="text-lg font-medium group-hover:text-white">École et scolarité</h4>
+                            </div>
+                            <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                                Vos enfants entre les meilleures mains, dès leur arrivée à Paris.
+                            </p>
                         </div>
-                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                            Personalized property search, including on-market and off-market opportunities.
-                        </p>
                     </div>
                 </div>
                 {# Nav buttons — hidden when 2 cards are visible (sm+) #}
