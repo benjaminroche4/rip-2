@@ -610,6 +610,7 @@
                     <div class="flex items-center justify-center gap-x-6 mt-8 mb-5">
                         <button
                             data-action="click->reviews-swiper#prev"
+                            aria-label="Avis précédent"
                             class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white active:scale-95 active:bg-primary active:text-white transition-all duration-100 shadow-md hover:shadow-lg touch-manipulation">
                             {{ ux_icon('material-symbols:arrow-back-ios-new-rounded', {'class':'size-5'}) }}
                         </button>
@@ -620,26 +621,31 @@
                                 data-reviews-swiper-target="indicator"
                                 data-index="0"
                                 data-action="click->reviews-swiper#goTo"
+                                aria-label="Aller à l'avis 1"
                                 class="size-2.5 rounded-full bg-primary transition-all duration-200 hover:scale-125 active:scale-110 touch-manipulation"></button>
                             <button
                                 data-reviews-swiper-target="indicator"
                                 data-index="1"
                                 data-action="click->reviews-swiper#goTo"
+                                aria-label="Aller à l'avis 2"
                                 class="size-2.5 rounded-full bg-gray-300 transition-all duration-200 hover:scale-125 active:scale-110 touch-manipulation"></button>
                             <button
                                 data-reviews-swiper-target="indicator"
                                 data-index="2"
                                 data-action="click->reviews-swiper#goTo"
+                                aria-label="Aller à l'avis 3"
                                 class="size-2.5 rounded-full bg-gray-300 transition-all duration-200 hover:scale-125 active:scale-110 touch-manipulation"></button>
                             <button
                                 data-reviews-swiper-target="indicator"
                                 data-index="3"
                                 data-action="click->reviews-swiper#goTo"
+                                aria-label="Aller à l'avis 4"
                                 class="size-2.5 rounded-full bg-gray-300 transition-all duration-200 hover:scale-125 active:scale-110 touch-manipulation"></button>
                         </div>
 
                         <button
                             data-action="click->reviews-swiper#next"
+                            aria-label="Avis suivant"
                             class="flex items-center justify-center size-12 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white active:scale-95 active:bg-primary active:text-white transition-all duration-100 shadow-md hover:shadow-lg touch-manipulation">
                             {{ ux_icon('material-symbols:arrow-forward-ios-rounded', {'class':'size-5'}) }}
                         </button>
