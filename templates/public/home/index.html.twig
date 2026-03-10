@@ -29,9 +29,9 @@
 {% endblock %}
 
 {% block body %}
-    <section class="mx-auto max-w-7xl mx-auto lg:px-8 lg:pt-6 lg:pb-12">
+    <section class="max-w-7xl mx-auto lg:px-8 lg:pt-6 lg:pb-12">
         <div class="lg:rounded-2xl bg-gray-900 relative overflow-hidden">
-            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline webkit-playsinline preload="auto">
+            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="{{ asset('medias/website/rip_paris.webp') }}" aria-hidden="true">
                 <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" type="video/webm">
                 <source src="{{ asset('medias/videos/relocation-in-paris.mp4') }}" type="video/mp4">
             </video>
@@ -89,9 +89,9 @@
                 </div>
                 <div class="flex items-center max-[340px]:flex-col flex-row gap-2 mt-8">
                     <div class="flex -space-x-1.5">
-                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                     </div>
                     <p class="text-white font-light text-sm text-center">
                         <span class="font-semibold">4.9/5</span> {{ 'home.heroSection.google'|trans|raw }}
@@ -108,6 +108,7 @@
                 content.appendChild(clone);
             });
     "
+                aria-hidden="true"
                 class="relative z-10 w-full container-block lg:py-7 py-6"
             >
                 <div class="relative w-full py-3 mx-auto overflow-hidden text-lg italic tracking-wide uppercase bg-white-900 max-w-7xl sm:text-xs md:text-sm lg:text-base xl:text-xl 2xl:text-2xl">
@@ -125,7 +126,7 @@
             </div>
         </div>
     </section>
-    <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div
             data-controller="slider"
             class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start"
@@ -133,18 +134,19 @@
             {# Left column: text + nav buttons (desktop) #}
             <div class="space-y-6 max-w-md">
                 <div class="space-y-3">
-                    <h2 class="font-semibold text-primary font-secondary">L'essentiel, sans le superflu</h2>
-                    <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
-                        Paris autrement
-                    </h3>
+                    <p class="font-semibold text-primary font-secondary">{{ 'home.services.title'|trans|raw }}</p>
+                    <h2 class="text-3xl sm:text-4xl font-medium text-pretty">
+                        {{ 'home.services.subTitle'|trans|raw }}
+                    </h2>
                     <p class="text-slate-600 font-light text-pretty">
-                        De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
+                        {{ 'home.services.text'|trans|raw }}
                     </p>
                 </div>
                 <div class="hidden sm:flex gap-3">
                     <button
                         data-slider-target="prev"
                         data-action="click->slider#prev"
+                        aria-label="{{ 'home.services.prev'|trans|default('Précédent') }}"
                         class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
                     >
                         {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
@@ -152,6 +154,7 @@
                     <button
                         data-slider-target="next"
                         data-action="click->slider#next"
+                        aria-label="{{ 'home.services.next'|trans|default('Suivant') }}"
                         class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
                     >
                         {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
@@ -166,10 +169,10 @@
                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                            <div class="space-y-4">
                                {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                               <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                               <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.1.title'|trans|raw }}</h3>
                            </div>
                            <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                               Accédez aux meilleurs biens avant tout le monde, depuis n'importe où.
+                               {{ 'home.services.1.text'|trans|raw }}
                            </p>
                        </div>
                     </div>
@@ -177,10 +180,10 @@
                         <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('akar-icons:paper', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                                <h4 class="text-lg font-medium group-hover:text-white">Démarches administratives</h4>
+                                <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.2.title'|trans|raw }}</h3>
                             </div>
                             <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                                Toutes vos démarches administratives, entièrement gérées pour vous.
+                                {{ 'home.services.2.text'|trans|raw }}
                             </p>
                         </div>
                     </div>
@@ -188,10 +191,10 @@
                         <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('hugeicons:package', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                                <h4 class="text-lg font-medium group-hover:text-white">Gestion du déménagement</h4>
+                                <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.3.title'|trans|raw }}</h3>
                             </div>
                             <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                                Un déménagement sans effort. Vous arrivez, tout est prêt.
+                                {{ 'home.services.3.text'|trans|raw }}
                             </p>
                         </div>
                     </div>
@@ -199,10 +202,10 @@
                         <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('ic:outline-school', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                                <h4 class="text-lg font-medium group-hover:text-white">École et scolarité</h4>
+                                <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.4.title'|trans|raw }}</h3>
                             </div>
                             <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                                Vos enfants entre les meilleures mains, dès leur arrivée à Paris.
+                                {{ 'home.services.4.text'|trans|raw }}
                             </p>
                         </div>
                     </div>
@@ -210,7 +213,7 @@
                         <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('mdi:paris', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                                <h4 class="text-lg font-medium group-hover:text-white">Découverte de Paris</h4>
+                                <h3 class="text-lg font-medium group-hover:text-white">Découverte de Paris</h3>
                             </div>
                             <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
                                 Adresses uniques, expériences exclusives, une immersion parisienne pensée pour vous.
@@ -223,6 +226,7 @@
                     <button
                         data-slider-target="prev"
                         data-action="click->slider#prev"
+                        aria-label="{{ 'home.services.prev'|trans|default('Précédent') }}"
                         class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
                     >
                         {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
@@ -230,6 +234,7 @@
                     <button
                         data-slider-target="next"
                         data-action="click->slider#next"
+                        aria-label="{{ 'home.services.next'|trans|default('Suivant') }}"
                         class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
                     >
                         {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
@@ -239,11 +244,11 @@
 
         </div>
     </section>
-    <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="rounded-2xl border border-neutral-100 bg-neutral-50 lg:p-12 p-6 lg:space-y-16 space-y-7">
             <div class="text-center space-y-3">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.steps.title'|trans|raw }}</h2>
-                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'home.steps.subTitle'|trans|raw }}</h3>
+                <p class="font-semibold text-primary font-secondary">{{ 'home.steps.title'|trans|raw }}</p>
+                <h2 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'home.steps.subTitle'|trans|raw }}</h2>
             </div>
             <div class="grid lg:grid-cols-3 gap-12 relative">
                 <div class="absolute top-6 left-[16.67%] right-[16.67%] h-px bg-primary/20 hidden lg:block"></div>
@@ -257,9 +262,9 @@
                         </div>
                     </div>
                     <div class="lg:text-center space-y-2">
-                        <h4 class="text-lg font-semibold">
+                        <h3 class="text-lg font-semibold">
                             {{ 'home.steps.1.title'|trans|raw }}
-                        </h4>
+                        </h3>
                         <p class="font-light text-slate-600 max-w-xs text-pretty">
                             {{ 'home.steps.1.text'|trans|raw }}
                         </p>
@@ -274,9 +279,9 @@
                         </div>
                     </div>
                     <div class="lg:text-center space-y-2">
-                        <h4 class="text-lg font-semibold">
+                        <h3 class="text-lg font-semibold">
                             {{ 'home.steps.2.title'|trans|raw }}
-                        </h4>
+                        </h3>
                         <p class="font-light text-slate-600 max-w-xs text-pretty">
                             {{ 'home.steps.2.text'|trans|raw }}
                         </p>
@@ -291,9 +296,9 @@
                         </div>
                     </div>
                     <div class="lg:text-center space-y-2">
-                        <h4 class="text-lg font-semibold">
+                        <h3 class="text-lg font-semibold">
                             {{ 'home.steps.3.title'|trans|raw }}
-                        </h4>
+                        </h3>
                         <p class="font-light text-slate-600 max-w-xs text-pretty">
                             {{ 'home.steps.3.text'|trans|raw }}
                         </p>
@@ -323,13 +328,13 @@
             </div>
         </div>
     </section>
-    <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div class="space-y-3 max-w-md">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'home.keyMetrics.title'|trans|raw }}</h2>
-                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
+                <p class="font-semibold text-primary font-secondary">{{ 'home.keyMetrics.title'|trans|raw }}</p>
+                <h2 class="text-3xl sm:text-4xl font-medium text-pretty">
                     {{ 'home.keyMetrics.subTitle'|trans|raw }}
-                </h3>
+                </h2>
             </div>
             <div class="flex flex-col space-y-3">
                 <div class="p-4 lg:p-7 rounded-2xl border border-neutral-100 bg-neutral-50">
@@ -385,12 +390,12 @@
     <section class="lg:py-16 py-12">
         <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
             <div class="text-center space-y-3">
-                <h2 class="font-semibold text-primary font-secondary">
+                <p class="font-semibold text-primary font-secondary">
                     {{ 'home.features.title'|trans|raw }}
-                </h2>
-                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
+                </p>
+                <h2 class="text-3xl sm:text-4xl font-medium text-pretty">
                     {{ 'home.features.subTitle'|trans|raw }}
-                </h3>
+                </h2>
             </div>
             <div class="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
                 <div class="relative lg:row-span-2 border rounded-3xl border-neutral-200 z-20">
@@ -402,7 +407,7 @@
                             </div>
                             <div class="relative min-h-[20rem] lg:min-h-[30rem] w-full max-lg:mx-auto max-lg:max-w-sm z-10">
                                 <div class="absolute inset-x-4 bottom-0 top-10 -mb-9 overflow-hidden rounded-t-2xl border-6 border-b-0 border-neutral-200 -rotate-5">
-                                    <img src="{{ asset('medias/website/img-visit-1.webp') }}" alt="{{ 'home.features.1.altImage'|trans|raw }}" class="h-full w-full object-cover object-top" />
+                                    <img src="{{ asset('medias/website/img-visit-1.webp') }}" alt="{{ 'home.features.1.altImage'|trans|raw }}" width="400" height="600" loading="lazy" class="h-full w-full object-cover object-top" />
                                 </div>
                             </div>
                         </div>
@@ -415,7 +420,7 @@
                                 <h3 class="mt-2 text-2xl font-medium tracking-tight text-primary text-center text-balance">{{ 'home.features.2.title'|trans|raw }}</h3>
                             </div>
                             <div class="flex items-center justify-center flex-1">
-                                <img src="{{ asset('medias/svg/location-radar.svg') }}" alt="Location radar" loading="eager" />
+                                <img src="{{ asset('medias/svg/location-radar.svg') }}" alt="Location radar" loading="eager" width="300" height="300" />
                             </div>
                         </div>
                     </div>
@@ -456,7 +461,7 @@
                             </div>
                             <div class="relative min-h-[20rem] lg:min-h-[30rem] w-full max-lg:mx-auto max-lg:max-w-sm z-10">
                                 <div class="absolute inset-x-4 bottom-0 top-10 -mb-9 overflow-hidden rounded-t-2xl border-6 border-b-0 border-neutral-200 rotate-5">
-                                    <img src="{{ asset('medias/website/img-visit-2.webp') }}" alt="{{ 'home.features.4.altImage'|trans|raw }}" class="h-full w-full object-cover object-top" />
+                                    <img src="{{ asset('medias/website/img-visit-2.webp') }}" alt="{{ 'home.features.4.altImage'|trans|raw }}" width="400" height="600" loading="lazy" class="h-full w-full object-cover object-top" />
                                 </div>
                             </div>
                         </div>

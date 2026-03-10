@@ -21,7 +21,7 @@
                             <div class="flex items-center gap-x-4">
                                 <img
                                     src="{{ asset('medias/reviews/user-'~ i ~'.webp')|trans }}"
-                                    alt="Avis de {{ ('reviews.' ~ i ~ '.name')|trans|raw }}"
+                                    alt="{{ ('reviews.' ~ i ~ '.alt')|trans|raw }}"
                                     loading="lazy"
                                     width="40"
                                     height="40"

@@ -392,18 +392,24 @@ home:
             2: 100% remote
             3: Turnkey service
     services:
-        title: Our services
-        subTitle: A tailored service for every need
-        button: Discover the service
+        title: The essentials, nothing more
+        subTitle: Paris, differently
+        text: Access the best properties before anyone else, from wherever you are.
         1:
-            title: Property search
-            text: An exclusive, personalized property search for short or long-term rentals in Paris.
+            title: Apartment Search
+            text: An exclusive, fully tailored apartment search for short or long-term rentals in Paris.
         2:
-            title: Corporate solutions
-            text: Free your team from administrative burdens with our turnkey solutions.
+            title: Administrative Support
+            text: Every administrative step, completely handled on your behalf.
         3:
-            title: Property management
-            text: Entrust us with your property for a smooth and profitable rental experience.
+            title: Moving Management
+            text: A seamless move, start to finish. You just show up, everything is ready.
+        4:
+            title: School & Education
+            text: Your children in the best hands, from the moment they arrive in Paris.
+        5:
+            title: Discovering Paris
+            text: Hidden gems, exclusive experiences, a Parisian immersion crafted just for you.
     faq:
         title: FAQ
         subTitle: Everything you need to know
@@ -1352,28 +1358,34 @@ reviews:
         name: Alexandre L.
         from: Google
         date: April 12, 2025
+        alt: Alexandre L. review on Google
     2:
         text: I recently moved to Paris from New York and the team was incredibly responsive. Charles supported me from the very beginning through lease signing. Everything was handled remotely and without stress. A perfect experience.
         name: Noah T.
         from: Trustpilot
         date: January 14, 2026
+        alt: Noah T. review on Trustpilot
     3:
         text: We were relocating from London and didn’t know the Paris market at all. Claire was extremely helpful, always available and transparent. The entire move went perfectly.
         name: Olivia B.
         from: Google
         date: July 3, 2025
+        alt: Olivia B. review on Google
     4:
         text: Moving from La Réunion to Paris, I was concerned about finding an apartment remotely. Élodie was very responsive and attentive to my criteria. We secured an apartment within five days.
         name: Juliette M.
         from: Trustpilot
         date: September 17, 2025
+        alt: Juliette M. review on Trustpilot
     5:
         text: I relocated to Paris from Sydney for a new role and had no knowledge of the local market. Everything was organized remotely, and I was able to move in as soon as I arrived. A smooth and perfectly managed experience.
         name: Madison R.
         from: Trustpilot
         date: February 7, 2026
+        alt: Madison R. review on Trustpilot
     6:
         text: Returning to France after several years abroad, Julien handled the viewings, application file, and negotiations with great efficiency. We quickly found an apartment that perfectly matched our expectations.
         name: Nicolas M.
         from: Google
         date: December 16, 2025
+        alt: Nicolas M. review on Google.

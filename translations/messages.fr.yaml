@@ -388,18 +388,24 @@ home:
         image:
             alt: Relocation In Paris, agence de relocation à Paris
     services:
-        title: Nos services
-        subTitle: Un accompagnement dédié à chaque besoin
-        button: Découvrir le service
+        title: L'essentiel, sans le superflu
+        subTitle: Paris autrement
+        text: De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
         1:
             title: Recherche de logement
-            text: Une recherche de logement exclusive et personnalisée, pour des locations courtes ou longues durées à Paris.
+            text: Accédez aux meilleurs biens avant tout le monde, depuis n'importe où.
         2:
-            title: Solutions pour les entreprises
-            text: Libérez vos collaborateurs des contraintes administratives avec nos solutions clés en main.
+            title: Démarches administratives
+            text: Toutes vos démarches administratives, entièrement gérées pour vous.
         3:
-            title: Gestion locative
-            text: Confiez-nous la gestion locative de votre bien et bénéficiez d’une location sereine, rentable et parfaitement maîtrisée.
+            title: Gestion du déménagement
+            text: Un déménagement sans effort. Vous arrivez, tout est prêt.
+        4:
+            title: École et scolarité
+            text: Vos enfants entre les meilleures mains, dès leur arrivée à Paris.
+        5:
+            title: Découverte de Paris
+            text: Adresses uniques, expériences exclusives, une immersion parisienne pensée pour vous.
     faq:
         title: FAQ
         subTitle: Tout ce que vous devez savoir
@@ -1346,28 +1352,34 @@ reviews:
         name: Alexandre L.
         from: Google
         date: 12 avril 2025
+        alt: "Photo de Alexandre L., client satisfait de Relocation In Paris"
     2:
         text: Je viens de m’installer à Paris depuis New York et l’équipe a été incroyablement réactive. Charles m’a accompagné du début à la signature du bail, tout s’est fait à distance et sans stress. Expérience parfaite.
         name: Noah T.
         from: Trustpilot
         date: 14 janvier 2026
+        alt: "Photo de Noah T., client satisfait de Relocation In Paris"
     3:
         text: Nous arrivions de Londres et ne connaissions pas le marché parisien. Claire a été d’une grande aide, toujours disponible et transparente. L’emménagement s’est déroulé parfaitement.
         name: Olivia B.
         from: Google
         date: 3 juillet 2025
+        alt: "Photo de Olivia B., cliente satisfaite de Relocation In Paris"
     4:
         text: Arrivé de La Réunion pour m’installer à Paris, j’appréhendais un peu la recherche de logement à distance. Élodie a été très réactif et à l’écoute de mes critères. Appartement trouvé en 5 jours.
         name: Juliette M.
         from: Trustpilot
         date: 17 septembre 2025
+        alt: "Photo de Juliette M., cliente satisfaite de Relocation In Paris"
     5:
         text: Je me suis installé à Paris depuis Sydney pour un nouveau poste et je ne connaissais absolument pas le marché local. Tout a été organisé à distance et j’ai pu emménager dès mon arrivée. Une expérience fluide et parfaitement gérée.
         name: Madison R.
         from: Trustpilot
         date: 7 février 2026
+        alt: "Photo de Madison R., cliente satisfaite de Relocation In Paris"
     6:
         text: Retour en France après plusieurs années à l’étranger. Julien a géré les visites, le dossier et la négociation avec une grande efficacité. Nous avons trouvé rapidement un appartement qui correspondait parfaitement à nos attentes.
         name: Nicolas M.
         from: Google
         date: 16 décembre 2025
+        alt: "Photo de Nicolas M., client satisfait de Relocation In Paris"

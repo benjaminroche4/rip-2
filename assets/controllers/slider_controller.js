@@ -11,6 +11,7 @@ export default class extends Controller {
     connect() {
         this.isDragging = false;
         this.isVerticalScroll = false;
+        this.isHovering = false;
         this.startX = 0;
         this.startY = 0;
         this.baseOffset = 0;
@@ -25,8 +26,8 @@ export default class extends Controller {
         this.boundHandleResize = () => { this.updateStep(); this.render(false); };
         window.addEventListener('resize', this.boundHandleResize);
 
-        this.boundPause  = () => this.stopAutoplay();
-        this.boundResume = () => this.startAutoplay();
+        this.boundPause  = () => { this.isHovering = true;  this.stopAutoplay(); };
+        this.boundResume = () => { this.isHovering = false; this.startAutoplay(); };
         this.element.addEventListener('mouseenter', this.boundPause);
         this.element.addEventListener('mouseleave', this.boundResume);
     }
@@ -49,7 +50,7 @@ export default class extends Controller {
 
     startAutoplay() {
         this.stopAutoplay();
-        if (this.maxValue === 0) return;
+        if (this.isHovering || this.maxValue === 0) return;
         this.autoplayTimer = setInterval(() => this.tick(), this.autoplayDelayValue);
     }
 
@@ -95,15 +96,15 @@ export default class extends Controller {
     }
 
     prev() {
-        this.stopAutoplay();
         if (this.currentValue > 0) this.currentValue--;
         this.render(true);
+        this.startAutoplay();
     }
 
     next() {
-        this.stopAutoplay();
         if (this.currentValue < this.maxValue) this.currentValue++;
         this.render(true);
+        this.startAutoplay();
     }
 
     render(animate = true) {
@@ -176,7 +177,7 @@ export default class extends Controller {
         const threshold = this.step * 0.25;
         if      (deltaX < -threshold) this.next();
         else if (deltaX >  threshold) this.prev();
-        else                          this.render(true);
+        else { this.render(true); this.startAutoplay(); }
     }
 
     handleTouchStart(event) {
@@ -209,6 +210,6 @@ export default class extends Controller {
         const threshold = this.step * 0.25;
         if      (deltaX < -threshold) this.next();
         else if (deltaX >  threshold) this.prev();
-        else                          this.render(true);
+        else { this.render(true); this.startAutoplay(); }
     }
 }
