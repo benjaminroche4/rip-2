@@ -24,6 +24,13 @@
         "primaryImageOfPage": {
             "@type": "ImageObject",
             "url": "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+        },
+        "review": {
+            "@type": "AggregateRating",
+            "itemReviewed": { "@id": "https://relocation-in-paris.fr/#organization" },
+            "ratingValue": "4.9",
+            "bestRating": "5",
+            "ratingCount": "370"
         }
     }
 {% endblock %}
@@ -31,7 +38,7 @@
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 lg:pt-6 lg:pb-12">
         <div class="lg:rounded-2xl bg-gray-900 relative overflow-hidden">
-            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="{{ asset('medias/website/rip_paris.webp') }}" aria-hidden="true">
+            <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline preload="auto" poster="{{ asset('medias/website/rip_paris.webp') }}" aria-hidden="true">
                 <source src="{{ asset('medias/videos/relocation-in-paris.webm') }}" type="video/webm">
                 <source src="{{ asset('medias/videos/relocation-in-paris.mp4') }}" type="video/mp4">
             </video>
@@ -131,7 +138,6 @@
             data-controller="slider"
             class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start"
         >
-            {# Left column: text + nav buttons (desktop) #}
             <div class="space-y-6 max-w-md">
                 <div class="space-y-3">
                     <p class="font-semibold text-primary font-secondary">{{ 'home.services.title'|trans|raw }}</p>
@@ -161,8 +167,6 @@
                     </button>
                 </div>
             </div>
-
-            {# Right column: contained carousel #}
             <div class="overflow-hidden">
                 <div data-slider-target="track" class="flex gap-6 cursor-grab">
                     <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
@@ -177,7 +181,7 @@
                        </div>
                     </div>
                     <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
-                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                        <div class="flex flex-col justify-between gap-20 lg:gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('akar-icons:paper', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
                                 <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.2.title'|trans|raw }}</h3>
@@ -188,7 +192,7 @@
                         </div>
                     </div>
                     <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
-                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                        <div class="flex flex-col justify-between gap-20 lg:gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('hugeicons:package', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
                                 <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.3.title'|trans|raw }}</h3>
@@ -199,7 +203,7 @@
                         </div>
                     </div>
                     <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
-                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                        <div class="flex flex-col justify-between gap-20 lg:gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('ic:outline-school', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
                                 <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.4.title'|trans|raw }}</h3>
@@ -210,7 +214,7 @@
                         </div>
                     </div>
                     <div class="w-full sm:w-[calc(50%-12px)] shrink-0 rounded-2xl p-2 border border-neutral-200 group">
-                        <div class="flex flex-col justify-between gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
+                        <div class="flex flex-col justify-between gap-20 lg:gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('mdi:paris', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
                                 <h3 class="text-lg font-medium group-hover:text-white">Découverte de Paris</h3>
