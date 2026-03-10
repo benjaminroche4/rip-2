@@ -11,15 +11,13 @@ warm:
 	php bin/console cache:warmup --env=prod
 
 deploy:
-	set -e
-	echo "→ Pull Git (main)"
-	git pull --ff-only origin main
-	echo "→ Compile AssetMapper"
-	php bin/console asset-map:compile --env=prod
-	echo "→ Clear cache (prod)"
-	php bin/console cache:clear --env=prod
-	echo "✓ Cache warmup (prod)"
-	php bin/console cache:warmup --env=prod
+	echo "→ Pull Git (main)" && git pull --ff-only origin main
+	echo "→ Install dependencies (prod)" && php composer.phar install --no-dev --optimize-autoloader
+	echo "→ Running database migrations" && php bin/console doctrine:migrations:migrate --env=prod --no-interaction
+	echo "→ Build Tailwind CSS" && php bin/console tailwind:build --minify
+	echo "→ Compile AssetMapper" && php bin/console asset-map:compile --env=prod
+	echo "→ Clear cache (prod)" && php bin/console cache:clear --env=prod
+	echo "✓ Cache warmup (prod)" && php bin/console cache:warmup --env=prod
 	echo "✓ Déploiement terminé"
 
 version:
@@ -29,8 +27,6 @@ version:
 	symfony -v
 	echo "→ PHP Version"
 	php -v
-
-.PHONY: tailwind
 
 tailwind:
 	@mkdir -p ~/tmp
