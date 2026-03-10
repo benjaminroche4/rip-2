@@ -4,7 +4,8 @@ export default class extends Controller {
     static targets = ['track', 'prev', 'next'];
     static values = {
         current: { type: Number, default: 0 },
-        max: { type: Number, default: 0 }
+        max: { type: Number, default: 0 },
+        autoplayDelay: { type: Number, default: 4000 }
     };
 
     connect() {
@@ -14,19 +15,29 @@ export default class extends Controller {
         this.startY = 0;
         this.baseOffset = 0;
         this.step = 0;
+        this.autoplayTimer = null;
 
         this.setupEvents();
         this.updateStep();
         this.render(false);
+        this.startAutoplay();
 
         this.boundHandleResize = () => { this.updateStep(); this.render(false); };
         window.addEventListener('resize', this.boundHandleResize);
+
+        this.boundPause  = () => this.stopAutoplay();
+        this.boundResume = () => this.startAutoplay();
+        this.element.addEventListener('mouseenter', this.boundPause);
+        this.element.addEventListener('mouseleave', this.boundResume);
     }
 
     disconnect() {
+        this.stopAutoplay();
         window.removeEventListener('resize', this.boundHandleResize);
         window.removeEventListener('mousemove', this.boundHandleMouseMove);
         window.removeEventListener('mouseup', this.boundHandleMouseUp);
+        this.element.removeEventListener('mouseenter', this.boundPause);
+        this.element.removeEventListener('mouseleave', this.boundResume);
 
         if (this.hasTrackTarget) {
             this.trackTarget.removeEventListener('touchstart', this.boundHandleTouchStart);
@@ -36,12 +47,47 @@ export default class extends Controller {
         }
     }
 
+    startAutoplay() {
+        this.stopAutoplay();
+        if (this.maxValue === 0) return;
+        this.autoplayTimer = setInterval(() => this.tick(), this.autoplayDelayValue);
+    }
+
+    stopAutoplay() {
+        if (this.autoplayTimer) {
+            clearInterval(this.autoplayTimer);
+            this.autoplayTimer = null;
+        }
+    }
+
+    tick() {
+        if (this.currentValue >= this.maxValue) {
+            this.currentValue = 0;
+        } else {
+            this.currentValue++;
+        }
+        this.render(true);
+    }
+
     updateStep() {
         if (!this.hasTrackTarget) return;
         const card = this.trackTarget.firstElementChild;
         if (!card) return;
         const gap = parseFloat(window.getComputedStyle(this.trackTarget).gap) || 20;
         this.step = card.offsetWidth + gap;
+
+        // Compute how many cards fit and update maxValue dynamically
+        const containerWidth = this.trackTarget.parentElement.offsetWidth;
+        const visibleCards = Math.max(1, Math.round(containerWidth / this.step));
+        const totalCards = this.trackTarget.children.length;
+        this.maxValue = Math.max(0, totalCards - visibleCards);
+
+        if (this.currentValue > this.maxValue) {
+            this.currentValue = this.maxValue;
+        }
+
+        // Restart autoplay now that maxValue is known
+        this.startAutoplay();
     }
 
     getCurrentOffset() {
@@ -49,14 +95,14 @@ export default class extends Controller {
     }
 
     prev() {
-        if (this.currentValue <= 0) return;
-        this.currentValue--;
+        this.stopAutoplay();
+        if (this.currentValue > 0) this.currentValue--;
         this.render(true);
     }
 
     next() {
-        if (this.currentValue >= this.maxValue) return;
-        this.currentValue++;
+        this.stopAutoplay();
+        if (this.currentValue < this.maxValue) this.currentValue++;
         this.render(true);
     }
 
@@ -66,21 +112,22 @@ export default class extends Controller {
         this.trackTarget.style.transition = animate ? 'transform 500ms ease-in-out' : 'none';
         this.trackTarget.style.transform = `translateX(${this.getCurrentOffset()}px)`;
 
-        if (this.hasPrevTarget) {
-            const atStart = this.currentValue === 0;
-            this.prevTarget.disabled = atStart;
-            this.prevTarget.classList.toggle('opacity-30', atStart);
-            this.prevTarget.classList.toggle('cursor-not-allowed', atStart);
-            this.prevTarget.classList.toggle('pointer-events-none', atStart);
-        }
+        const atStart = this.currentValue === 0;
+        const atEnd = this.currentValue === this.maxValue;
 
-        if (this.hasNextTarget) {
-            const atEnd = this.currentValue === this.maxValue;
-            this.nextTarget.disabled = atEnd;
-            this.nextTarget.classList.toggle('opacity-30', atEnd);
-            this.nextTarget.classList.toggle('cursor-not-allowed', atEnd);
-            this.nextTarget.classList.toggle('pointer-events-none', atEnd);
-        }
+        this.prevTargets.forEach(btn => {
+            btn.disabled = atStart;
+            btn.classList.toggle('opacity-30', atStart);
+            btn.classList.toggle('cursor-not-allowed', atStart);
+            btn.classList.toggle('pointer-events-none', atStart);
+        });
+
+        this.nextTargets.forEach(btn => {
+            btn.disabled = atEnd;
+            btn.classList.toggle('opacity-30', atEnd);
+            btn.classList.toggle('cursor-not-allowed', atEnd);
+            btn.classList.toggle('pointer-events-none', atEnd);
+        });
     }
 
     setupEvents() {
@@ -101,6 +148,7 @@ export default class extends Controller {
 
     handleMouseDown(event) {
         event.preventDefault();
+        this.stopAutoplay();
         this.isDragging = false;
         this.startX = event.clientX;
         this.baseOffset = this.getCurrentOffset();
@@ -125,12 +173,14 @@ export default class extends Controller {
         if (!this.isDragging) return;
 
         const deltaX = event.clientX - this.startX;
-        if      (deltaX < -80) this.next();
-        else if (deltaX >  80) this.prev();
-        else                   this.render(true);
+        const threshold = this.step * 0.25;
+        if      (deltaX < -threshold) this.next();
+        else if (deltaX >  threshold) this.prev();
+        else                          this.render(true);
     }
 
     handleTouchStart(event) {
+        this.stopAutoplay();
         this.isDragging = false;
         this.isVerticalScroll = false;
         this.startX = event.changedTouches[0].clientX;
@@ -156,8 +206,9 @@ export default class extends Controller {
     handleTouchEnd(event) {
         if (this.isVerticalScroll || !this.isDragging) return;
         const deltaX = event.changedTouches[0].clientX - this.startX;
-        if      (deltaX < -80) this.next();
-        else if (deltaX >  80) this.prev();
-        else                   this.render(true);
+        const threshold = this.step * 0.25;
+        if      (deltaX < -threshold) this.next();
+        else if (deltaX >  threshold) this.prev();
+        else                          this.render(true);
     }
 }

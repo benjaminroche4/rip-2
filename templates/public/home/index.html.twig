@@ -126,40 +126,98 @@
         </div>
     </section>
     <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div class="space-y-3 max-w-md">
-                <h2 class="font-semibold text-primary font-secondary">L'essentiel, sans le superflu</h2>
-                <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
-                    Paris autrement
-                </h3>
-                <p class="text-slate-600 font-light text-pretty">
-                    De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
-                </p>
+        <div
+            data-controller="slider"
+            class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start"
+        >
+            {# Left column: text + nav buttons (desktop) #}
+            <div class="space-y-6 max-w-md">
+                <div class="space-y-3">
+                    <h2 class="font-semibold text-primary font-secondary">L'essentiel, sans le superflu</h2>
+                    <h3 class="text-3xl sm:text-4xl font-medium text-pretty">
+                        Paris autrement
+                    </h3>
+                    <p class="text-slate-600 font-light text-pretty">
+                        De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
+                    </p>
+                </div>
+                <div class="hidden lg:flex gap-3">
+                    <button
+                        data-slider-target="prev"
+                        data-action="click->slider#prev"
+                        class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
+                    >
+                        {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
+                    </button>
+                    <button
+                        data-slider-target="next"
+                        data-action="click->slider#next"
+                        class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
+                    >
+                        {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
+                    </button>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-6">
-                <div class="bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 space-y-30">
-                    <div class="space-y-4">
-                        {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                        <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+
+            {# Right column: contained carousel #}
+            <div class="overflow-hidden">
+                <div data-slider-target="track" class="flex gap-6 cursor-grab">
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
+                        <div class="space-y-4">
+                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                        </div>
+                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                            Personalized property search, including on-market and off-market opportunities.
+                        </p>
                     </div>
-                    <div class="space-y-5">
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
+                        <div class="space-y-4">
+                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                        </div>
+                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                            Personalized property search, including on-market and off-market opportunities.
+                        </p>
+                    </div>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
+                        <div class="space-y-4">
+                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                        </div>
+                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
+                            Personalized property search, including on-market and off-market opportunities.
+                        </p>
+                    </div>
+                    <div class="w-full sm:w-[calc(50%-12px)] shrink-0 bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 flex flex-col gap-30">
+                        <div class="space-y-4">
+                            {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
+                            <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
+                        </div>
                         <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
                             Personalized property search, including on-market and off-market opportunities.
                         </p>
                     </div>
                 </div>
-                <div class="bg-neutral-100 rounded-2xl lg:p-7 p-6 group hover:bg-primary transition-colors duration-100 space-y-30 flex flex-col justify-between">
-                    <div class="space-y-4">
-                        {{ ux_icon('lineicons:home-2', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                        <h4 class="text-lg font-medium group-hover:text-white">Recherche de logement</h4>
-                    </div>
-                    <div class="space-y-5">
-                        <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                            Personalized property search, including on-market and off-market opportunities.
-                        </p>
-                    </div>
+                {# Nav buttons — hidden when 2 cards are visible (sm+) #}
+                <div class="flex sm:hidden gap-3 mt-5">
+                    <button
+                        data-slider-target="prev"
+                        data-action="click->slider#prev"
+                        class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
+                    >
+                        {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
+                    </button>
+                    <button
+                        data-slider-target="next"
+                        data-action="click->slider#next"
+                        class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
+                    >
+                        {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
+                    </button>
                 </div>
             </div>
+
         </div>
     </section>
     <section class="max-w-2xl mx-auto lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
