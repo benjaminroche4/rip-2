@@ -21,24 +21,15 @@ export default class extends Controller {
         this.setupEvents();
         this.updateStep();
         this.render(false);
-        this.startAutoplay();
 
         this.boundHandleResize = () => { this.updateStep(); this.render(false); };
         window.addEventListener('resize', this.boundHandleResize);
-
-        this.boundPause  = () => { this.isHovering = true;  this.stopAutoplay(); };
-        this.boundResume = () => { this.isHovering = false; this.startAutoplay(); };
-        this.element.addEventListener('mouseenter', this.boundPause);
-        this.element.addEventListener('mouseleave', this.boundResume);
     }
 
     disconnect() {
-        this.stopAutoplay();
         window.removeEventListener('resize', this.boundHandleResize);
         window.removeEventListener('mousemove', this.boundHandleMouseMove);
         window.removeEventListener('mouseup', this.boundHandleMouseUp);
-        this.element.removeEventListener('mouseenter', this.boundPause);
-        this.element.removeEventListener('mouseleave', this.boundResume);
 
         if (this.hasTrackTarget) {
             this.trackTarget.removeEventListener('touchstart', this.boundHandleTouchStart);
@@ -87,8 +78,6 @@ export default class extends Controller {
             this.currentValue = this.maxValue;
         }
 
-        // Restart autoplay now that maxValue is known
-        this.startAutoplay();
     }
 
     getCurrentOffset() {
@@ -98,13 +87,11 @@ export default class extends Controller {
     prev() {
         if (this.currentValue > 0) this.currentValue--;
         this.render(true);
-        this.startAutoplay();
     }
 
     next() {
         if (this.currentValue < this.maxValue) this.currentValue++;
         this.render(true);
-        this.startAutoplay();
     }
 
     render(animate = true) {
@@ -149,7 +136,6 @@ export default class extends Controller {
 
     handleMouseDown(event) {
         event.preventDefault();
-        this.stopAutoplay();
         this.isDragging = false;
         this.startX = event.clientX;
         this.baseOffset = this.getCurrentOffset();
@@ -177,11 +163,10 @@ export default class extends Controller {
         const threshold = this.step * 0.25;
         if      (deltaX < -threshold) this.next();
         else if (deltaX >  threshold) this.prev();
-        else { this.render(true); this.startAutoplay(); }
+        else { this.render(true); }
     }
 
     handleTouchStart(event) {
-        this.stopAutoplay();
         this.isDragging = false;
         this.isVerticalScroll = false;
         this.startX = event.changedTouches[0].clientX;
@@ -210,6 +195,6 @@ export default class extends Controller {
         const threshold = this.step * 0.25;
         if      (deltaX < -threshold) this.next();
         else if (deltaX >  threshold) this.prev();
-        else { this.render(true); this.startAutoplay(); }
+        else { this.render(true); }
     }
 }

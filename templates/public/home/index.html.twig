@@ -217,15 +217,14 @@
                         <div class="flex flex-col justify-between gap-20 lg:gap-30 p-4 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 group-hover:from-primary group-hover:to-primary h-full">
                             <div class="space-y-4">
                                 {{ ux_icon('mdi:paris', {'class': 'size-8 shrink-0 group-hover:text-white'}) }}
-                                <h3 class="text-lg font-medium group-hover:text-white">Découverte de Paris</h3>
+                                <h3 class="text-lg font-medium group-hover:text-white">{{ 'home.services.5.title'|trans|raw }}</h3>
                             </div>
                             <p class="font-light text-slate-600 text-pretty group-hover:text-slate-100">
-                                Adresses uniques, expériences exclusives, une immersion parisienne pensée pour vous.
+                                {{ 'home.services.5.text'|trans|raw }}
                             </p>
                         </div>
                     </div>
                 </div>
-                {# Nav buttons — hidden when 2 cards are visible (sm+) #}
                 <div class="flex sm:hidden gap-3 mt-5">
                     <button
                         data-slider-target="prev"
@@ -245,7 +244,6 @@
                     </button>
                 </div>
             </div>
-
         </div>
     </section>
     <section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
