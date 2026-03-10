@@ -51,8 +51,8 @@ contact:
             text: Un expert de notre équipe vous contactera dans les plus brefs délais.
         subButtonText: Réponse et devis sous 24 heures
 ctaFooter:
-    title: Vous avez un projet à Paris ?
-    subTitle: Nos experts vous accompagnent avec une approche personnalisée et des solutions sur mesure pour concrétiser vos ambitions.
+    title: Et si Paris devenait chez vous ?
+    subTitle: Dites-nous ce que vous cherchez. On s'occupe du reste.
     button: Contacter un expert
     image:
         1:
@@ -131,8 +131,8 @@ header:
         alt: Logo de Relocation In Pars, Agence de Relocation à Paris.
     menu:
         findAccommodation: Recherche de logement
-        companies: Solutions entreprises
         propertyManagement: Gestion et services
+        aboutUs: Notre histoire
         management:
             title: Gestion locative
             text: Une gestion sur mesure pour vos locations courte et moyenne durée à Paris.
@@ -140,6 +140,9 @@ header:
             title: Trouver un locataire
             text: Nous sélectionnons le locataire idéal et sécurisons votre mise en location.
             imgAlt: Expert en recherche de locataires
+        companies:
+            title: Solutions pour les entreprises
+            text: Logez vos collaborateurs à Paris facilement grâce à notre service clé en main.
         contactExpert: Contacter un expert
         blog: Nos actualités
     cta:
@@ -378,15 +381,12 @@ home:
         top:
             1: Meilleure agence
             2: 'à <span class="font-semibold">Paris en 2025</span>'
-        title: L’excellence de la relocation à Paris
-        subTitle: Un accompagnement exclusif et sur mesure pour transformer votre installation à Paris en une expérience fluide, sereine et pleinement réussie.
+        title: Votre installation à Paris, sans compromis
+        subTitle: Pour les particuliers, familles et professionnels qui s'installent à Paris.
         button: Contacter un expert
+        google: 'sur +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
         image:
             alt: Relocation In Paris, agence de relocation à Paris
-        service:
-            1: Recherche rapide
-            2: 100% à distance
-            3: Service clé-en-main
     services:
         title: Nos services
         subTitle: Un accompagnement dédié à chaque besoin
@@ -402,7 +402,7 @@ home:
             text: Confiez-nous la gestion locative de votre bien et bénéficiez d’une location sereine, rentable et parfaitement maîtrisée.
     faq:
         title: FAQ
-        subTitle: Vos questions, nos réponses
+        subTitle: Tout ce que vous devez savoir
         text: "Nos réponses aux questions les plus fréquentes. Consultez notre <a href='%url%' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>FAQ générale</a> pour plus de détails."
         question:
             1:
@@ -415,25 +415,60 @@ home:
                 title: Combien de temps faut-il pour trouver un logement à Paris ?
                 text: Le délai dépend du budget et des critères, mais en moyenne la recherche prend entre quelques jours et quelques semaines.
             4:
-                title: Comment fonctionne votre accompagnement ?
-                text: Nous analysons vos besoins, sélectionnons des biens adaptés, organisons les visites et vous accompagnons jusqu’à la signature du bail.
+                title: Comment se déroule la recherche d'appartement ?
+                text: Nous analysons vos besoins, sélectionnons les biens adaptés, organisons les visites et vous accompagnons jusqu'à la remise des clés.
             5:
-                title: Pourquoi passer par votre service plutôt que chercher seul ?
-                text: Nous vous faisons gagner du temps, sécurisons votre dossier et vous donnons accès à des opportunités souvent indisponibles sur le marché public.
+                title: Qu'est-ce qui vous différencie ?
+                text: Nous vous faisons gagner du temps, sécurisons votre dossier et vous donnons accès à des biens en avant-première.
             6:
                 title: Trouvez-vous toujours un logement ?
                 text: Grâce à notre expertise du marché parisien et à notre réseau, nous maximisons fortement vos chances de trouver un logement adapté à vos critères dans les meilleurs délais.
-    keyMetrics:
-        title: En quelques chiffres
-        subTitle: Une expertise reconnue à Paris
+    features:
+        title: Paris ne s'improvise pas
+        subTitle: Un marché difficile, un accès privilégié
         1:
-            value: installations réussies
+            title: Fini les refus à répétition.
+            text: Nous présentons votre dossier à nos partenaires exclusifs et vous accédez à des biens avant leur mise sur le marché.
+            altImage: Expert en recherche de logement à Paris
         2:
-            value: ans d'expertise combinée
+            title: À Paris en 4 semaines. Depuis n'importe où.
         3:
-            value: partenaires sur la capitale
+            title: Votre appartement. Vos critères.
+            text: Un interlocuteur unique, une sélection sur mesure.
+            type:
+                1: Quartier
+                2: Budget
+                3: Surface
+                4: Et bien plus encore...
         4:
-            value: avis google verifiés
+            title: Votre temps est précieux.
+            text: Plus d'annonces à parcourir. Plus de visites inutiles. Nous sélectionnons, vous n'avez plus qu'à valider.
+            altImage: Trouver un logement à Paris facilement
+    steps:
+        title: Comment ça marche
+        subTitle: Paris, en 3 étapes
+        1:
+            title: On vous écoute
+            text: Vos envies, votre budget, votre style de vie. On construit votre installation sur mesure et sans compromis.
+        2:
+            title: On trouve votre appartement
+            text: Nous recherchons votre appartement idéal. On s'occupe de tout, vous n'avez qu'à valider.
+        3:
+            title: Vous emménagez
+            text: Les clés en main, Paris est à vous. Votre appartement est prêt, vos démarches sont faites.
+        text: '<a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Partenaire officiel GarantMe</a>. Nous facilitons vos garanties locatives à Paris.'
+    keyMetrics:
+        title: Nos résultats
+        subTitle: Paris devient chez vous. On s'occupe du reste
+        1:
+            title: Installations réussies
+            text: À Paris et en Île-de-France
+        2:
+            title: Biens off-market
+            text: Des appartements exclusifs
+        3:
+            title: Avis Google
+            text: 'Lire nos avis <a class="underline underline-offset-4 hover:text-primary transition duration-100" href="https://share.google/c8msBrKphxqVY03er" target="_blank" rel="noopener noreferrer nofollow">sur Google</a>'
     aboutUs:
         title: Une arrivée sereine
         subTitle: Paris devient votre nouveau chez-vous
@@ -1299,8 +1334,8 @@ findTenant:
             6: Diffusion multicanal
         text3: du loyer hors charge
 reviews:
-    title: Témoignages clients
-    subTitle: L'expérience Relocation in Paris
+    title: Ils nous ont fait confiance
+    subTitle: Paris, enfin chez eux
     info:
         number: +370 avis
         text: clients

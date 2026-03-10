@@ -29,12 +29,6 @@
                 >
                     {{ 'header.menu.findAccommodation'|trans|raw }}
                 </a>
-                <a
-                    href="{{ path('app_service_companies') }}"
-                    class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
-                >
-                    {{ 'header.menu.companies'|trans|raw }}
-                </a>
                 <button
                     data-controller="popover"
                     data-popover-popover-id-value="desktop-menu-solutions"
@@ -47,6 +41,12 @@
                         <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd"/>
                     </svg>
                 </button>
+                <a
+                    href="{{ path('app_about_us') }}"
+                    class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                >
+                    {{ 'header.menu.aboutUs'|trans|raw }}
+                </a>
             </el-popover-group>
             <el-popover
                 id="desktop-menu-solutions"
@@ -66,7 +66,7 @@
                         >
                             <div class="flex items-start justify-start gap-x-4">
                                 <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_landlords' %}bg-white{% endif %}">
-                                    {{ ux_icon('lucide:home', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                    {{ ux_icon('meteor-icons:key', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
                                 </div>
                                 <div class="flex flex-col">
                                     <div class="flex items-center justify-between">
@@ -97,7 +97,7 @@
                         >
                             <div class="flex items-start justify-start gap-x-4">
                                 <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_find_tenant' %}bg-white{% endif %}">
-                                    {{ ux_icon('lucide:user-check', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                    {{ ux_icon('lucide:search', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
                                 </div>
                                 <div class="flex flex-col">
                                     <div class="flex items-center justify-between">
@@ -120,6 +120,26 @@
                                     </div>
                                     <p class="mt-2 text-neutral-600">
                                         {{ 'header.menu.findTenant.text'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <a
+                            href="{{ path('app_service_companies') }}"
+                            class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                        >
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_companies' %}bg-white{% endif %}">
+                                    {{ ux_icon('cuida:building-outline', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            {{ 'header.menu.companies.title'|trans|raw }}
+                                        </p>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">
+                                        {{ 'header.menu.companies.text'|trans|raw }}
                                     </p>
                                 </div>
                             </div>
@@ -210,7 +230,6 @@
             </div>
         </div>
     </nav>
-
     <el-dialog>
         <dialog id="mobile-menu" class="m-0 p-0 backdrop:bg-transparent lg:hidden" aria-label="{{ 'header.menu.mobile'|trans|default('Menu mobile') }}">
             <div tabindex="0" class="fixed inset-0 focus:outline focus:outline-0">
@@ -260,12 +279,6 @@
                                             {{ 'header.badge.tailorMade'|trans|raw }}
                                         </div>
                                     </a>
-                                    <a
-                                        href="{{ path('app_service_companies') }}"
-                                        class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
-                                    >
-                                        {{ 'header.menu.companies'|trans|raw }}
-                                    </a>
                                     <div class="-mx-3">
                                         <button
                                             type="button"
@@ -286,7 +299,7 @@
                                             >
                                                 <div class="flex items-start justify-start gap-x-4">
                                                     <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_landlords' %}bg-white{% endif %}">
-                                                        {{ ux_icon('lucide:home', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                                        {{ ux_icon('meteor-icons:key', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
                                                     </div>
                                                     <div class="flex flex-col w-full">
                                                         <div class="flex items-center justify-between">
@@ -317,7 +330,7 @@
                                             >
                                                 <div class="flex items-start justify-start gap-x-4">
                                                     <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_find_tenant' %}bg-white{% endif %}">
-                                                        {{ ux_icon('lucide:user-check', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                                        {{ ux_icon('lucide:search', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
                                                     </div>
                                                     <div class="flex flex-col w-full">
                                                         <div class="flex items-center justify-between">
@@ -344,8 +357,34 @@
                                                     </div>
                                                 </div>
                                             </a>
+                                            <a
+                                                href="{{ path('app_service_companies') }}"
+                                                class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block"
+                                            >
+                                                <div class="flex items-start justify-start gap-x-4">
+                                                    <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_companies' %}bg-white{% endif %}">
+                                                        {{ ux_icon('cuida:building-outline', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                                    </div>
+                                                    <div class="flex flex-col w-full">
+                                                        <div class="flex items-center justify-between">
+                                                            <p class="block font-semibold text-gray-900">
+                                                                {{ 'header.menu.companies.title'|trans|raw }}
+                                                            </p>
+                                                        </div>
+                                                        <p class="mt-2 text-neutral-600">
+                                                            {{ 'header.menu.companies.text'|trans|raw }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </a>
                                         </el-disclosure>
                                     </div>
+                                    <a
+                                        href="{{ path('app_about_us') }}"
+                                        class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                    >
+                                        {{ 'header.menu.aboutUs'|trans|raw }}
+                                    </a>
                                 </div>
                                 <div class="py-3 space-y-3">
                                     <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 mb-4"></div>

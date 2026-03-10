@@ -51,8 +51,8 @@ contact:
             text: An expert from our team will contact you as soon as possible.
         subButtonText: Response and quote within 24 hours
 ctaFooter:
-    title: Do you have a project in Paris?
-    subTitle: Our experts support you with a personalized approach and tailor-made solutions to achieve your goals.
+    title: Planning a move to Paris?
+    subTitle: Tell us what you're looking for. We'll handle the rest.
     button: Contact an expert
     image:
         1:
@@ -131,8 +131,8 @@ header:
         alt: Relocation In Paris logo, relocation agency in Paris.
     menu:
         findAccommodation: Property search
-        companies: Corporate services
         propertyManagement: Management & services
+        aboutUs: Our story
         management:
             title: Property management
             text: Tailor-made management for your short and medium-term rentals in Paris.
@@ -140,6 +140,9 @@ header:
             title: Find a tenant
             text: We find the ideal tenant and secure your rental process.
             imgAlt: Expert tenant search services
+        companies:
+            title: Corporate Solutions
+            text: Easily house your employees in Paris with our all-inclusive service.
         contactExpert: Talk to an expert
         blog: Blog
     cta:
@@ -378,9 +381,10 @@ home:
         top:
             1: Best agency
             2: 'in <span class="font-semibold">Paris in 2025</span>'
-        title: The Excellence of Relocation in Paris
-        subTitle: Exclusive, tailor-made support to make your move to Paris a smooth, serene, and truly successful experience.
+        title: Your move to Paris, without compromise
+        subTitle: For individuals, families, and professionals relocating to Paris.
         button: Contact an expert
+        google: 'based on +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">Google reviews</a>'
         image:
             alt: Relocation In Paris, relocation agency in Paris
         service:
@@ -402,7 +406,7 @@ home:
             text: Entrust us with your property for a smooth and profitable rental experience.
     faq:
         title: FAQ
-        subTitle: Your questions, our answers
+        subTitle: Everything you need to know
         text: "Our answers to the most frequently asked questions. Visit our <a href='%url%' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>General FAQ</a> for more details."
         question:
             1:
@@ -415,25 +419,60 @@ home:
                 title: How long does it take to find an apartment in Paris?
                 text: The timeline depends on your budget and criteria, but on average the search takes anywhere from a few days to several weeks.
             4:
-                title: How does your service work?
-                text: We assess your needs, shortlist suitable properties, organize viewings, and support you through to lease signing.
+                title: How does the apartment search work?
+                text: We assess your needs, shortlist suitable properties, organize viewings, and handle everything until you get your keys.
             5:
-                title: Why use your service instead of searching on my own?
-                text: We save you time, strengthen your application, and provide access to opportunities often unavailable on the public market.
+                title: What sets you apart?
+                text: We save you time, secure your application, and give you access to properties before they hit the market.
             6:
                 title: Do you always find an apartment?
                 text: Thanks to our in-depth knowledge of the Paris market and our network, we significantly increase your chances of securing a property that matches your criteria within a short timeframe.
     keyMetrics:
-        title: In numbers
-        subTitle: Recognized expertise in Paris
+        title: Proven Results
+        subTitle: Paris is waiting, We handle everything
         1:
-            value: successful relocations
+            title: Successful relocations
+            text: In Paris and the Île-de-France region
         2:
-            value: years of combined expertise
+            title: Off-market properties
+            text: Exclusive apartments
         3:
-            value: partners across the capital
+            title: Google Reviews
+            text: 'Read our reviews <a class="underline underline-offset-4 hover:text-primary transition duration-100" href="https://share.google/c8msBrKphxqVY03er" target="_blank" rel="noopener noreferrer nofollow">on Google</a>'
+    features:
+        title: Paris doesn't happen by chance
+        subTitle: A tough market, A privileged access
+        1:
+            title: No more rejections.
+            text: We connect you directly with our exclusive partners, giving you access to off-market properties before anyone else.
+            altImage: Expert support to find an apartment in Paris
+        2:
+            title: Settled in Paris in 4 weeks. From anywhere.
+        3:
+            title: Your apartment. Your criteria.
+            text: One advisor. End to end.
+            type:
+                1: Neighborhood
+                2: Budget
+                3: Size
+                4: And much more...
         4:
-            value: verified Google reviews
+            title: Your time is precious.
+            text: From the first listing to the keys in your hand, we handle everything. You just choose.
+            altImage: Find your apartment in Paris with expert support
+    steps:
+        title: How it works
+        subTitle: Paris, in 3 steps
+        1:
+            title: We listen to you
+            text: Your wishes, your budget, your lifestyle. We build your relocation plan tailored to you.
+        2:
+            title: We find your apartment
+            text: We search for your ideal apartment. We handle everything, you just have to say yes.
+        3:
+            title: You move in
+            text: Keys in hand, Paris is yours. Your apartment is ready, your paperwork is done.
+        text: '<a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Official GarantMe partner</a>. We facilitate your rental guarantees in Paris.'
     aboutUs:
         title: A serene arrival
         subTitle: Paris becomes your new home
@@ -445,24 +484,6 @@ home:
             title: Over 20 years of expertise.
             text: Two decades of experience dedicated to helping newcomers settle in Paris.
         button: Get your estimate
-    reviews:
-        title: Client testimonials
-        subTitle: The Relocation in Paris experience
-        1:
-            text: Moving from London to Paris could have been a challenge, but everything was handled seamlessly. The team found a beautiful apartment and managed all administrative formalities. A bespoke service and rare attentiveness.
-            title: Individual, Paris 10th
-        2:
-            text: A remarkably professional team. Relocation in Paris managed our employees’ mobility with precision and reactivity. Everything was executed flawlessly and on time. A trusted partner I wholeheartedly recommend.
-            title: Professional, Paris 11th
-        3:
-            text: We were supported from start to finish with great attention and an impressive sense of detail. Our relocation was fast, smooth, and stress-free. Thank you to the entire team for your efficiency and kindness.
-            title: Individual, Paris 7th
-        4:
-            text: I entrusted my property management to Relocation in Paris and couldn’t have made a better choice. The selected tenants are reliable, communication is seamless, and every step is handled with rigor and elegance.
-            title: Investor, Paris 16th
-        5:
-            text: Relocation in Paris handled the installation of several international employees. A turnkey, human, and efficient service. The team perfectly understands HR expectations and the demands of premium relocation.
-            title: Professional, Paris 14th
     blog:
         title: Blog
         subTitle: Our lastest articles
@@ -1319,11 +1340,11 @@ findTenant:
             6: Multichannel distribution
         text3: of the rent excluding charges
 reviews:
-    title: Client Testimonials
-    subTitle: The Relocation in Paris Experience
+    title: Testimonials
+    subTitle: Real moves, Real stories
     info:
-        number: 370+ reviews
-        text: clients
+        number: 370+ clients
+        text: reviews
         google: on Google
 
     1:
