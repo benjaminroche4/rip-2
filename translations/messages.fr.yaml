@@ -387,6 +387,10 @@ home:
         google: 'sur +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
         image:
             alt: Relocation In Paris, agence de relocation à Paris
+        service:
+            1: Recherche rapide
+            2: 100% à distance
+            3: Service clé en main
     services:
         title: L'essentiel, sans le superflu
         subTitle: Paris autrement
