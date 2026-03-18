@@ -4,6 +4,7 @@ namespace App\Controller\Public;
 
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -67,5 +68,12 @@ final class LegalController extends AbstractController
     public function termsAndConditions(): Response
     {
         return $this->render('public/legal/terms_conditions.html.twig');
+    }
+
+    #[Route('/documents/terms', name: 'app_terms_download')]
+    public function downloadTerms(): BinaryFileResponse
+    {
+        $path = $this->getParameter('kernel.project_dir') . '/private/terms.pdf';
+        return $this->file($path, 'CGV-RIP.pdf');
     }
 }

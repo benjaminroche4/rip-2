@@ -18,9 +18,16 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
 ./.idea
 .idea
 /.idea
 .claude
 /.claude
 ./.claude
+
+.private
+/.priavate
+./private
+./.private
+/private
