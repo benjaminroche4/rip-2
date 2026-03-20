@@ -1,11 +1,154 @@
-<h1 class="text-green-600">Nouveau contact du site internet :</h1>
-<br/>
-<p><strong>Nom/Prénom :</strong> {{ fistName }} {{ lastName }}</p>
-<p><strong>Email :</strong> {{ emailContact }}</p>
-<p><strong>Téléphone :</strong> {{ phoneNumber }}</p>
-<p><strong>Type :</strong> {{ helpType | trans }}</p>
-<p><strong>Message :</strong> {{ message }}</p>
-<p><strong>Langue :</strong> {{ lang }}</p>
-<br/>
-<p><strong>Envoyé le :</strong> {{ createdAt | date('d F Y') | format_date(locale='fr') }} à {{ createdAt | date('H:i') }}</p>
-<em>{{ ip }}</em>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="width=device-width" name="viewport" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta content="telephone=no,address=no,email=no,date=no,url=no" name="format-detection" />
+    <link rel="preload" as="image" href="https://resend-attachments.s3.amazonaws.com/y8VsZ3nZ1GDIWiz" />
+    <link rel="preload" as="image" href="https://resend-attachments.s3.amazonaws.com/16d42dd0-bce1-40e8-b0fb-29790baccd42" />
+</head>
+<body>
+    {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
+
+    {# Wrapper outer #}
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+        style="font-family:{{ fontStack }};font-size:1.077em;line-height:155%">
+        <tbody>
+            <tr>
+                <td align="center">
+
+                    {# Card container #}
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                        style="max-width:600px;width:100%;padding:40px 20px;border:1px solid #e2e2e2;border-radius:12px;background-color:#ffffff;font-family:{{ fontStack }}">
+                        <tbody>
+                            <tr>
+                                <td>
+
+                                    {# Logo #}
+                                    <img
+                                        src="https://resend-attachments.s3.amazonaws.com/y8VsZ3nZ1GDIWiz"
+                                        alt='Logo Relocation in Paris'
+                                        width="166" height="38"
+                                        style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;border-radius:8px" />
+
+                                    <p style="margin:0;padding:0.5em 0"><br /></p>
+
+                                    {# Titre #}
+                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center">
+                                        Nouvelle demande de contact
+                                    </h2>
+
+                                    <p style="margin:0;padding:0.5em 0"><br /></p>
+
+                                    {# Bloc infos contact #}
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                        style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;padding:10px 20px">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <p style="margin:0;padding:8px 0 16px;font-size:1em;line-height:155%">
+                                                        <strong>Informations de contact</strong>
+                                                    </p>
+
+                                                    {# Deux colonnes #}
+                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="background-color:#ffffff;border-radius:12px 0 0 0;padding:12px 12px 0">
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Nom/Prénom :</span> {{ fistName }} {{ lastName }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Email :</span> {{ emailContact }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Envoyé le :</span> {{ createdAt|date('d F Y')|format_date(locale='fr') }} à {{ createdAt|date('H:i') }}
+                                                                    </p>
+                                                                </td>
+                                                                <td style="background-color:#ffffff;border-radius:0 12px 0 0;padding:12px 12px 0">
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Téléphone :</span> {{ phoneNumber }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Langue :</span>
+                                                                        {% if lang == 'fr' %}Français{% elseif lang == 'en' %}Anglais{% else %}{{ lang }}{% endif %}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">
+                                                                        <span style="color:#525252">Entreprise :</span> {{ company }}
+                                                                    </p>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    {# Type + message #}
+                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                        style="background-color:#ffffff;border-radius:0 0 12px 12px;padding:0 0 12px 12px">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <p style="margin:0;padding:8px 0 16px;font-size:1em">
+                                                                        <span style="color:#525252">Type de demande :</span> {{ helpType|trans }}
+                                                                    </p>
+                                                                    <hr style="width:100%;border:none;border-top:2px solid #eaeaea;margin-bottom:1em" />
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em;color:#525252">Message :</p>
+                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em">{{ message }}</p>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <p style="margin:0;padding:0.5em 0"><br /></p>
+
+                                    {# Bandeau urgence #}
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                        style="background-color:#EFFDF4;border:1px solid #DCFCE7;border-radius:12px;padding:10px 20px">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <p style="margin:0;padding:0.5em 0;font-size:1em;text-align:center;color:#525252">
+                                                        Cette demande doit être répondue entre <strong><em>5mn et 30mn maximum</em></strong>.
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <br /><br />
+
+                                    {# Logo footer #}
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                                        <tbody>
+                                            <tr>
+                                                <td align="center">
+                                                    <img
+                                                        src="https://resend-attachments.s3.amazonaws.com/16d42dd0-bce1-40e8-b0fb-29790baccd42"
+                                                        alt="Relocation in Paris"
+                                                        width="124" height="88"
+                                                        style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;border-radius:8px" />
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <p style="margin:0;padding:16px 0 8px;font-size:1em;text-align:center">
+                                        <em>Cet email provient du site internet — IP : {{ ip }}</em>
+                                    </p>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

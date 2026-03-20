@@ -71,6 +71,7 @@ final class ContactController extends AbstractController
                     'phoneNumber' => $contact->getPhoneNumber(),
                     'helpType' => $contact->getHelpType(),
                     'message' => $contact->getMessage(),
+                    'company' => $contact->getCompany(),
 
                     'createdAt' => new \DateTimeImmutable(),
                     'lang' => $contact->getLang(),
