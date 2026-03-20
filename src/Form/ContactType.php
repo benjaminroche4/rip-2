@@ -46,7 +46,11 @@ class ContactType extends AbstractType
             ])
             ->add('phoneNumber', TextType::class, [
                 'label' => 'contact.contactForm.phoneNumber.label',
-                'required' => false,
+                'constraints' => [
+                    new NotBlank(
+                        message: 'contact.contactForm.phoneNumber.notBlank',
+                    )
+                ],
             ])
             ->add('company', TextType::class, [
                 'label' => 'contact.contactForm.company.label',

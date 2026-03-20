@@ -58,12 +58,11 @@ final class ContactController extends AbstractController
             $this->entityManager->persist($contact);
             $this->entityManager->flush();
 
-            $contactEmail = (
-            (new TemplatedEmail())
+            $adminEmail = (new TemplatedEmail())
                 ->from('Contact <contact@relocation-in-paris.fr>')
                 ->to(EmailAddress::CONTACT->value)
                 ->subject('📩 Demande de contact | Relocation In Paris')
-                ->htmlTemplate('emails/contact.html.twig')
+                ->htmlTemplate('emails/contact_admin.html.twig')
                 ->context([
                     'fistName' => $contact->getFirstName(),
                     'lastName' => $contact->getLastName(),
@@ -72,15 +71,34 @@ final class ContactController extends AbstractController
                     'helpType' => $contact->getHelpType(),
                     'message' => $contact->getMessage(),
                     'company' => $contact->getCompany(),
-
                     'createdAt' => new \DateTimeImmutable(),
                     'lang' => $contact->getLang(),
                     'ip' => $contact->getIp(),
-                ])
-            );
+                ]);
+
+            $clientEmail = (new TemplatedEmail())
+                ->from('Contact <contact@relocation-in-paris.fr>')
+                ->to($contact->getEmail())
+                ->subject($contact->getLang() === 'fr'
+                    ? sprintf('%s, votre conseiller vous contacte sous 30 minutes', $contact->getFirstName())
+                    : sprintf('%s, your advisor will contact you within 30 minutes', $contact->getFirstName())
+                )
+                ->htmlTemplate('emails/contact_client.html.twig')
+                ->context([
+                    'fistName' => $contact->getFirstName(),
+                    'lastName' => $contact->getLastName(),
+                    'emailContact' => $contact->getEmail(),
+                    'phoneNumber' => $contact->getPhoneNumber(),
+                    'helpType' => $contact->getHelpType(),
+                    'message' => $contact->getMessage(),
+                    'company' => $contact->getCompany(),
+                    'createdAt' => new \DateTimeImmutable(),
+                    'lang' => $contact->getLang(),
+                ]);
 
             try {
-                $this->mailer->send($contactEmail);
+                $this->mailer->send($adminEmail);
+                $this->mailer->send($clientEmail);
             } catch (TransportExceptionInterface $e) {
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
