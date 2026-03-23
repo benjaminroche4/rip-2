@@ -7,25 +7,25 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class EstimationController extends AbstractController
+final class PricingController extends AbstractController
 {
     #[Route(
         path: [
-            'fr' => '/{_locale}/estimation',
-            'en' => '/{_locale}/estimation',
+            'fr' => '/{_locale}/tarifs',
+            'en' => '/{_locale}/pricing',
         ],
-        name: 'app_estimation',
+        name: 'app_pricing',
         options: [
             'sitemap' =>
                 [
                     'priority' => 0.8,
                     'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-11-04')
+                    'lastmod' => new \DateTime('2026-03-23')
                 ]
         ]
     )]
     public function index(): Response
     {
-        return $this->render('public/estimation/index.html.twig');
+        return $this->render('public/pricing/index.html.twig');
     }
 }

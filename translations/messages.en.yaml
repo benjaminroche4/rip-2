@@ -93,7 +93,7 @@ sitemap:
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
         home: Home
-        estimation: Get your estimate
+        pricing: Pricing
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
@@ -115,7 +115,7 @@ footer:
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
         home: Home
-        estimation: Get your estimate
+        pricing: Pricing
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
@@ -147,6 +147,7 @@ header:
         findAccommodation: Property search
         propertyManagement: Management & services
         aboutUs: Our story
+        pricing: Pricing
         management:
             title: Property management
             text: Tailor-made management for your short and medium-term rentals in Paris.
@@ -372,9 +373,6 @@ meta:
     faq:
         title: Frequently Asked Questions (FAQ)
         description: Discover answers to the most common questions about relocation in Paris for tenants, companies, and landlords.
-    estimation:
-        title: Get Your Relocation Estimate in Paris
-        description: Estimate the cost of your relocation to Paris in just a few clicks. Discover our personalized services to find your new home and make your move smooth and stress-free.
     newsletter:
         title: Subscribe to Our Newsletter
         description: "Receive our latest listings, Paris news, and practical guides each week to help you settle in Paris."
@@ -757,49 +755,6 @@ privacy:
                 - "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
                 - "<span class='font-semibold'>Postal address</span>: Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
                 - "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
-estimation:
-    title: Rent estimation in Paris
-    hero:
-        title: Get Your Estimate
-        subtitle: Estimate The Cost of Your Relocation to Paris
-    rent:
-        label: Your estimated monthly rent
-    slider:
-        label: Amount slider
-    info:
-        description: We search and select the best properties for you in Paris (within and outside the city limits).
-        link: Discover the offer in detail
-    services:
-        title: Additional services
-        subtitle: Select the services you need
-        schooling:
-            title: Schooling service
-            description: Educational support and enrollment in the best schools.
-            perChild: per child
-        moving:
-            title: Moving service
-            description: Selection and coordination of your move for a stress-free installation in Paris.
-        administrative:
-            title: Administrative support
-            description: Help with administrative procedures (CAF, taxes, bank accounts).
-            perPerson: per person
-        setup:
-            title: Property activation service
-            description: Opening of water, electricity, and home insurance, with meter readings.
-        residencePermit:
-            title: Residence permit assistance
-            description: Complete support for preparing and tracking your residence permit application.
-        concierge:
-            title: Premium concierge
-            description: Privileged access to the best restaurants, cultural events, and private clubs.
-            onQuote: On quote
-    total:
-        title: Estimated quote amount
-        label: "Estimated amount:"
-    contact:
-        form:
-            title: Contact form
-            link: Be contacted quickly
 blog:
     list:
         title: blog

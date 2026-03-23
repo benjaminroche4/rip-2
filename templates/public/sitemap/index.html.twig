@@ -19,6 +19,7 @@
                 <div>
                     <ul class="list list-disc ml-12 space-y-3">
                         <li><a href="{{ path('app_home') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.home'|trans }}</a></li>
+                        <li><a href="{{ path('app_pricing') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.pricing'|trans }}</a></li>
                         <li><a href="{{ path('app_service_find_accommodation') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.findAccommodation'|trans }}</a></li>
                         <li><a href="{{ path('app_service_companies') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.companies'|trans }}</a></li>
                         <li><a href="{{ path('app_service_landlords') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.management'|trans }}</a></li>
@@ -34,7 +35,6 @@
                         {% else %}
                             <li><a href="{{ path('app_login') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.login'|trans }}</a></li>
                         {% endif %}
-                        <li><a href="{{ path('app_estimation') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.estimation'|trans }}</a></li>
                         <li><a href="{{ path('app_faq') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.faq'|trans }}</a></li>
                         <li><a href="{{ path('app_newsletter') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.newsletter'|trans }}</a></li>
                     </ul>

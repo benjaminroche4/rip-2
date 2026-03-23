@@ -42,10 +42,10 @@
                     </svg>
                 </button>
                 <a
-                    href="{{ path('app_about_us') }}"
-                    class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                    href="{{ path('app_pricing') }}"
+                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
                 >
-                    {{ 'header.menu.aboutUs'|trans|raw }}
+                    {{ 'header.menu.pricing'|trans|raw }}
                 </a>
             </el-popover-group>
             <el-popover
@@ -278,6 +278,12 @@
                                             </span>
                                             {{ 'header.badge.tailorMade'|trans|raw }}
                                         </div>
+                                    </a>
+                                    <a
+                                        href="{{ path('app_pricing') }}"
+                                        class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                    >
+                                        {{ 'header.menu.pricing'|trans|raw }}
                                     </a>
                                     <div class="-mx-3">
                                         <button

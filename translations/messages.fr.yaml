@@ -93,7 +93,7 @@ sitemap:
         legalNotice: Mentions légales
         privacyPolicy: Politique de confidentialité
         home: Accueil
-        estimation: Obtenez votre estimation
+        pricing: Tarifs
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Conditions générales de vente
@@ -115,7 +115,7 @@ footer:
         legalNotice: Mentions légales
         privacyPolicy: Politique de confidentialité
         home: Accueil
-        estimation: Obtenez votre estimation
+        pricing: Tarifs
         faq: FAQ
         newsletter: Newsletter
         termsConditions: CGV
@@ -147,6 +147,7 @@ header:
         findAccommodation: Recherche de logement
         propertyManagement: Gestion et services
         aboutUs: Notre histoire
+        pricing: Tarifs
         management:
             title: Gestion locative
             text: Une gestion sur mesure pour vos locations courte et moyenne durée à Paris.
@@ -369,9 +370,6 @@ meta:
     privacyPolicy:
         title: Politique de Confidentialité
         description: "Politique de confidentialité de Relocation in Paris : protection et gestion de vos données personnelles conformément au RGPD."
-    estimation:
-        title: Obtenez Votre Estimation de Relocation à Paris
-        description: Estimez le coût de votre relocation à Paris en quelques clics. Découvrez nos services sur mesure pour trouver votre logement et faciliter votre installation.
     faq:
         title: Questions Fréquentes (FAQ)
         description: Découvrez nos réponses aux questions les plus posées sur la relocation à Paris. Locataires, entreprises et propriétaires.
@@ -754,49 +752,6 @@ privacy:
                 - "<span class='font-semibold'>E-mail</span> : contact@relocation-in-paris.fr"
                 - "<span class='font-semibold'>Adresse postale</span> : Relocation In Paris – 155 Rue du Faubourg Saint-Denis, 75010 Paris, France"
                 - "<span class='font-semibold'>Téléphone</span> : +33 (0)1 84 80 43 44"
-estimation:
-    title: Estimation de loyer à Paris
-    hero:
-        title: Obtenez votre estimation
-        subtitle: Estimez le coût de votre relocation à Paris
-    rent:
-        label: Montant de votre loyer estimé
-    slider:
-        label: Curseur de montant
-    info:
-        description: Nous recherchons et sélectionnons pour vous les meilleurs logements à Paris (intra et extra-muros).
-        link: Découvrir l'offre en détail
-    services:
-        title: Services additionnels
-        subtitle: Sélectionnez les services dont vous avez besoin
-        schooling:
-            title: Service de schooling
-            description: Accompagnement scolaire et inscription dans les meilleures écoles.
-            perChild: par enfant
-        moving:
-            title: Service de déménagement
-            description: Sélection et coordination de votre déménagement pour une installation sans stress à Paris.
-        administrative:
-            title: Support administratif
-            description: Aide aux démarches administratives (CAF, impôts, comptes bancaires).
-            perPerson: par personne
-        setup:
-            title: Mise en service du logement
-            description: Ouverture de l'eau, de l'électricité et de l'assurance habitation, avec relevé des compteurs.
-        residencePermit:
-            title: Accompagnement carte de séjour
-            description: Support complet pour la préparation et le suivi de votre dossier de carte de séjour.
-        concierge:
-            title: Conciergerie Premium
-            description: Accès privilégié aux meilleures tables, aux événements culturels et aux clubs privés.
-            onQuote: Sur Devis
-    total:
-        title: Montant estimé du devis
-        label: "Montant estimé :"
-    contact:
-        form:
-            title: Formulaire de contact
-            link: Être recontacté rapidement
 blog:
     list:
         title: blog

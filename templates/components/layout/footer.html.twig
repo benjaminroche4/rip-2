@@ -158,7 +158,7 @@
                     <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.2'|trans|raw }}</h3>
                     <nav class="flex flex-col space-y-2 text-sm/6">
                         <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
-                        <a href="{{ path('app_estimation') }}" class="{% if app.request.attributes.get('_route') == 'app_estimation' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.estimation'|trans|raw }}</a>
+                        <a href="{{ path('app_pricing') }}" class="{% if app.request.attributes.get('_route') == 'app_pricing' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.pricing'|trans|raw }}</a>
                         <a href="{{ path('app_newsletter') }}" class="{% if app.request.attributes.get('_route') == 'app_newsletter' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.newsletter'|trans|raw }}</a>
                         <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
                     </nav>

@@ -4,12 +4,12 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-final class EstimationControllerTest extends WebTestCase
+final class PricingControllerTest extends WebTestCase
 {
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/estimation');
+        $client->request('GET', '/pricing');
 
         self::assertResponseIsSuccessful();
     }
