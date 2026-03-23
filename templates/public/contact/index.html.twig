@@ -168,6 +168,9 @@
                                             'autocomplete': 'given-name',
                                             'aria-required': 'true'
                                         }}) }}
+                                        {% for error in contactForm.firstName.vars.errors %}
+                                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 <div>
@@ -182,6 +185,9 @@
                                             'autocomplete': 'family-name',
                                             'aria-required': 'true'
                                         }}) }}
+                                        {% for error in contactForm.lastName.vars.errors %}
+                                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
@@ -198,6 +204,9 @@
                                         'autocomplete': 'email',
                                         'aria-required': 'true'
                                     }}) }}
+                                    {% for error in contactForm.email.vars.errors %}
+                                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -214,6 +223,9 @@
                                             'autocomplete': 'tel',
                                             'aria-required': 'true'
                                         }}) }}
+                                        {% for error in contactForm.phoneNumber.vars.errors %}
+                                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 <div>
@@ -240,6 +252,9 @@
                                         'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
                                         'aria-required': 'true'
                                     }}) }}
+                                    {% for error in contactForm.helpType.vars.errors %}
+                                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -258,12 +273,17 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center">
-                            {{ form_widget(contactForm.accept, {'attr': {
-                                'class': 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50',
-                                'aria-required': 'true'
-                            }}) }}
-                            <label for="{{ contactForm.accept.vars.id }}" class="ml-3 block text-sm leading-5 text-neutral-900">{{ 'contact.contactForm.accept.label'|trans }}</label>
+                        <div>
+                            <div class="flex items-center">
+                                {{ form_widget(contactForm.accept, {'attr': {
+                                    'class': 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+                                    'aria-required': 'true'
+                                }}) }}
+                                <label for="{{ contactForm.accept.vars.id }}" class="ml-3 block text-sm leading-5 text-neutral-900">{{ 'contact.contactForm.accept.label'|trans }}</label>
+                            </div>
+                            {% for error in contactForm.accept.vars.errors %}
+                                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                            {% endfor %}
                         </div>
 
                         <div class="pt-4">

@@ -114,13 +114,15 @@
                                                                                     <hr style="width:100%;border:none;border-top:2px solid #eaeaea;padding-bottom:1em" />
 
                                                                                     <p class="box-green" style="margin:0;padding:12px;background-color:#EFFDF4;border:1px solid #BBF7D0;border-radius:12px;font-size:1em;text-align:center">
-                                                                                        {{ fr ? 'Il vous contactera dans un délai de' : 'He will contact you within' }} <strong>{{ fr ? '5 à 30 minutes' : '5 to 30 minutes' }}</strong>
+                                                                                        <span style="font-size:12px;">{{ fr ? 'Il vous contactera dans un délai de' : 'He will contact you within' }}</span> <br/>
+                                                                                        <strong>{{ fr ? '30 minutes maximum' : '30 minutes maximum' }}</strong> <br/>
+                                                                                        <span style="font-size:12px;">{{ fr ? 'Durant les heures d\'ouverture.' : 'During opening hours.' }}</span>
                                                                                     </p>
 
                                                                                     <p style="margin:0;padding:0;text-align:center"><br /></p>
 
                                                                                     <p class="box-gray" style="margin:0;padding:12px;background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;font-size:1em;text-align:center">
-                                                                                        {{ fr ? 'Nous vous appelons au :' : 'We will call you at:' }}<br /><strong>{{ phoneNumber }}</strong>
+                                                                                        <span style="font-size:12px;">{{ fr ? 'Nous vous appelons au :' : 'We will call you at:' }}</span><br /><strong>{{ phoneNumber }}</strong>
                                                                                     </p>
 
                                                                                     <p class="text-muted" style="margin:0;padding:12px 0 8px;font-size:12px;line-height:160%;text-align:center">

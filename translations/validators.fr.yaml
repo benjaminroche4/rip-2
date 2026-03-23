@@ -1,3 +1,17 @@
+contact:
+    contactForm:
+        firstName:
+            notBlank: "Veuillez renseigner votre prénom."
+        lastName:
+            notBlank: "Veuillez renseigner votre nom."
+        email:
+            notBlank: "Veuillez renseigner votre adresse email."
+        phoneNumber:
+            notBlank: "Veuillez renseigner votre numéro de téléphone."
+        helpType:
+            notBlank: "Veuillez sélectionner un type de demande."
+        accept:
+            label: "Vous devez accepter les conditions pour continuer."
 newsletter:
     email:
         unique: "Cette adresse e-mail est déjà inscrite à la newsletter."

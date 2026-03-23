@@ -1,3 +1,17 @@
+contact:
+    contactForm:
+        firstName:
+            notBlank: "Please enter your first name."
+        lastName:
+            notBlank: "Please enter your last name."
+        email:
+            notBlank: "Please enter your email address."
+        phoneNumber:
+            notBlank: "Please enter your phone number."
+        helpType:
+            notBlank: "Please select a request type."
+        accept:
+            label: "You must accept the terms to continue."
 newsletter:
     email:
         unique: "This email address is already subscribed to the newsletter."
