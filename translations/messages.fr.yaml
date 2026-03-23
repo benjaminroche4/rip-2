@@ -12,7 +12,7 @@ contact:
             openHours: Lundi au Dimanche - 8h à 20h
             whatsapp: Disponible sur
         3:
-            time: Réponse sous 30mn
+            time: Réponse sous 30mn, aux heures d'ouverture.
     contactForm:
         badge: Disponible
         title: Demandez un rappel
@@ -42,13 +42,27 @@ contact:
                 4: Autre demande ou information
         message:
             label: Message
-            placeholder: Votre message...
+            placeholder: Décrivez votre projet en quelques mots...
         accept:
             label: En cochant cette case, j’accepte l’utilisation de mes informations pour être recontacté(e).
         button: Être recontacté rapidement
         success:
             title: Merci pour votre message !
             text: Un expert de notre équipe vous contactera dans les plus brefs délais.
+            box:
+                title: Votre demande est confirmée
+                text: Votre conseiller vous rappelle dans les 30 prochaines minutes.
+                advisor: Votre conseiller est assigné
+                altPhoto: Photo d'un expert de Relocation in Paris qui va vous rappeler
+                expertJob: Consultant en Mobilité Internationale
+                callBack:
+                    text: "Il vous contactera dans un délai de :"
+                    time: 30 minutes maximum
+                    info: Durant les heures d'ouverture.
+                number:
+                    text: "Nous vous appelons au :"
+            goodToKnow:
+                text: Si vous n'êtes pas disponible, il vous laissera un SMS ou un email.
         subButtonText: Vous serez rappelé sous 30 minutes, aux heures d'ouverture.
 ctaFooter:
     title: Et si Paris devenait chez vous ?

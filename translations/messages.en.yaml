@@ -11,7 +11,7 @@ contact:
             openHours: Monday to Sunday - 8am to 8pm
             whatsapp: Available on
         3:
-            time: Reply within 30 minutes
+            time: Reply within 30 minutes, during opening hours.
     contactForm:
         badge: Available
         title: Request a callback
@@ -41,13 +41,27 @@ contact:
                 4: Other Requests or Information
         message:
             label: Message
-            placeholder: Your message...
+            placeholder: Tell us about your project in a few words...
         accept:
             label: By checking this box, I agree that my information may be used to be contacted.
         button: Be contacted quickly
         success:
             title: Thank you for your message!
             text: An expert from our team will contact you as soon as possible.
+            box:
+                title: Your request is confirmed
+                text: Your advisor will call you back within the next 30 minutes.
+                advisor: Your advisor has been assigned
+                altPhoto: Photo of a Relocation in Paris expert who will call you back
+                expertJob: International Mobility Consultant
+                callBack:
+                    text: "He will contact you within:"
+                    time: 30 minutes maximum
+                    info: During opening hours.
+                number:
+                    text: "We will call you at:"
+            goodToKnow:
+                text: If you are unavailable, he will leave you an SMS or an email.
         subButtonText: You will be called back within 30 minutes, during opening hours.
 ctaFooter:
     title: Planning a move to Paris?

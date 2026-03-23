@@ -1,0 +1,87 @@
+<turbo-stream action="replace" target="contact-form">
+    <template>
+        {% set fr = (success.lang == 'fr') %}
+
+        <div id="contact-form" class="p-3 lg:p-8 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0" role="status" aria-live="polite">
+            <div class="flex justify-center flex-col items-center">
+
+                <div class="p-3 bg-white inline-block rounded-full">
+                    {{ ux_icon('mynaui:check-circle-one', {'class': 'size-7 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                </div>
+
+                <div class="space-y-1 text-center mt-2 max-w-sm">
+                    <h2 id="form-heading" class="text-2xl font-semibold">
+                        {{ 'contact.contactForm.success.title'|trans|raw }}
+                    </h2>
+                    <p class="text-slate-600 font-light text-pretty">
+                        {{ 'contact.contactForm.success.text'|trans|raw }}
+                    </p>
+                </div>
+
+                <div class="lg:mt-12 mt-6 w-full">
+                    <div class="border border-gray-100 rounded-xl p-4 bg-gray-50">
+
+                        <div class="mx-auto text-center">
+                            <h3 class="text-lg font-medium">
+                                {{ 'contact.contactForm.success.box.advisor'|trans|raw }}
+                            </h3>
+                        </div>
+
+                        <div class="mt-4 grid md:grid-cols-5 gap-x-2">
+
+                            <div class="md:col-span-2 bg-white rounded-lg p-1">
+                                <img
+                                    src="{{ asset('medias/team/team_2.webp') }}"
+                                    alt="{{ 'contact.contactForm.success.box.altPhoto'|trans|raw }}"
+                                    class="w-full h-auto rounded-lg"
+                                    width="205" height="171"
+                                    loading="lazy"
+                                />
+                                <div class="mt-2 pb-2 text-center space-y-2">
+                                    <p class="font-semibold">Charles M.</p>
+                                    <div class="flex items-center justify-center gap-x-2" aria-label="{{ fr ? 'Langues parlées : anglais, espagnol, français' : 'Languages spoken: English, Spanish, French' }}">
+                                        {{ ux_icon('circle-flags:lang-en', {'class': 'size-5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                        {{ ux_icon('circle-flags:lang-es', {'class': 'size-5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                        {{ ux_icon('circle-flags:lang-fr', {'class': 'size-5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                    </div>
+                                    <p class="text-slate-600 text-xs font-light text-pretty">
+                                        {{ 'contact.contactForm.success.box.expertJob'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-3 rounded-lg p-2 bg-white flex items-center justify-center w-full flex-col gap-3">
+
+                                <div class="border border-green-100 text-sm bg-green-50 rounded-lg p-2 w-full flex flex-col gap-y-2 text-center">
+                                    <p class="text-xs text-slate-600">
+                                        {{ 'contact.contactForm.success.box.callBack.text'|trans|raw }}
+                                    </p>
+                                    <p class="font-semibold text-base">
+                                        {{ 'contact.contactForm.success.box.callBack.time'|trans|raw }}
+                                    </p>
+                                    <p class="text-xs text-slate-600">
+                                        {{ 'contact.contactForm.success.box.callBack.info'|trans|raw }}
+                                    </p>
+                                </div>
+
+                                <div class="border border-gray-100 text-sm bg-gray-50 rounded-lg p-2 w-full flex flex-col gap-y-2 text-center">
+                                    <p class="text-xs text-slate-600">
+                                        {{ 'contact.contactForm.success.box.number.text'|trans|raw }}
+                                    </p>
+                                    <p class="font-semibold text-base">{{ success.phoneNumber }}</p>
+                                </div>
+
+                                <p class="text-slate-600 text-xs text-pretty flex items-start gap-2 mb-2 lg:mb-0">
+                                    {{ ux_icon('uiw:information-o', {'class': 'size-3 shrink-0 rounded-full mt-0.5', 'aria-hidden': 'true'}) }}
+                                    {{ 'contact.contactForm.success.goodToKnow.text'|trans|raw }}
+                                </p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </template>
+</turbo-stream>

@@ -17,6 +17,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\Turbo\TurboBundle;
 
 final class ContactController extends AbstractController
 {
@@ -101,6 +102,13 @@ final class ContactController extends AbstractController
                 $this->mailer->send($clientEmail);
             } catch (TransportExceptionInterface $e) {
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
+            }
+
+            if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+                $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+                return $this->render('public/contact/success.stream.html.twig', [
+                    'success' => $contact
+                ]);
             }
 
             $this->addFlash('contactSuccess', $this->translator->trans('contact.contactForm.success.title'));
