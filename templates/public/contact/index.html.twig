@@ -4,205 +4,285 @@
 {% block description %}{{ 'meta.contact.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_contact') }}{% endblock %}
 
+{% block schema_page %}
+{
+    "@type": "ContactPage",
+    "name": "{{ 'meta.contact.title'|trans|e('js') }}",
+    "description": "{{ 'meta.contact.description'|trans|e('js') }}",
+    "url": "{{ url('app_contact') }}",
+    "mainEntity": {
+        "@type": "LocalBusiness",
+        "name": "Relocation In Paris",
+        "url": "{{ url('app_home') }}",
+        "telephone": "+33184804344",
+        "email": "contact@relocation-in-paris.fr",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "155 Rue du Faubourg Saint-Denis",
+            "addressLocality": "Paris",
+            "postalCode": "75010",
+            "addressCountry": "FR"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            "opens": "08:00",
+            "closes": "20:00"
+        }
+    }
+}
+{% endblock %}
+
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary text-center">{{ 'contact.title'|trans|raw }}</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance text-center">{{ 'contact.subTitle'|trans|raw }}</h2>
-            <p></p>
-        </div>
-        <div class="max-w-5xl mx-auto mt-6">
-            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 max-w-xl lg:max-w-full mx-auto">
-                <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100 shadow-lg shadow-gray-300/30">
-                    <div class="flex flex-col justify-center items-center">
-                        <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:mail', {'class':'size-6 text-primary shrink-0'}) }}
-                        </div>
-                        <div class="mt-4 text-center space-y-2">
-                            <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.1.email.label'|trans|raw }}</h3>
-                            <a href="mailto:" class="text-primary font-medium hover:text-primary/80 transition duration-100">
-                                contact@relocation-in-paris.fr
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100 shadow-lg shadow-gray-300/30">
-                    <div class="flex flex-col justify-center items-center">
-                        <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:phone', {'class':'size-6 text-primary shrink-0'}) }}
-                        </div>
-                        <div class="mt-4 text-center space-y-2">
-                            <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.2.phone.label'|trans|raw }}</h3>
-                            <a href="tel:{{ phone_number }}" class="text-primary font-medium hover:text-primary/80 transition duration-100">
-                                {{ phone_number }}
-                            </a>
-                            <p class="text-xs mt-2 text-neutral-500 uppercase">
-                                {{ 'contact.contactType.2.orContactus'|trans|raw }}
-                                <a href="https://wa.me/33761719439" target="_blank" class="underline underline-offset-4 decoration-dotted hover:text-green-600 transition duration-100">
-                                    {{ 'contact.contactType.2.whatsapp'|trans|raw }}
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-lg border border-neutral-100 hover:border-primary/20 transition duration-100 shadow-lg shadow-gray-300/30">
-                    <div class="flex flex-col justify-center items-center">
-                        <div class="bg-primary/10 rounded-full p-4">
-                            {{ ux_icon('lucide:building', {'class':'size-6 text-primary shrink-0'}) }}
-                        </div>
-                        <div class="mt-4 text-center space-y-2">
-                            <h3 class="text-neutral-500 text-xs uppercase text-sm font-secondary">{{ 'contact.contactType.3.office.label'|trans|raw }}</h3>
-                            <a href="https://share.google/oIuZZm0UHoM8Mf3FX" target="_blank" class="text-primary font-medium hover:text-primary/80 transition duration-100">
-                                155 Rue du Faubourg Saint-Denis, 75010 Paris, France
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <section aria-labelledby="contact-heading">
+        <div class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+            <div class="max-w-2xl mx-auto flex flex-col justify-center items-center text-center space-y-4">
+                <p class="text-center font-semibold text-primary font-secondary">{{ 'contact.title'|trans|raw }}</p>
+                <h1 id="contact-heading" class="text-4xl lg:text-5xl/16 font-medium text-balance text-center">{{ 'contact.subTitle'|trans|raw }}</h1>
+                <p class="text-slate-600 font-light text-pretty max-w-lg">{{ 'contact.text'|trans|raw }}</p>
             </div>
         </div>
     </section>
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 mb-8 py-12">
-        <div class="grid grid-cols-1 gap-12 lg:gap-24 md:grid-cols-2">
-            <div>
-                <div class="pb-8 flex items-center gap-x-3">
-                    <span class="relative flex size-3">
-                      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex size-3 rounded-full bg-green-500"></span>
-                    </span>
-                    <h4 class="text-neutral-500 font-secondary uppercase text-base">
-                        {{ 'contact.contactForm.title'|trans|raw }}
-                    </h4>
+
+    <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 mt-5">
+        <div class="grid grid-cols-1 gap-12 lg:gap-24 lg:grid-cols-5">
+
+            <aside class="col-span-2 space-y-7 lg:space-y-12 lg:order-1 order-2" aria-label="{{ 'contact.contactType.title'|trans }}">
+                <div class="space-y-2">
+                    <h2 class="text-3xl font-semibold text-primary">{{ 'contact.contactType.title'|trans|raw }}</h2>
+                    <p class="text-slate-600 text-pretty">{{ 'contact.contactType.text'|trans|raw }}</p>
                 </div>
-                {{ form_start(contactForm, {'attr': {'class':'space-y-6'}}) }}
-                    {% for message in app.flashes('contactSuccess') %}
-                        <div class="rounded-xl bg-green-50 p-4">
-                            <div class="flex items-start gap-x-3">
-                                <div class="flex-shrink-0">
-                                    {{ ux_icon('lucide:circle-check', {'class':'text-green-600 size-5'}) }}
-                                </div>
-                                <div class="space-y-0.5">
-                                    <h3 class="text-base font-medium text-green-800 -mt-0.5">{{ message }}</h3>
-                                    <p class="text-sm text-slate-600">{{ 'contact.contactForm.success.text'|trans }}</p>
-                                </div>
+
+                <ul class="lg:space-y-7 space-y-6 list-none">
+                    <li class="flex flex-row items-start lg:gap-x-4 gap-x-3">
+                        <div class="rounded-full p-2.5 bg-primary" aria-hidden="true">
+                            {{ ux_icon('si:pin-line', {'class': 'size-5 shrink-0 text-white'}) }}
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <twig:Badge variant="destructive">
+                                    {{ 'contact.contactType.1.headOffice'|trans|raw }}
+                                </twig:Badge>
+                                <address class="not-italic space-y-0.5">
+                                    <p class="font-semibold text-lg">155 Rue du Faubourg Saint-Denis</p>
+                                    <p class="text-slate-600 font-light">75010 Paris, France</p>
+                                </address>
+                            </div>
+                            <a href="https://share.google/DuM7reAcGSrmXQ65I" target="_blank" rel="noopener noreferrer"
+                               class="text-primary hover:text-primary/80 transition duration-100 underline underline-offset-4 text-sm">
+                                {{ 'contact.contactType.1.viewOn'|trans|raw }}
+                            </a>
+                        </div>
+                    </li>
+
+                    <li aria-hidden="true" class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></li>
+
+                    <li class="flex flex-row items-start lg:gap-x-4 gap-x-3">
+                        <div class="rounded-full p-2.5 bg-primary" aria-hidden="true">
+                            {{ ux_icon('iconoir:phone', {'class': 'size-5 shrink-0 text-white'}) }}
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <a href="tel:+33184804344" class="font-semibold text-lg">+(33) 1 84 80 43 44</a>
+                                <p class="text-slate-600 font-light">{{ 'contact.contactType.2.openHours'|trans|raw }}</p>
+                            </div>
+                            <p class="text-sm text-slate-600 font-light flex items-center gap-x-2">
+                                {{ 'contact.contactType.2.whatsapp'|trans|raw }}
+                                <a href="https://wa.me/33184804344" target="_blank" rel="noopener noreferrer"
+                                   class="text-green-500 hover:text-green-400 transition duration-100 underline underline-offset-4 flex items-center gap-x-1">
+                                    {{ ux_icon('simple-icons:whatsapp', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    WhatsApp
+                                </a>
+                            </p>
+                        </div>
+                    </li>
+
+                    <li aria-hidden="true" class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></li>
+
+                    <li class="flex flex-row items-start lg:gap-x-4 gap-x-3">
+                        <div class="rounded-full p-2.5 bg-primary" aria-hidden="true">
+                            {{ ux_icon('proicons:mail', {'class': 'size-5 shrink-0 text-white'}) }}
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <a href="mailto:contact@relocation-in-paris.fr" class="font-semibold text-lg">contact@relocation-in-paris.fr</a>
+                                <p class="text-slate-600 font-light">{{ 'contact.contactType.3.time'|trans|raw }}</p>
                             </div>
                         </div>
-                    {% endfor %}
-                    <div class="space-y-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    </li>
+                </ul>
+            </aside>
+
+            <div class="col-span-3 lg:order-2 order-1" aria-labelledby="form-heading">
+                <div class="rounded-2xl p-2 border border-neutral-200 shadow-lg">
+                    <div class="p-3 lg:p-8 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0">
+
+                        <div class="text-center mb-6 lg:mb-12 mt-3 lg:mt-0">
+                            <div class="flex items-center justify-center gap-x-3 mb-4">
+                                <div class="flex -space-x-1.5" aria-hidden="true">
+                                    <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                    <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                    <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                </div>
+                                <div class="py-2 px-2.5 rounded-full bg-white flex items-center justify-center gap-x-1.5 text-green-600">
+                                    <span class="relative flex size-1.5" aria-hidden="true">
+                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex size-1.5 rounded-full bg-green-500"></span>
+                                    </span>
+                                    <p class="text-xs">{{ 'contact.contactForm.badge'|trans|raw }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <h2 id="form-heading" class="text-2xl font-semibold">{{ 'contact.contactForm.title'|trans|raw }}</h2>
+                                <p class="text-slate-600 font-light text-pretty">{{ 'contact.contactForm.text'|trans|raw }}</p>
+                            </div>
+                        </div>
+
+                        {{ form_start(contactForm, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+
+                        {% for message in app.flashes('contactSuccess') %}
+                            <div role="alert" aria-live="polite" class="rounded-xl bg-green-50 p-4">
+                                <div class="flex items-start gap-x-3">
+                                    <div class="flex-shrink-0" aria-hidden="true">
+                                        {{ ux_icon('lucide:circle-check', {'class': 'text-green-600 size-5'}) }}
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <p class="text-base font-medium text-green-800">{{ message }}</p>
+                                        <p class="text-sm text-slate-600">{{ 'contact.contactForm.success.text'|trans }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="flex items-center gap-x-0.5">
+                                        {{ form_label(contactForm.firstName, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                        <span class="text-red-600" aria-hidden="true">*</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        {{ form_widget(contactForm.firstName, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                            'placeholder': 'contact.contactForm.firstName.placeholder'|trans,
+                                            'autocomplete': 'given-name',
+                                            'aria-required': 'true'
+                                        }}) }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-x-0.5">
+                                        {{ form_label(contactForm.lastName, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                        <span class="text-red-600" aria-hidden="true">*</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        {{ form_widget(contactForm.lastName, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                            'placeholder': 'contact.contactForm.lastName.placeholder'|trans,
+                                            'autocomplete': 'family-name',
+                                            'aria-required': 'true'
+                                        }}) }}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <div class="flex items-center gap-x-0.5">
-                                    {{ form_label(contactForm.firstName, null, {
-                                        'label_attr': {
-                                            'class': 'block text-sm/6 font-semibold text-gray-900'
-                                        }
-                                    }) }}
-                                    <span class="text-red-600">*</span>
+                                    {{ form_label(contactForm.email, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                    <span class="text-red-600" aria-hidden="true">*</span>
                                 </div>
                                 <div class="mt-2">
-                                    {{ form_widget(contactForm.firstName, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.firstName.placeholder'|trans }}) }}
+                                    {{ form_widget(contactForm.email, {'attr': {
+                                        'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                        'placeholder': 'contact.contactForm.email.placeholder'|trans,
+                                        'autocomplete': 'email',
+                                        'aria-required': 'true'
+                                    }}) }}
                                 </div>
                             </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="flex items-center gap-x-0.5">
+                                        {{ form_label(contactForm.phoneNumber, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                        <span class="text-red-600" aria-hidden="true">*</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        {{ form_widget(contactForm.phoneNumber, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                            'placeholder': 'contact.contactForm.phoneNumber.placeholder'|trans,
+                                            'autocomplete': 'tel',
+                                            'aria-required': 'true'
+                                        }}) }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-x-0.5">
+                                        {{ form_label(contactForm.company, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                    </div>
+                                    <div class="mt-2">
+                                        {{ form_widget(contactForm.company, {'attr': {
+                                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                            'placeholder': 'contact.contactForm.company.placeholder'|trans,
+                                            'autocomplete': 'organization'
+                                        }}) }}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <div class="flex items-center gap-x-0.5">
-                                    {{ form_label(contactForm.lastName, null, {
-                                        'label_attr': {
-                                            'class': 'block text-sm/6 font-semibold text-gray-900'
-                                        }
-                                    }) }}
-                                    <span class="text-red-600">*</span>
+                                    {{ form_label(contactForm.helpType, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
+                                    <span class="text-red-600" aria-hidden="true">*</span>
                                 </div>
                                 <div class="mt-2">
-                                    {{ form_widget(contactForm.lastName, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.lastName.placeholder'|trans }}) }}
+                                    {{ form_widget(contactForm.helpType, {'attr': {
+                                        'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                        'aria-required': 'true'
+                                    }}) }}
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-x-0.5">
-                                {{ form_label(contactForm.email, null, {
-                                    'label_attr': {
-                                        'class': 'block text-sm/6 font-semibold text-gray-900'
-                                    }
-                                }) }}
-                                <span class="text-red-600">*</span>
-                            </div>
-                            <div class="mt-2">
-                                {{ form_widget(contactForm.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.email.placeholder'|trans }}) }}
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                             <div>
                                 <div class="flex items-center gap-x-0.5">
-                                    {{ form_label(contactForm.phoneNumber, null, {
-                                        'label_attr': {
-                                            'class': 'block text-sm/6 font-semibold text-gray-900'
-                                        }
-                                    }) }}
-                                    <span class="text-red-600">*</span>
+                                    {{ form_label(contactForm.message, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
                                 </div>
                                 <div class="mt-2">
-                                    {{ form_widget(contactForm.phoneNumber, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.phoneNumber.placeholder'|trans }}) }}
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-x-0.5">
-                                    {{ form_label(contactForm.company, null, {
-                                        'label_attr': {
-                                            'class': 'block text-sm/6 font-semibold text-gray-900'
-                                        }
-                                    }) }}
-                                </div>
-                                <div class="mt-2">
-                                    {{ form_widget(contactForm.company, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.company.placeholder'|trans  }}) }}
+                                    {{ form_widget(contactForm.message, {'attr': {
+                                        'rows': '5',
+                                        'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                                        'placeholder': 'contact.contactForm.message.placeholder'|trans,
+                                        'autocomplete': 'off'
+                                    }}) }}
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <div class="flex items-center gap-x-0.5">
-                                {{ form_label(contactForm.helpType, null, {
-                                    'label_attr': {
-                                        'class': 'block text-sm/6 font-semibold text-gray-900'
-                                    }
-                                }) }}
-                                <span class="text-red-600">*</span>
-                            </div>
-                            <div class="mt-2">
-                                {{ form_widget(contactForm.helpType, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6' }}) }}
-                            </div>
+
+                        <div class="flex items-center">
+                            {{ form_widget(contactForm.accept, {'attr': {
+                                'class': 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+                                'aria-required': 'true'
+                            }}) }}
+                            <label for="{{ contactForm.accept.vars.id }}" class="ml-3 block text-sm leading-5 text-neutral-900">{{ 'contact.contactForm.accept.label'|trans }}</label>
                         </div>
-                        <div>
-                            <div class="flex items-center gap-x-0.5">
-                                {{ form_label(contactForm.message, null, {
-                                    'label_attr': {
-                                        'class': 'block text-sm/6 font-semibold text-gray-900'
-                                    }
-                                }) }}
-                            </div>
-                            <div class="mt-2">
-                                {{ form_widget(contactForm.message, {'attr': {'rows':'5','class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'contact.contactForm.message.placeholder'|trans }}) }}
-                            </div>
+
+                        <div class="pt-4">
+                            <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
+                                {{ ux_icon('famicons:paper-plane-outline', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'contact.contactForm.button'|trans|raw }}
+                            </twig:Button>
                         </div>
+
+                        {{ form_end(contactForm) }}
+
+                        <p class="-mt-2 flex items-start mt-1 lg:mt-0 lg:items-center font-light justify-center gap-x-1.5 text-neutral-500 text-left lg:text-center text-sm">
+                            {{ ux_icon('mingcute:bell-ringing-line', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
+                            {{ 'contact.contactForm.subButtonText'|trans|raw }}
+                        </p>
                     </div>
-                    <div class="flex items-center">
-                        {{ form_widget(contactForm.accept, {
-                            'attr': {
-                                'class': 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50'
-                            }
-                        }) }}
-                        <label class="ml-3 block text-sm leading-5 text-neutral-900">{{ form_label(contactForm.accept, 'contact.contactForm.accept.label'|trans) }}</label>
-                    </div>
-                    <div class="pt-4">
-                        <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
-                            {{ 'contact.contactForm.button'|trans|raw }}
-                        </twig:Button>
-                    </div>
-                {{ form_end(contactForm) }}
-                <div class="-mt-2">
-                    <p class="text-neutral-500 text-center italic text-sm">{{ 'contact.contactForm.subButtonText'|trans|raw }}</p>
                 </div>
             </div>
-            <div class="md:flex hidden">
-                <img src="{{ asset('medias/website/rip_contact.webp') }}" alt="{{ 'contact.image.alt'|trans|raw }}" class="w-full h-full object-cover rounded-2xl" loading="eager" width="590" height="790">
-            </div>
+
         </div>
     </section>
 {% endblock %}

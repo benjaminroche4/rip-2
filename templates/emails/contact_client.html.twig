@@ -11,8 +11,25 @@
     <link rel="preload" as="image" href="https://resend-attachments.s3.amazonaws.com/c177d504-56a7-437c-b8f8-b559cacf5c9b" />
     <link rel="preload" as="image" href="https://resend-attachments.s3.amazonaws.com/16d42dd0-bce1-40e8-b0fb-29790baccd42" />
     <link rel="preload" as="image" href="https://resend.com/static/email/social-linkedin.png" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <style>
+        @media (prefers-color-scheme: dark) {
+            body, .email-body { background-color: #111111 !important; }
+            .email-card { background-color: #1e1e1e !important; border-color: #333333 !important; }
+            .email-card td { color: #e4e4e4 !important; }
+            .email-card h2, .email-card h3 { color: #f5f5f5 !important; }
+            .box-gray { background-color: #2a2a2a !important; border-color: #3a3a3a !important; }
+            .box-white { background-color: #252525 !important; }
+            .box-green { background-color: #052e16 !important; border-color: #166534 !important; color: #bbf7d0 !important; }
+            .box-green strong { color: #bbf7d0 !important; }
+            .label-muted { color: #9ca3af !important; }
+            .text-muted { color: #9ca3af !important; }
+            hr { border-top-color: #3a3a3a !important; }
+        }
+    </style>
 </head>
-<body>
+<body class="email-body" style="background-color:#f4f4f4">
     {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
     {% set fr = (lang == 'fr') %}
 
@@ -25,7 +42,7 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                                    <table class="email-card" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
                                         style="max-width:600px;width:100%;padding:40px 20px;border:1px solid #e2e2e2;border-radius:12px;background-color:#ffffff;font-family:{{ fontStack }}">
                                         <tbody>
                                             <tr>
@@ -44,12 +61,12 @@
 
                                                     <p style="margin:0;padding:0.5em 0;text-align:center"><br /></p>
 
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                    <table class="box-gray" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                         style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;padding:10px">
                                                         <tbody>
                                                             <tr>
                                                                 <td>
-                                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                                    <table class="box-white" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                                         style="background-color:#ffffff;border-radius:12px;padding:10px 20px">
                                                                         <tbody>
                                                                             <tr>
@@ -90,23 +107,23 @@
                                                                                         </tbody>
                                                                                     </table>
 
-                                                                                    <p style="margin:0;padding:0.5em 0;text-align:center">
+                                                                                    <p class="text-muted" style="margin:0;padding:0.5em 0;text-align:center">
                                                                                         {{ fr ? 'Consultant en Mobilité Internationale' : 'International Mobility Consultant' }}
                                                                                     </p>
 
                                                                                     <hr style="width:100%;border:none;border-top:2px solid #eaeaea;padding-bottom:1em" />
 
-                                                                                    <p style="margin:0;padding:12px;background-color:#EFFDF4;border:1px solid #BBF7D0;border-radius:12px;font-size:1em;text-align:center">
+                                                                                    <p class="box-green" style="margin:0;padding:12px;background-color:#EFFDF4;border:1px solid #BBF7D0;border-radius:12px;font-size:1em;text-align:center">
                                                                                         {{ fr ? 'Il vous contactera dans un délai de' : 'He will contact you within' }} <strong>{{ fr ? '5 à 30 minutes' : '5 to 30 minutes' }}</strong>
                                                                                     </p>
 
                                                                                     <p style="margin:0;padding:0;text-align:center"><br /></p>
 
-                                                                                    <p style="margin:0;padding:12px;background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;font-size:1em;text-align:center">
+                                                                                    <p class="box-gray" style="margin:0;padding:12px;background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;font-size:1em;text-align:center">
                                                                                         {{ fr ? 'Nous vous appelons au :' : 'We will call you at:' }}<br /><strong>{{ phoneNumber }}</strong>
                                                                                     </p>
 
-                                                                                    <p style="margin:0;padding:12px 0 8px;font-size:12px;line-height:160%;text-align:center">
+                                                                                    <p class="text-muted" style="margin:0;padding:12px 0 8px;font-size:12px;line-height:160%;text-align:center">
                                                                                         <em>{{ fr ? "Si vous n'êtes pas disponible, nous laisserons un SMS ou un email." : 'If you are unavailable, we will leave an SMS or an email.' }}</em>
                                                                                     </p>
                                                                                 </td>
@@ -120,7 +137,7 @@
 
                                                     <p style="margin:0;padding:0.5em 0;text-align:center"><br /></p>
 
-                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                    <table class="box-gray" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                         style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;padding:10px">
                                                         <tbody>
                                                             <tr>
@@ -128,35 +145,35 @@
                                                                     <p style="margin:0;padding:8px 0 16px;font-size:15px;line-height:155%">
                                                                         <strong>{{ fr ? 'Informations de contact' : 'Contact information' }}</strong>
                                                                     </p>
-                                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                                    <table class="box-white" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                                         style="background-color:#ffffff;border-radius:12px;padding:0 0 12px 12px">
                                                                         <tbody>
                                                                             <tr>
                                                                                 <td>
                                                                                     <p style="margin:0;padding:8px 0 16px;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Nom/Prénom :' : 'Name:' }}</span> {{ fistName }} {{ lastName }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Nom/Prénom :' : 'Name:' }}</span> {{ fistName }} {{ lastName }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Téléphone :' : 'Phone:' }}</span> {{ phoneNumber }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Téléphone :' : 'Phone:' }}</span> {{ phoneNumber }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">Email :</span> {{ emailContact }}
+                                                                                        <span class="label-muted" style="color:#525252">Email :</span> {{ emailContact }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Langue :' : 'Language:' }}</span>
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Langue :' : 'Language:' }}</span>
                                                                                         {{ lang == 'fr' ? 'Français' : 'English' }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Entreprise :' : 'Company:' }}</span> {{ company }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Entreprise :' : 'Company:' }}</span> {{ company }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Envoyé le :' : 'Sent on:' }}</span> {{ createdAt|date('d F Y')|format_date(locale=lang) }} {{ fr ? 'à' : 'at' }} {{ createdAt|date('H:i') }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Envoyé le :' : 'Sent on:' }}</span> {{ createdAt|date('d F Y')|format_date(locale=lang) }} {{ fr ? 'à' : 'at' }} {{ createdAt|date('H:i') }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">{{ fr ? 'Type de demande :' : 'Request type:' }}</span> {{ helpType|trans(locale=lang) }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Type de demande :' : 'Request type:' }}</span> {{ helpType|trans(locale=lang) }}
                                                                                     </p>
                                                                                     <hr style="width:100%;border:none;border-top:2px solid #eaeaea;padding-bottom:1em" />
-                                                                                    <p style="margin:0;padding:0.5em 0;font-size:1em;color:#525252">{{ fr ? 'Message :' : 'Message:' }}</p>
+                                                                                    <p class="label-muted" style="margin:0;padding:0.5em 0;font-size:1em;color:#525252">{{ fr ? 'Message :' : 'Message:' }}</p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">{{ message }}</p>
                                                                                 </td>
                                                                             </tr>
@@ -183,13 +200,13 @@
                                                         </tbody>
                                                     </table>
 
-                                                    <p style="margin:0;padding:16px 0;font-size:1em;text-align:center">
+                                                    <p class="text-muted" style="margin:0;padding:16px 0;font-size:1em;text-align:center">
                                                         {{ fr ? 'Agence de Relocation pour Particuliers et Professionnels' : 'Relocation Agency for Individuals and Businesses' }}
                                                     </p>
 
                                                     <hr style="width:100%;border:none;border-top:2px solid #eaeaea;margin:16px 0 0" />
 
-                                                    <p style="margin:0;padding:2em 0;font-size:1em;text-align:center">
+                                                    <p class="text-muted" style="margin:0;padding:2em 0;font-size:1em;text-align:center">
                                                         155 Rue du Faubourg Saint-Denis<br />75010 Paris – France
                                                     </p>
 

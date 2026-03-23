@@ -1,22 +1,21 @@
 contact:
-    title: Contact Us
-    subTitle: Contact Our Team of Experts
-    image:
-        alt: Relocation In Paris, relocation agency in Paris
+    subTitle: Let's talk about your move to Paris
+    text: Your advisor will call you back within 30 minutes. A human conversation to understand your project and guide you every step of the way.
     contactType:
+        title: We're here for you
+        text: An expert answers all your questions during opening hours.
         1:
-            email:
-                label: Email address
+            headOffice: Head Office
+            viewOn: View on Google Maps
         2:
-            phone:
-                label: Phone
-            orContactus: Or contact us
-            whatsapp: via WhatsApp
+            openHours: Monday to Sunday - 8am to 8pm
+            whatsapp: Available on
         3:
-            office:
-                label: Office
+            time: Reply within 30 minutes
     contactForm:
-        title: Contact our relocation experts
+        badge: Available
+        title: Request a callback
+        text: Your advisor will call you back within 30 minutes.
         firstName:
             label: First name
             placeholder: First name
@@ -49,7 +48,7 @@ contact:
         success:
             title: Thank you for your message!
             text: An expert from our team will contact you as soon as possible.
-        subButtonText: Response and quote within 24 hours
+        subButtonText: You will be called back within 30 minutes, during opening hours.
 ctaFooter:
     title: Planning a move to Paris?
     subTitle: Tell us what you're looking for. We'll handle the rest.

@@ -165,9 +165,6 @@
         {{ component('layout/header', {post: post|default(null)}) }}
         <main class="relative z-20">
             {% block body %}{% endblock %}
-            {% if app.request.attributes.get('_route') != 'app_estimation' %}
-                {{ component('blocks/whatsappButton') }}
-            {% endif %}
         </main>
         {{ component('layout/footer') }}
     </body>

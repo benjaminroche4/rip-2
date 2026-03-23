@@ -1,22 +1,22 @@
 contact:
     title: Contactez-nous
-    subTitle: Contactez notre équipe d’experts
-    image:
-        alt: Relocation In Paris, agence de relocation à Paris
+    subTitle: Parlons de votre installation à Paris
+    text: Votre conseiller vous rappelle sous 30 minutes. Un échange humain pour comprendre votre projet et vous accompagner ensemble.
     contactType:
+        title: On vous écoute
+        text: Un expert répond à toutes vos questions durant les heures d'ouverture.
         1:
-            email:
-                label: Adresse email
+            headOffice: Bureau principal
+            viewOn: Voir sur Google Maps
         2:
-            phone:
-                label: Téléphone
-            orContactus: Ou contactez-nous
-            whatsapp: via Whatsapp
+            openHours: Lundi au Dimanche - 8h à 20h
+            whatsapp: Disponible sur
         3:
-            office:
-                label: Bureau
+            time: Réponse sous 30mn
     contactForm:
-        title: Contactez nos experts en relocation
+        badge: Disponible
+        title: Demandez un rappel
+        text: Votre conseiller vous rappelle sous 30 minutes.
         firstName:
             label: Prénom
             placeholder: Prénom
@@ -49,7 +49,7 @@ contact:
         success:
             title: Merci pour votre message !
             text: Un expert de notre équipe vous contactera dans les plus brefs délais.
-        subButtonText: Réponse et devis sous 24 heures
+        subButtonText: Vous serez rappelé sous 30 minutes, aux heures d'ouverture.
 ctaFooter:
     title: Et si Paris devenait chez vous ?
     subTitle: Dites-nous ce que vous cherchez. On s'occupe du reste.
