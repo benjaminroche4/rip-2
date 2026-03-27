@@ -336,7 +336,7 @@ findAccommodation:
 meta:
     pricing:
         title: Tarifs
-        text: Trouvez votre appartement à Paris avec un expert à vos côtés. Choisissez la formule faite pour vous.
+        description: Trouvez votre appartement à Paris avec un expert à vos côtés. Découvrez nos tarifs et choisissez la formule faite pour vous.
     blog:
         title: Le Blog pour Vivre et S’installer à Paris
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
@@ -1319,7 +1319,7 @@ reviews:
         date: 16 décembre 2025
         alt: "Photo de Nicolas M., client satisfait de Relocation In Paris"
 pricing:
-    title: Nos tarifs
+    title: Tarifs
     subTitle: Installez-vous à Paris, en toute sérénité
     text: Choisissez la formule faite pour vous.
     package:

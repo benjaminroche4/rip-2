@@ -334,6 +334,9 @@ findAccommodation:
                 title: Key Handover and Ongoing Support
                 description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
 meta:
+    pricing:
+        title: Pricing
+        description: Find your apartment in Paris with an expert by your side. Discover our plans and choose the one made for you.
     blog:
         title: The Blog For Living And Settling in Paris
         description: "The essential blog for living, working, and settling in Paris: practical tips, neighborhoods, housing, paperwork, and everyday life insights."
@@ -1317,3 +1320,56 @@ reviews:
         from: Google
         date: December 16, 2025
         alt: Nicolas M. review on Google.
+pricing:
+    title: Pricing
+    subTitle: Settle in Paris, with complete peace of mind
+    text: Choose the plan made for you.
+    package:
+        1:
+            eyebrow: The easiest way to get started
+            title: Guided
+            text: Save weeks of searching. You visit, we handle everything else.
+            listing:
+                include: What's included
+                1: Tailored apartment search
+                2: Access to off-market properties
+                3: Visit scheduling
+                4: Rental application optimization
+                5: Application management and follow-ups
+                6: Dedicated rental agent
+            button: Start my search
+        2:
+            eyebrow: Most popular
+            title: Entrusted
+            text: We handle everything, from search to full installation. You just have to validate.
+            listing:
+                include: "Everything in <span class='underline underline-offset-4 decoration-dotted decoration-gray-400'>Guided</span>, plus"
+                1: Visits handled by your agent
+                2: Video report after each visit
+                3: Support through to key handover
+                4: Full administrative assistance
+                5: Priority WhatsApp support 7 days a week
+                6: Exclusive access to off-market properties
+            button: Entrust my search
+        other:
+            title: Beyond the apartment, we think of everything
+            text: Visa, exclusive neighborhood discovery, concierge services, schooling... Your Paris installation, down to the last detail.
+            button: Speak to an expert
+    faq:
+        title: FAQ
+        subTitle: Your questions, our answers
+        1:
+            title: What happens if you don't find an apartment?
+            text: We never take on a mission without being certain we can deliver. With over 900 successful relocations and an unmatched network of partners in Paris, we have never left a client without keys.
+        2:
+            title: How quickly can I be settled in?
+            text: On average, our clients sign their lease in under 20 days. In a market as competitive as Paris, that is the difference between searching alone and searching with us.
+        3:
+            title: My profile is atypical — can you still help me?
+            text: That is exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor... our network of partner landlords trusts us — and that trust is what gets your application through.
+        4:
+            title: Is my budget realistic for finding a good apartment in Paris?
+            text: We always begin with an in-depth conversation to understand your needs. Together, we define a search brief that is realistic and aligned with the Paris market — so your search starts on the right foundations from day one.
+        5:
+            title: Can I switch plans during my search?
+            text: Absolutely. If your situation changes, you can move from Guided to Entrusted at any time. We adapt to you, not the other way around.
