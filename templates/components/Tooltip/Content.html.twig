@@ -1,7 +1,7 @@
 {# @prop side 'top'|'right'|'bottom'|'left' The preferred side to display the tooltip. Defaults to `top` #}
 {# @prop sideOffset number The distance in pixels from the trigger. Defaults to `0` #}
 {# @block content The tooltip text or content #}
-{%- props side = 'top', sideOffset = 0 -%}
+{%- props side = 'top', sideOffset = 10 -%}
 
 <div
     id="{{ _tooltip_wrapper_id }}"
@@ -14,7 +14,7 @@
     style="position: absolute; left: 0px; top: 0px; will-change: transform;"
 >
     <div
-        class="{{ ('invisible open:visible transition-all duration-200 open:opacity-100 open:scale-100 opacity-0 scale-95 bg-gray-800 text-white z-50 w-fit max-w-xs rounded-md px-3 py-1.5 text-xs ' ~ attributes.render('class'))|tailwind_merge }}"
+        class="{{ ('relative invisible open:visible transition-all duration-200 open:opacity-100 open:scale-100 opacity-0 scale-95 bg-gray-800 text-white z-50 w-fit max-w-xs rounded-md px-3 py-1.5 text-xs ' ~ attributes.render('class'))|tailwind_merge }}"
         {{ attributes.defaults({
             id: _tooltip_content_id,
             role: 'tooltip',
@@ -30,8 +30,7 @@
             data-side="{{ side }}"
             data-tooltip-target="arrow"
             aria-hidden="true"
-            class="bg-foreground fill-foreground z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5"
-            style="position: absolute;"
+            class="bg-gray-800 z-50 size-2.5 rotate-45 rounded-[2px] absolute data-[side=bottom]:-top-1 data-[side=bottom]:left-1/2 data-[side=bottom]:-translate-x-1/2 data-[side=left]:top-1/2 data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2 data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:left-1/2 data-[side=top]:-bottom-1 data-[side=top]:-translate-x-1/2"
         ></div>
     </div>
 </div>

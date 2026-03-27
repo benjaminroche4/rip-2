@@ -95,8 +95,6 @@ export default class extends Controller {
 
         let wrapperLeft = 0;
         let wrapperTop = 0;
-        let arrowLeft = null;
-        let arrowTop = null;
         const scrollX = window.scrollX;
         const scrollY = window.scrollY;
 
@@ -104,31 +102,21 @@ export default class extends Controller {
             case 'left':
                 wrapperLeft = triggerRect.left + scrollX - contentRect.width - arrowRect.width / 2 - this.sideOffset;
                 wrapperTop = triggerRect.top + scrollY - contentRect.height / 2 + triggerRect.height / 2;
-                arrowTop = contentRect.height / 2 - arrowRect.height / 2;
                 break;
             case 'top':
                 wrapperLeft = triggerRect.left + scrollX - contentRect.width / 2 + triggerRect.width / 2;
                 wrapperTop = triggerRect.top + scrollY - contentRect.height - arrowRect.height / 2 - this.sideOffset;
-                arrowLeft = contentRect.width / 2 - arrowRect.width / 2;
                 break;
             case 'right':
                 wrapperLeft = triggerRect.right + scrollX + arrowRect.width / 2 + this.sideOffset;
                 wrapperTop = triggerRect.top + scrollY - contentRect.height / 2 + triggerRect.height / 2;
-                arrowTop = contentRect.height / 2 - arrowRect.height / 2;
                 break;
             case 'bottom':
                 wrapperLeft = triggerRect.left + scrollX - contentRect.width / 2 + triggerRect.width / 2;
                 wrapperTop = triggerRect.bottom + scrollY + arrowRect.height / 2 + this.sideOffset;
-                arrowLeft = contentRect.width / 2 - arrowRect.width / 2;
                 break;
         }
 
         this.wrapperElement.style.transform = `translate3d(${wrapperLeft}px, ${wrapperTop}px, 0)`;
-        if (arrowLeft !== null) {
-            this.arrowElement.style.left = `${arrowLeft}px`;
-        }
-        if (arrowTop !== null) {
-            this.arrowElement.style.top = `${arrowTop}px`;
-        }
     }
 }
