@@ -494,6 +494,7 @@ home:
             title: You move in
             text: Keys in hand, Paris is yours. Your apartment is ready, your paperwork is done.
         text: '<a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Official GarantMe partner</a>. We facilitate your rental guarantees in Paris.'
+        button: Discover our pricing
     aboutUs:
         title: A serene arrival
         subTitle: Paris becomes your new home
@@ -1326,7 +1327,7 @@ pricing:
     text: Choose the plan made for you.
     package:
         1:
-            eyebrow: The easiest way to get started
+            eyebrow: Ready to settle in
             title: Guided
             text: Save weeks of searching. You visit, we handle everything else.
             listing:

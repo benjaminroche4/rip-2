@@ -59,11 +59,11 @@
     </section>
     <section class="mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
         <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div class="rounded-2xl p-2 border border-slate-100 group order-2 md:order-1 max-w-lg mx-auto">
+            <div class="rounded-2xl p-2 border border-slate-100 group order-2 md:order-1 max-w-lg mx-auto flex flex-col">
                 <div class="mb-1.5 mt-0.5 text-center">
                     <p class="text-sm">{{ 'pricing.package.1.eyebrow'|trans|raw }}</p>
                 </div>
-                <div class="rounded-xl bg-gradient-to-b from-neutral-100 to-neutral-100/0">
+                <div class="rounded-xl bg-gradient-to-b from-neutral-100 to-neutral-100/0 flex flex-col flex-1">
                     <div class="p-4 lg:p-6">
                         <div class="rounded-full p-3 bg-white inline-block">
                             {{ ux_icon('material-symbols:star-rounded', {'class':'size-7 text-gray-900 group-hover:text-primary transition duration-100', 'aria-hidden':'true'}) }}
@@ -75,8 +75,8 @@
                         </div>
                     </div>
                     <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                    <div class="p-4 lg:p-6">
-                        <div class="space-y-3.5">
+                    <div class="p-4 lg:p-6 flex flex-col flex-1">
+                        <div class="flex flex-col flex-1 space-y-3.5">
                             <div class="flex -space-x-1.5">
                                 <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                 <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
@@ -121,7 +121,7 @@
                                     <p class="text-slate-800 font-light">{{ 'pricing.package.1.listing.6'|trans|raw }}</p>
                                 </div>
                             </div>
-                            <div class="mt-6">
+                            <div class="mt-auto pt-6">
                                 <twig:Button variant="outline" as="a" size="lg" class="w-full" href="{{ path('app_contact') }}">
                                     {{ 'pricing.package.1.button'|trans|raw }}
                                 </twig:Button>
@@ -130,14 +130,14 @@
                     </div>
                 </div>
             </div>
-            <div class="rounded-2xl p-2 border border-[#EB9CB0] group bg-gradient-to-b from-[#FFE5EB] to-[#FFE5EB]/0 order-1 md:order-2 max-w-lg mx-auto">
+            <div class="rounded-2xl p-2 border border-[#EB9CB0] group bg-gradient-to-b from-[#FFE5EB] to-[#FFE5EB]/0 order-1 md:order-2 max-w-lg mx-auto flex flex-col">
                 <div class="mb-1.5 mt-0.5 text-center text-primary">
                     <p class="text-sm flex items-center gap-x-2 justify-center">
                         {{ ux_icon('akar-icons:thunder', {'class':'size-3 text-primary', 'aria-hidden':'true'}) }}
                         {{ 'pricing.package.2.eyebrow'|trans|raw }}
                     </p>
                 </div>
-                <div class="rounded-xl bg-white">
+                <div class="rounded-xl bg-white flex flex-col flex-1">
                     <div class="p-4 lg:p-6">
                         <div class="rounded-full p-3 bg-[#FFF4F6] inline-block">
                             {{ ux_icon('tabler:crown-filled', {'class':'size-7 text-primary', 'aria-hidden':'true'}) }}
@@ -149,8 +149,8 @@
                         </div>
                     </div>
                     <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                    <div class="p-4 lg:p-6">
-                        <div class="space-y-3.5">
+                    <div class="p-4 lg:p-6 flex flex-col flex-1">
+                        <div class="flex flex-col flex-1 space-y-3.5">
                             <div class="flex -space-x-1.5">
                                 <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                 <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
@@ -181,6 +181,14 @@
                                         {{ ux_icon('material-symbols:check-small-rounded', {'class':'size-5 text-primary'}) }}
                                     </div>
                                     <p class="text-slate-800 font-light">{{ 'pricing.package.2.listing.4'|trans|raw }}</p>
+                                    <twig:Tooltip id="my-tooltip">
+                                        <twig:Tooltip:Trigger>
+                                            e
+                                        </twig:Tooltip:Trigger>
+                                        <twig:Tooltip:Content>
+                                            <p>Add to library</p>
+                                        </twig:Tooltip:Content>
+                                    </twig:Tooltip>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <div class="bg-[#FFF4F6] rounded-full p-0.5" aria-hidden="true">
@@ -195,7 +203,7 @@
                                     <p class="text-slate-800 font-light">{{ 'pricing.package.2.listing.6'|trans|raw }}</p>
                                 </div>
                             </div>
-                            <div class="mt-6">
+                            <div class="mt-auto pt-6">
                                 <twig:Button variant="default" as="a" size="lg" class="w-full" href="{{ path('app_contact') }}">
                                     {{ 'pricing.package.2.button'|trans|raw }}
                                 </twig:Button>

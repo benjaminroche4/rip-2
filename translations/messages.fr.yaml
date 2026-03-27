@@ -482,6 +482,7 @@ home:
             title: Vous emménagez
             text: Les clés en main, Paris est à vous. Votre appartement est prêt, vos démarches sont faites.
         text: '<a href="https://app.garantme.fr/fr/relocation-in-paris" target="_blank" class="underline underline-offset-4 hover:text-primary transition duration-100">Partenaire officiel GarantMe</a>. Nous facilitons vos garanties locatives à Paris.'
+        button: Découvrez nos tarifs
     keyMetrics:
         title: Nos résultats
         subTitle: Paris devient chez vous. On s'occupe du reste
