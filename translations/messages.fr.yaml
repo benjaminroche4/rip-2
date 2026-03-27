@@ -396,9 +396,9 @@ home:
         top:
             1: Meilleure agence
             2: 'à <span class="font-semibold">Paris en 2025</span>'
-        title: Votre installation à Paris, sans compromis
-        subTitle: Pour les particuliers, familles et professionnels qui s'installent à Paris.
-        button: Contacter un expert
+        title: Installez-vous à Paris en moins de 20 jours
+        subTitle: Votre recherche d'appartement à Paris, confiée à des experts.
+        button: On vous rappelle
         google: 'sur +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
         image:
             alt: Relocation In Paris, agence de relocation à Paris
