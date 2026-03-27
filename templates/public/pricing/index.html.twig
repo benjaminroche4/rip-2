@@ -180,15 +180,19 @@
                                     <div class="bg-[#FFF4F6] rounded-full p-0.5" aria-hidden="true">
                                         {{ ux_icon('material-symbols:check-small-rounded', {'class':'size-5 text-primary'}) }}
                                     </div>
-                                    <p class="text-slate-800 font-light">{{ 'pricing.package.2.listing.4'|trans|raw }}</p>
-                                    <twig:Tooltip id="my-tooltip">
-                                        <twig:Tooltip:Trigger>
-                                            e
-                                        </twig:Tooltip:Trigger>
-                                        <twig:Tooltip:Content>
-                                            <p>Add to library</p>
-                                        </twig:Tooltip:Content>
-                                    </twig:Tooltip>
+                                    <p class="text-slate-800 font-light flex items-center space-x-2">
+                                        {{ 'pricing.package.2.listing.4'|trans|raw }}
+                                        <twig:Tooltip id="my-tooltip">
+                                            <twig:Tooltip:Trigger>
+                                                <span {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %} class="inline-flex cursor-pointer">
+                                                {{ ux_icon('streamline-ultimate:information-circle', {'class':'size-4 text-gray-800 mt-2 p'}) }}
+                                                </span>
+                                            </twig:Tooltip:Trigger>
+                                            <twig:Tooltip:Content side="left">
+                                                <p>Internet, eau, électricité, <br/> assurance habitation</p>
+                                            </twig:Tooltip:Content>
+                                        </twig:Tooltip>
+                                    </p>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <div class="bg-[#FFF4F6] rounded-full p-0.5" aria-hidden="true">
