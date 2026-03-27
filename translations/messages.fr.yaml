@@ -161,7 +161,7 @@ header:
         contactExpert: Contacter un expert
         blog: Nos actualités
     cta:
-        title: Lancer mon projet
+        title: On vous rappelle
         whatsapp:
             title: WhatsApp
             text: Contactez-nous via WhatsApp
@@ -334,6 +334,9 @@ findAccommodation:
                 title: Remise des clés et suivi
                 description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
 meta:
+    pricing:
+        title: Tarifs
+        text: Trouvez votre appartement à Paris avec un expert à vos côtés. Choisissez la formule faite pour vous.
     blog:
         title: Le Blog pour Vivre et S’installer à Paris
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
@@ -1315,3 +1318,56 @@ reviews:
         from: Google
         date: 16 décembre 2025
         alt: "Photo de Nicolas M., client satisfait de Relocation In Paris"
+pricing:
+    title: Nos tarifs
+    subTitle: Installez-vous à Paris, en toute sérénité
+    text: Choisissez la formule faite pour vous.
+    package:
+        1:
+            eyebrow: S'installer facilement
+            title: Accompagné
+            text: Gagnez des semaines de recherche. Vous visitez, nous gérons tout le reste.
+            listing:
+                include: Ce qui est inclus
+                1: Recherche de logement sur mesure
+                2: Accès aux biens off-market
+                3: Planification des visites
+                4: Optimisation de votre dossier locatif
+                5: Gestion des candidatures et des relances
+                6: Agent locatif dédié
+            button: Démarrer ma recherche
+        2:
+            eyebrow: Le plus populaire
+            title: Confié
+            text: Nous gérons tout, de la recherche à l'installation complète. Vous n'avez plus qu'à valider.
+            listing:
+                include: "Toute l'offre <span class='underline underline-offset-4 decoration-dotted decoration-gray-400'>Accompagné</span>, plus"
+                1: Visites assurées par votre agent
+                2: Compte-rendu vidéo après chaque visite
+                3: Suivi jusqu'à la remise des clés
+                4: Accompagnement administratif complet
+                5: Support prioritaire WhatsApp 7j/7
+                6: Accès exclusif aux biens off-market
+            button: Confier ma recherche
+        other:
+            title: Au-delà du logement, nous pensons à tout
+            text: Visa, découverte de quartiers exclusifs, conciergerie, scolarité... Votre installation à Paris, sans rien laisser au hasard.
+            button: Parler à un expert
+    faq:
+        title: FAQ
+        subTitle: Vos questions, nos réponses
+        1:
+            title: Que se passe-t-il si vous ne trouvez pas de logement ?
+            text: Nous ne prenons pas une mission sans être certains de la réussir. Avec plus de 900 relocations réussies et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
+        2:
+            title: Sous combien de temps trouvez-vous un logement ?
+            text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce que fait la différence entre chercher seul et chercher avec nous.
+        3:
+            title: Mon profil est atypique, pouvez-vous quand même m'aider ?
+            text: C'est exactement pourquoi nous existons. Expatriés sans fiches de paie françaises, freelances, étrangers sans garant... notre réseau de propriétaires partenaires nous fait confiance, et cette confiance fait passer votre dossier.
+        4:
+            title: Mon loyer est-il suffisant pour trouver un bon appartement à Paris ?
+            text: Nous commençons toujours par un échange approfondi pour comprendre vos besoins. Ensemble, nous définissons un cahier des charges réaliste et cohérent avec le marché parisien pour que votre recherche parte sur les bonnes bases dès le premier jour.
+        5:
+            title: Puis-je changer d'offre en cours de mission ?
+            text: Oui, tout à fait. Si votre situation évolue en cours de recherche, vous pouvez basculer de l'offre Accompagné vers l'offre Confié à tout moment. Nous nous adaptons à vous, pas l'inverse.

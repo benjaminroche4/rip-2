@@ -19,6 +19,12 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    TalesFromADev\Twig\Extra\Tailwind\TailwindExtension:
+        tags: ['twig.extension']
+
+    TalesFromADev\Twig\Extra\Tailwind\TailwindRuntime:
+        tags: ['twig.runtime']
+
     App\Service\SanityService:
         arguments:
             $sanityProjectId: '%env(SANITY_PROJECT_ID)%'
