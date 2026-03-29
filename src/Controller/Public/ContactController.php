@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
 
@@ -25,6 +26,7 @@ final class ContactController extends AbstractController
         private readonly MailerInterface $mailer,
         private readonly LoggerInterface $logger,
         private readonly TranslatorInterface $translator,
+        private readonly HttpClientInterface $http,
     )
     {
     }
@@ -102,6 +104,26 @@ final class ContactController extends AbstractController
             } catch (TransportExceptionInterface $e) {
                 $this->logger->error('An error occurred while sending :'. $e->getMessage());
             }
+
+            // Send contact data to Make webhook
+/*            try {
+                $this->http->request('POST', $_ENV['MAKE_WEBHOOK_URL'], [
+                    'json' => [
+                        'firstName'  => $contact->getFirstName(),
+                        'lastName'   => $contact->getLastName(),
+                        'email'      => $contact->getEmail(),
+                        'phone'      => $contact->getPhoneNumber(),
+                        'helpType'   => $contact->getHelpType(),
+                        'message'    => $contact->getMessage(),
+                        'company'    => $contact->getCompany(),
+                        'lang'       => $contact->getLang(),
+                        'createdAt'  => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+                    ],
+                    'timeout' => 3,
+                ]);
+            } catch (\Exception $e) {
+                $this->logger->warning('Make webhook failed: ' . $e->getMessage());
+            }*/
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
