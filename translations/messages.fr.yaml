@@ -441,7 +441,7 @@ home:
                 text: Le délai dépend du budget et des critères, mais en moyenne la recherche prend entre quelques jours et quelques semaines.
             4:
                 title: Comment se déroule la recherche d'appartement ?
-                text: Nous analysons vos besoins, sélectionnons les biens adaptés, organisons les visites et vous accompagnons jusqu'à la remise des clés.
+                text: Nous prenons en charge tout ce que vous n'avez pas le temps de gérer, de la sélection des biens jusqu'à la remise des clés, en fonction de vos critères et de votre situation. Chaque accompagnement est unique, pensé sur mesure pour vous.
             5:
                 title: Qu'est-ce qui vous différencie ?
                 text: Nous vous faisons gagner du temps, sécurisons votre dossier et vous donnons accès à des biens en avant-première.
@@ -783,193 +783,48 @@ blog:
 faq:
     title: FAQ
     subTitle: Vous avez des questions ?
-    tabs:
-        1: Locataires
-        2: Entreprises
-        3: Propriétaires
-    tenant:
-        question:
-                1:
-                    title: Que comprend votre service d’installation exactement ?
-                    text: Notre service couvre l’ensemble de votre installation, de la recherche du logement à votre emménagement. Il inclut la sélection des biens, l’organisation des visites, la sécurisation et la signature du bail, l’état des lieux d’entrée ainsi que la mise en service du logement (énergies, internet, assurance habitation). L’objectif est de vous offrir une installation fluide, sécurisée et sans stress, avec un interlocuteur unique à chaque étape.
-                2:
-                    title: Quelle est la différence entre Relocation In Paris et une agence immobilière classique ?
-                    text: Une agence immobilière classique travaille pour le propriétaire et cherche avant tout à louer son stock. Nous sommes des chasseurs d’appartements et travaillons exclusivement pour vous, le locataire. Nous scannons l’ensemble du marché (agences, particuliers, off-market) afin de trouver le bien correspondant à vos critères et de défendre votre dossier.
-                3:
-                    title: Avez-vous accès à des biens off-market ?
-                    text: Oui. Grâce à notre ancienneté et à notre réseau de plus de 80 partenaires à Paris et en Île-de-France, nous avons accès à des biens off-market ou en avant-première, avant leur diffusion sur les grands portails immobiliers. C’est un avantage clé sur un marché très concurrentiel.
-                4:
-                    title: Que se passe-t-il si vous ne trouvez pas d’appartement ?
-                    text: Cette situation est extrêmement rare, car nous validons la faisabilité de votre projet avant toute mission. Depuis notre création, 100 % des recherches menées ont abouti. Tant que le bien n’est pas trouvé, nous poursuivons les recherches ou ajustons la stratégie ensemble. De plus, 50 % de nos honoraires ne sont dus qu’au succès, lors de la signature du bail.
-                5:
-                    title: Puis-je louer un logement à distance avant mon arrivée en France ?
-                    text: Absolument. C’est l’une de nos spécialités. La majorité de nos clients louent à distance. Nous visitons pour vous, inspectons chaque détail, réalisons un compte rendu précis après chaque visite et gérons la signature du bail. Vous arrivez à Paris pour récupérer les clés, en toute sérénité.
-                6:
-                    title: Quels documents sont nécessaires pour louer un appartement à Paris ?
-                    text: Les propriétaires demandent généralement une pièce d’identité, les trois derniers bulletins de salaire, un avis d’imposition, un justificatif de domicile et une attestation d’employeur. Pour les profils plus complexes, nous vous aidons à constituer un dossier solide et rassurant.
-                7:
-                    title: Pouvez-vous accompagner les freelances ou profils sans CDI ?
-                    text: Oui. Nous accompagnons régulièrement des freelances, personnes en période d’essai ou sans CDI. Nous savons comment présenter ces profils auprès des propriétaires et des assureurs, et pouvons vous orienter vers des solutions de garanties adaptées.
-                8:
-                    title: Ai-je besoin d’un garant français ?
-                    text: Un garant est souvent demandé, notamment pour les étudiants et jeunes actifs. Si vous n’en avez pas, nous travaillons avec des organismes de cautionnement reconnus, capables d’agir comme garant institutionnel auprès des agences et propriétaires parisiens.
-                9:
-                    title: Accompagnez-vous les étudiants et les colocations ?
-                    text: Oui. Nous accompagnons des étudiants français et internationaux, ainsi que des projets de colocation. Selon la solidité du dossier et les critères définis, nous adaptons notre stratégie pour identifier les meilleures opportunités.
-                10:
-                    title: Combien de temps faut-il pour trouver un logement à Paris ?
-                    text: Une fois votre dossier complet et le mandat signé, le délai moyen est d’environ 20 jours. Pour les demandes urgentes, notre réactivité permet parfois de finaliser une location en moins d’une semaine.
-                11:
-                    title: Quel budget prévoir pour louer à Paris ?
-                    text: En 2026, le budget moyen se situe entre 35 et 45 € par m² pour une location meublée de qualité dans le centre de Paris. Un studio débute généralement autour de 800 à 900 €, et un deux-pièces entre 1 400 et 1 700 €. Une estimation précise est réalisée lors de notre premier échange.
-                12:
-                    title: Quels arrondissements sont les plus adaptés à mon profil ?
-                    text: Chaque arrondissement possède sa propre identité. Le choix dépend de votre mode de vie, de votre travail, de votre situation familiale et de vos priorités. Lors de notre entretien, nous vous conseillons les quartiers les plus adaptés à votre profil.
-                13:
-                    title: Proposez-vous des locations meublées et non meublées ?
-                    text: Oui. Nous recherchons aussi bien des biens meublés que non meublés. Le meublé offre une solution flexible et immédiatement habitable, tandis que le non meublé convient davantage aux installations longue durée.
-                14:
-                    title: Quelle est la durée minimale d’un bail ?
-                    text: Pour un logement meublé, le bail est généralement d’un an renouvelable. Pour un logement vide, il est de trois ans. Il existe également le bail mobilité, d’une durée de 1 à 10 mois. À Paris, le préavis de départ est d’un mois.
-                15:
-                    title: Les charges sont-elles incluses dans le loyer ?
-                    text: Les charges locatives incluent généralement l’eau froide, l’entretien des parties communes et l’ascenseur. L’électricité, le gaz et l’internet restent souvent à la charge du locataire, sauf mention spécifique de type forfait tout inclus.
-                16:
-                    title: Comment fonctionnent vos honoraires ?
-                    text: Nos honoraires sont transparents et orientés résultat. 50 % sont réglés au lancement de la mission afin d’activer la recherche. Les 50 % restants sont dus uniquement au succès, lors de la signature du bail.
-                17:
-                    title: Vos honoraires incluent-ils les frais d’agence du logement ?
-                    text: Nos honoraires couvrent exclusivement notre service de recherche et d’accompagnement. Les frais d’agence du logement, lorsqu’ils existent, sont distincts et encadrés par la loi. Lorsque le bien provient d’un propriétaire particulier, aucun frais d’agence supplémentaire ne s’applique.
-                18:
-                    title: Proposez-vous un accompagnement après l’emménagement ?
-                    text: Oui. Nous vous assistons pour l’ouverture des compteurs, l’installation internet et l’assurance habitation, et restons disponibles pour faciliter votre installation après votre arrivée.
-                19:
-                    title: Aidez-vous pour les démarches de visa ou titre de séjour ?
-                    text: Nous collaborons avec des partenaires spécialisés en immigration et pouvons coordonner votre installation logement avec vos démarches administratives afin d’assurer une arrivée fluide en France.
-    company:
-        question:
-            1:
-                title: Pourquoi faire appel à une agence de relocation pour vos collaborateurs ?
-                text: Faire appel à une agence de relocation permet de gagner du temps, de sécuriser vos recrutements et d’accueillir vos talents dans les meilleures conditions. Un collaborateur qui rencontre des difficultés de logement est plus stressé et moins productif. En nous déléguant cette mission, vous offrez une arrivée sereine à vos talents, valorisez votre marque employeur et libérez vos équipes RH d’une charge administrative chronophage.
-            2:
-                title: Quel est le coût du service pour l’entreprise ?
-                text: Nos prestations fonctionnent sur devis personnalisé. Le coût dépend de la complexité de la mission (recherche familiale, studio, arrivée urgente) et du volume de dossiers confiés. Il s’agit d’un investissement mesuré, largement inférieur au coût d’un recrutement raté ou d’un collaborateur qui quitterait l’entreprise faute de logement.
-            3:
-                title: Le service est-il à la charge de l’entreprise ou du collaborateur ?
-                text: Cela dépend de votre politique RH. Dans la majorité des cas, l’entreprise prend en charge les frais de relocation dans le package d’accueil afin d’attirer les talents. Certaines entreprises optent pour un remboursement sur note de frais ou une prise en charge partielle. Nous nous adaptons à votre fonctionnement interne.
-            4:
-                title: Quelle est la charge de travail pour les équipes RH ?
-                text: Elle est proche de zéro. Une fois le collaborateur mis en relation avec nos équipes, nous prenons le relais intégralement. Vous êtes informés de l’avancée via un reporting régulier jusqu’à la signature du bail, sans gestion opérationnelle de votre côté.
-            5:
-                title: Accompagnez-vous aussi les petites entreprises et les startups ?
-                text: Oui. Qu’il s’agisse d’un premier recrutement international ou de la gestion de plusieurs mobilités par an, nous adaptons notre accompagnement. Pour une startup, la relocation est souvent un levier décisif pour attirer des talents étrangers face à la concurrence.
-            6:
-                title: Gérez-vous l’arrivée de collaborateurs étrangers ?
-                text: Oui, c’est notre cœur de métier. Nous maîtrisons les enjeux liés à la mobilité internationale et agissons comme tiers de confiance pour sécuriser les dossiers, rassurer les propriétaires et garantir une installation fluide à Paris.
-            7:
-                title: Accompagnez-vous également les familles des collaborateurs ?
-                text: Oui. Une mobilité réussie implique toute la famille. Nous proposons un accompagnement incluant la recherche d’écoles, l’inscription en crèche et une aide à l’intégration du conjoint.
-            8:
-                title: Pouvez-vous proposer des logements temporaires ou du corporate housing ?
-                text: Oui. Pour les missions de courte durée ou en attendant un logement définitif, nous disposons d’un accès à des appartements meublés prêts à vivre, avec services inclus et disponibilité immédiate.
-            9:
-                title: Organisez-vous les visites pour le collaborateur ?
-                text: Oui. Nous pré-sélectionnons les biens les plus adaptés et organisons l’ensemble des visites. Chaque visite donne lieu à un compte rendu détaillé afin de sécuriser la prise de décision du collaborateur.
-            10:
-                title: Aidez-vous pour les démarches administratives ?
-                text: Oui. Nous coordonnons les démarches liées au logement et travaillons avec des partenaires spécialisés pour les volets immigration, visa, titre de séjour et affiliation à la sécurité sociale, afin d’offrir un guichet unique.
-            11:
-                title: Quelle est votre zone d’intervention géographique ?
-                text: Nous intervenons à Paris intra-muros ainsi que sur l’ensemble de la petite et grande couronne. Nous adaptons la recherche afin de minimiser les temps de trajet domicile-travail.
-            12:
-                title: Comment les équipes RH sont-elles informées de l’avancée de la recherche ?
-                text: Nous travaillons en autonomie avec le collaborateur tout en fournissant aux RH un reporting régulier, à chaque étape clé, garantissant visibilité et respect des délais sans surcharge opérationnelle.
-            13:
-                title: Gérez-vous également les stagiaires et profils juniors ?
-                text: Oui. Grâce à nos partenariats avec des résidences et des propriétaires privés, nous proposons des solutions adaptées aux budgets des stagiaires, alternants et jeunes actifs.
-            14:
-                title: Comment fonctionne la facturation de vos honoraires ?
-                text: Un acompte de 50 % est demandé au lancement de la mission afin de mobiliser nos équipes. Les 50 % restants sont dus uniquement à la réussite, une fois les collaborateurs installés et les baux signés. Pour les volumes importants, une facturation périodique peut être mise en place.
-            15:
-                title: Intervenez-vous lors d’un déménagement de siège social ?
-                text: Oui. Nous pouvons déployer une cellule dédiée pour accompagner simultanément la relocation de plusieurs collaborateurs et familles, avec des réunions collectives et un suivi individualisé.
-            16:
-                title: Quels sont vos délais pour installer un collaborateur ?
-                text: En moyenne, un collaborateur est logé sous 20 jours après validation du mandat. Pour les situations urgentes ou profils stratégiques, nous pouvons accélérer via notre réseau off-market.
-            17:
-                title: Fournissez-vous une assistance pour l’ouverture des compteurs et internet ?
-                text: Oui. Le collaborateur arrive dans un logement prêt à vivre, avec électricité, gaz et internet déjà fonctionnels, lui permettant d’être opérationnel immédiatement.
-            18:
-                title: Comment garantissez-vous la confidentialité des données ?
-                text: La confidentialité est absolue. Seules les données strictement nécessaires à la constitution du dossier locatif sont transmises, via des canaux sécurisés. Pour les profils sensibles ou dirigeants, un protocole de discrétion renforcé est appliqué.
-            19:
-                title: Disposez-vous d’une assurance professionnelle ?
-                text: Oui. Nous disposons d’une Responsabilité Civile Professionnelle couvrant l’ensemble de nos activités de conseil et de recherche, garantissant la sécurité de nos interventions.
-            20:
-                title: Comment démarrer un partenariat avec Relocation In Paris ?
-                text: Il suffit de nous contacter via le formulaire dédié ou par téléphone. Après un échange sur vos besoins, nous lançons la mission dès la signature d’un mandat simple.
-    landlord:
-        question:
-            1:
-                title: En quoi êtes-vous différents d’une agence de gestion classique ?
-                text: "Une agence classique publie une annonce et attend les candidatures. Chez Relocation In Paris, la démarche est inverse: nous disposons déjà d’un flux constant de locataires qualifiés issus de notre réseau d’entreprises et de salariés en mobilité. Votre bien est proposé directement à cette clientèle ciblée, ce qui réduit fortement les délais de location."
-            2:
-                title: Quel type de locataires installez-vous dans les biens ?
-                text: "Nous sélectionnons une clientèle premium et sécurisante: cadres en mutation, familles, expatriés, diplomates ou consultants en mission longue. Ces profils disposent de revenus confortables, souvent garantis par leur entreprise, et prennent soin des logements."
-            3:
-                title: Quels types de biens recherchez-vous en priorité ?
-                text: "Nous travaillons principalement sur des biens situés à Paris intra-muros ou en proche banlieue Ouest. Du studio fonctionnel à l’appartement familial, le critère commun reste la qualité: un bien propre, lumineux, bien situé et bien entretenu."
-            4:
-                title: Dois-je obligatoirement louer mon bien en meublé ?
-                text: Nous gérons aussi bien les locations meublées que non meublées. Le meublé est toutefois souvent privilégié par notre clientèle en mobilité, car il permet une installation immédiate, une location plus rapide et une plus grande souplesse contractuelle. Les biens non meublés restent parfaitement adaptés à une stratégie de location longue durée.
-            5:
-                title: Quels types de baux proposez-vous ?
-                text: Selon votre bien et vos objectifs, nous proposons le bail mobilité (1 à 10 mois), le bail code civil signé avec une entreprise, ou le bail meublé classique d’un an. Chaque option est étudiée afin de concilier sécurité, flexibilité et rentabilité.
-            6:
-                title: Quels sont les avantages du bail code civil pour un propriétaire ?
-                text: Le bail code civil, signé avec une entreprise, offre une grande liberté contractuelle et une sécurité accrue. Il n’est pas soumis à certaines contraintes de la loi de 1989 et garantit un paiement ponctuel par une personne morale.
-            7:
-                title: Comment sélectionnez-vous les dossiers des locataires ?
-                text: La sélection est rigoureuse. Nous vérifions l’identité, la solvabilité, la situation professionnelle et les garanties. Pour les locations via entreprise, nous analysons également la solidité financière de celle-ci. Seuls des dossiers entièrement validés vous sont présentés.
-            8:
-                title: Que se passe-t-il en cas d’impayé ?
-                text: Le risque est très limité avec notre clientèle corporate. Pour une sécurité maximale, nous pouvons mettre en place une assurance loyers impayés ou des garanties complémentaires. En gestion complète, nous assurons le suivi, la relance et le recouvrement dès le premier retard.
-            9:
-                title: Que comprend votre service de gestion locative ?
-                text: "Nous gérons l’ensemble du processus: recherche du locataire, rédaction du bail, états des lieux, encaissement des loyers, quittances, révision annuelle, régularisation des charges et gestion des incidents techniques. Vous percevez vos loyers sans gérer le quotidien."
-            10:
-                title: Qui s’occupe de la maintenance et des réparations ?
-                text: Nous coordonnons les interventions via notre réseau d’artisans partenaires. Les travaux sont réalisés après validation de votre part sur devis, sauf urgence ou seuil préalablement défini.
-            11:
-                title: Gérez-vous le ménage et le linge entre deux locations ?
-                text: Oui. Nous organisons un ménage professionnel et la gestion du linge afin de garantir un standing constant et une présentation irréprochable du logement.
-            12:
-                title: Puis-je vous confier uniquement la recherche de locataire ?
-                text: Oui. Nous proposons un mandat de recherche seul. Vous bénéficiez de notre réseau de locataires premium et d’une mise en location rapide. Une fois le bail signé et l’état des lieux réalisé, la gestion vous est restituée.
-            13:
-                title: Comment se déroule la remise des clés ?
-                text: Nous assurons l’accueil du locataire, expliquons le fonctionnement du logement et des équipements afin de garantir une installation fluide et autonome.
-            14:
-                title: Comment sont calculés vos honoraires de gestion ?
-                text: Nos honoraires correspondent à un pourcentage des sommes encaissées, variable selon la durée et le type de location. Ils sont entièrement déductibles des revenus fonciers.
-            15:
-                title: Aidez-vous à fixer le montant du loyer ?
-                text: Oui. Nous réalisons une estimation précise en tenant compte du marché, de l’état du bien, de son standing et de la réglementation en vigueur, notamment l’encadrement des loyers à Paris.
-            16:
-                title: Comment gérez-vous l’encadrement des loyers à Paris ?
-                text: Nous respectons strictement la réglementation afin d’éviter tout risque juridique. Certains dispositifs, comme le bail code civil ou le complément de loyer pour des caractéristiques exceptionnelles, permettent toutefois une optimisation légale.
-            17:
-                title: Pouvez-vous meubler un appartement vide ?
-                text: Oui. Nous accompagnons l’ameublement, la décoration et le home staging via notre réseau de partenaires afin de rendre le bien attractif pour une clientèle internationale.
-            18:
-                title: Quels diagnostics sont obligatoires pour louer ?
-                text: Le DPE, le diagnostic plomb et l’état des risques et pollutions sont requis. Nous vérifions leur validité et pouvons organiser leur réalisation si nécessaire.
-            19:
-                title: En combien de temps trouvez-vous un locataire ?
-                text: Pour un bien au prix du marché et en bon état, nous trouvons généralement un locataire qualifié en moins de 2 à 3 semaines, parfois en quelques jours pour les biens très recherchés.
-            20:
-                title: Puis-je récupérer mon bien pour y habiter ?
-                text: Oui. Les locations meublées et certains baux offrent une grande souplesse de reprise. Nous anticipons ces situations dès la rédaction du bail afin de respecter les délais et conditions légales.
+    1:
+        title: Que se passe-t-il si vous ne trouvez pas de logement ?
+        text: Nous ne prenons pas une mission sans être certains de la réussir. Avec plus de 900 relocations réussies et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
+    2:
+        title: Sous combien de temps trouvez-vous un logement ?
+        text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce que fait la différence entre chercher seul et chercher avec nous.
+    3:
+        title: Mon profil est atypique, pouvez-vous quand même m'aider ?
+        text: C'est exactement pourquoi nous existons. Expatriés sans fiches de paie françaises, freelances, étrangers sans garant... notre réseau de propriétaires partenaires nous fait confiance, et cette confiance fait passer votre dossier.
+    4:
+        title: Mon loyer est-il suffisant pour trouver un bon appartement à Paris ?
+        text: Nous commençons toujours par un échange approfondi pour comprendre vos besoins. Ensemble, nous définissons un cahier des charges réaliste et cohérent avec le marché parisien pour que votre recherche parte sur les bonnes bases dès le premier jour.
+    5:
+        title: Puis-je changer d'offre en cours de mission ?
+        text: Oui, tout à fait. Si votre situation évolue en cours de recherche, vous pouvez basculer de l'offre Accompagné vers l'offre Confié à tout moment. Nous nous adaptons à vous, pas l'inverse.
+    6:
+        title: Pour qui est fait votre service ?
+        text: "Notre service s'adresse à toute personne qui souhaite s'installer à Paris : expatriés en mission, familles en relocation, cadres, jeunes actifs, étudiants, entrepreneurs tous ceux qui veulent poser leurs valises sans perdre de temps."
+    7:
+        title: Comment se déroule la recherche d'appartement ?
+        text: Nous prenons en charge tout ce que vous n'avez pas le temps de gérer, de la sélection des biens jusqu'à la remise des clés, en fonction de vos critères et de votre situation. Chaque accompagnement est unique, pensé sur mesure pour vous.
+    8:
+        title: Peut-on trouver un appartement à Paris sans se déplacer ?
+        text: Oui, c'est exactement pour ça que nous existons. La plupart de nos clients sont à l'étranger ou en dehors de Paris au moment où ils commencent leur recherche. Nous gérons les visites, les échanges avec les propriétaires et le montage du dossier à votre place. Vous validez à distance, on s'occupe du reste.
+    9:
+        title: Est-ce que vos honoraires sont inclus dans le loyer ?
+        text: Non. Nos honoraires sont indépendants du loyer et des frais d'agence. Grâce à notre réseau exclusif et nos contacts directs avec les propriétaires, certains biens sont proposés sans frais d'agence, ce qui réduit significativement votre coût d'installation.
+    10:
+        title: Quels documents faut-il préparer pour un dossier locatif ?
+        text: Pas d'inquiétude, nous vous envoyons la liste complète des documents à préparer dès la signature de votre contrat de mission. Chaque dossier est unique, votre expert vous guide personnellement selon votre situation pour constituer le dossier le plus solide possible.
+    11:
+        title: Quels types de biens proposez-vous ?
+        text: Tout dépend de vos critères et de vos besoins. Studio, deux-pièces, grand appartement familial, meublé ou vide. Nous adaptons la recherche à votre situation. Notre accompagnement est 100% sur mesure, pas de catalogue préétabli.
+    12:
+        title: Quels arrondissements couvrez-vous ?
+        text: Nous intervenons sur l'ensemble des 20 arrondissements de Paris ainsi que dans toute la petite couronne.
+    13:
+        title: Combien de logements me proposez-vous ?
+        text: "Cela dépend du marché et de votre situation. Nous ne visons pas le volume notre approche est qualitative : chaque bien sélectionné correspond réellement à vos critères."
+    14:
+        title: Vous occupez-vous des démarches administratives ?
+        text: "Oui. Nous vous accompagnons sur les démarches essentielles à votre installation selon l'offre : ouverture des contrats d'électricité, de gaz, d'internet, mais aussi les démarches liées au visa et à votre situation administrative en France."
 propertyManagement:
     hero:
         title: Confiez-nous la gestion de votre bien
