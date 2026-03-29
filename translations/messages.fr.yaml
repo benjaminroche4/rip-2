@@ -1373,3 +1373,16 @@ pricing:
         5:
             title: Puis-je changer d'offre en cours de mission ?
             text: Oui, tout à fait. Si votre situation évolue en cours de recherche, vous pouvez basculer de l'offre Accompagné vers l'offre Confié à tout moment. Nous nous adaptons à vous, pas l'inverse.
+error:
+    403:
+        title: Accès refusé
+        text: Vous n'avez pas les droits pour accéder à cette page.
+        button: Retour à l'accueil
+    404:
+        title: Oops ! On s'est perdus en chemin...
+        text: Cette page n'existe plus ou a changé d'adresse.
+        button: Retour à l'accueil
+    500:
+        title: Une erreur est survenue
+        text: Une erreur inattendue s'est produite. Réessayez dans quelques instants.
+        button: Réessayer

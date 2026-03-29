@@ -1375,3 +1375,16 @@ pricing:
         5:
             title: Can I switch plans during my search?
             text: Absolutely. If your situation changes, you can move from Guided to Entrusted at any time. We adapt to you, not the other way around.
+error:
+    403:
+        title: Access denied
+        text: You don't have permission to access this page.
+        button: Back to home
+    404:
+        title: Oops! Looks like we took a wrong turn...
+        text: This page no longer exists or has moved.
+        button: Back to home
+    500:
+        title: Something went wrong
+        text: An unexpected error occurred. Please try again in a few moments.
+        button: Try again

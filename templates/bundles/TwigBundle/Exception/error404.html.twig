@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}404{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-30">
+        <div class="flex justify-center flex-col items-center w-full">
+            <svg class="w-full max-w-2xl h-auto" viewBox="0 0 788 282" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M206.112 6.43457V176.643H237.085V234.379H206.112V276.405H135.293V234.379H4.57812V176.997L4.65625 176.875L112.798 6.66602L112.945 6.43457H206.112ZM77.498 175.186V176.643H136.868V83.083H135.544L77.498 175.186Z" fill="url(#paint0_linear_3666_112491)" stroke="url(#paint1_linear_3666_112491)"/>
+                <path d="M393.297 0.5C417.884 0.500007 439.15 5.94591 457.076 16.8574L457.914 17.3682C475.435 28.1772 488.97 43.802 498.521 64.2217C508.224 84.9675 513.02 110.128 512.933 139.687L512.918 142.462C512.625 171.008 507.789 195.548 498.391 216.067C488.842 236.916 475.309 252.972 457.79 264.213L456.952 264.744C439.113 275.921 417.887 281.5 393.297 281.5H393.295C368.705 281.412 347.436 275.746 329.51 264.481C311.584 253.217 297.772 236.985 288.071 215.805C278.37 194.623 273.573 169.245 273.661 139.686C273.749 110.041 278.59 84.8366 288.204 64.0918L288.205 64.0898C297.907 43.3471 311.676 27.5519 329.516 16.7266L329.517 16.7256C347.443 5.90151 368.71 0.5 393.297 0.5ZM393.297 60.3369C380.853 60.3369 370.675 66.6069 362.751 79.2764C355.079 91.5434 351.005 110.8 350.599 137.121L350.57 139.689C350.483 158.485 352.282 173.927 355.952 186.032L356.301 187.15C359.944 198.612 364.884 207.076 371.091 212.594C377.593 218.296 384.989 221.138 393.297 221.138C405.735 221.138 415.958 214.699 423.973 201.676L423.974 201.675C432.069 188.575 436.111 167.941 436.023 139.688V139.687C436.023 121.241 434.18 106.193 430.511 94.5273C426.837 82.8473 421.781 74.2738 415.374 68.752L415.371 68.75C408.958 63.1366 401.607 60.3369 393.297 60.3369Z" fill="url(#paint2_linear_3666_112491)" stroke="url(#paint3_linear_3666_112491)"/>
+                <path d="M753.112 6.43457V176.643H784.085V234.379H753.112V276.405H682.293V234.379H551.578V176.997L551.656 176.875L659.798 6.66602L659.945 6.43457H753.112ZM624.498 175.186V176.643H683.868V83.083H682.544L624.498 175.186Z" fill="url(#paint4_linear_3666_112491)" stroke="url(#paint5_linear_3666_112491)"/>
+                <defs>
+                    <linearGradient id="paint0_linear_3666_112491" x1="120.832" y1="6.93457" x2="120.5" y2="228" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FEF1F3"/>
+                        <stop offset="1" stop-color="white"/>
+                    </linearGradient>
+                    <linearGradient id="paint1_linear_3666_112491" x1="120.832" y1="6.93457" x2="125" y2="245" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFDAE3"/>
+                        <stop offset="1" stop-color="#FFDAE3" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint2_linear_3666_112491" x1="393.297" y1="1" x2="392.948" y2="231.13" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FEF1F3"/>
+                        <stop offset="1" stop-color="white"/>
+                    </linearGradient>
+                    <linearGradient id="paint3_linear_3666_112491" x1="393.297" y1="1" x2="397.686" y2="248.825" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFDAE3"/>
+                        <stop offset="1" stop-color="#FFDAE3" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint4_linear_3666_112491" x1="667.832" y1="6.93457" x2="667.5" y2="228" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FEF1F3"/>
+                        <stop offset="1" stop-color="white"/>
+                    </linearGradient>
+                    <linearGradient id="paint5_linear_3666_112491" x1="667.832" y1="6.93457" x2="672" y2="245" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFDAE3"/>
+                        <stop offset="1" stop-color="#FFDAE3" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+
+            <div class="text-center space-y-4">
+                <h1 class="text-pretty font-semibold text-2xl lg:text-3xl text-primary">{{ 'error.404.title'|trans|raw }}</h1>
+                <p class="text-pretty mx-auto text-slate-600 font-light max-w-sm">{{ 'error.404.text'|trans|raw }}</p>
+                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_home') }}" class="mt-3">
+                    {{ 'error.404.button'|trans|raw }}
+                </twig:Button>
+            </div>
+        </div>
+    </section>
+{% endblock %}
