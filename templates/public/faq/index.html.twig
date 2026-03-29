@@ -4,11 +4,96 @@
 {% block description %}{{ 'meta.faq.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_faq') }}{% endblock %}
 
+{% block schema_page %}
+    ,{
+        "@type": "FAQPage",
+        "@id": "https://relocation-in-paris.fr{{ path('app_faq') }}/#faqpage",
+        "url": "https://relocation-in-paris.fr{{ path('app_faq') }}",
+        "name": "{{ 'meta.faq.title'|trans|striptags|e('js') }}",
+        "description": "{{ 'meta.faq.description'|trans|striptags|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
+        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.1.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.1.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.2.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.2.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.3.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.3.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.4.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.4.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.5.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.5.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.6.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.6.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.7.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.7.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.8.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.8.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.9.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.9.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.10.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.10.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.11.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.11.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.12.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.12.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.13.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.13.text'|trans|striptags|e('js') }}" }
+            },
+            {
+                "@type": "Question",
+                "name": "{{ 'faq.14.title'|trans|striptags|e('js') }}",
+                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.14.text'|trans|striptags|e('js') }}" }
+            }
+        ]
+    }
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pt-16 pt-12 lg:pb-10 pb-6">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <h1 class="text-center font-semibold text-primary font-secondary">{{ 'faq.title'|trans|raw }}</h1>
-            <h2 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'faq.subTitle'|trans|raw }}</h2>
+            <p class="text-center font-semibold text-primary font-secondary">{{ 'faq.title'|trans|raw }}</p>
+            <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'faq.subTitle'|trans|raw }}</h1>
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 mt-8">
