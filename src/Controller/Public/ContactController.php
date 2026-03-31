@@ -106,7 +106,7 @@ final class ContactController extends AbstractController
             }
 
             // Send contact data to Make webhook
-/*            try {
+            try {
                 $this->http->request('POST', $_ENV['MAKE_WEBHOOK_URL'], [
                     'json' => [
                         'firstName'  => $contact->getFirstName(),
@@ -123,7 +123,7 @@ final class ContactController extends AbstractController
                 ]);
             } catch (\Exception $e) {
                 $this->logger->warning('Make webhook failed: ' . $e->getMessage());
-            }*/
+            }
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
