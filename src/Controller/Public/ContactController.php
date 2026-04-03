@@ -66,7 +66,7 @@ final class ContactController extends AbstractController
                 ->subject('📩 Demande de contact | Relocation In Paris')
                 ->htmlTemplate('emails/contact_admin.html.twig')
                 ->context([
-                    'fistName' => $contact->getFirstName(),
+                    'firstName' => $contact->getFirstName(),
                     'lastName' => $contact->getLastName(),
                     'emailContact' => $contact->getEmail(),
                     'phoneNumber' => $contact->getPhoneNumber(),
@@ -87,7 +87,7 @@ final class ContactController extends AbstractController
                 )
                 ->htmlTemplate('emails/contact_client.html.twig')
                 ->context([
-                    'fistName' => $contact->getFirstName(),
+                    'firstName' => $contact->getFirstName(),
                     'lastName' => $contact->getLastName(),
                     'emailContact' => $contact->getEmail(),
                     'phoneNumber' => $contact->getPhoneNumber(),
