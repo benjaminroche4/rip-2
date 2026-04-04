@@ -175,7 +175,7 @@ final class MarketplaceController extends AbstractController
                 position: new Point($property['location']['lat'], $property['location']['lng']),
                 title: $property['address']['street'] ?? $property['title'] ?? '',
                 icon: $icon,
-                extra: ['hoverIconUrl' => 'data:image/svg+xml;base64,' . base64_encode($hoverSvg)],
+                extra: ['hoverSvg' => $hoverSvg],
                 infoWindow: new InfoWindow(
                     headerContent: '<b>Lyon</b>',
                     content: 'The French town in the historic Rhône-Alpes region, located at the junction of the Rhône and Saône rivers.'
