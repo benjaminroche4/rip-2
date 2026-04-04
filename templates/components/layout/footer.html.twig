@@ -152,6 +152,12 @@
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
                         <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.management'|trans|raw }}</a>
                         <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findTenant'|trans|raw }}</a>
+                        <a href="{{ path('app_property') }}" class="{% if app.request.attributes.get('_route') == 'app_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">
+                            {{ 'footer.menu.ourProperty'|trans|raw }}
+                            <twig:Badge variant="primary" class="ml-0.5 rounded-full">
+                                Beta
+                            </twig:Badge>
+                        </a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">

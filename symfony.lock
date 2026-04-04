@@ -306,6 +306,15 @@
             "templates/base.html.twig"
         ]
     },
+    "symfony/ux-google-map": {
+        "version": "2.34",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.22",
+            "ref": "c571ed5f392f3574791a65f9881c54af3c44368d"
+        }
+    },
     "symfony/ux-icons": {
         "version": "2.30",
         "recipe": {
@@ -316,6 +325,18 @@
         },
         "files": [
             "assets/icons/symfony.svg"
+        ]
+    },
+    "symfony/ux-map": {
+        "version": "2.34",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.19",
+            "ref": "04de870967555f00bd82f542e9e2d29683c3d39e"
+        },
+        "files": [
+            "config/packages/ux_map.yaml"
         ]
     },
     "symfony/ux-toolkit": {

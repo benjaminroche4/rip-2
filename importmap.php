@@ -52,4 +52,10 @@ return [
     'canvas-confetti' => [
         'version' => '1.9.4',
     ],
+    '@googlemaps/js-api-loader' => [
+        'version' => '1.16.10',
+    ],
+    '@symfony/ux-google-map' => [
+        'path' => './vendor/symfony/ux-google-map/assets/dist/map_controller.js',
+    ],
 ];
