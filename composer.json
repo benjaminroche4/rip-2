@@ -46,6 +46,7 @@
         "symfony/twig-bundle": "7.3.*",
         "symfony/ux-google-map": "^2.34",
         "symfony/ux-icons": "^2.30",
+        "symfony/ux-live-component": "^2.34",
         "symfony/ux-map": "^2.34",
         "symfony/ux-turbo": "^2.30",
         "symfony/ux-twig-component": "^2.34",

@@ -58,4 +58,7 @@ return [
     '@symfony/ux-google-map' => [
         'path' => './vendor/symfony/ux-google-map/assets/dist/map_controller.js',
     ],
+    '@symfony/ux-live-component' => [
+        'path' => './vendor/symfony/ux-live-component/assets/dist/live_controller.js',
+    ],
 ];
