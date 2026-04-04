@@ -104,16 +104,26 @@ final class MarketplaceController extends AbstractController
             ->center(new Point(48.8566, 2.3522))
             ->zoom(12)
             ->minZoom(9)
+            ->maxZoom(17)
             ->options(new GoogleOptions(
+                gestureHandling: GestureHandling::GREEDY,
                 mapTypeControl: false,
                 streetViewControl: false,
-                fullscreenControl: false,
-                gestureHandling: GestureHandling::GREEDY
+                fullscreenControl: false
             ));
 
 
+        // Paris + petite couronne (92, 93, 94) bounding box
+        $bounds = ['south' => 48.69, 'north' => 49.01, 'west' => 2.09, 'east' => 2.67];
+
         foreach ($properties as $property) {
             if (empty($property['location']['lat']) || empty($property['location']['lng'])) {
+                continue;
+            }
+
+            $lat = $property['location']['lat'];
+            $lng = $property['location']['lng'];
+            if ($lat < $bounds['south'] || $lat > $bounds['north'] || $lng < $bounds['west'] || $lng > $bounds['east']) {
                 continue;
             }
 
