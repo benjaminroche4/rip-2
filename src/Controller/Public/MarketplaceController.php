@@ -64,8 +64,12 @@ final class MarketplaceController extends AbstractController
                         categoryFlags,
                         "slug": slug.current,
                         "address": address{city, postalCode, street, number},
-                        "mainPhoto": photos[0].asset->url,
-                        "mainPhotoAlt": photos[0].alt,
+                        "photos": photos[0..4]{
+                            "url": asset->url,
+                            "alt": alt
+                        },
+                        availableDate,
+                        "agentPhoto": agent->photo.asset->url,
                         "photoCount": count(photos),
                         "location": location{lat, lng}
                     }'
