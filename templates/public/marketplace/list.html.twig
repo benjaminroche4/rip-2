@@ -20,143 +20,43 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {% for property in properties %}
-
-                            <article class="flex flex-col border border-slate-100 rounded-2xl overflow-hidden bg-white">
-
-                                {# Photo #}
-                                <div class="relative overflow-hidden aspect-3/2 bg-slate-100">
-                                    {% if property.mainPhoto %}
-                                        <img
-                                            src="{{ property.mainPhoto }}?w=600&h=400&fit=crop&auto=format&q=80"
-                                            alt="{{ property.mainPhotoAlt|default(property.title|default('Bien immobilier')) }}"
-                                            loading="lazy"
-                                            width="600"
-                                            height="400"
-                                            class="w-full h-full object-cover"
-                                        />
-                                    {% else %}
-                                        <div class="w-full h-full flex items-center justify-center bg-slate-100">
-                                            Housse
-                                        </div>
-                                    {% endif %}
-
-                                    {# Badges top-left #}
-                                    <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-
-
-                                    </div>
-
-                                    {# Photo count badge top-right #}
-                                    {% if property.photoCount is defined and property.photoCount > 1 %}
-                                        <div class="absolute top-3 right-3">
-                                            <twig:Badge variant="secondary" class="gap-x-1">
-                                                {{ property.photoCount }}
-                                            </twig:Badge>
-                                        </div>
-                                    {% endif %}
-
-                                    {# Status badge bottom-left #}
-                                    {% if property.status is defined %}
-                                        <div class="absolute bottom-3 left-3">
-                                            {% if property.status == 'available' %}
-                                                <twig:Badge variant="destructive">
-                                                    <span class="size-1.5 rounded-full bg-green-500 inline-block mr-1"></span>
-                                                    {{ 'marketplace.status.available'|trans|default('Disponible') }}
-                                                </twig:Badge>
-                                            {% elseif property.status == 'under_offer' %}
-                                                <twig:Badge variant="destructive">
-                                                    <span class="size-1.5 rounded-full bg-amber-500 inline-block mr-1"></span>
-                                                    {{ 'marketplace.status.under_offer'|trans|default('Offre en cours') }}
-                                                </twig:Badge>
-                                            {% elseif property.status == 'rented' %}
-                                                <twig:Badge variant="destructive">
-                                                    <span class="size-1.5 rounded-full bg-red-500 inline-block mr-1"></span>
-                                                    {{ 'marketplace.status.rented'|trans|default('Loué') }}
-                                                </twig:Badge>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
+                            <article class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
+                                <div class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50">
+                                    <img
+                                        src="{{ property.mainPhoto }}?w=600&h=400&fit=crop&auto=format&q=80"
+                                        alt="{{ property.mainPhotoAlt|default(property.title|default('Bien immobilier')) }}"
+                                        loading="lazy"
+                                        width="600"
+                                        height="400"
+                                        class="w-full h-full object-cover rounded-xl">
                                 </div>
 
-                                {# Card body #}
-                                <div class="p-5 flex flex-col flex-1 space-y-4">
-
-                                    {# Reference & Location #}
-                                    <div class="flex items-start justify-between gap-2">
+                                <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
+                                    <div class="space-y-1">
                                         <div>
-                                            {% if property.address is defined and property.address %}
-                                                <p class="font-semibold text-base text-neutral-900 leading-snug">
-                                                    {{ property.address.street ?: property.address.city }}{% if property.address.city and property.address.street %}, {{ property.address.city }}{% endif %}
-                                                </p>
-                                                {% if property.address.postalCode %}
-                                                    <p class="text-sm text-neutral-500">{{ property.address.postalCode }}</p>
-                                                {% endif %}
-                                            {% elseif property.title %}
-                                                <p class="font-semibold text-base text-neutral-900">{{ property.title }}</p>
-                                            {% endif %}
+                                            <p class="text-primary text-xl font-semibold">1 149€<span class="text-gray-600 text-sm font-light ml-1">/mois CC</span></p>
                                         </div>
-                                        {% if property.uniqueId %}
-                                            <span class="text-xs text-neutral-400 shrink-0 mt-0.5">{{ property.uniqueId }}</span>
-                                        {% endif %}
-                                    </div>
-
-                                    {# Short description #}
-                                    {% if property.shortDescription %}
-                                        <p class="text-sm text-neutral-600 line-clamp-2">{{ property.shortDescription }}</p>
-                                    {% endif %}
-
-                                    {# Key stats #}
-                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-600">
-                                        {% if property.surface %}
-                                            <span class="flex items-center gap-1">
-                                            {{ ux_icon('streamline-ultimate:expand-diagonal', {'class': 'size-3.5 shrink-0 text-neutral-400'}) }}
-                                                {{ property.surface }} m²
-                                        </span>
-                                        {% endif %}
-                                        {% if property.rooms %}
-                                            <span class="flex items-center gap-1">
-                                            {{ ux_icon('streamline-ultimate:door', {'class': 'size-3.5 shrink-0 text-neutral-400'}) }}
-                                                {{ property.rooms }} {{ property.rooms > 1 ? ('marketplace.rooms_plural'|trans|default('pièces')) : ('marketplace.room_singular'|trans|default('pièce')) }}
-                                        </span>
-                                        {% endif %}
-                                        {% if property.bedrooms %}
-                                            <span class="flex items-center gap-1">
-                                            {{ ux_icon('streamline-ultimate:single-bed', {'class': 'size-3.5 shrink-0 text-neutral-400'}) }}
-                                                {{ property.bedrooms }} {{ property.bedrooms > 1 ? ('marketplace.bedrooms_plural'|trans|default('ch.')) : ('marketplace.bedroom_singular'|trans|default('ch.')) }}
-                                        </span>
-                                        {% endif %}
-                                    </div>
-
-                                    {# Rental type tags #}
-                                    {% set rentalTypes = [] %}
-                                    {% if property.longTerm %}{% set rentalTypes = rentalTypes|merge(['marketplace.rental.long_term'|trans|default('Long terme')]) %}{% endif %}
-                                    {% if property.midTerm %}{% set rentalTypes = rentalTypes|merge(['marketplace.rental.mid_term'|trans|default('Moyen terme')]) %}{% endif %}
-                                    {% if property.shortTerm is defined and property.shortTerm %}{% set rentalTypes = rentalTypes|merge(['marketplace.rental.short_term'|trans|default('Court terme')]) %}{% endif %}
-                                    {% if rentalTypes|length > 0 %}
-                                        <div class="flex flex-wrap gap-1.5">
-                                            {% for type in rentalTypes %}
-                                                <twig:Badge variant="secondary">{{ type }}</twig:Badge>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-
-                                    {# Price #}
-                                    <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                                        <h3 class="font-semibold">Appartement 4 pièces</h3>
                                         <div>
-                                            {% if property.monthlyRent %}
-                                                <p class="text-lg font-semibold text-neutral-900">
-                                                    {{ property.monthlyRent|number_format(0, ',', ' ') }}
-                                                    {{ property.currency == 'EUR' ? '€' : (property.currency|default('€')) }}
-                                                    <span class="text-sm font-normal text-neutral-500">/ {{ 'marketplace.price.per_month'|trans|default('mois') }}</span>
-                                                </p>
-                                            {% else %}
-                                                <p class="text-sm text-neutral-500">{{ 'marketplace.price.on_request'|trans|default('Prix sur demande') }}</p>
-                                            {% endif %}
+                                            <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
+                                                {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                                                Paris, 16è arrondissement
+                                            </address>
                                         </div>
-                                        <span class="font-medium text-primary flex items-center gap-x-1.5 text-sm">
-                                        {{ 'marketplace.list.see_more'|trans|default('Voir') }}
-                                            {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
-                                    </span>
+                                    </div>
+                                    <div class="bg-neutral-50 rounded-xl p-2 grid grid-cols-3 divide-x divide-gray-200">
+                                        <div class="flex items-center justify-center gap-x-1">
+                                            {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                            <p class="text-sm font-light">Yes</p>
+                                        </div>
+                                        <div class="flex items-center justify-center gap-x-1">
+                                            {{ ux_icon('ic:outline-bed', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                            <p class="text-sm font-light">Studio</p>
+                                        </div>
+                                        <div class="flex items-center justify-center gap-x-1">
+                                            {{ ux_icon('wordpress:square', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                            <p class="text-sm font-light">102 m²</p>
+                                        </div>
                                     </div>
                                 </div>
                             </article>
