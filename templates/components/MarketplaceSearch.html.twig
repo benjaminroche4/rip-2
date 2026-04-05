@@ -13,8 +13,16 @@
                     />
                 </div>
                 <div class="px-3 py-2 flex items-center gap-x-2">
-                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
-                    <p class="font-light text-gray-400">Localisation</p>
+                    {{ ux_icon('iconoir:home-simple', {'class': 'size-5 text-gray-400 shrink-0'}) }}
+                    <select
+                        data-model="on(change)|propertyType"
+                        class="font-light text-gray-400 outline-none w-full bg-transparent appearance-none cursor-pointer"
+                    >
+                        <option value="">{{ locale == 'fr' ? 'Type de bien' : 'Property type' }}</option>
+                        {% for slug, name in this.propertyTypes %}
+                            <option value="{{ slug }}" {{ propertyType == slug ? 'selected' : '' }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="px-3 py-2 flex items-center gap-x-2">
                     {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
@@ -33,12 +41,7 @@
                     {{ this.totalCount }} offres en location à Paris
                 </h3>
 
-                <div class="flex flex-col gap-6">
-                    {% if page > 1 %}
-                        <div id="page--{{ page - 1 }}" class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-live-ignore="true"></div>
-                    {% endif %}
-
-                    <div id="page--{{ page }}" class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-live-ignore="true">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-loading="addClass(opacity-50)">
                         {% for property in this.items %}
                             <article class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5"
                                     data-property-id="{{ property._id }}"
@@ -85,7 +88,7 @@
                                                         loading="lazy"
                                                         width="24"
                                                         height="24"
-                                                        class="size-5 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                                        class="size-7 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
                                                     />
                                                 {% endif %}
                                                 {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
@@ -108,45 +111,49 @@
                                         <div>
                                             <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
                                                 {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                                                Paris, 16è arrondissement
+                                                {{ property.address.city}},  {{ property.address.postalCode }} arrondissement
                                             </address>
                                         </div>
                                     </div>
                                     <div class="bg-neutral-50 rounded-lg px-2 py-3 grid grid-cols-3 divide-x divide-gray-200">
                                         <div class="flex items-center justify-center gap-x-1">
-                                            {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                            <p class="text-sm font-light">Yes</p>
+                                            {% if property.elevator %}
+                                                {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                                <p class="text-sm font-light">Yes</p>
+                                            {% else %}
+                                                {{ ux_icon('solar:box-linear', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                                <p class="text-sm font-light">{{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}</p>
+                                            {% endif %}
                                         </div>
                                         <div class="flex items-center justify-center gap-x-1">
-                                            {{ ux_icon('ic:outline-bed', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                            <p class="text-sm font-light">Studio</p>
+                                            {{ ux_icon('fluent:bed-24-regular', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                            <p class="text-sm font-light">{{ property.bedroomsLabel }}</p>
                                         </div>
                                         <div class="flex items-center justify-center gap-x-1">
                                             {{ ux_icon('wordpress:square', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                            <p class="text-sm font-light">102 m²</p>
+                                            <p class="text-sm font-light">{{ property.squareMeters }} m²</p>
                                         </div>
                                     </div>
                                 </div>
                             </article>
                         {% endfor %}
-                    </div>
-
-                    <div class="flex justify-center py-4">
-                        {% if this.hasMore %}
-                            <button
-                                class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
-                                data-action="live#action"
-                                data-live-action-param="more"
-                            >
-                                <span data-loading="action(more)|hide">Voir plus de biens</span>
-                                <span data-loading="action(more)|show" class="hidden">Chargement...</span>
-                            </button>
-                        {% endif %}
-                    </div>
                 </div>
+
+                {% if this.hasMore %}
+                    <div class="flex justify-center mt-8">
+                        <button
+                            class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
+                            data-action="live#action"
+                            data-live-action-param="more"
+                        >
+                            <span data-loading="action(more)|hide">Voir plus de biens</span>
+                            <span data-loading="action(more)|show" class="hidden">Chargement...</span>
+                        </button>
+                    </div>
+                {% endif %}
             </div>
             <aside class="rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200" data-loading="action(updateBounds)|addClass(opacity-50)">
-                {{ ux_map(map, {style: 'height: 100%;', 'class': 'rounded-2xl', 'data-controller': 'map-cluster'}) }}
+                {{ ux_map(map, {style: 'height: 100%;', 'class': 'rounded-2xl', 'data-controller': 'map-cluster map-restriction'}) }}
             </aside>
         </div>
     </section>

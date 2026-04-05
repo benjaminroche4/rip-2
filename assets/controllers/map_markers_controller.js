@@ -48,14 +48,20 @@ export default class extends Controller {
     #activateCluster(cluster) {
         this.#highlightedCluster = cluster
         cluster.outerCircle.setAttribute('fill', '#71172e')
+        cluster.outerCircle.setAttribute('opacity', '0.3')
+        cluster.middleCircle.setAttribute('fill', '#71172e')
         cluster.innerCircle.setAttribute('fill', '#71172e')
+        cluster.text.setAttribute('fill', 'white')
     }
 
     #deactivateCluster() {
         if (!this.#highlightedCluster) return
         const c = this.#highlightedCluster
-        c.outerCircle.setAttribute('fill', '#111827')
-        c.innerCircle.setAttribute('fill', '#111827')
+        c.outerCircle.setAttribute('fill', '#e5e7eb')
+        c.outerCircle.setAttribute('opacity', '0.5')
+        c.middleCircle.setAttribute('fill', '#f3f4f6')
+        c.innerCircle.setAttribute('fill', 'white')
+        c.text.setAttribute('fill', '#111827')
         this.#highlightedCluster = null
     }
 
@@ -104,14 +110,19 @@ export default class extends Controller {
         // Cluster marker
         if (definition.extra?.isCluster) {
             const circles = marker.content.querySelectorAll('circle')
-            if (circles.length >= 2) {
+            const text = marker.content.querySelector('text')
+            if (circles.length >= 3) {
                 const clusterData = {
                     outerCircle: circles[0],
-                    innerCircle: circles[1],
+                    middleCircle: circles[1],
+                    innerCircle: circles[2],
+                    text,
                 }
 
-                circles[0].style.transition = 'fill 150ms ease'
+                circles[0].style.transition = 'fill 150ms ease, opacity 150ms ease'
                 circles[1].style.transition = 'fill 150ms ease'
+                circles[2].style.transition = 'fill 150ms ease'
+                if (text) text.style.transition = 'fill 150ms ease'
 
                 for (const id of definition.extra.propertyIds || []) {
                     this.#clusterByPropertyId.set(id, clusterData)

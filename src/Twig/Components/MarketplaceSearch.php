@@ -29,6 +29,9 @@ final class MarketplaceSearch
     #[LiveProp(writable: true, url: true)]
     public string $location = '';
 
+    #[LiveProp(writable: true, url: true)]
+    public string $propertyType = '';
+
     #[LiveProp(writable: true)]
     public float $zoom = 12;
 
@@ -87,17 +90,90 @@ final class MarketplaceSearch
 
     public function getItems(): array
     {
-        return array_slice($this->loadProperties(), ($this->page - 1) * self::PER_PAGE, self::PER_PAGE);
+        return array_slice($this->getFilteredProperties(), 0, $this->page * self::PER_PAGE);
     }
 
     public function hasMore(): bool
     {
-        return count($this->loadProperties()) > $this->page * self::PER_PAGE;
+        return count($this->getFilteredProperties()) > $this->page * self::PER_PAGE;
+    }
+
+    public function getPropertyTypes(): array
+    {
+        return $this->cache->get(
+            'property_types_' . $this->locale,
+            function (ItemInterface $item): array {
+                $item->expiresAfter(300);
+
+                $results = $this->sanityService->query(
+                    '*[_type == "propertyType" && language == $lang] | order(name asc) { "slug": slug.current, name }',
+                    ['lang' => $this->locale]
+                );
+
+                if (!is_array($results)) {
+                    return [];
+                }
+
+                $types = [];
+                foreach ($results as $type) {
+                    if (!empty($type['slug']) && !empty($type['name'])) {
+                        $types[$type['slug']] = $type['name'];
+                    }
+                }
+                return $types;
+            }
+        );
     }
 
     public function getTotalCount(): int
     {
-        return count($this->loadProperties());
+        return count($this->getFilteredProperties());
+    }
+
+    private function getFilteredProperties(): array
+    {
+        $properties = $this->loadProperties();
+
+        if ($this->propertyType !== '') {
+            $matchSlugs = $this->getMatchingSlugs($this->propertyType);
+            $properties = array_values(array_filter($properties, fn (array $p) => in_array($p['propertyTypeSlug'] ?? '', $matchSlugs, true)));
+        }
+
+        return $properties;
+    }
+
+    /**
+     * Given a propertyType slug, returns all slugs that represent the same concept
+     * across languages (matched by lowercase name).
+     */
+    private function getMatchingSlugs(string $slug): array
+    {
+        return $this->cache->get(
+            'property_type_slugs_' . $slug,
+            function (ItemInterface $item) use ($slug): array {
+                $item->expiresAfter(300);
+
+                $selected = $this->sanityService->query(
+                    '*[_type == "propertyType" && slug.current == $slug][0]{ name }',
+                    ['slug' => $slug]
+                );
+
+                if (empty($selected['name'])) {
+                    return [$slug];
+                }
+
+                $allMatches = $this->sanityService->query(
+                    '*[_type == "propertyType" && lower(name) == lower($name)]{ "slug": slug.current }',
+                    ['name' => $selected['name']]
+                );
+
+                if (!is_array($allMatches)) {
+                    return [$slug];
+                }
+
+                return array_map(fn ($t) => $t['slug'], $allMatches);
+            }
+        );
     }
 
     private function loadProperties(): array
@@ -126,7 +202,7 @@ final class MarketplaceSearch
 
     private function addMarkersToMap(Map $map): void
     {
-        $properties = $this->loadProperties();
+        $properties = $this->getFilteredProperties();
 
         // Filter properties with valid location within bounds
         $validProperties = [];
@@ -251,17 +327,19 @@ final class MarketplaceSearch
     private function addClusterMarker(Map $map, Point $center, int $count, array $propertyIds = []): void
     {
         $label = (string) $count;
-        $size = $count < 10 ? 40 : ($count < 100 ? 48 : 56);
+        $size = $count < 10 ? 46 : ($count < 100 ? 54 : 62);
 
         $icon = Icon::svg(sprintf(
             '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">
-                <circle cx="%d" cy="%d" r="%d" fill="#71172e" opacity="0.9"/>
-                <circle cx="%d" cy="%d" r="%d" fill="#71172e"/>
-                <text x="%d" y="%d" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="700" fill="white">%s</text>
+                <circle cx="%d" cy="%d" r="%d" fill="#e5e7eb" opacity="0.5"/>
+                <circle cx="%d" cy="%d" r="%d" fill="#f3f4f6"/>
+                <circle cx="%d" cy="%d" r="%d" fill="white"/>
+                <text x="%d" y="%d" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="700" fill="#111827">%s</text>
             </svg>',
             $size, $size,
-            $size / 2, $size / 2, $size / 2,         // outer circle
-            $size / 2, $size / 2, (int) ($size * 0.35), // inner circle
+            $size / 2, $size / 2, $size / 2 - 1,     // outer circle - gris léger
+            $size / 2, $size / 2, (int) ($size * 0.4), // middle circle - gris clair
+            $size / 2, $size / 2, (int) ($size * 0.3), // inner circle - blanc
             $size / 2, $size / 2,                     // text position
             $label,
         ));
@@ -323,7 +401,14 @@ final class MarketplaceSearch
                         availableDate,
                         "agentPhoto": agent->photo.asset->url,
                         "photoCount": count(photos),
-                        "location": location{lat, lng}
+                        "location": location{lat, lng},
+                        "elevator": equipment.elevator,
+                        "furnished": main.furnished,
+                        "bedroomsLabel": main.bedrooms,
+                        "squareMeters": main.squareMeters,
+                        "propertyTypeName": propertyType->name,
+                        "propertyTypeSlug": propertyType->slug.current,
+                        "propertyTypeLang": propertyType->language
                     }'
                 );
 
