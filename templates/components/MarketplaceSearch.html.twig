@@ -1,0 +1,132 @@
+<div {{ attributes }}>
+    <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <div class="border border-slate-200 rounded-2xl px-3 py-2 shadow-lg shadow-gray-500/10 bg-white flex items-center justify-between w-full">
+            <div class="grid grid-cols-3 divide-slate-200 divide-x flex-1">
+                <div class="px-3 py-2 flex items-center gap-x-2">
+                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
+                    <input
+                        type="text"
+                        data-model="debounce(300)|location"
+                        placeholder="Localisation"
+                        class="font-light text-gray-400 outline-none w-full bg-transparent"
+                        value="{{ location }}"
+                    />
+                </div>
+                <div class="px-3 py-2 flex items-center gap-x-2">
+                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
+                    <p class="font-light text-gray-400">Localisation</p>
+                </div>
+                <div class="px-3 py-2 flex items-center gap-x-2">
+                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
+                    <p class="font-light text-gray-400">Localisation</p>
+                </div>
+            </div>
+            <twig:Button variant="default" size="lg">
+                Rechercher
+            </twig:Button>
+        </div>
+    </section>
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
+            <div>
+                <h3 class="text-base font-medium mb-8 font-secondary">
+                    {{ this.totalCount }} offres en location à Paris
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-loading="addClass(opacity-50)">
+                    {% for property in this.properties %}
+                        <article class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
+                            <div class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group" data-controller="carousel" data-live-ignore>
+                                <div class="flex h-full transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing" data-carousel-target="track">
+                                    {% for photo in property.photos[:5] %}
+                                        <div class="w-full h-full shrink-0">
+                                            <img
+                                                src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&q=80"
+                                                alt="{{ photo.alt|default(property.title|default('Bien immobilier')) }}"
+                                                loading="lazy"
+                                                width="600"
+                                                height="400"
+                                                class="w-full h-full object-cover pointer-events-none select-none"
+                                                draggable="false"
+                                            />
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if property.photos|length > 1 %}
+                                    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1" data-carousel-target="dots">
+                                        {% for photo in property.photos[:5] %}
+                                            <button
+                                                type="button"
+                                                class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
+                                                data-carousel-target="dot"
+                                                data-action="carousel#goTo"
+                                                data-index="{{ loop.index0 }}"
+                                            ></button>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
+                                {% if property.availableDate is defined and property.availableDate %}
+                                    <div>
+                                        <twig:Badge variant="primary" class="rounded-lg bg-[#EFFDF4] border border-green-100 font-light text-green-600 gap-x-2 px-1">
+                                            {% if property.agentPhoto is defined and property.agentPhoto %}
+                                                <img
+                                                    src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
+                                                    alt=""
+                                                    loading="lazy"
+                                                    width="24"
+                                                    height="24"
+                                                    class="size-5 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                                />
+                                            {% endif %}
+                                            {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                                <p class="font-semibold">Disponible immédiatement</p>
+                                            {% else %}
+                                                <p>À partir du <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
+                                            {% endif %}
+                                        </twig:Badge>
+                                    </div>
+                                {% endif %}
+                                <div class="space-y-1">
+                                    <div>
+                                        {% if property.monthlyRent %}
+                                            <p class="text-primary text-xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€<span class="text-gray-600 text-sm font-light ml-1">/mois CC</span></p>
+                                        {% else %}
+                                            <p class="text-primary text-xl font-semibold">Prix sur demande</p>
+                                        {% endif %}
+                                    </div>
+                                    <h3 class="font-semibold">Appartement 4 pièces</h3>
+                                    <div>
+                                        <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
+                                            {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                                            Paris, 16è arrondissement
+                                        </address>
+                                    </div>
+                                </div>
+                                <div class="bg-neutral-50 rounded-lg p-2 grid grid-cols-3 divide-x divide-gray-200">
+                                    <div class="flex items-center justify-center gap-x-1">
+                                        {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                        <p class="text-sm font-light">Yes</p>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-x-1">
+                                        {{ ux_icon('ic:outline-bed', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                        <p class="text-sm font-light">Studio</p>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-x-1">
+                                        {{ ux_icon('wordpress:square', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                        <p class="text-sm font-light">102 m²</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+            <aside class="rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200" data-controller="map-markers" data-loading="action(updateBounds)|addClass(opacity-50)">
+                {{ ux_map(map, {style: 'height: 100%;', 'class': 'rounded-2xl', 'data-controller': 'map-cluster'}) }}
+            </aside>
+        </div>
+    </section>
+</div>
