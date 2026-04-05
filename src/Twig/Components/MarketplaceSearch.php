@@ -45,7 +45,12 @@ final class MarketplaceSearch
     public ?float $east = null;
 
     #[LiveProp]
+    public int $page = 1;
+
+    #[LiveProp]
     public string $locale = 'fr';
+
+    private const PER_PAGE = 2;
 
     /** @var array|null In-memory cache to avoid multiple fetchProperties() calls per render */
     private ?array $propertiesCache = null;
@@ -54,6 +59,12 @@ final class MarketplaceSearch
         private readonly SanityService $sanityService,
         private readonly CacheInterface $cache,
     ) {}
+
+    #[LiveAction]
+    public function more(): void
+    {
+        ++$this->page;
+    }
 
     #[LiveAction]
     public function updateBounds(
@@ -74,9 +85,14 @@ final class MarketplaceSearch
         $this->addMarkersToMap($map);
     }
 
-    public function getProperties(): array
+    public function getItems(): array
     {
-        return $this->loadProperties();
+        return array_slice($this->loadProperties(), ($this->page - 1) * self::PER_PAGE, self::PER_PAGE);
+    }
+
+    public function hasMore(): bool
+    {
+        return count($this->loadProperties()) > $this->page * self::PER_PAGE;
     }
 
     public function getTotalCount(): int
@@ -161,8 +177,15 @@ final class MarketplaceSearch
                     $this->addPropertyMarker($map, $property);
                 }
             } else {
-                // Cluster marker: circle with count
-                $this->addClusterMarker($map, $center, $cluster->count());
+                // Cluster marker: collect all propertyIds in this cluster
+                $clusterPropertyIds = [];
+                foreach ($cluster->getPoints() as $point) {
+                    $key = $point->getLatitude() . ',' . $point->getLongitude();
+                    foreach ($pointToProperties[$key] ?? [] as $p) {
+                        $clusterPropertyIds[] = $p['_id'];
+                    }
+                }
+                $this->addClusterMarker($map, $center, $cluster->count(), $clusterPropertyIds);
             }
         }
     }
@@ -217,7 +240,7 @@ final class MarketplaceSearch
             position: new Point($property['location']['lat'], $property['location']['lng']),
             title: $property['address']['street'] ?? $property['title'] ?? '',
             icon: $icon,
-            extra: ['hoverSvg' => $hoverSvg],
+            extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property['_id']],
             infoWindow: new InfoWindow(
                 headerContent: '<b>' . ($property['address']['city'] ?? 'Paris') . '</b>',
                 content: $property['title'] ?? '',
@@ -225,7 +248,7 @@ final class MarketplaceSearch
         ));
     }
 
-    private function addClusterMarker(Map $map, Point $center, int $count): void
+    private function addClusterMarker(Map $map, Point $center, int $count, array $propertyIds = []): void
     {
         $label = (string) $count;
         $size = $count < 10 ? 40 : ($count < 100 ? 48 : 56);
@@ -247,7 +270,7 @@ final class MarketplaceSearch
             position: $center,
             title: $count . ' biens',
             icon: $icon,
-            extra: ['isCluster' => true, 'count' => $count],
+            extra: ['isCluster' => true, 'count' => $count, 'propertyIds' => $propertyIds],
         ));
     }
 
