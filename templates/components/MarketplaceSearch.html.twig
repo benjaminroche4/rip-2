@@ -131,7 +131,7 @@
                                             </twig:Badge>
                                         </div>
                                     {% endif %}
-                                    {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+                                    {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
                                         <div class="text-xs font-medium text-gray-400 uppercase">
                                             Nouveau
                                         </div>
@@ -190,12 +190,14 @@
                             data-live-action-param="more"
                         >
                             <span data-loading="action(more)|hide">Voir plus de biens</span>
-                            <span data-loading="action(more)|show" class="hidden">Chargement...</span>
+                            <span data-loading="action(more)|show" class="hidden flex items-center gap-x-2">
+                                <twig:Spinner class="inline" /> Chargement...
+                            </span>
                         </button>
                     </div>
                 {% endif %}
             </div>
-            <aside class="hidden lg:block rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200" data-loading="action(updateBounds)|addClass(opacity-50)">
+            <aside class="hidden lg:block rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200 sticky top-4 h-[calc(100vh-2rem)]" data-loading="action(updateBounds)|addClass(opacity-50)">
                 {{ ux_map(map, {style: 'height: 100%;', 'class': 'rounded-2xl', 'data-controller': 'map-cluster map-restriction'}) }}
             </aside>
         </div>

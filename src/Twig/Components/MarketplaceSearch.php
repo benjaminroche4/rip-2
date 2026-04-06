@@ -381,6 +381,7 @@ final class MarketplaceSearch
                     '*[_type == "property"] | order(_createdAt desc) {
                         _id,
                         "createdAt": _createdAt,
+                        "updatedAt": _updatedAt,
                         uniqueId,
                         title,
                         shortDescription,
