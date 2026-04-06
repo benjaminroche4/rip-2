@@ -268,9 +268,11 @@ final class MarketplaceSearch
 
     private function addPropertyMarker(Map $map, array $property): void
     {
-        $label = !empty($property['monthlyRent'])
-            ? number_format($property['monthlyRent'], 0, ',', ' ') . ' €'
-            : 'Sur demande';
+        $label = !empty($property['priceOnRequest'])
+            ? 'Sur demande'
+            : (!empty($property['monthlyRent'])
+                ? number_format($property['monthlyRent'], 0, ',', ' ') . ' €'
+                : 'Sur demande');
 
         $charWidth = 8;
         $padding = 8;
@@ -378,6 +380,7 @@ final class MarketplaceSearch
                 $results = $this->sanityService->query(
                     '*[_type == "property"] | order(_createdAt desc) {
                         _id,
+                        "createdAt": _createdAt,
                         uniqueId,
                         title,
                         shortDescription,
@@ -386,9 +389,13 @@ final class MarketplaceSearch
                         bedrooms,
                         bathrooms,
                         "monthlyRent": rents.monthlyRent,
+                        "priceOnRequest": rents.priceOnRequest,
+                        "chargesIncludes": chargesIncludes,
+                        "showCategoryOnCard": showCategoryOnCard,
                         currency,
                         status,
                         leaseType,
+                        "listingTypeName": listingType->name,
                         longTerm,
                         midTerm,
                         categoryFlags,

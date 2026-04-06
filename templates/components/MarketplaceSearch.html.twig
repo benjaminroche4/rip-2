@@ -84,8 +84,8 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                {% if property.categoryName is defined and property.categoryName %}
-                                    <div class="absolute top-2 left-2">
+                                {% if property.showCategoryOnCard is defined and property.showCategoryOnCard and property.categoryName is defined and property.categoryName %}
+                                    <div class="absolute top-1.5 left-2">
                                         <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
                                             {{ property.categoryName }}
                                         </span>
@@ -94,55 +94,67 @@
                             </div>
 
                             <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
-                                {% if property.status == 'underOffer' %}
-                                    {% set badgeClass = 'bg-amber-50 border-amber-100 text-amber-600' %}
-                                    {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Offre en cours' : 'Under offer' }}</p>{% endset %}
-                                {% elseif property.status == 'rented' %}
-                                    {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
-                                    {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
-                                {% elseif property.availableDate is defined and property.availableDate %}
-                                    {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
-                                    {% set badgeText %}
-                                        {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
-                                            <p class="font-semibold">{{ locale == 'fr' ? 'Disponible immédiatement' : 'Available now' }}</p>
-                                        {% else %}
-                                            <p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
-                                        {% endif %}
-                                    {% endset %}
-                                {% else %}
-                                    {% set badgeClass = null %}
-                                {% endif %}
-
-                                {% if badgeClass %}
-                                    <div>
-                                        <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badgeClass }}">
-                                            {% if property.agentPhoto is defined and property.agentPhoto %}
-                                                <img
-                                                    src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
-                                                    alt=""
-                                                    loading="lazy"
-                                                    width="24"
-                                                    height="24"
-                                                    class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                                                />
+                                <div class="flex items-center justify-between">
+                                    {% if property.status == 'underOffer' %}
+                                        {% set badgeClass = 'bg-amber-50 border-amber-100 text-amber-600' %}
+                                        {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Offre en cours' : 'Under offer' }}</p>{% endset %}
+                                    {% elseif property.status == 'rented' %}
+                                        {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
+                                        {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
+                                    {% elseif property.availableDate is defined and property.availableDate %}
+                                        {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
+                                        {% set badgeText %}
+                                            {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                                <p class="font-semibold">{{ locale == 'fr' ? 'Dispo immédiatement' : 'Available now' }}</p>
+                                            {% else %}
+                                                <p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
                                             {% endif %}
-                                            {{ badgeText|raw }}
-                                        </twig:Badge>
-                                    </div>
-                                {% endif %}
+                                        {% endset %}
+                                    {% else %}
+                                        {% set badgeClass = null %}
+                                    {% endif %}
+
+                                    {% if badgeClass %}
+                                        <div>
+                                            <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badgeClass }}">
+                                                {% if property.agentPhoto is defined and property.agentPhoto %}
+                                                    <img
+                                                        src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
+                                                        alt=""
+                                                        loading="lazy"
+                                                        width="24"
+                                                        height="24"
+                                                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                                    />
+                                                {% endif %}
+                                                {{ badgeText|raw }}
+                                            </twig:Badge>
+                                        </div>
+                                    {% endif %}
+                                    {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+                                        <div class="text-xs font-medium text-gray-400 uppercase">
+                                            Nouveau
+                                        </div>
+                                    {% endif %}
+                                </div>
                                 <div class="space-y-1">
                                     <div>
-                                        {% if property.monthlyRent %}
-                                            <p class="text-primary text-2xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€<span class="text-gray-600 text-sm font-light ml-1">/mois CC</span></p>
+                                        {% if property.monthlyRent and not (property.priceOnRequest is defined and property.priceOnRequest) %}
+                                            <p class="text-primary text-2xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€
+                                                <span class="text-gray-600 text-sm font-light ml-0.5">/mois
+                                                    {% if property.chargesIncludes is defined and property.chargesIncludes %}
+                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">charges comprises</span>{% endif %}
+                                                </span>
+                                            </p>
                                         {% else %}
-                                            <p class="text-primary text-xl font-semibold">Prix sur demande</p>
+                                            <p class="text-primary text-2xl font-semibold">Prix sur demande</p>
                                         {% endif %}
                                     </div>
-                                    <h3 class="font-semibold text-lg">Appartement 4 pièces</h3>
+                                    <h3 class="font-semibold text-base capitalize font-secondary">{{ property.listingTypeName|default('Location') }} {{ property.propertyTypeName }}{% if property.rooms %} {{ property.rooms }} pièces{% endif %}</h3>
                                     <div>
-                                        <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
+                                        <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1 capitalize">
                                             {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                                            {{ property.address.city}},  {{ property.address.postalCode }} arrondissement
+                                            {{ property.address.city }}, {{ property.address.postalCode|arrondissement }}
                                         </address>
                                     </div>
                                 </div>
@@ -152,7 +164,7 @@
                                             {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
                                             <p class="text-sm font-light">Yes</p>
                                         {% else %}
-                                            {{ ux_icon('solar:box-linear', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                                            {{ ux_icon('iconoir:sofa', {'class': 'size-5 text-gray-800 shrink-0'}) }}
                                             <p class="text-sm font-light">{{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}</p>
                                         {% endif %}
                                     </div>
@@ -183,7 +195,7 @@
                     </div>
                 {% endif %}
             </div>
-            <aside class="rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200" data-loading="action(updateBounds)|addClass(opacity-50)">
+            <aside class="hidden lg:block rounded-3xl p-2 border border-neutral-200 transition-opacity duration-200" data-loading="action(updateBounds)|addClass(opacity-50)">
                 {{ ux_map(map, {style: 'height: 100%;', 'class': 'rounded-2xl', 'data-controller': 'map-cluster map-restriction'}) }}
             </aside>
         </div>
