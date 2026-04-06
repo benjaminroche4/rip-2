@@ -405,6 +405,7 @@ final class MarketplaceSearch
                         availableDate,
                         "agentPhoto": agent->photo.asset->url,
                         "photoCount": count(photos),
+                        "categoryName": categories[0]->name,
                         "location": location{lat, lng},
                         "elevator": equipment.elevator,
                         "furnished": main.furnished,
