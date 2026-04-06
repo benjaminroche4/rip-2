@@ -87,47 +87,42 @@
                                 </div>
 
                                 <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
-                                    <div class="flex justify-between items-center gap-x-2">
-                                        {% if property.status == 'underOffer' %}
-                                            {% set badgeClass = 'bg-amber-50 border-amber-100 text-amber-600' %}
-                                            {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Offre en cours' : 'Under offer' }}</p>{% endset %}
-                                        {% elseif property.status == 'rented' %}
-                                            {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
-                                            {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
-                                        {% elseif property.availableDate is defined and property.availableDate %}
-                                            {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
-                                            {% set badgeText %}
-                                                {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
-                                                    <p class="font-semibold">{{ locale == 'fr' ? 'Disponible immédiatement' : 'Available now' }}</p>
-                                                {% else %}
-                                                    <p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
-                                                {% endif %}
-                                            {% endset %}
-                                        {% else %}
-                                            {% set badgeClass = null %}
-                                        {% endif %}
+                                    {% if property.status == 'underOffer' %}
+                                        {% set badgeClass = 'bg-amber-50 border-amber-100 text-amber-600' %}
+                                        {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Offre en cours' : 'Under offer' }}</p>{% endset %}
+                                    {% elseif property.status == 'rented' %}
+                                        {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
+                                        {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
+                                    {% elseif property.availableDate is defined and property.availableDate %}
+                                        {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
+                                        {% set badgeText %}
+                                            {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                                <p class="font-semibold">{{ locale == 'fr' ? 'Disponible immédiatement' : 'Available now' }}</p>
+                                            {% else %}
+                                                <p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
+                                            {% endif %}
+                                        {% endset %}
+                                    {% else %}
+                                        {% set badgeClass = null %}
+                                    {% endif %}
 
-                                        {% if badgeClass %}
-                                            <div>
-                                                <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badgeClass }}">
-                                                    {% if property.agentPhoto is defined and property.agentPhoto %}
-                                                        <img
-                                                            src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
-                                                            alt=""
-                                                            loading="lazy"
-                                                            width="24"
-                                                            height="24"
-                                                            class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                                                        />
-                                                    {% endif %}
-                                                    {{ badgeText|raw }}
-                                                </twig:Badge>
-                                            </div>
-                                        {% endif %}
-                                        <div class="bg-primary/10 rounded-full p-1.5">
-                                            {{ ux_icon('material-symbols:verified-rounded', {'class': 'size-4 shrink-0 text-primary'}) }}
+                                    {% if badgeClass %}
+                                        <div>
+                                            <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badgeClass }}">
+                                                {% if property.agentPhoto is defined and property.agentPhoto %}
+                                                    <img
+                                                        src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
+                                                        alt=""
+                                                        loading="lazy"
+                                                        width="24"
+                                                        height="24"
+                                                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                                    />
+                                                {% endif %}
+                                                {{ badgeText|raw }}
+                                            </twig:Badge>
                                         </div>
-                                    </div>
+                                    {% endif %}
                                     <div class="space-y-1">
                                         <div>
                                             {% if property.monthlyRent %}
