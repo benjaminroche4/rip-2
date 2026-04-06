@@ -124,6 +124,18 @@ export default class extends Controller {
                 circles[2].style.transition = 'fill 150ms ease'
                 if (text) text.style.transition = 'fill 150ms ease'
 
+                marker.element.style.cursor = 'pointer'
+
+                marker.content.addEventListener('mouseenter', () => {
+                    this.#activateCluster(clusterData)
+                })
+
+                marker.content.addEventListener('mouseleave', () => {
+                    if (this.#highlightedCluster === clusterData) {
+                        this.#deactivateCluster()
+                    }
+                })
+
                 for (const id of definition.extra.propertyIds || []) {
                     this.#clusterByPropertyId.set(id, clusterData)
                 }

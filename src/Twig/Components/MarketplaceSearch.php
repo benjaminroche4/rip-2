@@ -394,7 +394,11 @@ final class MarketplaceSearch
                         categoryFlags,
                         "slug": slug.current,
                         "address": address{city, postalCode, street, number},
-                        "photos": photos[0..4]{
+                        "mainPhoto": {
+                            "url": mainPhoto.asset->url,
+                            "alt": mainPhoto.alt
+                        },
+                        "photos": photos[0..3]{
                             "url": asset->url,
                             "alt": alt
                         },
