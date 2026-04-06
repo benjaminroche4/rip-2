@@ -7,6 +7,7 @@ use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\Attribute\PreReRender;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\Map\Bridge\Google\GoogleOptions;
 use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
@@ -86,6 +87,25 @@ final class MarketplaceSearch
         $map = $this->getMap();
         $map->removeAllMarkers();
         $this->addMarkersToMap($map);
+    }
+
+    #[LiveProp(writable: false)]
+    public string $prevLocation = '';
+
+    #[LiveProp(writable: false)]
+    public string $prevPropertyType = '';
+
+    #[PreReRender]
+    public function refreshMapMarkers(): void
+    {
+        if ($this->location !== $this->prevLocation || $this->propertyType !== $this->prevPropertyType) {
+            $map = $this->getMap();
+            $map->removeAllMarkers();
+            $this->addMarkersToMap($map);
+
+            $this->prevLocation = $this->location;
+            $this->prevPropertyType = $this->propertyType;
+        }
     }
 
     public function getItems(): array
