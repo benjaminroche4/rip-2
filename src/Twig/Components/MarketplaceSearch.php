@@ -33,6 +33,12 @@ final class MarketplaceSearch
     #[LiveProp(writable: true, url: true)]
     public string $propertyType = '';
 
+    #[LiveProp(writable: true, url: true)]
+    public ?int $rentMin = null;
+
+    #[LiveProp(writable: true, url: true)]
+    public ?int $rentMax = null;
+
     #[LiveProp(writable: true)]
     public float $zoom = 12;
 
@@ -95,16 +101,24 @@ final class MarketplaceSearch
     #[LiveProp(writable: false)]
     public string $prevPropertyType = '';
 
+    #[LiveProp(writable: false)]
+    public ?int $prevRentMin = null;
+
+    #[LiveProp(writable: false)]
+    public ?int $prevRentMax = null;
+
     #[PreReRender]
     public function refreshMapMarkers(): void
     {
-        if ($this->location !== $this->prevLocation || $this->propertyType !== $this->prevPropertyType) {
+        if ($this->location !== $this->prevLocation || $this->propertyType !== $this->prevPropertyType || $this->rentMin !== $this->prevRentMin || $this->rentMax !== $this->prevRentMax) {
             $map = $this->getMap();
             $map->removeAllMarkers();
             $this->addMarkersToMap($map);
 
             $this->prevLocation = $this->location;
             $this->prevPropertyType = $this->propertyType;
+            $this->prevRentMin = $this->rentMin;
+            $this->prevRentMax = $this->rentMax;
         }
     }
 
@@ -152,11 +166,24 @@ final class MarketplaceSearch
 
     private function getFilteredProperties(): array
     {
+        // Si max < min, on inverse les deux valeurs
+        if ($this->rentMin !== null && $this->rentMax !== null && $this->rentMax < $this->rentMin) {
+            [$this->rentMin, $this->rentMax] = [$this->rentMax, $this->rentMin];
+        }
+
         $properties = $this->loadProperties();
 
         if ($this->propertyType !== '') {
             $matchSlugs = $this->getMatchingSlugs($this->propertyType);
             $properties = array_values(array_filter($properties, fn (array $p) => in_array($p['propertyTypeSlug'] ?? '', $matchSlugs, true)));
+        }
+
+        if ($this->rentMin !== null) {
+            $properties = array_values(array_filter($properties, fn (array $p) => !empty($p['monthlyRent']) && $p['monthlyRent'] >= $this->rentMin));
+        }
+
+        if ($this->rentMax !== null) {
+            $properties = array_values(array_filter($properties, fn (array $p) => !empty($p['monthlyRent']) && $p['monthlyRent'] <= $this->rentMax));
         }
 
         return $properties;
