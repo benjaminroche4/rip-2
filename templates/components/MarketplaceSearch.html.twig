@@ -73,9 +73,17 @@
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8" data-controller="map-markers">
             <div>
-                <h3 class="text-base font-medium mb-8 font-secondary">
-                    {{ this.totalCount }} offres en location à Paris
-                </h3>
+                <div class="justify-between flex gap-x-2 items-center mb-8 ">
+                    <div>
+                        <h3 class="text-base font-medium font-secondary">
+                            {{ this.totalCount }} offres en location à Paris
+                        </h3>
+                    </div>
+                    <div class="rounded-lg bg-primary/5 py-2 px-2 flex items-center gap-x-2 text-sm text-primary">
+                        {{ ux_icon('material-symbols:map-outline-rounded', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                        Show on map
+                    </div>
+                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" data-loading="addClass(opacity-50)">
                     {% for property in this.items %}
@@ -144,14 +152,13 @@
                                         {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
                                         {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
                                     {% elseif property.availableDate is defined and property.availableDate %}
-                                        {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
-                                        {% set badgeText %}
-                                            {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
-                                                <p class="font-semibold">{{ locale == 'fr' ? 'Dispo immédiatement' : 'Available now' }}</p>
-                                            {% else %}
-                                                <p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
-                                            {% endif %}
-                                        {% endset %}
+                                        {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                            {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
+                                            {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Disponible immédiatement' : 'Available now' }}</p>{% endset %}
+                                        {% else %}
+                                            {% set badgeClass = 'bg-slate-50 border-slate-100 text-slate-600' %}
+                                            {% set badgeText %}<p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>{% endset %}
+                                        {% endif %}
                                     {% else %}
                                         {% set badgeClass = null %}
                                     {% endif %}
@@ -190,7 +197,7 @@
                                             <p class="text-primary text-2xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€
                                                 <span class="text-gray-600 text-sm font-light ml-0.5">/mois
                                                     {% if property.chargesIncludes is defined and property.chargesIncludes %}
-                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">charges comprises</span>
+                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">Charges incl.</span>
                                                     {% endif %}
                                                 </span>
                                             </p>
