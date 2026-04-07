@@ -1,18 +1,25 @@
 <div {{ attributes }}>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="border border-slate-200 rounded-2xl px-3 py-2 shadow-lg shadow-gray-500/10 bg-white flex items-center justify-between w-full">
-            <div class="grid grid-cols-3 divide-slate-200 divide-x flex-1">
-                <div class="px-3 py-2 flex items-center gap-x-2">
+        <div class="border border-slate-200/20 lg:border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white flex lg:flex-raw flex-col items-center justify-between w-full">
+            <div class="grid lg:grid-cols-3 divide-slate-200 divide-x flex-1 w-full space-y-3 lg:space-y-0">
+                <div class="px-3 py-2 flex items-center gap-x-2 border lg:border-none lg:border-slate-200 rounded-xl">
                     {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
-                    <input
-                        type="text"
-                        data-model="debounce(300)|location"
-                        placeholder="Localisation"
-                        class="font-light text-gray-400 outline-none w-full bg-transparent"
-                        value="{{ location }}"
-                    />
+                    <select
+                        data-model="on(change)|arrondissement"
+                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none {{ arrondissement is null ? 'text-gray-400' : 'text-gray-900' }}"
+                    >
+                        <option value="">{{ locale == 'fr' ? 'Arrondissement' : 'Arrondissement' }}</option>
+                        {% for i in 1..20 %}
+                            <option value="{{ i }}" {{ arrondissement == i ? 'selected' : '' }}>
+                                {{ locale == 'fr'
+                                    ? (i == 1 ? '1er arrondissement' : i ~ 'e arrondissement')
+                                    : (i == 1 ? '1st arrondissement' : (i == 2 ? '2nd arrondissement' : (i == 3 ? '3rd arrondissement' : i ~ 'th arrondissement')))
+                                }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="px-3 py-2 flex items-center gap-x-2">
+                <div class="px-3 py-2 flex items-center gap-x-2 border lg:border-none border-slate-200 rounded-xl">
                     {{ ux_icon('iconoir:home-simple', {'class': 'size-5 text-gray-400 shrink-0'}) }}
                     <select
                         data-model="on(change)|propertyType"
@@ -24,34 +31,43 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="px-3 py-2 flex items-center gap-x-2">
+                <div class="px-3 py-2 flex items-center gap-x-2 border lg:border-none border-slate-200 rounded-xl">
                     {{ ux_icon('iconoir:euro', {'class': 'size-5 text-gray-400 shrink-0'}) }}
                     <div class="flex items-center gap-x-1 flex-1 min-w-0">
                         <input
                             type="number"
                             data-model="debounce(500)|rentMin"
+                            data-action="blur->live#action"
+                            data-live-action-param="normalizeRents"
                             placeholder="Min"
                             min="0"
                             step="100"
-                            class="font-light text-gray-400 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
+                            class="font-light text-gray-900 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
                             value="{{ rentMin }}"
                         />
                         <span class="text-gray-300 shrink-0">–</span>
                         <input
                             type="number"
                             data-model="debounce(500)|rentMax"
+                            data-action="blur->live#action"
+                            data-live-action-param="normalizeRents"
                             placeholder="Max"
                             min="0"
                             step="100"
-                            class="font-light text-gray-400 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
+                            class="font-light text-gray-900 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
                             value="{{ rentMax }}"
                         />
                     </div>
                 </div>
             </div>
-            <twig:Button variant="default" size="lg">
-                Rechercher
-            </twig:Button>
+            {#<twig:Button
+                variant="outline"
+                size="lg"
+                data-action="live#action"
+                data-live-action-param="reset"
+            >
+                {{ locale == 'fr' ? 'Réinitialiser' : 'Reset' }}
+            </twig:Button>#}
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
@@ -104,7 +120,13 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                {% if property.showCategoryOnCard is defined and property.showCategoryOnCard and property.categoryName is defined and property.categoryName %}
+                                {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+                                    <div class="absolute top-1.5 left-2">
+                                        <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
+                                            {{ locale == 'fr' ? 'Nouveau' : 'New' }}
+                                        </span>
+                                    </div>
+                                {% elseif property.showCategoryOnCard is defined and property.showCategoryOnCard and property.categoryName is defined and property.categoryName %}
                                     <div class="absolute top-1.5 left-2">
                                         <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
                                             {{ property.categoryName }}
@@ -151,11 +173,16 @@
                                             </twig:Badge>
                                         </div>
                                     {% endif %}
-                                    {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
-                                        <div class="text-xs font-medium text-gray-400 uppercase">
-                                            Nouveau
-                                        </div>
-                                    {% endif %}
+                                    <twig:Tooltip id="verified-{{ property._id|replace({'.': '-'}) }}">
+                                        <twig:Tooltip:Trigger>
+                                            <span {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %} class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5">
+                                                {{ ux_icon('flowbite:badge-check-solid', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                                            </span>
+                                        </twig:Tooltip:Trigger>
+                                        <twig:Tooltip:Content side="left">
+                                            <p>{{ locale == 'fr' ? 'Bien vérifié par Relocation In Paris' : 'Property verified by Relocation In Paris' }}</p>
+                                        </twig:Tooltip:Content>
+                                    </twig:Tooltip>
                                 </div>
                                 <div class="space-y-1">
                                     <div>
@@ -163,7 +190,8 @@
                                             <p class="text-primary text-2xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€
                                                 <span class="text-gray-600 text-sm font-light ml-0.5">/mois
                                                     {% if property.chargesIncludes is defined and property.chargesIncludes %}
-                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">charges comprises</span>{% endif %}
+                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">charges comprises</span>
+                                                    {% endif %}
                                                 </span>
                                             </p>
                                         {% else %}

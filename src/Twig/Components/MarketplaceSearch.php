@@ -28,7 +28,31 @@ final class MarketplaceSearch
     use ComponentWithMapTrait;
 
     #[LiveProp(writable: true, url: true)]
-    public string $location = '';
+    public ?int $arrondissement = null;
+
+    /** Centre approximatif de chaque arrondissement de Paris */
+    private const ARRONDISSEMENT_CENTERS = [
+        1  => [48.8606, 2.3376],
+        2  => [48.8682, 2.3417],
+        3  => [48.8630, 2.3601],
+        4  => [48.8550, 2.3578],
+        5  => [48.8443, 2.3500],
+        6  => [48.8488, 2.3325],
+        7  => [48.8567, 2.3127],
+        8  => [48.8718, 2.3119],
+        9  => [48.8769, 2.3372],
+        10 => [48.8762, 2.3601],
+        11 => [48.8594, 2.3782],
+        12 => [48.8400, 2.3877],
+        13 => [48.8322, 2.3561],
+        14 => [48.8331, 2.3264],
+        15 => [48.8417, 2.2986],
+        16 => [48.8603, 2.2620],
+        17 => [48.8848, 2.3076],
+        18 => [48.8925, 2.3444],
+        19 => [48.8847, 2.3845],
+        20 => [48.8631, 2.4007],
+    ];
 
     #[LiveProp(writable: true, url: true)]
     public string $propertyType = '';
@@ -96,7 +120,7 @@ final class MarketplaceSearch
     }
 
     #[LiveProp(writable: false)]
-    public string $prevLocation = '';
+    public ?int $prevArrondissement = null;
 
     #[LiveProp(writable: false)]
     public string $prevPropertyType = '';
@@ -110,12 +134,28 @@ final class MarketplaceSearch
     #[PreReRender]
     public function refreshMapMarkers(): void
     {
-        if ($this->location !== $this->prevLocation || $this->propertyType !== $this->prevPropertyType || $this->rentMin !== $this->prevRentMin || $this->rentMax !== $this->prevRentMax) {
-            $map = $this->getMap();
-            $map->removeAllMarkers();
-            $this->addMarkersToMap($map);
+        $arrondissementChanged = $this->arrondissement !== $this->prevArrondissement;
 
-            $this->prevLocation = $this->location;
+        if ($arrondissementChanged || $this->propertyType !== $this->prevPropertyType || $this->rentMin !== $this->prevRentMin || $this->rentMax !== $this->prevRentMax) {
+            // Si l'arrondissement a changé : reset complet de la carte (nouveau centre + zoom)
+            if ($arrondissementChanged) {
+                $this->south = null;
+                $this->north = null;
+                $this->west = null;
+                $this->east = null;
+                if ($this->arrondissement !== null && isset(self::ARRONDISSEMENT_CENTERS[$this->arrondissement])) {
+                    $this->zoom = 14;
+                } else {
+                    $this->zoom = 12;
+                }
+                $this->map = null;
+            } else {
+                $map = $this->getMap();
+                $map->removeAllMarkers();
+                $this->addMarkersToMap($map);
+            }
+
+            $this->prevArrondissement = $this->arrondissement;
             $this->prevPropertyType = $this->propertyType;
             $this->prevRentMin = $this->rentMin;
             $this->prevRentMax = $this->rentMax;
@@ -164,14 +204,38 @@ final class MarketplaceSearch
         return count($this->getFilteredProperties());
     }
 
-    private function getFilteredProperties(): array
+    #[LiveAction]
+    public function reset(): void
     {
-        // Si max < min, on inverse les deux valeurs
+        $this->arrondissement = null;
+        $this->propertyType = '';
+        $this->rentMin = null;
+        $this->rentMax = null;
+        $this->page = 1;
+        $this->south = null;
+        $this->north = null;
+        $this->west = null;
+        $this->east = null;
+        $this->zoom = 12;
+        $this->map = null;
+    }
+
+    #[LiveAction]
+    public function normalizeRents(): void
+    {
         if ($this->rentMin !== null && $this->rentMax !== null && $this->rentMax < $this->rentMin) {
             [$this->rentMin, $this->rentMax] = [$this->rentMax, $this->rentMin];
         }
+    }
 
+    private function getFilteredProperties(): array
+    {
         $properties = $this->loadProperties();
+
+        if ($this->arrondissement !== null) {
+            $code = sprintf('750%02d', $this->arrondissement);
+            $properties = array_values(array_filter($properties, fn (array $p) => ($p['address']['postalCode'] ?? '') === $code));
+        }
 
         if ($this->propertyType !== '') {
             $matchSlugs = $this->getMatchingSlugs($this->propertyType);
@@ -230,8 +294,12 @@ final class MarketplaceSearch
 
     protected function instantiateMap(): Map
     {
+        $center = ($this->arrondissement !== null && isset(self::ARRONDISSEMENT_CENTERS[$this->arrondissement]))
+            ? new Point(self::ARRONDISSEMENT_CENTERS[$this->arrondissement][0], self::ARRONDISSEMENT_CENTERS[$this->arrondissement][1])
+            : new Point(48.8566, 2.3522);
+
         $map = (new Map('default'))
-            ->center(new Point(48.8566, 2.3522))
+            ->center($center)
             ->zoom($this->zoom)
             ->minZoom(9)
             ->maxZoom(17)
