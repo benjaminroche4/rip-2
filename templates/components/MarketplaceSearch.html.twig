@@ -6,7 +6,8 @@
                     {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
                     <select
                         data-model="norender|draftArrondissement"
-                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none {{ draftArrondissement is null ? 'text-gray-400' : 'text-gray-900' }}"
+                        required
+                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light"
                     >
                         <option value="">{{ locale == 'fr' ? 'Arrondissement' : 'Arrondissement' }}</option>
                         {% for i in 1..20 %}
@@ -23,7 +24,8 @@
                     {{ ux_icon('iconoir:home-simple', {'class': 'size-5 text-gray-400 shrink-0'}) }}
                     <select
                         data-model="norender|draftPropertyType"
-                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none {{ draftPropertyType == '' ? 'text-gray-400' : 'text-gray-900' }}"
+                        required
+                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light"
                     >
                         <option value="" class="text-gray-200">{{ locale == 'fr' ? 'Tous les biens' : 'Property type' }}</option>
                         {% for slug, name in this.propertyTypes %}
@@ -36,6 +38,8 @@
                     <div class="flex items-center gap-x-1 flex-1 min-w-0">
                         <input
                             type="number"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
                             data-model="norender|draftRentMin"
                             placeholder="Min"
                             min="0"
@@ -46,6 +50,8 @@
                         <span class="text-gray-300 shrink-0">–</span>
                         <input
                             type="number"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
                             data-model="norender|draftRentMax"
                             placeholder="Max"
                             min="0"
