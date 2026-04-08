@@ -20,6 +20,7 @@ use Symfony\UX\Map\Marker;
 use Symfony\UX\Map\Point;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Twig\Environment;
 
 #[AsLiveComponent]
 final class MarketplaceSearch
@@ -116,6 +117,7 @@ final class MarketplaceSearch
     public function __construct(
         private readonly SanityService $sanityService,
         private readonly CacheInterface $cache,
+        private readonly Environment $twig,
     ) {}
 
     #[LiveAction]
@@ -461,8 +463,11 @@ final class MarketplaceSearch
             icon: $icon,
             extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property['_id']],
             infoWindow: new InfoWindow(
-                headerContent: '<b>' . ($property['address']['city'] ?? 'Paris') . '</b>',
-                content: $property['title'] ?? '',
+                content: $this->twig->render('components/MarketplaceSearch/Card.html.twig', [
+                    'property' => $property,
+                    'locale' => $this->locale,
+                    'compact' => true,
+                ]),
             ),
         ));
     }

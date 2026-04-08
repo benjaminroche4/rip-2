@@ -110,202 +110,28 @@
                     </button>
                 </div>
 
-                <div class="hidden grid-cols-1 lg:grid-cols-2 gap-6 data-[loading]:grid" data-loading="action(search)|show">
-                    {% for i in 1..4 %}
-                        <div class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
-                            <twig:Skeleton class="aspect-3/2 rounded-xl bg-neutral-800/10" />
-                            <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
-                                <div class="space-y-2">
-                                    <twig:Skeleton class="h-7 w-1/3 rounded-md bg-neutral-800/10" />
-                                    <twig:Skeleton class="h-5 w-2/3 rounded-md bg-neutral-800/10" />
-                                    <twig:Skeleton class="h-4 w-1/2 rounded-md bg-neutral-800/10" />
+                <div class="hidden" data-loading="action(search)|show">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {% for i in 1..4 %}
+                            <div class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
+                                <twig:Skeleton class="aspect-3/2 rounded-xl bg-neutral-800/10" />
+                                <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
+                                    <div class="space-y-2">
+                                        <twig:Skeleton class="h-7 w-1/3 rounded-md bg-neutral-800/10" />
+                                        <twig:Skeleton class="h-5 w-2/3 rounded-md bg-neutral-800/10" />
+                                        <twig:Skeleton class="h-4 w-1/2 rounded-md bg-neutral-800/10" />
+                                    </div>
+                                    <twig:Skeleton class="h-12 w-full rounded-lg bg-neutral-800/10" />
                                 </div>
-                                <twig:Skeleton class="h-12 w-full rounded-lg bg-neutral-800/10" />
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
 
                 <div data-loading="action(search)|hide">
                     <div class="grid md:grid-cols-2 gap-6">
                         {% for property in this.items %}
-                            {% set allPhotos = [] %}
-                            {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
-                                {% set allPhotos = allPhotos|merge([property.mainPhoto]) %}
-                            {% endif %}
-                            {% for photo in property.photos %}
-                                {% if photo.url != property.mainPhoto.url|default('') %}
-                                    {% set allPhotos = allPhotos|merge([photo]) %}
-                                {% endif %}
-                            {% endfor %}
-
-                            {% set badge = null %}
-                            {% if property.status == 'underOffer' %}
-                                {% set badge = {
-                                    class: 'bg-amber-50 border-amber-100 text-amber-600',
-                                    text: locale == 'fr' ? 'Offre en cours' : 'Under offer',
-                                    bold: true,
-                                } %}
-                            {% elseif property.status == 'rented' %}
-                                {% set badge = {
-                                    class: 'bg-red-50 border-red-100 text-red-600',
-                                    text: locale == 'fr' ? 'Non disponible' : 'Rented',
-                                    bold: true,
-                                } %}
-                            {% elseif property.availableDate is defined and property.availableDate %}
-                                {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
-                                    {% set badge = {
-                                        class: 'bg-green-50 border-green-100 text-green-600',
-                                        text: locale == 'fr' ? 'Disponible immédiatement' : 'Available now',
-                                        bold: true,
-                                    } %}
-                                {% else %}
-                                    {% set badge = {
-                                        class: 'bg-slate-50 border-slate-100 text-slate-600',
-                                        text: (locale == 'fr' ? 'À partir du ' : 'From ') ~ property.availableDate|date('d/m/Y'),
-                                        bold: false,
-                                    } %}
-                                {% endif %}
-                            {% endif %}
-
-                            {% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U')
-                                or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
-
-                            <article
-                                class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5"
-                                data-property-id="{{ property._id }}"
-                                data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
-                            >
-                                <div
-                                    class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
-                                    data-controller="carousel"
-                                >
-                                    <div
-                                        class="flex h-full transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
-                                        data-carousel-target="track"
-                                    >
-                                        {% for photo in allPhotos[:5] %}
-                                            <div class="w-full h-full shrink-0">
-                                                <img
-                                                    src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&q=80"
-                                                    alt="{{ photo.alt|default(property.title) }}"
-                                                    {{ loop.first ? '' : 'loading="lazy"' }}
-                                                    width="600"
-                                                    height="400"
-                                                    draggable="false"
-                                                    class="w-full h-full object-cover pointer-events-none select-none"
-                                                />
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-
-                                    {% if allPhotos|length > 1 %}
-                                        <div
-                                            class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1"
-                                            data-carousel-target="dots"
-                                        >
-                                            {% for photo in allPhotos[:5] %}
-                                                <button
-                                                    type="button"
-                                                    data-carousel-target="dot"
-                                                    data-action="carousel#goTo"
-                                                    data-index="{{ loop.index0 }}"
-                                                    class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
-                                                ></button>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-
-                                    {% if isNew or (property.showCategoryOnCard|default(false) and property.categoryName|default(false)) %}
-                                        <div class="absolute top-1.5 left-2">
-                                            <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
-                                                {{ isNew ? (locale == 'fr' ? 'Nouveau' : 'New') : property.categoryName }}
-                                            </span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
-                                    <div class="flex items-center justify-between gap-x-2">
-                                        {% if badge %}
-                                            <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badge.class }}">
-                                                {% if property.agentPhoto|default(false) %}
-                                                    <img
-                                                        src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
-                                                        alt="{{ property.agentName }}{{ locale == 'fr' ? ', responsable de la location' : ', rental manager' }}"
-                                                        loading="lazy"
-                                                        width="24"
-                                                        height="24"
-                                                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                                                    />
-                                                {% endif %}
-                                                <p class="{{ badge.bold ? 'font-semibold' }}">{{ badge.text }}</p>
-                                            </twig:Badge>
-                                        {% endif %}
-
-                                        <twig:Tooltip id="verified-{{ property._id|replace({'.': '-'}) }}">
-                                            <twig:Tooltip:Trigger>
-                                                <span
-                                                    {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %}
-                                                    class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5"
-                                                >
-                                                    {{ ux_icon('flowbite:badge-check-solid', {'class': 'size-4.5 shrink-0 text-primary'}) }}
-                                                </span>
-                                            </twig:Tooltip:Trigger>
-                                            <twig:Tooltip:Content side="left">
-                                                <p>{{ locale == 'fr' ? 'Bien vérifié par Relocation In Paris' : 'Property verified by Relocation In Paris' }}</p>
-                                            </twig:Tooltip:Content>
-                                        </twig:Tooltip>
-                                    </div>
-
-                                    <div class="space-y-1">
-                                        {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
-                                            <p class="text-primary text-2xl font-semibold">
-                                                {{ property.monthlyRent|number_format(0, ',', ' ') }}€
-                                                <span class="text-gray-600 text-sm font-light ml-0.5">
-                                                    /mois
-                                                    {% if property.chargesIncludes|default(false) %}
-                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">Charges incl.</span>
-                                                    {% endif %}
-                                                </span>
-                                            </p>
-                                        {% else %}
-                                            <p class="text-primary text-2xl font-semibold">Prix sur demande</p>
-                                        {% endif %}
-
-                                        <h3 class="font-semibold text-base capitalize font-secondary">
-                                            {{ property.listingTypeName|default('Location') }} {{ property.propertyTypeName }}{% if property.rooms %} {{ property.rooms }} pièces{% endif %}
-                                        </h3>
-
-                                        <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1 capitalize">
-                                            {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                                            {{ property.address.city }}, {{ property.address.postalCode|arrondissement }}
-                                        </address>
-                                    </div>
-
-                                    <div class="bg-neutral-50 rounded-lg px-2 py-3 grid grid-cols-3 divide-x divide-gray-200">
-                                        <div class="flex items-center justify-center gap-x-1">
-                                            {% if property.elevator %}
-                                                {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                                <p class="text-sm font-light">{{ locale == 'fr' ? 'Oui' : 'Yes' }}</p>
-                                            {% else %}
-                                                {{ ux_icon('iconoir:sofa', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                                <p class="text-sm font-light">
-                                                    {{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}
-                                                </p>
-                                            {% endif %}
-                                        </div>
-                                        <div class="flex items-center justify-center gap-x-1">
-                                            {{ ux_icon('fluent:bed-24-regular', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                            <p class="text-sm font-light">{{ property.bedroomsLabel }}</p>
-                                        </div>
-                                        <div class="flex items-center justify-center gap-x-1">
-                                            {{ ux_icon('wordpress:square', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                            <p class="text-sm font-light">{{ property.squareMeters }} m²</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
+                            {% include 'components/MarketplaceSearch/Card.html.twig' with { property, locale } only %}
                         {% endfor %}
                     </div>
                 </div>

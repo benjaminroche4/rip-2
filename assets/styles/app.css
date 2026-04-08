@@ -142,3 +142,23 @@ turbo-frame#blog-list[busy] {
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
+
+/* === Google Maps InfoWindow — strip chrome for property cards === */
+.gm-style .gm-style-iw-c {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    max-width: 280px !important;
+}
+.gm-style .gm-style-iw-c button.gm-ui-hover-effect {
+    display: none !important;
+}
+.gm-style .gm-style-iw-d {
+    overflow: visible !important;
+    padding: 0 !important;
+    max-width: 280px !important;
+}
+.gm-style .gm-style-iw-tc {
+    display: none !important;
+}
