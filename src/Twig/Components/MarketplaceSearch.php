@@ -519,7 +519,7 @@ final class MarketplaceSearch
                 $item->expiresAfter(300); // 5 minutes
 
                 $results = $this->sanityService->query(
-                    '*[_type == "property"] | order(_createdAt desc) {
+                    '*[_type == "property" && language == $lang] | order(_createdAt desc) {
                         _id,
                         "createdAt": _createdAt,
                         "updatedAt": _updatedAt,
@@ -553,6 +553,7 @@ final class MarketplaceSearch
                         },
                         availableDate,
                         "agentPhoto": agent->photo.asset->url,
+                        "agentName": agent->fullName,
                         "photoCount": count(photos),
                         "categoryName": categories[0]->name,
                         "location": location{lat, lng},
@@ -563,7 +564,8 @@ final class MarketplaceSearch
                         "propertyTypeName": propertyType->name,
                         "propertyTypeSlug": propertyType->slug.current,
                         "propertyTypeLang": propertyType->language
-                    }'
+                    }',
+                    ['lang' => $this->locale]
                 );
 
                 if (!is_array($results)) {

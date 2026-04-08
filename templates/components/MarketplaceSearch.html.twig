@@ -1,40 +1,54 @@
+{% macro arrondissementLabel(i, locale) %}
+    {%- if locale == 'fr' -%}
+        {{ i == 1 ? '1er arrondissement' : i ~ 'e arrondissement' }}
+    {%- else -%}
+        {%- set suffix = {1: 'st', 2: 'nd', 3: 'rd'}[i]|default('th') -%}
+        {{ i ~ suffix ~ ' arrondissement' }}
+    {%- endif -%}
+{% endmacro %}
+
+{% macro searchField(icon) %}
+    <div class="px-3 py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl">
+        {{ ux_icon(icon, {'class': 'size-5 text-gray-400 shrink-0'}) }}
+        {{ block('field') }}
+    </div>
+{% endmacro %}
+
+{% import _self as ui %}
+
+{% set selectClass = 'font-light w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light' %}
+{% set inputClass = 'font-light text-gray-900 w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none' %}
+{% set fieldWrapper = 'px-3 py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl' %}
+{% set iconClass = 'size-5 text-gray-400 shrink-0' %}
+
 <div {{ attributes }}>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="border border-slate-200/20 lg:border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex flex-row items-center w-full">
+        <div class="border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full">
             <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
-                <div class="px-3 py-2 bg flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl">
-                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-400 shrink-0'}) }}
-                    <select
-                        data-model="norender|draftArrondissement"
-                        required
-                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light"
-                    >
+                <div class="{{ fieldWrapper }}">
+                    {{ ux_icon('iconoir:elevator', {'class': iconClass}) }}
+                    <select data-model="norender|draftArrondissement" required class="{{ selectClass }}">
                         <option value="">{{ locale == 'fr' ? 'Arrondissement' : 'Arrondissement' }}</option>
                         {% for i in 1..20 %}
-                            <option value="{{ i }}" {{ draftArrondissement == i ? 'selected' : '' }}>
-                                {{ locale == 'fr'
-                                    ? (i == 1 ? '1er arrondissement' : i ~ 'e arrondissement')
-                                    : (i == 1 ? '1st arrondissement' : (i == 2 ? '2nd arrondissement' : (i == 3 ? '3rd arrondissement' : i ~ 'th arrondissement')))
-                                }}
+                            <option value="{{ i }}" {{ draftArrondissement == i ? 'selected' }}>
+                                {{ ui.arrondissementLabel(i, locale) }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="px-3 py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl">
-                    {{ ux_icon('iconoir:home-simple', {'class': 'size-5 text-gray-400 shrink-0'}) }}
-                    <select
-                        data-model="norender|draftPropertyType"
-                        required
-                        class="font-light outline-none w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light"
-                    >
-                        <option value="" class="text-gray-200">{{ locale == 'fr' ? 'Tous les biens' : 'Property type' }}</option>
+
+                <div class="{{ fieldWrapper }}">
+                    {{ ux_icon('iconoir:home-simple', {'class': iconClass}) }}
+                    <select data-model="norender|draftPropertyType" required class="{{ selectClass }}">
+                        <option value="">{{ locale == 'fr' ? 'Tous les biens' : 'Property type' }}</option>
                         {% for slug, name in this.propertyTypes %}
-                            <option value="{{ slug }}" {{ draftPropertyType == slug ? 'selected' : '' }}>{{ name }}</option>
+                            <option value="{{ slug }}" {{ draftPropertyType == slug ? 'selected' }}>{{ name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="px-3 py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl">
-                    {{ ux_icon('iconoir:euro', {'class': 'size-5 text-gray-400 shrink-0'}) }}
+
+                <div class="{{ fieldWrapper }}">
+                    {{ ux_icon('iconoir:euro', {'class': iconClass}) }}
                     <div class="flex items-center gap-x-1 flex-1 min-w-0">
                         <input
                             type="number"
@@ -44,8 +58,8 @@
                             placeholder="Min"
                             min="0"
                             step="100"
-                            class="font-light text-gray-900 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
                             value="{{ draftRentMin }}"
+                            class="{{ inputClass }}"
                         />
                         <span class="text-gray-300 shrink-0">–</span>
                         <input
@@ -56,12 +70,13 @@
                             placeholder="Max"
                             min="0"
                             step="100"
-                            class="font-light text-gray-900 outline-none w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none"
                             value="{{ draftRentMax }}"
+                            class="{{ inputClass }}"
                         />
                     </div>
                 </div>
             </div>
+
             <twig:Button
                 variant="default"
                 size="lg"
@@ -73,15 +88,18 @@
             </twig:Button>
         </div>
     </section>
+
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8" data-controller="map-markers map-teleport" data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto">
+        <div
+            class="grid grid-cols-1 lg:grid-cols-2 gap-x-8"
+            data-controller="map-markers map-teleport"
+            data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto"
+        >
             <div>
-                <div class="justify-between flex gap-x-2 items-center mb-8 ">
-                    <div>
-                        <h3 class="text-base font-medium font-secondary">
-                            {{ this.totalCount }} offres en location à Paris
-                        </h3>
-                    </div>
+                <div class="flex justify-between items-center gap-x-2 mb-8">
+                    <h3 class="text-base font-medium font-secondary">
+                        {{ this.totalCount }} offres en location à Paris
+                    </h3>
                     <button
                         type="button"
                         data-action="map-teleport#open"
@@ -92,7 +110,7 @@
                     </button>
                 </div>
 
-                <div class="grid lg:grid-cols-2 gap-6 hidden" data-loading="action(search)|show">
+                <div class="hidden grid-cols-1 lg:grid-cols-2 gap-6 data-[loading]:grid" data-loading="action(search)|show">
                     {% for i in 1..4 %}
                         <div class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
                             <twig:Skeleton class="aspect-3/2 rounded-xl bg-neutral-800/10" />
@@ -111,57 +129,97 @@
                 <div data-loading="action(search)|hide">
                     <div class="grid md:grid-cols-2 gap-6">
                         {% for property in this.items %}
-                            <article class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5"
-                                    data-property-id="{{ property._id }}"
-                                    data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker">
-                                <div class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group" data-controller="carousel">
-                                    {% set allPhotos = [] %}
-                                    {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
-                                        {% set allPhotos = allPhotos|merge([property.mainPhoto]) %}
-                                    {% endif %}
-                                    {% for photo in property.photos %}
-                                        {% if photo.url != property.mainPhoto.url|default('') %}
-                                            {% set allPhotos = allPhotos|merge([photo]) %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    <div class="flex h-full transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing" data-carousel-target="track">
+                            {% set allPhotos = [] %}
+                            {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+                                {% set allPhotos = allPhotos|merge([property.mainPhoto]) %}
+                            {% endif %}
+                            {% for photo in property.photos %}
+                                {% if photo.url != property.mainPhoto.url|default('') %}
+                                    {% set allPhotos = allPhotos|merge([photo]) %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% set badge = null %}
+                            {% if property.status == 'underOffer' %}
+                                {% set badge = {
+                                    class: 'bg-amber-50 border-amber-100 text-amber-600',
+                                    text: locale == 'fr' ? 'Offre en cours' : 'Under offer',
+                                    bold: true,
+                                } %}
+                            {% elseif property.status == 'rented' %}
+                                {% set badge = {
+                                    class: 'bg-red-50 border-red-100 text-red-600',
+                                    text: locale == 'fr' ? 'Non disponible' : 'Rented',
+                                    bold: true,
+                                } %}
+                            {% elseif property.availableDate is defined and property.availableDate %}
+                                {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                    {% set badge = {
+                                        class: 'bg-green-50 border-green-100 text-green-600',
+                                        text: locale == 'fr' ? 'Disponible immédiatement' : 'Available now',
+                                        bold: true,
+                                    } %}
+                                {% else %}
+                                    {% set badge = {
+                                        class: 'bg-slate-50 border-slate-100 text-slate-600',
+                                        text: (locale == 'fr' ? 'À partir du ' : 'From ') ~ property.availableDate|date('d/m/Y'),
+                                        bold: false,
+                                    } %}
+                                {% endif %}
+                            {% endif %}
+
+                            {% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U')
+                                or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+
+                            <article
+                                class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5"
+                                data-property-id="{{ property._id }}"
+                                data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
+                            >
+                                <div
+                                    class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
+                                    data-controller="carousel"
+                                >
+                                    <div
+                                        class="flex h-full transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
+                                        data-carousel-target="track"
+                                    >
                                         {% for photo in allPhotos[:5] %}
                                             <div class="w-full h-full shrink-0">
                                                 <img
                                                     src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&q=80"
-                                                    alt="{{ photo.alt|default(property.title|default('Bien immobilier')) }}"
+                                                    alt="{{ photo.alt|default(property.title) }}"
                                                     {{ loop.first ? '' : 'loading="lazy"' }}
                                                     width="600"
                                                     height="400"
-                                                    class="w-full h-full object-cover pointer-events-none select-none"
                                                     draggable="false"
+                                                    class="w-full h-full object-cover pointer-events-none select-none"
                                                 />
                                             </div>
                                         {% endfor %}
                                     </div>
+
                                     {% if allPhotos|length > 1 %}
-                                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1" data-carousel-target="dots">
+                                        <div
+                                            class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1"
+                                            data-carousel-target="dots"
+                                        >
                                             {% for photo in allPhotos[:5] %}
                                                 <button
                                                     type="button"
-                                                    class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
                                                     data-carousel-target="dot"
                                                     data-action="carousel#goTo"
                                                     data-index="{{ loop.index0 }}"
+                                                    class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
                                                 ></button>
                                             {% endfor %}
                                         </div>
                                     {% endif %}
-                                    {% if property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+
+                                    {% if isNew or (property.showCategoryOnCard|default(false) and property.categoryName|default(false)) %}
                                         <div class="absolute top-1.5 left-2">
                                             <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
-                                                {{ locale == 'fr' ? 'Nouveau' : 'New' }}
-                                            </span>
-                                        </div>
-                                    {% elseif property.showCategoryOnCard is defined and property.showCategoryOnCard and property.categoryName is defined and property.categoryName %}
-                                        <div class="absolute top-1.5 left-2">
-                                            <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
-                                                {{ property.categoryName }}
+                                                {{ isNew ? (locale == 'fr' ? 'Nouveau' : 'New') : property.categoryName }}
                                             </span>
                                         </div>
                                     {% endif %}
@@ -169,44 +227,28 @@
 
                                 <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
                                     <div class="flex items-center justify-between gap-x-2">
-                                        {% if property.status == 'underOffer' %}
-                                            {% set badgeClass = 'bg-amber-50 border-amber-100 text-amber-600' %}
-                                            {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Offre en cours' : 'Under offer' }}</p>{% endset %}
-                                        {% elseif property.status == 'rented' %}
-                                            {% set badgeClass = 'bg-red-50 border-red-100 text-red-600' %}
-                                            {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Non disponible' : 'Rented' }}</p>{% endset %}
-                                        {% elseif property.availableDate is defined and property.availableDate %}
-                                            {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
-                                                {% set badgeClass = 'bg-green-50 border-green-100 text-green-600' %}
-                                                {% set badgeText %}<p class="font-semibold">{{ locale == 'fr' ? 'Disponible immédiatement' : 'Available now' }}</p>{% endset %}
-                                            {% else %}
-                                                {% set badgeClass = 'bg-slate-50 border-slate-100 text-slate-600' %}
-                                                {% set badgeText %}<p>{{ locale == 'fr' ? 'À partir du' : 'From' }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>{% endset %}
-                                            {% endif %}
-                                        {% else %}
-                                            {% set badgeClass = null %}
+                                        {% if badge %}
+                                            <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badge.class }}">
+                                                {% if property.agentPhoto|default(false) %}
+                                                    <img
+                                                        src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
+                                                        alt="{{ property.agentName }}{{ locale == 'fr' ? ', responsable de la location' : ', rental manager' }}"
+                                                        loading="lazy"
+                                                        width="24"
+                                                        height="24"
+                                                        class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                                    />
+                                                {% endif %}
+                                                <p class="{{ badge.bold ? 'font-semibold' }}">{{ badge.text }}</p>
+                                            </twig:Badge>
                                         {% endif %}
 
-                                        {% if badgeClass %}
-                                            <div>
-                                                <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badgeClass }}">
-                                                    {% if property.agentPhoto is defined and property.agentPhoto %}
-                                                        <img
-                                                            src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
-                                                            alt=""
-                                                            loading="lazy"
-                                                            width="24"
-                                                            height="24"
-                                                            class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
-                                                        />
-                                                    {% endif %}
-                                                    {{ badgeText|raw }}
-                                                </twig:Badge>
-                                            </div>
-                                        {% endif %}
                                         <twig:Tooltip id="verified-{{ property._id|replace({'.': '-'}) }}">
                                             <twig:Tooltip:Trigger>
-                                                <span {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %} class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5">
+                                                <span
+                                                    {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %}
+                                                    class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5"
+                                                >
                                                     {{ ux_icon('flowbite:badge-check-solid', {'class': 'size-4.5 shrink-0 text-primary'}) }}
                                                 </span>
                                             </twig:Tooltip:Trigger>
@@ -215,36 +257,42 @@
                                             </twig:Tooltip:Content>
                                         </twig:Tooltip>
                                     </div>
+
                                     <div class="space-y-1">
-                                        <div>
-                                            {% if property.monthlyRent and not (property.priceOnRequest is defined and property.priceOnRequest) %}
-                                                <p class="text-primary text-2xl font-semibold">{{ property.monthlyRent|number_format(0, ',', ' ') }}€
-                                                    <span class="text-gray-600 text-sm font-light ml-0.5">/mois
-                                                        {% if property.chargesIncludes is defined and property.chargesIncludes %}
-                                                            <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">Charges incl.</span>
-                                                        {% endif %}
-                                                    </span>
-                                                </p>
-                                            {% else %}
-                                                <p class="text-primary text-2xl font-semibold">Prix sur demande</p>
-                                            {% endif %}
-                                        </div>
-                                        <h3 class="font-semibold text-base capitalize font-secondary">{{ property.listingTypeName|default('Location') }} {{ property.propertyTypeName }}{% if property.rooms %} {{ property.rooms }} pièces{% endif %}</h3>
-                                        <div>
-                                            <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1 capitalize">
-                                                {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                                                {{ property.address.city }}, {{ property.address.postalCode|arrondissement }}
-                                            </address>
-                                        </div>
+                                        {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+                                            <p class="text-primary text-2xl font-semibold">
+                                                {{ property.monthlyRent|number_format(0, ',', ' ') }}€
+                                                <span class="text-gray-600 text-sm font-light ml-0.5">
+                                                    /mois
+                                                    {% if property.chargesIncludes|default(false) %}
+                                                        <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">Charges incl.</span>
+                                                    {% endif %}
+                                                </span>
+                                            </p>
+                                        {% else %}
+                                            <p class="text-primary text-2xl font-semibold">Prix sur demande</p>
+                                        {% endif %}
+
+                                        <h3 class="font-semibold text-base capitalize font-secondary">
+                                            {{ property.listingTypeName|default('Location') }} {{ property.propertyTypeName }}{% if property.rooms %} {{ property.rooms }} pièces{% endif %}
+                                        </h3>
+
+                                        <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1 capitalize">
+                                            {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                                            {{ property.address.city }}, {{ property.address.postalCode|arrondissement }}
+                                        </address>
                                     </div>
+
                                     <div class="bg-neutral-50 rounded-lg px-2 py-3 grid grid-cols-3 divide-x divide-gray-200">
                                         <div class="flex items-center justify-center gap-x-1">
                                             {% if property.elevator %}
                                                 {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                                <p class="text-sm font-light">Yes</p>
+                                                <p class="text-sm font-light">{{ locale == 'fr' ? 'Oui' : 'Yes' }}</p>
                                             {% else %}
                                                 {{ ux_icon('iconoir:sofa', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                                                <p class="text-sm font-light">{{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}</p>
+                                                <p class="text-sm font-light">
+                                                    {{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}
+                                                </p>
                                             {% endif %}
                                         </div>
                                         <div class="flex items-center justify-center gap-x-1">
@@ -265,25 +313,26 @@
                 {% if this.hasMore %}
                     <div class="flex justify-center mt-8">
                         <button
-                            class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
                             data-action="live#action"
                             data-live-action-param="more"
+                            class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
                         >
                             <span data-loading="action(more)|hide">Voir plus de biens</span>
-                            <span data-loading="action(more)|show" class="hidden flex items-center gap-x-2">
+                            <span data-loading="action(more)|show" class="hidden items-center gap-x-2">
                                 <twig:Spinner class="inline" /> Chargement...
                             </span>
                         </button>
                     </div>
                 {% endif %}
             </div>
+
             <div
                 data-map-teleport-target="container"
+                data-loading="action(updateBounds)|addClass(opacity-50)"
                 class="
                     max-lg:fixed max-lg:inset-0 max-lg:z-50 max-lg:bg-white max-lg:translate-y-full max-lg:opacity-0 max-lg:pointer-events-none max-lg:transition-all max-lg:duration-300
                     lg:block lg:rounded-3xl lg:p-2 lg:border lg:border-neutral-200 lg:transition-opacity lg:duration-200 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]
                 "
-                data-loading="action(updateBounds)|addClass(opacity-50)"
             >
                 <button
                     type="button"
