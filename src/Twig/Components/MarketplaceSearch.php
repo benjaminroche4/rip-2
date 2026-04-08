@@ -63,6 +63,30 @@ final class MarketplaceSearch
     #[LiveProp(writable: true, url: true)]
     public ?int $rentMax = null;
 
+    /* État "draft" — modifié par les inputs sans déclencher de re-render.
+       Ces valeurs sont copiées dans les props finales lors du clic sur "Rechercher". */
+
+    #[LiveProp(writable: true)]
+    public ?int $draftArrondissement = null;
+
+    #[LiveProp(writable: true)]
+    public string $draftPropertyType = '';
+
+    #[LiveProp(writable: true)]
+    public ?int $draftRentMin = null;
+
+    #[LiveProp(writable: true)]
+    public ?int $draftRentMax = null;
+
+    public function mount(): void
+    {
+        // Initialise les drafts depuis les props (gère le chargement depuis URL)
+        $this->draftArrondissement = $this->arrondissement;
+        $this->draftPropertyType = $this->propertyType;
+        $this->draftRentMin = $this->rentMin;
+        $this->draftRentMax = $this->rentMax;
+    }
+
     #[LiveProp(writable: true)]
     public float $zoom = 12;
 
@@ -205,26 +229,28 @@ final class MarketplaceSearch
     }
 
     #[LiveAction]
-    public function reset(): void
+    public function search(): void
     {
-        $this->arrondissement = null;
-        $this->propertyType = '';
-        $this->rentMin = null;
-        $this->rentMax = null;
+        // Normalise min/max draft avant application
+        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
+            [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
+        }
+
+        // Applique les drafts aux props finales
+        $this->arrondissement = $this->draftArrondissement;
+        $this->propertyType = $this->draftPropertyType;
+        $this->rentMin = $this->draftRentMin;
+        $this->rentMax = $this->draftRentMax;
+
+        // Reset pagination
         $this->page = 1;
-        $this->south = null;
-        $this->north = null;
-        $this->west = null;
-        $this->east = null;
-        $this->zoom = 12;
-        $this->map = null;
     }
 
     #[LiveAction]
     public function normalizeRents(): void
     {
-        if ($this->rentMin !== null && $this->rentMax !== null && $this->rentMax < $this->rentMin) {
-            [$this->rentMin, $this->rentMax] = [$this->rentMax, $this->rentMin];
+        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
+            [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
         }
     }
 
