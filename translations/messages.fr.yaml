@@ -80,6 +80,7 @@ sitemap:
     subTitle: Découvrez nos services
     general: Général
     blog: Blog
+    property: Nos biens
     menu:
         findAccommodation: Recherche de logement
         companies: Solutions entreprises
@@ -99,6 +100,8 @@ sitemap:
         termsConditions: Conditions générales de vente
     blogMenu:
         blog: Blog
+    propertyMenu:
+        ourProperty: Tous nos biens en location (Marketplace)
 footer:
     logo:
         alt: Logo Relocation in Paris
@@ -335,6 +338,9 @@ findAccommodation:
                 title: Remise des clés et suivi
                 description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
 meta:
+    marketplace:
+        title: Nos Appartements à Louer à Paris
+        description: Trouvez votre appartement à louer à Paris, dans tous les arrondissements. Sélectionnés, visités et vérifiés. Du studio au grand appartement familial, meublé ou vide.
     pricing:
         title: Tarifs
         description: Trouvez votre appartement à Paris avec un expert à vos côtés. Découvrez nos tarifs et choisissez la formule faite pour vous.
@@ -1242,3 +1248,52 @@ error:
         title: Une erreur est survenue
         text: Une erreur inattendue s'est produite. Réessayez dans quelques instants.
         button: Réessayer
+schema:
+    description: Agence de relocation à Paris spécialisée dans la recherche d'appartement sur mesure et clés en main. +900 installations réussies.
+marketplace:
+    list:
+        schema:
+            breadcrumb:
+                home: Accueil
+                properties: Nos biens
+            itemlist:
+                name: Biens en location à Paris
+            apartment:
+                fallback: Appartement
+                rooms: "%count% pièces"
+        search:
+            arrondissement: Arrondissement
+            type: Tous les biens
+            price:
+                min: Min
+                max: Max
+            button: Rechercher
+        properties:
+            title: 'offres <span class="hidden lg:block">en location à Paris</span>'
+            map: Voir sur la carte
+            button: Voir plus de biens
+            loading: Chargement
+            closeMap: Fermer la carte
+        card:
+            status:
+                underOffer: Offre en cours
+                rented: Non disponible
+                available: Disponible immédiatement
+                soon: À partir du
+            category:
+                new: Nouveau
+            agent:
+                alt: responsable de la location du bien chez Relocation In Paris
+            price:
+                month: mois
+                chargesIncludes: Charges incl.
+                onDemand: Prix sur demande
+            furnished:
+                yes: Oui
+                no: Non
+            elevator:
+                yes: Oui
+                no: Non
+            verified: Propriété vérifiée
+            carousel:
+                goTo: 'Aller à la photo %n%'

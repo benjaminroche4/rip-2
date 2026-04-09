@@ -335,6 +335,9 @@ findAccommodation:
                 title: Key Handover and Ongoing Support
                 description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
 meta:
+    marketplace:
+        title: Our Apartments for Rent in Paris
+        description: Find your apartment for rent in Paris, across all arrondissements. Handpicked, visited and verified. From studios to large family apartments, furnished or unfurnished.
     pricing:
         title: Pricing
         description: Find your apartment in Paris with an expert by your side. Discover our plans and choose the one made for you.
@@ -1244,3 +1247,52 @@ error:
         title: Something went wrong
         text: An unexpected error occurred. Please try again in a few moments.
         button: Try again
+schema:
+    description: Paris relocation agency specializing in tailor-made and turnkey apartment search. 900+ successful relocations.
+marketplace:
+    list:
+        schema:
+            breadcrumb:
+                home: Home
+                properties: Our properties
+            itemlist:
+                name: Properties for rent in Paris
+            apartment:
+                fallback: Apartment
+                rooms: "%count% rooms"
+        search:
+            arrondissement: Arrondissement
+            type: All properties
+            price:
+                min: Min
+                max: Max
+            button: Search
+        properties:
+            title: 'properties <span class="hidden lg:block">for rent in Paris</span>'
+            map: Show on map
+            button: Load more properties
+            loading: Loading
+            closeMap: Close the map
+        card:
+            status:
+                underOffer: Under offer
+                rented: Unavailable
+                available: Available now
+                soon: From
+            category:
+                new: New
+            agent:
+                alt: rental manager at Relocation In Paris
+            price:
+                month: month
+                chargesIncludes: Utilities incl.
+                onDemand: Price on request
+            furnished:
+                yes: Yes
+                no: No
+            elevator:
+                yes: Yes
+                no: No
+            verified: Property verified
+            carousel:
+                goTo: 'Go to photo %n%'

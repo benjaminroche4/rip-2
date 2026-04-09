@@ -13,26 +13,26 @@
 {% if property.status == 'underOffer' %}
     {% set badge = {
         class: 'bg-amber-50 border-amber-100 text-amber-600',
-        text: locale == 'fr' ? 'Offre en cours' : 'Under offer',
+        text: 'marketplace.list.card.status.underOffer'|trans,
         bold: true,
     } %}
 {% elseif property.status == 'rented' %}
     {% set badge = {
         class: 'bg-red-50 border-red-100 text-red-600',
-        text: locale == 'fr' ? 'Non disponible' : 'Rented',
+        text: 'marketplace.list.card.status.rented'|trans,
         bold: true,
     } %}
 {% elseif property.availableDate is defined and property.availableDate %}
     {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
         {% set badge = {
             class: 'bg-green-50 border-green-100 text-green-600',
-            text: locale == 'fr' ? 'Disponible immédiatement' : 'Available now',
+            text: 'marketplace.list.card.status.available'|trans,
             bold: true,
         } %}
     {% else %}
         {% set badge = {
             class: 'bg-slate-50 border-slate-100 text-slate-600',
-            text: (locale == 'fr' ? 'À partir du ' : 'From ') ~ '<span class="font-semibold">' ~ property.availableDate|date('d/m/Y') ~ '</span>',
+            text: 'marketplace.list.card.status.soon'|trans ~ ' <span class="font-semibold">' ~ property.availableDate|date('d/m/Y') ~ '</span>',
             bold: false,
         } %}
     {% endif %}
@@ -80,6 +80,7 @@
                         data-carousel-target="dot"
                         data-action="carousel#goTo"
                         data-index="{{ loop.index0 }}"
+                        aria-label="{{ 'marketplace.list.card.carousel.goTo'|trans({'%n%': loop.index}) }}"
                         class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
                     ></button>
                 {% endfor %}
@@ -89,7 +90,7 @@
         {% if isNew or (property.showCategoryOnCard|default(false) and property.categoryName|default(false)) %}
             <div class="absolute top-1.5 left-2">
                 <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
-                    {{ isNew ? (locale == 'fr' ? 'Nouveau' : 'New') : property.categoryName }}
+                    {{ isNew ? 'marketplace.list.card.category.new'|trans|raw : property.categoryName }}
                 </span>
             </div>
         {% endif %}
@@ -102,7 +103,7 @@
                     {% if property.agentPhoto|default(false) %}
                         <img
                             src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&q=80"
-                            alt="{{ property.agentName }}{{ locale == 'fr' ? ', responsable de la location' : ', rental manager' }}"
+                            alt="{{ property.agentName }} {{ 'marketplace.list.card.agent.alt'|trans|raw }}"
                             loading="lazy"
                             width="24"
                             height="24"
@@ -116,14 +117,14 @@
             <twig:Tooltip id="verified-{{ property._id|replace({'.': '-'}) }}">
                 <twig:Tooltip:Trigger>
                     <span
-                        {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %}
+                        {% for attr, val in tooltip_trigger_attrs|default({}) %}{{ attr }}="{{ val }}" {% endfor %}
                         class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5"
                     >
                         {{ ux_icon('flowbite:badge-check-solid', {'class': 'size-4.5 shrink-0 text-primary'}) }}
                     </span>
                 </twig:Tooltip:Trigger>
                 <twig:Tooltip:Content side="left">
-                    <p>{{ locale == 'fr' ? 'Bien vérifié par Relocation In Paris' : 'Property verified by Relocation In Paris' }}</p>
+                    <p>{{ 'marketplace.list.card.verified'|trans|raw }}</p>
                 </twig:Tooltip:Content>
             </twig:Tooltip>
         </div>
@@ -133,23 +134,27 @@
                 <p class="text-primary {{ compact ? 'text-xl' : 'text-2xl' }} font-semibold">
                     {{ property.monthlyRent|number_format(0, ',', ' ') }}€
                     <span class="text-gray-600 text-sm font-light ml-0.5">
-                        /mois
+                        /{{ 'marketplace.list.card.price.month'|trans|raw }}
                         {% if property.chargesIncludes|default(false) %}
-                            <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">Charges incl.</span>
+                            <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">
+                                {{ 'marketplace.list.card.price.chargesIncludes'|trans|raw }}
+                            </span>
                         {% endif %}
                     </span>
                 </p>
             {% else %}
-                <p class="text-primary text-2xl font-semibold">Prix sur demande</p>
+                <p class="text-primary text-2xl font-semibold">
+                    {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
+                </p>
             {% endif %}
 
-            <h3 class="font-semibold text-base capitalize font-secondary">
-                {{ property.listingTypeName|default('Location') }} {{ property.propertyTypeName }}{% if property.rooms %} {{ property.rooms }} pièces{% endif %}
-            </h3>
+            <h2 class="font-semibold text-base capitalize font-secondary">
+                {{ property.listingTypeName }} {{ property.propertyTypeName }}
+            </h2>
 
-            <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1 capitalize">
+            <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
                 {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                {{ property.address.city }}, {{ property.address.postalCode|arrondissement }}
+                {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
             </address>
         </div>
 
@@ -157,11 +162,11 @@
             <div class="flex items-center justify-center gap-x-1">
                 {% if property.elevator %}
                     {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
-                    <p class="text-sm font-light">{{ locale == 'fr' ? 'Oui' : 'Yes' }}</p>
+                    <p class="text-sm font-light">{{ 'marketplace.list.card.elevator.yes'|trans|raw }}</p>
                 {% else %}
                     {{ ux_icon('iconoir:sofa', {'class': 'size-5 text-gray-800 shrink-0'}) }}
                     <p class="text-sm font-light">
-                        {{ property.furnished == 'yes' ? (locale == 'fr' ? 'Oui' : 'Yes') : (locale == 'fr' ? 'Non' : 'No') }}
+                        {{ property.furnished == 'yes' ? 'marketplace.list.card.furnished.yes'|trans|raw : 'marketplace.list.card.furnished.no'|trans|raw }}
                     </p>
                 {% endif %}
             </div>

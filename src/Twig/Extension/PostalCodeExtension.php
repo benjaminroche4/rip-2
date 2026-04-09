@@ -14,7 +14,7 @@ class PostalCodeExtension extends AbstractExtension
         ];
     }
 
-    public function formatPostalCode(?string $postalCode): string
+    public function formatPostalCode(?string $postalCode, string $locale = 'fr'): string
     {
         if ($postalCode === null || $postalCode === '') {
             return '';
@@ -26,10 +26,20 @@ class PostalCodeExtension extends AbstractExtension
 
         $arr = (int) substr($postalCode, -2);
 
-        if ($arr === 1) {
-            return '1er arrondissement';
+        if ($locale === 'fr') {
+            return $arr === 1 ? '1er arrondissement' : $arr . 'e arrondissement';
         }
 
-        return $arr . 'ème arrondissement';
+        $suffix = match ($arr % 100) {
+            11, 12, 13 => 'th',
+            default => match ($arr % 10) {
+                1 => 'st',
+                2 => 'nd',
+                3 => 'rd',
+                default => 'th',
+            },
+        };
+
+        return $arr . $suffix . ' arrondissement';
     }
 }

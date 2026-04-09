@@ -79,13 +79,32 @@ final class MarketplaceSearch
     #[LiveProp(writable: true)]
     public ?int $draftRentMax = null;
 
-    public function mount(): void
-    {
+    #[LiveProp]
+    public bool $draftsInitialized = false;
+
+    public function mount(
+        ?int $arrondissement = null,
+        string $propertyType = '',
+        ?int $rentMin = null,
+        ?int $rentMax = null,
+    ): void {
+        // Hydrate les props finales (au cas où Live ne le ferait pas avant mount)
+        $this->arrondissement = $arrondissement;
+        $this->propertyType = $propertyType;
+        $this->rentMin = $rentMin;
+        $this->rentMax = $rentMax;
+
         // Initialise les drafts depuis les props (gère le chargement depuis URL)
         $this->draftArrondissement = $this->arrondissement;
         $this->draftPropertyType = $this->propertyType;
         $this->draftRentMin = $this->rentMin;
         $this->draftRentMax = $this->rentMax;
+
+        // Évite que PreReRender ne re-trigger un reset au premier render
+        $this->prevArrondissement = $this->arrondissement;
+        $this->prevPropertyType = $this->propertyType;
+        $this->prevRentMin = $this->rentMin;
+        $this->prevRentMax = $this->rentMax;
     }
 
     #[LiveProp(writable: true)]
@@ -106,7 +125,7 @@ final class MarketplaceSearch
     #[LiveProp]
     public int $page = 1;
 
-    #[LiveProp]
+    #[LiveProp(writable: true)]
     public string $locale = 'fr';
 
     private const PER_PAGE = 2;
@@ -156,6 +175,19 @@ final class MarketplaceSearch
 
     #[LiveProp(writable: false)]
     public ?int $prevRentMax = null;
+
+    #[PreReRender]
+    public function syncDraftsFromUrl(): void
+    {
+        // Sur tout premier render avec des props venant de l'URL, copie-les dans les drafts
+        if (!$this->draftsInitialized) {
+            $this->draftArrondissement = $this->arrondissement;
+            $this->draftPropertyType = $this->propertyType;
+            $this->draftRentMin = $this->rentMin;
+            $this->draftRentMax = $this->rentMax;
+            $this->draftsInitialized = true;
+        }
+    }
 
     #[PreReRender]
     public function refreshMapMarkers(): void

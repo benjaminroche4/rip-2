@@ -22,15 +22,15 @@
 {% set iconClass = 'size-5 text-gray-400 shrink-0' %}
 
 <div {{ attributes }}>
-    <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+    <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-10">
         <div class="border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full">
             <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
                 <div class="{{ fieldWrapper }}">
                     {{ ux_icon('iconoir:elevator', {'class': iconClass}) }}
                     <select data-model="norender|draftArrondissement" required class="{{ selectClass }}">
-                        <option value="">{{ locale == 'fr' ? 'Arrondissement' : 'Arrondissement' }}</option>
+                        <option value="">{{ 'marketplace.list.search.arrondissement'|trans|raw }}</option>
                         {% for i in 1..20 %}
-                            <option value="{{ i }}" {{ draftArrondissement == i ? 'selected' }}>
+                            <option value="{{ i }}" {{ (draftArrondissement ?? arrondissement) == i ? 'selected' }}>
                                 {{ ui.arrondissementLabel(i, locale) }}
                             </option>
                         {% endfor %}
@@ -40,9 +40,9 @@
                 <div class="{{ fieldWrapper }}">
                     {{ ux_icon('iconoir:home-simple', {'class': iconClass}) }}
                     <select data-model="norender|draftPropertyType" required class="{{ selectClass }}">
-                        <option value="">{{ locale == 'fr' ? 'Tous les biens' : 'Property type' }}</option>
+                        <option value="">{{ 'marketplace.list.search.type'|trans|raw }}</option>
                         {% for slug, name in this.propertyTypes %}
-                            <option value="{{ slug }}" {{ draftPropertyType == slug ? 'selected' }}>{{ name }}</option>
+                            <option value="{{ slug }}" {{ (draftPropertyType ?: propertyType) == slug ? 'selected' }}>{{ name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -55,10 +55,10 @@
                             inputmode="numeric"
                             pattern="[0-9]*"
                             data-model="norender|draftRentMin"
-                            placeholder="Min"
+                            placeholder="{{ 'marketplace.list.search.price.min'|trans|raw }}"
                             min="0"
                             step="100"
-                            value="{{ draftRentMin }}"
+                            value="{{ draftRentMin ?? rentMin }}"
                             class="{{ inputClass }}"
                         />
                         <span class="text-gray-300 shrink-0">–</span>
@@ -67,10 +67,10 @@
                             inputmode="numeric"
                             pattern="[0-9]*"
                             data-model="norender|draftRentMax"
-                            placeholder="Max"
+                            placeholder="{{ 'marketplace.list.search.price.max'|trans|raw }}"
                             min="0"
                             step="100"
-                            value="{{ draftRentMax }}"
+                            value="{{ draftRentMax ?? rentMax }}"
                             class="{{ inputClass }}"
                         />
                     </div>
@@ -82,9 +82,17 @@
                 size="lg"
                 data-action="live#action"
                 data-live-action-param="search"
+                data-loading="action(search)|addAttribute(disabled)"
                 class="w-full lg:w-auto"
             >
-                {{ locale == 'fr' ? 'Rechercher' : 'Search' }}
+                <span class="relative inline-flex items-center justify-center">
+                    <span data-loading="action(search)|addClass(invisible)">
+                        {{ 'marketplace.list.search.button'|trans|raw }}
+                    </span>
+                    <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(search)|removeClass(hidden)">
+                        <twig:Spinner />
+                    </span>
+                </span>
             </twig:Button>
         </div>
     </section>
@@ -96,17 +104,17 @@
             data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto"
         >
             <div>
-                <div class="flex justify-between items-center gap-x-2 mb-8">
-                    <h3 class="text-base font-medium font-secondary">
-                        {{ this.totalCount }} offres en location à Paris
-                    </h3>
+                <div class="max-[360px]:flex-col min-[361px]:flex-raw flex justify-between min-[361px]:items-center gap-2 mb-8">
+                    <h1 class="text-base font-medium font-secondary flex gap-x-1">
+                        {{ this.totalCount }} {{ 'marketplace.list.properties.title'|trans|raw }}
+                    </h1>
                     <button
                         type="button"
                         data-action="map-teleport#open"
-                        class="lg:hidden cursor-pointer rounded-lg bg-primary/5 hover:bg-primary/10 py-2 px-2 flex items-center gap-x-2 text-sm text-primary transition duration-100"
+                        class="lg:hidden cursor-pointer rounded-lg justify-center bg-primary/5 hover:bg-primary/10 py-2 px-2 flex items-center gap-x-2 text-sm text-primary transition duration-100"
                     >
                         {{ ux_icon('material-symbols:map-outline-rounded', {'class': 'size-4.5 shrink-0 text-primary'}) }}
-                        {{ locale == 'fr' ? 'Voir sur la carte' : 'Show on map' }}
+                        {{ 'marketplace.list.properties.map'|trans|raw }}
                     </button>
                 </div>
 
@@ -143,9 +151,10 @@
                             data-live-action-param="more"
                             class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
                         >
-                            <span data-loading="action(more)|hide">Voir plus de biens</span>
+                            <span data-loading="action(more)|hide">{{ 'marketplace.list.properties.button'|trans|raw }}</span>
                             <span data-loading="action(more)|show" class="hidden items-center gap-x-2">
-                                <twig:Spinner class="inline" /> Chargement...
+                                <twig:Spinner class="inline" />
+                                {{ 'marketplace.list.properties.loading'|trans|raw }}
                             </span>
                         </button>
                     </div>
@@ -163,7 +172,7 @@
                 <button
                     type="button"
                     data-action="map-teleport#close"
-                    aria-label="{{ locale == 'fr' ? 'Fermer la carte' : 'Close map' }}"
+                    aria-label="{{ 'marketplace.list.properties.closeMap'|trans|raw }}"
                     class="lg:hidden absolute top-4 right-4 z-20 size-10 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-neutral-100 transition duration-100"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
