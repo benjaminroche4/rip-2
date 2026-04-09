@@ -42,6 +42,7 @@
     or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
 
 <article
+    id="property-{{ property.slug|default(property._id) }}"
     class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }}"
     data-property-id="{{ property._id }}"
     data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
@@ -57,9 +58,13 @@
             {% for photo in allPhotos[:5] %}
                 <div class="w-full h-full shrink-0">
                     <img
-                        src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&q=80"
+                        src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75"
+                        srcset="{{ photo.url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=75 400w,
+                                {{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75 600w,
+                                {{ photo.url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=75 900w"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                         alt="{{ photo.alt|default(property.title) }}"
-                        {{ loop.first ? '' : 'loading="lazy"' }}
+                        {% if not loop.first %}loading="lazy" decoding="async"{% endif %}
                         width="600"
                         height="400"
                         draggable="false"
@@ -148,9 +153,9 @@
                 </p>
             {% endif %}
 
-            <h2 class="font-semibold text-base capitalize font-secondary">
+            <p class="font-semibold text-base capitalize font-secondary">
                 {{ property.listingTypeName }} {{ property.propertyTypeName }}
-            </h2>
+            </p>
 
             <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
                 {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}

@@ -55,12 +55,12 @@
                 {
                     "@type": "ListItem",
                     "position": {{ loop.index }},
-                    "url": "{{ pageUrl }}#{{ property.slug|default(property._id) }}",
+                    "url": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}",
                     "item": {
                         "@type": "Apartment",
-                        "@id": "{{ pageUrl }}#{{ property.slug|default(property._id) }}",
+                        "@id": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}",
                         "name": "{{ ((property.propertyTypeName ?? 'marketplace.list.schema.apartment.fallback'|trans) ~ (property.rooms ? ' ' ~ ('marketplace.list.schema.apartment.rooms'|trans({ '%count%': property.rooms })) : ''))|e('js') }}",
-                        "url": "{{ pageUrl }}#{{ property.slug|default(property._id) }}"
+                        "url": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}"
                         {% if property.image %}
                         ,"image": "{{ property.image }}?w=1200&h=800&fit=crop&auto=format&q=80"
                         {% endif %}
@@ -87,7 +87,7 @@
                         {% if property.monthlyRent and not property.priceOnRequest %}
                         ,"offers": {
                             "@type": "Offer",
-                            "url": "{{ pageUrl }}#{{ property.slug|default(property._id) }}",
+                            "url": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}",
                             "price": {{ property.monthlyRent }},
                             "priceCurrency": "EUR",
                             "priceSpecification": {

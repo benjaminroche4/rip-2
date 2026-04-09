@@ -7,13 +7,6 @@
     {%- endif -%}
 {% endmacro %}
 
-{% macro searchField(icon) %}
-    <div class="px-3 py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl">
-        {{ ux_icon(icon, {'class': 'size-5 text-gray-400 shrink-0'}) }}
-        {{ block('field') }}
-    </div>
-{% endmacro %}
-
 {% import _self as ui %}
 
 {% set selectClass = 'font-light w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light' %}
