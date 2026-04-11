@@ -174,6 +174,22 @@ final class MarketplaceSearch
     }
 
     #[LiveAction]
+    public function clearFilters(): void
+    {
+        $this->arrondissement = null;
+        $this->propertyType = '';
+        $this->rentMin = null;
+        $this->rentMax = null;
+
+        $this->draftArrondissement = null;
+        $this->draftPropertyType = '';
+        $this->draftRentMin = null;
+        $this->draftRentMax = null;
+
+        $this->page = 1;
+    }
+
+    #[LiveAction]
     public function normalizeRents(): void
     {
         if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {

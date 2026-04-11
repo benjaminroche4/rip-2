@@ -1274,6 +1274,8 @@ marketplace:
             button: Voir plus de biens
             loading: Chargement
             closeMap: Fermer la carte
+            noResults: "Aucune propri\u00e9t\u00e9 trouv\u00e9e"
+            clearFilters: Effacer les filtres
         card:
             status:
                 underOffer: Offre en cours

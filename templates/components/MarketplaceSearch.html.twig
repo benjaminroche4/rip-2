@@ -132,11 +132,28 @@
                 </div>
 
                 <div data-loading="action(search)|hide">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        {% for property in this.items %}
-                            {% include 'components/MarketplaceSearch/Card.html.twig' with { property, locale } only %}
-                        {% endfor %}
-                    </div>
+                    {% if this.items is empty %}
+                        <div class="flex flex-col items-center justify-center py-16 text-center">
+                            <img src="{{ asset('medias/svg/no-results.svg') }}" alt="No properties found" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
+                            <p class="text-gray-600 text-lg font-medium mb-4">
+                                {{ 'marketplace.list.properties.noResults'|trans }}
+                            </p>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="clearFilters"
+                                class="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-gray-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                                {{ 'marketplace.list.properties.clearFilters'|trans }}
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="grid md:grid-cols-2 gap-6">
+                            {% for property in this.items %}
+                                {% include 'components/MarketplaceSearch/Card.html.twig' with { property, locale } only %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 {% if this.hasMore %}

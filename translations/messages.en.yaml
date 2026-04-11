@@ -1273,6 +1273,8 @@ marketplace:
             button: Load more properties
             loading: Loading
             closeMap: Close the map
+            noResults: No properties found
+            clearFilters: Clear filters
         card:
             status:
                 underOffer: Under offer
