@@ -3,8 +3,8 @@
 namespace App\Marketplace\Repository;
 
 use App\Service\SanityService;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
  * Centralizes all Sanity queries for the marketplace (properties + property types).
@@ -12,11 +12,15 @@ use Symfony\Contracts\Cache\ItemInterface;
  */
 final class PropertyRepository
 {
-    private const TTL = 300;
+    public const CACHE_TAG = 'marketplace';
+
+    private const TTL_PROPERTIES = 600;     // 10 min — biens (prix/statut peuvent évoluer)
+    private const TTL_TYPES = 3600;         // 1 h   — types de biens (quasi statique)
+    private const TTL_COUNT = 1800;         // 30 min — count cosmétique
 
     public function __construct(
         private readonly SanityService $sanityService,
-        private readonly CacheInterface $cache,
+        private readonly TagAwareCacheInterface $cache,
     ) {}
 
     /**
@@ -30,7 +34,8 @@ final class PropertyRepository
         return $this->cache->get(
             'marketplace_properties_' . $locale,
             function (ItemInterface $item) use ($locale): array {
-                $item->expiresAfter(self::TTL);
+                $item->expiresAfter(self::TTL_PROPERTIES);
+                $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
                     '*[_type == "property" && language == $lang] | order(_createdAt desc) {
@@ -101,7 +106,8 @@ final class PropertyRepository
         return $this->cache->get(
             'marketplace_schema_properties_' . $locale . '_' . $limit,
             function (ItemInterface $item) use ($locale, $limit): array {
-                $item->expiresAfter(self::TTL);
+                $item->expiresAfter(self::TTL_PROPERTIES);
+                $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
                     sprintf(
@@ -134,7 +140,8 @@ final class PropertyRepository
         return $this->cache->get(
             'marketplace_schema_properties_count_' . $locale,
             function (ItemInterface $item) use ($locale): int {
-                $item->expiresAfter(self::TTL);
+                $item->expiresAfter(self::TTL_COUNT);
+                $item->tag(self::CACHE_TAG);
 
                 $result = $this->sanityService->query(
                     'count(*[_type == "property" && language == $lang && status != "rented"])',
@@ -163,6 +170,21 @@ final class PropertyRepository
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public function findOneById(string $id, string $locale): ?array
+    {
+        $needle = str_starts_with($id, 'drafts.') ? substr($id, 7) : $id;
+        foreach ($this->findAll($locale) as $property) {
+            $candidate = str_starts_with($property['_id'], 'drafts.') ? substr($property['_id'], 7) : $property['_id'];
+            if ($candidate === $needle) {
+                return $property;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return array<string, string> slug => name
      */
     public function findPropertyTypes(string $locale): array
@@ -170,7 +192,8 @@ final class PropertyRepository
         return $this->cache->get(
             'property_types_' . $locale,
             function (ItemInterface $item) use ($locale): array {
-                $item->expiresAfter(self::TTL);
+                $item->expiresAfter(self::TTL_TYPES);
+                $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
                     '*[_type == "propertyType" && language == $lang] | order(name asc) { "slug": slug.current, name }',
@@ -202,7 +225,8 @@ final class PropertyRepository
         return $this->cache->get(
             'property_type_slugs_' . $slug,
             function (ItemInterface $item) use ($slug): array {
-                $item->expiresAfter(self::TTL);
+                $item->expiresAfter(self::TTL_TYPES);
+                $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
                     '*[_type == "propertyType" && lower(name) == lower(*[_type == "propertyType" && slug.current == $slug][0].name)]{ "slug": slug.current }',

@@ -94,6 +94,8 @@
         <div
             class="grid grid-cols-1 lg:grid-cols-2 gap-x-8"
             data-controller="map-markers map-teleport"
+            data-map-markers-card-url-value="{{ path('app_property_card_fragment', {locale: locale, id: '__ID__'}) }}"
+            data-map-markers-locale-value="{{ locale }}"
             data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto"
         >
             <div>

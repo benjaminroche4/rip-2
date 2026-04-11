@@ -1,12 +1,20 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
+    static values = {
+        cardUrl: { type: String, default: '' },
+        locale: { type: String, default: 'fr' },
+    }
+
     #map = null
     #selected = null
     #infoWindows = []
     #markersByPropertyId = new Map()
     #clusterByPropertyId = new Map()
     #highlightedCluster = null
+    #cardCache = new Map()
+    #activeInfoWindow = null
 
     connect() {
         this.element.addEventListener('ux:map:connect', this.#onMapConnect)
@@ -175,6 +183,49 @@ export default class extends Controller {
             }
             this.#selected = markerData
             this.#activate(rect, text)
+            this.#openInfoWindow(marker, definition.extra?.propertyId)
         })
+    }
+
+    async #openInfoWindow(marker, propertyId) {
+        if (!propertyId || !this.#map) return
+
+        if (this.#activeInfoWindow) {
+            this.#activeInfoWindow.close()
+            this.#activeInfoWindow = null
+        }
+
+        const html = await this.#fetchCardHtml(propertyId)
+        if (!html) return
+
+        const infoWindow = new google.maps.InfoWindow({ content: html, disableAutoPan: false })
+        infoWindow.open({ map: this.#map, anchor: marker })
+
+        infoWindow.addListener('closeclick', () => {
+            if (this.#selected) {
+                this.#deactivate(this.#selected.rect, this.#selected.text)
+                this.#selected = null
+            }
+            this.#activeInfoWindow = null
+        })
+
+        this.#activeInfoWindow = infoWindow
+    }
+
+    async #fetchCardHtml(propertyId) {
+        if (this.#cardCache.has(propertyId)) {
+            return this.#cardCache.get(propertyId)
+        }
+
+        const url = this.cardUrlValue.replace('__ID__', encodeURIComponent(propertyId))
+        try {
+            const response = await fetch(url, { headers: { Accept: 'text/html' } })
+            if (!response.ok) return null
+            const html = await response.text()
+            this.#cardCache.set(propertyId, html)
+            return html
+        } catch {
+            return null
+        }
     }
 }

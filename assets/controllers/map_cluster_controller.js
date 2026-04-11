@@ -1,3 +1,4 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus'
 import { getComponent } from '@symfony/ux-live-component'
 

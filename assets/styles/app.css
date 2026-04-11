@@ -6,6 +6,10 @@
     --color-primary: #71172e;
 }
 
+.turbo-progress-bar {
+    background-color: var(--color-primary);
+}
+
 select {
     -webkit-appearance: none;
     appearance: none;

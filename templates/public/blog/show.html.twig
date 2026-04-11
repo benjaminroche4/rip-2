@@ -3,7 +3,7 @@
 {% block title %}{{ post.title }}{% endblock %}
 {% block description %}{{ post.metaDescription ?? post.shortDescription ?? post.title }}{% endblock %}
 {% block url %}/{{ app.request.locale }}/blog/{{ post.slug }}{% endblock %}
-{% block og_image %}{{ post.mainPhoto }}{% endblock %}
+{% block og_image %}{{ post.mainPhoto }}?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80{% endblock %}
 
 {% set postDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
 {% block schema_page %}
@@ -24,7 +24,7 @@
         {% if post.mainPhoto is defined and post.mainPhoto %}
         ,"image": {
             "@type": "ImageObject",
-            "url": "{{ post.mainPhoto }}"
+            "url": "{{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
         }
         {% endif %}
         {% if post.authors is defined and post.authors|length > 0 %}
@@ -148,7 +148,7 @@
                 </div>
                 {% if post.mainPhoto %}
                     <div class="mt-4">
-                        <img src="{{ post.mainPhoto }}" alt="{{ post.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 rounded-2xl object-cover">
+                        <img src="{{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80" srcset="{{ post.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w, {{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80 1200w, {{ post.mainPhoto }}?w=1800&h=1200&fit=crop&auto=format&fm=webp&q=80 1800w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ post.mainPhotoAlt }}" decoding="async" width="1200" height="800" class="w-full aspect-3/2 rounded-2xl object-cover">
                     </div>
                 {% endif %}
             </section>
@@ -195,7 +195,7 @@
                                         <div class="flex items-center space-x-3">
                                             {% if author.photo %}
                                                 <div>
-                                                    <img src="{{ author.photo }}" alt="{{ author.fullName }}" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                                                    <img src="{{ author.photo }}?w=80&h=80&fit=crop&auto=format&fm=webp&q=80" alt="{{ author.fullName }}" loading="lazy" width="40" height="40" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
                                                 </div>
                                             {% endif %}
                                             <div class="flex flex-col text-sm">
@@ -230,7 +230,7 @@
                                             </div>
                                         {% elseif segment.type == 'image' and segment.url %}
                                             <figure class="p-6 bg-white rounded-lg">
-                                                <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
+                                                <img src="{{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80" srcset="{{ segment.url }}?w=600&fit=max&auto=format&fm=webp&q=80 600w, {{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80 1200w" sizes="(max-width: 768px) 100vw, 66vw" alt="{{ segment.alt }}" loading="lazy" decoding="async" class="rounded-2xl w-full" />
                                                 {% if segment.alt %}
                                                     <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.alt }}</figcaption>
                                                 {% endif %}
@@ -259,7 +259,7 @@
                                             </div>
                                         {% elseif segment.type == 'image' and segment.url %}
                                             <figure class="my-6">
-                                                <img src="{{ segment.url }}" alt="{{ segment.alt }}" loading="lazy" class="rounded-2xl w-full" />
+                                                <img src="{{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80" srcset="{{ segment.url }}?w=600&fit=max&auto=format&fm=webp&q=80 600w, {{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80 1200w" sizes="(max-width: 768px) 100vw, 66vw" alt="{{ segment.alt }}" loading="lazy" decoding="async" class="rounded-2xl w-full" />
                                                 {% if segment.alt %}
                                                     <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
                                                         {{ ux_icon('meteor-icons:link', {'class': 'size-4 shrink-0'}) }}
@@ -380,7 +380,7 @@
                         <a href="{{ path('app_blog_show', { '_locale': app.request.locale, 'slug': latestPost.slug }) }}" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2 {{ loop.index == 3 ? 'sm:hidden lg:flex' : '' }}">
                             {% if latestPost.mainPhoto %}
                                 <div class="relative rounded-lg overflow-hidden">
-                                    <img src="{{ latestPost.mainPhoto }}" alt="{{ latestPost.mainPhotoAlt }}" loading="lazy" class="w-full aspect-3/2 object-cover rounded-lg"/>
+                                    <img src="{{ latestPost.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80" srcset="{{ latestPost.mainPhoto }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w, {{ latestPost.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w, {{ latestPost.mainPhoto }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80 900w" sizes="(max-width: 768px) 100vw, 33vw" alt="{{ latestPost.mainPhotoAlt }}" loading="lazy" decoding="async" width="600" height="400" class="w-full aspect-3/2 object-cover rounded-lg"/>
                                     {% if latestPost.category is defined and latestPost.category %}
                                         <div class="absolute top-3 left-3">
                                             <twig:Badge variant="secondary" class="gap-x-1.5">
@@ -398,7 +398,7 @@
                                     {% if latestPost.authors is defined and latestPost.authors|length > 0 %}
                                         <div class="flex items-center gap-x-2">
                                             {% if latestPost.authors[0].photo %}
-                                                <img src="{{ latestPost.authors[0].photo }}" alt="{{ latestPost.authors[0].fullName }}" loading="lazy" class="size-6 rounded-full object-cover"/>
+                                                <img src="{{ latestPost.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80" alt="{{ latestPost.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
                                             {% endif %}
                                             <p class="truncate">{{ latestPost.authors[0].fullName }}</p>
                                         </div>

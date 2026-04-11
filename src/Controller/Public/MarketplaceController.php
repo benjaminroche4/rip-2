@@ -37,4 +37,31 @@ final class MarketplaceController extends AbstractController
             'schemaPropertiesTotal' => $this->propertyRepository->countAvailable($_locale),
         ]);
     }
+
+    #[Route(
+        path: '/_marketplace/property-card/{locale}/{id}',
+        name: 'app_property_card_fragment',
+        requirements: ['locale' => 'fr|en', 'id' => '[A-Za-z0-9._-]+'],
+        methods: ['GET'],
+    )]
+    public function propertyCardFragment(string $locale, string $id): Response
+    {
+        $property = $this->propertyRepository->findOneById($id, $locale);
+        if ($property === null) {
+            return new Response('', 404);
+        }
+
+        $response = $this->render('components/MarketplaceSearch/Card.html.twig', [
+            'property' => $property,
+            'locale' => $locale,
+            'compact' => true,
+        ]);
+
+        // Cache 5 min côté HTTP : la card est immutable tant que la donnée Sanity ne change pas.
+        $response->setPublic();
+        $response->setMaxAge(300);
+        $response->setSharedMaxAge(300);
+
+        return $response;
+    }
 }

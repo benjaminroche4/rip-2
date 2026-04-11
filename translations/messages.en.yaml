@@ -1296,8 +1296,8 @@ marketplace:
             verified: Property verified
             carousel:
                 goTo: 'Go to photo %n%'
-        map:
-            marker:
-                onRequest: 'On request'
-            cluster:
-                label: '%count% properties'
+            map:
+                marker:
+                    onRequest: 'On request'
+                cluster:
+                    label: '%count% properties'

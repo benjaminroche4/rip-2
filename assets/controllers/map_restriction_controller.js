@@ -1,3 +1,4 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus'
 
 // Restricts the Google Map viewport to Paris + petite couronne (92, 93, 94)

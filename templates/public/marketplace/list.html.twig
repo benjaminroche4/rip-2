@@ -62,7 +62,7 @@
                         "name": "{{ ((property.propertyTypeName ?? 'marketplace.list.schema.apartment.fallback'|trans) ~ (property.rooms ? ' ' ~ ('marketplace.list.schema.apartment.rooms'|trans({ '%count%': property.rooms })) : ''))|e('js') }}",
                         "url": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}"
                         {% if property.image %}
-                        ,"image": "{{ property.image }}?w=1200&h=800&fit=crop&auto=format&q=80"
+                        ,"image": "{{ property.image }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
                         {% endif %}
                         {% if property.rooms %}
                         ,"numberOfRooms": {{ property.rooms }}

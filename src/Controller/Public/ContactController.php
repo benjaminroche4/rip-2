@@ -10,11 +10,13 @@ use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
@@ -27,6 +29,8 @@ final class ContactController extends AbstractController
         private readonly LoggerInterface $logger,
         private readonly TranslatorInterface $translator,
         private readonly HttpClientInterface $http,
+        #[Autowire(env: 'MAKE_WEBHOOK_URL')]
+        private readonly string $makeWebhookUrl,
     )
     {
     }
@@ -107,7 +111,7 @@ final class ContactController extends AbstractController
 
             // Send contact data to Make webhook
             try {
-                $this->http->request('POST', $_ENV['MAKE_WEBHOOK_URL'], [
+                $this->http->request('POST', $this->makeWebhookUrl, [
                     'json' => [
                         'firstName'  => $contact->getFirstName(),
                         'lastName'   => $contact->getLastName(),
@@ -120,8 +124,9 @@ final class ContactController extends AbstractController
                         'createdAt'  => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
                     ],
                     'timeout' => 3,
+                    'max_duration' => 5,
                 ]);
-            } catch (\Exception $e) {
+            } catch (HttpClientExceptionInterface $e) {
                 $this->logger->warning('Make webhook failed: ' . $e->getMessage());
             }
 

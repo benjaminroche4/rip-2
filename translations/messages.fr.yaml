@@ -1297,8 +1297,8 @@ marketplace:
             verified: Propriété vérifiée
             carousel:
                 goTo: 'Aller à la photo %n%'
-        map:
-            marker:
-                onRequest: 'Sur demande'
-            cluster:
-                label: '%count% biens'
+            map:
+                marker:
+                    onRequest: 'Sur demande'
+                cluster:
+                    label: '%count% biens'
