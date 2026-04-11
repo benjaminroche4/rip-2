@@ -91,6 +91,10 @@ export default class extends Controller {
             this.#selected = null
         }
         this.#infoWindows.forEach(iw => iw.close())
+        if (this.#activeInfoWindow) {
+            this.#activeInfoWindow.close()
+            this.#activeInfoWindow = null
+        }
     }
 
     #onMapConnect = (event) => {
@@ -178,6 +182,10 @@ export default class extends Controller {
         })
 
         marker.addListener('click', () => {
+            if (this.#selected === markerData && this.#activeInfoWindow) {
+                this.#deselect()
+                return
+            }
             if (this.#selected && this.#selected !== markerData) {
                 this.#deactivate(this.#selected.rect, this.#selected.text)
             }
@@ -198,7 +206,8 @@ export default class extends Controller {
         const html = await this.#fetchCardHtml(propertyId)
         if (!html) return
 
-        const infoWindow = new google.maps.InfoWindow({ content: html, disableAutoPan: false })
+        const { InfoWindow } = await google.maps.importLibrary('maps')
+        const infoWindow = new InfoWindow({ content: html, disableAutoPan: false })
         infoWindow.open({ map: this.#map, anchor: marker })
 
         infoWindow.addListener('closeclick', () => {
