@@ -1304,3 +1304,7 @@ marketplace:
                     onRequest: 'Sur demande'
                 cluster:
                     label: '%count% biens'
+    show:
+        rooms: Pièces
+        bedrooms: Chambres
+        contact: Nous contacter

@@ -1303,3 +1303,7 @@ marketplace:
                     onRequest: 'On request'
                 cluster:
                     label: '%count% properties'
+    show:
+        rooms: Rooms
+        bedrooms: Bedrooms
+        contact: Contact us

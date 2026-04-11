@@ -3,6 +3,7 @@
 namespace App\Controller\Public;
 
 use App\Marketplace\Repository\PropertyRepository;
+use App\Twig\Extension\PropertyUrlExtension;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,6 +13,7 @@ final class MarketplaceController extends AbstractController
 {
     public function __construct(
         private readonly PropertyRepository $propertyRepository,
+        private readonly PropertyUrlExtension $propertyUrlExtension,
     ) {}
 
     #[Route(
@@ -35,6 +37,40 @@ final class MarketplaceController extends AbstractController
             'locale' => $_locale,
             'schemaProperties' => $this->propertyRepository->findForSchema($_locale, 12),
             'schemaPropertiesTotal' => $this->propertyRepository->countAvailable($_locale),
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/{_locale}/nos-biens/{listingType}/{propertyType}/{city}/{district}/{slug}',
+            'en' => '/{_locale}/our-properties/{listingType}/{propertyType}/{city}/{district}/{slug}',
+        ],
+        name: 'app_property_show',
+        requirements: [
+            'listingType' => '[a-z0-9-]+',
+            'propertyType' => '[a-z0-9-]+',
+            'city' => '[a-z0-9-]+',
+            'district' => '[a-z0-9-]+',
+            'slug' => '[a-z0-9-]+',
+        ],
+    )]
+    public function show(string $slug, string $_locale): Response
+    {
+        $property = $this->propertyRepository->findOneBySlug($slug, $_locale);
+        if ($property === null) {
+            throw $this->createNotFoundException();
+        }
+
+        // Redirect 301 if SEO segments don't match (canonical URL)
+        $canonicalPath = $this->propertyUrlExtension->propertyShowPath($property, $_locale);
+        $currentPath = $this->container->get('request_stack')->getCurrentRequest()->getPathInfo();
+        if ($currentPath !== $canonicalPath) {
+            return $this->redirect($canonicalPath, 301);
+        }
+
+        return $this->render('public/marketplace/show.html.twig', [
+            'property' => $property,
+            'locale' => $_locale,
         ]);
     }
 

@@ -1,0 +1,7 @@
+{# @block content The default block #}
+<li
+    class="{{ 'inline-flex items-center gap-1.5 min-w-0 shrink-0 last:shrink ' ~ attributes.render('class')|tailwind_merge }}"
+    {{ attributes }}
+>
+    {%- block content %}{% endblock -%}
+</li>

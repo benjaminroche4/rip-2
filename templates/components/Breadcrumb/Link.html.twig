@@ -1,0 +1,7 @@
+{# @block content The default block #}
+<a
+    class="{{ 'transition-colors hover:text-primary duration-100 ' ~ attributes.render('class')|tailwind_merge }}"
+    {{ attributes }}
+>
+    {%- block content %}{% endblock -%}
+</a>

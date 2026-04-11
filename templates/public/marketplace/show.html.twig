@@ -1,7 +1,231 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MarketplaceController!{% endblock %}
+{% block title %}{{ property.title }}{% endblock %}
+{% block description %}{{ property.shortDescription|default(property.title) }}{% endblock %}
+{% block url %}{{ property_show_path(property, locale) }}{% endblock %}
+
+{% set baseUrl = 'https://relocation-in-paris.fr' %}
+{% set pageUrl = baseUrl ~ property_show_path(property, locale) %}
+
+{% block og_image %}{{ property.mainPhoto.url is defined and property.mainPhoto.url ? property.mainPhoto.url ~ '?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80' : asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}
+
+{% block schema_page %}
+    ,{
+        "@type": "Apartment",
+        "@id": "{{ pageUrl }}/#property",
+        "url": "{{ pageUrl }}",
+        "name": "{{ property.title|e('js') }}",
+        "description": "{{ (property.shortDescription|default(property.title))|e('js') }}",
+        "inLanguage": "{{ locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "{{ baseUrl }}/#website" }
+        {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+        ,"image": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+        {% endif %}
+        {% if property.rooms %}
+        ,"numberOfRooms": {{ property.rooms }}
+        {% endif %}
+        {% if property.bedrooms %}
+        ,"numberOfBedrooms": {{ property.bedrooms }}
+        {% endif %}
+        {% if property.squareMeters %}
+        ,"floorSize": {
+            "@type": "QuantitativeValue",
+            "value": {{ property.squareMeters }},
+            "unitCode": "MTK"
+        }
+        {% endif %}
+        ,"address": {
+            "@type": "PostalAddress",
+            "streetAddress": "{{ (property.address.street|default(''))|e('js') }}",
+            "addressLocality": "{{ (property.address.city|default('Paris'))|e('js') }}",
+            "postalCode": "{{ (property.address.postalCode|default(''))|e('js') }}",
+            "addressRegion": "Île-de-France",
+            "addressCountry": "FR"
+        }
+        {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+        ,"offers": {
+            "@type": "Offer",
+            "url": "{{ pageUrl }}",
+            "price": {{ property.monthlyRent }},
+            "priceCurrency": "EUR",
+            "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": {{ property.monthlyRent }},
+                "priceCurrency": "EUR",
+                "referenceQuantity": {
+                    "@type": "QuantitativeValue",
+                    "value": 1,
+                    "unitCode": "MON"
+                }
+            },
+            "availability": "{{ property.status == 'rented' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock' }}",
+            "seller": { "@id": "{{ baseUrl }}/#organization" }
+        }
+        {% endif %}
+    },
+    {
+        "@type": "BreadcrumbList",
+        "@id": "{{ pageUrl }}/#breadcrumb",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'marketplace.list.schema.breadcrumb.home'|trans|e('js') }}",
+                "item": "{{ baseUrl }}/{{ locale }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'marketplace.list.schema.breadcrumb.properties'|trans|e('js') }}",
+                "item": "{{ baseUrl }}{{ path('app_property') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ property.title|e('js') }}",
+                "item": "{{ pageUrl }}"
+            }
+        ]
+    }
+{% endblock %}
 
 {% block body %}
-LIST
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-10 lg:pt-8 pt-6">
+        <twig:Breadcrumb class="mb-8">
+            <twig:Breadcrumb:List>
+                <twig:Breadcrumb:Item>
+                    <twig:Breadcrumb:Link href="{{ path('app_property') }}">
+                        {{ 'marketplace.list.schema.breadcrumb.properties'|trans }}
+                    </twig:Breadcrumb:Link>
+                </twig:Breadcrumb:Item>
+                <twig:Breadcrumb:Separator />
+                <twig:Breadcrumb:Item>
+                    {{ property.listingTypeName|default(locale == 'fr' ? 'Location' : 'Rental') }}
+                </twig:Breadcrumb:Item>
+                <twig:Breadcrumb:Separator />
+                <twig:Breadcrumb:Item>
+                    {{ property.propertyTypeName|default(locale == 'fr' ? 'Bien' : 'Property') }}
+                </twig:Breadcrumb:Item>
+                <twig:Breadcrumb:Separator />
+                <twig:Breadcrumb:Item>
+                    {{ property.address.city }}
+                </twig:Breadcrumb:Item>
+                <twig:Breadcrumb:Separator />
+                <twig:Breadcrumb:Item>
+                    <twig:Breadcrumb:Link href="{{ path('app_property') }}">
+                        {{ property.address.postalCode|arrondissement(locale) }}
+                    </twig:Breadcrumb:Link>
+                </twig:Breadcrumb:Item>
+                <twig:Breadcrumb:Separator />
+                <twig:Breadcrumb:Item>
+                    <twig:Breadcrumb:Page>{{ property.title }}</twig:Breadcrumb:Page>
+                </twig:Breadcrumb:Item>
+            </twig:Breadcrumb:List>
+        </twig:Breadcrumb>
+        <section class="bg-neutral-50 rounded-2xl p-2">
+            {% set allPhotos = [] %}
+            {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+                {% set allPhotos = allPhotos|merge([property.mainPhoto]) %}
+            {% endif %}
+            {% for photo in property.photos|default([]) %}
+                {% if photo.url and photo.url != property.mainPhoto.url|default('') and allPhotos|length < 4 %}
+                    {% set allPhotos = allPhotos|merge([photo]) %}
+                {% endif %}
+            {% endfor %}
+
+            <div class="grid grid-cols-8 gap-3">
+                <div class="col-span-3">
+                    {% if allPhotos[0] is defined %}
+                        <img
+                            src="{{ allPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
+                            srcset="{{ allPhotos[0].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
+                                    {{ allPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80 900w,
+                                    {{ allPhotos[0].url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80 1200w"
+                            sizes="(max-width: 1024px) 100vw, 37.5vw"
+                            alt="{{ allPhotos[0].alt|default(property.title) }}"
+                            width="900"
+                            height="600"
+                            draggable="false"
+                            class="w-full h-full object-cover rounded-xl"
+                        />
+                    {% endif %}
+                </div>
+                <div class="col-span-2 space-y-3">
+                    {% if allPhotos[1] is defined %}
+                        <div>
+                            <img
+                                src="{{ allPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
+                                srcset="{{ allPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
+                                        {{ allPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
+                                alt="{{ allPhotos[1].alt|default(property.title) }}"
+                                width="600"
+                                height="400"
+                                loading="lazy"
+                                decoding="async"
+                                draggable="false"
+                                class="w-full rounded-xl aspect-3/2 object-cover"
+                            />
+                        </div>
+                    {% endif %}
+                    {% if allPhotos[2] is defined %}
+                        <div>
+                            <img
+                                src="{{ allPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
+                                srcset="{{ allPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
+                                        {{ allPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
+                                alt="{{ allPhotos[2].alt|default(property.title) }}"
+                                width="600"
+                                height="400"
+                                loading="lazy"
+                                decoding="async"
+                                draggable="false"
+                                class="w-full rounded-xl aspect-3/2 object-cover"
+                            />
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-span-3">
+                    {% if allPhotos[3] is defined %}
+                        <img
+                            src="{{ allPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
+                            srcset="{{ allPhotos[3].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
+                                    {{ allPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80 900w,
+                                    {{ allPhotos[3].url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80 1200w"
+                            sizes="(max-width: 1024px) 100vw, 37.5vw"
+                            alt="{{ allPhotos[3].alt|default(property.title) }}"
+                            width="900"
+                            height="600"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            class="w-full h-full object-cover rounded-xl"
+                        />
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        <section class="pt-8">
+            <div class="grid grid-cols-8 gap-3">
+                <div class="col-span-5">
+                    <div class="space-y-2">
+                        <h1 class="text-2xl lg:text-3xl font-semibold font-secondary">{{ property.title }}</h1>
+                        <p class="text-gray-500 flex items-center gap-x-1">
+                            {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                            {% if property.address.street is defined and property.address.street %}
+                                {{ property.address.street }},
+                            {% endif %}
+                            {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-neutral-50 col-span-3 rounded-2xl p-4">
+                    <div>
+                        <p class="text-2xl font-semibold text-primary">1200<span class="text-gray-900 font-light text-sm">/mois</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
 {% endblock %}

@@ -43,10 +43,11 @@
 
 <article
     id="property-{{ property.slug|default(property._id) }}"
-    class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }}"
+    class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }} group/card"
     data-property-id="{{ property._id }}"
     data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
 >
+    {% if property.slug|default(false) %}<a href="{{ property_show_path(property, locale) }}" class="contents">{% endif %}
     <div
         class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
         data-controller="carousel"
@@ -185,4 +186,5 @@
             </div>
         </div>
     </div>
+    {% if property.slug|default(false) %}</a>{% endif %}
 </article>

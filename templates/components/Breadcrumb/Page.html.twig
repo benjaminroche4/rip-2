@@ -1,0 +1,10 @@
+{# @block content The default block #}
+<span
+    class="{{ 'text-gray-800 truncate ' ~ attributes.render('class')|tailwind_merge }}"
+    {{ attributes }}
+    role="link"
+    aria-disabled="true"
+    aria-current="page"
+>
+    {%- block content %}{% endblock -%}
+</span>
