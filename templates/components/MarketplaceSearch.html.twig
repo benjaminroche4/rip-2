@@ -99,7 +99,7 @@
             data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto"
         >
             <div>
-                <div class="max-[360px]:flex-col min-[361px]:flex-raw flex justify-between min-[361px]:items-center gap-2 mb-8">
+                <div class="max-[360px]:flex-col min-[361px]:flex-row flex justify-between min-[361px]:items-center gap-2 mb-8">
                     <h1 class="text-base font-medium font-secondary flex gap-x-1">
                         {{ this.totalCount }} {{ 'marketplace.list.properties.title'|trans|raw }}
                     </h1>
@@ -134,7 +134,7 @@
                 <div data-loading="action(search)|hide">
                     {% if this.items is empty %}
                         <div class="flex flex-col items-center justify-center py-16 text-center">
-                            <img src="{{ asset('medias/svg/no-results.svg') }}" alt="No properties found" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
+                            <img src="{{ asset('medias/svg/no-results.svg') }}" alt="{{ 'marketplace.list.properties.noResults'|trans }}" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
                             <p class="text-gray-600 text-lg font-medium mb-4">
                                 {{ 'marketplace.list.properties.noResults'|trans }}
                             </p>

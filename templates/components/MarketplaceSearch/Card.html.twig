@@ -157,10 +157,10 @@
                 {{ property.listingTypeName }} {{ property.propertyTypeName }}
             </p>
 
-            <address class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
+            <p class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
                 {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
                 {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
-            </address>
+            </p>
         </div>
 
         <div class="bg-neutral-50 rounded-lg px-2 py-3 grid grid-cols-3 divide-x divide-gray-200">
