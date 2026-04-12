@@ -66,7 +66,7 @@ final class PropertyRepository
                             "url": mainPhoto.asset->url,
                             "alt": mainPhoto.alt
                         },
-                        "photos": photos[0..3]{
+                        "photos": photos[]{
                             "url": asset->url,
                             "alt": alt
                         },

@@ -168,7 +168,7 @@ export default class extends Controller {
             btn.type = 'button'
             btn.dataset.action = 'gallery#goTo'
             btn.dataset.galleryIndexParam = i
-            btn.className = 'shrink-0 rounded-lg overflow-hidden cursor-pointer ring-2 ring-transparent transition-all duration-200 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none'
+            btn.className = 'shrink-0 rounded-lg overflow-hidden cursor-pointer ring-2 ring-transparent transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none'
 
             const img = document.createElement('img')
             img.src = photo.url + '?w=120&h=80&fit=crop&auto=format&fm=webp&q=70'
@@ -192,10 +192,11 @@ export default class extends Controller {
             btn.classList.toggle('ring-transparent', !isActive)
             btn.classList.toggle('opacity-100', isActive)
             btn.classList.toggle('opacity-60', !isActive)
-
-            if (isActive) {
-                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-            }
         })
+
+        const activeBtn = buttons[this.#currentIndex]
+        if (activeBtn) {
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+        }
     }
 }
