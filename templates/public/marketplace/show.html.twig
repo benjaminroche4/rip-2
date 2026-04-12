@@ -145,7 +145,7 @@
             <div class="grid grid-cols-8 gap-3">
                 <div class="col-span-3">
                     {% if gridPhotos[0] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" class="w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[0].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -163,7 +163,7 @@
                 </div>
                 <div class="col-span-2 space-y-3">
                     {% if gridPhotos[1] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" class="w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" class="relative w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -180,7 +180,7 @@
                         </button>
                     {% endif %}
                     {% if gridPhotos[2] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" class="w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" class="relative w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -199,7 +199,7 @@
                 </div>
                 <div class="col-span-3">
                     {% if gridPhotos[3] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" class="w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[3].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
