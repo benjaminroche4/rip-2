@@ -1,0 +1,7 @@
+{%- props name, lines = [] -%}
+<span class="inline-flex items-center gap-1.5" {{ attributes }}>
+    <span class="text-sm text-gray-700">{{ name }}</span>
+    {% for line in lines %}
+        <twig:Transport:Line :line="line" size="sm" />
+    {% endfor %}
+</span>

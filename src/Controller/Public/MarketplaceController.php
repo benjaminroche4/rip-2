@@ -2,6 +2,7 @@
 
 namespace App\Controller\Public;
 
+use App\Data\ParisTransport;
 use App\Marketplace\Repository\PropertyRepository;
 use App\Twig\Extension\PropertyUrlExtension;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -71,6 +72,8 @@ final class MarketplaceController extends AbstractController
         return $this->render('public/marketplace/show.html.twig', [
             'property' => $property,
             'locale' => $_locale,
+            'transportLines' => ParisTransport::LINES,
+            'transportStationsByLine' => ParisTransport::STATIONS_BY_LINE,
         ]);
     }
 
