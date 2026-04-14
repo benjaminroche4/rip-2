@@ -77,12 +77,16 @@ final class PropertyRepository
                         "categoryName": categories[0]->name,
                         "location": location{lat, lng},
                         "elevator": equipment.elevator,
+                        equipment,
                         "furnished": main.furnished,
                         "bedroomsLabel": main.bedrooms,
                         "squareMeters": main.squareMeters,
                         "propertyTypeName": propertyType->name,
                         "propertyTypeSlug": propertyType->slug.current,
-                        "propertyTypeLang": propertyType->language
+                        "propertyTypeLang": propertyType->language,
+                        "metro": metro,
+                        "rer": rer,
+                        description
                     }',
                     ['lang' => $locale]
                 );

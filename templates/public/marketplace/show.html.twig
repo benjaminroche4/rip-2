@@ -287,18 +287,116 @@
         </section>
 
         <section class="pt-8">
-            <div class="grid grid-cols-8 gap-3">
-                <div class="col-span-5">
-                    <div class="space-y-2">
-                        <h1 class="text-2xl lg:text-3xl font-semibold font-secondary">{{ property.title }}</h1>
-                        <p class="text-gray-500 flex items-center gap-x-1">
-                            {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
-                            {% if property.address.street is defined and property.address.street %}
-                                {{ property.address.street }},
-                            {% endif %}
-                            {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
-                        </p>
+            <div class="grid grid-cols-8 gap-12">
+                <div class="col-span-5 lg:space-y-15 space-y-10">
+                    <div class="space-y-8">
+                        <div class="space-y-4">
+                            <h1 class="text-2xl lg:text-3xl font-semibold font-secondary text-pretty">{{ property.title }}</h1>
+                            <div class="flex items-center divide-x divide-gray-200">
+                                <div class="pr-4">
+                                    <p class="text-gray-500 flex items-center gap-x-1">
+                                        {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                                        {% if property.address.street is defined and property.address.street %}
+                                            {{ property.address.street }},
+                                        {% endif %}
+                                        {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
+                                    </p>
+                                </div>
+                                {% if (property.metro is defined and property.metro is not empty) or (property.rer is defined and property.rer is not empty) %}
+                                    <div class="flex items-center gap-4 pl-4">
+                                        {% if property.metro is defined and property.metro is not empty %}
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex -space-x-1 overflow-hidden">
+                                                    {% for line in property.metro %}
+                                                        <twig:Transport:Line :line="line" class="ring-2 ring-white" />
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if property.rer is defined and property.rer is not empty %}
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex -space-x-1 overflow-hidden">
+                                                    {% for line in property.rer %}
+                                                        <twig:Transport:Line :line="line" class="ring-2 ring-white" />
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="rounded-2xl py-3 px-5 bg-neutral-50">
+                            <div class="grid grid-cols-3 divide-x divide-gray-200">
+                                <div class="pr-6 space-y-2">
+                                    <p class="font-light text-neutral-600 text-sm">Bedroom</p>
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('fluent:bed-24-regular', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                        <p>3</p>
+                                    </div>
+                                </div>
+                                <div class="px-6 space-y-2">
+                                    <p class="font-light text-neutral-600 text-sm">Meublé</p>
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:sofa', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                        <p>Oui</p>
+                                    </div>
+                                </div>
+                                <div class="pl-6 space-y-2">
+                                    <p class="font-light text-neutral-600 text-sm">Surface</p>
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('wordpress:square', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                        <p>125 m²</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    {% if property.description is defined and property.description is not empty %}
+                        <div class="space-y-3" data-controller="expandable">
+                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Description' : 'Description' }}</h3>
+                            <div data-expandable-target="content" class="prose prose-sm max-w-none text-gray-600 line-clamp-6">
+                                {{ property.description|sanity_to_html }}
+                            </div>
+                            <button
+                                type="button"
+                                data-action="expandable#expand"
+                                data-expandable-target="trigger"
+                                class="font-semibold text-gray-900 cursor-pointer hover:underline underline-offset-4"
+                            >
+                                ... {{ locale == 'fr' ? 'Voir plus' : 'Show more' }}
+                            </button>
+                        </div>
+                    {% endif %}
+                    {% if property.equipment is defined and property.equipment is not empty %}
+                        {% set equipmentMap = {
+                            wifi: { icon: 'boxicons:wifi', label: 'Wi-Fi' },
+                            airConditioning: { icon: 'iconoir:snow-flake', label: (locale == 'fr' ? 'Climatisation' : 'Air conditioning') },
+                            balcony: { icon: 'mdi:balcony', label: (locale == 'fr' ? 'Balcon' : 'Balcony') },
+                            concierge: { icon: 'iconoir:bell', label: (locale == 'fr' ? 'Concierge' : 'Concierge') },
+                            dishwasher: { icon: 'material-symbols:dishwasher-gen-outline-sharp', label: (locale == 'fr' ? 'Lave-vaisselle' : 'Dishwasher') },
+                            dryer: { icon: 'boxicons:dryer', label: (locale == 'fr' ? 'Sèche-linge' : 'Dryer') },
+                            elevator: { icon: 'iconoir:elevator', label: (locale == 'fr' ? 'Ascenseur' : 'Elevator') },
+                            intercom: { icon: 'iconoir:phone', label: (locale == 'fr' ? 'Interphone' : 'Intercom') },
+                            microwave: { icon: 'mdi:microwave', label: (locale == 'fr' ? 'Micro-ondes' : 'Microwave') },
+                            parking: { icon: 'iconoir:parking', label: (locale == 'fr' ? 'Parking' : 'Parking') },
+                            television: { icon: 'iconoir:tv', label: (locale == 'fr' ? 'Télévision' : 'Television') },
+                            washingMachine: { icon: 'iconoir:washing-machine', label: (locale == 'fr' ? 'Lave-linge' : 'Washing machine') },
+                        } %}
+                        <div class="space-y-5">
+                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Ce que ce bien offre' : 'What this property offers' }}</h3>
+                            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                                {% for key, info in equipmentMap %}
+                                    {% if property.equipment[key]|default(false) %}
+                                        <div class="flex items-center gap-2">
+                                            {{ ux_icon(info.icon, {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                            <p>{{ info.label }}</p>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
 
 
@@ -310,23 +408,4 @@
             </div>
         </section>
 
-        <section class="pt-12 mt-12 border-t border-gray-200">
-            <h2 class="text-xl font-semibold font-secondary mb-6">Transports</h2>
-            <div class="space-y-6">
-                {% for lineId, lineInfo in transportLines %}
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <twig:Transport:Line :line="lineId" />
-                            <span class="text-sm font-medium text-gray-700 uppercase">{{ lineInfo.type }} {{ lineId }}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5">
-                            {% for station in transportStationsByLine[lineId] %}
-                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">{{ station }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-    </section>
 {% endblock %}
