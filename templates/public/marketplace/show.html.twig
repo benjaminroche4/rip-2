@@ -386,6 +386,12 @@
                         <div class="space-y-5">
                             <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Ce que ce bien offre' : 'What this property offers' }}</h3>
                             <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                                {% if property.floor is defined and property.floor %}
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:building', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                        <p>{{ locale == 'fr' ? 'Étage' : 'Floor' }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}</p>
+                                    </div>
+                                {% endif %}
                                 {% for key, info in equipmentMap %}
                                     {% if property.equipment[key]|default(false) %}
                                         <div class="flex items-center gap-2">
@@ -395,6 +401,29 @@
                                     {% endif %}
                                 {% endfor %}
                             </div>
+                        </div>
+                    {% endif %}
+                    {% if map is not null %}
+                        <div class="space-y-5">
+                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Localisation' : 'Location' }}</h3>
+                            <div class="rounded-3xl lg:p-2 border border-neutral-200">
+                                {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if property.faq is defined and property.faq is not empty %}
+                        <div class="space-y-5">
+                            <h3 class="font-semibold font-secondary">FAQ</h3>
+                            <twig:Accordion id="property-faq" defaultValue="{{ ['item-0'] }}">
+                                {% for item in property.faq %}
+                                    <twig:Accordion:Item value="item-{{ loop.index0 }}">
+                                        <twig:Accordion:Trigger>{{ item.question }}</twig:Accordion:Trigger>
+                                        <twig:Accordion:Content>
+                                            {{ item.answer }}
+                                        </twig:Accordion:Content>
+                                    </twig:Accordion:Item>
+                                {% endfor %}
+                            </twig:Accordion>
                         </div>
                     {% endif %}
                 </div>

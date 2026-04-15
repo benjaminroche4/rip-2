@@ -8,6 +8,11 @@ use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\UX\Map\Bridge\Google\GoogleOptions;
+use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
+use Symfony\UX\Map\Map;
+use Symfony\UX\Map\Marker;
+use Symfony\UX\Map\Point;
 
 final class MarketplaceController extends AbstractController
 {
@@ -68,9 +73,28 @@ final class MarketplaceController extends AbstractController
             return $this->redirect($canonicalPath, 301);
         }
 
+        $map = null;
+        if (!empty($property['location']['lat']) && !empty($property['location']['lng'])) {
+            $point = new Point(
+                (float) $property['location']['lat'],
+                (float) $property['location']['lng'],
+            );
+            $map = (new Map('default'))
+                ->center($point)
+                ->zoom(15)
+                ->addMarker(new Marker(position: $point))
+                ->options(new GoogleOptions(
+                    gestureHandling: GestureHandling::GREEDY,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false,
+                ));
+        }
+
         return $this->render('public/marketplace/show.html.twig', [
             'property' => $property,
             'locale' => $_locale,
+            'map' => $map,
         ]);
     }
 
