@@ -28,7 +28,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?string $password = null;
 
     #[ORM\Column(length: 50)]
@@ -39,6 +39,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(length: 100, nullable: true, unique: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column]
+    private bool $isProfileComplete = false;
 
     public function getId(): ?int
     {
@@ -97,7 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
 
@@ -110,8 +116,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
-        
+        $data["\0" . self::class . "\0password"] = $this->password === null ? null : hash('crc32c', $this->password);
+
         return $data;
     }
 
@@ -153,6 +159,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): static
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function isProfileComplete(): bool
+    {
+        return $this->isProfileComplete;
+    }
+
+    public function setProfileComplete(bool $isProfileComplete): static
+    {
+        $this->isProfileComplete = $isProfileComplete;
 
         return $this;
     }

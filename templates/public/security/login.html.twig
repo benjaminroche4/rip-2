@@ -72,6 +72,23 @@
         </div>
         <div class="mt-10 mx-auto w-full max-w-sm">
             <div>
+                <div class="grid grid-cols-1 gap-4">
+                    <a href="{{ path('app_google_login') }}" class="flex h-10 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm/6 font-semibold text-gray-900 hover:bg-neutral-50 transition duration-100 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none">
+                        {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
+                        <span class="text-sm/6 font-semibold">{{ 'login.provider.google'|trans|raw }}</span>
+                    </a>
+                </div>
+                <div class="relative mt-6">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                        <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm/6 font-medium">
+                        <span
+                            class="bg-white px-6 text-gray-900 text-center">{{ 'login.continueWith.title'|trans|raw }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8">
                 <form method="POST" class="space-y-6">
                     {% if error %}
                         <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
@@ -114,25 +131,6 @@
                         </twig:Button>
                     </div>
                 </form>
-            </div>
-
-            <div class="mt-8">
-                <div class="relative">
-                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
-                        <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm/6 font-medium">
-                        <span
-                            class="bg-white px-6 text-gray-900 text-center">{{ 'login.continueWith.title'|trans|raw }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-4">
-                    <span class="flex h-10 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm/6 font-semibold text-gray-400 cursor-not-allowed opacity-60">
-                        {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
-                        <span class="text-sm/6 font-semibold">{{ 'login.provider.google'|trans|raw }}</span>
-                    </span>
-                </div>
             </div>
         </div>
     </section>
