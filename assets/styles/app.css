@@ -6,6 +6,10 @@
     --color-primary: #71172e;
 }
 
+[x-cloak] {
+    display: none !important;
+}
+
 .turbo-progress-bar {
     background-color: var(--color-primary);
 }

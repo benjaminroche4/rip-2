@@ -19,7 +19,7 @@
         <div class="border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full">
             <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
                 <div class="{{ fieldWrapper }}">
-                    {{ ux_icon('iconoir:elevator', {'class': iconClass}) }}
+                    {{ ux_icon('lucide:map-pin', {'class': iconClass}) }}
                     <select data-model="norender|draftArrondissement" data-action="keydown.enter->live#action" data-live-action-param="search" required class="{{ selectClass }}">
                         <option value="">{{ 'marketplace.list.search.arrondissement'|trans|raw }}</option>
                         {% for i in 1..20 %}

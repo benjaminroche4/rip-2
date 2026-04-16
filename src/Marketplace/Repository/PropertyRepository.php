@@ -81,6 +81,8 @@ final class PropertyRepository
                         "floor": floors.floor,
                         "totalFloors": floors.totalFloors,
                         "faq": faq[]{_key, question, answer},
+                        requiredDocuments,
+                        "extraFees": extraFees[]{_key, amount, feeType},
                         "furnished": main.furnished,
                         "bedroomsLabel": main.bedrooms,
                         "squareMeters": main.squareMeters,
@@ -89,6 +91,8 @@ final class PropertyRepository
                         "propertyTypeLang": propertyType->language,
                         "metro": metro,
                         "rer": rer,
+                        tags,
+                        internalNotes,
                         description
                     }',
                     ['lang' => $locale]

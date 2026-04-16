@@ -9,7 +9,7 @@
 {%- set _accordion_item_trigger_id = _accordion_item_id ~ '-trigger' -%}
 {%- set _accordion_item_disabled = disabled -%}
 <div
-    class="{{ 'border border-neutral-200 rounded-2xl py-4 px-6 group hover:border-primary data-[open=true]:border-primary transition-colors duration-100 ' ~ attributes.render('class')|tailwind_merge }}"
+    class="{{ 'bg-white border border-neutral-200 rounded-2xl py-4 px-6 group hover:border-primary data-[open=true]:border-primary transition-colors duration-100 ' ~ attributes.render('class')|tailwind_merge }}"
     {{ attributes.defaults({
         'data-slot': 'accordion-item',
         'data-accordion-target': 'item',

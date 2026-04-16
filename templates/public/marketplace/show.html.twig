@@ -287,9 +287,40 @@
         </section>
 
         <section class="pt-8">
-            <div class="grid grid-cols-8 gap-12">
-                <div class="col-span-5 lg:space-y-15 space-y-10">
+            <div class="grid lg:grid-cols-8 gap-12">
+                <div class="lg:col-span-5 lg:space-y-15 space-y-10">
                     <div class="space-y-8">
+                        <div class="rounded-2xl p-4 bg-neutral-50" data-controller="collapsible" data-collapsible-open-value="true">
+                            <button type="button" data-action="collapsible#toggle" class="w-full flex items-center justify-between cursor-pointer select-none">
+                                <span class="font-secondary flex items-center gap-x-2">
+                                    {{ ux_icon('eos-icons:admin-outlined', {'class': 'size-5 shrink-0'}) }}
+                                    Admin info
+                                </span>
+                                <span class="bg-white rounded-full p-2 shrink-0">
+                                    <svg data-collapsible-target="chevron" class="w-4 h-4 transition-transform duration-300 ease-in-out" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </span>
+                            </button>
+                            <div data-collapsible-target="content">
+                                <div class="rounded-2xl border border-slate-200 divide-y divide-gray-200 mt-3">
+                                    <div class="grid grid-cols-2 divide-x divide-gray-200">
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Date de mise en ligne' : 'Published on' }}</p>
+                                            <p class="text-sm">{{ property.createdAt ? property.createdAt|format_datetime('long', 'short', locale: locale) : '—' }}</p>
+                                        </div>
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Dernière mise à jour' : 'Last updated' }}</p>
+                                            <p class="text-sm">{{ property.updatedAt ? property.updatedAt|format_datetime('long', 'short', locale: locale) : '—' }}</p>
+                                        </div>
+                                    </div>
+                                    {% if property.internalNotes is defined and property.internalNotes %}
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Note interne' : 'Internal note' }}</p>
+                                            <p class="text-sm">{{ property.internalNotes }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                         <div class="space-y-4">
                             <h1 class="text-2xl lg:text-3xl font-semibold font-secondary text-pretty">{{ property.title }}</h1>
                             <div class="flex items-center divide-x divide-gray-200">
@@ -329,24 +360,24 @@
                         <div class="rounded-2xl py-3 px-5 bg-neutral-50">
                             <div class="grid grid-cols-3 divide-x divide-gray-200">
                                 <div class="pr-6 space-y-2">
-                                    <p class="font-light text-neutral-600 text-sm">Bedroom</p>
+                                    <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Chambres' : 'Bedrooms' }}</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('fluent:bed-24-regular', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
-                                        <p>3</p>
+                                        <p class="capitalize">{{ property.bedroomsLabel|default(property.bedrooms|default('-')) }}</p>
                                     </div>
                                 </div>
                                 <div class="px-6 space-y-2">
-                                    <p class="font-light text-neutral-600 text-sm">Meublé</p>
+                                    <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Meublé' : 'Furnished' }}</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:sofa', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
-                                        <p>Oui</p>
+                                        <p>{{ property.furnished == 'yes' ? 'marketplace.list.card.furnished.yes'|trans|raw : 'marketplace.list.card.furnished.no'|trans|raw }}</p>
                                     </div>
                                 </div>
                                 <div class="pl-6 space-y-2">
                                     <p class="font-light text-neutral-600 text-sm">Surface</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('wordpress:square', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
-                                        <p>125 m²</p>
+                                        <p>{{ property.squareMeters|default('-') }} m²</p>
                                     </div>
                                 </div>
                             </div>
@@ -377,7 +408,7 @@
                             dishwasher: { icon: 'material-symbols:dishwasher-gen-outline-sharp', label: (locale == 'fr' ? 'Lave-vaisselle' : 'Dishwasher') },
                             dryer: { icon: 'boxicons:dryer', label: (locale == 'fr' ? 'Sèche-linge' : 'Dryer') },
                             elevator: { icon: 'iconoir:elevator', label: (locale == 'fr' ? 'Ascenseur' : 'Elevator') },
-                            intercom: { icon: 'iconoir:phone', label: (locale == 'fr' ? 'Interphone' : 'Intercom') },
+                            intercom: { icon: 'lucide-lab:intercom', label: (locale == 'fr' ? 'Interphone' : 'Intercom') },
                             microwave: { icon: 'mdi:microwave', label: (locale == 'fr' ? 'Micro-ondes' : 'Microwave') },
                             parking: { icon: 'iconoir:parking', label: (locale == 'fr' ? 'Parking' : 'Parking') },
                             television: { icon: 'iconoir:tv', label: (locale == 'fr' ? 'Télévision' : 'Television') },
@@ -406,7 +437,7 @@
                     {% if map is not null %}
                         <div class="space-y-5">
                             <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Localisation' : 'Location' }}</h3>
-                            <div class="rounded-3xl lg:p-2 border border-neutral-200">
+                            <div class="rounded-3xl lg:p-2 border border-neutral-200" data-controller="map-disable-scrollwheel">
                                 {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
                             </div>
                         </div>
@@ -426,15 +457,193 @@
                             </twig:Accordion>
                         </div>
                     {% endif %}
+                    <div class="space-y-5">
+                        <h3 class="font-semibold font-secondary">Good to know</h3>
+                        <div class="rounded-2xl p-5 bg-neutral-50">
+                            <div class="grid grid-cols-3 divide-x divide-gray-200">
+                                <div class="pr-6 space-y-2">
+                                    <div class="bg-white p-2 rounded-md inline-block">
+                                        {{ ux_icon('solar:shield-check-linear', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                    </div>
+                                    <p class="text-base">Logement vérifié</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">Chaque bien inspecté, contrôlé et validé en amont.</p>
+                                </div>
+                                <div class="px-6 space-y-2">
+                                    <div class="bg-white p-2 rounded-md inline-block">
+                                        {{ ux_icon('uil:lock', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                    </div>
+                                    <p class="text-base">Transaction sécurisée</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">Baux conformes et fonds protégés à chaque étape.</p>
+                                </div>
+                                <div class="pl-6 space-y-2">
+                                    <div class="bg-white p-2 rounded-md inline-block">
+                                        {{ ux_icon('solar:user-outline', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
+                                    </div>
+                                    <p class="text-base">Agent dedié</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">Un interlocuteur unique, de la recherche à la remise des clés.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if property.tags is defined and property.tags is not empty %}
+                        <div class="flex flex-wrap gap-2">
+                            {% for tag in property.tags %}
+                                <twig:Badge variant="secondary" class="capitalize">
+                                    {{ tag }}
+                                </twig:Badge>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
-
-                <div class="bg-neutral-50 col-span-3 rounded-2xl p-4">
-                    <div>
-                        <p class="text-2xl font-semibold text-primary">1200<span class="text-gray-900 font-light text-sm">/mois</span></p>
+                <div class="lg:col-span-3">
+                    <div class="space-y-6 sticky top-4">
+                        <div class="rounded-2xl p-4 bg-neutral-50 divide-y divide-gray-200 [&>*]:py-4 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
+                            <div class="flex items-end gap-x-2">
+                                {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+                                    <p class="text-3xl font-semibold text-primary">
+                                        {{ property.monthlyRent|number_format(0, ',', ' ') }}€
+                                        <span class="text-gray-600 font-light text-base">/{{ 'marketplace.list.card.price.month'|trans|raw }}</span>
+                                    </p>
+                                    {% if property.chargesIncludes|default(false) %}
+                                        <div class="px-2 py-0.5 rounded-full bg-white text-xs">
+                                            {{ 'marketplace.list.card.price.chargesIncludes'|trans|raw }}
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-3xl font-semibold text-primary">
+                                        {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="space-y-7">
+                                <div>
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="font-semibold font-secondary">Property details</h3>
+                                        <p class="text-xs font-light text-gray-400">PR5058</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-slate-200 mt-3 divide-y divide-gray-200">
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">Disponibilité</p>
+                                            {% if property.status == 'underOffer' %}
+                                                <p class="text-amber-600">{{ 'marketplace.list.card.status.underOffer'|trans }}</p>
+                                            {% elseif property.status == 'rented' %}
+                                                <p class="text-red-600">{{ 'marketplace.list.card.status.rented'|trans }}</p>
+                                            {% elseif property.availableDate is defined and property.availableDate %}
+                                                {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                                    <p class="text-green-600">{{ 'marketplace.list.card.status.available'|trans }}</p>
+                                                {% else %}
+                                                    <p class="text-slate-600">{{ 'marketplace.list.card.status.soon'|trans }} <span class="font-semibold">{{ property.availableDate|date('d/m/Y') }}</span></p>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        {% if property.leaseType is defined and property.leaseType %}
+                                            {% set leaseTypesMap = {
+                                                civilCode: (locale == 'fr' ? 'Bail code civil' : 'Civil Code lease'),
+                                                mobility: (locale == 'fr' ? 'Bail mobilité' : 'Mobility lease'),
+                                                furnished: (locale == 'fr' ? 'Bail meublé' : 'Furnished lease'),
+                                                unfurnished: (locale == 'fr' ? 'Bail vide' : 'Unfurnished lease'),
+                                                commercial: (locale == 'fr' ? 'Bail commercial' : 'Commercial lease'),
+                                                shortTerm: (locale == 'fr' ? 'Bail court terme' : 'Short-term lease'),
+                                            } %}
+                                            <div class="p-4 space-y-2">
+                                                <p class="font-light text-neutral-600 text-sm flex items-center gap-x-1.5">
+                                                    {{ locale == 'fr' ? 'Type de bail' : 'Lease type' }}
+                                                </p>
+                                                <div class="flex items-center gap-x-2">
+                                                    <p class="text-sm">{{ leaseTypesMap[property.leaseType]|default(property.leaseType) }}</p>
+                                                    <twig:Tooltip id="lease-type-tooltip">
+                                                        <twig:Tooltip:Trigger>
+                                                            <span {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %} class="inline-flex cursor-pointer mt-2">
+                                                            {{ ux_icon('streamline-ultimate:information-circle', {'class':'size-4 text-gray-500'}) }}
+                                                            </span>
+                                                        </twig:Tooltip:Trigger>
+                                                        <twig:Tooltip:Content side="top">
+                                                            <p>{{ locale == 'fr' ? 'Le type de bail définit le cadre juridique de la location (durée, conditions, etc.)' : 'The lease type defines the legal framework of the rental (duration, conditions, etc.)' }}</p>
+                                                        </twig:Tooltip:Content>
+                                                    </twig:Tooltip>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">Durée de location</p>
+                                            <ul class="space-y-1.5">
+                                                <li class="flex items-center gap-2 text-sm">
+                                                    {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
+                                                    Moyen terme <span class="text-gray-600 font-light">- 1 à 6 mois</span>
+                                                </li>
+                                                <li class="flex items-center gap-2 text-sm">
+                                                    {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
+                                                    Long terme <span class="text-neutral-600 font-light text-sm">- À partir de 6 mois</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if is_granted('ROLE_ADMIN') and property.extraFees is defined and property.extraFees is not empty %}
+                                    {% set feeTypesMap = {
+                                        agencyFees: (locale == 'fr' ? 'Honoraires d\'agence' : 'Agency fees'),
+                                        securityDeposit: (locale == 'fr' ? 'Dépôt de garantie (Remboursable)' : 'Security deposit'),
+                                        cleaningFee: (locale == 'fr' ? 'Frais de nettoyage' : 'Cleaning fee'),
+                                        registrationFee: (locale == 'fr' ? 'Frais d\'enregistrement' : 'Registration fee'),
+                                        guarantorFee: (locale == 'fr' ? 'Frais de garantie' : 'Guarantor fee'),
+                                        relocationFee: (locale == 'fr' ? 'Honoraires Relocation In Paris' : 'Relocation In Paris fee'),
+                                        applicationFee: (locale == 'fr' ? 'Frais de dossier' : 'Application fee'),
+                                        inventoryFee: (locale == 'fr' ? 'Frais d\'état des lieux' : 'Inventory fee'),
+                                    } %}
+                                    {% set totalFees = 0 %}
+                                    {% for fee in property.extraFees %}
+                                        {% set totalFees = totalFees + (fee.amount|default(0)) %}
+                                    {% endfor %}
+                                    <div>
+                                        <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Frais d\'entrée dans le logement' : 'Move-in fees' }}</h3>
+                                        <div class="rounded-2xl border border-slate-200 mt-3 divide-y divide-gray-200">
+                                            <div class="p-4 space-y-3">
+                                                {% for fee in property.extraFees %}
+                                                    <div class="flex justify-between items-center gap-2">
+                                                        <p class="text-neutral font-light text-sm">{{ feeTypesMap[fee.feeType]|default(fee.feeType) }}</p>
+                                                        <p>{{ fee.amount|number_format(0, ',', ' ') }}€</p>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="p-4 flex justify-between items-end">
+                                                <div class="">
+                                                    <p class="font-semibold">{{ locale == 'fr' ? 'Total' : 'Total' }}</p>
+                                                    <p class="text-xs font-light text-slate-600">Aucun frais caché</p>
+                                                </div>
+                                                <p class="font-semibold">{{ totalFees|number_format(0, ',', ' ') }}€</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="w-full">
+                                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_pricing') }}" class="w-full">
+                                        {% if property.agentPhoto|default(false) %}
+                                            <img
+                                                src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80"
+                                                alt="{{ property.agentName|default('') }}"
+                                                loading="lazy"
+                                                width="24"
+                                                height="24"
+                                                class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                            />
+                                        {% else %}
+                                            <img
+                                                src="{{ asset('medias/team/team_1.webp') }}"
+                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                                loading="lazy"
+                                                width="24"
+                                                height="24"
+                                                class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                                            />
+                                        {% endif %}
+                                        Parler à un expert
+                                    </twig:Button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-
 {% endblock %}
