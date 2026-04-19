@@ -290,6 +290,7 @@
             <div class="grid lg:grid-cols-8 gap-12">
                 <div class="lg:col-span-5 lg:space-y-15 space-y-10">
                     <div class="space-y-8">
+                        {% if is_granted('ROLE_ADMIN') %}
                         <div class="rounded-2xl p-4 bg-neutral-50" data-controller="collapsible" data-collapsible-open-value="true">
                             <button type="button" data-action="collapsible#toggle" class="w-full flex items-center justify-between cursor-pointer select-none">
                                 <span class="font-secondary flex items-center gap-x-2">
@@ -318,9 +319,63 @@
                                             <p class="text-sm">{{ property.internalNotes }}</p>
                                         </div>
                                     {% endif %}
+                                    {% if property.tenant is defined and property.tenant %}
+                                        {% set tenant = property.tenant %}
+                                        {% set isPro = tenant.tenantType == 'professional' %}
+                                        <div class="p-4 space-y-3">
+                                            <p class="font-light text-neutral-600 text-sm">
+                                                Propriétaire
+                                            </p>
+                                            <div class="grid grid-cols-2">
+                                                <div class="flex items-start gap-x-3">
+                                                    {% if isPro and tenant.logo %}
+                                                        <img
+                                                            src="{{ tenant.logo }}?w=96&h=96&fit=crop&auto=format&fm=webp&q=80"
+                                                            alt="{{ tenant.logoAlt|default(tenant.companyName|default(tenant.fullName)) }}"
+                                                            width="48"
+                                                            height="48"
+                                                            class="size-10 rounded-full object-cover bg-neutral-100 shrink-0"
+                                                            loading="lazy"
+                                                        >
+                                                    {% endif %}
+                                                    <div class="space-y-0.5 flex flex-col text-sm">
+                                                        <p class="text-neutral-600">
+                                                            {{ isPro ? (locale == 'fr' ? 'Professionnel' : 'Professional') : (locale == 'fr' ? 'Particulier' : 'Individual') }}
+                                                        </p>
+                                                        {% if isPro and tenant.companyName %}
+                                                            <p>{{ tenant.companyName }}</p>
+                                                            {% if tenant.fullName %}
+                                                                <p>{{ tenant.fullName }}</p>
+                                                            {% endif %}
+                                                        {% elseif tenant.fullName %}
+                                                            <p>{{ tenant.fullName }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-1 text-sm px-6">
+                                                    {% if tenant.email %}
+                                                        <p>
+                                                            <a href="mailto:{{ tenant.email }}" class="hover:underline">{{ tenant.email }}</a>
+                                                        </p>
+                                                    {% endif %}
+                                                    {% if tenant.phone %}
+                                                        <p>
+                                                            <a href="tel:{{ tenant.phone|replace({' ': '', '.': '', '-': ''}) }}" class="hover:underline">{{ tenant.phone }}</a>
+                                                        </p>
+                                                    {% endif %}
+                                                    {% if isPro and tenant.website %}
+                                                        <p>
+                                                            <a href="{{ tenant.website }}" target="_blank" rel="noopener noreferrer" class="hover:underline break-all">{{ tenant.website|replace({'https://': '', 'http://': ''})|trim('/') }}</a>
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                         <div class="space-y-4">
                             <h1 class="text-2xl lg:text-3xl font-semibold font-secondary text-pretty">{{ property.title }}</h1>
                             <div class="flex items-center divide-x divide-gray-200">
@@ -413,6 +468,23 @@
                             parking: { icon: 'iconoir:parking', label: (locale == 'fr' ? 'Parking' : 'Parking') },
                             television: { icon: 'iconoir:tv', label: (locale == 'fr' ? 'Télévision' : 'Television') },
                             washingMachine: { icon: 'iconoir:washing-machine', label: (locale == 'fr' ? 'Lave-linge' : 'Washing machine') },
+                            naturalLight: { icon: 'iconoir:sun-light', label: (locale == 'fr' ? 'Lumière naturelle' : 'Natural light') },
+                            doubleGlazing: { icon: 'tabler:window', label: (locale == 'fr' ? 'Double vitrage' : 'Double glazing') },
+                            cellar: { icon: 'tabler:stairs-down', label: (locale == 'fr' ? 'Cave' : 'Cellar') },
+                            bathtub: { icon: 'iconoir:bathroom', label: (locale == 'fr' ? 'Baignoire' : 'Bathtub') },
+                            wheelchairAccess: { icon: 'iconoir:accessibility', label: (locale == 'fr' ? 'Accès handicapé' : 'Wheelchair access') },
+                            bikeStorage: { icon: 'iconoir:bicycle', label: (locale == 'fr' ? 'Local vélo' : 'Bike storage') },
+                            workspace: { icon: 'fluent:desk-48-regular', label: (locale == 'fr' ? 'Espace de travail' : 'Workspace') },
+                        } %}
+                        {% set exposureMap = {
+                            north: (locale == 'fr' ? 'Nord' : 'North'),
+                            south: (locale == 'fr' ? 'Sud' : 'South'),
+                            east: (locale == 'fr' ? 'Est' : 'East'),
+                            west: (locale == 'fr' ? 'Ouest' : 'West'),
+                        } %}
+                        {% set viewMap = {
+                            courtyard: (locale == 'fr' ? 'Cour' : 'Courtyard'),
+                            street: (locale == 'fr' ? 'Rue' : 'Street'),
                         } %}
                         <div class="space-y-5">
                             <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Ce que ce bien offre' : 'What this property offers' }}</h3>
@@ -421,6 +493,30 @@
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:building', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
                                         <p>{{ locale == 'fr' ? 'Étage' : 'Floor' }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}</p>
+                                    </div>
+                                {% endif %}
+                                {% if property.constructionYear is defined and property.constructionYear %}
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:calendar', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                        <p>{{ locale == 'fr' ? 'Construction' : 'Built' }} {{ property.constructionYear }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if property.renovationYear is defined and property.renovationYear %}
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:tools', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                        <p>{{ locale == 'fr' ? 'Rénovation' : 'Renovated' }} {{ property.renovationYear }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if property.exposure is defined and property.exposure and exposureMap[property.exposure] is defined %}
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:compass', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                        <p>{{ locale == 'fr' ? 'Exposition' : 'Exposure' }} {{ exposureMap[property.exposure] }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if property.view is defined and property.view and viewMap[property.view] is defined %}
+                                    <div class="flex items-center gap-2">
+                                        {{ ux_icon('iconoir:eye', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                        <p>{{ locale == 'fr' ? 'Vue' : 'View' }} {{ viewMap[property.view]|lower }}</p>
                                     </div>
                                 {% endif %}
                                 {% for key, info in equipmentMap %}
@@ -517,7 +613,19 @@
                                 {% endif %}
                             </div>
                             <div class="space-y-7">
-                                <div>
+                                <div class="space-y-4">
+                                    <div class="flex items-end gap-x-2">
+                                        <twig:Badge variant="success">
+                                            {{ ux_icon('iconoir:badge-check', {'class':'size-4'}) }}
+                                            Bien vérifié
+                                        </twig:Badge>
+                                        {% if property.status != 'underOffer' and property.status != 'rented' and property.availableDate is defined and property.availableDate and property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+                                            <twig:Badge variant="inform">
+                                                {{ ux_icon('mdi:thunder-outline', {'class':'size-4'}) }}
+                                                Installation rapide
+                                            </twig:Badge>
+                                        {% endif %}
+                                    </div>
                                     <div class="flex justify-between items-center">
                                         <h3 class="font-semibold font-secondary">Property details</h3>
                                         <p class="text-xs font-light text-gray-400">PR5058</p>
@@ -546,12 +654,17 @@
                                                 commercial: (locale == 'fr' ? 'Bail commercial' : 'Commercial lease'),
                                                 shortTerm: (locale == 'fr' ? 'Bail court terme' : 'Short-term lease'),
                                             } %}
+                                            {% set leaseTypeKeys = property.leaseType is iterable ? property.leaseType : [property.leaseType] %}
+                                            {% set leaseTypeLabels = [] %}
+                                            {% for key in leaseTypeKeys %}
+                                                {% set leaseTypeLabels = leaseTypeLabels|merge([leaseTypesMap[key]|default(key)]) %}
+                                            {% endfor %}
                                             <div class="p-4 space-y-2">
                                                 <p class="font-light text-neutral-600 text-sm flex items-center gap-x-1.5">
                                                     {{ locale == 'fr' ? 'Type de bail' : 'Lease type' }}
                                                 </p>
                                                 <div class="flex items-center gap-x-2">
-                                                    <p class="text-sm">{{ leaseTypesMap[property.leaseType]|default(property.leaseType) }}</p>
+                                                    <p class="text-sm">{{ leaseTypeLabels|join(', ') }}</p>
                                                     <twig:Tooltip id="lease-type-tooltip">
                                                         <twig:Tooltip:Trigger>
                                                             <span {% for attr, val in tooltip_trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %} class="inline-flex cursor-pointer mt-2">
