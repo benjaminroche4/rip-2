@@ -45,6 +45,7 @@ final class PropertyRepository
                         uniqueId,
                         title,
                         shortDescription,
+                        metaDescription,
                         surface,
                         rooms,
                         bedrooms,

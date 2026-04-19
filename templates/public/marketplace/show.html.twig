@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}{{ property.title }}{% endblock %}
-{% block description %}{{ property.shortDescription|default(property.title) }}{% endblock %}
+{% block description %}{{ property.metaDescription }}{% endblock %}
 {% block url %}{{ property_show_path(property, locale) }}{% endblock %}
 
 {% set baseUrl = 'https://relocation-in-paris.fr' %}
@@ -531,11 +531,45 @@
                         </div>
                     {% endif %}
                     {% if map is not null %}
-                        <div class="space-y-5">
+                        <div class="space-y-5" data-controller="map-dialog">
                             <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Localisation' : 'Location' }}</h3>
-                            <div class="rounded-3xl lg:p-2 border border-neutral-200" data-controller="map-disable-scrollwheel">
-                                {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
+                            <div class="relative rounded-3xl lg:p-2 border border-neutral-200">
+                                <div class="pointer-events-none">
+                                    {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
+                                </div>
+                                <button
+                                    type="button"
+                                    data-action="map-dialog#open"
+                                    aria-label="{{ locale == 'fr' ? 'Agrandir la carte' : 'Expand map' }}"
+                                    class="absolute inset-0 lg:inset-2 cursor-pointer rounded-2xl focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none hover:bg-black/5 transition-colors duration-100"
+                                ></button>
+                                <span
+                                    class="pointer-events-none absolute top-4 right-4 lg:top-6 lg:right-6 z-10 size-10 flex items-center justify-center rounded-full bg-white shadow-md text-gray-700"
+                                >
+                                    {{ ux_icon('iconoir:expand', {'class':'size-5', 'aria-hidden':'true'}) }}
+                                </span>
                             </div>
+
+                            {# Map dialog #}
+                            <dialog
+                                data-map-dialog-target="dialog"
+                                data-action="click->map-dialog#closeOnClickOutside"
+                                class="fixed inset-0 z-50 m-0 h-full w-full max-h-full max-w-full bg-black/95 backdrop:bg-transparent open:flex open:items-center open:justify-center"
+                            >
+                                <div class="relative flex items-center justify-center w-full h-full px-4 py-12">
+                                    <button
+                                        type="button"
+                                        data-action="map-dialog#close"
+                                        aria-label="{{ locale == 'fr' ? 'Fermer' : 'Close' }}"
+                                        class="absolute top-4 right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                    <div class="w-full h-full max-w-6xl rounded-2xl overflow-hidden">
+                                        {{ ux_map(map, {style: 'height: 100%; width: 100%;'}) }}
+                                    </div>
+                                </div>
+                            </dialog>
                         </div>
                     {% endif %}
                     {% if property.faq is defined and property.faq is not empty %}
