@@ -614,7 +614,7 @@
                             </div>
                             <div class="space-y-7">
                                 <div class="space-y-4">
-                                    <div class="flex items-end gap-x-2">
+                                    <div class="flex flex-wrap items-end gap-2">
                                         <twig:Badge variant="success">
                                             {{ ux_icon('iconoir:badge-check', {'class':'size-4'}) }}
                                             Bien vérifié
@@ -624,6 +624,22 @@
                                                 {{ ux_icon('mdi:thunder-outline', {'class':'size-4'}) }}
                                                 Installation rapide
                                             </twig:Badge>
+                                        {% endif %}
+                                        {% if property.categoryList is defined and property.categoryList %}
+                                            {% set categoryStyleMap = {
+                                                premium: { icon: 'iconoir:crown', variant: 'warning' },
+                                                featured: { icon: 'iconoir:star', variant: 'primary' },
+                                                'coup-de-coeur': { icon: 'iconoir:heart', variant: 'default' },
+                                            } %}
+                                            {% for category in property.categoryList %}
+                                                {% if category.name %}
+                                                    {% set categoryStyle = categoryStyleMap[category.slug]|default({ icon: 'iconoir:bookmark', variant: 'secondary' }) %}
+                                                    <twig:Badge variant="{{ categoryStyle.variant }}">
+                                                        {{ ux_icon(categoryStyle.icon, {'class':'size-4'}) }}
+                                                        {{ category.name }}
+                                                    </twig:Badge>
+                                                {% endif %}
+                                            {% endfor %}
                                         {% endif %}
                                     </div>
                                     <div class="flex justify-between items-center">

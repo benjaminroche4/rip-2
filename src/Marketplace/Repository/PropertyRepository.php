@@ -85,6 +85,7 @@ final class PropertyRepository
                         },
                         "photoCount": count(photos),
                         "categoryName": categories[0]->name,
+                        "categoryList": categories[]->{"name": name, "slug": slug.current},
                         "location": location{lat, lng},
                         "elevator": equipment.elevator,
                         equipment,
