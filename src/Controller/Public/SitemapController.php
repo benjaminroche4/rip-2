@@ -2,6 +2,7 @@
 
 namespace App\Controller\Public;
 
+use App\Marketplace\Repository\PropertyRepository;
 use App\Service\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,6 +13,7 @@ final class SitemapController extends AbstractController
 {
     public function __construct(
         private readonly SanityService $sanityService,
+        private readonly PropertyRepository $propertyRepository,
     )
     {
     }
@@ -43,6 +45,7 @@ final class SitemapController extends AbstractController
 
         return $this->render('public/sitemap/index.html.twig', [
             'posts' => $posts,
+            'properties' => $this->propertyRepository->findAll($_locale),
         ]);
     }
 }

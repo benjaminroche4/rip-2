@@ -149,7 +149,7 @@
             {# Mobile/tablet: 1 main square + 3 squares below #}
             <div class="lg:hidden max-w-3xl mx-auto space-y-3">
                 {% if gridPhotos[0] is defined %}
-                    <button type="button" data-action="gallery#open" class="relative block w-full aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-2xl after:absolute after:inset-0 after:rounded-2xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                    <button type="button" data-action="gallery#open" aria-label="{{ locale == 'fr' ? 'Voir les photos' : 'View photos' }}" class="relative block w-full aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-2xl after:absolute after:inset-0 after:rounded-2xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                         <img
                             src="{{ gridPhotos[0].url }}?w=900&h=900&fit=crop&auto=format&fm=webp&q=80"
                             srcset="{{ gridPhotos[0].url }}?w=600&h=600&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -170,7 +170,7 @@
                     {% for i in 1..3 %}
                         {% if gridPhotos[i] is defined %}
                             {% set isLast = (i == 3) and (remainingCount > 0) %}
-                            <button type="button" data-action="gallery#open" class="relative block aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl {{ isLast ? '' : 'after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100' }}">
+                            <button type="button" data-action="gallery#open" aria-label="{{ locale == 'fr' ? 'Voir la photo ' ~ (i + 1) : 'View photo ' ~ (i + 1) }}" class="relative block aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl {{ isLast ? '' : 'after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100' }}">
                                 <img
                                     src="{{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=80"
                                     srcset="{{ gridPhotos[i].url }}?w=300&h=300&fit=crop&auto=format&fm=webp&q=80 300w,
@@ -200,7 +200,7 @@
             <div class="hidden lg:grid grid-cols-8 gap-3">
                 <div class="col-span-3">
                     {% if gridPhotos[0] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" aria-label="{{ locale == 'fr' ? 'Voir la photo 1' : 'View photo 1' }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[0].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -218,7 +218,7 @@
                 </div>
                 <div class="col-span-2 flex flex-col gap-3">
                     {% if gridPhotos[1] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" aria-label="{{ locale == 'fr' ? 'Voir la photo 2' : 'View photo 2' }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -235,7 +235,7 @@
                         </button>
                     {% endif %}
                     {% if gridPhotos[2] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" aria-label="{{ locale == 'fr' ? 'Voir la photo 3' : 'View photo 3' }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -254,7 +254,7 @@
                 </div>
                 <div class="col-span-3 relative">
                     {% if gridPhotos[3] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" aria-label="{{ locale == 'fr' ? 'Voir la photo 4' : 'View photo 4' }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[3].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -485,7 +485,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="rounded-2xl md:py-3 px-4 sm:px-5 bg-neutral-50">
+                        <div class="rounded-2xl py-2 md:py-3 px-4 sm:px-5 bg-neutral-50">
                             <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 <div class="py-4 md:py-0 md:pr-6 space-y-2">
                                     <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Chambres' : 'Bedrooms' }}</p>
@@ -920,7 +920,7 @@
                                                 {% endfor %}
                                             </div>
                                             <div class="p-4 flex justify-between items-end">
-                                                <div class="">
+                                                <div>
                                                     <p class="font-semibold">{{ locale == 'fr' ? 'Total' : 'Total' }}</p>
                                                     <p class="text-xs font-light text-slate-600">Aucun frais caché</p>
                                                 </div>

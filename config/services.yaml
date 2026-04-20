@@ -31,3 +31,4 @@ services:
             $sanityDataset: '%env(SANITY_DATASET)%'
             $sanityApiVersion: '%env(SANITY_API_VERSION)%'
             $sanityToken: '%env(SANITY_TOKEN)%'
+            $sanityUseCdn: '%env(bool:SANITY_USE_CDN)%'

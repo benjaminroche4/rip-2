@@ -27,16 +27,20 @@ class PropertyUrlExtension extends AbstractExtension
     /**
      * @param array<string, mixed> $property
      */
-    public function propertyShowPath(array $property, string $locale = 'fr'): string
+    public function propertyShowPath(array $property, string $locale = 'fr', bool $absolute = false): string
     {
-        return $this->urlGenerator->generate('app_property_show', [
-            '_locale' => $locale,
-            'listingType' => $this->slugify($property['listingTypeName'] ?? ($locale === 'fr' ? 'location' : 'rental')),
-            'propertyType' => $this->slugify($property['propertyTypeName'] ?? ($locale === 'fr' ? 'bien' : 'property')),
-            'city' => $this->slugify($property['address']['city'] ?? 'paris'),
-            'district' => $this->buildDistrict($property['address']['postalCode'] ?? '', $locale),
-            'slug' => $this->slugify($property['slug'] ?? $property['title'] ?? $property['_id'] ?? 'property'),
-        ]);
+        return $this->urlGenerator->generate(
+            'app_property_show',
+            [
+                '_locale' => $locale,
+                'listingType' => $this->slugify($property['listingTypeName'] ?? ($locale === 'fr' ? 'location' : 'rental')),
+                'propertyType' => $this->slugify($property['propertyTypeName'] ?? ($locale === 'fr' ? 'bien' : 'property')),
+                'city' => $this->slugify($property['address']['city'] ?? 'paris'),
+                'district' => $this->buildDistrict($property['address']['postalCode'] ?? '', $locale),
+                'slug' => $this->slugify($property['slug'] ?? $property['title'] ?? $property['_id'] ?? 'property'),
+            ],
+            $absolute ? UrlGeneratorInterface::ABSOLUTE_URL : UrlGeneratorInterface::ABSOLUTE_PATH
+        );
     }
 
     private function slugify(string $value): string

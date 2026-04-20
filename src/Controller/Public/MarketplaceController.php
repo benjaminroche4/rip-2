@@ -4,7 +4,6 @@ namespace App\Controller\Public;
 
 use App\Marketplace\Repository\PropertyRepository;
 use App\Twig\Extension\PropertyUrlExtension;
-use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,14 +27,6 @@ final class MarketplaceController extends AbstractController
             'en' => '/{_locale}/our-properties',
         ],
         name: 'app_property',
-        options: [
-            'sitemap' => [
-                'section' => 'properties',
-                'priority' => 0.9,
-                'changefreq' => UrlConcrete::CHANGEFREQ_DAILY,
-                'lastmod' => new \DateTime('2026-04-02'),
-            ],
-        ]
     )]
     public function list(string $_locale): Response
     {

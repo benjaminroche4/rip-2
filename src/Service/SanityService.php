@@ -13,11 +13,12 @@ class SanityService
         string $sanityDataset,
         string $sanityApiVersion,
         string $sanityToken,
+        bool $sanityUseCdn,
     ) {
         $this->client = new SanityClient([
             'projectId' => $sanityProjectId,
             'dataset' => $sanityDataset,
-            'useCdn' => false,
+            'useCdn' => $sanityUseCdn,
             'apiVersion' => $sanityApiVersion,
             'token' => $sanityToken,
         ]);
