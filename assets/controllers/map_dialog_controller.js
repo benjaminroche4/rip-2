@@ -6,6 +6,7 @@ export default class extends Controller {
 
     open() {
         this.dialogTarget.showModal()
+        this.dialogTarget.focus()
         document.body.style.overflow = 'hidden'
         document.addEventListener('keydown', this.#handleKeydown)
         requestAnimationFrame(() => {
