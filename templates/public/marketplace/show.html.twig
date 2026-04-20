@@ -90,7 +90,11 @@
 {% endblock %}
 
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-10 lg:pt-8 pt-6">
+    <div
+        data-controller="mobile-sheet"
+        data-mobile-sheet-open-class="max-lg:!translate-y-0 max-lg:!opacity-100 max-lg:!pointer-events-auto"
+    >
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-24 lg:pt-8 pt-6">
         <twig:Breadcrumb class="mb-6 lg:mb-8 overflow-x-auto scrollbar-hide">
             <twig:Breadcrumb:List>
                 <twig:Breadcrumb:Item>
@@ -140,6 +144,7 @@
         <section
             class="bg-neutral-50 rounded-2xl p-2"
             data-controller="gallery"
+            data-gallery-photos-value="{{ galleryPhotos|map(p => {url: p.url, alt: p.alt|default(property.title)})|json_encode|e('html_attr') }}"
         >
             {# Mobile/tablet: 1 main square + 3 squares below #}
             <div class="lg:hidden max-w-3xl mx-auto space-y-3">
@@ -195,7 +200,7 @@
             <div class="hidden lg:grid grid-cols-8 gap-3">
                 <div class="col-span-3">
                     {% if gridPhotos[0] is defined %}
-                        <button type="button" data-action="gallery#open" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[0].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -213,7 +218,7 @@
                 </div>
                 <div class="col-span-2 flex flex-col gap-3">
                     {% if gridPhotos[1] is defined %}
-                        <button type="button" data-action="gallery#open" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -230,7 +235,7 @@
                         </button>
                     {% endif %}
                     {% if gridPhotos[2] is defined %}
-                        <button type="button" data-action="gallery#open" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -249,7 +254,7 @@
                 </div>
                 <div class="col-span-3 relative">
                     {% if gridPhotos[3] is defined %}
-                        <button type="button" data-action="gallery#open" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[3].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -266,38 +271,40 @@
                             />
                         </button>
                     {% endif %}
-                    <twig:Button variant="secondary" size="sm" class="absolute bottom-3 right-3 z-10" data-action="gallery#open">
+                    <twig:Button variant="secondary" size="sm" class="absolute bottom-3 right-3 z-10" data-action="gallery#open" data-gallery-index-param="0">
                         {{ ux_icon('iconoir:view-grid') }}
                         Show all photos ({{ galleryPhotos|length }})
                     </twig:Button>
                 </div>
             </div>
 
-            {# Gallery dialog — vertical scroll, no carousel #}
+            {# Gallery dialog — mobile vertical scroll, desktop carousel #}
             <dialog
                 data-gallery-target="dialog"
                 data-action="click->gallery#closeOnClickOutside"
                 tabindex="-1"
                 class="fixed inset-0 z-50 m-0 h-full w-full max-h-full max-w-full bg-black/95 backdrop:bg-transparent open:block focus:outline-none"
             >
+                {# Close — same transparent style on mobile & desktop #}
                 <button
                     type="button"
                     data-action="gallery#close"
                     aria-label="Close"
-                    class="fixed top-4 right-4 z-20 size-10 flex items-center justify-center rounded-full bg-white hover:bg-neutral-100 text-gray-700 shadow-lg transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                    class="fixed top-4 right-4 z-20 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
 
-                <div class="h-full overflow-y-auto overscroll-contain">
-                    <div class="max-w-4xl mx-auto px-4 pt-20 sm:pt-24 pb-12 sm:pb-16 flex flex-col gap-3 sm:gap-4">
+                {# Mobile: vertical scroll #}
+                <div class="lg:hidden h-full overflow-y-auto overscroll-contain">
+                    <div class="max-w-4xl mx-auto px-4 pt-20 pb-12 flex flex-col gap-3">
                         {% for photo in galleryPhotos %}
                             <img
                                 src="{{ photo.url }}?w=1400&fit=max&auto=format&fm=webp&q=85"
                                 srcset="{{ photo.url }}?w=800&fit=max&auto=format&fm=webp&q=85 800w,
                                         {{ photo.url }}?w=1200&fit=max&auto=format&fm=webp&q=85 1200w,
                                         {{ photo.url }}?w=1600&fit=max&auto=format&fm=webp&q=85 1600w"
-                                sizes="(max-width: 1024px) 100vw, 56rem"
+                                sizes="100vw"
                                 alt="{{ photo.alt|default(property.title) }}"
                                 loading="{{ loop.first ? 'eager' : 'lazy' }}"
                                 decoding="async"
@@ -306,6 +313,46 @@
                             />
                         {% endfor %}
                     </div>
+                </div>
+
+                {# Desktop: carousel #}
+                <div class="hidden lg:flex relative items-center justify-center w-full h-full px-4 py-12">
+                    {# Prev #}
+                    <button
+                        type="button"
+                        data-action="gallery#prev"
+                        aria-label="Previous"
+                        class="absolute left-4 z-10 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="size-5"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
+                    <div class="flex flex-col items-center gap-6 max-h-full w-full">
+                        <img
+                            data-gallery-target="image"
+                            src=""
+                            alt=""
+                            draggable="false"
+                            style="touch-action: none"
+                            class="max-h-[calc(100vh-14rem)] max-w-full object-contain select-none rounded-lg transition-all duration-300 ease-out cursor-grab"
+                        />
+                        <div class="w-full max-w-4xl px-4">
+                            <div class="flex flex-col items-center gap-2">
+                                <span data-gallery-target="counter" class="text-white/50 text-xs font-medium"></span>
+                                <div data-gallery-target="thumbnails" class="flex flex-nowrap gap-2 p-1 scroll-p-1 w-full overflow-x-auto scrollbar-hide scroll-smooth"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Next #}
+                    <button
+                        type="button"
+                        data-action="gallery#next"
+                        aria-label="Next"
+                        class="absolute right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="size-5"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
             </dialog>
         </section>
@@ -588,7 +635,7 @@
                                         type="button"
                                         data-action="map-dialog#close"
                                         aria-label="{{ locale == 'fr' ? 'Fermer' : 'Close' }}"
-                                        class="absolute top-4 right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white hover:bg-neutral-100 text-gray-700 shadow-lg transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                                        class="absolute top-4 right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white text-gray-700 shadow-lg hover:bg-neutral-100 lg:bg-white/10 lg:text-white lg:shadow-none lg:hover:bg-white/20 transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                     </button>
@@ -654,7 +701,19 @@
                 </div>
 
                 <div class="lg:col-span-3 min-w-0">
-                    <div class="space-y-6 lg:sticky lg:top-4">
+                    <div
+                        data-mobile-sheet-target="sheet"
+                        class="space-y-6 lg:sticky lg:top-4 max-lg:fixed max-lg:bottom-0 max-lg:inset-x-0 max-lg:z-50 max-lg:translate-y-full max-lg:opacity-0 max-lg:pointer-events-none max-lg:transition-all max-lg:duration-300 max-lg:bg-white max-lg:rounded-t-2xl max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:shadow-2xl"
+                    >
+                        {# Mobile sheet close button #}
+                        <button
+                            type="button"
+                            data-action="mobile-sheet#close"
+                            aria-label="{{ locale == 'fr' ? 'Fermer' : 'Close' }}"
+                            class="lg:hidden absolute top-3 right-3 z-10 size-9 flex items-center justify-center rounded-full bg-white shadow-md text-gray-700 hover:bg-neutral-100 transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
                         <div class="rounded-2xl p-4 sm:p-5 bg-neutral-50 divide-y divide-gray-200 [&>*]:py-4 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
                             <div class="flex flex-wrap items-end gap-x-2 gap-y-2">
                                 {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
@@ -871,7 +930,7 @@
                                     </div>
                                 {% endif %}
                                 <div class="w-full">
-                                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_pricing') }}" class="w-full gap-x-2">
+                                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_pricing') }}" class="w-full gap-x-3">
                                         {% if property.agentPhoto|default(false) %}
                                             <div class="relative">
                                                 <span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
@@ -905,4 +964,30 @@
                 </div>
             </div>
         </section>
+
+        {# Mobile backdrop #}
+        <div
+            data-mobile-sheet-target="backdrop"
+            data-action="click->mobile-sheet#close"
+            class="lg:hidden fixed inset-0 z-40 bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300"
+        ></div>
+
+        {# Mobile sticky bottom bar (trigger) #}
+        <div class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-neutral-200 px-6 lg:px-8 py-3 flex items-center justify-between gap-4 shadow-t-xl rounded-t-2xl">
+            <div class="min-w-0">
+                {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+                    <p class="text-2xl font-semibold text-primary tabular-nums">
+                        {{ property.monthlyRent|number_format(0, ',', ' ') }}€<span class="text-gray-600 font-light text-sm">/{{ 'marketplace.list.card.price.month'|trans|raw }}</span>
+                    </p>
+                {% else %}
+                    <p class="text-2xl font-semibold text-primary">
+                        {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
+                    </p>
+                {% endif %}
+            </div>
+            <twig:Button variant="default" size="default" data-action="mobile-sheet#open" class="shrink-0">
+                {{ locale == 'fr' ? 'Voir les détails' : 'View details' }}
+            </twig:Button>
+        </div>
+    </div>
 {% endblock %}
