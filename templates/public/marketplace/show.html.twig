@@ -423,7 +423,7 @@
 
                 {# Mobile: vertical scroll #}
                 <div class="lg:hidden h-full overflow-y-auto overscroll-contain">
-                    <div class="max-w-4xl mx-auto px-4 pt-20 pb-12 flex flex-col gap-3">
+                    <div class="max-w-4xl mx-auto px-3 sm:px-4 pt-16 sm:pt-20 pb-8 sm:pb-12 flex flex-col gap-2 sm:gap-3">
                         {% for photo in galleryPhotos %}
                             <img
                                 src="{{ photo.url }}?w=1400&fit=max&auto=format&fm=webp&q=85"
@@ -579,7 +579,7 @@
                                 <div class="sm:pr-4 w-full sm:w-auto">
                                     <p class="text-gray-500 flex items-start gap-x-1">
                                         {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0 mt-1'}) }}
-                                        <span class="text-pretty">
+                                        <span class="text-pretty break-words min-w-0">
                                             {% if property.address.street is defined and property.address.street %}
                                                 {{ property.address.street }},
                                             {% endif %}
@@ -611,7 +611,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="rounded-2xl py-2 md:py-3 px-4 sm:px-5 bg-neutral-50">
+                        <div class="rounded-2xl py-3 md:py-3 px-4 sm:px-5 bg-neutral-50">
                             <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 <div class="py-4 md:py-0 md:pr-6 space-y-2">
                                     <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.propertyKey.bedrooms'|trans }}</p>
@@ -687,7 +687,7 @@
                         } %}
                         <div class="space-y-5">
                             <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.equipment.title'|trans }}</h2>
-                            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                 {% if property.floor is defined and property.floor %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:building', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
@@ -835,7 +835,7 @@
                     {% endif %}
                 </div>
 
-                <div class="lg:col-span-3 min-w-0">
+                <aside class="lg:col-span-3 min-w-0" aria-label="{{ 'marketplace.show.sidebar.propertyDetails'|trans }}">
                     <div
                         data-mobile-sheet-target="sheet"
                         class="space-y-6 lg:sticky lg:top-4 max-lg:fixed max-lg:bottom-0 max-lg:inset-x-0 max-lg:z-50 max-lg:translate-y-full max-lg:opacity-0 max-lg:pointer-events-none max-lg:transition-all max-lg:duration-300 max-lg:bg-white max-lg:rounded-t-2xl max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:shadow-2xl"
@@ -995,7 +995,7 @@
                                                                                     {% endif %}
                                                                                 </div>
                                                                                 <p class="mt-1 text-sm text-neutral-600 text-pretty leading-relaxed">{{ lease.forWho }}</p>
-                                                                                <dl class="mt-3 grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1 text-sm">
+                                                                                <dl class="mt-3 grid grid-cols-[max-content_1fr] gap-x-3 sm:gap-x-6 gap-y-1 text-sm">
                                                                                     {% for spec in lease.specs %}
                                                                                         <dt class="text-neutral-400">{{ spec.label }}</dt>
                                                                                         <dd class="text-neutral-900">{{ spec.value }}</dd>
@@ -1013,7 +1013,7 @@
                                         {% endif %}
                                         <div class="p-4 space-y-2">
                                             <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.sidebar.rentalDuration'|trans }}</p>
-                                            <ul class="space-y-1.5">
+                                            <ul role="list" class="space-y-1.5">
                                                 <li class="flex items-center gap-2 text-sm">
                                                     {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
                                                     {{ 'marketplace.show.sidebar.mediumTerm'|trans }} <span class="text-gray-600 font-light">- {{ 'marketplace.show.sidebar.mediumTermRange'|trans }}</span>
@@ -1094,7 +1094,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </aside>
             </div>
         </section>
         </article>
