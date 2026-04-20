@@ -147,11 +147,11 @@
             </iframe>
         </noscript>
         {{ component('blocks/gridBackground') }}
-        {{ component('layout/header', {post: post|default(null)}) }}
+        {{ component('Layout/header', {post: post|default(null)}) }}
         <main class="relative z-20">
             {% block body %}{% endblock %}
         </main>
-        {{ component('layout/footer') }}
+        {{ component('Layout/footer') }}
 
         <!-- Google Tag Manager -->
         <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
