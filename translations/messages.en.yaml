@@ -1307,3 +1307,158 @@ marketplace:
         rooms: Rooms
         bedrooms: Bedrooms
         contact: Contact us
+        breadcrumb:
+            listing: Rental
+            property: Property
+        admin:
+            title: Admin info
+            publishedOn: Published on
+            lastUpdated: Last updated
+            internalNote: Internal note
+            tenantLabel: Owner
+            professional: Professional
+            individual: Individual
+        propertyKey:
+            bedrooms: Bedrooms
+            furnished: Furnished
+            surface: Surface
+        description:
+            title: Description
+            showMore: Show more
+        equipment:
+            title: What this property offers
+            wifi: Wi-Fi
+            airConditioning: Air conditioning
+            balcony: Balcony
+            concierge: Concierge
+            dishwasher: Dishwasher
+            dryer: Dryer
+            elevator: Elevator
+            intercom: Intercom
+            microwave: Microwave
+            parking: Parking
+            television: Television
+            washingMachine: Washing machine
+            naturalLight: Natural light
+            doubleGlazing: Double glazing
+            cellar: Cellar
+            bathtub: Bathtub
+            wheelchairAccess: Wheelchair access
+            bikeStorage: Bike storage
+            workspace: Workspace
+        exposure:
+            label: Exposure
+            north: North
+            south: South
+            east: East
+            west: West
+        view:
+            label: View
+            courtyard: Courtyard
+            street: Street
+        building:
+            floor: Floor
+            construction: Built
+            renovation: Renovated
+        location:
+            title: Location
+        faq:
+            title: FAQ
+        goodToKnow:
+            title: Good to know
+            verified:
+                title: Verified listing
+                description: Every property inspected, checked and validated in advance.
+            secure:
+                title: Secure transaction
+                description: Compliant leases and funds protected at every step.
+            agent:
+                title: Dedicated agent
+                description: A single point of contact, from search to key handover.
+        badges:
+            verified: Verified property
+            quickMove: Quick move-in
+        sidebar:
+            propertyDetails: Property details
+            availability: Availability
+            leaseTypeLabel: Lease type
+            learnMore: Learn more
+            rentalDuration: Rental duration
+            mediumTerm: Medium term
+            mediumTermRange: 1 to 6 months
+            longTerm: Long term
+            longTermRange: From 6 months
+        lease:
+            dialogTitle: Lease types
+            dialogDescription: Four formats to frame your rental — duration, terms and protections.
+            thisProperty: This property
+            types:
+                civilCode: Civil Code lease
+                furnished: Furnished lease
+                alur: Alur law lease
+                noLease: No lease
+            forWho:
+                civilCode: Expats, work assignments, second homes
+                furnished: Tenants looking for a turnkey primary residence
+                alur: Tenants settling long-term in an unfurnished home as their primary residence
+                noLease: Short stays, serviced residences, hospitality services
+            specs:
+                civilCode:
+                    durationLabel: Duration
+                    durationValue: Freely negotiated
+                    tenantTerminationLabel: Tenant termination
+                    tenantTerminationValue: Per contract
+                    homeLabel: Home
+                    homeValue: Furnished or unfurnished
+                    useLabel: Use
+                    useValue: Not a primary residence
+                furnished:
+                    durationLabel: Min. duration
+                    durationValue: 1 year (9 months for students)
+                    tenantTerminationLabel: Tenant termination
+                    tenantTerminationValue: Anytime, 1-month notice
+                    homeLabel: Home
+                    homeValue: Fully furnished
+                alur:
+                    durationLabel: Min. duration
+                    durationValue: 3 years (6 if legal entity)
+                    tenantTerminationLabel: Tenant termination
+                    tenantTerminationValue: Anytime, 1 to 3-month notice
+                    homeLabel: Home
+                    homeValue: Unfurnished
+                noLease:
+                    durationLabel: Duration
+                    durationValue: Per night or per week
+                    tenantTerminationLabel: Tenant termination
+                    tenantTerminationValue: Anytime, no commitment
+                    includedLabel: Included
+                    includedValue: Services and amenities
+        fees:
+            title: Move-in fees
+            total: Total
+            noHidden: No hidden fees
+            types:
+                agencyFees: Agency fees
+                securityDeposit: Security deposit
+                cleaningFee: Cleaning fee
+                registrationFee: Registration fee
+                guarantorFee: Guarantor fee
+                relocationFee: Relocation In Paris fee
+                applicationFee: Application fee
+                inventoryFee: Inventory fee
+        cta:
+            scheduleVisit: Schedule a visit
+            viewDetails: View details
+        gallery:
+            viewPhotos: View photos
+            viewPhoto: 'View photo %n%'
+            showAll: 'Show all photos (%count%)'
+            close: Close
+            previous: Previous
+            next: Next
+        dialog:
+            close: Close
+            expandMap: Expand map
+
+a11y:
+    skipToContent: Skip to main content

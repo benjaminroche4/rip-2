@@ -1,11 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ property.title }}{% endblock %}
+{% set baseUrl = 'https://relocation-in-paris.fr' %}
+{% set pageUrl = baseUrl ~ property_show_path(property, locale) %}
+
+{# Rich, SEO-friendly title: "{Type} {city} {district} - {price}€/month | Site" #}
+{% set _titleParts = [property.title] %}
+{% if property.address.city is defined and property.address.city %}
+    {% set _titleParts = _titleParts|merge([property.address.city ~ (property.address.postalCode ? ' ' ~ property.address.postalCode|arrondissement(locale) : '')]) %}
+{% endif %}
+{% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+    {% set _titleParts = _titleParts|merge([property.monthlyRent|number_format(0, ',', ' ') ~ '€/' ~ ('marketplace.list.card.price.month'|trans)]) %}
+{% endif %}
+
+{% block title %}{{ _titleParts|join(' · ') }}{% endblock %}
 {% block description %}{{ property.metaDescription }}{% endblock %}
 {% block url %}{{ property_show_path(property, locale) }}{% endblock %}
 
-{% set baseUrl = 'https://relocation-in-paris.fr' %}
-{% set pageUrl = baseUrl ~ property_show_path(property, locale) %}
+{# noindex for rented properties so old listings don't pollute the index #}
+{% block meta_robots %}
+    {% if property.status == 'rented' %}
+        <meta name="robots" content="noindex, follow">
+    {% else %}
+        <meta name="robots" content="index, follow">
+    {% endif %}
+{% endblock %}
+
+{# Preload the above-the-fold main photo to improve LCP #}
+{% block head_preload %}
+    {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+        <link rel="preload" as="image"
+              href="{{ property.mainPhoto.url }}?w=900&h=900&fit=crop&auto=format&fm=webp&q=80"
+              imagesrcset="{{ property.mainPhoto.url }}?w=600&h=600&fit=crop&auto=format&fm=webp&q=80 600w,
+                           {{ property.mainPhoto.url }}?w=900&h=900&fit=crop&auto=format&fm=webp&q=80 900w,
+                           {{ property.mainPhoto.url }}?w=1200&h=1200&fit=crop&auto=format&fm=webp&q=80 1200w"
+              imagesizes="(max-width: 1024px) 100vw, 48rem"
+              fetchpriority="high">
+    {% endif %}
+{% endblock %}
 
 {% block og_image %}{{ property.mainPhoto.url is defined and property.mainPhoto.url ? property.mainPhoto.url ~ '?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80' : asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}
 
@@ -15,9 +46,35 @@
         "@id": "{{ pageUrl }}/#property",
         "url": "{{ pageUrl }}",
         "name": "{{ property.title|e('js') }}",
-        "description": "{{ (property.shortDescription|default(property.title))|e('js') }}",
+        "description": "{{ property.metaDescription|e('js') }}",
         "inLanguage": "{{ locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "isPartOf": { "@id": "{{ baseUrl }}/#website" }
+        {% if property.uniqueId is defined and property.uniqueId %}
+        ,"identifier": "{{ property.uniqueId|e('js') }}"
+        {% endif %}
+        {% if property.createdAt is defined and property.createdAt %}
+        ,"datePosted": "{{ property.createdAt|date('c') }}"
+        {% endif %}
+        {% if property.updatedAt is defined and property.updatedAt %}
+        ,"dateModified": "{{ property.updatedAt|date('c') }}"
+        {% endif %}
+        {% if property.photos is defined and property.photos|length > 0 %}
+        ,"photo": [
+            {% for photo in property.photos %}
+                {
+                    "@type": "ImageObject",
+                    "url": "{{ photo.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+                    {% if photo.alt %},"description": "{{ photo.alt|e('js') }}"{% endif %}
+                }{{ not loop.last ? ',' }}
+            {% endfor %}
+        ]
+        {% elseif property.mainPhoto.url is defined and property.mainPhoto.url %}
+        ,"photo": [{
+            "@type": "ImageObject",
+            "url": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+            {% if property.mainPhoto.alt %},"description": "{{ property.mainPhoto.alt|e('js') }}"{% endif %}
+        }]
+        {% endif %}
         {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
         ,"image": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
         {% endif %}
@@ -27,12 +84,51 @@
         {% if property.bedrooms %}
         ,"numberOfBedrooms": {{ property.bedrooms }}
         {% endif %}
+        {% if property.bathrooms %}
+        ,"numberOfBathroomsTotal": {{ property.bathrooms }}
+        {% endif %}
         {% if property.squareMeters %}
         ,"floorSize": {
             "@type": "QuantitativeValue",
             "value": {{ property.squareMeters }},
             "unitCode": "MTK"
         }
+        {% endif %}
+        {% if property.equipment is defined and property.equipment is not empty %}
+        ,"amenityFeature": [
+            {% set _amenityLabels = {
+                wifi: 'Wi-Fi',
+                airConditioning: (locale == 'fr' ? 'Climatisation' : 'Air conditioning'),
+                balcony: (locale == 'fr' ? 'Balcon' : 'Balcony'),
+                concierge: (locale == 'fr' ? 'Concierge' : 'Concierge'),
+                dishwasher: (locale == 'fr' ? 'Lave-vaisselle' : 'Dishwasher'),
+                dryer: (locale == 'fr' ? 'Sèche-linge' : 'Dryer'),
+                elevator: (locale == 'fr' ? 'Ascenseur' : 'Elevator'),
+                intercom: (locale == 'fr' ? 'Interphone' : 'Intercom'),
+                microwave: (locale == 'fr' ? 'Micro-ondes' : 'Microwave'),
+                parking: (locale == 'fr' ? 'Parking' : 'Parking'),
+                television: (locale == 'fr' ? 'Télévision' : 'Television'),
+                washingMachine: (locale == 'fr' ? 'Lave-linge' : 'Washing machine'),
+                naturalLight: (locale == 'fr' ? 'Lumière naturelle' : 'Natural light'),
+                doubleGlazing: (locale == 'fr' ? 'Double vitrage' : 'Double glazing'),
+                cellar: (locale == 'fr' ? 'Cave' : 'Cellar'),
+                bathtub: (locale == 'fr' ? 'Baignoire' : 'Bathtub'),
+                wheelchairAccess: (locale == 'fr' ? 'Accès handicapé' : 'Wheelchair access'),
+                bikeStorage: (locale == 'fr' ? 'Local vélo' : 'Bike storage'),
+                workspace: (locale == 'fr' ? 'Espace de travail' : 'Workspace'),
+            } %}
+            {% set _amenityFirst = true %}
+            {% for key, label in _amenityLabels %}
+                {% if property.equipment[key]|default(false) %}
+                    {{ _amenityFirst ? '' : ',' }}{
+                        "@type": "LocationFeatureSpecification",
+                        "name": "{{ label|e('js') }}",
+                        "value": true
+                    }
+                    {% set _amenityFirst = false %}
+                {% endif %}
+            {% endfor %}
+        ]
         {% endif %}
         ,"address": {
             "@type": "PostalAddress",
@@ -42,12 +138,20 @@
             "addressRegion": "Île-de-France",
             "addressCountry": "FR"
         }
+        {% if property.location.lat is defined and property.location.lng is defined %}
+        ,"geo": {
+            "@type": "GeoCoordinates",
+            "latitude": {{ property.location.lat }},
+            "longitude": {{ property.location.lng }}
+        }
+        {% endif %}
         {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
         ,"offers": {
             "@type": "Offer",
             "url": "{{ pageUrl }}",
             "price": {{ property.monthlyRent }},
             "priceCurrency": "EUR",
+            "priceValidUntil": "{{ 'now'|date_modify('+3 months')|date('Y-m-d') }}",
             "priceSpecification": {
                 "@type": "UnitPriceSpecification",
                 "price": {{ property.monthlyRent }},
@@ -58,8 +162,11 @@
                     "unitCode": "MON"
                 }
             },
-            "availability": "{{ property.status == 'rented' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock' }}",
-            "seller": { "@id": "{{ baseUrl }}/#organization" }
+            "availability": "{{ property.status == 'rented' ? 'https://schema.org/SoldOut' : (property.status == 'underOffer' ? 'https://schema.org/LimitedAvailability' : 'https://schema.org/InStock') }}"
+            {% if property.availableDate is defined and property.availableDate %}
+            ,"availabilityStarts": "{{ property.availableDate|date('c') }}"
+            {% endif %}
+            ,"seller": { "@id": "{{ baseUrl }}/#organization" }
         }
         {% endif %}
     },
@@ -87,6 +194,24 @@
             }
         ]
     }
+    {% if property.faq is defined and property.faq is not empty %}
+    ,{
+        "@type": "FAQPage",
+        "@id": "{{ pageUrl }}/#faq",
+        "mainEntity": [
+            {% for item in property.faq %}
+                {
+                    "@type": "Question",
+                    "name": "{{ item.question|e('js') }}",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "{{ item.answer|e('js') }}"
+                    }
+                }{{ not loop.last ? ',' }}
+            {% endfor %}
+        ]
+    }
+    {% endif %}
 {% endblock %}
 
 {% block body %}
@@ -104,11 +229,11 @@
                 </twig:Breadcrumb:Item>
                 <twig:Breadcrumb:Separator />
                 <twig:Breadcrumb:Item>
-                    {{ property.listingTypeName|default(locale == 'fr' ? 'Location' : 'Rental') }}
+                    {{ property.listingTypeName|default('marketplace.show.breadcrumb.listing'|trans) }}
                 </twig:Breadcrumb:Item>
                 <twig:Breadcrumb:Separator />
                 <twig:Breadcrumb:Item>
-                    {{ property.propertyTypeName|default(locale == 'fr' ? 'Bien' : 'Property') }}
+                    {{ property.propertyTypeName|default('marketplace.show.breadcrumb.property'|trans) }}
                 </twig:Breadcrumb:Item>
                 <twig:Breadcrumb:Separator />
                 <twig:Breadcrumb:Item>
@@ -126,6 +251,7 @@
                 </twig:Breadcrumb:Item>
             </twig:Breadcrumb:List>
         </twig:Breadcrumb>
+        <article itemscope itemtype="https://schema.org/Apartment">
         {% set gridPhotos = [] %}
         {% set galleryPhotos = [] %}
         {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
@@ -149,7 +275,7 @@
             {# Mobile/tablet: 1 main square + 3 squares below #}
             <div class="lg:hidden max-w-3xl mx-auto space-y-3">
                 {% if gridPhotos[0] is defined %}
-                    <button type="button" data-action="gallery#open" aria-label="{{ locale == 'fr' ? 'Voir les photos' : 'View photos' }}" class="relative block w-full aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-2xl after:absolute after:inset-0 after:rounded-2xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                    <button type="button" data-action="gallery#open" aria-label="{{ 'marketplace.show.gallery.viewPhotos'|trans }}" class="relative block w-full aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-2xl after:absolute after:inset-0 after:rounded-2xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                         <img
                             src="{{ gridPhotos[0].url }}?w=900&h=900&fit=crop&auto=format&fm=webp&q=80"
                             srcset="{{ gridPhotos[0].url }}?w=600&h=600&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -170,7 +296,7 @@
                     {% for i in 1..3 %}
                         {% if gridPhotos[i] is defined %}
                             {% set isLast = (i == 3) and (remainingCount > 0) %}
-                            <button type="button" data-action="gallery#open" aria-label="{{ locale == 'fr' ? 'Voir la photo ' ~ (i + 1) : 'View photo ' ~ (i + 1) }}" class="relative block aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl {{ isLast ? '' : 'after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100' }}">
+                            <button type="button" data-action="gallery#open" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': i + 1}) }}" class="relative block aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl {{ isLast ? '' : 'after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100' }}">
                                 <img
                                     src="{{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=80"
                                     srcset="{{ gridPhotos[i].url }}?w=300&h=300&fit=crop&auto=format&fm=webp&q=80 300w,
@@ -200,7 +326,7 @@
             <div class="hidden lg:grid grid-cols-8 gap-3">
                 <div class="col-span-3">
                     {% if gridPhotos[0] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" aria-label="{{ locale == 'fr' ? 'Voir la photo 1' : 'View photo 1' }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="0" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 1}) }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[0].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[0].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -218,7 +344,7 @@
                 </div>
                 <div class="col-span-2 flex flex-col gap-3">
                     {% if gridPhotos[1] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" aria-label="{{ locale == 'fr' ? 'Voir la photo 2' : 'View photo 2' }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="1" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 2}) }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -235,7 +361,7 @@
                         </button>
                     {% endif %}
                     {% if gridPhotos[2] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" aria-label="{{ locale == 'fr' ? 'Voir la photo 3' : 'View photo 3' }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="2" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 3}) }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
@@ -254,7 +380,7 @@
                 </div>
                 <div class="col-span-3 relative">
                     {% if gridPhotos[3] is defined %}
-                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" aria-label="{{ locale == 'fr' ? 'Voir la photo 4' : 'View photo 4' }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
+                        <button type="button" data-action="gallery#open" data-gallery-index-param="3" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 4}) }}" class="relative w-full h-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
                                 src="{{ gridPhotos[3].url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80"
                                 srcset="{{ gridPhotos[3].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w,
@@ -273,7 +399,7 @@
                     {% endif %}
                     <twig:Button variant="secondary" size="sm" class="absolute bottom-3 right-3 z-10" data-action="gallery#open" data-gallery-index-param="0">
                         {{ ux_icon('iconoir:view-grid') }}
-                        Show all photos ({{ galleryPhotos|length }})
+                        {{ 'marketplace.show.gallery.showAll'|trans({'%count%': galleryPhotos|length}) }}
                     </twig:Button>
                 </div>
             </div>
@@ -289,7 +415,7 @@
                 <button
                     type="button"
                     data-action="gallery#close"
-                    aria-label="Close"
+                    aria-label="{{ 'marketplace.show.gallery.close'|trans }}"
                     class="fixed top-4 right-4 z-20 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -321,7 +447,7 @@
                     <button
                         type="button"
                         data-action="gallery#prev"
-                        aria-label="Previous"
+                        aria-label="{{ 'marketplace.show.gallery.previous'|trans }}"
                         class="absolute left-4 z-10 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="size-5"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -348,7 +474,7 @@
                     <button
                         type="button"
                         data-action="gallery#next"
-                        aria-label="Next"
+                        aria-label="{{ 'marketplace.show.gallery.next'|trans }}"
                         class="absolute right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                     >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="size-5"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -366,7 +492,7 @@
                             <button type="button" data-action="collapsible#toggle" class="w-full flex items-center justify-between cursor-pointer select-none">
                                 <span class="font-secondary flex items-center gap-x-2">
                                     {{ ux_icon('eos-icons:admin-outlined', {'class': 'size-5 shrink-0'}) }}
-                                    Admin info
+                                    {{ 'marketplace.show.admin.title'|trans }}
                                 </span>
                                 <span class="bg-white rounded-full p-2 shrink-0">
                                     <svg data-collapsible-target="chevron" class="w-4 h-4 transition-transform duration-300 ease-in-out" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -376,17 +502,17 @@
                                 <div class="rounded-2xl border border-slate-200 divide-y divide-gray-200 mt-3">
                                     <div class="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
                                         <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Date de mise en ligne' : 'Published on' }}</p>
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.admin.publishedOn'|trans }}</p>
                                             <p class="text-sm">{{ property.createdAt ? property.createdAt|format_datetime('long', 'short', locale: locale) : '—' }}</p>
                                         </div>
                                         <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Dernière mise à jour' : 'Last updated' }}</p>
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.admin.lastUpdated'|trans }}</p>
                                             <p class="text-sm">{{ property.updatedAt ? property.updatedAt|format_datetime('long', 'short', locale: locale) : '—' }}</p>
                                         </div>
                                     </div>
                                     {% if property.internalNotes is defined and property.internalNotes %}
                                         <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Note interne' : 'Internal note' }}</p>
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.admin.internalNote'|trans }}</p>
                                             <p class="text-sm">{{ property.internalNotes }}</p>
                                         </div>
                                     {% endif %}
@@ -395,7 +521,7 @@
                                         {% set isPro = tenant.tenantType == 'professional' %}
                                         <div class="p-4 space-y-3">
                                             <p class="font-light text-neutral-600 text-sm">
-                                                Propriétaire
+                                                {{ 'marketplace.show.admin.tenantLabel'|trans }}
                                             </p>
                                             <div class="grid sm:grid-cols-2 gap-4">
                                                 <div class="flex items-start gap-x-3">
@@ -411,7 +537,7 @@
                                                     {% endif %}
                                                     <div class="space-y-0.5 flex flex-col text-sm min-w-0">
                                                         <p class="text-neutral-600">
-                                                            {{ isPro ? (locale == 'fr' ? 'Professionnel' : 'Professional') : (locale == 'fr' ? 'Particulier' : 'Individual') }}
+                                                            {{ isPro ? 'marketplace.show.admin.professional'|trans : 'marketplace.show.admin.individual'|trans }}
                                                         </p>
                                                         {% if isPro and tenant.companyName %}
                                                             <p class="break-words">{{ tenant.companyName }}</p>
@@ -488,21 +614,21 @@
                         <div class="rounded-2xl py-2 md:py-3 px-4 sm:px-5 bg-neutral-50">
                             <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 <div class="py-4 md:py-0 md:pr-6 space-y-2">
-                                    <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Chambres' : 'Bedrooms' }}</p>
+                                    <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.propertyKey.bedrooms'|trans }}</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('fluent:bed-24-regular', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
                                         <p class="capitalize">{{ property.bedroomsLabel|default(property.bedrooms|default('-')) }}</p>
                                     </div>
                                 </div>
                                 <div class="py-4 md:py-0 md:px-6 space-y-2">
-                                    <p class="font-light text-neutral-600 text-sm">{{ locale == 'fr' ? 'Meublé' : 'Furnished' }}</p>
+                                    <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.propertyKey.furnished'|trans }}</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:sofa', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
                                         <p>{{ property.furnished == 'yes' ? 'marketplace.list.card.furnished.yes'|trans|raw : 'marketplace.list.card.furnished.no'|trans|raw }}</p>
                                     </div>
                                 </div>
                                 <div class="py-4 md:py-0 md:pl-6 space-y-2">
-                                    <p class="font-light text-neutral-600 text-sm">Surface</p>
+                                    <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.propertyKey.surface'|trans }}</p>
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('wordpress:square', {'class':'size-7 text-gray-800', 'aria-hidden':'true'}) }}
                                         <p>{{ property.squareMeters|default('-') }} m²</p>
@@ -513,7 +639,7 @@
                     </div>
                     {% if property.description is defined and property.description is not empty %}
                         <div class="space-y-3" data-controller="expandable">
-                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Description' : 'Description' }}</h3>
+                            <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.description.title'|trans }}</h2>
                             <div data-expandable-target="content" class="prose prose-sm max-w-none text-gray-600 line-clamp-6 break-words [&_img]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto">
                                 {{ property.description|sanity_to_html }}
                             </div>
@@ -523,73 +649,73 @@
                                 data-expandable-target="trigger"
                                 class="font-semibold text-gray-900 cursor-pointer hover:underline underline-offset-4"
                             >
-                                ... {{ locale == 'fr' ? 'Voir plus' : 'Show more' }}
+                                ... {{ 'marketplace.show.description.showMore'|trans }}
                             </button>
                         </div>
                     {% endif %}
                     {% if property.equipment is defined and property.equipment is not empty %}
                         {% set equipmentMap = {
-                            wifi: { icon: 'boxicons:wifi', label: 'Wi-Fi' },
-                            airConditioning: { icon: 'iconoir:snow-flake', label: (locale == 'fr' ? 'Climatisation' : 'Air conditioning') },
-                            balcony: { icon: 'mdi:balcony', label: (locale == 'fr' ? 'Balcon' : 'Balcony') },
-                            concierge: { icon: 'iconoir:bell', label: (locale == 'fr' ? 'Concierge' : 'Concierge') },
-                            dishwasher: { icon: 'material-symbols:dishwasher-gen-outline-sharp', label: (locale == 'fr' ? 'Lave-vaisselle' : 'Dishwasher') },
-                            dryer: { icon: 'boxicons:dryer', label: (locale == 'fr' ? 'Sèche-linge' : 'Dryer') },
-                            elevator: { icon: 'iconoir:elevator', label: (locale == 'fr' ? 'Ascenseur' : 'Elevator') },
-                            intercom: { icon: 'lucide-lab:intercom', label: (locale == 'fr' ? 'Interphone' : 'Intercom') },
-                            microwave: { icon: 'mdi:microwave', label: (locale == 'fr' ? 'Micro-ondes' : 'Microwave') },
-                            parking: { icon: 'iconoir:parking', label: (locale == 'fr' ? 'Parking' : 'Parking') },
-                            television: { icon: 'iconoir:tv', label: (locale == 'fr' ? 'Télévision' : 'Television') },
-                            washingMachine: { icon: 'iconoir:washing-machine', label: (locale == 'fr' ? 'Lave-linge' : 'Washing machine') },
-                            naturalLight: { icon: 'iconoir:sun-light', label: (locale == 'fr' ? 'Lumière naturelle' : 'Natural light') },
-                            doubleGlazing: { icon: 'tabler:window', label: (locale == 'fr' ? 'Double vitrage' : 'Double glazing') },
-                            cellar: { icon: 'tabler:stairs-down', label: (locale == 'fr' ? 'Cave' : 'Cellar') },
-                            bathtub: { icon: 'iconoir:bathroom', label: (locale == 'fr' ? 'Baignoire' : 'Bathtub') },
-                            wheelchairAccess: { icon: 'iconoir:accessibility', label: (locale == 'fr' ? 'Accès handicapé' : 'Wheelchair access') },
-                            bikeStorage: { icon: 'iconoir:bicycle', label: (locale == 'fr' ? 'Local vélo' : 'Bike storage') },
-                            workspace: { icon: 'fluent:desk-48-regular', label: (locale == 'fr' ? 'Espace de travail' : 'Workspace') },
+                            wifi: { icon: 'boxicons:wifi', label: 'marketplace.show.equipment.wifi'|trans },
+                            airConditioning: { icon: 'iconoir:snow-flake', label: 'marketplace.show.equipment.airConditioning'|trans },
+                            balcony: { icon: 'mdi:balcony', label: 'marketplace.show.equipment.balcony'|trans },
+                            concierge: { icon: 'iconoir:bell', label: 'marketplace.show.equipment.concierge'|trans },
+                            dishwasher: { icon: 'material-symbols:dishwasher-gen-outline-sharp', label: 'marketplace.show.equipment.dishwasher'|trans },
+                            dryer: { icon: 'boxicons:dryer', label: 'marketplace.show.equipment.dryer'|trans },
+                            elevator: { icon: 'iconoir:elevator', label: 'marketplace.show.equipment.elevator'|trans },
+                            intercom: { icon: 'lucide-lab:intercom', label: 'marketplace.show.equipment.intercom'|trans },
+                            microwave: { icon: 'mdi:microwave', label: 'marketplace.show.equipment.microwave'|trans },
+                            parking: { icon: 'iconoir:parking', label: 'marketplace.show.equipment.parking'|trans },
+                            television: { icon: 'iconoir:tv', label: 'marketplace.show.equipment.television'|trans },
+                            washingMachine: { icon: 'iconoir:washing-machine', label: 'marketplace.show.equipment.washingMachine'|trans },
+                            naturalLight: { icon: 'iconoir:sun-light', label: 'marketplace.show.equipment.naturalLight'|trans },
+                            doubleGlazing: { icon: 'tabler:window', label: 'marketplace.show.equipment.doubleGlazing'|trans },
+                            cellar: { icon: 'tabler:stairs-down', label: 'marketplace.show.equipment.cellar'|trans },
+                            bathtub: { icon: 'iconoir:bathroom', label: 'marketplace.show.equipment.bathtub'|trans },
+                            wheelchairAccess: { icon: 'iconoir:accessibility', label: 'marketplace.show.equipment.wheelchairAccess'|trans },
+                            bikeStorage: { icon: 'iconoir:bicycle', label: 'marketplace.show.equipment.bikeStorage'|trans },
+                            workspace: { icon: 'fluent:desk-48-regular', label: 'marketplace.show.equipment.workspace'|trans },
                         } %}
                         {% set exposureMap = {
-                            north: (locale == 'fr' ? 'Nord' : 'North'),
-                            south: (locale == 'fr' ? 'Sud' : 'South'),
-                            east: (locale == 'fr' ? 'Est' : 'East'),
-                            west: (locale == 'fr' ? 'Ouest' : 'West'),
+                            north: 'marketplace.show.exposure.north'|trans,
+                            south: 'marketplace.show.exposure.south'|trans,
+                            east: 'marketplace.show.exposure.east'|trans,
+                            west: 'marketplace.show.exposure.west'|trans,
                         } %}
                         {% set viewMap = {
-                            courtyard: (locale == 'fr' ? 'Cour' : 'Courtyard'),
-                            street: (locale == 'fr' ? 'Rue' : 'Street'),
+                            courtyard: 'marketplace.show.view.courtyard'|trans,
+                            street: 'marketplace.show.view.street'|trans,
                         } %}
                         <div class="space-y-5">
-                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Ce que ce bien offre' : 'What this property offers' }}</h3>
+                            <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.equipment.title'|trans }}</h2>
                             <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
                                 {% if property.floor is defined and property.floor %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:building', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ locale == 'fr' ? 'Étage' : 'Floor' }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}</p>
+                                        <p>{{ 'marketplace.show.building.floor'|trans }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}</p>
                                     </div>
                                 {% endif %}
                                 {% if property.constructionYear is defined and property.constructionYear %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:calendar', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ locale == 'fr' ? 'Construction' : 'Built' }} {{ property.constructionYear }}</p>
+                                        <p>{{ 'marketplace.show.building.construction'|trans }} {{ property.constructionYear }}</p>
                                     </div>
                                 {% endif %}
                                 {% if property.renovationYear is defined and property.renovationYear %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:tools', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ locale == 'fr' ? 'Rénovation' : 'Renovated' }} {{ property.renovationYear }}</p>
+                                        <p>{{ 'marketplace.show.building.renovation'|trans }} {{ property.renovationYear }}</p>
                                     </div>
                                 {% endif %}
                                 {% if property.exposure is defined and property.exposure and exposureMap[property.exposure] is defined %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:compass', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ locale == 'fr' ? 'Exposition' : 'Exposure' }} {{ exposureMap[property.exposure] }}</p>
+                                        <p>{{ 'marketplace.show.exposure.label'|trans }} {{ exposureMap[property.exposure] }}</p>
                                     </div>
                                 {% endif %}
                                 {% if property.view is defined and property.view and viewMap[property.view] is defined %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:eye', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ locale == 'fr' ? 'Vue' : 'View' }} {{ viewMap[property.view]|lower }}</p>
+                                        <p>{{ 'marketplace.show.view.label'|trans }} {{ viewMap[property.view]|lower }}</p>
                                     </div>
                                 {% endif %}
                                 {% for key, info in equipmentMap %}
@@ -605,15 +731,24 @@
                     {% endif %}
                     {% if map is not null %}
                         <div class="space-y-5" data-controller="map-dialog">
-                            <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Localisation' : 'Location' }}</h3>
-                            <div class="relative rounded-3xl lg:p-2 border border-neutral-200">
-                                <div class="pointer-events-none">
-                                    {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
-                                </div>
+                            <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.location.title'|trans }}</h2>
+                            <div class="relative rounded-3xl lg:p-2 border border-neutral-200" data-controller="lazy-map">
+                                {# Placeholder (skeleton) shown until the section enters the viewport #}
+                                <div
+                                    data-lazy-map-target="placeholder"
+                                    class="h-96 w-full rounded-2xl bg-neutral-100 animate-pulse"
+                                    aria-hidden="true"
+                                ></div>
+                                {# Actual Google Maps markup, inert inside <template> until cloned into the DOM #}
+                                <template data-lazy-map-target="content">
+                                    <div class="pointer-events-none">
+                                        {{ ux_map(map, {style: 'height: 24rem; width: 100%;', 'class': 'rounded-2xl overflow-hidden'}) }}
+                                    </div>
+                                </template>
                                 <button
                                     type="button"
                                     data-action="map-dialog#open"
-                                    aria-label="{{ locale == 'fr' ? 'Agrandir la carte' : 'Expand map' }}"
+                                    aria-label="{{ 'marketplace.show.dialog.expandMap'|trans }}"
                                     class="absolute inset-0 lg:inset-2 cursor-pointer rounded-2xl focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none hover:bg-black/5 transition-colors duration-100"
                                 ></button>
                                 <span
@@ -634,7 +769,7 @@
                                     <button
                                         type="button"
                                         data-action="map-dialog#close"
-                                        aria-label="{{ locale == 'fr' ? 'Fermer' : 'Close' }}"
+                                        aria-label="{{ 'marketplace.show.dialog.close'|trans }}"
                                         class="absolute top-4 right-4 z-10 size-10 flex items-center justify-center rounded-full bg-white text-gray-700 shadow-lg hover:bg-neutral-100 lg:bg-white/10 lg:text-white lg:shadow-none lg:hover:bg-white/20 transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -648,7 +783,7 @@
                     {% endif %}
                     {% if property.faq is defined and property.faq is not empty %}
                         <div class="space-y-5">
-                            <h3 class="font-semibold font-secondary">FAQ</h3>
+                            <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.faq.title'|trans }}</h2>
                             <twig:Accordion id="property-faq" defaultValue="{{ ['item-0'] }}">
                                 {% for item in property.faq %}
                                     <twig:Accordion:Item value="item-{{ loop.index0 }}">
@@ -662,29 +797,29 @@
                         </div>
                     {% endif %}
                     <div class="space-y-5">
-                        <h3 class="font-semibold font-secondary">Good to know</h3>
+                        <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.goodToKnow.title'|trans }}</h2>
                         <div class="rounded-2xl p-4 sm:p-5 bg-neutral-50">
                             <div class="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
                                 <div class="py-4 md:py-0 md:pr-6 space-y-2">
                                     <div class="bg-white p-2 rounded-md inline-block">
                                         {{ ux_icon('solar:shield-check-linear', {'class':'size-6 text-gray-800', 'aria-hidden':'true'}) }}
                                     </div>
-                                    <p class="text-base">Logement vérifié</p>
-                                    <p class="font-light text-neutral-600 text-sm text-pretty">Chaque bien inspecté, contrôlé et validé en amont.</p>
+                                    <p class="text-base">{{ 'marketplace.show.goodToKnow.verified.title'|trans }}</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">{{ 'marketplace.show.goodToKnow.verified.description'|trans }}</p>
                                 </div>
                                 <div class="py-4 md:py-0 md:px-6 space-y-2">
                                     <div class="bg-white p-2 rounded-md inline-block">
                                         {{ ux_icon('uil:lock', {'class':'size-6 text-gray-800', 'aria-hidden':'true'}) }}
                                     </div>
-                                    <p class="text-base">Transaction sécurisée</p>
-                                    <p class="font-light text-neutral-600 text-sm text-pretty">Baux conformes et fonds protégés à chaque étape.</p>
+                                    <p class="text-base">{{ 'marketplace.show.goodToKnow.secure.title'|trans }}</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">{{ 'marketplace.show.goodToKnow.secure.description'|trans }}</p>
                                 </div>
                                 <div class="py-4 md:py-0 md:pl-6 space-y-2">
                                     <div class="bg-white p-2 rounded-md inline-block">
                                         {{ ux_icon('solar:user-outline', {'class':'size-6 text-gray-800', 'aria-hidden':'true'}) }}
                                     </div>
-                                    <p class="text-base">Agent dedié</p>
-                                    <p class="font-light text-neutral-600 text-sm text-pretty">Un interlocuteur unique, de la recherche à la remise des clés.</p>
+                                    <p class="text-base">{{ 'marketplace.show.goodToKnow.agent.title'|trans }}</p>
+                                    <p class="font-light text-neutral-600 text-sm text-pretty">{{ 'marketplace.show.goodToKnow.agent.description'|trans }}</p>
                                 </div>
                             </div>
                         </div>
@@ -709,7 +844,7 @@
                         <button
                             type="button"
                             data-action="mobile-sheet#close"
-                            aria-label="{{ locale == 'fr' ? 'Fermer' : 'Close' }}"
+                            aria-label="{{ 'marketplace.show.dialog.close'|trans }}"
                             class="lg:hidden absolute top-3 right-3 z-10 size-9 flex items-center justify-center rounded-full bg-white shadow-md text-gray-700 hover:bg-neutral-100 transition duration-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -735,12 +870,12 @@
                             <div class="space-y-7">
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center">
-                                        <h3 class="font-semibold font-secondary">Property details</h3>
+                                        <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.sidebar.propertyDetails'|trans }}</h2>
                                         <p class="text-xs font-light text-gray-400">PR5058</p>
                                     </div>
                                     <div class="rounded-2xl border border-slate-200 mt-3 divide-y divide-gray-200">
                                         <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">Disponibilité</p>
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.sidebar.availability'|trans }}</p>
                                             {% if property.status == 'underOffer' %}
                                                 <p class="text-amber-600">{{ 'marketplace.list.card.status.underOffer'|trans }}</p>
                                             {% elseif property.status == 'rented' %}
@@ -755,10 +890,10 @@
                                         </div>
                                         {% if property.leaseType is defined and property.leaseType %}
                                             {% set leaseTypesMap = {
-                                                civilCode: (locale == 'fr' ? 'Bail code civil' : 'Civil Code lease'),
-                                                furnished: (locale == 'fr' ? 'Bail meublé' : 'Furnished lease'),
-                                                alur: (locale == 'fr' ? 'Bail loi Alur' : 'Alur law lease'),
-                                                noLease: (locale == 'fr' ? 'Aucun bail' : 'No lease'),
+                                                civilCode: 'marketplace.show.lease.types.civilCode'|trans,
+                                                furnished: 'marketplace.show.lease.types.furnished'|trans,
+                                                alur: 'marketplace.show.lease.types.alur'|trans,
+                                                noLease: 'marketplace.show.lease.types.noLease'|trans,
                                             } %}
                                             {% set leaseTypeKeys = property.leaseType is iterable ? property.leaseType : [property.leaseType] %}
                                             {% set leaseTypeLabels = [] %}
@@ -769,46 +904,46 @@
                                                 {
                                                     key: 'civilCode',
                                                     icon: 'iconoir:page-edit',
-                                                    name: (locale == 'fr' ? 'Bail code civil' : 'Civil Code lease'),
-                                                    forWho: (locale == 'fr' ? 'Expatriés, séjours professionnels, résidence secondaire' : 'Expats, work assignments, second homes'),
+                                                    name: 'marketplace.show.lease.types.civilCode'|trans,
+                                                    forWho: 'marketplace.show.lease.forWho.civilCode'|trans,
                                                     specs: [
-                                                        { label: (locale == 'fr' ? 'Durée du bail' : 'Duration'), value: (locale == 'fr' ? 'Libre, négociée' : 'Freely negotiated') },
-                                                        { label: (locale == 'fr' ? 'Résiliation locataire' : 'Tenant termination'), value: (locale == 'fr' ? 'Selon le contrat' : 'Per contract') },
-                                                        { label: (locale == 'fr' ? 'Logement' : 'Home'), value: (locale == 'fr' ? 'Meublé ou vide' : 'Furnished or unfurnished') },
-                                                        { label: (locale == 'fr' ? 'Usage' : 'Use'), value: (locale == 'fr' ? 'Pas une résidence principale' : 'Not a primary residence') },
+                                                        { label: 'marketplace.show.lease.specs.civilCode.durationLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.durationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.civilCode.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.tenantTerminationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.civilCode.homeLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.homeValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.civilCode.useLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.useValue'|trans },
                                                     ],
                                                 },
                                                 {
                                                     key: 'furnished',
                                                     icon: 'iconoir:sofa',
-                                                    name: (locale == 'fr' ? 'Bail meublé' : 'Furnished lease'),
-                                                    forWho: (locale == 'fr' ? 'Locataire souhaitant un logement équipé comme résidence principale' : 'Tenants looking for a turnkey primary residence'),
+                                                    name: 'marketplace.show.lease.types.furnished'|trans,
+                                                    forWho: 'marketplace.show.lease.forWho.furnished'|trans,
                                                     specs: [
-                                                        { label: (locale == 'fr' ? 'Durée du bail' : 'Min. duration'), value: (locale == 'fr' ? '1 an (9 mois étudiant)' : '1 year (9 months for students)') },
-                                                        { label: (locale == 'fr' ? 'Résiliation locataire' : 'Tenant termination'), value: (locale == 'fr' ? 'À tout moment, préavis 1 mois' : 'Anytime, 1-month notice') },
-                                                        { label: (locale == 'fr' ? 'Logement' : 'Home'), value: (locale == 'fr' ? 'Meublé et équipé' : 'Fully furnished') },
+                                                        { label: 'marketplace.show.lease.specs.furnished.durationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.durationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.furnished.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.tenantTerminationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.furnished.homeLabel'|trans, value: 'marketplace.show.lease.specs.furnished.homeValue'|trans },
                                                     ],
                                                 },
                                                 {
                                                     key: 'alur',
                                                     icon: 'iconoir:home-simple-door',
-                                                    name: (locale == 'fr' ? 'Bail loi Alur' : 'Alur law lease'),
-                                                    forWho: (locale == 'fr' ? 'Locataire cherchant à s\'installer durablement dans un logement vide, en résidence principale' : 'Tenants settling long-term in an unfurnished home as their primary residence'),
+                                                    name: 'marketplace.show.lease.types.alur'|trans,
+                                                    forWho: 'marketplace.show.lease.forWho.alur'|trans,
                                                     specs: [
-                                                        { label: (locale == 'fr' ? 'Durée du bail' : 'Min. duration'), value: (locale == 'fr' ? '3 ans (6 ans si société)' : '3 years (6 if legal entity)') },
-                                                        { label: (locale == 'fr' ? 'Résiliation locataire' : 'Tenant termination'), value: (locale == 'fr' ? 'À tout moment, préavis 1 à 3 mois' : 'Anytime, 1 to 3-month notice') },
-                                                        { label: (locale == 'fr' ? 'Logement' : 'Home'), value: (locale == 'fr' ? 'Vide' : 'Unfurnished') },
+                                                        { label: 'marketplace.show.lease.specs.alur.durationLabel'|trans, value: 'marketplace.show.lease.specs.alur.durationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.alur.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.alur.tenantTerminationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.alur.homeLabel'|trans, value: 'marketplace.show.lease.specs.alur.homeValue'|trans },
                                                     ],
                                                 },
                                                 {
                                                     key: 'noLease',
                                                     icon: 'iconoir:flash',
-                                                    name: (locale == 'fr' ? 'Aucun bail' : 'No lease'),
-                                                    forWho: (locale == 'fr' ? 'Courts séjours, résidence de services, mise à disposition hôtelière' : 'Short stays, serviced residences, hospitality services'),
+                                                    name: 'marketplace.show.lease.types.noLease'|trans,
+                                                    forWho: 'marketplace.show.lease.forWho.noLease'|trans,
                                                     specs: [
-                                                        { label: (locale == 'fr' ? 'Durée' : 'Duration'), value: (locale == 'fr' ? 'À la nuit ou à la semaine' : 'Per night or per week') },
-                                                        { label: (locale == 'fr' ? 'Résiliation locataire' : 'Tenant termination'), value: (locale == 'fr' ? 'À tout moment, aucun engagement' : 'Anytime, no commitment') },
-                                                        { label: (locale == 'fr' ? 'Inclus' : 'Included'), value: (locale == 'fr' ? 'Services et équipements' : 'Services and amenities') },
+                                                        { label: 'marketplace.show.lease.specs.noLease.durationLabel'|trans, value: 'marketplace.show.lease.specs.noLease.durationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.noLease.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.noLease.tenantTerminationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.noLease.includedLabel'|trans, value: 'marketplace.show.lease.specs.noLease.includedValue'|trans },
                                                     ],
                                                 },
                                             ] %}
@@ -816,7 +951,7 @@
                                                 <twig:Dialog id="lease-type-{{ property.uniqueId|default('info') }}" class="space-y-2">
                                                     <div class="flex items-center justify-between gap-x-2">
                                                         <p class="font-light text-neutral-600 text-sm">
-                                                            {{ locale == 'fr' ? 'Type de bail' : 'Lease type' }}
+                                                            {{ 'marketplace.show.sidebar.leaseTypeLabel'|trans }}
                                                         </p>
                                                         <twig:Dialog:Trigger>
                                                             <button
@@ -824,7 +959,7 @@
                                                                 {% for attr, val in trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %}
                                                                 class="text-xs text-neutral-600 font-light underline underline-offset-3 decoration-dotted hover:text-primary cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none rounded-sm"
                                                             >
-                                                                {{ locale == 'fr' ? 'En savoir plus' : 'Learn more' }}
+                                                                {{ 'marketplace.show.sidebar.learnMore'|trans }}
                                                             </button>
                                                         </twig:Dialog:Trigger>
                                                     </div>
@@ -834,12 +969,10 @@
                                                         <div class="px-6 sm:px-8 pt-8 sm:pt-10 pb-6">
                                                             <twig:Dialog:Header>
                                                                 <twig:Dialog:Title class="text-2xl tracking-tight text-neutral-900 font-semibold">
-                                                                    {{ locale == 'fr' ? 'Types de bail' : 'Lease types' }}
+                                                                    {{ 'marketplace.show.lease.dialogTitle'|trans }}
                                                                 </twig:Dialog:Title>
                                                                 <twig:Dialog:Description class="mt-2 text-base text-neutral-500 text-pretty">
-                                                                    {{ locale == 'fr'
-                                                                        ? 'Quatre formules pour encadrer votre location — durée, conditions et protections.'
-                                                                        : 'Four formats to frame your rental — duration, terms and protections.' }}
+                                                                    {{ 'marketplace.show.lease.dialogDescription'|trans }}
                                                                 </twig:Dialog:Description>
                                                             </twig:Dialog:Header>
                                                         </div>
@@ -857,7 +990,7 @@
                                                                                     <h3 class="text-base font-semibold text-neutral-900">{{ lease.name }}</h3>
                                                                                     {% if isActive %}
                                                                                         <span class="inline-flex items-center rounded-full bg-[#FFF4F6] text-primary border border-[#F3C7D2] text-[0.6875rem] leading-none font-medium py-1 px-1.5">
-                                                                                            {{ locale == 'fr' ? 'Ce bien' : 'This property' }}
+                                                                                            {{ 'marketplace.show.lease.thisProperty'|trans }}
                                                                                         </span>
                                                                                     {% endif %}
                                                                                 </div>
@@ -879,15 +1012,15 @@
                                             </div>
                                         {% endif %}
                                         <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">Durée de location</p>
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.sidebar.rentalDuration'|trans }}</p>
                                             <ul class="space-y-1.5">
                                                 <li class="flex items-center gap-2 text-sm">
                                                     {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
-                                                    Moyen terme <span class="text-gray-600 font-light">- 1 à 6 mois</span>
+                                                    {{ 'marketplace.show.sidebar.mediumTerm'|trans }} <span class="text-gray-600 font-light">- {{ 'marketplace.show.sidebar.mediumTermRange'|trans }}</span>
                                                 </li>
                                                 <li class="flex items-center gap-2 text-sm">
                                                     {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
-                                                    Long terme <span class="text-neutral-600 font-light text-sm">- À partir de 6 mois</span>
+                                                    {{ 'marketplace.show.sidebar.longTerm'|trans }} <span class="text-neutral-600 font-light text-sm">- {{ 'marketplace.show.sidebar.longTermRange'|trans }}</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -895,21 +1028,21 @@
                                 </div>
                                 {% if is_granted('ROLE_ADMIN') and property.extraFees is defined and property.extraFees is not empty %}
                                     {% set feeTypesMap = {
-                                        agencyFees: (locale == 'fr' ? 'Honoraires d\'agence' : 'Agency fees'),
-                                        securityDeposit: (locale == 'fr' ? 'Dépôt de garantie (Remboursable)' : 'Security deposit'),
-                                        cleaningFee: (locale == 'fr' ? 'Frais de nettoyage' : 'Cleaning fee'),
-                                        registrationFee: (locale == 'fr' ? 'Frais d\'enregistrement' : 'Registration fee'),
-                                        guarantorFee: (locale == 'fr' ? 'Frais de garantie' : 'Guarantor fee'),
-                                        relocationFee: (locale == 'fr' ? 'Honoraires Relocation In Paris' : 'Relocation In Paris fee'),
-                                        applicationFee: (locale == 'fr' ? 'Frais de dossier' : 'Application fee'),
-                                        inventoryFee: (locale == 'fr' ? 'Frais d\'état des lieux' : 'Inventory fee'),
+                                        agencyFees: 'marketplace.show.fees.types.agencyFees'|trans,
+                                        securityDeposit: 'marketplace.show.fees.types.securityDeposit'|trans,
+                                        cleaningFee: 'marketplace.show.fees.types.cleaningFee'|trans,
+                                        registrationFee: 'marketplace.show.fees.types.registrationFee'|trans,
+                                        guarantorFee: 'marketplace.show.fees.types.guarantorFee'|trans,
+                                        relocationFee: 'marketplace.show.fees.types.relocationFee'|trans,
+                                        applicationFee: 'marketplace.show.fees.types.applicationFee'|trans,
+                                        inventoryFee: 'marketplace.show.fees.types.inventoryFee'|trans,
                                     } %}
                                     {% set totalFees = 0 %}
                                     {% for fee in property.extraFees %}
                                         {% set totalFees = totalFees + (fee.amount|default(0)) %}
                                     {% endfor %}
                                     <div>
-                                        <h3 class="font-semibold font-secondary">{{ locale == 'fr' ? 'Frais d\'entrée dans le logement' : 'Move-in fees' }}</h3>
+                                        <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.fees.title'|trans }}</h2>
                                         <div class="rounded-2xl border border-slate-200 mt-3 divide-y divide-gray-200">
                                             <div class="p-4 space-y-3">
                                                 {% for fee in property.extraFees %}
@@ -921,8 +1054,8 @@
                                             </div>
                                             <div class="p-4 flex justify-between items-end">
                                                 <div>
-                                                    <p class="font-semibold">{{ locale == 'fr' ? 'Total' : 'Total' }}</p>
-                                                    <p class="text-xs font-light text-slate-600">Aucun frais caché</p>
+                                                    <p class="font-semibold">{{ 'marketplace.show.fees.total'|trans }}</p>
+                                                    <p class="text-xs font-light text-slate-600">{{ 'marketplace.show.fees.noHidden'|trans }}</p>
                                                 </div>
                                                 <p class="font-semibold">{{ totalFees|number_format(0, ',', ' ') }}€</p>
                                             </div>
@@ -955,7 +1088,7 @@
                                                 class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
                                             />
                                         {% endif %}
-                                        Prévoir une visite
+                                        {{ 'marketplace.show.cta.scheduleVisit'|trans }}
                                     </twig:Button>
                                 </div>
                             </div>
@@ -964,6 +1097,8 @@
                 </div>
             </div>
         </section>
+        </article>
+    </section>
 
         {# Mobile backdrop #}
         <div
@@ -986,7 +1121,7 @@
                 {% endif %}
             </div>
             <twig:Button variant="default" size="default" data-action="mobile-sheet#open" class="shrink-0">
-                {{ locale == 'fr' ? 'Voir les détails' : 'View details' }}
+                {{ 'marketplace.show.cta.viewDetails'|trans }}
             </twig:Button>
         </div>
     </div>

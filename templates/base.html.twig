@@ -7,13 +7,27 @@
 
         <title>Relocation In Paris - {% block title %}{% endblock %}</title>
         <meta name="description" content="{% block description %}{% endblock %}">
+        {% block meta_robots %}<meta name="robots" content="index, follow">{% endblock %}
         <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
+        {% block head_preload %}{% endblock %}
 
         <!-- Hreflang -->
         {% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
         <link rel="alternate" hreflang="fr" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
         <link rel="alternate" hreflang="en" href="https://relocation-in-paris.fr/en{{ currentPath }}" />
         <link rel="alternate" hreflang="x-default" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+
+        {# Preconnect to external origins used for above-the-fold resources #}
+        <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="dns-prefetch" href="https://maps.googleapis.com">
+        <link rel="dns-prefetch" href="https://maps.gstatic.com">
+
+        {# Google Fonts — loaded non-blocking via print media swap, avoids blocking CSS parse #}
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" media="print" onload="this.media='all'">
+        <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"></noscript>
 
         <link rel="icon" type="image/jpg" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
@@ -141,6 +155,9 @@
         {% endblock %}
     </head>
     <body>
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
+            {{ 'a11y.skipToContent'|trans }}
+        </a>
         <noscript>
             <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSHQL7Q6"
                     height="0" width="0" style="display:none;visibility:hidden">
@@ -148,7 +165,7 @@
         </noscript>
         {{ component('blocks/gridBackground') }}
         {{ component('Layout/header', {post: post|default(null)}) }}
-        <main class="relative z-20">
+        <main id="main-content" class="relative z-20" tabindex="-1">
             {% block body %}{% endblock %}
         </main>
         {{ component('Layout/footer') }}

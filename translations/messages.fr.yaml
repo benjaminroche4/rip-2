@@ -1308,3 +1308,158 @@ marketplace:
         rooms: Pièces
         bedrooms: Chambres
         contact: Nous contacter
+        breadcrumb:
+            listing: Location
+            property: Bien
+        admin:
+            title: Admin info
+            publishedOn: Date de mise en ligne
+            lastUpdated: Dernière mise à jour
+            internalNote: Note interne
+            tenantLabel: Propriétaire
+            professional: Professionnel
+            individual: Particulier
+        propertyKey:
+            bedrooms: Chambres
+            furnished: Meublé
+            surface: Surface
+        description:
+            title: Description
+            showMore: Voir plus
+        equipment:
+            title: Ce que ce bien offre
+            wifi: Wi-Fi
+            airConditioning: Climatisation
+            balcony: Balcon
+            concierge: Concierge
+            dishwasher: Lave-vaisselle
+            dryer: Sèche-linge
+            elevator: Ascenseur
+            intercom: Interphone
+            microwave: Micro-ondes
+            parking: Parking
+            television: Télévision
+            washingMachine: Lave-linge
+            naturalLight: Lumière naturelle
+            doubleGlazing: Double vitrage
+            cellar: Cave
+            bathtub: Baignoire
+            wheelchairAccess: Accès handicapé
+            bikeStorage: Local vélo
+            workspace: Espace de travail
+        exposure:
+            label: Exposition
+            north: Nord
+            south: Sud
+            east: Est
+            west: Ouest
+        view:
+            label: Vue
+            courtyard: Cour
+            street: Rue
+        building:
+            floor: Étage
+            construction: Construction
+            renovation: Rénovation
+        location:
+            title: Localisation
+        faq:
+            title: FAQ
+        goodToKnow:
+            title: Good to know
+            verified:
+                title: Logement vérifié
+                description: Chaque bien inspecté, contrôlé et validé en amont.
+            secure:
+                title: Transaction sécurisée
+                description: Baux conformes et fonds protégés à chaque étape.
+            agent:
+                title: Agent dédié
+                description: Un interlocuteur unique, de la recherche à la remise des clés.
+        badges:
+            verified: Bien vérifié
+            quickMove: Installation rapide
+        sidebar:
+            propertyDetails: Détails du bien
+            availability: Disponibilité
+            leaseTypeLabel: Type de bail
+            learnMore: En savoir plus
+            rentalDuration: Durée de location
+            mediumTerm: Moyen terme
+            mediumTermRange: 1 à 6 mois
+            longTerm: Long terme
+            longTermRange: À partir de 6 mois
+        lease:
+            dialogTitle: Types de bail
+            dialogDescription: Quatre formules pour encadrer votre location — durée, conditions et protections.
+            thisProperty: Ce bien
+            types:
+                civilCode: Bail code civil
+                furnished: Bail meublé
+                alur: Bail loi Alur
+                noLease: Aucun bail
+            forWho:
+                civilCode: Expatriés, séjours professionnels, résidence secondaire
+                furnished: Locataire souhaitant un logement équipé comme résidence principale
+                alur: "Locataire cherchant à s'installer durablement dans un logement vide, en résidence principale"
+                noLease: Courts séjours, résidence de services, mise à disposition hôtelière
+            specs:
+                civilCode:
+                    durationLabel: Durée du bail
+                    durationValue: Libre, négociée
+                    tenantTerminationLabel: Résiliation locataire
+                    tenantTerminationValue: Selon le contrat
+                    homeLabel: Logement
+                    homeValue: Meublé ou vide
+                    useLabel: Usage
+                    useValue: Pas une résidence principale
+                furnished:
+                    durationLabel: Durée du bail
+                    durationValue: 1 an (9 mois étudiant)
+                    tenantTerminationLabel: Résiliation locataire
+                    tenantTerminationValue: À tout moment, préavis 1 mois
+                    homeLabel: Logement
+                    homeValue: Meublé et équipé
+                alur:
+                    durationLabel: Durée du bail
+                    durationValue: 3 ans (6 ans si société)
+                    tenantTerminationLabel: Résiliation locataire
+                    tenantTerminationValue: À tout moment, préavis 1 à 3 mois
+                    homeLabel: Logement
+                    homeValue: Vide
+                noLease:
+                    durationLabel: Durée
+                    durationValue: À la nuit ou à la semaine
+                    tenantTerminationLabel: Résiliation locataire
+                    tenantTerminationValue: À tout moment, aucun engagement
+                    includedLabel: Inclus
+                    includedValue: Services et équipements
+        fees:
+            title: Frais d'entrée dans le logement
+            total: Total
+            noHidden: Aucun frais caché
+            types:
+                agencyFees: Honoraires d'agence
+                securityDeposit: Dépôt de garantie (Remboursable)
+                cleaningFee: Frais de nettoyage
+                registrationFee: Frais d'enregistrement
+                guarantorFee: Frais de garantie
+                relocationFee: Honoraires Relocation In Paris
+                applicationFee: Frais de dossier
+                inventoryFee: Frais d'état des lieux
+        cta:
+            scheduleVisit: Prévoir une visite
+            viewDetails: Voir les détails
+        gallery:
+            viewPhotos: Voir les photos
+            viewPhoto: 'Voir la photo %n%'
+            showAll: 'Voir toutes les photos (%count%)'
+            close: Fermer
+            previous: Précédent
+            next: Suivant
+        dialog:
+            close: Fermer
+            expandMap: Agrandir la carte
+
+a11y:
+    skipToContent: Aller au contenu principal

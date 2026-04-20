@@ -13,6 +13,26 @@ export default class extends Controller {
 
     connect() {
         this.#photos = JSON.parse(this.element.dataset.galleryPhotosValue || '[]')
+        this.#preloadFullSize()
+    }
+
+    // Warm the browser cache so the first open() paints instantly.
+    // First photo eagerly; the rest deferred to idle time to avoid
+    // competing with critical resources.
+    #preloadFullSize() {
+        if (!this.#photos.length) return
+
+        const urlFor = (photo) => photo.url + '?w=1400&fit=max&auto=format&fm=webp&q=85'
+        const preload = (url) => { const i = new Image(); i.src = url }
+
+        preload(urlFor(this.#photos[0]))
+
+        const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 500))
+        idle(() => {
+            for (let i = 1; i < this.#photos.length; i++) {
+                preload(urlFor(this.#photos[i]))
+            }
+        })
     }
 
     open({ params: { index } }) {
@@ -139,24 +159,34 @@ export default class extends Controller {
         if (!photo || !this.hasImageTarget) return
 
         const img = this.imageTarget
-        const slideOut = direction === 'left' ? 'translate-x-6' : direction === 'right' ? '-translate-x-6' : 'translate-x-4'
-        const slideIn = direction === 'left' ? '-translate-x-6' : direction === 'right' ? 'translate-x-6' : '-translate-x-4'
+        const src = photo.url + '?w=1400&fit=max&auto=format&fm=webp&q=85'
 
-        img.classList.add('opacity-0', slideOut)
-
-        setTimeout(() => {
-            img.src = photo.url + '?w=1400&fit=max&auto=format&fm=webp&q=85'
+        if (direction === undefined) {
+            // Initial render (on open): no slide animation, paint ASAP
+            img.src = src
             img.alt = photo.alt || ''
+            img.classList.remove('opacity-0', 'translate-x-4', '-translate-x-4', 'translate-x-6', '-translate-x-6')
+        } else {
+            // Navigation between photos: slide animation
+            const slideOut = direction === 'left' ? 'translate-x-6' : '-translate-x-6'
+            const slideIn = direction === 'left' ? '-translate-x-6' : 'translate-x-6'
 
-            img.classList.remove(slideOut)
-            img.classList.add(slideIn)
+            img.classList.add('opacity-0', slideOut)
 
-            requestAnimationFrame(() => {
+            setTimeout(() => {
+                img.src = src
+                img.alt = photo.alt || ''
+
+                img.classList.remove(slideOut)
+                img.classList.add(slideIn)
+
                 requestAnimationFrame(() => {
-                    img.classList.remove('opacity-0', slideIn)
+                    requestAnimationFrame(() => {
+                        img.classList.remove('opacity-0', slideIn)
+                    })
                 })
-            })
-        }, 150)
+            }, 150)
+        }
 
         if (this.hasCounterTarget) {
             this.counterTarget.textContent = `${this.#currentIndex + 1} / ${this.#photos.length}`
