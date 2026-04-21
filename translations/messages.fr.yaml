@@ -1391,16 +1391,18 @@ marketplace:
             longTermRange: À partir de 6 mois
         lease:
             dialogTitle: Types de bail
-            dialogDescription: Quatre formules pour encadrer votre location — durée, conditions et protections.
+            dialogDescription: Cinq formules pour encadrer votre location — durée, conditions et protections.
             thisProperty: Ce bien
             types:
                 civilCode: Bail code civil
                 furnished: Bail meublé
+                mobility: Bail mobilité
                 alur: Bail loi Alur
                 noLease: Aucun bail
             forWho:
                 civilCode: Expatriés, séjours professionnels, résidence secondaire
                 furnished: Locataire souhaitant un logement équipé comme résidence principale
+                mobility: Étudiants, stagiaires, apprentis, missions temporaires, formations professionnelles
                 alur: "Locataire cherchant à s'installer durablement dans un logement vide, en résidence principale"
                 noLease: Courts séjours, résidence de services, mise à disposition hôtelière
             specs:
@@ -1420,6 +1422,15 @@ marketplace:
                     tenantTerminationValue: À tout moment, préavis 1 mois
                     homeLabel: Logement
                     homeValue: Meublé et équipé
+                mobility:
+                    durationLabel: Durée du bail
+                    durationValue: 1 à 10 mois, non renouvelable
+                    tenantTerminationLabel: Résiliation locataire
+                    tenantTerminationValue: À tout moment, préavis 1 mois
+                    homeLabel: Logement
+                    homeValue: Meublé obligatoire
+                    depositLabel: Dépôt de garantie
+                    depositValue: Interdit
                 alur:
                     durationLabel: Durée du bail
                     durationValue: 3 ans (6 ans si société)

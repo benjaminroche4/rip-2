@@ -1390,16 +1390,18 @@ marketplace:
             longTermRange: From 6 months
         lease:
             dialogTitle: Lease types
-            dialogDescription: Four formats to frame your rental — duration, terms and protections.
+            dialogDescription: Five formats to frame your rental — duration, terms and protections.
             thisProperty: This property
             types:
                 civilCode: Civil Code lease
                 furnished: Furnished lease
+                mobility: Mobility lease
                 alur: Alur law lease
                 noLease: No lease
             forWho:
                 civilCode: Expats, work assignments, second homes
                 furnished: Tenants looking for a turnkey primary residence
+                mobility: Students, interns, apprentices, temporary assignments, professional training
                 alur: Tenants settling long-term in an unfurnished home as their primary residence
                 noLease: Short stays, serviced residences, hospitality services
             specs:
@@ -1419,6 +1421,15 @@ marketplace:
                     tenantTerminationValue: Anytime, 1-month notice
                     homeLabel: Home
                     homeValue: Fully furnished
+                mobility:
+                    durationLabel: Duration
+                    durationValue: 1 to 10 months, non-renewable
+                    tenantTerminationLabel: Tenant termination
+                    tenantTerminationValue: Anytime, 1-month notice
+                    homeLabel: Home
+                    homeValue: Furnished required
+                    depositLabel: Security deposit
+                    depositValue: Not allowed
                 alur:
                     durationLabel: Min. duration
                     durationValue: 3 years (6 if legal entity)

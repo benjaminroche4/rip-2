@@ -11,6 +11,7 @@ export default class extends Controller {
     #dragging = false
     #startTime = 0
     #isHorizontalSwipe = null
+    #didSwipe = false
 
     connect() {
         this.trackTarget.style.touchAction = 'pan-y'
@@ -18,6 +19,10 @@ export default class extends Controller {
         window.addEventListener('pointermove', this.#onPointerMove)
         window.addEventListener('pointerup', this.#onPointerUp)
         window.addEventListener('pointercancel', this.#onPointerUp)
+
+        // Swallow the click that fires at the end of a swipe so the parent
+        // <a> doesn't navigate when the user was just dragging the carousel.
+        this.element.addEventListener('click', this.#onClickCapture, true)
     }
 
     disconnect() {
@@ -25,6 +30,15 @@ export default class extends Controller {
         window.removeEventListener('pointermove', this.#onPointerMove)
         window.removeEventListener('pointerup', this.#onPointerUp)
         window.removeEventListener('pointercancel', this.#onPointerUp)
+        this.element.removeEventListener('click', this.#onClickCapture, true)
+    }
+
+    #onClickCapture = (e) => {
+        if (this.#didSwipe) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.#didSwipe = false
+        }
     }
 
     get count() {
@@ -107,6 +121,12 @@ export default class extends Controller {
         const diff = this.#currentX - this.#startX
         const elapsed = Date.now() - this.#startTime
         const velocity = Math.abs(diff) / elapsed
+
+        // Any movement past ~6px while swiping horizontally counts as a drag,
+        // not a click — block the ensuing click from navigating the card link.
+        if (this.#isHorizontalSwipe && Math.abs(diff) > 6) {
+            this.#didSwipe = true
+        }
 
         // Swipe threshold: either 15% of width OR fast flick (velocity > 0.3px/ms)
         const threshold = this.trackTarget.offsetWidth * 0.15

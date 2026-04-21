@@ -892,6 +892,7 @@
                                             {% set leaseTypesMap = {
                                                 civilCode: 'marketplace.show.lease.types.civilCode'|trans,
                                                 furnished: 'marketplace.show.lease.types.furnished'|trans,
+                                                mobility: 'marketplace.show.lease.types.mobility'|trans,
                                                 alur: 'marketplace.show.lease.types.alur'|trans,
                                                 noLease: 'marketplace.show.lease.types.noLease'|trans,
                                             } %}
@@ -922,6 +923,18 @@
                                                         { label: 'marketplace.show.lease.specs.furnished.durationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.durationValue'|trans },
                                                         { label: 'marketplace.show.lease.specs.furnished.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.tenantTerminationValue'|trans },
                                                         { label: 'marketplace.show.lease.specs.furnished.homeLabel'|trans, value: 'marketplace.show.lease.specs.furnished.homeValue'|trans },
+                                                    ],
+                                                },
+                                                {
+                                                    key: 'mobility',
+                                                    icon: 'iconoir:suitcase',
+                                                    name: 'marketplace.show.lease.types.mobility'|trans,
+                                                    forWho: 'marketplace.show.lease.forWho.mobility'|trans,
+                                                    specs: [
+                                                        { label: 'marketplace.show.lease.specs.mobility.durationLabel'|trans, value: 'marketplace.show.lease.specs.mobility.durationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.mobility.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.mobility.tenantTerminationValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.mobility.homeLabel'|trans, value: 'marketplace.show.lease.specs.mobility.homeValue'|trans },
+                                                        { label: 'marketplace.show.lease.specs.mobility.depositLabel'|trans, value: 'marketplace.show.lease.specs.mobility.depositValue'|trans },
                                                     ],
                                                 },
                                                 {
