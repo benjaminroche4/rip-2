@@ -18,6 +18,11 @@ export default class extends Controller {
         this.dialogTarget.close()
         document.body.style.overflow = ''
         document.removeEventListener('keydown', this.#handleKeydown)
+
+        // Prevent focus ring from showing on the trigger (large clickable map area)
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur()
+        }
     }
 
     closeOnClickOutside({ target }) {

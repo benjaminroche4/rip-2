@@ -71,6 +71,12 @@ export default class extends Controller {
             img.removeEventListener('pointerup', this.#handlePointerUp)
             img.removeEventListener('pointercancel', this.#handlePointerUp)
         }
+
+        // Blur the trigger button that re-gains focus on dialog close — otherwise
+        // browsers render a visible focus ring around the large clickable image area.
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur()
+        }
     }
 
     closeOnClickOutside({ target }) {
