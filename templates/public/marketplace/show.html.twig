@@ -925,19 +925,25 @@
                                                 <p class="text-sm">{{ leaseTypeLabels|join(', ') }}</p>
                                             </div>
                                         {% endif %}
-                                        <div class="p-4 space-y-2">
-                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.sidebar.rentalDuration'|trans }}</p>
-                                            <ul role="list" class="space-y-1.5">
-                                                <li class="flex items-center gap-2 text-sm">
-                                                    {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
-                                                    {{ 'marketplace.show.sidebar.mediumTerm'|trans }} <span class="text-gray-600 font-light">- {{ 'marketplace.show.sidebar.mediumTermRange'|trans }}</span>
-                                                </li>
-                                                <li class="flex items-center gap-2 text-sm">
-                                                    {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
-                                                    {{ 'marketplace.show.sidebar.longTerm'|trans }} <span class="text-neutral-600 font-light text-sm">- {{ 'marketplace.show.sidebar.longTermRange'|trans }}</span>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        {% if property.midTerm|default(false) or property.longTerm|default(false) %}
+                                            <div class="p-4 space-y-2">
+                                                <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.sidebar.rentalDuration'|trans }}</p>
+                                                <ul role="list" class="space-y-1.5">
+                                                    {% if property.midTerm|default(false) %}
+                                                        <li class="flex items-center gap-2 text-sm">
+                                                            {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
+                                                            {{ 'marketplace.show.sidebar.mediumTerm'|trans }} <span class="text-gray-600 font-light">- {{ 'marketplace.show.sidebar.mediumTermRange'|trans }}</span>
+                                                        </li>
+                                                    {% endif %}
+                                                    {% if property.longTerm|default(false) %}
+                                                        <li class="flex items-center gap-2 text-sm">
+                                                            {{ ux_icon('iconoir:check', {'class': 'size-4 text-primary shrink-0'}) }}
+                                                            {{ 'marketplace.show.sidebar.longTerm'|trans }} <span class="text-neutral-600 font-light text-sm">- {{ 'marketplace.show.sidebar.longTermRange'|trans }}</span>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 {% if is_granted('ROLE_ADMIN') and property.extraFees is defined and property.extraFees is not empty %}
