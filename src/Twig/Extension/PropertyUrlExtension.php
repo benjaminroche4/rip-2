@@ -4,6 +4,7 @@ namespace App\Twig\Extension;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -13,6 +14,8 @@ class PropertyUrlExtension extends AbstractExtension
 
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TranslatorInterface $translator,
+        private readonly PostalCodeExtension $postalCode,
     ) {
         $this->slugger = new AsciiSlugger();
     }
@@ -22,6 +25,7 @@ class PropertyUrlExtension extends AbstractExtension
         return [
             new TwigFunction('property_show_path', [$this, 'propertyShowPath']),
             new TwigFunction('property_show_path_params', [$this, 'propertyShowPathParams']),
+            new TwigFunction('property_display_title', [$this, 'propertyDisplayTitle']),
         ];
     }
 
@@ -54,6 +58,51 @@ class PropertyUrlExtension extends AbstractExtension
             $this->propertyShowPathParams($property, $locale),
             $absolute ? UrlGeneratorInterface::ABSOLUTE_URL : UrlGeneratorInterface::ABSOLUTE_PATH
         );
+    }
+
+    /**
+     * Builds the structured SEO-friendly display title used in the <title> tag,
+     * sitemap, breadcrumb and JSON-LD — e.g.:
+     *   "Appartement 2 chambres meublé 65 m² Paris 11e arrondissement"
+     *   "Studio meublé 30 m² Paris 8e arrondissement"
+     *   "Studio Levallois-Perret 92300"
+     *
+     * @param array<string, mixed> $property
+     */
+    public function propertyDisplayTitle(array $property, string $locale = 'fr'): string
+    {
+        $parts = [];
+        $bedrooms = $property['bedroomsLabel'] ?? null;
+
+        if ($bedrooms === 'studio') {
+            $parts[] = $this->translator->trans('marketplace.show.title.studio', [], null, $locale);
+        } else {
+            $parts[] = $property['propertyTypeName'] ?? $property['title'] ?? '';
+            if ($bedrooms) {
+                $key = $bedrooms === '1'
+                    ? 'marketplace.show.title.bedroom'
+                    : 'marketplace.show.title.bedrooms';
+                $parts[] = $bedrooms . ' ' . $this->translator->trans($key, [], null, $locale);
+            }
+        }
+
+        if (($property['furnished'] ?? null) === 'yes') {
+            $parts[] = $this->translator->trans('marketplace.show.title.furnished', [], null, $locale);
+        }
+
+        if (!empty($property['squareMeters'])) {
+            $parts[] = $property['squareMeters'] . ' m²';
+        }
+
+        if (!empty($property['address']['city'])) {
+            $city = $property['address']['city'];
+            if (!empty($property['address']['postalCode'])) {
+                $city .= ' ' . $this->postalCode->formatPostalCode($property['address']['postalCode'], $locale);
+            }
+            $parts[] = $city;
+        }
+
+        return implode(' ', array_filter($parts, fn ($p) => $p !== ''));
     }
 
     private function slugify(string $value): string

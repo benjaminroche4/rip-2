@@ -57,7 +57,7 @@
                     <ul class="list list-disc ml-12 space-y-3">
                         <li><a href="{{ path('app_property') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.propertyMenu.ourProperty'|trans }}</a></li>
                         {% for property in properties|default([]) %}
-                            <li><a href="{{ property_show_path(property, app.request.locale) }}" class="hover:text-primary transition duration-100">{{ property.title }}</a></li>
+                            <li><a href="{{ property_show_path(property, app.request.locale) }}" class="hover:text-primary transition duration-100">{{ property_display_title(property, app.request.locale) }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
