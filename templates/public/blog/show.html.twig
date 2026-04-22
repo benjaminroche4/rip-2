@@ -195,7 +195,7 @@
                                         <div class="flex items-center space-x-3">
                                             {% if author.photo %}
                                                 <div>
-                                                    <img src="{{ author.photo }}?w=80&h=80&fit=crop&auto=format&fm=webp&q=80" alt="{{ author.fullName }}" loading="lazy" width="40" height="40" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
+                                                    <img src="{{ author.photo }}?w=80&h=80&fit=crop&auto=format&fm=webp&q=75" alt="{{ author.fullName }}" loading="lazy" width="40" height="40" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
                                                 </div>
                                             {% endif %}
                                             <div class="flex flex-col text-sm">
@@ -398,7 +398,7 @@
                                     {% if latestPost.authors is defined and latestPost.authors|length > 0 %}
                                         <div class="flex items-center gap-x-2">
                                             {% if latestPost.authors[0].photo %}
-                                                <img src="{{ latestPost.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80" alt="{{ latestPost.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
+                                                <img src="{{ latestPost.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70" alt="{{ latestPost.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
                                             {% endif %}
                                             <p class="truncate">{{ latestPost.authors[0].fullName }}</p>
                                         </div>

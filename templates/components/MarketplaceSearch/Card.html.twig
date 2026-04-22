@@ -107,7 +107,7 @@
                 <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badge.class }}">
                     {% if property.agentPhoto|default(false) %}
                         <img
-                            src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80"
+                            src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70"
                             alt="{{ property.agentName }} {{ 'marketplace.list.card.agent.alt'|trans|raw }}"
                             loading="lazy"
                             width="24"

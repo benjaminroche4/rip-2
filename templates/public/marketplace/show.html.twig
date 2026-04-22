@@ -315,10 +315,10 @@
                             {% set isLast = (i == 3) and (remainingCount > 0) %}
                             <button type="button" data-action="gallery#open" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': i + 1}) }}" class="relative block aspect-square cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl {{ isLast ? '' : 'after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100' }}">
                                 <img
-                                    src="{{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=80"
-                                    srcset="{{ gridPhotos[i].url }}?w=300&h=300&fit=crop&auto=format&fm=webp&q=80 300w,
-                                            {{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=80 400w,
-                                            {{ gridPhotos[i].url }}?w=600&h=600&fit=crop&auto=format&fm=webp&q=80 600w"
+                                    src="{{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=75"
+                                    srcset="{{ gridPhotos[i].url }}?w=300&h=300&fit=crop&auto=format&fm=webp&q=75 300w,
+                                            {{ gridPhotos[i].url }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=75 400w,
+                                            {{ gridPhotos[i].url }}?w=600&h=600&fit=crop&auto=format&fm=webp&q=75 600w"
                                     sizes="(max-width: 1024px) 33vw, 16rem"
                                     alt="{{ gridPhotos[i].alt|default(property.title) }}"
                                     width="400"
@@ -363,9 +363,9 @@
                     {% if gridPhotos[1] is defined %}
                         <button type="button" data-action="gallery#open" data-gallery-index-param="1" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 2}) }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
-                                src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
-                                srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
-                                        {{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w"
+                                src="{{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75"
+                                srcset="{{ gridPhotos[1].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=75 400w,
+                                        {{ gridPhotos[1].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75 600w"
                                 sizes="25vw"
                                 alt="{{ gridPhotos[1].alt|default(property.title) }}"
                                 width="600"
@@ -380,9 +380,9 @@
                     {% if gridPhotos[2] is defined %}
                         <button type="button" data-action="gallery#open" data-gallery-index-param="2" aria-label="{{ 'marketplace.show.gallery.viewPhoto'|trans({'%n%': 3}) }}" class="relative flex-1 min-h-0 w-full cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none focus-visible:rounded-xl after:absolute after:inset-0 after:rounded-xl after:bg-black/0 hover:after:bg-black/20 after:transition after:duration-100">
                             <img
-                                src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80"
-                                srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w,
-                                        {{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w"
+                                src="{{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75"
+                                srcset="{{ gridPhotos[2].url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=75 400w,
+                                        {{ gridPhotos[2].url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75 600w"
                                 sizes="25vw"
                                 alt="{{ gridPhotos[2].alt|default(property.title) }}"
                                 width="600"
@@ -544,7 +544,7 @@
                                                 <div class="flex items-start gap-x-3">
                                                     {% if isPro and tenant.logo %}
                                                         <img
-                                                            src="{{ tenant.logo }}?w=96&h=96&fit=crop&auto=format&fm=webp&q=80"
+                                                            src="{{ tenant.logo }}?w=96&h=96&fit=crop&auto=format&fm=webp&q=75"
                                                             alt="{{ tenant.logoAlt|default(tenant.companyName|default(tenant.fullName)) }}"
                                                             width="48"
                                                             height="48"
@@ -984,7 +984,7 @@
                                                     <span class="absolute inline-flex size-5 animate-ping rounded-full bg-[#FFE5EB] opacity-90"></span>
                                                 </span>
                                                 <img
-                                                    src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80"
+                                                    src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70"
                                                     alt="{{ property.agentName|default('') }}"
                                                     loading="lazy"
                                                     width="24"

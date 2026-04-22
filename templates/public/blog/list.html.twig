@@ -60,7 +60,7 @@
                                     {% if hero.authors is defined and hero.authors|length > 0 %}
                                         <div class="flex items-center gap-x-2">
                                             {% if hero.authors[0].photo %}
-                                                <img src="{{ hero.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80" alt="{{ hero.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
+                                                <img src="{{ hero.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70" alt="{{ hero.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
                                             {% endif %}
                                             <p class="truncate">{{ hero.authors[0].fullName }}</p>
                                         </div>
@@ -142,7 +142,7 @@
                                 {% if blog.authors is defined and blog.authors|length > 0 %}
                                     <div class="flex items-center gap-x-2">
                                         {% if blog.authors[0].photo %}
-                                            <img src="{{ blog.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=80" alt="{{ blog.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
+                                            <img src="{{ blog.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70" alt="{{ blog.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
                                         {% endif %}
                                         <p class="truncate">{{ blog.authors[0].fullName }}</p>
                                     </div>
