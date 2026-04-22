@@ -38,29 +38,24 @@ final class PropertyRepository
                 $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
-                    '*[_type == "property" && language == $lang] | order(_createdAt desc) {
+                    '*[_type == "property" && language == $lang && !(_id in path("drafts.**"))] | order(_createdAt desc) {
                         _id,
                         "createdAt": _createdAt,
                         "updatedAt": _updatedAt,
                         uniqueId,
                         title,
-                        shortDescription,
                         metaDescription,
-                        surface,
-                        rooms,
-                        bedrooms,
-                        bathrooms,
+                        "bedrooms": main.bedrooms,
+                        "bathrooms": main.bathrooms,
                         "monthlyRent": rents.monthlyRent,
-                        "priceOnRequest": rents.priceOnRequest,
-                        "chargesIncludes": chargesIncludes,
+                        priceOnRequest,
+                        chargesIncludes,
                         "showCategoryOnCard": showCategoryOnCard,
-                        currency,
                         status,
                         leaseType,
                         "listingTypeName": listingType->name,
                         longTerm,
                         midTerm,
-                        categoryFlags,
                         "slug": slug.current,
                         "address": address{city, postalCode, street, number},
                         "mainPhoto": {
@@ -97,7 +92,6 @@ final class PropertyRepository
                         "constructionYear": buildingYears.constructionYear,
                         "renovationYear": buildingYears.renovationYear,
                         "faq": faq[]{_key, question, answer},
-                        requiredDocuments,
                         "extraFees": extraFees[]{_key, amount, feeType},
                         "furnished": main.furnished,
                         "bedroomsLabel": main.bedrooms,
@@ -109,7 +103,17 @@ final class PropertyRepository
                         "rer": rer,
                         tags,
                         internalNotes,
-                        description
+                        description,
+                        "alternateProperty": *[_type == "translation.metadata" && references(^._id)]{
+                            translations[_key != $lang]{
+                                _key,
+                                "slug": value->slug.current,
+                                "title": value->title,
+                                "listingTypeName": value->listingType->name,
+                                "propertyTypeName": value->propertyType->name,
+                                "address": value->address{city, postalCode}
+                            }
+                        }[0].translations[0]
                     }',
                     ['lang' => $locale]
                 );
@@ -138,14 +142,13 @@ final class PropertyRepository
 
                 $results = $this->sanityService->query(
                     sprintf(
-                        '*[_type == "property" && language == $lang && status != "rented"] | order(_createdAt desc) [0..%d] {
+                        '*[_type == "property" && language == $lang && status != "rented" && !(_id in path("drafts.**"))] | order(_createdAt desc) [0..%d] {
                             _id,
                             title,
                             "slug": slug.current,
                             "monthlyRent": rents.monthlyRent,
-                            "priceOnRequest": rents.priceOnRequest,
-                            rooms,
-                            bedrooms,
+                            priceOnRequest,
+                            "bedrooms": main.bedrooms,
                             "squareMeters": main.squareMeters,
                             status,
                             "address": address{city, postalCode},
@@ -171,7 +174,7 @@ final class PropertyRepository
                 $item->tag(self::CACHE_TAG);
 
                 $result = $this->sanityService->query(
-                    'count(*[_type == "property" && language == $lang && status != "rented"])',
+                    'count(*[_type == "property" && language == $lang && status != "rented" && !(_id in path("drafts.**"))])',
                     ['lang' => $locale]
                 );
 

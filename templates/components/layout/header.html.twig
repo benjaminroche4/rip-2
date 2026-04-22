@@ -8,6 +8,18 @@
     } %}
 {% endif %}
 
+{% if currentRoute == 'app_property_show' and property is defined and property is not null %}
+    {% set _currentLocale = app.request.locale %}
+    {% set _otherLocale = _currentLocale == 'fr' ? 'en' : 'fr' %}
+    {% set _altProperty = property.alternateProperty|default(null) %}
+    {% set propertySwitchParams = {
+        (_currentLocale): property_show_path_params(property, _currentLocale),
+        (_otherLocale): _altProperty
+            ? property_show_path_params(_altProperty, _otherLocale)
+            : property_show_path_params(property, _otherLocale)
+    } %}
+{% endif %}
+
 <header class="relative z-10 bg-white" role="banner">
     <nav aria-label="{{ 'header.nav.ariaLabel'|trans|default('Navigation principale') }}" class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 gap-x-3">
         <div class="flex lg:flex-2 items-center justify-start gap-x-4">
@@ -200,7 +212,7 @@
             >
                 <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
                     <a
-                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'})) }}"
+                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                         hreflang="fr"
                         lang="fr"
                         class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
@@ -211,7 +223,7 @@
                         </span>
                     </a>
                     <a
-                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'})) }}"
+                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                         hreflang="en"
                         lang="en"
                         class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
@@ -417,7 +429,7 @@
                                         </button>
                                         <el-disclosure id="lang" hidden class="mt-2 [&:not([hidden])]:block">
                                             <a
-                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'})) }}"
+                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                                                 hreflang="fr"
                                                 lang="fr"
                                                 class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"
@@ -433,7 +445,7 @@
                                                 {% endif %}
                                             </a>
                                             <a
-                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'})) }}"
+                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                                                 hreflang="en"
                                                 lang="en"
                                                 class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"

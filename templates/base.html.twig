@@ -12,10 +12,12 @@
         {% block head_preload %}{% endblock %}
 
         <!-- Hreflang -->
-        {% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
-        <link rel="alternate" hreflang="fr" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
-        <link rel="alternate" hreflang="en" href="https://relocation-in-paris.fr/en{{ currentPath }}" />
-        <link rel="alternate" hreflang="x-default" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+        {% block hreflang %}
+            {% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
+            <link rel="alternate" hreflang="fr" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+            <link rel="alternate" hreflang="en" href="https://relocation-in-paris.fr/en{{ currentPath }}" />
+            <link rel="alternate" hreflang="x-default" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+        {% endblock %}
 
         {# Preconnect to external origins used for above-the-fold resources #}
         <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>
@@ -164,7 +166,7 @@
             </iframe>
         </noscript>
         {{ component('blocks/gridBackground') }}
-        {{ component('Layout/header', {post: post|default(null)}) }}
+        {{ component('Layout/header', {post: post|default(null), property: property|default(null)}) }}
         <main id="main-content" class="relative z-20" tabindex="-1">
             {% block body %}{% endblock %}
         </main>

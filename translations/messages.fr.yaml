@@ -1327,7 +1327,7 @@ marketplace:
             title: Description
             showMore: Voir plus
         equipment:
-            title: Ce que ce bien offre
+            title: Ce que propose ce logement
             wifi: Wi-Fi
             airConditioning: Climatisation
             balcony: Balcon
@@ -1344,7 +1344,7 @@ marketplace:
             doubleGlazing: Double vitrage
             cellar: Cave
             bathtub: Baignoire
-            wheelchairAccess: Accès handicapé
+            wheelchairAccess: Accès PMR
             bikeStorage: Local vélo
             workspace: Espace de travail
         exposure:
@@ -1366,7 +1366,7 @@ marketplace:
         faq:
             title: FAQ
         goodToKnow:
-            title: Good to know
+            title: Bon à savoir
             verified:
                 title: Logement vérifié
                 description: Chaque bien inspecté, contrôlé et validé en amont.
@@ -1384,7 +1384,7 @@ marketplace:
             availability: Disponibilité
             leaseTypeLabel: Type de bail
             learnMore: En savoir plus
-            rentalDuration: Durée de location
+            rentalDuration: Durée de location souhaitée
             mediumTerm: Moyen terme
             mediumTermRange: 1 à 6 mois
             longTerm: Long terme
@@ -1471,6 +1471,10 @@ marketplace:
         dialog:
             close: Fermer
             expandMap: Agrandir la carte
-
+        title:
+            studio: Studio
+            bedroom: chambre
+            bedrooms: chambres
+            furnished: meublé
 a11y:
     skipToContent: Aller au contenu principal

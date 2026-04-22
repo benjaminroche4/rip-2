@@ -21,6 +21,26 @@ class PropertyUrlExtension extends AbstractExtension
     {
         return [
             new TwigFunction('property_show_path', [$this, 'propertyShowPath']),
+            new TwigFunction('property_show_path_params', [$this, 'propertyShowPathParams']),
+        ];
+    }
+
+    /**
+     * Returns the route parameters array for `app_property_show` — useful when
+     * you need to pass params to `path()` directly (e.g. language switcher).
+     *
+     * @param array<string, mixed> $property
+     * @return array<string, mixed>
+     */
+    public function propertyShowPathParams(array $property, string $locale = 'fr'): array
+    {
+        return [
+            '_locale' => $locale,
+            'listingType' => $this->slugify($property['listingTypeName'] ?? ($locale === 'fr' ? 'location' : 'rental')),
+            'propertyType' => $this->slugify($property['propertyTypeName'] ?? ($locale === 'fr' ? 'bien' : 'property')),
+            'city' => $this->slugify($property['address']['city'] ?? 'paris'),
+            'district' => $this->buildDistrict($property['address']['postalCode'] ?? '', $locale),
+            'slug' => $this->slugify($property['slug'] ?? $property['title'] ?? $property['_id'] ?? 'property'),
         ];
     }
 
@@ -31,14 +51,7 @@ class PropertyUrlExtension extends AbstractExtension
     {
         return $this->urlGenerator->generate(
             'app_property_show',
-            [
-                '_locale' => $locale,
-                'listingType' => $this->slugify($property['listingTypeName'] ?? ($locale === 'fr' ? 'location' : 'rental')),
-                'propertyType' => $this->slugify($property['propertyTypeName'] ?? ($locale === 'fr' ? 'bien' : 'property')),
-                'city' => $this->slugify($property['address']['city'] ?? 'paris'),
-                'district' => $this->buildDistrict($property['address']['postalCode'] ?? '', $locale),
-                'slug' => $this->slugify($property['slug'] ?? $property['title'] ?? $property['_id'] ?? 'property'),
-            ],
+            $this->propertyShowPathParams($property, $locale),
             $absolute ? UrlGeneratorInterface::ABSOLUTE_URL : UrlGeneratorInterface::ABSOLUTE_PATH
         );
     }

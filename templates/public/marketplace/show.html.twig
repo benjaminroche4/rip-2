@@ -3,16 +3,31 @@
 {% set baseUrl = 'https://relocation-in-paris.fr' %}
 {% set pageUrl = baseUrl ~ property_show_path(property, locale) %}
 
-{# Rich, SEO-friendly title: "{Type} {city} {district} - {price}€/month | Site" #}
-{% set _titleParts = [property.title] %}
-{% if property.address.city is defined and property.address.city %}
-    {% set _titleParts = _titleParts|merge([property.address.city ~ (property.address.postalCode ? ' ' ~ property.address.postalCode|arrondissement(locale) : '')]) %}
+{# SEO title: "{Type} [N chambres] [meublé] [surface m²] {City} [district]" #}
+{% if property.bedroomsLabel|default('') == 'studio' %}
+    {% set _titleParts = ['marketplace.show.title.studio'|trans] %}
+{% else %}
+    {% set _titleParts = [property.propertyTypeName|default(property.title)] %}
+    {% if property.bedroomsLabel is defined and property.bedroomsLabel %}
+        {% set _bedWord = property.bedroomsLabel == '1' ? 'marketplace.show.title.bedroom'|trans : 'marketplace.show.title.bedrooms'|trans %}
+        {% set _titleParts = _titleParts|merge([property.bedroomsLabel ~ ' ' ~ _bedWord]) %}
+    {% endif %}
 {% endif %}
-{% if property.monthlyRent and not property.priceOnRequest|default(false) %}
-    {% set _titleParts = _titleParts|merge([property.monthlyRent|number_format(0, ',', ' ') ~ '€/' ~ ('marketplace.list.card.price.month'|trans)]) %}
+{% if property.furnished|default('') == 'yes' %}
+    {% set _titleParts = _titleParts|merge(['marketplace.show.title.furnished'|trans]) %}
+{% endif %}
+{% if property.squareMeters is defined and property.squareMeters %}
+    {% set _titleParts = _titleParts|merge([property.squareMeters ~ ' m²']) %}
+{% endif %}
+{% if property.address.city is defined and property.address.city %}
+    {% set _cityPart = property.address.city %}
+    {% if property.address.postalCode %}
+        {% set _cityPart = _cityPart ~ ' ' ~ property.address.postalCode|arrondissement(locale) %}
+    {% endif %}
+    {% set _titleParts = _titleParts|merge([_cityPart]) %}
 {% endif %}
 
-{% block title %}{{ _titleParts|join(' · ') }}{% endblock %}
+{% block title %}{{ _titleParts|join(' ') }}{% endblock %}
 {% block description %}{{ property.metaDescription }}{% endblock %}
 {% block url %}{{ property_show_path(property, locale) }}{% endblock %}
 
@@ -40,12 +55,21 @@
 
 {% block og_image %}{{ property.mainPhoto.url is defined and property.mainPhoto.url ? property.mainPhoto.url ~ '?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80' : asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}
 
+{# Hreflang: use alternate property's actual URL since slugs differ per locale #}
+{% block hreflang %}
+    {% set _frParams = locale == 'fr' ? property_show_path_params(property, 'fr') : (property.alternateProperty ? property_show_path_params(property.alternateProperty, 'fr') : property_show_path_params(property, 'fr')) %}
+    {% set _enParams = locale == 'en' ? property_show_path_params(property, 'en') : (property.alternateProperty ? property_show_path_params(property.alternateProperty, 'en') : property_show_path_params(property, 'en')) %}
+    <link rel="alternate" hreflang="fr" href="{{ url('app_property_show', _frParams) }}" />
+    <link rel="alternate" hreflang="en" href="{{ url('app_property_show', _enParams) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ url('app_property_show', _frParams) }}" />
+{% endblock %}
+
 {% block schema_page %}
     ,{
         "@type": "Apartment",
         "@id": "{{ pageUrl }}/#property",
         "url": "{{ pageUrl }}",
-        "name": "{{ property.title|e('js') }}",
+        "name": "{{ _titleParts|join(' ')|e('js') }}",
         "description": "{{ property.metaDescription|e('js') }}",
         "inLanguage": "{{ locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "isPartOf": { "@id": "{{ baseUrl }}/#website" }
@@ -78,11 +102,8 @@
         {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
         ,"image": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
         {% endif %}
-        {% if property.rooms %}
-        ,"numberOfRooms": {{ property.rooms }}
-        {% endif %}
-        {% if property.bedrooms %}
-        ,"numberOfBedrooms": {{ property.bedrooms }}
+        {% if property.bedrooms is defined and property.bedrooms and property.bedrooms != 'studio' %}
+        ,"numberOfBedrooms": {{ property.bedrooms == '9+' ? 9 : property.bedrooms }}
         {% endif %}
         {% if property.bathrooms %}
         ,"numberOfBathroomsTotal": {{ property.bathrooms }}
@@ -174,24 +195,32 @@
         "@type": "BreadcrumbList",
         "@id": "{{ pageUrl }}/#breadcrumb",
         "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "{{ 'marketplace.list.schema.breadcrumb.home'|trans|e('js') }}",
-                "item": "{{ baseUrl }}/{{ locale }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "{{ 'marketplace.list.schema.breadcrumb.properties'|trans|e('js') }}",
-                "item": "{{ baseUrl }}{{ path('app_property') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "{{ property.title|e('js') }}",
-                "item": "{{ pageUrl }}"
-            }
+            {% set _propertyListUrl = baseUrl ~ path('app_property') %}
+            {% set _breadcrumbs = [
+                { name: 'marketplace.list.schema.breadcrumb.home'|trans, item: baseUrl ~ '/' ~ locale },
+                { name: 'marketplace.list.schema.breadcrumb.properties'|trans, item: _propertyListUrl }
+            ] %}
+            {% if property.listingTypeName %}
+                {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.listingTypeName, item: _propertyListUrl }]) %}
+            {% endif %}
+            {% if property.propertyTypeName %}
+                {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.propertyTypeName, item: _propertyListUrl }]) %}
+            {% endif %}
+            {% if property.address.city %}
+                {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.address.city, item: _propertyListUrl }]) %}
+            {% endif %}
+            {% if property.address.postalCode %}
+                {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.address.postalCode|arrondissement(locale), item: _propertyListUrl }]) %}
+            {% endif %}
+            {% set _breadcrumbs = _breadcrumbs|merge([{ name: _titleParts|join(' '), item: pageUrl }]) %}
+            {% for bc in _breadcrumbs %}
+                {
+                    "@type": "ListItem",
+                    "position": {{ loop.index }},
+                    "name": "{{ bc.name|e('js') }}",
+                    "item": "{{ bc.item }}"
+                }{{ not loop.last ? ',' }}
+            {% endfor %}
         ]
     }
     {% if property.faq is defined and property.faq is not empty %}
@@ -862,7 +891,7 @@
                                         </div>
                                     {% endif %}
                                 {% else %}
-                                    <p class="text-2xl sm:text-3xl font-semibold text-primary">
+                                    <p class="text-xl sm:text-2xl font-semibold text-primary">
                                         {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
                                     </p>
                                 {% endif %}
@@ -979,46 +1008,48 @@
                                                     <p class="text-sm">{{ leaseTypeLabels|join(', ') }}</p>
 
                                                     <twig:Dialog:Content class="sm:max-w-xl p-0 overflow-hidden rounded-2xl border-0 shadow-2xl open:backdrop:bg-black/70">
-                                                        <div class="px-6 sm:px-8 pt-8 sm:pt-10 pb-6">
-                                                            <twig:Dialog:Header>
-                                                                <twig:Dialog:Title class="text-2xl tracking-tight text-neutral-900 font-semibold">
+                                                        <header class="px-5 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b border-slate-200">
+                                                            <twig:Dialog:Header class="space-y-1.5">
+                                                                <twig:Dialog:Title class="font-secondary text-xl sm:text-2xl font-semibold text-neutral-900 tracking-tight">
                                                                     {{ 'marketplace.show.lease.dialogTitle'|trans }}
                                                                 </twig:Dialog:Title>
-                                                                <twig:Dialog:Description class="mt-2 text-base text-neutral-500 text-pretty">
+                                                                <twig:Dialog:Description class="text-sm text-neutral-500 text-pretty">
                                                                     {{ 'marketplace.show.lease.dialogDescription'|trans }}
                                                                 </twig:Dialog:Description>
                                                             </twig:Dialog:Header>
-                                                        </div>
-                                                        <div class="max-h-[65vh] overflow-y-auto px-6 sm:px-8 pb-8 sm:pb-10">
-                                                            <div class="divide-y divide-neutral-200">
+                                                        </header>
+                                                        <div class="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overscroll-contain px-5 sm:px-6">
+                                                            <ul role="list" class="divide-y divide-gray-200">
                                                                 {% for lease in leaseTypeDetails %}
                                                                     {% set isActive = lease.key in leaseTypeKeys %}
-                                                                    <div class="py-6 first:pt-2 last:pb-2">
+                                                                    <li class="py-5 first:pt-4 last:pb-4">
                                                                         <div class="flex items-start gap-x-3">
-                                                                            <div class="shrink-0 size-9 rounded-lg bg-neutral-100 inline-flex items-center justify-center">
-                                                                                {{ ux_icon(lease.icon, {'class':'size-4.5 text-neutral-900'}) }}
+                                                                            <div class="shrink-0 size-10 rounded-lg bg-neutral-100 inline-flex items-center justify-center">
+                                                                                {{ ux_icon(lease.icon, {'class': 'size-5 text-neutral-900'}) }}
                                                                             </div>
-                                                                            <div class="flex-1 min-w-0 pt-0.5">
-                                                                                <div class="flex items-center gap-2 flex-wrap">
-                                                                                    <h3 class="text-base font-semibold text-neutral-900">{{ lease.name }}</h3>
+                                                                            <div class="flex-1 min-w-0 pt-0.5 space-y-2">
+                                                                                <div class="flex items-center gap-x-2 gap-y-1 flex-wrap">
+                                                                                    <h3 class="font-secondary text-base font-semibold text-neutral-900">{{ lease.name }}</h3>
                                                                                     {% if isActive %}
-                                                                                        <span class="inline-flex items-center rounded-full bg-[#FFF4F6] text-primary border border-[#F3C7D2] text-[0.6875rem] leading-none font-medium py-1 px-1.5">
+                                                                                        <twig:Badge variant="default" class="py-0.5 px-1.5 text-[0.6875rem] leading-none">
                                                                                             {{ 'marketplace.show.lease.thisProperty'|trans }}
-                                                                                        </span>
+                                                                                        </twig:Badge>
                                                                                     {% endif %}
                                                                                 </div>
-                                                                                <p class="mt-1 text-sm text-neutral-600 text-pretty leading-relaxed">{{ lease.forWho }}</p>
-                                                                                <dl class="mt-3 grid grid-cols-[max-content_1fr] gap-x-3 sm:gap-x-6 gap-y-1 text-sm">
+                                                                                <p class="text-sm text-neutral-600 text-pretty leading-relaxed">{{ lease.forWho }}</p>
+                                                                                <dl class="text-sm pt-1 space-y-3 sm:space-y-1.5">
                                                                                     {% for spec in lease.specs %}
-                                                                                        <dt class="text-neutral-400">{{ spec.label }}</dt>
-                                                                                        <dd class="text-neutral-900">{{ spec.value }}</dd>
+                                                                                        <div class="sm:grid sm:grid-cols-[max-content_1fr] sm:gap-x-6">
+                                                                                            <dt class="text-neutral-400">{{ spec.label }}</dt>
+                                                                                            <dd class="text-neutral-900 font-medium sm:font-normal mt-0.5 sm:mt-0 break-words">{{ spec.value }}</dd>
+                                                                                        </div>
                                                                                     {% endfor %}
                                                                                 </dl>
                                                                             </div>
                                                                         </div>
-                                                                    </div>
+                                                                    </li>
                                                                 {% endfor %}
-                                                            </div>
+                                                            </ul>
                                                         </div>
                                                     </twig:Dialog:Content>
                                                 </twig:Dialog>
@@ -1128,7 +1159,7 @@
                         {{ property.monthlyRent|number_format(0, ',', ' ') }}€<span class="text-gray-600 font-light text-sm">/{{ 'marketplace.list.card.price.month'|trans|raw }}</span>
                     </p>
                 {% else %}
-                    <p class="text-2xl font-semibold text-primary">
+                    <p class="text-xl font-semibold text-primary">
                         {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
                     </p>
                 {% endif %}

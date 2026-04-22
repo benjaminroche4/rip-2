@@ -59,16 +59,13 @@
                     "item": {
                         "@type": "Apartment",
                         "@id": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}",
-                        "name": "{{ ((property.propertyTypeName ?? 'marketplace.list.schema.apartment.fallback'|trans) ~ (property.rooms ? ' ' ~ ('marketplace.list.schema.apartment.rooms'|trans({ '%count%': property.rooms })) : ''))|e('js') }}",
+                        "name": "{{ (property.propertyTypeName ?? 'marketplace.list.schema.apartment.fallback'|trans)|e('js') }}",
                         "url": "{{ pageUrl }}#property-{{ property.slug|default(property._id) }}"
                         {% if property.image %}
                         ,"image": "{{ property.image }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
                         {% endif %}
-                        {% if property.rooms %}
-                        ,"numberOfRooms": {{ property.rooms }}
-                        {% endif %}
-                        {% if property.bedrooms %}
-                        ,"numberOfBedroomsTotal": {{ property.bedrooms }}
+                        {% if property.bedrooms is defined and property.bedrooms and property.bedrooms != 'studio' %}
+                        ,"numberOfBedroomsTotal": {{ property.bedrooms == '9+' ? 9 : property.bedrooms }}
                         {% endif %}
                         {% if property.squareMeters %}
                         ,"floorSize": {

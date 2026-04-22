@@ -1326,7 +1326,7 @@ marketplace:
             title: Description
             showMore: Show more
         equipment:
-            title: What this property offers
+            title: What this home offers
             wifi: Wi-Fi
             airConditioning: Air conditioning
             balcony: Balcony
@@ -1368,7 +1368,7 @@ marketplace:
             title: Good to know
             verified:
                 title: Verified listing
-                description: Every property inspected, checked and validated in advance.
+                description: Every property inspected, checked and validated.
             secure:
                 title: Secure transaction
                 description: Compliant leases and funds protected at every step.
@@ -1383,7 +1383,7 @@ marketplace:
             availability: Availability
             leaseTypeLabel: Lease type
             learnMore: Learn more
-            rentalDuration: Rental duration
+            rentalDuration: Preferred rental duration
             mediumTerm: Medium term
             mediumTermRange: 1 to 6 months
             longTerm: Long term
@@ -1470,6 +1470,10 @@ marketplace:
         dialog:
             close: Close
             expandMap: Expand map
-
+        title:
+            studio: Studio
+            bedroom: bedroom
+            bedrooms: bedrooms
+            furnished: furnished
 a11y:
     skipToContent: Skip to main content
