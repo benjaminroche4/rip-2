@@ -38,8 +38,7 @@
     {% endif %}
 {% endif %}
 
-{% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U')
-    or property.updatedAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+{% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
 
 <article
     id="property-{{ property.slug|default(property._id) }}"
