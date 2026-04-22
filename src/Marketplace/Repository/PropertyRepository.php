@@ -14,9 +14,9 @@ final class PropertyRepository
 {
     public const CACHE_TAG = 'marketplace';
 
-    private const TTL_PROPERTIES = 600;     // 10 min — biens (prix/statut peuvent évoluer)
-    private const TTL_TYPES = 3600;         // 1 h   — types de biens (quasi statique)
-    private const TTL_COUNT = 1800;         // 30 min — count cosmétique
+    private const TTL_PROPERTIES = 86400;   // 24 h — invalidation via webhook Sanity
+    private const TTL_TYPES = 604800;       // 7 j  — quasi statique, invalidation via webhook
+    private const TTL_COUNT = 86400;        // 24 h — invalidation via webhook
 
     public function __construct(
         private readonly SanityService $sanityService,

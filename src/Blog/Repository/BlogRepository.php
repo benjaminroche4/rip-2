@@ -14,9 +14,9 @@ final class BlogRepository
 {
     public const CACHE_TAG = 'blog';
 
-    private const TTL_POSTS = 1800;       // 30 min — articles, hero, latest, paginated
-    private const TTL_CATEGORIES = 21600; // 6 h  — quasi statique
-    private const TTL_COUNT = 1800;       // 30 min — count cosmétique
+    private const TTL_POSTS = 86400;      // 24 h — invalidation via webhook Sanity
+    private const TTL_CATEGORIES = 604800; // 7 j — quasi statique, invalidation via webhook
+    private const TTL_COUNT = 86400;      // 24 h — invalidation via webhook
 
     private const LIST_FIELDS = '{
         title,
