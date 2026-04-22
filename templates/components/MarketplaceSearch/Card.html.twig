@@ -46,7 +46,7 @@
     data-property-id="{{ property._id }}"
     data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
 >
-    {% if property.slug|default(false) %}<a href="{{ property_show_path(property, locale) }}" class="contents">{% endif %}
+    {% if property.slug|default(false) %}<a href="{{ property_show_path(property, locale) }}" target="_blank" rel="noopener" class="contents">{% endif %}
     <div
         class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
         data-controller="carousel"

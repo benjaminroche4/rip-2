@@ -228,7 +228,16 @@
         data-mobile-sheet-open-class="max-lg:!translate-y-0 max-lg:!opacity-100 max-lg:!pointer-events-auto"
     >
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-24 lg:pt-8 pt-6">
-        <twig:Breadcrumb class="mb-6 lg:mb-8 overflow-x-auto scrollbar-hide">
+        {# Mobile: compact back link (the full breadcrumb is hard to use on narrow screens) #}
+        <div class="lg:hidden mb-3">
+            <a href="{{ path('app_property') }}" class="inline-flex items-center gap-x-1 text-sm text-neutral-600 hover:text-primary transition duration-100">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="size-4"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                {{ 'marketplace.list.schema.breadcrumb.properties'|trans }}
+            </a>
+        </div>
+
+        {# Desktop: full breadcrumb — keeps all SEO signals and rich context #}
+        <twig:Breadcrumb class="hidden lg:block mb-8">
             <twig:Breadcrumb:List>
                 <twig:Breadcrumb:Item>
                     <twig:Breadcrumb:Link href="{{ path('app_property') }}">
@@ -909,129 +918,11 @@
                                             {% for key in leaseTypeKeys %}
                                                 {% set leaseTypeLabels = leaseTypeLabels|merge([leaseTypesMap[key]|default(key)]) %}
                                             {% endfor %}
-                                            {% set leaseTypeDetails = [
-                                                {
-                                                    key: 'civilCode',
-                                                    icon: 'iconoir:page-edit',
-                                                    name: 'marketplace.show.lease.types.civilCode'|trans,
-                                                    forWho: 'marketplace.show.lease.forWho.civilCode'|trans,
-                                                    specs: [
-                                                        { label: 'marketplace.show.lease.specs.civilCode.durationLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.durationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.civilCode.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.tenantTerminationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.civilCode.homeLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.homeValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.civilCode.useLabel'|trans, value: 'marketplace.show.lease.specs.civilCode.useValue'|trans },
-                                                    ],
-                                                },
-                                                {
-                                                    key: 'furnished',
-                                                    icon: 'iconoir:sofa',
-                                                    name: 'marketplace.show.lease.types.furnished'|trans,
-                                                    forWho: 'marketplace.show.lease.forWho.furnished'|trans,
-                                                    specs: [
-                                                        { label: 'marketplace.show.lease.specs.furnished.durationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.durationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.furnished.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.furnished.tenantTerminationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.furnished.homeLabel'|trans, value: 'marketplace.show.lease.specs.furnished.homeValue'|trans },
-                                                    ],
-                                                },
-                                                {
-                                                    key: 'mobility',
-                                                    icon: 'iconoir:suitcase',
-                                                    name: 'marketplace.show.lease.types.mobility'|trans,
-                                                    forWho: 'marketplace.show.lease.forWho.mobility'|trans,
-                                                    specs: [
-                                                        { label: 'marketplace.show.lease.specs.mobility.durationLabel'|trans, value: 'marketplace.show.lease.specs.mobility.durationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.mobility.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.mobility.tenantTerminationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.mobility.homeLabel'|trans, value: 'marketplace.show.lease.specs.mobility.homeValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.mobility.depositLabel'|trans, value: 'marketplace.show.lease.specs.mobility.depositValue'|trans },
-                                                    ],
-                                                },
-                                                {
-                                                    key: 'alur',
-                                                    icon: 'iconoir:home-simple-door',
-                                                    name: 'marketplace.show.lease.types.alur'|trans,
-                                                    forWho: 'marketplace.show.lease.forWho.alur'|trans,
-                                                    specs: [
-                                                        { label: 'marketplace.show.lease.specs.alur.durationLabel'|trans, value: 'marketplace.show.lease.specs.alur.durationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.alur.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.alur.tenantTerminationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.alur.homeLabel'|trans, value: 'marketplace.show.lease.specs.alur.homeValue'|trans },
-                                                    ],
-                                                },
-                                                {
-                                                    key: 'noLease',
-                                                    icon: 'iconoir:flash',
-                                                    name: 'marketplace.show.lease.types.noLease'|trans,
-                                                    forWho: 'marketplace.show.lease.forWho.noLease'|trans,
-                                                    specs: [
-                                                        { label: 'marketplace.show.lease.specs.noLease.durationLabel'|trans, value: 'marketplace.show.lease.specs.noLease.durationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.noLease.tenantTerminationLabel'|trans, value: 'marketplace.show.lease.specs.noLease.tenantTerminationValue'|trans },
-                                                        { label: 'marketplace.show.lease.specs.noLease.includedLabel'|trans, value: 'marketplace.show.lease.specs.noLease.includedValue'|trans },
-                                                    ],
-                                                },
-                                            ] %}
-                                            <div class="p-4">
-                                                <twig:Dialog id="lease-type-{{ property.uniqueId|default('info') }}" class="space-y-2">
-                                                    <div class="flex items-center justify-between gap-x-2">
-                                                        <p class="font-light text-neutral-600 text-sm">
-                                                            {{ 'marketplace.show.sidebar.leaseTypeLabel'|trans }}
-                                                        </p>
-                                                        <twig:Dialog:Trigger>
-                                                            <button
-                                                                type="button"
-                                                                {% for attr, val in trigger_attrs %}{{ attr }}="{{ val }}" {% endfor %}
-                                                                class="text-xs text-neutral-600 font-light underline underline-offset-3 decoration-dotted hover:text-primary cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none rounded-sm"
-                                                            >
-                                                                {{ 'marketplace.show.sidebar.learnMore'|trans }}
-                                                            </button>
-                                                        </twig:Dialog:Trigger>
-                                                    </div>
-                                                    <p class="text-sm">{{ leaseTypeLabels|join(', ') }}</p>
-
-                                                    <twig:Dialog:Content class="sm:max-w-xl p-0 overflow-hidden rounded-2xl border-0 shadow-2xl open:backdrop:bg-black/70">
-                                                        <header class="px-5 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-5 border-b border-slate-200">
-                                                            <twig:Dialog:Header class="space-y-1.5">
-                                                                <twig:Dialog:Title class="font-secondary text-xl sm:text-2xl font-semibold text-neutral-900 tracking-tight">
-                                                                    {{ 'marketplace.show.lease.dialogTitle'|trans }}
-                                                                </twig:Dialog:Title>
-                                                                <twig:Dialog:Description class="text-sm text-neutral-500 text-pretty">
-                                                                    {{ 'marketplace.show.lease.dialogDescription'|trans }}
-                                                                </twig:Dialog:Description>
-                                                            </twig:Dialog:Header>
-                                                        </header>
-                                                        <div class="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overscroll-contain px-5 sm:px-6">
-                                                            <ul role="list" class="divide-y divide-gray-200">
-                                                                {% for lease in leaseTypeDetails %}
-                                                                    {% set isActive = lease.key in leaseTypeKeys %}
-                                                                    <li class="py-5 first:pt-4 last:pb-4">
-                                                                        <div class="flex items-start gap-x-3">
-                                                                            <div class="shrink-0 size-10 rounded-lg bg-neutral-100 inline-flex items-center justify-center">
-                                                                                {{ ux_icon(lease.icon, {'class': 'size-5 text-neutral-900'}) }}
-                                                                            </div>
-                                                                            <div class="flex-1 min-w-0 pt-0.5 space-y-2">
-                                                                                <div class="flex items-center gap-x-2 gap-y-1 flex-wrap">
-                                                                                    <h3 class="font-secondary text-base font-semibold text-neutral-900">{{ lease.name }}</h3>
-                                                                                    {% if isActive %}
-                                                                                        <twig:Badge variant="default" class="py-0.5 px-1.5 text-[0.6875rem] leading-none">
-                                                                                            {{ 'marketplace.show.lease.thisProperty'|trans }}
-                                                                                        </twig:Badge>
-                                                                                    {% endif %}
-                                                                                </div>
-                                                                                <p class="text-sm text-neutral-600 text-pretty leading-relaxed">{{ lease.forWho }}</p>
-                                                                                <dl class="text-sm pt-1 space-y-3 sm:space-y-1.5">
-                                                                                    {% for spec in lease.specs %}
-                                                                                        <div class="sm:grid sm:grid-cols-[max-content_1fr] sm:gap-x-6">
-                                                                                            <dt class="text-neutral-400">{{ spec.label }}</dt>
-                                                                                            <dd class="text-neutral-900 font-medium sm:font-normal mt-0.5 sm:mt-0 break-words">{{ spec.value }}</dd>
-                                                                                        </div>
-                                                                                    {% endfor %}
-                                                                                </dl>
-                                                                            </div>
-                                                                        </div>
-                                                                    </li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        </div>
-                                                    </twig:Dialog:Content>
-                                                </twig:Dialog>
+                                            <div class="p-4 space-y-2">
+                                                <p class="font-light text-neutral-600 text-sm">
+                                                    {{ 'marketplace.show.sidebar.leaseTypeLabel'|trans }}
+                                                </p>
+                                                <p class="text-sm">{{ leaseTypeLabels|join(', ') }}</p>
                                             </div>
                                         {% endif %}
                                         <div class="p-4 space-y-2">
