@@ -442,7 +442,7 @@ home:
                 text: Un service de relocation accompagne les particuliers et les professionnels dans leur recherche de logement et leur installation à Paris, de manière simple et clé en main.
             2:
                 title: À qui s’adressent vos services de relocation ?
-                text: Nos services s’adressent aux professionnels, aux entreprises et aux particuliers souhaitant s’installer ou déménager à Paris.
+                text: Nos services s’adressent aux particuliers, aux entreprises et aux professionnels souhaitant s’installer ou déménager à Paris.
             3:
                 title: Combien de temps faut-il pour trouver un logement à Paris ?
                 text: Le délai dépend du budget et des critères, mais en moyenne la recherche prend entre quelques jours et quelques semaines.
@@ -455,6 +455,15 @@ home:
             6:
                 title: Trouvez-vous toujours un logement ?
                 text: Grâce à notre expertise du marché parisien et à notre réseau, nous maximisons fortement vos chances de trouver un logement adapté à vos critères dans les meilleurs délais.
+            7:
+                title: "J'ai un profil atypique, pouvez-vous m'aider ?"
+                text: "Oui, c'est notre spécialité. Entrepreneurs, expatriés, profils sans garant français : nous construisons un dossier solide et défendons votre candidature auprès de notre réseau de bailleurs."
+            8:
+                title: Gérez-vous l'administratif ?
+                text: Oui, nous prenons en charge l'ouverture de vos contrats d'électricité, gaz, internet et assurance habitation.
+            9:
+                title: Sous combien de temps peut démarrer ma recherche ?
+                text: Dès réception de vos critères, nous lançons la recherche sans attendre. Le marché parisien est tendu, chaque jour compte.
     features:
         title: Paris ne s'improvise pas
         subTitle: Un marché difficile, un accès privilégié

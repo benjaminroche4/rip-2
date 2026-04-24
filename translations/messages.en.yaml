@@ -452,6 +452,15 @@ home:
             6:
                 title: Do you always find an apartment?
                 text: Thanks to our in-depth knowledge of the Paris market and our network, we significantly increase your chances of securing a property that matches your criteria within a short timeframe.
+            7:
+                title: "I have an atypical profile, can you help me?"
+                text: "Yes, it's our specialty. Entrepreneurs, expats, profiles without a French guarantor: we build a solid application and defend your candidacy with our network of landlords."
+            8:
+                title: "Do you handle the administrative setup?"
+                text: "Yes, we take care of opening your electricity, gas, internet and home insurance contracts."
+            9:
+                title: "How quickly can my search start?"
+                text: "As soon as we receive your criteria, we start the search right away. The Paris market moves fast, every day counts."
     keyMetrics:
         title: Proven Results
         subTitle: Paris is waiting, We handle everything
