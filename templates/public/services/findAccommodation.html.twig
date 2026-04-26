@@ -235,70 +235,10 @@
             </twig:Button>
         </div>
     </section>
-    <section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="rounded-2xl bg-neutral-100/80 p-8">
-            <div class="mt-5 pb-12 lg:pb-16 mx-auto text-center space-y-3">
-                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'findAccommodation.solution.title'|trans|raw }}</h2>
-                <h2 class="text-3xl font-medium text-pretty text-center">{{ 'findAccommodation.solution.subTitle'|trans|raw }}</h2>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3">
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('gg:search', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.1.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.1.text'|trans|raw }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('hugeicons:diamond-02', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.2.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.2.text'|trans|raw }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mdi:paper-check-outline', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.3.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.3.text'|trans|raw }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('humbleicons:key', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.4.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.4.text'|trans|raw }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('icon-park-outline:people', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.5.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.5.text'|trans|raw }}</p>
-                </div>
-                <div class="bg-white rounded-xl p-6 border border-neutral-100 hover:border-primary/20 transition-colors duration-100 space-y-2 shadow-lg shadow-gray-300/30 group">
-                    <div class="flex items-center flex-col gap-3">
-                        <div class="p-2 border bg-white border-slate-200 block rounded-lg w-fit group-hover:bg-primary transition-colors duration-100">
-                            {{ ux_icon('mdi:paris', {'class':'size-6 text-primary shrink-0 group-hover:text-white'}) }}
-                        </div>
-                        <h3 class="font-semibold text-lg text-center text-pretty">{{ 'findAccommodation.solution.6.title'|trans|raw }}</h3>
-                    </div>
-                    <p class="flex-auto text-neutral-800/70 text-base/6 text-center">{{ 'findAccommodation.solution.6.text'|trans|raw }}</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <twig:Section:SolutionGrid
+        keyPrefix="findAccommodation.solution"
+        :icons="['gg:search', 'hugeicons:diamond-02', 'mdi:paper-check-outline', 'humbleicons:key', 'icon-park-outline:people', 'mdi:paris']"
+    />
     <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
         <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
             <div class="max-w-xl mb-8 mx-auto lg:mx-0">
