@@ -9,7 +9,7 @@ final class ContactControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/contact');
+        $client->request('GET', '/fr/contact');
 
         self::assertResponseIsSuccessful();
     }

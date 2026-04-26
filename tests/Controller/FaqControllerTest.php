@@ -9,7 +9,7 @@ final class FaqControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/faq');
+        $client->request('GET', '/fr/faq');
 
         self::assertResponseIsSuccessful();
     }

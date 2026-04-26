@@ -9,7 +9,7 @@ final class BlogControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/blog');
+        $client->request('GET', '/fr/blog');
 
         self::assertResponseIsSuccessful();
     }

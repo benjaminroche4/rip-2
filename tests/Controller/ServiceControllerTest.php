@@ -9,7 +9,7 @@ final class ServiceControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/service');
+        $client->request('GET', '/fr/services/trouver-un-logement');
 
         self::assertResponseIsSuccessful();
     }

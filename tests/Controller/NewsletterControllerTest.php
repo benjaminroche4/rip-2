@@ -9,7 +9,7 @@ final class NewsletterControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/newsletter');
+        $client->request('GET', '/fr/newsletter/rejoindre');
 
         self::assertResponseIsSuccessful();
     }

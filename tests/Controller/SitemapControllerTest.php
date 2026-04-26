@@ -9,7 +9,7 @@ final class SitemapControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/sitemap');
+        $client->request('GET', '/fr/sitemap');
 
         self::assertResponseIsSuccessful();
     }

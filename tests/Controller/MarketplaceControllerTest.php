@@ -9,7 +9,7 @@ final class MarketplaceControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/marketplace');
+        $client->request('GET', '/fr/nos-biens');
 
         self::assertResponseIsSuccessful();
     }

@@ -9,7 +9,7 @@ final class AboutUsControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/about/us');
+        $client->request('GET', '/fr/a-propos');
 
         self::assertResponseIsSuccessful();
     }

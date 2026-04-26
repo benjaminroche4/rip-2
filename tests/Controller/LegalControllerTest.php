@@ -9,7 +9,7 @@ final class LegalControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/legal');
+        $client->request('GET', '/fr/mentions-legales');
 
         self::assertResponseIsSuccessful();
     }
