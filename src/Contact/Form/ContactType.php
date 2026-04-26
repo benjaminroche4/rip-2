@@ -81,9 +81,7 @@ class ContactType extends AbstractType
             ->add('accept', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => 'contact.contactForm.accept.label',
-                    ]),
+                    new IsTrue(message: 'contact.contactForm.accept.label'),
                 ],
             ])
         ;
