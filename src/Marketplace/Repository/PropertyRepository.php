@@ -2,6 +2,8 @@
 
 namespace App\Marketplace\Repository;
 
+use App\Marketplace\Domain\Property;
+use App\Marketplace\Domain\PropertyMapper;
 use App\Shared\Sanity\SanityService;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -99,6 +101,7 @@ final class PropertyRepository
     public function __construct(
         private readonly SanityService $sanityService,
         private readonly TagAwareCacheInterface $cache,
+        private readonly PropertyMapper $mapper,
     ) {}
 
     /**
@@ -209,14 +212,12 @@ final class PropertyRepository
     /**
      * Looks up a property by its Sanity _id. Both the draft (`drafts.X`) and the
      * published copy match the same logical entity.
-     *
-     * @return array<string, mixed>|null
      */
-    public function findOneById(string $id, string $locale): ?array
+    public function findOneById(string $id, string $locale): ?Property
     {
         $publishedId = str_starts_with($id, 'drafts.') ? substr($id, 7) : $id;
 
-        return $this->cache->get(
+        $row = $this->cache->get(
             'marketplace_property_id_' . $locale . '_' . md5($publishedId),
             function (ItemInterface $item) use ($publishedId, $locale): ?array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
@@ -230,6 +231,8 @@ final class PropertyRepository
                 return is_array($result) ? $result : null;
             }
         );
+
+        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
