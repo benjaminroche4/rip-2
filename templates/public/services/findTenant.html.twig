@@ -203,113 +203,11 @@
         keyPrefix="findTenant.solution"
         :icons="['gg:search', 'solar:camera-linear', 'fluent:premium-20-regular', 'tabler:user-check', 'material-symbols:door-open-outline', 'material-symbols:key-outline-rounded']"
     />
-    <section class="overflow-hidden bg-white py-12 lg:py-16 lg:px-8 px-6">
-        <div class="mx-auto max-w-7xl md:px-6 lg:px-8">
-            <div class="max-w-xl mb-8 mx-auto lg:mx-0">
-                <h2 class="text-sm font-semibold text-primary font-secondary">{{ 'findTenant.advantage.title'|trans|raw }}</h2>
-                <h3 class="mt-3 text-pretty text-3xl font-medium">{{ 'findTenant.advantage.subTitle'|trans|raw }}</h3>
-                <p class="mt-6 text-neutral-600">
-                    {{ 'findTenant.advantage.text'|trans|raw }}
-                </p>
-            </div>
-            <div class="grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:grid-cols-2 lg:items-start">
-                <div class="lg:px-0 lg:pr-4">
-                    <div class="mx-auto max-w-2xl lg:mx-0 max-w-lg">
-                        <div
-                            data-controller="features-list"
-                            class="relative bg-white"
-                        >
-                            {# Features list #}
-                            <div class="relative">
-                                {# Feature 1 #}
-                                <div
-                                    data-features-list-target="item"
-                                    data-action="click->features-list#activate"
-                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
-                                >
-                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
-                                    <div
-                                        data-features-list-target="indicator"
-                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
-                                        style="height: 0;"
-                                    ></div>
-                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        {{ 'findTenant.advantage.1.title'|trans|raw }}
-                                    </h4>
-                                    <p class="text-sm text-slate-600">
-                                        {{ 'findTenant.advantage.1.text'|trans|raw }}
-                                    </p>
-                                </div>
-
-                                {# Feature 2 #}
-                                <div
-                                    data-features-list-target="item"
-                                    data-action="click->features-list#activate"
-                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
-                                >
-                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
-                                    <div
-                                        data-features-list-target="indicator"
-                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
-                                        style="height: 0;"
-                                    ></div>
-                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        {{ 'findTenant.advantage.2.title'|trans|raw }}
-                                    </h4>
-                                    <p class="text-sm text-slate-600">
-                                        {{ 'findTenant.advantage.2.text'|trans|raw }}
-                                    </p>
-                                </div>
-
-                                {# Feature 3 #}
-                                <div
-                                    data-features-list-target="item"
-                                    data-action="click->features-list#activate"
-                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
-                                >
-                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
-                                    <div
-                                        data-features-list-target="indicator"
-                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
-                                        style="height: 0;"
-                                    ></div>
-                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        {{ 'findTenant.advantage.3.title'|trans|raw }}
-                                    </h4>
-                                    <p class="text-sm text-slate-600">
-                                        {{ 'findTenant.advantage.3.text'|trans|raw }}
-                                    </p>
-                                </div>
-
-                                {# Feature 4 #}
-                                <div
-                                    data-features-list-target="item"
-                                    data-action="click->features-list#activate"
-                                    class="relative pl-6 pr-4 py-4 rounded-r-xl cursor-pointer transition-colors duration-200"
-                                >
-                                    <div class="absolute left-0 top-0 w-1 h-full bg-gray-200 rounded-full"></div>
-                                    <div
-                                        data-features-list-target="indicator"
-                                        class="absolute left-0 top-0 w-1 bg-primary rounded-full"
-                                        style="height: 0;"
-                                    ></div>
-                                    <h4 class="font-bold text-lg text-slate-800 mb-2">
-                                        {{ 'findTenant.advantage.4.title'|trans|raw }}
-                                    </h4>
-                                    <p class="text-sm text-slate-600">
-                                        {{ 'findTenant.advantage.4.text'|trans|raw }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="h-full">
-                    <img width="546" height="448" loading="eager" src="{{ asset('medias/website/relocation-in-paris-8.webp') }}" alt="Relocation In Paris, trouver un locataire" class="w-full h-[250px] lg:h-full object-cover rounded-2xl" />
-                </div>
-            </div>
-        </div>
-    </section>
+    <twig:Section:AdvantageList
+        keyPrefix="findTenant.advantage"
+        imageSrc="medias/website/relocation-in-paris-8.webp"
+        imageAlt="Relocation In Paris, trouver un locataire"
+    />
     <section class="bg-white py-24 sm:py-32">
         <div class="mx-auto max-w-5xl px-6 lg:px-8">
             <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center max-w-xl">
