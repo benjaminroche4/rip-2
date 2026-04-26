@@ -109,7 +109,7 @@ SVG;
             return new Response('', 404);
         }
 
-        $response = $this->render('components/MarketplaceSearch/Card.html.twig', [
+        $response = $this->render('components/Marketplace/PropertyCard.html.twig', [
             'property' => $property,
             'locale' => $locale,
             'compact' => true,

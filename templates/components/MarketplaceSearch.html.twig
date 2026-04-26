@@ -154,7 +154,7 @@
                     {% else %}
                         <div class="grid md:grid-cols-2 gap-6">
                             {% for property in this.items %}
-                                {% include 'components/MarketplaceSearch/Card.html.twig' with { property, locale } only %}
+                                {% include 'components/Marketplace/PropertyCard.html.twig' with { property, locale } only %}
                             {% endfor %}
                         </div>
                     {% endif %}
