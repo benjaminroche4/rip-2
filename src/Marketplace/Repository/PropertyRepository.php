@@ -8,15 +8,93 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
  * Centralizes all Sanity queries for the marketplace (properties + property types).
- * All reads go through Symfony's cache (5 min TTL by default).
+ * All reads go through Symfony's cache, invalidated by the Sanity webhook.
  */
 final class PropertyRepository
 {
     public const CACHE_TAG = 'marketplace';
 
-    private const TTL_PROPERTIES = 86400;   // 24 h — invalidation via webhook Sanity
-    private const TTL_TYPES = 604800;       // 7 j  — quasi statique, invalidation via webhook
-    private const TTL_COUNT = 86400;        // 24 h — invalidation via webhook
+    private const TTL_PROPERTIES = 86400;
+    private const TTL_TYPES = 604800;
+    private const TTL_COUNT = 86400;
+
+    private const PROPERTY_PROJECTION = '{
+        _id,
+        "createdAt": _createdAt,
+        "updatedAt": _updatedAt,
+        uniqueId,
+        title,
+        metaDescription,
+        "bedrooms": main.bedrooms,
+        "bathrooms": main.bathrooms,
+        "monthlyRent": rents.monthlyRent,
+        priceOnRequest,
+        chargesIncludes,
+        "showCategoryOnCard": showCategoryOnCard,
+        status,
+        leaseType,
+        "listingTypeName": listingType->name,
+        longTerm,
+        midTerm,
+        "slug": slug.current,
+        "address": address{city, postalCode, street, number},
+        "mainPhoto": {
+            "url": mainPhoto.asset->url,
+            "alt": mainPhoto.alt
+        },
+        "photos": photos[]{
+            "url": asset->url,
+            "alt": alt
+        },
+        availableDate,
+        "agentPhoto": agent->photo.asset->url,
+        "agentName": agent->fullName,
+        "tenant": tenant->{
+            tenantType,
+            fullName,
+            companyName,
+            email,
+            phone,
+            website,
+            "logo": logo.asset->url,
+            "logoAlt": logo.alt
+        },
+        "photoCount": count(photos),
+        "categoryName": categories[0]->name,
+        "categoryList": categories[]->{"name": name, "slug": slug.current},
+        "location": location{lat, lng},
+        "elevator": equipment.elevator,
+        equipment,
+        "floor": floors.floor,
+        "totalFloors": floors.totalFloors,
+        exposure,
+        view,
+        "constructionYear": buildingYears.constructionYear,
+        "renovationYear": buildingYears.renovationYear,
+        "faq": faq[]{_key, question, answer},
+        "extraFees": extraFees[]{_key, amount, feeType},
+        "furnished": main.furnished,
+        "bedroomsLabel": main.bedrooms,
+        "squareMeters": main.squareMeters,
+        "propertyTypeName": propertyType->name,
+        "propertyTypeSlug": propertyType->slug.current,
+        "propertyTypeLang": propertyType->language,
+        "metro": metro,
+        "rer": rer,
+        tags,
+        internalNotes,
+        description,
+        "alternateProperty": *[_type == "translation.metadata" && references(^._id)]{
+            translations[_key != $lang]{
+                _key,
+                "slug": value->slug.current,
+                "title": value->title,
+                "listingTypeName": value->listingType->name,
+                "propertyTypeName": value->propertyType->name,
+                "address": value->address{city, postalCode}
+            }
+        }[0].translations[0]
+    }';
 
     public function __construct(
         private readonly SanityService $sanityService,
@@ -38,83 +116,7 @@ final class PropertyRepository
                 $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
-                    '*[_type == "property" && language == $lang && !(_id in path("drafts.**"))] | order(_createdAt desc) {
-                        _id,
-                        "createdAt": _createdAt,
-                        "updatedAt": _updatedAt,
-                        uniqueId,
-                        title,
-                        metaDescription,
-                        "bedrooms": main.bedrooms,
-                        "bathrooms": main.bathrooms,
-                        "monthlyRent": rents.monthlyRent,
-                        priceOnRequest,
-                        chargesIncludes,
-                        "showCategoryOnCard": showCategoryOnCard,
-                        status,
-                        leaseType,
-                        "listingTypeName": listingType->name,
-                        longTerm,
-                        midTerm,
-                        "slug": slug.current,
-                        "address": address{city, postalCode, street, number},
-                        "mainPhoto": {
-                            "url": mainPhoto.asset->url,
-                            "alt": mainPhoto.alt
-                        },
-                        "photos": photos[]{
-                            "url": asset->url,
-                            "alt": alt
-                        },
-                        availableDate,
-                        "agentPhoto": agent->photo.asset->url,
-                        "agentName": agent->fullName,
-                        "tenant": tenant->{
-                            tenantType,
-                            fullName,
-                            companyName,
-                            email,
-                            phone,
-                            website,
-                            "logo": logo.asset->url,
-                            "logoAlt": logo.alt
-                        },
-                        "photoCount": count(photos),
-                        "categoryName": categories[0]->name,
-                        "categoryList": categories[]->{"name": name, "slug": slug.current},
-                        "location": location{lat, lng},
-                        "elevator": equipment.elevator,
-                        equipment,
-                        "floor": floors.floor,
-                        "totalFloors": floors.totalFloors,
-                        exposure,
-                        view,
-                        "constructionYear": buildingYears.constructionYear,
-                        "renovationYear": buildingYears.renovationYear,
-                        "faq": faq[]{_key, question, answer},
-                        "extraFees": extraFees[]{_key, amount, feeType},
-                        "furnished": main.furnished,
-                        "bedroomsLabel": main.bedrooms,
-                        "squareMeters": main.squareMeters,
-                        "propertyTypeName": propertyType->name,
-                        "propertyTypeSlug": propertyType->slug.current,
-                        "propertyTypeLang": propertyType->language,
-                        "metro": metro,
-                        "rer": rer,
-                        tags,
-                        internalNotes,
-                        description,
-                        "alternateProperty": *[_type == "translation.metadata" && references(^._id)]{
-                            translations[_key != $lang]{
-                                _key,
-                                "slug": value->slug.current,
-                                "title": value->title,
-                                "listingTypeName": value->listingType->name,
-                                "propertyTypeName": value->propertyType->name,
-                                "address": value->address{city, postalCode}
-                            }
-                        }[0].translations[0]
-                    }',
+                    '*[_type == "property" && language == $lang && !(_id in path("drafts.**"))] | order(_createdAt desc) ' . self::PROPERTY_PROJECTION,
                     ['lang' => $locale]
                 );
 
@@ -184,34 +186,50 @@ final class PropertyRepository
     }
 
     /**
-     * Returns single property by slug (used by detail page).
-     *
      * @return array<string, mixed>|null
      */
     public function findOneBySlug(string $slug, string $locale): ?array
     {
-        $all = $this->findAll($locale);
-        foreach ($all as $property) {
-            if (($property['slug'] ?? null) === $slug) {
-                return $property;
+        return $this->cache->get(
+            'marketplace_property_slug_' . $locale . '_' . md5($slug),
+            function (ItemInterface $item) use ($slug, $locale): ?array {
+                $item->expiresAfter(self::TTL_PROPERTIES);
+                $item->tag(self::CACHE_TAG);
+
+                $result = $this->sanityService->query(
+                    '*[_type == "property" && language == $lang && slug.current == $slug && !(_id in path("drafts.**"))][0] ' . self::PROPERTY_PROJECTION,
+                    ['lang' => $locale, 'slug' => $slug]
+                );
+
+                return is_array($result) ? $result : null;
             }
-        }
-        return null;
+        );
     }
 
     /**
+     * Looks up a property by its Sanity _id. Both the draft (`drafts.X`) and the
+     * published copy match the same logical entity.
+     *
      * @return array<string, mixed>|null
      */
     public function findOneById(string $id, string $locale): ?array
     {
-        $needle = str_starts_with($id, 'drafts.') ? substr($id, 7) : $id;
-        foreach ($this->findAll($locale) as $property) {
-            $candidate = str_starts_with($property['_id'], 'drafts.') ? substr($property['_id'], 7) : $property['_id'];
-            if ($candidate === $needle) {
-                return $property;
+        $publishedId = str_starts_with($id, 'drafts.') ? substr($id, 7) : $id;
+
+        return $this->cache->get(
+            'marketplace_property_id_' . $locale . '_' . md5($publishedId),
+            function (ItemInterface $item) use ($publishedId, $locale): ?array {
+                $item->expiresAfter(self::TTL_PROPERTIES);
+                $item->tag(self::CACHE_TAG);
+
+                $result = $this->sanityService->query(
+                    '*[_type == "property" && language == $lang && (_id == $id || _id == $draftId)] | order(_id asc)[0] ' . self::PROPERTY_PROJECTION,
+                    ['lang' => $locale, 'id' => $publishedId, 'draftId' => 'drafts.' . $publishedId]
+                );
+
+                return is_array($result) ? $result : null;
             }
-        }
-        return null;
+        );
     }
 
     /**
