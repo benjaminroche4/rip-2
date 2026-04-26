@@ -1493,3 +1493,14 @@ marketplace:
             furnished: meublé
 a11y:
     skipToContent: Aller au contenu principal
+admin:
+    nav:
+        dashboard: Tableau de bord
+        logout: Se déconnecter
+    dashboard:
+        title: Tableau de bord
+        welcome: Bonjour
+        contactsMonthly:
+            title: Demandes de contact par mois
+            subtitle: 12 derniers mois
+            label: Demandes

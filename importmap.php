@@ -40,4 +40,10 @@ return [
     '@hotwired/turbo' => [
         'version' => '8.0.23',
     ],
+    'chart.js/auto' => [
+        'version' => '4.5.1',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.3.4',
+    ],
 ];

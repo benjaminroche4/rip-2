@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}" class="h-full bg-neutral-50">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#FFFFFF">
+        {# noindex/nofollow servi via X-Robots-Tag par AdminNoIndexListener — couvre HTML + futurs exports JSON/CSV/PDF #}
+
+        <title>{% block title %}Admin{% endblock %} — Relocation In Paris</title>
+
+        {% block stylesheets %}
+            {{ importmap('app') }}
+        {% endblock %}
+    </head>
+    <body class="min-h-full font-sans text-gray-900 antialiased">
+        <div class="min-h-screen flex">
+            <aside class="w-64 shrink-0 border-r border-neutral-200 bg-white px-4 py-6 hidden lg:block">
+                <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" class="flex items-center gap-2 text-sm font-semibold text-gray-900 px-2 py-1.5 mb-6">
+                    <span class="size-2 rounded-full bg-primary"></span>
+                    RIP Admin
+                </a>
+
+                <nav class="flex flex-col gap-1 text-sm">
+                    {% set currentRoute = app.request.attributes.get('_route') %}
+                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" class="rounded-lg px-3 py-2 transition-colors {% if currentRoute == 'admin_dashboard' %}bg-neutral-100 font-medium text-primary{% else %}text-gray-600 hover:bg-neutral-50 hover:text-gray-900{% endif %}">
+                        {{ 'admin.nav.dashboard'|trans }}
+                    </a>
+                </nav>
+
+                <div class="mt-auto pt-6 border-t border-neutral-200 absolute bottom-6 w-56">
+                    <div class="text-xs text-gray-500 mb-2 px-2">{{ app.user.email|default('') }}</div>
+                    <a href="{{ path('app_logout') }}" class="block rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-neutral-50 hover:text-gray-900">
+                        {{ 'admin.nav.logout'|trans }}
+                    </a>
+                </div>
+            </aside>
+
+            <div class="flex-1 flex flex-col">
+                <header class="border-b border-neutral-200 bg-white px-6 py-4 lg:px-8">
+                    <h1 class="text-lg font-semibold text-gray-900">{% block page_title %}{% endblock %}</h1>
+                </header>
+
+                <main class="flex-1 px-6 py-6 lg:px-8 lg:py-8">
+                    {% block body %}{% endblock %}
+                </main>
+            </div>
+        </div>
+    </body>
+</html>

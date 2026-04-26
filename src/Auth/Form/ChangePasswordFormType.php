@@ -26,15 +26,13 @@ class ChangePasswordFormType extends AbstractType
                 ],
                 'first_options' => [
                     'constraints' => [
-                        new NotBlank([
-                            'message' => 'resetPassword.empty',
-                        ]),
-                        new Length([
-                            'min' => 6,
-                            'minMessage' => 'resetPassword.minLength',
+                        new NotBlank(message: 'resetPassword.empty'),
+                        new Length(
+                            min: 6,
                             // max length allowed by Symfony for security reasons
-                            'max' => 4096,
-                        ]),
+                            max: 4096,
+                            minMessage: 'resetPassword.minLength',
+                        ),
                         new PasswordStrength(),
                         new NotCompromisedPassword(),
                     ],

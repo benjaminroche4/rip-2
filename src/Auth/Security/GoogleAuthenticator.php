@@ -26,6 +26,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoginSuccessHandler $loginSuccessHandler,
     ) {
     }
 
@@ -82,7 +83,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        return $this->loginSuccessHandler->onAuthenticationSuccess($request, $token);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

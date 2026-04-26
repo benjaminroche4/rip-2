@@ -1492,3 +1492,14 @@ marketplace:
             furnished: furnished
 a11y:
     skipToContent: Skip to main content
+admin:
+    nav:
+        dashboard: Dashboard
+        logout: Log out
+    dashboard:
+        title: Dashboard
+        welcome: Hello
+        contactsMonthly:
+            title: Contact requests per month
+            subtitle: Last 12 months
+            label: Requests

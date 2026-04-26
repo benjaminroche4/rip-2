@@ -23,6 +23,7 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+                success_handler: App\Auth\Security\LoginSuccessHandler
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -41,9 +42,15 @@ security:
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Espace admin : URL = /{_locale}/{adminPrefix}/admin où adminPrefix est un secret
+        # stocké dans %admin_path_prefix% (env ADMIN_PATH_PREFIX). Tout chemin différent
+        # renvoie un 404 du router → pas de leak du format. Les sous-routes /admin/...
+        # héritent de la même règle.
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin($|/)', roles: ROLE_ADMIN }
 
 when@test:
     security:
