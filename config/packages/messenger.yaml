@@ -25,5 +25,5 @@ framework:
             Symfony\Component\Notifier\Message\SmsMessage: async
 
             App\Contact\Message\SendContactEmailsMessage: async
-            App\Message\SendEstimationEmailMessage: async
+            App\PropertyEstimation\Message\SendEstimationEmailMessage: async
             App\Shared\Webhook\NotifyMakeWebhookMessage: async

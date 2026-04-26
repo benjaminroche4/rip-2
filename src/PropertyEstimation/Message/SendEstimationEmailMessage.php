@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Message;
+namespace App\PropertyEstimation\Message;
 
 /**
  * Carries the property-estimation lead payload to the async email handler.

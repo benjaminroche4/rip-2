@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Form;
+namespace App\PropertyEstimation\Form;
 
-use App\Entity\PropertyEstimation;
+use App\PropertyEstimation\Entity\PropertyEstimation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;

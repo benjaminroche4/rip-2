@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\PropertyEstimation\Repository;
 
-use App\Entity\PropertyEstimation;
+use App\PropertyEstimation\Entity\PropertyEstimation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

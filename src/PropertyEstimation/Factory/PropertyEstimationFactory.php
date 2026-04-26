@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Factory;
+namespace App\PropertyEstimation\Factory;
 
-use App\Entity\PropertyEstimation;
+use App\PropertyEstimation\Entity\PropertyEstimation;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**

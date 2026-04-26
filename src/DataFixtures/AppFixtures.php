@@ -4,7 +4,7 @@ namespace App\DataFixtures;
 
 use App\Contact\Factory\ContactFactory;
 use App\Newsletter\Factory\NewsletterFactory;
-use App\Factory\PropertyEstimationFactory;
+use App\PropertyEstimation\Factory\PropertyEstimationFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;

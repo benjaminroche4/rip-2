@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\PropertyEstimation\Controller;
 
-use App\Entity\PropertyEstimation;
-use App\Form\PropertyEstimationType;
-use App\Message\SendEstimationEmailMessage;
+use App\PropertyEstimation\Entity\PropertyEstimation;
+use App\PropertyEstimation\Form\PropertyEstimationType;
+use App\PropertyEstimation\Message\SendEstimationEmailMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

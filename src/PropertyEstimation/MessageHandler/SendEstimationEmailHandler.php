@@ -1,9 +1,9 @@
 <?php
 
-namespace App\MessageHandler;
+namespace App\PropertyEstimation\MessageHandler;
 
 use App\Enum\EmailAddress;
-use App\Message\SendEstimationEmailMessage;
+use App\PropertyEstimation\Message\SendEstimationEmailMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;

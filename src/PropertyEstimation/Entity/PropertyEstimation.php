@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\PropertyEstimation\Entity;
 
-use App\Repository\PropertyEstimationRepository;
+use App\PropertyEstimation\Repository\PropertyEstimationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PropertyEstimationRepository::class)]
