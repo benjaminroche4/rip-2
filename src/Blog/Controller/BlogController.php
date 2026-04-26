@@ -32,7 +32,7 @@ final class BlogController extends AbstractController
         $categories = $this->blogRepository->findCategoriesWithCount($_locale);
         $totalArticles = $this->blogRepository->countAll($_locale);
 
-        $heroSlug = $hero['slug'] ?? '';
+        $heroSlug = $hero?->slug ?? '';
         $paginated = $this->blogRepository->findPaginated($_locale, $page, self::PER_PAGE, $activeCategory, $heroSlug);
 
         $totalCount = $paginated['total'];
