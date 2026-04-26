@@ -1,0 +1,20 @@
+{# JSON-LD Service node — included from a service-landing page's
+   {% block schema_page %}.
+   Caller passes via {% include … with %}: routeName, metaPrefix, image (optional).
+   Caller is responsible for the leading comma. #}
+
+,{
+    "@type": "Service",
+    "@id": "{{ site_url }}{{ path(routeName) }}/#service",
+    "url": "{{ site_url }}{{ path(routeName) }}",
+    "name": "{{ ('meta.' ~ metaPrefix ~ '.title')|trans|e('js') }}",
+    "description": "{{ ('meta.' ~ metaPrefix ~ '.description')|trans|e('js') }}",
+    "provider": { "@id": "{{ site_url }}/#organization" },
+    "areaServed": {
+        "@type": "City",
+        "name": "Paris"
+    }
+    {% if image is defined and image %}
+    ,"image": "{{ site_url }}/{{ image }}"
+    {% endif %}
+}

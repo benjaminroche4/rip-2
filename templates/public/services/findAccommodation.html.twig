@@ -5,19 +5,11 @@
 {% block url %}{{ path('app_service_find_accommodation') }}{% endblock %}
 
 {% block schema_page %}
-    ,{
-        "@type": "Service",
-        "@id": "{{ site_url }}{{ path('app_service_find_accommodation') }}/#service",
-        "url": "{{ site_url }}{{ path('app_service_find_accommodation') }}",
-        "name": "{{ 'meta.findAccommodation.title'|trans|e('js') }}",
-        "description": "{{ 'meta.findAccommodation.description'|trans|e('js') }}",
-        "provider": { "@id": "{{ site_url }}/#organization" },
-        "areaServed": {
-            "@type": "City",
-            "name": "Paris"
-        },
-        "image": "{{ site_url }}/medias/website/relocation-in-paris-9.webp"
-    }
+    {% include '_partials/schema/service.html.twig' with {
+        routeName: 'app_service_find_accommodation',
+        metaPrefix: 'findAccommodation',
+        image: 'medias/website/relocation-in-paris-9.webp',
+    } only %}
 {% endblock %}
 
 {% block body %}

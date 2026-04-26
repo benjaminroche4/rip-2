@@ -5,18 +5,10 @@
 {% block url %}{{ path('app_service_find_tenant') }}{% endblock %}
 
 {% block schema_page %}
-    ,{
-        "@type": "Service",
-        "@id": "{{ site_url }}{{ path('app_service_find_tenant') }}/#service",
-        "url": "{{ site_url }}{{ path('app_service_find_tenant') }}",
-        "name": "{{ 'meta.findTenant.title'|trans|e('js') }}",
-        "description": "{{ 'meta.findTenant.description'|trans|e('js') }}",
-        "provider": { "@id": "{{ site_url }}/#organization" },
-        "areaServed": {
-            "@type": "City",
-            "name": "Paris"
-        }
-    }
+    {% include '_partials/schema/service.html.twig' with {
+        routeName: 'app_service_find_tenant',
+        metaPrefix: 'findTenant',
+    } only %}
 {% endblock %}
 
 {% block body %}

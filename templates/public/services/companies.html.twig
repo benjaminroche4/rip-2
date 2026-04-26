@@ -5,18 +5,10 @@
 {% block url %}{{ path('app_service_companies') }}{% endblock %}
 
 {% block schema_page %}
-    ,{
-        "@type": "Service",
-        "@id": "{{ site_url }}{{ path('app_service_companies') }}/#service",
-        "url": "{{ site_url }}{{ path('app_service_companies') }}",
-        "name": "{{ 'meta.companies.title'|trans|e('js') }}",
-        "description": "{{ 'meta.companies.description'|trans|e('js') }}",
-        "provider": { "@id": "{{ site_url }}/#organization" },
-        "areaServed": {
-            "@type": "City",
-            "name": "Paris"
-        }
-    }
+    {% include '_partials/schema/service.html.twig' with {
+        routeName: 'app_service_companies',
+        metaPrefix: 'companies',
+    } only %}
 {% endblock %}
 
 {% block body %}
