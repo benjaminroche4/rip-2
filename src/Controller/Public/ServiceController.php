@@ -26,7 +26,7 @@ final class ServiceController extends AbstractController
     )]
     public function findAccommodation(): Response
     {
-        return $this->render('public/services/findAccommodation.html.twig');
+        return $this->render('public/services/find_accommodation.html.twig');
     }
 
     #[Route(
@@ -66,6 +66,6 @@ final class ServiceController extends AbstractController
     )]
     public function findTenant(): Response
     {
-        return $this->render('public/services/findTenant.html.twig');
+        return $this->render('public/services/find_tenant.html.twig');
     }
 }

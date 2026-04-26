@@ -15,7 +15,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\Map\Live\ComponentWithMapTrait;
 use Symfony\UX\Map\Map;
 
-#[AsLiveComponent]
+#[AsLiveComponent(name: 'Marketplace:Search', template: 'components/Marketplace/Search.html.twig')]
 final class MarketplaceSearch
 {
     use DefaultActionTrait;
