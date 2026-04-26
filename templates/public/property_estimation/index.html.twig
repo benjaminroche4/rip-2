@@ -28,18 +28,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 py-8 lg:py-12 gap-y-12">
             <div class="mx-auto flex h-full w-full max-w-xl flex-col justify-center">
                 <div class="pb-10 w-fit mx-auto lg:mx-0" aria-hidden="true">
-                    <div class="border border-neutral-100 rounded-full px-4 py-1.5 flex items-center justify-center gap-x-2
-                        text-sm text-slate-600  mx-auto bg-white shadow-lg shadow-gray-300/30">
-                        <div class="flex justify-center items-center -space-x-1">
-                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
-                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
-                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
-                            <span class="max-[382px]:hidden">{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
-                            <span>{{ ux_icon('material-symbols:star-rounded', {'class':'size-5 text-yellow-500 shrink-0'}) }}</span>
-                        </div>
-                        <p>{{ 'findAccommodation.trust.1'|trans|raw }} <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">+300 {{ 'findAccommodation.trust.2'|trans|raw }} </a></p>
-                        <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>
-                    </div>
+                    <twig:Section:GoogleTrustBadge keyPrefix="findAccommodation.trust" />
                 </div>
                 <h1 class="mx-auto max-w-2xl text-center text-5xl font-medium tracking-tight text-gray-900 lg:text-start lg:text-6xl/16 text-pretty">
                     {{ 'propertyManagement.hero.title'|trans|raw }}

@@ -36,13 +36,12 @@
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <p class="text-center font-semibold text-primary font-secondary capitalize">{{ 'blog.list.title'|trans|raw }}</p>
-            <h1 class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ 'blog.list.subTitle'|trans|raw }}</h1>
-            <p class="text-center max-w-lg mx-auto text-neutral-600 text-pretty">
-                {{ 'blog.list.text'|trans|raw }}
-            </p>
-        </div>
+        <twig:Section:PageHeader
+            caption="blog.list.title"
+            subtitle="blog.list.subTitle"
+            intro="blog.list.text"
+            captionClass="capitalize"
+        />
     </section>
     <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
         {% if hero %}

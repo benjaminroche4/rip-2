@@ -1,0 +1,29 @@
+{# Centered page header used on landing pages.
+
+   Renders the typical hero pattern:
+   - small primary-color caption (visual label, semantically <p>)
+   - large heading (h1 by default, h2 if rendered inside a section)
+   - optional intro paragraph
+
+   Each text comes from a translation key — caller passes the key, not the
+   resolved string, so the component owns the |trans|raw step. #}
+
+{# @prop caption  string|null Translation key for the small caption (default null = hidden) #}
+{# @prop subtitle string      Translation key for the main heading #}
+{# @prop intro    string|null Translation key for the optional intro paragraph #}
+{# @prop introParams array    Optional placeholders for intro translation (e.g. {'%url%': path('app_x')}) #}
+{# @prop as        string     Heading tag for subtitle, default 'h1'. Use 'h2' from inner sections. #}
+{# @prop captionClass string  Extra classes appended to the caption (e.g. 'capitalize') #}
+{%- props caption = null, subtitle, intro = null, introParams = {}, as = 'h1', captionClass = '' -%}
+
+<div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
+    {% if caption %}
+        <p class="text-center font-semibold text-primary font-secondary {{ captionClass }}">{{ caption|trans|raw }}</p>
+    {% endif %}
+    <{{ as }} class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ subtitle|trans|raw }}</{{ as }}>
+    {% if intro %}
+        <p class="text-center max-w-lg mx-auto text-neutral-600 text-pretty">
+            {{ intro|trans(introParams)|raw }}
+        </p>
+    {% endif %}
+</div>
