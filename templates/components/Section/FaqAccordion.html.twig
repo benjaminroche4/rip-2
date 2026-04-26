@@ -1,0 +1,24 @@
+{# Reusable FAQ accordion driven by translation keys.
+
+   For each integer in `keys`, renders one accordion item whose trigger
+   reads `{keyPrefix}.{i}.title` and content `{keyPrefix}.{i}.text`.
+   Pages keep their own surrounding heading/layout; this component owns
+   only the accordion innards.
+
+   Used by home/index, faq/index, pricing/index, services/findAccommodation. #}
+
+{# @prop keyPrefix string Translation namespace, e.g. 'home.faq.question' #}
+{# @prop keys      array Suffixes to render, in order — e.g. [1,2,3] or 1..14 or [7,8,3,4,9,6] #}
+{# @prop accordionId string Unique accordion id (default: 'accordion-1'); useful when two FAQs coexist on a page #}
+{%- props keyPrefix, keys, accordionId = 'accordion-1' -%}
+
+<twig:Accordion id="{{ accordionId }}" defaultValue="{{ ['item-1'] }}">
+    {% for i in keys %}
+        <twig:Accordion:Item value="item-{{ loop.index }}">
+            <twig:Accordion:Trigger>{{ (keyPrefix ~ '.' ~ i ~ '.title')|trans|raw }}</twig:Accordion:Trigger>
+            <twig:Accordion:Content>
+                {{ (keyPrefix ~ '.' ~ i ~ '.text')|trans|raw }}
+            </twig:Accordion:Content>
+        </twig:Accordion:Item>
+    {% endfor %}
+</twig:Accordion>

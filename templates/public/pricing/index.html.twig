@@ -253,38 +253,7 @@
                 </div>
             </div>
             <div class="mt-10 lg:col-span-7 lg:mt-0">
-                <twig:Accordion id="accordion-1" defaultValue="{{ ['item-1'] }}">
-                    <twig:Accordion:Item value="item-1">
-                        <twig:Accordion:Trigger>{{ 'pricing.faq.1.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'pricing.faq.1.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-2">
-                        <twig:Accordion:Trigger>{{ 'pricing.faq.2.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'pricing.faq.2.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-3">
-                        <twig:Accordion:Trigger>{{ 'pricing.faq.3.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'pricing.faq.3.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-4">
-                        <twig:Accordion:Trigger>{{ 'pricing.faq.4.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'pricing.faq.4.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-5">
-                        <twig:Accordion:Trigger>{{ 'pricing.faq.5.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'pricing.faq.5.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                </twig:Accordion>
+                <twig:Section:FaqAccordion keyPrefix="pricing.faq" :keys="1..5" />
             </div>
         </div>
     </section>

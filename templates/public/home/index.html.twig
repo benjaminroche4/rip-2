@@ -483,44 +483,7 @@
                 </div>
             </div>
             <div class="mt-10 lg:col-span-7 lg:mt-0">
-                <twig:Accordion id="accordion-1" defaultValue="{{ ['item-1'] }}">
-                    <twig:Accordion:Item value="item-1">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.1.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.1.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-2">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.2.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.2.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-3">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.3.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.3.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-4">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.4.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.4.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-5">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.5.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.5.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                    <twig:Accordion:Item value="item-6">
-                        <twig:Accordion:Trigger>{{ 'home.faq.question.6.title'|trans|raw }}</twig:Accordion:Trigger>
-                        <twig:Accordion:Content>
-                            {{ 'home.faq.question.6.text'|trans|raw }}
-                        </twig:Accordion:Content>
-                    </twig:Accordion:Item>
-                </twig:Accordion>
+                <twig:Section:FaqAccordion keyPrefix="home.faq.question" :keys="1..6" />
             </div>
         </div>
     </section>
