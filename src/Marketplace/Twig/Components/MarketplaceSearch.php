@@ -3,7 +3,8 @@
 namespace App\Marketplace\Twig\Components;
 
 use App\Marketplace\Filter\PropertyFilter;
-use App\Marketplace\Map\MarkerBuilder;
+use App\Marketplace\Map\MapBuilder;
+use App\Marketplace\Reference\ParisArrondissements;
 use App\Marketplace\Repository\PropertyRepository;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -11,12 +12,8 @@ use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\Attribute\PreReRender;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use Symfony\UX\Map\Bridge\Google\GoogleOptions;
-use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
-use Symfony\UX\Map\Cluster\GridClusteringAlgorithm;
 use Symfony\UX\Map\Live\ComponentWithMapTrait;
 use Symfony\UX\Map\Map;
-use Symfony\UX\Map\Point;
 
 #[AsLiveComponent]
 final class MarketplaceSearch
@@ -26,30 +23,6 @@ final class MarketplaceSearch
 
     private const PER_PAGE = 24;
     private const ALLOWED_LOCALES = ['fr', 'en'];
-
-    /** Centre approximatif de chaque arrondissement de Paris */
-    private const ARRONDISSEMENT_CENTERS = [
-        1  => [48.8606, 2.3376],
-        2  => [48.8682, 2.3417],
-        3  => [48.8630, 2.3601],
-        4  => [48.8550, 2.3578],
-        5  => [48.8443, 2.3500],
-        6  => [48.8488, 2.3325],
-        7  => [48.8567, 2.3127],
-        8  => [48.8718, 2.3119],
-        9  => [48.8769, 2.3372],
-        10 => [48.8762, 2.3601],
-        11 => [48.8594, 2.3782],
-        12 => [48.8400, 2.3877],
-        13 => [48.8322, 2.3561],
-        14 => [48.8331, 2.3264],
-        15 => [48.8417, 2.2986],
-        16 => [48.8603, 2.2620],
-        17 => [48.8848, 2.3076],
-        18 => [48.8925, 2.3444],
-        19 => [48.8847, 2.3845],
-        20 => [48.8631, 2.4007],
-    ];
 
     /* ----------------- Live state ----------------- */
 
@@ -123,7 +96,7 @@ final class MarketplaceSearch
     public function __construct(
         private readonly PropertyRepository $propertyRepository,
         private readonly PropertyFilter $propertyFilter,
-        private readonly MarkerBuilder $markerBuilder,
+        private readonly MapBuilder $mapBuilder,
     ) {}
 
     public function mount(
@@ -161,9 +134,7 @@ final class MarketplaceSearch
     #[LiveAction]
     public function search(): void
     {
-        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
-            [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
-        }
+        $this->normalizeRentBounds();
 
         $this->arrondissement = $this->draftArrondissement;
         $this->propertyType = $this->draftPropertyType;
@@ -192,9 +163,7 @@ final class MarketplaceSearch
     #[LiveAction]
     public function normalizeRents(): void
     {
-        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
-            [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
-        }
+        $this->normalizeRentBounds();
     }
 
     #[LiveAction]
@@ -213,7 +182,7 @@ final class MarketplaceSearch
 
         $map = $this->getMap();
         $map->removeAllMarkers();
-        $this->addMarkersToMap($map);
+        $this->refreshMarkers($map);
     }
 
     #[PreReRender]
@@ -230,17 +199,17 @@ final class MarketplaceSearch
         }
 
         if ($arrondissementChanged) {
-            // Reset complet de la carte (nouveau centre + zoom)
+            // Reset complet de la carte (nouveau centre + zoom).
             $this->south = null;
             $this->north = null;
             $this->west = null;
             $this->east = null;
-            $this->zoom = ($this->arrondissement !== null && isset(self::ARRONDISSEMENT_CENTERS[$this->arrondissement])) ? 14 : 12;
+            $this->zoom = ParisArrondissements::defaultZoom($this->arrondissement);
             $this->map = null;
         } else {
             $map = $this->getMap();
             $map->removeAllMarkers();
-            $this->addMarkersToMap($map);
+            $this->refreshMarkers($map);
         }
 
         $this->prevArrondissement = $this->arrondissement;
@@ -273,6 +242,20 @@ final class MarketplaceSearch
 
     /* ----------------- Internals ----------------- */
 
+    protected function instantiateMap(): Map
+    {
+        $map = $this->mapBuilder->buildMap($this->arrondissement, $this->zoom);
+        $this->refreshMarkers($map);
+
+        return $map;
+    }
+
+    private function refreshMarkers(Map $map): void
+    {
+        $bounds = $this->mapBuilder->resolveBounds($this->south, $this->north, $this->west, $this->east);
+        $this->mapBuilder->addMarkers($map, $this->getFilteredProperties(), $bounds, $this->zoom, $this->locale);
+    }
+
     private function getFilteredProperties(): array
     {
         $key = sprintf('%s|%s|%s|%s', $this->arrondissement ?? '', $this->propertyType, $this->rentMin ?? '', $this->rentMax ?? '');
@@ -294,103 +277,10 @@ final class MarketplaceSearch
         return $filtered;
     }
 
-    protected function instantiateMap(): Map
+    private function normalizeRentBounds(): void
     {
-        $center = ($this->arrondissement !== null && isset(self::ARRONDISSEMENT_CENTERS[$this->arrondissement]))
-            ? new Point(self::ARRONDISSEMENT_CENTERS[$this->arrondissement][0], self::ARRONDISSEMENT_CENTERS[$this->arrondissement][1])
-            : new Point(48.8566, 2.3522);
-
-        $map = (new Map('default'))
-            ->center($center)
-            ->zoom($this->zoom)
-            ->minZoom(9)
-            ->maxZoom(17)
-            ->options(new GoogleOptions(
-                gestureHandling: GestureHandling::GREEDY,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-            ));
-
-        $this->addMarkersToMap($map);
-
-        return $map;
-    }
-
-    private function addMarkersToMap(Map $map): void
-    {
-        $properties = $this->getFilteredProperties();
-        $bounds = $this->getActiveBounds();
-
-        $validProperties = [];
-        $points = [];
-
-        foreach ($properties as $property) {
-            if (empty($property['location']['lat']) || empty($property['location']['lng'])) {
-                continue;
-            }
-
-            $lat = $property['location']['lat'];
-            $lng = $property['location']['lng'];
-
-            if ($lat < $bounds['south'] || $lat > $bounds['north'] || $lng < $bounds['west'] || $lng > $bounds['east']) {
-                continue;
-            }
-
-            $points[] = new Point($lat, $lng);
-            $validProperties[] = $property;
+        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
+            [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
         }
-
-        if (empty($points)) {
-            return;
-        }
-
-        // Lookup "lat,lng" => list of properties at that point
-        $pointToProperties = [];
-        foreach ($validProperties as $i => $property) {
-            $key = $points[$i]->getLatitude() . ',' . $points[$i]->getLongitude();
-            $pointToProperties[$key][] = $property;
-        }
-
-        $clusters = (new GridClusteringAlgorithm())->cluster($points, $this->zoom);
-
-        foreach ($clusters as $cluster) {
-            if ($cluster->count() === 1) {
-                $singlePoint = $cluster->getPoints()[0];
-                $key = $singlePoint->getLatitude() . ',' . $singlePoint->getLongitude();
-                $property = $pointToProperties[$key][0] ?? null;
-
-                if ($property) {
-                    $map->addMarker($this->markerBuilder->buildPropertyMarker($property, $this->locale));
-                }
-            } else {
-                $clusterPropertyIds = [];
-                foreach ($cluster->getPoints() as $point) {
-                    $key = $point->getLatitude() . ',' . $point->getLongitude();
-                    foreach ($pointToProperties[$key] ?? [] as $p) {
-                        $clusterPropertyIds[] = $p['_id'];
-                    }
-                }
-                $map->addMarker($this->markerBuilder->buildClusterMarker($cluster->getCenter(), $cluster->count(), $clusterPropertyIds, $this->locale));
-            }
-        }
-    }
-
-    /**
-     * @return array{south: float, north: float, west: float, east: float}
-     */
-    private function getActiveBounds(): array
-    {
-        if ($this->south !== null && $this->north !== null && $this->west !== null && $this->east !== null) {
-            return [
-                'south' => $this->south,
-                'north' => $this->north,
-                'west' => $this->west,
-                'east' => $this->east,
-            ];
-        }
-
-        // Default: Paris + petite couronne
-        return ['south' => 48.69, 'north' => 49.01, 'west' => 2.09, 'east' => 2.67];
     }
 }
