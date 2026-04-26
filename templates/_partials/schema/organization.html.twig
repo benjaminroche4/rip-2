@@ -1,0 +1,84 @@
+{# Schema.org ProfessionalService + WebSite. Always included; the per-page
+   WebPage / Article / Product node is appended via {% block schema_page %}. #}
+{
+    "@type": "ProfessionalService",
+    "@id": "https://relocation-in-paris.fr/#organization",
+    "name": "Relocation in Paris",
+    "legalName": "SARL Relocation in Paris",
+    "url": "https://relocation-in-paris.fr",
+    "description": "{{ 'schema.description'|trans|e('js') }}",
+    "telephone": "+33184804344",
+    "email": "contact@relocation-in-paris.fr",
+    "inLanguage": ["fr-FR", "en-GB"],
+    "areaServed": {
+        "@type": "City",
+        "name": "Paris"
+    },
+    "logo": {
+        "@type": "ImageObject",
+        "url": "https://relocation-in-paris.fr/medias/logos/logo_red.svg"
+    },
+    "image": [
+        "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+    ],
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "155 Rue du Faubourg Saint-Denis",
+        "addressLocality": "Paris",
+        "postalCode": "75010",
+        "addressRegion": "Île-de-France",
+        "addressCountry": "FR"
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 48.878,
+        "longitude": 2.355
+    },
+    "openingHoursSpecification": [
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"],
+            "opens": "08:00",
+            "closes": "20:00"
+        }
+    ],
+    "priceRange": "À partir de 1190€",
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": "370",
+        "reviewCount": "370"
+    },
+    "sameAs": [
+        "https://www.linkedin.com/company/relocation-in-paris/",
+        "https://www.instagram.com/relocation_in_paris/"
+    ],
+    "contactPoint": [
+        {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "telephone": "+33184804344",
+            "email": "contact@relocation-in-paris.fr",
+            "availableLanguage": ["French", "English", "Spanish"]
+        },
+        {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "telephone": "+33761719439",
+            "url": "https://wa.me/33761719439",
+            "availableLanguage": ["French", "English", "Spanish"]
+        }
+    ]
+},
+{
+    "@type": "WebSite",
+    "@id": "https://relocation-in-paris.fr/#website",
+    "url": "https://relocation-in-paris.fr",
+    "name": "Relocation in Paris",
+    "publisher": {
+        "@id": "https://relocation-in-paris.fr/#organization"
+    },
+    "inLanguage": ["fr-FR", "en-GB"]
+}

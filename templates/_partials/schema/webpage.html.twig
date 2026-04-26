@@ -1,0 +1,25 @@
+{# Renders a JSON-LD WebPage node — included from a page's {% block schema_page %}.
+   Required:
+     - id           page anchor (e.g. "homepage", "contactpage")
+     - name         the page title
+     - description  the meta description
+   Optional:
+     - image        URL of the primary page image (defaults to the OG banner)
+     - type         WebPage subtype (default "WebPage")
+   Caller is responsible for the leading comma. #}
+,{
+    "@type": "{{ type|default('WebPage') }}",
+    "@id": "https://relocation-in-paris.fr/{{ app.request.locale }}/#{{ id }}",
+    "url": "https://relocation-in-paris.fr/{{ app.request.locale }}{{ url|default('') }}",
+    "name": "{{ name|e('js') }}",
+    "description": "{{ description|e('js') }}",
+    "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+    "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
+    "about": { "@id": "https://relocation-in-paris.fr/#organization" }
+    {% if image is defined %}
+    ,"primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "{{ image }}"
+    }
+    {% endif %}
+}

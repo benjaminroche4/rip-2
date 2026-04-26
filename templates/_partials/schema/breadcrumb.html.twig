@@ -1,0 +1,17 @@
+{# Renders a JSON-LD BreadcrumbList — included from a page's {% block schema_page %}.
+   Required:
+     - items  array of { name, url } objects in order.
+   Caller is responsible for the leading comma. #}
+,{
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {% for item in items %}
+        {
+            "@type": "ListItem",
+            "position": {{ loop.index }},
+            "name": "{{ item.name|e('js') }}",
+            "item": "{{ item.url|e('js') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}

@@ -11,47 +11,17 @@
         <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
         {% block head_preload %}{% endblock %}
 
-        <!-- Hreflang -->
+        {# OG image is captured here so meta partial can receive the resolved value #}
+        {% set pageOgImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
+
         {% block hreflang %}
-            {% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
-            <link rel="alternate" hreflang="fr" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
-            <link rel="alternate" hreflang="en" href="https://relocation-in-paris.fr/en{{ currentPath }}" />
-            <link rel="alternate" hreflang="x-default" href="https://relocation-in-paris.fr/fr{{ currentPath }}" />
+            {% include '_partials/meta.html.twig' with {
+                pageTitle: block('title'),
+                pageDescription: block('description'),
+                pageUrl: block('url'),
+                pageOgImage: pageOgImage|trim,
+            } only %}
         {% endblock %}
-
-        {# Preconnect to external origins used for above-the-fold resources #}
-        <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="dns-prefetch" href="https://maps.googleapis.com">
-        <link rel="dns-prefetch" href="https://maps.gstatic.com">
-
-        {# Google Fonts — loaded non-blocking via print media swap, avoids blocking CSS parse #}
-        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" media="print" onload="this.media='all'">
-        <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"></noscript>
-
-        <link rel="icon" type="image/jpg" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
-
-        <!-- Og Meta Tags -->
-        <meta property="og:type" content="website">
-        <meta property="og:site_name" content="Relocation In Paris">
-        <meta property="og:locale" content="{{ app.request.locale == 'fr' ? 'fr_FR' : 'en_GB' }}">
-        <meta property="og:locale:alternate" content="{{ app.request.locale == 'fr' ? 'en_GB' : 'fr_FR' }}">
-        <meta property="og:title" content="Relocation In Paris - {{ block('title') }}">
-        <meta property="og:url" content="https://relocation-in-paris.fr{{ block('url') }}">
-        {% set ogImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
-        <meta property="og:image" content="{{ ogImage|trim }}">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
-        <meta property="og:description" content="{{ block('description') }}">
-
-        <!-- Twitter Card -->
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Relocation In Paris - {{ block('title') }}">
-        <meta name="twitter:description" content="{{ block('description') }}">
-        <meta name="twitter:image" content="{{ ogImage|trim }}">
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
@@ -63,121 +33,30 @@
 
             {% block google_maps %}{% endblock %}
 
-            <!-- Schema.org -->
+            {# Schema.org graph: Organization + WebSite always; per-page node via schema_page #}
             <script type="application/ld+json">
                 {
                   "@context": "https://schema.org",
                   "@graph": [
-                    {
-                      "@type": "ProfessionalService",
-                      "@id": "https://relocation-in-paris.fr/#organization",
-                      "name": "Relocation in Paris",
-                      "legalName": "SARL Relocation in Paris",
-                      "url": "https://relocation-in-paris.fr",
-                      "description": "{{ 'schema.description'|trans|e('js') }}",
-                      "telephone": "+33184804344",
-                      "email": "contact@relocation-in-paris.fr",
-                      "inLanguage": ["fr-FR", "en-GB"],
-                      "areaServed": {
-                        "@type": "City",
-                        "name": "Paris"
-                      },
-                      "logo": {
-                        "@type": "ImageObject",
-                        "url": "https://relocation-in-paris.fr/medias/logos/logo_red.svg"
-                      },
-                      "image": [
-                        "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
-                      ],
-                      "address": {
-                        "@type": "PostalAddress",
-                        "streetAddress": "155 Rue du Faubourg Saint-Denis",
-                        "addressLocality": "Paris",
-                        "postalCode": "75010",
-                        "addressRegion": "Île-de-France",
-                        "addressCountry": "FR"
-                      },
-                      "geo": {
-                        "@type": "GeoCoordinates",
-                        "latitude": 48.878,
-                        "longitude": 2.355
-                      },
-                      "openingHoursSpecification": [
-                        {
-                          "@type": "OpeningHoursSpecification",
-                          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"],
-                          "opens": "08:00",
-                          "closes": "20:00"
-                        }
-                      ],
-                      "priceRange": "À partir de 1190€",
-                      "aggregateRating": {
-                        "@type": "AggregateRating",
-                        "ratingValue": "4.9",
-                        "bestRating": "5",
-                        "worstRating": "1",
-                        "ratingCount": "370",
-                        "reviewCount": "370"
-                      },
-                      "sameAs": [
-                        "https://www.linkedin.com/company/relocation-in-paris/",
-                        "https://www.instagram.com/relocation_in_paris/"
-                      ],
-                      "contactPoint": [
-                        {
-                          "@type": "ContactPoint",
-                          "contactType": "customer service",
-                          "telephone": "+33184804344",
-                          "email": "contact@relocation-in-paris.fr",
-                          "availableLanguage": ["French", "English", "Spanish"]
-                        },
-                        {
-                          "@type": "ContactPoint",
-                          "contactType": "customer service",
-                          "telephone": "+33761719439",
-                          "url": "https://wa.me/33761719439",
-                          "availableLanguage": ["French", "English", "Spanish"]
-                        }
-                      ]
-                    },
-                    {
-                      "@type": "WebSite",
-                      "@id": "https://relocation-in-paris.fr/#website",
-                      "url": "https://relocation-in-paris.fr",
-                      "name": "Relocation in Paris",
-                      "publisher": {
-                        "@id": "https://relocation-in-paris.fr/#organization"
-                      },
-                      "inLanguage": ["fr-FR", "en-GB"]
-                    }
+                    {% include '_partials/schema/organization.html.twig' %}
                     {% block schema_page %}{% endblock %}
                   ]
                 }
             </script>
         {% endblock %}
+
+        {% block head_tracking %}{% include '_partials/tracking/gtm_head.html.twig' %}{% endblock %}
     </head>
     <body>
+        {% include '_partials/tracking/gtm_body.html.twig' %}
         <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
             {{ 'a11y.skipToContent'|trans }}
         </a>
-        <noscript>
-            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSHQL7Q6"
-                    height="0" width="0" style="display:none;visibility:hidden">
-            </iframe>
-        </noscript>
         {{ component('blocks/gridBackground') }}
         {{ component('Layout/header', {post: post|default(null), property: property|default(null)}) }}
         <main id="main-content" class="relative z-20" tabindex="-1">
             {% block body %}{% endblock %}
         </main>
         {{ component('Layout/footer') }}
-
-        <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-TSHQL7Q6');</script>
-        <!-- End Google Tag Manager -->
     </body>
 </html>
