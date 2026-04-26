@@ -10,8 +10,8 @@
     "headline": "{{ post.title|e('js') }}",
     "description": "{{ (post.metaDescription ?? post.shortDescription ?? post.title)|e('js') }}",
     "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
-    "datePublished": "{{ postDate }}",
-    "dateModified": "{{ postDate }}",
+    "datePublished": "{{ postDate|date('c') }}",
+    "dateModified": "{{ postDate|date('c') }}",
     {% if post.category is defined and post.category %}
     "articleSection": "{{ post.category.name|e('js') }}",
     {% endif %}

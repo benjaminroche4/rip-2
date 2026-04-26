@@ -69,7 +69,7 @@
                                         </svg>
                                     {% endif %}
                                     <div class="min-[359px]:mt-0 mt-2">
-                                        <time class="truncate" datetime="{{ heroDate }}">{{ heroDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                        <time class="truncate" datetime="{{ heroDate|date('c') }}">{{ heroDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                     </div>
                                 </div>
                                 <h2 class="mt-4 lg:mt-8 font-semibold text-xl lg:text-3xl text-pretty">{{ hero.title }}</h2>
@@ -151,7 +151,7 @@
                                     </svg>
                                 {% endif %}
                                 <div class="min-[359px]:mt-0 mt-2">
-                                    <time class="truncate" datetime="{{ blogDate }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    <time class="truncate" datetime="{{ blogDate|date('c') }}">{{ blogDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                 </div>
                             </div>
                             <div class="mt-4 space-y-2">

@@ -134,7 +134,7 @@
                                 </div>
                                 <div>
                                     {% set displayDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
-                                    <time class="text-neutral-500 text-sm" datetime="{{ displayDate }}">{{ 'blog.show.menu.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                    <time class="text-neutral-500 text-sm" datetime="{{ displayDate|date('c') }}">{{ 'blog.show.menu.published'|trans|raw }} {{ displayDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                 </div>
                             </div>
                         </div>
@@ -334,7 +334,7 @@
                                         </svg>
                                     {% endif %}
                                     <div class="min-[359px]:mt-0 mt-2">
-                                        <time class="truncate" datetime="{{ latestPostDate }}">{{ latestPostDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                                        <time class="truncate" datetime="{{ latestPostDate|date('c') }}">{{ latestPostDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
                                     </div>
                                 </div>
                                 <div class="mt-4 space-y-2">
