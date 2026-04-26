@@ -4,7 +4,7 @@
 {% block description %}{{ 'meta.marketplace.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_property') }}{% endblock %}
 
-{% set baseUrl = 'https://relocation-in-paris.fr' %}
+{% set baseUrl = site_url %}
 {% set pageUrl = baseUrl ~ path('app_property') %}
 
 {% block schema_page %}

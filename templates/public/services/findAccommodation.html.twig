@@ -7,16 +7,16 @@
 {% block schema_page %}
     ,{
         "@type": "Service",
-        "@id": "https://relocation-in-paris.fr{{ path('app_service_find_accommodation') }}/#service",
-        "url": "https://relocation-in-paris.fr{{ path('app_service_find_accommodation') }}",
+        "@id": "{{ site_url }}{{ path('app_service_find_accommodation') }}/#service",
+        "url": "{{ site_url }}{{ path('app_service_find_accommodation') }}",
         "name": "{{ 'meta.findAccommodation.title'|trans|e('js') }}",
         "description": "{{ 'meta.findAccommodation.description'|trans|e('js') }}",
-        "provider": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "provider": { "@id": "{{ site_url }}/#organization" },
         "areaServed": {
             "@type": "City",
             "name": "Paris"
         },
-        "image": "https://relocation-in-paris.fr/medias/website/relocation-in-paris-9.webp"
+        "image": "{{ site_url }}/medias/website/relocation-in-paris-9.webp"
     }
 {% endblock %}
 

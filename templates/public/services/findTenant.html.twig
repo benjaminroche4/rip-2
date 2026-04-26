@@ -7,11 +7,11 @@
 {% block schema_page %}
     ,{
         "@type": "Service",
-        "@id": "https://relocation-in-paris.fr{{ path('app_service_find_tenant') }}/#service",
-        "url": "https://relocation-in-paris.fr{{ path('app_service_find_tenant') }}",
+        "@id": "{{ site_url }}{{ path('app_service_find_tenant') }}/#service",
+        "url": "{{ site_url }}{{ path('app_service_find_tenant') }}",
         "name": "{{ 'meta.findTenant.title'|trans|e('js') }}",
         "description": "{{ 'meta.findTenant.description'|trans|e('js') }}",
-        "provider": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "provider": { "@id": "{{ site_url }}/#organization" },
         "areaServed": {
             "@type": "City",
             "name": "Paris"

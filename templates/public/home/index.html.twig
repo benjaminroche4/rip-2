@@ -14,20 +14,20 @@
 {% block schema_page %}
     ,{
         "@type": "WebPage",
-        "@id": "https://relocation-in-paris.fr/{{ app.request.locale }}/#homepage",
-        "url": "https://relocation-in-paris.fr/{{ app.request.locale }}",
+        "@id": "{{ site_url }}/{{ app.request.locale }}/#homepage",
+        "url": "{{ site_url }}/{{ app.request.locale }}",
         "name": "{{ 'meta.home.title'|trans|e('js') }}",
         "description": "{{ 'meta.home.description'|trans|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
-        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
-        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" },
         "primaryImageOfPage": {
             "@type": "ImageObject",
-            "url": "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+            "url": "{{ site_url }}/medias/banner/relocation-in-paris-banner.webp"
         },
         "review": {
             "@type": "AggregateRating",
-            "itemReviewed": { "@id": "https://relocation-in-paris.fr/#organization" },
+            "itemReviewed": { "@id": "{{ site_url }}/#organization" },
             "ratingValue": "4.9",
             "bestRating": "5",
             "ratingCount": "370"

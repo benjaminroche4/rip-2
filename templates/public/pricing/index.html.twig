@@ -7,12 +7,12 @@
 {% block schema_page %}
     ,{
         "@type": "Service",
-        "@id": "https://relocation-in-paris.fr/tarifs/#service",
+        "@id": "{{ site_url }}/tarifs/#service",
         "name": "{{ 'meta.pricing.title'|trans }}",
-        "url": "https://relocation-in-paris.fr{{ path('app_pricing') }}",
+        "url": "{{ site_url }}{{ path('app_pricing') }}",
         "provider": {
             "@type": "Organization",
-            "@id": "https://relocation-in-paris.fr/#organization"
+            "@id": "{{ site_url }}/#organization"
         },
         "hasOfferCatalog": {
             "@type": "OfferCatalog",

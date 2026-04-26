@@ -7,12 +7,12 @@
 {% block schema_page %},
     {
         "@type": "WebPage",
-        "@id": "https://relocation-in-paris.fr{{ path('app_terms_and_conditions') }}#webpage",
-        "url": "https://relocation-in-paris.fr{{ path('app_terms_and_conditions') }}",
+        "@id": "{{ site_url }}{{ path('app_terms_and_conditions') }}#webpage",
+        "url": "{{ site_url }}{{ path('app_terms_and_conditions') }}",
         "name": "{{ 'meta.termsConditions.title'|trans }}",
         "description": "{{ 'meta.termsConditions.description'|trans }}",
-        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
-        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" },
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "specialty": "TermsOfService"
     }

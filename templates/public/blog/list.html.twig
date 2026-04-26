@@ -7,13 +7,13 @@
 {% block schema_page %}
     ,{
         "@type": "CollectionPage",
-        "@id": "https://relocation-in-paris.fr{{ path('app_blog') }}/#bloglist",
-        "url": "https://relocation-in-paris.fr{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}",
+        "@id": "{{ site_url }}{{ path('app_blog') }}/#bloglist",
+        "url": "{{ site_url }}{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}",
         "name": "{{ 'meta.blog.title'|trans|e('js') }}",
         "description": "{{ 'meta.blog.description'|trans|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
-        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
-        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" },
         "numberOfItems": {{ totalArticles }}
     }
     ,{
@@ -23,7 +23,7 @@
                 "@type": "ListItem",
                 "position": 1,
                 "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
-                "item": "https://relocation-in-paris.fr/{{ app.request.locale }}"
+                "item": "{{ site_url }}/{{ app.request.locale }}"
             },
             {
                 "@type": "ListItem",

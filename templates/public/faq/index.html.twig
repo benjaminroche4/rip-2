@@ -7,13 +7,13 @@
 {% block schema_page %}
     ,{
         "@type": "FAQPage",
-        "@id": "https://relocation-in-paris.fr{{ path('app_faq') }}/#faqpage",
-        "url": "https://relocation-in-paris.fr{{ path('app_faq') }}",
+        "@id": "{{ site_url }}{{ path('app_faq') }}/#faqpage",
+        "url": "{{ site_url }}{{ path('app_faq') }}",
         "name": "{{ 'meta.faq.title'|trans|striptags|e('js') }}",
         "description": "{{ 'meta.faq.description'|trans|striptags|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
-        "isPartOf": { "@id": "https://relocation-in-paris.fr/#website" },
-        "about": { "@id": "https://relocation-in-paris.fr/#organization" },
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" },
         "mainEntity": [
             {
                 "@type": "Question",
