@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Data;
+namespace App\Marketplace\Reference;
 
-final class ParisTransport
+/**
+ * Static catalogue of Paris metro/RER lines (name, brand color, contrasting
+ * text color, type). Used to render the colored line badges on property cards.
+ */
+final class ParisMetroLines
 {
     public const LINES = [
         '1' => ['name' => 'Métro 1', 'color' => '#FFCD00', 'textColor' => '#000', 'type' => 'metro'],

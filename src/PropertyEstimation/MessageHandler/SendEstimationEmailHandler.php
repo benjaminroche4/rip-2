@@ -2,7 +2,7 @@
 
 namespace App\PropertyEstimation\MessageHandler;
 
-use App\Enum\EmailAddress;
+use App\Shared\Email\EmailAddress;
 use App\PropertyEstimation\Message\SendEstimationEmailMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
