@@ -1,0 +1,181 @@
+{# JSON-LD schema_page nodes for a Sanity Property — included from
+   marketplace/show.html.twig's {% block schema_page %}.
+   Caller passes via {% include … with %}: property, locale, pageUrl, baseUrl, seoTitle.
+   Caller is responsible for the leading comma. #}
+
+,{
+    "@type": "Apartment",
+    "@id": "{{ pageUrl }}/#property",
+    "url": "{{ pageUrl }}",
+    "name": "{{ seoTitle|e('js') }}",
+    "description": "{{ property.metaDescription|e('js') }}",
+    "inLanguage": "{{ locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+    "isPartOf": { "@id": "{{ baseUrl }}/#website" }
+    {% if property.uniqueId is defined and property.uniqueId %}
+    ,"identifier": "{{ property.uniqueId|e('js') }}"
+    {% endif %}
+    {% if property.createdAt is defined and property.createdAt %}
+    ,"datePosted": "{{ property.createdAt|date('c') }}"
+    {% endif %}
+    {% if property.updatedAt is defined and property.updatedAt %}
+    ,"dateModified": "{{ property.updatedAt|date('c') }}"
+    {% endif %}
+    {% if property.photos is defined and property.photos|length > 0 %}
+    ,"photo": [
+        {% for photo in property.photos %}
+            {
+                "@type": "ImageObject",
+                "url": "{{ photo.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+                {% if photo.alt %},"description": "{{ photo.alt|e('js') }}"{% endif %}
+            }{{ not loop.last ? ',' }}
+        {% endfor %}
+    ]
+    {% elseif property.mainPhoto.url is defined and property.mainPhoto.url %}
+    ,"photo": [{
+        "@type": "ImageObject",
+        "url": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+        {% if property.mainPhoto.alt %},"description": "{{ property.mainPhoto.alt|e('js') }}"{% endif %}
+    }]
+    {% endif %}
+    {% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+    ,"image": "{{ property.mainPhoto.url }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80"
+    {% endif %}
+    {% if property.bedrooms is defined and property.bedrooms and property.bedrooms != 'studio' %}
+    ,"numberOfBedrooms": {{ property.bedrooms == '9+' ? 9 : property.bedrooms }}
+    {% endif %}
+    {% if property.bathrooms %}
+    ,"numberOfBathroomsTotal": {{ property.bathrooms }}
+    {% endif %}
+    {% if property.squareMeters %}
+    ,"floorSize": {
+        "@type": "QuantitativeValue",
+        "value": {{ property.squareMeters }},
+        "unitCode": "MTK"
+    }
+    {% endif %}
+    {% if property.equipment is defined and property.equipment is not empty %}
+    ,"amenityFeature": [
+        {% set _amenityLabels = {
+            wifi: 'Wi-Fi',
+            airConditioning: (locale == 'fr' ? 'Climatisation' : 'Air conditioning'),
+            balcony: (locale == 'fr' ? 'Balcon' : 'Balcony'),
+            concierge: (locale == 'fr' ? 'Concierge' : 'Concierge'),
+            dishwasher: (locale == 'fr' ? 'Lave-vaisselle' : 'Dishwasher'),
+            dryer: (locale == 'fr' ? 'Sèche-linge' : 'Dryer'),
+            elevator: (locale == 'fr' ? 'Ascenseur' : 'Elevator'),
+            intercom: (locale == 'fr' ? 'Interphone' : 'Intercom'),
+            microwave: (locale == 'fr' ? 'Micro-ondes' : 'Microwave'),
+            parking: (locale == 'fr' ? 'Parking' : 'Parking'),
+            television: (locale == 'fr' ? 'Télévision' : 'Television'),
+            washingMachine: (locale == 'fr' ? 'Lave-linge' : 'Washing machine'),
+            naturalLight: (locale == 'fr' ? 'Lumière naturelle' : 'Natural light'),
+            doubleGlazing: (locale == 'fr' ? 'Double vitrage' : 'Double glazing'),
+            cellar: (locale == 'fr' ? 'Cave' : 'Cellar'),
+            bathtub: (locale == 'fr' ? 'Baignoire' : 'Bathtub'),
+            wheelchairAccess: (locale == 'fr' ? 'Accès handicapé' : 'Wheelchair access'),
+            bikeStorage: (locale == 'fr' ? 'Local vélo' : 'Bike storage'),
+            workspace: (locale == 'fr' ? 'Espace de travail' : 'Workspace'),
+        } %}
+        {% set _amenityFirst = true %}
+        {% for key, label in _amenityLabels %}
+            {% if property.equipment[key]|default(false) %}
+                {{ _amenityFirst ? '' : ',' }}{
+                    "@type": "LocationFeatureSpecification",
+                    "name": "{{ label|e('js') }}",
+                    "value": true
+                }
+                {% set _amenityFirst = false %}
+            {% endif %}
+        {% endfor %}
+    ]
+    {% endif %}
+    ,"address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ (property.address.street|default(''))|e('js') }}",
+        "addressLocality": "{{ (property.address.city|default('Paris'))|e('js') }}",
+        "postalCode": "{{ (property.address.postalCode|default(''))|e('js') }}",
+        "addressRegion": "Île-de-France",
+        "addressCountry": "FR"
+    }
+    {% if property.location.lat is defined and property.location.lng is defined %}
+    ,"geo": {
+        "@type": "GeoCoordinates",
+        "latitude": {{ property.location.lat }},
+        "longitude": {{ property.location.lng }}
+    }
+    {% endif %}
+    {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+    ,"offers": {
+        "@type": "Offer",
+        "url": "{{ pageUrl }}",
+        "price": {{ property.monthlyRent }},
+        "priceCurrency": "EUR",
+        "priceValidUntil": "{{ 'now'|date_modify('+3 months')|date('Y-m-d') }}",
+        "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": {{ property.monthlyRent }},
+            "priceCurrency": "EUR",
+            "referenceQuantity": {
+                "@type": "QuantitativeValue",
+                "value": 1,
+                "unitCode": "MON"
+            }
+        },
+        "availability": "{{ property.status == 'rented' ? 'https://schema.org/SoldOut' : (property.status == 'underOffer' ? 'https://schema.org/LimitedAvailability' : 'https://schema.org/InStock') }}"
+        {% if property.availableDate is defined and property.availableDate %}
+        ,"availabilityStarts": "{{ property.availableDate|date('c') }}"
+        {% endif %}
+        ,"seller": { "@id": "{{ baseUrl }}/#organization" }
+    }
+    {% endif %}
+},
+{
+    "@type": "BreadcrumbList",
+    "@id": "{{ pageUrl }}/#breadcrumb",
+    "itemListElement": [
+        {% set _propertyListUrl = baseUrl ~ path('app_property') %}
+        {% set _breadcrumbs = [
+            { name: 'marketplace.list.schema.breadcrumb.home'|trans, item: baseUrl ~ '/' ~ locale },
+            { name: 'marketplace.list.schema.breadcrumb.properties'|trans, item: _propertyListUrl }
+        ] %}
+        {% if property.listingTypeName %}
+            {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.listingTypeName, item: _propertyListUrl }]) %}
+        {% endif %}
+        {% if property.propertyTypeName %}
+            {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.propertyTypeName, item: _propertyListUrl }]) %}
+        {% endif %}
+        {% if property.address.city %}
+            {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.address.city, item: _propertyListUrl }]) %}
+        {% endif %}
+        {% if property.address.postalCode %}
+            {% set _breadcrumbs = _breadcrumbs|merge([{ name: property.address.postalCode|arrondissement(locale), item: _propertyListUrl }]) %}
+        {% endif %}
+        {% set _breadcrumbs = _breadcrumbs|merge([{ name: seoTitle, item: pageUrl }]) %}
+        {% for bc in _breadcrumbs %}
+            {
+                "@type": "ListItem",
+                "position": {{ loop.index }},
+                "name": "{{ bc.name|e('js') }}",
+                "item": "{{ bc.item }}"
+            }{{ not loop.last ? ',' }}
+        {% endfor %}
+    ]
+}
+{% if property.faq is defined and property.faq is not empty %}
+,{
+    "@type": "FAQPage",
+    "@id": "{{ pageUrl }}/#faq",
+    "mainEntity": [
+        {% for item in property.faq %}
+            {
+                "@type": "Question",
+                "name": "{{ item.question|e('js') }}",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "{{ item.answer|e('js') }}"
+                }
+            }{{ not loop.last ? ',' }}
+        {% endfor %}
+    ]
+}
+{% endif %}
