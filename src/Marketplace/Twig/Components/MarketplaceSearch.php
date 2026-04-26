@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Twig\Components;
+namespace App\Marketplace\Twig\Components;
 
 use App\Marketplace\Filter\PropertyFilter;
 use App\Marketplace\Map\MarkerBuilder;

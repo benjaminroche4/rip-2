@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Marketplace\Controller;
 
 use App\Marketplace\Repository\PropertyRepository;
-use App\Twig\Extension\PropertyUrlExtension;
+use App\Marketplace\Twig\Extension\PropertyUrlExtension;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;

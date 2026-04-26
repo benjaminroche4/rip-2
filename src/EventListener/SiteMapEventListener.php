@@ -4,7 +4,7 @@ namespace App\EventListener;
 
 use App\Marketplace\Repository\PropertyRepository;
 use App\Service\SanityService;
-use App\Twig\Extension\PropertyUrlExtension;
+use App\Marketplace\Twig\Extension\PropertyUrlExtension;
 use Presta\SitemapBundle\Event\SitemapPopulateEvent;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
