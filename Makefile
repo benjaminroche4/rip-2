@@ -34,7 +34,19 @@ lint:
 	php bin/console lint:container
 
 test:
-	php bin/phpunit tests/Controller
+	php bin/phpunit
+
+test-db-init:
+	echo "→ Create rip_test database (no-op if it already exists)"
+	php bin/console doctrine:database:create --env=test --if-not-exists
+	echo "→ Apply all migrations to rip_test"
+	php bin/console doctrine:migrations:migrate --env=test --no-interaction
+	echo "✓ Test DB ready. Run 'make test' to execute the suite."
+
+test-db-reset:
+	echo "→ Drop rip_test"
+	php bin/console doctrine:database:drop --env=test --force --if-exists
+	$(MAKE) test-db-init
 
 tailwind:
 	@mkdir -p ~/tmp
