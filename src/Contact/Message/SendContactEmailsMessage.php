@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Message;
+namespace App\Contact\Message;
 
 /**
  * Carries the contact-form payload to the async handler that sends both

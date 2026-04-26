@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Message;
+namespace App\Shared\Webhook;
 
 /**
  * Asks the async handler to forward an arbitrary payload to the Make.com webhook.

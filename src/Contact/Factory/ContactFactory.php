@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Factory;
+namespace App\Contact\Factory;
 
-use App\Entity\Contact;
-use App\Repository\ContactRepository;
+use App\Contact\Entity\Contact;
+use App\Contact\Repository\ContactRepository;
 use Doctrine\ORM\EntityRepository;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 use Zenstruck\Foundry\Persistence\Proxy;

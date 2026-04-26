@@ -2,7 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\Factory\ContactFactory;
+use App\Contact\Factory\ContactFactory;
 use App\Newsletter\Factory\NewsletterFactory;
 use App\Factory\PropertyEstimationFactory;
 use App\Factory\UserFactory;

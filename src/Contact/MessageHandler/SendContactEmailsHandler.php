@@ -1,9 +1,9 @@
 <?php
 
-namespace App\MessageHandler;
+namespace App\Contact\MessageHandler;
 
+use App\Contact\Message\SendContactEmailsMessage;
 use App\Enum\EmailAddress;
-use App\Message\SendContactEmailsMessage;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;

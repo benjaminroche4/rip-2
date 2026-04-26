@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Contact\Entity;
 
-use App\Repository\ContactRepository;
+use App\Contact\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Contact\Controller;
 
-use App\Entity\Contact;
-use App\Form\ContactType;
-use App\Message\NotifyMakeWebhookMessage;
-use App\Message\SendContactEmailsMessage;
+use App\Contact\Entity\Contact;
+use App\Contact\Form\ContactType;
+use App\Contact\Message\SendContactEmailsMessage;
+use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

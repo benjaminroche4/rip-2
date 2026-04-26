@@ -1,9 +1,7 @@
 <?php
 
-namespace App\MessageHandler;
+namespace App\Shared\Webhook;
 
-use App\Message\NotifyMakeWebhookMessage;
-use App\Shared\Webhook\MakeWebhookClient;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
