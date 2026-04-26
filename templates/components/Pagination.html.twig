@@ -1,3 +1,7 @@
+{# @prop currentPage  int    1-based current page index #}
+{# @prop totalPages   int    total number of pages (returns nothing if <= 1) #}
+{# @prop route        string Symfony route name to link to #}
+{# @prop routeParams  array  extra params merged into each page link #}
 {%- props currentPage = 1, totalPages = 1, route = '', routeParams = {} -%}
 
 {% if totalPages > 1 %}

@@ -1,3 +1,6 @@
+{# Anonymous Twig component <twig:Skeleton>.
+   Loading placeholder with a pulse animation. Caller controls size & shape via
+   utility classes (e.g. <twig:Skeleton class="h-7 w-1/3 rounded-md" />). #}
 <div
     class="{{ 'animate-pulse rounded-full bg-muted ' ~ attributes.render('class')|tailwind_merge }}"
     {{ attributes }}

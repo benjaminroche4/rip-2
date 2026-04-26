@@ -1,4 +1,7 @@
-{# @block content The default block #}
+{# Anonymous Twig component <twig:Breadcrumb>.
+   Top-level container; compose with <twig:Breadcrumb:List>, :Item, :Link,
+   :Separator and :Page for the inner structure. #}
+{# @block content The default block — typically a <twig:Breadcrumb:List> #}
 <nav{{ attributes }} aria-label="Breadcrumb">
     {%- block content %}{% endblock -%}
 </nav>
