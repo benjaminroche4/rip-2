@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Webhook;
+namespace App\Cms\Controller\Webhook;
 
 use App\Blog\Repository\BlogRepository;
 use App\Marketplace\Repository\PropertyRepository;

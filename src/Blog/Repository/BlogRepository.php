@@ -2,7 +2,7 @@
 
 namespace App\Blog\Repository;
 
-use App\Service\SanityService;
+use App\Shared\Sanity\SanityService;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 

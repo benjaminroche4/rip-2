@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Twig\Extension;
-
-use App\Shared\Sanity\PortableTextRenderer;
+namespace App\Shared\Sanity;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;

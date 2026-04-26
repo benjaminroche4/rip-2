@@ -2,7 +2,6 @@
 
 namespace App\Controller\Public;
 
-use App\Service\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

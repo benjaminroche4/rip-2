@@ -8,7 +8,7 @@ namespace App\Shared\Sanity;
  * Extracted from the Twig layer so it can be unit-tested and reused
  * outside template rendering (e.g. RSS feeds, plain-text emails).
  *
- * Twig integration lives in App\Twig\Extension\SanityExtension.
+ * Twig integration lives in App\Shared\Sanity\SanityExtension.
  */
 final class PortableTextRenderer
 {

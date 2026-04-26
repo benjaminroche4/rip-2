@@ -3,7 +3,7 @@
 namespace App\Controller\Public;
 
 use App\Marketplace\Repository\PropertyRepository;
-use App\Service\SanityService;
+use App\Shared\Sanity\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

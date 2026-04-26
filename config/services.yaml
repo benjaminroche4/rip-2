@@ -25,7 +25,7 @@ services:
     TalesFromADev\Twig\Extra\Tailwind\TailwindRuntime:
         tags: ['twig.runtime']
 
-    App\Service\SanityService:
+    App\Shared\Sanity\SanityService:
         arguments:
             $sanityProjectId: '%env(SANITY_PROJECT_ID)%'
             $sanityDataset: '%env(SANITY_DATASET)%'

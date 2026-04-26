@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Shared\Sanity;
 
 use Sanity\Client as SanityClient;
 
