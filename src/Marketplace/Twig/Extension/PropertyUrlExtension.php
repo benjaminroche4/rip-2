@@ -34,30 +34,23 @@ class PropertyUrlExtension extends AbstractExtension
      * Returns the route parameters array for `app_property_show` — useful when
      * you need to pass params to `path()` directly (e.g. language switcher).
      *
-     * Accepts either a Property DTO (modern) or a raw GROQ array (callers not
-     * yet migrated, e.g. SiteMapEventListener iterating over findAll).
-     *
-     * @param Property|array<string, mixed> $property
      * @return array<string, mixed>
      */
-    public function propertyShowPathParams(Property|array $property, string $locale = 'fr'): array
+    public function propertyShowPathParams(Property $property, string $locale = 'fr'): array
     {
-        $address = $this->get($property, 'address') ?? [];
+        $address = $property->address ?? [];
 
         return [
             '_locale' => $locale,
-            'listingType' => $this->slugify($this->get($property, 'listingTypeName') ?? ($locale === 'fr' ? 'location' : 'rental')),
-            'propertyType' => $this->slugify($this->get($property, 'propertyTypeName') ?? ($locale === 'fr' ? 'bien' : 'property')),
+            'listingType' => $this->slugify($property->listingTypeName ?? ($locale === 'fr' ? 'location' : 'rental')),
+            'propertyType' => $this->slugify($property->propertyTypeName ?? ($locale === 'fr' ? 'bien' : 'property')),
             'city' => $this->slugify($address['city'] ?? 'paris'),
             'district' => $this->buildDistrict($address['postalCode'] ?? '', $locale),
-            'slug' => $this->slugify($this->get($property, 'slug') ?? $this->get($property, 'title') ?? $this->getId($property) ?? 'property'),
+            'slug' => $this->slugify($property->slug ?? $property->title ?? $property->id),
         ];
     }
 
-    /**
-     * @param Property|array<string, mixed> $property
-     */
-    public function propertyShowPath(Property|array $property, string $locale = 'fr', bool $absolute = false): string
+    public function propertyShowPath(Property $property, string $locale = 'fr', bool $absolute = false): string
     {
         return $this->urlGenerator->generate(
             'app_property_show',
@@ -72,19 +65,17 @@ class PropertyUrlExtension extends AbstractExtension
      *   "Appartement 2 chambres meublé 65 m² Paris 11e arrondissement"
      *   "Studio meublé 30 m² Paris 8e arrondissement"
      *   "Studio Levallois-Perret 92300"
-     *
-     * @param Property|array<string, mixed> $property
      */
-    public function propertyDisplayTitle(Property|array $property, string $locale = 'fr'): string
+    public function propertyDisplayTitle(Property $property, string $locale = 'fr'): string
     {
         $parts = [];
-        $bedrooms = $this->get($property, 'bedroomsLabel');
+        $bedrooms = $property->bedroomsLabel;
 
         if ($bedrooms === 'studio') {
             $parts[] = $this->translator->trans('marketplace.show.title.studio', [], null, $locale);
         } else {
-            $parts[] = $this->get($property, 'propertyTypeName') ?? $this->get($property, 'title') ?? '';
-            if ($bedrooms) {
+            $parts[] = $property->propertyTypeName ?? $property->title ?? '';
+            if ($bedrooms !== null && $bedrooms !== '') {
                 $key = $bedrooms === '1'
                     ? 'marketplace.show.title.bedroom'
                     : 'marketplace.show.title.bedrooms';
@@ -92,16 +83,15 @@ class PropertyUrlExtension extends AbstractExtension
             }
         }
 
-        if ($this->get($property, 'furnished') === 'yes') {
+        if ($property->furnished === 'yes') {
             $parts[] = $this->translator->trans('marketplace.show.title.furnished', [], null, $locale);
         }
 
-        $squareMeters = $this->get($property, 'squareMeters');
-        if (!empty($squareMeters)) {
-            $parts[] = $squareMeters . ' m²';
+        if ($property->squareMeters !== null && $property->squareMeters > 0) {
+            $parts[] = $property->squareMeters . ' m²';
         }
 
-        $address = $this->get($property, 'address') ?? [];
+        $address = $property->address ?? [];
         if (!empty($address['city'])) {
             $city = $address['city'];
             if (!empty($address['postalCode'])) {
@@ -111,28 +101,6 @@ class PropertyUrlExtension extends AbstractExtension
         }
 
         return implode(' ', array_filter($parts, fn ($p) => $p !== ''));
-    }
-
-    /**
-     * @param Property|array<string, mixed> $property
-     */
-    private function get(Property|array $property, string $field): mixed
-    {
-        if (is_array($property)) {
-            return $property[$field] ?? null;
-        }
-        return $property->{$field} ?? null;
-    }
-
-    /**
-     * @param Property|array<string, mixed> $property
-     */
-    private function getId(Property|array $property): ?string
-    {
-        if (is_array($property)) {
-            return $property['_id'] ?? null;
-        }
-        return $property->id;
     }
 
     private function slugify(string $value): string

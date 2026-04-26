@@ -2,10 +2,11 @@
 
 namespace App\Marketplace\Filter;
 
+use App\Marketplace\Domain\Property;
 use App\Marketplace\Repository\PropertyRepository;
 
 /**
- * Stateless filtering of property arrays.
+ * Stateless filtering of Property DTOs.
  * Filters are applied in PHP after fetching the full list (cached upstream).
  */
 final class PropertyFilter
@@ -15,8 +16,8 @@ final class PropertyFilter
     ) {}
 
     /**
-     * @param array<int, array<string, mixed>> $properties
-     * @return array<int, array<string, mixed>>
+     * @param array<int, Property> $properties
+     * @return array<int, Property>
      */
     public function apply(
         array $properties,
@@ -29,7 +30,7 @@ final class PropertyFilter
             $code = sprintf('750%02d', $arrondissement);
             $properties = array_values(array_filter(
                 $properties,
-                fn (array $p) => ($p['address']['postalCode'] ?? '') === $code
+                fn (Property $p) => ($p->address['postalCode'] ?? '') === $code
             ));
         }
 
@@ -37,21 +38,21 @@ final class PropertyFilter
             $matchSlugs = $this->propertyRepository->findMatchingTypeSlugs($propertyType);
             $properties = array_values(array_filter(
                 $properties,
-                fn (array $p) => in_array($p['propertyTypeSlug'] ?? '', $matchSlugs, true)
+                fn (Property $p) => in_array($p->propertyTypeSlug ?? '', $matchSlugs, true)
             ));
         }
 
         if ($rentMin !== null) {
             $properties = array_values(array_filter(
                 $properties,
-                fn (array $p) => !empty($p['monthlyRent']) && $p['monthlyRent'] >= $rentMin
+                fn (Property $p) => $p->monthlyRent !== null && $p->monthlyRent >= $rentMin
             ));
         }
 
         if ($rentMax !== null) {
             $properties = array_values(array_filter(
                 $properties,
-                fn (array $p) => !empty($p['monthlyRent']) && $p['monthlyRent'] <= $rentMax
+                fn (Property $p) => $p->monthlyRent !== null && $p->monthlyRent <= $rentMax
             ));
         }
 

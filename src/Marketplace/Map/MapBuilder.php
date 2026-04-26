@@ -2,6 +2,7 @@
 
 namespace App\Marketplace\Map;
 
+use App\Marketplace\Domain\Property;
 use App\Marketplace\Reference\ParisArrondissements;
 use Symfony\UX\Map\Bridge\Google\GoogleOptions;
 use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
@@ -43,7 +44,7 @@ final class MapBuilder
      * Adds clustered markers for the given properties to the map. Properties
      * outside the visible bounds (or without coordinates) are skipped.
      *
-     * @param array<int, array<string, mixed>> $properties
+     * @param array<int, Property> $properties
      * @param array{south: float, north: float, west: float, east: float} $bounds
      */
     public function addMarkers(Map $map, array $properties, array $bounds, float $zoom, string $locale): void
@@ -52,8 +53,8 @@ final class MapBuilder
         $pointToProperties = [];
 
         foreach ($properties as $property) {
-            $lat = $property['location']['lat'] ?? null;
-            $lng = $property['location']['lng'] ?? null;
+            $lat = $property->location['lat'] ?? null;
+            $lng = $property->location['lng'] ?? null;
 
             if ($lat === null || $lng === null) {
                 continue;
@@ -90,7 +91,7 @@ final class MapBuilder
             foreach ($cluster->getPoints() as $point) {
                 $key = $point->getLatitude() . ',' . $point->getLongitude();
                 foreach ($pointToProperties[$key] ?? [] as $p) {
-                    $clusterPropertyIds[] = $p['_id'];
+                    $clusterPropertyIds[] = $p->id;
                 }
             }
             $map->addMarker($this->markerBuilder->buildClusterMarker(

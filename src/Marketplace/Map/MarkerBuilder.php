@@ -2,6 +2,7 @@
 
 namespace App\Marketplace\Map;
 
+use App\Marketplace\Domain\Property;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Icon\Icon;
 use Symfony\UX\Map\Marker;
@@ -16,10 +17,7 @@ final class MarkerBuilder
         private readonly TranslatorInterface $translator,
     ) {}
 
-    /**
-     * @param array<string, mixed> $property
-     */
-    public function buildPropertyMarker(array $property, string $locale): Marker
+    public function buildPropertyMarker(Property $property, string $locale): Marker
     {
         $label = $this->buildPriceLabel($property, $locale);
 
@@ -34,10 +32,10 @@ final class MarkerBuilder
         $hoverSvg = $this->renderPriceSvg($svgWidth, $svgHeight, $cx, $cy, $label, true);
 
         return new Marker(
-            position: new Point($property['location']['lat'], $property['location']['lng']),
-            title: $property['address']['street'] ?? $property['title'] ?? '',
+            position: new Point((float) $property->location['lat'], (float) $property->location['lng']),
+            title: $property->address['street'] ?? $property->title ?? '',
             icon: $icon,
-            extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property['_id']],
+            extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property->id],
         );
     }
 
@@ -72,19 +70,16 @@ final class MarkerBuilder
         );
     }
 
-    /**
-     * @param array<string, mixed> $property
-     */
-    private function buildPriceLabel(array $property, string $locale): string
+    private function buildPriceLabel(Property $property, string $locale): string
     {
         $onRequest = $this->translator->trans('marketplace.list.card.map.marker.onRequest', [], null, $locale);
 
-        if (!empty($property['priceOnRequest'])) {
+        if ($property->priceOnRequest === true) {
             return $onRequest;
         }
 
-        if (!empty($property['monthlyRent'])) {
-            return number_format($property['monthlyRent'], 0, ',', ' ') . ' €';
+        if ($property->monthlyRent !== null && $property->monthlyRent > 0) {
+            return number_format($property->monthlyRent, 0, ',', ' ') . ' €';
         }
 
         return $onRequest;

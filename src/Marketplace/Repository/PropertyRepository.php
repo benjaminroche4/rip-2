@@ -108,11 +108,11 @@ final class PropertyRepository
      * Full property list for a given locale, used by the marketplace listing + map.
      * Drafts are merged into their published equivalents.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, Property>
      */
     public function findAll(string $locale): array
     {
-        return $this->cache->get(
+        $rows = $this->cache->get(
             'marketplace_properties_' . $locale,
             function (ItemInterface $item) use ($locale): array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
@@ -130,6 +130,8 @@ final class PropertyRepository
                 return $this->dedupeDrafts($results);
             }
         );
+
+        return $this->mapper->fromGroqArrayList($rows);
     }
 
     /**

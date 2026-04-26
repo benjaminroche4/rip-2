@@ -85,10 +85,9 @@ readonly class SiteMapEventListener
                 );
                 $url->setChangefreq(UrlConcrete::CHANGEFREQ_DAILY);
                 $url->setPriority(0.8);
-                if (!empty($property['updatedAt'])) {
-                    $url->setLastmod(new \DateTime($property['updatedAt']));
-                } elseif (!empty($property['createdAt'])) {
-                    $url->setLastmod(new \DateTime($property['createdAt']));
+                $lastmod = $property->updatedAt ?? $property->createdAt;
+                if ($lastmod !== null) {
+                    $url->setLastmod(\DateTime::createFromImmutable($lastmod));
                 }
                 $urlContainer->addUrl($url, 'properties');
             }

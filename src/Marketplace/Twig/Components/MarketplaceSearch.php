@@ -89,7 +89,7 @@ final class MarketplaceSearch
 
     /* ----------------- In-memory caches (per render) ----------------- */
 
-    /** @var array<int, array<string, mixed>>|null */
+    /** @var array<int, \App\Marketplace\Domain\Property>|null */
     private ?array $filteredCache = null;
     private ?string $filteredCacheKey = null;
 
