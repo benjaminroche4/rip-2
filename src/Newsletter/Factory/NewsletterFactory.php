@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Factory;
+namespace App\Newsletter\Factory;
 
-use App\Entity\Newsletter;
+use App\Newsletter\Entity\Newsletter;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**

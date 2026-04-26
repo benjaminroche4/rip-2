@@ -12,3 +12,15 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Bounded-context controllers (e.g. App\Newsletter\Controller, App\Contact\Controller, …).
+# Discovered by attribute scan; the namespace stays generic so future modules are picked up automatically.
+controllers_modules:
+    requirements:
+        _locale: en|fr
+    resource:
+        path: ../src/
+        namespace: App
+        exclude: ../src/Controller/
+    type: attribute
+

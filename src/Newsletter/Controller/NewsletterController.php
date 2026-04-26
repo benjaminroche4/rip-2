@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Newsletter\Controller;
 
-use App\Entity\Newsletter;
-use App\Form\NewsletterType;
+use App\Newsletter\Entity\Newsletter;
+use App\Newsletter\Form\NewsletterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Psr\Log\LoggerInterface;

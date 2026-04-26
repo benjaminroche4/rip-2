@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Factory\ContactFactory;
-use App\Factory\NewsletterFactory;
+use App\Newsletter\Factory\NewsletterFactory;
 use App\Factory\PropertyEstimationFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;

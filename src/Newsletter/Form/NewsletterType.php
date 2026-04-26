@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Form;
+namespace App\Newsletter\Form;
 
-use App\Entity\Newsletter;
+use App\Newsletter\Entity\Newsletter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;

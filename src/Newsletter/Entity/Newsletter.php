@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Newsletter\Entity;
 
-use App\Repository\NewsletterRepository;
+use App\Newsletter\Repository\NewsletterRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
