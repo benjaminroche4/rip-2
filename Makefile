@@ -12,11 +12,12 @@ warm:
 
 deploy:
 	echo "→ Pull Git (main)" && git pull --ff-only origin main
+	echo "→ Lint Twig + YAML (catch config errors before they break prod)" && php bin/console lint:twig templates/ && php bin/console lint:yaml config/ --parse-tags
 	echo "→ Install dependencies (prod)" && php composer.phar install --no-dev --optimize-autoloader
 	echo "→ Running database migrations" && php bin/console doctrine:migrations:migrate --env=prod --no-interaction
 	echo "→ Compile AssetMapper" && php bin/console asset-map:compile --env=prod
 	echo "→ Clear cache (prod)" && php bin/console cache:clear --env=prod
-	echo "✓ Cache warmup (prod)" && php bin/console cache:warmup --env=prod
+	echo "✓ Cache warmup (prod, compiles all Twig templates ahead of first request)" && php bin/console cache:warmup --env=prod
 	echo "✓ Déploiement terminé"
 
 version:
@@ -26,6 +27,14 @@ version:
 	symfony -v
 	echo "→ PHP Version"
 	php -v
+
+lint:
+	php bin/console lint:twig templates/
+	php bin/console lint:yaml config/ --parse-tags
+	php bin/console lint:container
+
+test:
+	php bin/phpunit tests/Controller
 
 tailwind:
 	@mkdir -p ~/tmp
