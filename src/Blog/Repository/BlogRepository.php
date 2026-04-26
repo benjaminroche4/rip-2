@@ -2,21 +2,23 @@
 
 namespace App\Blog\Repository;
 
+use App\Blog\Domain\Post;
+use App\Blog\Domain\PostMapper;
 use App\Shared\Sanity\SanityService;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
  * Centralizes all Sanity queries for the blog (posts, categories, latest).
- * All reads go through Symfony's cache (5 min TTL).
+ * All reads go through Symfony's cache, invalidated by the Sanity webhook.
  */
 final class BlogRepository
 {
     public const CACHE_TAG = 'blog';
 
-    private const TTL_POSTS = 86400;      // 24 h — invalidation via webhook Sanity
-    private const TTL_CATEGORIES = 604800; // 7 j — quasi statique, invalidation via webhook
-    private const TTL_COUNT = 86400;      // 24 h — invalidation via webhook
+    private const TTL_POSTS = 86400;
+    private const TTL_CATEGORIES = 604800;
+    private const TTL_COUNT = 86400;
 
     private const LIST_FIELDS = '{
         title,
@@ -34,14 +36,12 @@ final class BlogRepository
     public function __construct(
         private readonly SanityService $sanityService,
         private readonly TagAwareCacheInterface $cache,
+        private readonly PostMapper $mapper,
     ) {}
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findHero(string $locale): ?array
+    public function findHero(string $locale): ?Post
     {
-        return $this->cache->get(
+        $row = $this->cache->get(
             'blog_hero_' . $locale,
             function (ItemInterface $item) use ($locale): ?array {
                 $item->expiresAfter(self::TTL_POSTS);
@@ -55,9 +55,13 @@ final class BlogRepository
                 return is_array($result) ? $result : null;
             }
         );
+
+        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
+     * Categories listing is presentational, kept as raw arrays.
+     *
      * @return array<int, array<string, mixed>>
      */
     public function findCategoriesWithCount(string $locale): array
@@ -104,13 +108,13 @@ final class BlogRepository
     /**
      * Returns the paginated post list (excluding hero, optionally filtered by category) and the matching total count.
      *
-     * @return array{posts: array<int, array<string, mixed>>, total: int}
+     * @return array{posts: array<int, Post>, total: int}
      */
     public function findPaginated(string $locale, int $page, int $perPage, ?string $category, string $heroSlug): array
     {
         $cacheKey = sprintf('blog_list_%s_%s_%d_%d_%s', $locale, $category ?? 'all', $page, $perPage, md5($heroSlug));
 
-        return $this->cache->get(
+        $cached = $this->cache->get(
             $cacheKey,
             function (ItemInterface $item) use ($locale, $page, $perPage, $category, $heroSlug): array {
                 $item->expiresAfter(self::TTL_POSTS);
@@ -141,14 +145,16 @@ final class BlogRepository
                 ];
             }
         );
+
+        return [
+            'posts' => $this->mapper->fromGroqArrayList($cached['posts']),
+            'total' => $cached['total'],
+        ];
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findOneBySlug(string $slug, string $locale): ?array
+    public function findOneBySlug(string $slug, string $locale): ?Post
     {
-        return $this->cache->get(
+        $row = $this->cache->get(
             'blog_post_' . $locale . '_' . md5($slug),
             function (ItemInterface $item) use ($slug, $locale): ?array {
                 $item->expiresAfter(self::TTL_POSTS);
@@ -194,14 +200,16 @@ final class BlogRepository
                 return is_array($result) ? $result : null;
             }
         );
+
+        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array<int, Post>
      */
     public function findLatest(string $locale, string $excludeSlug, int $limit = 3): array
     {
-        return $this->cache->get(
+        $rows = $this->cache->get(
             sprintf('blog_latest_%s_%d_%s', $locale, $limit, md5($excludeSlug)),
             function (ItemInterface $item) use ($locale, $excludeSlug, $limit): array {
                 $item->expiresAfter(self::TTL_POSTS);
@@ -227,5 +235,7 @@ final class BlogRepository
                 return is_array($results) ? $results : [];
             }
         );
+
+        return $this->mapper->fromGroqArrayList($rows);
     }
 }
