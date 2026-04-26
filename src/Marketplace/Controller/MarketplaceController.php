@@ -66,11 +66,10 @@ final class MarketplaceController extends AbstractController
         }
 
         $map = null;
-        if (!empty($property['location']['lat']) && !empty($property['location']['lng'])) {
-            $point = new Point(
-                (float) $property['location']['lat'],
-                (float) $property['location']['lng'],
-            );
+        $lat = $property->location['lat'] ?? null;
+        $lng = $property->location['lng'] ?? null;
+        if ($lat !== null && $lng !== null) {
+            $point = new Point((float) $lat, (float) $lng);
             $pinSvg = <<<'SVG'
 <svg xmlns="http://www.w3.org/2000/svg" width="39" height="50" viewBox="0 0 44 56">
     <path d="M22 0C9.85 0 0 9.85 0 22c0 16.5 22 34 22 34s22-17.5 22-34C44 9.85 34.15 0 22 0Z" fill="#71172e"/>

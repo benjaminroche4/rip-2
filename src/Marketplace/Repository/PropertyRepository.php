@@ -188,12 +188,9 @@ final class PropertyRepository
         );
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findOneBySlug(string $slug, string $locale): ?array
+    public function findOneBySlug(string $slug, string $locale): ?Property
     {
-        return $this->cache->get(
+        $row = $this->cache->get(
             'marketplace_property_slug_' . $locale . '_' . md5($slug),
             function (ItemInterface $item) use ($slug, $locale): ?array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
@@ -207,6 +204,8 @@ final class PropertyRepository
                 return is_array($result) ? $result : null;
             }
         );
+
+        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
