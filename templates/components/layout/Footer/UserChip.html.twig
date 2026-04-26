@@ -1,0 +1,9 @@
+{# Footer login/logout link — ESI fragment.
+   Caller passes `currentRoute` so the active-style highlight still works
+   even though we're outside the parent page's request scope. #}
+{%- set route = currentRoute|default('') -%}
+{% if app.user %}
+    <a href="{{ path('app_logout') }}" class="{% if route == 'app_logout' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
+{% else %}
+    <a href="{{ path('app_login') }}" class="{% if route == 'app_login' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
+{% endif %}

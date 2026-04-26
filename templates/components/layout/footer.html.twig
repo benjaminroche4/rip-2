@@ -173,11 +173,7 @@
                     <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.3'|trans|raw }}</h3>
                     <nav class="flex flex-col space-y-2 text-sm/6">
                         <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
-                        {% if app.user %}
-                            <a href="{{ path('app_logout') }}" class="{% if app.request.attributes.get('_route') == 'app_logout' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
-                        {% else %}
-                            <a href="{{ path('app_login') }}" class="{% if app.request.attributes.get('_route') == 'app_login' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.login'|trans|raw }}</a>
-                        {% endif %}
+                        {{ render_esi(path('fragment_footer_user_chip', {currentRoute: app.request.attributes.get('_route')})) }}
                         <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
                     </nav>
                 </div>

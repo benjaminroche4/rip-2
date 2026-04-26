@@ -5,8 +5,13 @@ framework:
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
-    #esi: true
-    #fragments: true
+    # ESI + fragments: enables {{ render_esi(controller(...)) }} for auth-aware
+    # footer chip. Without a reverse proxy in front, Symfony renders the
+    # fragment inline transparently — same output, just adds the
+    # <esi:include> scaffolding if/when a CDN like Cloudflare Workers is
+    # added in front. Required to make the rest of the page HTTP-cacheable.
+    esi: true
+    fragments: true
 
 when@test:
     framework:
