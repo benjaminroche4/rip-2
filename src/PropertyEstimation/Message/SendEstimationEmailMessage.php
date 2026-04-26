@@ -18,5 +18,6 @@ final readonly class SendEstimationEmailMessage
         public string $lang,
         public ?string $ip,
         public \DateTimeImmutable $createdAt,
-    ) {}
+    ) {
+    }
 }

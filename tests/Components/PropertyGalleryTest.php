@@ -65,15 +65,15 @@ final class PropertyGalleryTest extends KernelTestCase
             : null;
 
         $extras = [];
-        for ($i = 2; $i <= $photoCount; $i++) {
-            $extras[] = ['url' => 'https://example.test/photo-' . $i . '.jpg', 'alt' => 'Photo ' . $i];
+        for ($i = 2; $i <= $photoCount; ++$i) {
+            $extras[] = ['url' => 'https://example.test/photo-'.$i.'.jpg', 'alt' => 'Photo '.$i];
         }
 
         return new Property(
             id: 'gallery-test',
             title: 'Galerie test',
             mainPhoto: $mainPhoto,
-            photos: $extras !== [] ? $extras : null,
+            photos: [] !== $extras ? $extras : null,
         );
     }
 }

@@ -46,6 +46,8 @@ contact:
         accept:
             label: By checking this box, I agree that my information may be used to be contacted.
         button: Be contacted quickly
+        error:
+            tooManyRequests: Too many attempts. Please wait a minute before trying again.
         success:
             title: Thank you for your message!
             text: An expert from our team will contact you as soon as possible.
@@ -889,6 +891,8 @@ propertyManagement:
         trust:
             1: Response in 2h
             2: Data protected
+        error:
+            tooManyRequests: Too many attempts. Please wait a minute before trying again.
         success:
             title: Request sent successfully!
             text: Your estimate is being processed. An expert will contact you shortly.
@@ -1027,7 +1031,9 @@ newsletter:
             label: Your email
             notBlank: Email must not be empty.
             placeholder: "Your email address"
-        error: Error
+        error:
+            title: Error
+            tooManyRequests: Too many attempts. Please wait a minute before trying again.
         success:
             title: You're subscribed!
             text: Thanks for joining our newsletter. Keep an eye on your inbox, your first update will arrive soon.

@@ -16,12 +16,11 @@ final class PricingController extends AbstractController
         ],
         name: 'app_pricing',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2026-03-23')
-                ]
+            'sitemap' => [
+                'priority' => 0.8,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2026-03-23'),
+            ],
         ]
     )]
     public function index(): Response

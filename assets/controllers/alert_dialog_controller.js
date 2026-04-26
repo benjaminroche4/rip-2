@@ -12,7 +12,7 @@ export default class extends Controller {
             if (this.dialogTarget.getAnimations().length > 0) {
                 this.dialogTarget.addEventListener('transitionend', () => {
                     this.triggerTarget.setAttribute('aria-expanded', 'true');
-                })
+                }, { once: true })
             } else {
                 this.triggerTarget.setAttribute('aria-expanded', 'true');
             }
@@ -26,7 +26,7 @@ export default class extends Controller {
             if (this.dialogTarget.getAnimations().length > 0) {
                 this.dialogTarget.addEventListener('transitionend', () => {
                     this.triggerTarget.setAttribute('aria-expanded', 'false');
-                })
+                }, { once: true })
             } else {
                 this.triggerTarget.setAttribute('aria-expanded', 'false');
             }

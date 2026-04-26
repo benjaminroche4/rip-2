@@ -16,12 +16,11 @@ final class FaqController extends AbstractController
         ],
         name: 'app_faq',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.6,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-12-19')
-                ]
+            'sitemap' => [
+                'priority' => 0.6,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-12-19'),
+            ],
         ]
     )]
     public function index(): Response

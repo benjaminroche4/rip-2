@@ -26,7 +26,7 @@ final class NewsletterFlowTest extends WebTestCase
     {
         $this->client = static::createClient();
         $this->em = static::getContainer()->get('doctrine.orm.entity_manager');
-        $this->em->createQuery('DELETE FROM ' . Newsletter::class)->execute();
+        $this->em->createQuery('DELETE FROM '.Newsletter::class)->execute();
     }
 
     public function testValidEmailPersistsSubscriber(): void

@@ -10,20 +10,20 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class PropertyEstimationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('address',TextType::class, [
+            ->add('address', TextType::class, [
                 'label' => 'propertyManagement.form.address.label',
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.address.notBlank',
-                    )
+                    ),
                 ],
                 'attr' => [
                     'data-controller' => 'google-places',
@@ -43,16 +43,16 @@ class PropertyEstimationType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.propertyCondition.notBlank',
-                    )
+                    ),
                 ],
             ])
-            ->add('bedroom',IntegerType::class, [
+            ->add('bedroom', IntegerType::class, [
                 'label' => 'propertyManagement.form.bedroom.label',
                 'data' => 1,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.bedroom.notBlank',
-                    )
+                    ),
                 ],
                 'attr' => [
                     'min' => 0,
@@ -60,13 +60,13 @@ class PropertyEstimationType extends AbstractType
                     'step' => 1,
                 ],
             ])
-            ->add('bathroom',IntegerType::class, [
+            ->add('bathroom', IntegerType::class, [
                 'label' => 'propertyManagement.form.bathroom.label',
                 'data' => 1,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.bathroom.notBlank',
-                    )
+                    ),
                 ],
                 'attr' => [
                     'min' => 0,
@@ -74,13 +74,13 @@ class PropertyEstimationType extends AbstractType
                     'step' => 1,
                 ],
             ])
-            ->add('surface',IntegerType::class, [
+            ->add('surface', IntegerType::class, [
                 'label' => 'propertyManagement.form.surface.label',
                 'data' => 30,
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.surface.notBlank',
-                    )
+                    ),
                 ],
                 'attr' => [
                     'min' => 8,
@@ -97,7 +97,22 @@ class PropertyEstimationType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.email.notBlank',
-                    )
+                    ),
+                ],
+            ])
+            // Honeypot: invisible to humans, frequently auto-filled by bots.
+            ->add('website', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                    'tabindex' => -1,
+                    'aria-hidden' => 'true',
+                    'class' => 'sr-only',
+                ],
+                'constraints' => [
+                    new Blank(),
                 ],
             ])
         ;

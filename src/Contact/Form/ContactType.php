@@ -11,21 +11,21 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class ContactType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('firstName',TextType::class, [
+            ->add('firstName', TextType::class, [
                 'label' => 'contact.contactForm.firstName.label',
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.firstName.notBlank',
-                    )
+                    ),
                 ],
             ])
             ->add('lastName', TextType::class, [
@@ -33,7 +33,7 @@ class ContactType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.lastName.notBlank',
-                    )
+                    ),
                 ],
             ])
             ->add('email', EmailType::class, [
@@ -41,7 +41,7 @@ class ContactType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.email.notBlank',
-                    )
+                    ),
                 ],
             ])
             ->add('phoneNumber', TextType::class, [
@@ -49,7 +49,7 @@ class ContactType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.phoneNumber.notBlank',
-                    )
+                    ),
                 ],
             ])
             ->add('company', TextType::class, [
@@ -68,7 +68,7 @@ class ContactType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.helpType.notBlank',
-                    )
+                    ),
                 ],
             ])
             ->add('message', TextareaType::class, [
@@ -82,6 +82,23 @@ class ContactType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue(message: 'contact.contactForm.accept.label'),
+                ],
+            ])
+            // Honeypot: invisible to humans, frequently auto-filled by bots.
+            // If non-empty, validation fails silently as if it were a normal
+            // form error — the bot gets a 422 with no clue why.
+            ->add('website', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                    'tabindex' => -1,
+                    'aria-hidden' => 'true',
+                    'class' => 'sr-only',
+                ],
+                'constraints' => [
+                    new Blank(),
                 ],
             ])
         ;

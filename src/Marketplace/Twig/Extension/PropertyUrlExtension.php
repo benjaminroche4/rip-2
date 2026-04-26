@@ -42,8 +42,8 @@ class PropertyUrlExtension extends AbstractExtension
 
         return [
             '_locale' => $locale,
-            'listingType' => $this->slugify($property->listingTypeName ?? ($locale === 'fr' ? 'location' : 'rental')),
-            'propertyType' => $this->slugify($property->propertyTypeName ?? ($locale === 'fr' ? 'bien' : 'property')),
+            'listingType' => $this->slugify($property->listingTypeName ?? ('fr' === $locale ? 'location' : 'rental')),
+            'propertyType' => $this->slugify($property->propertyTypeName ?? ('fr' === $locale ? 'bien' : 'property')),
             'city' => $this->slugify($address['city'] ?? 'paris'),
             'district' => $this->buildDistrict($address['postalCode'] ?? '', $locale),
             'slug' => $this->slugify($property->slug ?? $property->title ?? $property->id),
@@ -64,62 +64,62 @@ class PropertyUrlExtension extends AbstractExtension
      * sitemap, breadcrumb and JSON-LD — e.g.:
      *   "Appartement 2 chambres meublé 65 m² Paris 11e arrondissement"
      *   "Studio meublé 30 m² Paris 8e arrondissement"
-     *   "Studio Levallois-Perret 92300"
+     *   "Studio Levallois-Perret 92300".
      */
     public function propertyDisplayTitle(Property $property, string $locale = 'fr'): string
     {
         $parts = [];
         $bedrooms = $property->bedroomsLabel;
 
-        if ($bedrooms === 'studio') {
+        if ('studio' === $bedrooms) {
             $parts[] = $this->translator->trans('marketplace.show.title.studio', [], null, $locale);
         } else {
             $parts[] = $property->propertyTypeName ?? $property->title ?? '';
-            if ($bedrooms !== null && $bedrooms !== '') {
-                $key = $bedrooms === '1'
+            if (null !== $bedrooms && '' !== $bedrooms) {
+                $key = '1' === $bedrooms
                     ? 'marketplace.show.title.bedroom'
                     : 'marketplace.show.title.bedrooms';
-                $parts[] = $bedrooms . ' ' . $this->translator->trans($key, [], null, $locale);
+                $parts[] = $bedrooms.' '.$this->translator->trans($key, [], null, $locale);
             }
         }
 
-        if ($property->furnished === 'yes') {
+        if ('yes' === $property->furnished) {
             $parts[] = $this->translator->trans('marketplace.show.title.furnished', [], null, $locale);
         }
 
-        if ($property->squareMeters !== null && $property->squareMeters > 0) {
-            $parts[] = $property->squareMeters . ' m²';
+        if (null !== $property->squareMeters && $property->squareMeters > 0) {
+            $parts[] = $property->squareMeters.' m²';
         }
 
         $address = $property->address ?? [];
         if (!empty($address['city'])) {
             $city = $address['city'];
             if (!empty($address['postalCode'])) {
-                $city .= ' ' . $this->postalCode->formatPostalCode($address['postalCode'], $locale);
+                $city .= ' '.$this->postalCode->formatPostalCode($address['postalCode'], $locale);
             }
             $parts[] = $city;
         }
 
-        return implode(' ', array_filter($parts, fn ($p) => $p !== ''));
+        return implode(' ', array_filter($parts, fn ($p) => '' !== $p));
     }
 
     private function slugify(string $value): string
     {
         $slug = $this->slugger->slug($value)->lower()->toString();
 
-        return $slug !== '' ? $slug : 'other';
+        return '' !== $slug ? $slug : 'other';
     }
 
     private function buildDistrict(string $postalCode, string $locale): string
     {
-        if (!str_starts_with($postalCode, '75') || strlen($postalCode) !== 5) {
+        if (!str_starts_with($postalCode, '75') || 5 !== strlen($postalCode)) {
             return $this->slugify($postalCode);
         }
 
         $arr = (int) substr($postalCode, -2);
 
-        if ($locale === 'fr') {
-            return $arr === 1 ? '1er' : $arr . 'eme';
+        if ('fr' === $locale) {
+            return 1 === $arr ? '1er' : $arr.'eme';
         }
 
         $suffix = match ($arr % 100) {
@@ -132,6 +132,6 @@ class PropertyUrlExtension extends AbstractExtension
             },
         };
 
-        return $arr . $suffix;
+        return $arr.$suffix;
     }
 }

@@ -14,8 +14,7 @@ final class SitemapController extends AbstractController
     public function __construct(
         private readonly SanityService $sanityService,
         private readonly PropertyRepository $propertyRepository,
-    )
-    {
+    ) {
     }
 
     #[Route(
@@ -25,12 +24,11 @@ final class SitemapController extends AbstractController
         ],
         name: 'app_sitemap',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.1,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-10-09')
-                ]
+            'sitemap' => [
+                'priority' => 0.1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-10-09'),
+            ],
         ]
     )]
     public function index(string $_locale): Response

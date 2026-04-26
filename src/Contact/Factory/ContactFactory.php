@@ -3,17 +3,14 @@
 namespace App\Contact\Factory;
 
 use App\Contact\Entity\Contact;
-use App\Contact\Repository\ContactRepository;
-use Doctrine\ORM\EntityRepository;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
-use Zenstruck\Foundry\Persistence\Proxy;
-use Zenstruck\Foundry\Persistence\ProxyRepositoryDecorator;
 
 /**
  * @extends PersistentProxyObjectFactory<Contact>
  */
-final class ContactFactory extends PersistentProxyObjectFactory{
-    const HELP_TYPES = ['Question', 'Suggestion', 'Other'];
+final class ContactFactory extends PersistentProxyObjectFactory
+{
+    public const HELP_TYPES = ['Question', 'Suggestion', 'Other'];
 
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
@@ -24,17 +21,20 @@ final class ContactFactory extends PersistentProxyObjectFactory{
     {
     }
 
-    #[\Override]    public static function class(): string
+    #[\Override]
+    public static function class(): string
     {
         return Contact::class;
     }
 
-        /**
+    /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
      *
      * @todo add your default values here
      */
-    #[\Override]    protected function defaults(): array|callable    {
+    #[\Override]
+    protected function defaults(): array|callable
+    {
         return [
             'firstName' => self::faker()->firstName(),
             'lastName' => self::faker()->lastName(),
@@ -49,10 +49,11 @@ final class ContactFactory extends PersistentProxyObjectFactory{
         ];
     }
 
-        /**
+    /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
      */
-    #[\Override]    protected function initialize(): static
+    #[\Override]
+    protected function initialize(): static
     {
         return $this
             // ->afterInstantiate(function(Contact $contact): void {})

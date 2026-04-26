@@ -13,8 +13,35 @@ framework:
     esi: true
     fragments: true
 
+    # Anti-spam on public POST forms. Storage is cache.app (filesystem on
+    # o2switch — no Redis available). Lookup is per client IP — each
+    # controller calls $factory->create($request->getClientIp())->consume().
+    rate_limiter:
+        form_contact:
+            policy: fixed_window
+            limit: 5
+            interval: '1 minute'
+        form_estimation:
+            policy: fixed_window
+            limit: 5
+            interval: '1 minute'
+        form_newsletter:
+            policy: fixed_window
+            limit: 5
+            interval: '1 minute'
+
 when@test:
     framework:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+        # Bump anti-spam limits in test so the suite, which fires many POSTs
+        # from 127.0.0.1, does not start hitting 429 instead of testing the
+        # form behavior. The production limits stay at 5/min above.
+        rate_limiter:
+            form_contact:
+                limit: 1000
+            form_estimation:
+                limit: 1000
+            form_newsletter:
+                limit: 1000

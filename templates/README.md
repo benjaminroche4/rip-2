@@ -35,7 +35,7 @@ templates/
 │   ├── Section/CtaFooter.html.twig
 │   └── Section/Reviews.html.twig
 │   │  -- Composants par bounded context (mirror src/) --
-│   ├── Marketplace/{PropertyCard, PropertyGallery}.html.twig
+│   ├── Marketplace/{PropertyCard, PropertyGallery, Search}.html.twig
 │   ├── Transport/{Line, Station}.html.twig
 │   └── …
 └── public/                  ← une vue = une route
@@ -107,11 +107,10 @@ Le `Makefile` lance `lint:twig` aussi avant chaque `deploy`, pour fail-fast.
 
 ## Pièges connus
 
-- Le dossier `templates/components/Layout/` est tracké par git en **minuscule**
-  (`layout/`) à cause d'un commit historique. macOS y est insensible mais
-  attention si tu déploies sur un FS case-sensitive (Linux strict).
-- `components/MarketplaceSearch.html.twig` est lié à la classe PHP
-  `App\Marketplace\Twig\Components\MarketplaceSearch` — ne pas renommer le
-  template seul, il faut renommer la classe en parallèle.
+- `components/Marketplace/Search.html.twig` est rendu par la classe PHP
+  `App\Marketplace\Twig\Components\MarketplaceSearch`. Le découplage est
+  explicite via `#[AsLiveComponent(name: 'Marketplace:Search', template: …)]`
+  — donc le tag `<twig:Marketplace:Search>` reste stable même si la classe
+  est renommée.
 - `twig/cache-extra` n'est pas installé — si tu veux `{% cache %}` pour
   des fragments lourds, fais d'abord `composer require twig/cache-extra`.

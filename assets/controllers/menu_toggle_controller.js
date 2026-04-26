@@ -7,11 +7,12 @@ export default class extends Controller {
     connect() {
         const isMobile = window.innerWidth < 768;
 
-        this.contentTarget.addEventListener('transitionend', () => {
+        this.onTransitionEnd = () => {
             if (this.open) {
                 this.contentTarget.style.maxHeight = 'none';
             }
-        });
+        };
+        this.contentTarget.addEventListener('transitionend', this.onTransitionEnd);
 
         if (isMobile) {
             this.open = false;
@@ -22,6 +23,10 @@ export default class extends Controller {
             this.open = true;
             this.iconTarget.classList.add('rotate-180');
         }
+    }
+
+    disconnect() {
+        this.contentTarget.removeEventListener('transitionend', this.onTransitionEnd);
     }
 
     toggle() {

@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
@@ -21,7 +22,9 @@ final class PropertyEstimationController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
         private readonly TranslatorInterface $translator,
-    ) {}
+        private readonly RateLimiterFactoryInterface $formEstimationLimiter,
+    ) {
+    }
 
     #[Route(
         path: [
@@ -43,6 +46,17 @@ final class PropertyEstimationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->formEstimationLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+                $form->addError(new \Symfony\Component\Form\FormError(
+                    $this->translator->trans('propertyEstimation.form.error.tooManyRequests'),
+                ));
+
+                $response = $this->render('public/property_estimation/index.html.twig', ['form' => $form]);
+                $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
+
+                return $response;
+            }
+
             /** @var PropertyEstimation $data */
             $data = $form->getData();
             $now = new \DateTimeImmutable();
@@ -68,12 +82,14 @@ final class PropertyEstimationController extends AbstractController
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
                 return $this->render('public/property_estimation/success.stream.html.twig', [
                     'success' => $data,
                 ]);
             }
 
             $this->addFlash('success', $this->translator->trans('propertyEstimation.form.success.title'));
+
             return $this->redirectToRoute('app_service_landlords', [], Response::HTTP_SEE_OTHER);
         }
 

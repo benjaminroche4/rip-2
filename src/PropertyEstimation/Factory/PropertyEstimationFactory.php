@@ -10,7 +10,7 @@ use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
  */
 final class PropertyEstimationFactory extends PersistentObjectFactory
 {
-    const PROPERTY_CONDITION = ['Usé', 'Standard', 'Premium', 'Luxe'];
+    public const PROPERTY_CONDITION = ['Usé', 'Standard', 'Premium', 'Luxe'];
 
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services

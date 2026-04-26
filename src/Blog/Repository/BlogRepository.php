@@ -37,18 +37,19 @@ final class BlogRepository
         private readonly SanityService $sanityService,
         private readonly TagAwareCacheInterface $cache,
         private readonly PostMapper $mapper,
-    ) {}
+    ) {
+    }
 
     public function findHero(string $locale): ?Post
     {
         $row = $this->cache->get(
-            'blog_hero_' . $locale,
+            'blog_hero_'.$locale,
             function (ItemInterface $item) use ($locale): ?array {
                 $item->expiresAfter(self::TTL_POSTS);
                 $item->tag(self::CACHE_TAG);
 
                 $result = $this->sanityService->query(
-                    '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) [0] ' . self::LIST_FIELDS,
+                    '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))] | order(_createdAt desc) [0] '.self::LIST_FIELDS,
                     ['locale' => $locale]
                 );
 
@@ -56,7 +57,7 @@ final class BlogRepository
             }
         );
 
-        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
+        return null !== $row ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
@@ -67,7 +68,7 @@ final class BlogRepository
     public function findCategoriesWithCount(string $locale): array
     {
         return $this->cache->get(
-            'blog_categories_' . $locale,
+            'blog_categories_'.$locale,
             function (ItemInterface $item) use ($locale): array {
                 $item->expiresAfter(self::TTL_CATEGORIES);
                 $item->tag(self::CACHE_TAG);
@@ -90,7 +91,7 @@ final class BlogRepository
     public function countAll(string $locale): int
     {
         return $this->cache->get(
-            'blog_total_' . $locale,
+            'blog_total_'.$locale,
             function (ItemInterface $item) use ($locale): int {
                 $item->expiresAfter(self::TTL_COUNT);
                 $item->tag(self::CACHE_TAG);
@@ -121,21 +122,21 @@ final class BlogRepository
                 $item->tag(self::CACHE_TAG);
 
                 $categoryFilter = $category ? ' && category->slug.current == $category' : '';
-                $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))' . $categoryFilter . ' && slug.current != $heroSlug]';
+                $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**"))'.$categoryFilter.' && slug.current != $heroSlug]';
 
                 $params = ['locale' => $locale, 'heroSlug' => $heroSlug];
                 if ($category) {
                     $params['category'] = $category;
                 }
 
-                $total = $this->sanityService->query('count(' . $baseFilter . ')', $params);
+                $total = $this->sanityService->query('count('.$baseFilter.')', $params);
                 $total = is_int($total) ? $total : 0;
 
                 $offset = ($page - 1) * $perPage;
                 $end = $offset + $perPage;
 
                 $posts = $this->sanityService->query(
-                    $baseFilter . ' | order(_createdAt desc) [$offset...$end] ' . self::LIST_FIELDS,
+                    $baseFilter.' | order(_createdAt desc) [$offset...$end] '.self::LIST_FIELDS,
                     array_merge($params, ['offset' => $offset, 'end' => $end])
                 );
 
@@ -155,7 +156,7 @@ final class BlogRepository
     public function findOneBySlug(string $slug, string $locale): ?Post
     {
         $row = $this->cache->get(
-            'blog_post_' . $locale . '_' . md5($slug),
+            'blog_post_'.$locale.'_'.md5($slug),
             function (ItemInterface $item) use ($slug, $locale): ?array {
                 $item->expiresAfter(self::TTL_POSTS);
                 $item->tag(self::CACHE_TAG);
@@ -201,7 +202,7 @@ final class BlogRepository
             }
         );
 
-        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
+        return null !== $row ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**

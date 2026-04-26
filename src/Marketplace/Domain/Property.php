@@ -80,7 +80,8 @@ final readonly class Property
         public mixed $description = null,
         /** @var array<string, mixed>|null */
         public ?array $alternateProperty = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Convenience for legacy templates / code paths that still address fields

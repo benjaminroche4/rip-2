@@ -45,8 +45,8 @@ final class ResetPasswordControllerTest extends WebTestCase
         $this->userRepository = $container->get(UserRepository::class);
 
         // Cascade-friendly cleanup: child rows first, then users.
-        $this->em->createQuery('DELETE FROM ' . ResetPasswordRequest::class)->execute();
-        $this->em->createQuery('DELETE FROM ' . User::class)->execute();
+        $this->em->createQuery('DELETE FROM '.ResetPasswordRequest::class)->execute();
+        $this->em->createQuery('DELETE FROM '.User::class)->execute();
 
         $user = (new User())
             ->setEmail(self::TEST_EMAIL)

@@ -16,12 +16,11 @@ final class AboutUsController extends AbstractController
         ],
         name: 'app_about_us',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.6,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-10-30')
-                ]
+            'sitemap' => [
+                'priority' => 0.6,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-10-30'),
+            ],
         ]
     )]
     public function index(): Response

@@ -34,6 +34,7 @@ final class PostMapper
 
     /**
      * @param array<int, array<string, mixed>> $rows
+     *
      * @return array<int, Post>
      */
     public function fromGroqArrayList(array $rows): array
@@ -43,7 +44,7 @@ final class PostMapper
 
     private function toDateTime(mixed $value): ?\DateTimeImmutable
     {
-        if (!is_string($value) || $value === '') {
+        if (!is_string($value) || '' === $value) {
             return null;
         }
         try {
@@ -55,15 +56,16 @@ final class PostMapper
 
     private function toNullableString(mixed $value): ?string
     {
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return null;
         }
+
         return is_scalar($value) ? (string) $value : null;
     }
 
     private function toNullableInt(mixed $value): ?int
     {
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return null;
         }
         if (is_int($value)) {
@@ -72,6 +74,7 @@ final class PostMapper
         if (is_numeric($value)) {
             return (int) $value;
         }
+
         return null;
     }
 
@@ -80,6 +83,6 @@ final class PostMapper
      */
     private function toNullableArray(mixed $value): ?array
     {
-        return is_array($value) && $value !== [] ? $value : null;
+        return is_array($value) && [] !== $value ? $value : null;
     }
 }

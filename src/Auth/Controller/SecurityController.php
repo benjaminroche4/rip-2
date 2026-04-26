@@ -17,12 +17,11 @@ class SecurityController extends AbstractController
         ],
         name: 'app_login',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.2,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2026-03-06')
-                ]
+            'sitemap' => [
+                'priority' => 0.2,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2026-03-06'),
+            ],
         ]
     )]
     public function login(AuthenticationUtils $authenticationUtils): Response

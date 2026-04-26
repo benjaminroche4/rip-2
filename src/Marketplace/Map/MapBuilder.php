@@ -21,7 +21,8 @@ final class MapBuilder
 {
     public function __construct(
         private readonly MarkerBuilder $markerBuilder,
-    ) {}
+    ) {
+    }
 
     public function buildMap(?int $arrondissement, float $zoom): Map
     {
@@ -44,7 +45,7 @@ final class MapBuilder
      * Adds clustered markers for the given properties to the map. Properties
      * outside the visible bounds (or without coordinates) are skipped.
      *
-     * @param array<int, Property> $properties
+     * @param array<int, Property>                                        $properties
      * @param array{south: float, north: float, west: float, east: float} $bounds
      */
     public function addMarkers(Map $map, array $properties, array $bounds, float $zoom, string $locale): void
@@ -56,7 +57,7 @@ final class MapBuilder
             $lat = $property->location['lat'] ?? null;
             $lng = $property->location['lng'] ?? null;
 
-            if ($lat === null || $lng === null) {
+            if (null === $lat || null === $lng) {
                 continue;
             }
             if ($lat < $bounds['south'] || $lat > $bounds['north'] || $lng < $bounds['west'] || $lng > $bounds['east']) {
@@ -64,7 +65,7 @@ final class MapBuilder
             }
 
             $point = new Point($lat, $lng);
-            $key = $lat . ',' . $lng;
+            $key = $lat.','.$lng;
             $points[] = $point;
             $pointToProperties[$key][] = $property;
         }
@@ -76,12 +77,12 @@ final class MapBuilder
         $clusters = (new GridClusteringAlgorithm())->cluster($points, $zoom);
 
         foreach ($clusters as $cluster) {
-            if ($cluster->count() === 1) {
+            if (1 === $cluster->count()) {
                 $singlePoint = $cluster->getPoints()[0];
-                $key = $singlePoint->getLatitude() . ',' . $singlePoint->getLongitude();
+                $key = $singlePoint->getLatitude().','.$singlePoint->getLongitude();
                 $property = $pointToProperties[$key][0] ?? null;
 
-                if ($property !== null) {
+                if (null !== $property) {
                     $map->addMarker($this->markerBuilder->buildPropertyMarker($property, $locale));
                 }
                 continue;
@@ -89,7 +90,7 @@ final class MapBuilder
 
             $clusterPropertyIds = [];
             foreach ($cluster->getPoints() as $point) {
-                $key = $point->getLatitude() . ',' . $point->getLongitude();
+                $key = $point->getLatitude().','.$point->getLongitude();
                 foreach ($pointToProperties[$key] ?? [] as $p) {
                     $clusterPropertyIds[] = $p->id;
                 }
@@ -111,7 +112,7 @@ final class MapBuilder
      */
     public function resolveBounds(?float $south, ?float $north, ?float $west, ?float $east): array
     {
-        if ($south !== null && $north !== null && $west !== null && $east !== null) {
+        if (null !== $south && null !== $north && null !== $west && null !== $east) {
             return [
                 'south' => $south,
                 'north' => $north,

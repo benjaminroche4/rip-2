@@ -1,0 +1,189 @@
+{% set compact = compact|default(false) %}
+{% set allPhotos = [] %}
+{% if property.mainPhoto.url is defined and property.mainPhoto.url %}
+    {% set allPhotos = allPhotos|merge([property.mainPhoto]) %}
+{% endif %}
+{% for photo in property.photos %}
+    {% if photo.url != property.mainPhoto.url|default('') %}
+        {% set allPhotos = allPhotos|merge([photo]) %}
+    {% endif %}
+{% endfor %}
+
+{% set badge = null %}
+{% if property.status == 'underOffer' %}
+    {% set badge = {
+        class: 'bg-amber-50 border-amber-100 text-amber-600',
+        text: 'marketplace.list.card.status.underOffer'|trans,
+        bold: true,
+    } %}
+{% elseif property.status == 'rented' %}
+    {% set badge = {
+        class: 'bg-red-50 border-red-100 text-red-600',
+        text: 'marketplace.list.card.status.rented'|trans,
+        bold: true,
+    } %}
+{% elseif property.availableDate is defined and property.availableDate %}
+    {% if property.availableDate|date('Y-m-d') <= 'now'|date('Y-m-d') %}
+        {% set badge = {
+            class: 'bg-green-50 border-green-100 text-green-600',
+            text: 'marketplace.list.card.status.available'|trans,
+            bold: true,
+        } %}
+    {% else %}
+        {% set badge = {
+            class: 'bg-slate-50 border-slate-100 text-slate-600',
+            text: 'marketplace.list.card.status.soon'|trans ~ ' <span class="font-semibold">' ~ property.availableDate|date('d/m/Y') ~ '</span>',
+            bold: false,
+        } %}
+    {% endif %}
+{% endif %}
+
+{% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+
+<article
+    id="property-{{ property.slug|default(property._id) }}"
+    class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }} group/card"
+    data-property-id="{{ property._id }}"
+    data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
+>
+    {% if property.slug|default(false) %}<a href="{{ property_show_path(property, locale) }}" target="_blank" rel="noopener" class="contents">{% endif %}
+    <div
+        class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
+        data-controller="carousel"
+    >
+        <div
+            class="flex h-full transition-transform duration-300 ease-out cursor-grab active:cursor-grabbing"
+            data-carousel-target="track"
+        >
+            {% for photo in allPhotos[:5] %}
+                <div class="w-full h-full shrink-0">
+                    <img
+                        src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75"
+                        srcset="{{ photo.url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=75 400w,
+                                {{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75 600w,
+                                {{ photo.url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=75 900w"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                        alt="{{ photo.alt|default(property.title) }}"
+                        {% if not loop.first %}loading="lazy" decoding="async"{% endif %}
+                        width="600"
+                        height="400"
+                        draggable="false"
+                        class="w-full h-full object-cover pointer-events-none select-none"
+                    />
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if allPhotos|length > 1 %}
+            <div
+                class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1"
+                data-carousel-target="dots"
+            >
+                {% for photo in allPhotos[:5] %}
+                    <button
+                        type="button"
+                        data-carousel-target="dot"
+                        data-action="carousel#goTo"
+                        data-index="{{ loop.index0 }}"
+                        aria-label="{{ 'marketplace.list.card.carousel.goTo'|trans({'%n%': loop.index}) }}"
+                        class="size-1.5 rounded-full transition-colors duration-200 {{ loop.first ? 'bg-white' : 'bg-white/50' }}"
+                    ></button>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if isNew or (property.showCategoryOnCard|default(false) and property.categoryName|default(false)) %}
+            <div class="absolute top-1.5 left-2">
+                <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
+                    {{ isNew ? 'marketplace.list.card.category.new'|trans|raw : property.categoryName }}
+                </span>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="px-2 py-3 flex flex-col flex-1 space-y-4">
+        <div class="flex items-center justify-between gap-x-2">
+            {% if badge %}
+                <twig:Badge variant="primary" class="rounded-md border font-light gap-x-2 px-1 {{ badge.class }}">
+                    {% if property.agentPhoto|default(false) %}
+                        <img
+                            src="{{ property.agentPhoto }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70"
+                            alt="{{ property.agentName }} {{ 'marketplace.list.card.agent.alt'|trans|raw }}"
+                            loading="lazy"
+                            width="24"
+                            height="24"
+                            class="size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5"
+                        />
+                    {% endif %}
+                    <p class="{{ badge.bold ? 'font-semibold' }}">{{ badge.text|raw }}</p>
+                </twig:Badge>
+            {% endif %}
+
+            <twig:Tooltip id="verified-{{ property._id|replace({'.': '-'}) }}">
+                <twig:Tooltip:Trigger>
+                    <span
+                        {% for attr, val in tooltip_trigger_attrs|default({}) %}{{ attr }}="{{ val }}" {% endfor %}
+                        class="inline-flex cursor-pointer rounded-full p-1 bg-primary/5"
+                    >
+                        {{ ux_icon('flowbite:badge-check-solid', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                    </span>
+                </twig:Tooltip:Trigger>
+                <twig:Tooltip:Content side="left">
+                    <p>{{ 'marketplace.list.card.verified'|trans|raw }}</p>
+                </twig:Tooltip:Content>
+            </twig:Tooltip>
+        </div>
+
+        <div class="space-y-1">
+            {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
+                <p class="text-primary {{ compact ? 'text-xl' : 'text-2xl' }} font-semibold">
+                    {{ property.monthlyRent|number_format(0, ',', ' ') }}€
+                    <span class="text-gray-600 text-sm font-light ml-0.5">
+                        /{{ 'marketplace.list.card.price.month'|trans|raw }}
+                        {% if property.chargesIncludes|default(false) %}
+                            <span class="px-2 py-0.5 rounded-full bg-neutral-50 text-xs">
+                                {{ 'marketplace.list.card.price.chargesIncludes'|trans|raw }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </p>
+            {% else %}
+                <p class="text-primary text-2xl font-semibold">
+                    {{ 'marketplace.list.card.price.onDemand'|trans|raw }}
+                </p>
+            {% endif %}
+
+            <p class="font-semibold text-base capitalize font-secondary">
+                {{ property.listingTypeName }} {{ property.propertyTypeName }}
+            </p>
+
+            <p class="not-italic text-gray-500 text-sm flex items-center gap-x-1">
+                {{ ux_icon('gg:pin', {'class': 'size-4 shrink-0'}) }}
+                {{ property.address.city }}, {{ property.address.postalCode|arrondissement(locale) }}
+            </p>
+        </div>
+
+        <div class="bg-neutral-50 rounded-lg px-2 py-3 grid grid-cols-3 divide-x divide-gray-200">
+            <div class="flex items-center justify-center gap-x-1">
+                {% if property.elevator %}
+                    {{ ux_icon('iconoir:elevator', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                    <p class="text-sm font-light">{{ 'marketplace.list.card.elevator.yes'|trans|raw }}</p>
+                {% else %}
+                    {{ ux_icon('iconoir:sofa', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                    <p class="text-sm font-light">
+                        {{ property.furnished == 'yes' ? 'marketplace.list.card.furnished.yes'|trans|raw : 'marketplace.list.card.furnished.no'|trans|raw }}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-center gap-x-1">
+                {{ ux_icon('fluent:bed-24-regular', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                <p class="text-sm font-light">{{ property.bedroomsLabel }}</p>
+            </div>
+            <div class="flex items-center justify-center gap-x-1">
+                {{ ux_icon('wordpress:square', {'class': 'size-5 text-gray-800 shrink-0'}) }}
+                <p class="text-sm font-light">{{ property.squareMeters }} m²</p>
+            </div>
+        </div>
+    </div>
+    {% if property.slug|default(false) %}</a>{% endif %}
+</article>

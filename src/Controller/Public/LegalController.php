@@ -13,16 +13,15 @@ final class LegalController extends AbstractController
     #[Route(
         path: [
             'fr' => '/{_locale}/mentions-legales',
-            'en' => '/{_locale}/legal-notice'
+            'en' => '/{_locale}/legal-notice',
         ],
         name: 'app_legal_notice',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.1,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-10-30')
-                ]
+            'sitemap' => [
+                'priority' => 0.1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-10-30'),
+            ],
         ]
     )]
     public function legalNotice(): Response
@@ -33,16 +32,15 @@ final class LegalController extends AbstractController
     #[Route(
         path: [
             'fr' => '/{_locale}/politique-de-confidentialite',
-            'en' => '/{_locale}/privacy-policy'
+            'en' => '/{_locale}/privacy-policy',
         ],
         name: 'app_privacy_policy',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.1,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-10-30')
-                ]
+            'sitemap' => [
+                'priority' => 0.1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-10-30'),
+            ],
         ]
     )]
     public function privacyPolicy(): Response
@@ -53,16 +51,15 @@ final class LegalController extends AbstractController
     #[Route(
         path: [
             'fr' => '/{_locale}/conditions-generales-de-vente',
-            'en' => '/{_locale}/terms-and-conditions'
+            'en' => '/{_locale}/terms-and-conditions',
         ],
         name: 'app_terms_and_conditions',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.1,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2025-01-12')
-                ]
+            'sitemap' => [
+                'priority' => 0.1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2025-01-12'),
+            ],
         ]
     )]
     public function termsAndConditions(): Response
@@ -73,7 +70,8 @@ final class LegalController extends AbstractController
     #[Route('/documents/terms', name: 'app_terms_download')]
     public function downloadTerms(): BinaryFileResponse
     {
-        $path = $this->getParameter('kernel.project_dir') . '/private/terms.pdf';
+        $path = $this->getParameter('kernel.project_dir').'/private/terms.pdf';
+
         return $this->file($path, 'CGV-RIP.pdf');
     }
 }

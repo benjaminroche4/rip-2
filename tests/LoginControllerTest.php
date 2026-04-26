@@ -37,8 +37,8 @@ final class LoginControllerTest extends WebTestCase
         // Wipe + ensure a User exists with the required NOT NULL columns.
         // Foreign-keyed children (ResetPasswordRequest) are removed first so
         // doctrine can drop the parent row without integrity errors.
-        $em->createQuery('DELETE FROM ' . \App\Auth\Entity\ResetPasswordRequest::class)->execute();
-        $em->createQuery('DELETE FROM ' . User::class)->execute();
+        $em->createQuery('DELETE FROM '.\App\Auth\Entity\ResetPasswordRequest::class)->execute();
+        $em->createQuery('DELETE FROM '.User::class)->execute();
 
         /** @var UserPasswordHasherInterface $hasher */
         $hasher = $container->get('security.user_password_hasher');

@@ -1,0 +1,205 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method KnpU\\OAuth2ClientBundle\\Client\\OAuth2ClientInterface\:\:redirect\(\) invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Auth/Controller/GoogleAuthController.php
+
+		-
+			message: '#^Property App\\Auth\\Entity\\ResetPasswordRequest\:\:\$user type mapping mismatch\: property can contain App\\Auth\\Entity\\User\|null but database expects App\\Auth\\Entity\\User\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Auth/Entity/ResetPasswordRequest.php
+
+		-
+			message: '#^Property App\\Auth\\Entity\\User\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Auth/Entity/User.php
+
+		-
+			message: '#^Property App\\Auth\\Entity\\User\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Auth/Entity/User.php
+
+		-
+			message: '#^Property App\\Auth\\Entity\\User\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Auth/Entity/User.php
+
+		-
+			message: '#^Property App\\Auth\\Entity\\User\:\:\$lastName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Auth/Entity/User.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Auth/Security/GoogleAuthenticator.php
+
+		-
+			message: '#^Method App\\Auth\\Security\\GoogleAuthenticator\:\:onAuthenticationFailure\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Auth/Security/GoogleAuthenticator.php
+
+		-
+			message: '#^Method App\\Auth\\Security\\GoogleAuthenticator\:\:onAuthenticationSuccess\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Auth/Security/GoogleAuthenticator.php
+
+		-
+			message: '#^Method App\\Auth\\Security\\GoogleAuthenticator\:\:supports\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Auth/Security/GoogleAuthenticator.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Auth/Security/GoogleAuthenticator.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>slug" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Blog/Controller/BlogController.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$helpType type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$lang type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$lastName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Contact/Entity/Contact.php
+
+		-
+			message: '#^Property App\\Newsletter\\Controller\\NewsletterController\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Newsletter/Controller/NewsletterController.php
+
+		-
+			message: '#^Property App\\Newsletter\\Entity\\Newsletter\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Newsletter/Entity/Newsletter.php
+
+		-
+			message: '#^Property App\\Newsletter\\Entity\\Newsletter\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Newsletter/Entity/Newsletter.php
+
+		-
+			message: '#^Property App\\Newsletter\\Entity\\Newsletter\:\:\$subscribe type mapping mismatch\: property can contain bool\|null but database expects bool\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Newsletter/Entity/Newsletter.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$address type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$bathroom type mapping mismatch\: property can contain int\|null but database expects int\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$bedroom type mapping mismatch\: property can contain int\|null but database expects int\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$ip type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$phoneNumber type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$propertyCondition type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Property App\\PropertyEstimation\\Entity\\PropertyEstimation\:\:\$surface type mapping mismatch\: property can contain int\|null but database expects int\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Cannot call method tick\(\) on array\<array\<Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: tests/Flow/ContactFlowTest.php
+
+		-
+			message: '#^Property App\\Tests\\ResetPasswordControllerTest\:\:\$userRepository is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/ResetPasswordControllerTest.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Symfony\\\\Component\\\\Dotenv\\\\Dotenv'' and ''bootEnv'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/bootstrap.php

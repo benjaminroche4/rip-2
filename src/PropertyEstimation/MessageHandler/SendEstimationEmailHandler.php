@@ -2,8 +2,8 @@
 
 namespace App\PropertyEstimation\MessageHandler;
 
-use App\Shared\Email\EmailAddress;
 use App\PropertyEstimation\Message\SendEstimationEmailMessage;
+use App\Shared\Email\EmailAddress;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -16,7 +16,8 @@ final class SendEstimationEmailHandler
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function __invoke(SendEstimationEmailMessage $message): void
     {
@@ -41,7 +42,7 @@ final class SendEstimationEmailHandler
         try {
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $e) {
-            $this->logger->error('Estimation email failed: ' . $e->getMessage(), ['email' => $message->email]);
+            $this->logger->error('Estimation email failed: '.$e->getMessage(), ['email' => $message->email]);
         }
     }
 }

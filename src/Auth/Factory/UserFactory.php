@@ -9,10 +9,10 @@ use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 /**
  * @extends PersistentProxyObjectFactory<User>
  */
-final class UserFactory extends PersistentProxyObjectFactory{
-
+final class UserFactory extends PersistentProxyObjectFactory
+{
     private UserPasswordHasherInterface $passwordHasher;
-    const USER_ROLES = ['ROLE_USER', 'ROLE_ADMIN'];
+    public const USER_ROLES = ['ROLE_USER', 'ROLE_ADMIN'];
 
     public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
@@ -28,7 +28,8 @@ final class UserFactory extends PersistentProxyObjectFactory{
     }
 
     #[\Override]
-    protected function defaults(): array|callable    {
+    protected function defaults(): array|callable
+    {
         return [
             'firstName' => self::faker()->firstName(),
             'lastName' => self::faker()->lastName(),
@@ -42,7 +43,7 @@ final class UserFactory extends PersistentProxyObjectFactory{
     #[\Override]
     protected function initialize(): static
     {
-        return $this->afterInstantiate(function(User $user) {
+        return $this->afterInstantiate(function (User $user) {
             $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPassword()));
         });
     }

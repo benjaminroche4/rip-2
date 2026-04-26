@@ -5,7 +5,6 @@ namespace App\Newsletter\Entity;
 use App\Newsletter\Repository\NewsletterRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: NewsletterRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'newsletter.email.unique')]

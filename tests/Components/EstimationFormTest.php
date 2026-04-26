@@ -14,7 +14,7 @@ use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
  * - the form is wired with Turbo (`data-turbo` attribute)
  * - all expected fields are present (address, propertyCondition, bedroom,
  *   bathroom, surface, phoneNumber, email)
- * - the three number-stepper blocks generate the right Stimulus wiring
+ * - the three number-stepper blocks generate the right Stimulus wiring.
  *
  * This catches drift between the form type and its template — e.g. someone
  * adds/removes a field on the entity without updating the component.
@@ -41,7 +41,7 @@ final class EstimationFormTest extends KernelTestCase
         // All seven expected form widgets
         foreach (['address', 'propertyCondition', 'bedroom', 'bathroom', 'surface', 'phoneNumber', 'email'] as $field) {
             $this->assertMatchesRegularExpression(
-                '/(name|id)="property_estimation(_form)?\[?' . preg_quote($field, '/') . '\]?"|(name|id)="property_estimation_' . preg_quote($field, '/') . '"/i',
+                '/(name|id)="property_estimation(_form)?\[?'.preg_quote($field, '/').'\]?"|(name|id)="property_estimation_'.preg_quote($field, '/').'"/i',
                 $html,
                 "Missing widget for field {$field}",
             );

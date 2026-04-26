@@ -11,7 +11,7 @@ use Resend;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -21,8 +21,8 @@ final class NewsletterController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
         private readonly LoggerInterface $logger,
-    )
-    {
+        private readonly RateLimiterFactoryInterface $formNewsletterLimiter,
+    ) {
     }
 
     #[Route(
@@ -32,43 +32,54 @@ final class NewsletterController extends AbstractController
         ],
         name: 'app_newsletter',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.4,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                    'lastmod' => new \DateTime('2026-01-04')
-                ]
+            'sitemap' => [
+                'priority' => 0.4,
+                'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
+                'lastmod' => new \DateTime('2026-01-04'),
+            ],
         ]
     )]
     public function index(Request $request): Response
     {
-        //$resend = Resend::client($_ENV['RESEND_API_KEY']);
+        // $resend = Resend::client($_ENV['RESEND_API_KEY']);
 
         $newsletter = new Newsletter();
         $form = $this->createForm(NewsletterType::class, $newsletter);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->formNewsletterLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+                $form->get('email')->addError(new \Symfony\Component\Form\FormError(
+                    $this->translator->trans('newsletter.form.error.tooManyRequests'),
+                ));
+
+                $response = $this->render('public/newsletter/index.html.twig', ['newsletterForm' => $form->createView()]);
+                $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
+
+                return $response;
+            }
+
             $newsletter->setCreatedAt(new \DateTimeImmutable());
-            $newsletter->setSubscribe(1);
+            $newsletter->setSubscribe(true);
 
             $this->entityManager->persist($newsletter);
             $this->entityManager->flush();
 
-/*            try {
-                $resend->contacts->create([
-                    'email' => $newsletter->getEmail(),
-                    'segments' => [
-                        ['id' => '52a39bfb-e0fe-4aa6-8838-4555bc24f108'],
-                    ],
-                ]);
-            } catch (\Exception $e) {
-                $this->logger->error('Resend API error while adding contact: ' . $e->getMessage(), [
-                    'email' => $newsletter->getEmail(),
-                ]);
-            }*/
+            /*            try {
+                            $resend->contacts->create([
+                                'email' => $newsletter->getEmail(),
+                                'segments' => [
+                                    ['id' => '52a39bfb-e0fe-4aa6-8838-4555bc24f108'],
+                                ],
+                            ]);
+                        } catch (\Exception $e) {
+                            $this->logger->error('Resend API error while adding contact: ' . $e->getMessage(), [
+                                'email' => $newsletter->getEmail(),
+                            ]);
+                        }*/
 
             $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
+
             return $this->redirectToRoute('app_newsletter');
         }
 

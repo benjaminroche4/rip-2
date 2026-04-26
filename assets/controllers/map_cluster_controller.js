@@ -10,6 +10,7 @@ export default class extends Controller {
     #map = null
     #debounceTimer = null
     #component = null
+    #mapListeners = []
 
     async connect() {
         this.#component = await getComponent(this.element.closest('[data-controller*="live"]'))
@@ -23,22 +24,24 @@ export default class extends Controller {
         if (this.#debounceTimer) {
             clearTimeout(this.#debounceTimer)
         }
+        this.#mapListeners.forEach(l => google.maps.event.removeListener(l))
+        this.#mapListeners = []
     }
 
     #onMapConnect = (event) => {
         this.#map = event.detail.map
-        this.#map.addListener('idle', this.#onMapIdle)
+        this.#mapListeners.push(this.#map.addListener('idle', this.#onMapIdle))
     }
 
     #onMarkerCreated = (event) => {
         const { marker, definition } = event.detail
         if (!definition.extra?.isCluster) return
 
-        marker.addListener('click', () => {
+        this.#mapListeners.push(marker.addListener('click', () => {
             const pos = marker.position
             this.#map.setZoom(this.#map.getZoom() + 2)
             this.#map.panTo(pos)
-        })
+        }))
     }
 
     #onMapIdle = () => {

@@ -35,7 +35,8 @@ final readonly class Post
         public ?array $tags = null,
         /** @var array{_key?: string, slug?: string}|null */
         public ?array $alternateSlug = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Twig back-compat: templates that read `post._createdAt` (the raw

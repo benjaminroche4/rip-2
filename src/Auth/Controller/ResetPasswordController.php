@@ -49,7 +49,10 @@ class ResetPasswordController extends AbstractController
             /** @var string $email */
             $email = $form->get('email')->getData();
 
-            return $this->processSendingPasswordResetEmail($email, $mailer, $translator
+            return $this->processSendingPasswordResetEmail(
+                $email,
+                $mailer,
+                $translator
             );
         }
 
@@ -66,7 +69,8 @@ class ResetPasswordController extends AbstractController
             'fr' => '/{_locale}/verification-email',
             'en' => '/{_locale}/check-email',
         ],
-        name: 'app_check_email')]
+        name: 'app_check_email'
+    )]
     public function checkEmail(): Response
     {
         // Generate a fake token if the user does not exist or someone hit this page directly.
@@ -88,7 +92,8 @@ class ResetPasswordController extends AbstractController
             'fr' => '/{_locale}/nouveau/{token}',
             'en' => '/{_locale}/reset/{token}',
         ],
-        name: 'app_reset_password')]
+        name: 'app_reset_password'
+    )]
     public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator, ?string $token = null): Response
     {
         if ($token) {

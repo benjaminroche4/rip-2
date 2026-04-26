@@ -32,9 +32,29 @@ lint:
 	php bin/console lint:twig templates/
 	php bin/console lint:yaml config/ --parse-tags
 	php bin/console lint:container
+	vendor/bin/phpstan analyse --memory-limit=1G
+	vendor/bin/php-cs-fixer fix --dry-run --diff
+
+cs-fix:
+	vendor/bin/php-cs-fixer fix
 
 test:
 	php bin/phpunit
+
+test-prod:
+	@echo "→ [1/6] Lint Twig"
+	@php bin/console lint:twig templates/
+	@echo "→ [2/6] Lint YAML"
+	@php bin/console lint:yaml config/ --parse-tags
+	@echo "→ [3/6] Lint container (DI types)"
+	@php bin/console lint:container
+	@echo "→ [4/6] PHPStan (niveau 5, baseline appliqué)"
+	@vendor/bin/phpstan analyse --memory-limit=1G
+	@echo "→ [5/6] PHP-CS-Fixer (dry-run, formatage Symfony + PHP82)"
+	@vendor/bin/php-cs-fixer fix --dry-run --diff
+	@echo "→ [6/6] PHPUnit"
+	@php bin/phpunit
+	@echo "✓ Pre-prod OK : tu peux deployer avec 'make deploy'"
 
 test-db-init:
 	echo "→ Create rip_test database (no-op if it already exists)"

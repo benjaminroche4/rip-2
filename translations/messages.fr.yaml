@@ -46,6 +46,8 @@ contact:
         accept:
             label: En cochant cette case, j’accepte l’utilisation de mes informations pour être recontacté(e).
         button: Être recontacté rapidement
+        error:
+            tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
             title: Merci pour votre message !
             text: Un expert de notre équipe vous contactera dans les plus brefs délais.
@@ -889,6 +891,8 @@ propertyManagement:
         trust:
             1: Réponse sous 2h
             2: Données confidentielles
+        error:
+            tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
             title: Demande envoyée avec succès !
             text: Votre estimation est en cours de traitement. Un expert vous contactera très prochainement.
@@ -1027,7 +1031,9 @@ newsletter:
             label: Votre email
             notBlank: L'email ne doit pas être vide.
             placeholder: "Votre address email"
-        error: Erreur
+        error:
+            title: Erreur
+            tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
             title: Inscription confirmée !
             text: "Merci de vous être inscrit(e) à notre newsletter. Surveillez votre boîte de réception, vous recevrez bientôt notre prochain email."

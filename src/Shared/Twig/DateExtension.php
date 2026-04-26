@@ -21,12 +21,13 @@ class DateExtension extends AbstractExtension
         $dayOfWeek = (int) $now->format('N'); // 1 (Monday) to 7 (Sunday)
 
         // Si c'est lundi, on prend le lundi prochain (dans 7 jours)
-        if ($dayOfWeek === 1) {
+        if (1 === $dayOfWeek) {
             return $now->modify('+7 days');
         }
 
         // Sinon, on calcule les jours jusqu'au prochain lundi
         $daysUntilMonday = 8 - $dayOfWeek; // 8 - jour actuel = jours jusqu'au lundi
+
         return $now->modify("+{$daysUntilMonday} days");
     }
 
@@ -40,12 +41,12 @@ class DateExtension extends AbstractExtension
             \IntlDateFormatter::NONE,
             'Europe/Paris',
             \IntlDateFormatter::GREGORIAN,
-            $locale === 'fr' ? 'EEEE d MMMM' : 'EEEE, MMMM d'
+            'fr' === $locale ? 'EEEE d MMMM' : 'EEEE, MMMM d'
         );
 
         $formatted = $formatter->format($nextMonday);
 
         // Capitalise la première lettre
-        return mb_convert_case($formatted, MB_CASE_TITLE, "UTF-8");
+        return mb_convert_case($formatted, MB_CASE_TITLE, 'UTF-8');
     }
 }

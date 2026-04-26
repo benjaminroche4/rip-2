@@ -27,7 +27,7 @@ final class PropertyEstimationFlowTest extends WebTestCase
     {
         $this->client = static::createClient();
         $this->em = static::getContainer()->get('doctrine.orm.entity_manager');
-        $this->em->createQuery('DELETE FROM ' . PropertyEstimation::class)->execute();
+        $this->em->createQuery('DELETE FROM '.PropertyEstimation::class)->execute();
     }
 
     public function testValidSubmissionPersistsAndDispatchesEmail(): void
@@ -96,6 +96,7 @@ final class PropertyEstimationFlowTest extends WebTestCase
     {
         /** @var InMemoryTransport $transport */
         $transport = static::getContainer()->get('messenger.transport.async');
+
         return $transport;
     }
 }

@@ -30,7 +30,8 @@ final class SanityWebhookController extends AbstractController
         private readonly TagAwareCacheInterface $cache,
         #[Autowire(env: 'WEBHOOK_SANITY_SECRET')]
         private readonly string $secret,
-    ) {}
+    ) {
+    }
 
     #[Route('/_webhook/sanity', name: 'webhook_sanity', methods: ['POST'])]
     public function __invoke(Request $request): Response
@@ -68,18 +69,18 @@ final class SanityWebhookController extends AbstractController
 
     /**
      * Sanity signs payloads using HMAC-SHA256, format: "t=<timestamp>,v1=<hash>".
-     * See https://www.sanity.io/docs/webhooks#authenticating-webhook-requests
+     * See https://www.sanity.io/docs/webhooks#authenticating-webhook-requests.
      */
     private function verifySignature(string $payload, string $signatureHeader): bool
     {
-        if ($signatureHeader === '' || $this->secret === '') {
+        if ('' === $signatureHeader || '' === $this->secret) {
             return false;
         }
 
         $parts = [];
         foreach (explode(',', $signatureHeader) as $segment) {
             $kv = explode('=', trim($segment), 2);
-            if (count($kv) === 2) {
+            if (2 === count($kv)) {
                 $parts[$kv[0]] = $kv[1];
             }
         }
@@ -87,11 +88,11 @@ final class SanityWebhookController extends AbstractController
         $timestamp = $parts['t'] ?? null;
         $signature = $parts['v1'] ?? null;
 
-        if ($timestamp === null || $signature === null) {
+        if (null === $timestamp || null === $signature) {
             return false;
         }
 
-        $signedPayload = $timestamp . '.' . $payload;
+        $signedPayload = $timestamp.'.'.$payload;
         $expected = rtrim(strtr(base64_encode(hash_hmac('sha256', $signedPayload, $this->secret, true)), '+/', '-_'), '=');
 
         return hash_equals($expected, $signature);

@@ -18,14 +18,15 @@ final class MakeWebhookClient
         private readonly LoggerInterface $logger,
         #[Autowire(env: 'MAKE_WEBHOOK_URL')]
         private readonly string $webhookUrl,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $payload
      */
     public function notify(array $payload): bool
     {
-        if ($this->webhookUrl === '') {
+        if ('' === $this->webhookUrl) {
             return false;
         }
 
@@ -35,11 +36,13 @@ final class MakeWebhookClient
                 'timeout' => 3,
                 'max_duration' => 5,
             ]);
+
             return true;
         } catch (HttpClientExceptionInterface $e) {
-            $this->logger->warning('Make webhook failed: ' . $e->getMessage(), [
+            $this->logger->warning('Make webhook failed: '.$e->getMessage(), [
                 'payload' => $payload,
             ]);
+
             return false;
         }
     }

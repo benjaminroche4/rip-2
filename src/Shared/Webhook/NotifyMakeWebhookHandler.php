@@ -9,7 +9,8 @@ final class NotifyMakeWebhookHandler
 {
     public function __construct(
         private readonly MakeWebhookClient $client,
-    ) {}
+    ) {
+    }
 
     public function __invoke(NotifyMakeWebhookMessage $message): void
     {

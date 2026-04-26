@@ -15,6 +15,8 @@ export default class extends Controller {
     #highlightedCluster = null
     #cardCache = new Map()
     #activeInfoWindow = null
+    #mapsListeners = []
+    #domListeners = []
 
     connect() {
         this.element.addEventListener('ux:map:connect', this.#onMapConnect)
@@ -26,8 +28,17 @@ export default class extends Controller {
         this.element.removeEventListener('ux:map:connect', this.#onMapConnect)
         this.element.removeEventListener('ux:map:marker:after-create', this.#onMarkerCreated)
         this.element.removeEventListener('ux:map:info-window:after-create', this.#onInfoWindowCreated)
+        this.#mapsListeners.forEach(l => google.maps.event.removeListener(l))
+        this.#mapsListeners = []
+        this.#domListeners.forEach(({ target, type, handler }) => target.removeEventListener(type, handler))
+        this.#domListeners = []
         this.#markersByPropertyId.clear()
         this.#clusterByPropertyId.clear()
+    }
+
+    #addDomListener(target, type, handler) {
+        target.addEventListener(type, handler)
+        this.#domListeners.push({ target, type, handler })
     }
 
     highlightMarker(event) {
@@ -99,19 +110,19 @@ export default class extends Controller {
 
     #onMapConnect = (event) => {
         this.#map = event.detail.map
-        this.#map.addListener('click', () => this.#deselect())
+        this.#mapsListeners.push(this.#map.addListener('click', () => this.#deselect()))
     }
 
     #onInfoWindowCreated = (event) => {
         const infoWindow = event.detail.infoWindow
         this.#infoWindows.push(infoWindow)
 
-        infoWindow.addListener('closeclick', () => {
+        this.#mapsListeners.push(infoWindow.addListener('closeclick', () => {
             if (this.#selected) {
                 this.#deactivate(this.#selected.rect, this.#selected.text)
                 this.#selected = null
             }
-        })
+        }))
     }
 
     #onMarkerCreated = (event) => {
@@ -138,11 +149,11 @@ export default class extends Controller {
 
                 marker.element.style.cursor = 'pointer'
 
-                marker.content.addEventListener('mouseenter', () => {
+                this.#addDomListener(marker.content, 'mouseenter', () => {
                     this.#activateCluster(clusterData)
                 })
 
-                marker.content.addEventListener('mouseleave', () => {
+                this.#addDomListener(marker.content, 'mouseleave', () => {
                     if (this.#highlightedCluster === clusterData) {
                         this.#deactivateCluster()
                     }
@@ -171,17 +182,17 @@ export default class extends Controller {
             this.#markersByPropertyId.set(definition.extra.propertyId, markerData)
         }
 
-        marker.content.addEventListener('mouseenter', () => {
+        this.#addDomListener(marker.content, 'mouseenter', () => {
             this.#activate(rect, text)
         })
 
-        marker.content.addEventListener('mouseleave', () => {
+        this.#addDomListener(marker.content, 'mouseleave', () => {
             if (this.#selected !== markerData) {
                 this.#deactivate(rect, text)
             }
         })
 
-        marker.addListener('click', () => {
+        this.#mapsListeners.push(marker.addListener('click', () => {
             if (this.#selected === markerData && this.#activeInfoWindow) {
                 this.#deselect()
                 return
@@ -192,7 +203,7 @@ export default class extends Controller {
             this.#selected = markerData
             this.#activate(rect, text)
             this.#openInfoWindow(marker, definition.extra?.propertyId)
-        })
+        }))
     }
 
     async #openInfoWindow(marker, propertyId) {
@@ -210,13 +221,13 @@ export default class extends Controller {
         const infoWindow = new InfoWindow({ content: html, disableAutoPan: false })
         infoWindow.open({ map: this.#map, anchor: marker })
 
-        infoWindow.addListener('closeclick', () => {
+        this.#mapsListeners.push(infoWindow.addListener('closeclick', () => {
             if (this.#selected) {
                 this.#deactivate(this.#selected.rect, this.#selected.text)
                 this.#selected = null
             }
             this.#activeInfoWindow = null
-        })
+        }))
 
         this.#activeInfoWindow = infoWindow
     }

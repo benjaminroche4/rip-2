@@ -97,7 +97,8 @@ final class MarketplaceSearch
         private readonly PropertyRepository $propertyRepository,
         private readonly PropertyFilter $propertyFilter,
         private readonly MapBuilder $mapBuilder,
-    ) {}
+    ) {
+    }
 
     public function mount(
         string $locale = 'fr',
@@ -168,11 +169,16 @@ final class MarketplaceSearch
 
     #[LiveAction]
     public function updateBounds(
-        #[LiveArg] float $zoom,
-        #[LiveArg] float $south,
-        #[LiveArg] float $north,
-        #[LiveArg] float $west,
-        #[LiveArg] float $east,
+        #[LiveArg]
+        float $zoom,
+        #[LiveArg]
+        float $south,
+        #[LiveArg]
+        float $north,
+        #[LiveArg]
+        float $west,
+        #[LiveArg]
+        float $east,
     ): void {
         $this->zoom = $zoom;
         $this->south = $south;
@@ -259,7 +265,7 @@ final class MarketplaceSearch
     private function getFilteredProperties(): array
     {
         $key = sprintf('%s|%s|%s|%s', $this->arrondissement ?? '', $this->propertyType, $this->rentMin ?? '', $this->rentMax ?? '');
-        if ($this->filteredCache !== null && $this->filteredCacheKey === $key) {
+        if (null !== $this->filteredCache && $this->filteredCacheKey === $key) {
             return $this->filteredCache;
         }
 
@@ -279,7 +285,7 @@ final class MarketplaceSearch
 
     private function normalizeRentBounds(): void
     {
-        if ($this->draftRentMin !== null && $this->draftRentMax !== null && $this->draftRentMax < $this->draftRentMin) {
+        if (null !== $this->draftRentMin && null !== $this->draftRentMax && $this->draftRentMax < $this->draftRentMin) {
             [$this->draftRentMin, $this->draftRentMax] = [$this->draftRentMax, $this->draftRentMin];
         }
     }

@@ -17,8 +17,7 @@ readonly class SiteMapEventListener
         private SanityService $sanityService,
         private PropertyRepository $propertyRepository,
         private PropertyUrlExtension $propertyUrlExtension,
-    )
-    {
+    ) {
     }
 
     public function onSitemapPopulate(SitemapPopulateEvent $event): void
@@ -86,7 +85,7 @@ readonly class SiteMapEventListener
                 $url->setChangefreq(UrlConcrete::CHANGEFREQ_DAILY);
                 $url->setPriority(0.8);
                 $lastmod = $property->updatedAt ?? $property->createdAt;
-                if ($lastmod !== null) {
+                if (null !== $lastmod) {
                     $url->setLastmod(\DateTime::createFromImmutable($lastmod));
                 }
                 $urlContainer->addUrl($url, 'properties');

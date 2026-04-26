@@ -1,0 +1,145 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}{{ 'meta.login.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.login.description'|trans }}{% endblock %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% block body %}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        {{ component('blocks/gridBackground', {auth: true}) }}
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div
+                        class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                        </a>
+                    </div>
+                </el-popover>
+            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">{{ 'login.title'|trans|raw }}</h1>
+                <p class="font-light text-neutral-400 text-pretty text-center">
+                    {{ 'login.subTitle'|trans|raw }}
+                </p>
+            </div>
+        </div>
+        <div class="mt-10 mx-auto w-full max-w-sm">
+            <div>
+                <div class="grid grid-cols-1 gap-4">
+                    <a href="{{ path('app_google_login') }}" class="flex h-10 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm/6 font-semibold text-gray-900 hover:bg-neutral-50 transition duration-100 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none">
+                        {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
+                        <span class="text-sm/6 font-semibold">{{ 'login.provider.google'|trans|raw }}</span>
+                    </a>
+                </div>
+                <div class="relative mt-6">
+                    <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                        <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm/6 font-medium">
+                        <span
+                            class="bg-white px-6 text-gray-900 text-center">{{ 'login.continueWith.title'|trans|raw }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8">
+                <form method="POST" class="space-y-6">
+                    {% if error %}
+                        <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
+                            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                            <twig:Alert:Title>{{ 'login.form.error.title'|trans|raw }}</twig:Alert:Title>
+                            <twig:Alert:Description>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </twig:Alert:Description>
+                        </twig:Alert>
+                    {% endif %}
+                    <div>
+                        <twig:Label for="username">{{ 'login.form.email.label'|trans|raw }}</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" class="max-w-sm" />
+                        </div>
+                    </div>
+                    <div>
+                        <twig:Label for="password">{{ 'login.form.password.label'|trans|raw }}</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input type="password" id="password" name="_password" autocomplete="current-password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" class="max-w-sm" />
+                        </div>
+                    </div>
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                    <div class="flex max-[344px]:flex-col max-[344px]:justify-start gap-2 max-[344px]:items-start items-center justify-between">
+                        <div class="flex gap-3 items-center">
+                            <twig:Checkbox id="_remember_me" name="_remember_me" checked />
+                            <label for="_remember_me" class="block text-sm/6 font-light text-gray-900">
+                                {{ 'login.form.rememberMe'|trans|raw }}
+                            </label>
+                        </div>
+                        <div class="text-sm/6">
+                            <a href="{{ path('app_forgot_password_request') }}"
+                               class="font-medium text-gray-800 hover:text-primary transition duration-100">{{ 'login.form.forgotPassword'|trans|raw }}</a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
+                            {{ 'login.form.button'|trans|raw }}
+                        </twig:Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_login.webp') }}"
+            alt="Relocation In Paris, agence de relocation à Paris"
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"/>
+        <div class="absolute inset-0 bg-black/10"></div>
+    </section>
+{% endblock %}

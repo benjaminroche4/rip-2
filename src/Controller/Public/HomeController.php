@@ -16,12 +16,11 @@ final class HomeController extends AbstractController
         ],
         name: 'app_home',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 1,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2026-01-04')
-                ]
+            'sitemap' => [
+                'priority' => 1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                'lastmod' => new \DateTime('2026-01-04'),
+            ],
         ]
     )]
     public function index(): Response

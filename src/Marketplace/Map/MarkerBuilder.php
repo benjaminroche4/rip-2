@@ -15,7 +15,8 @@ final class MarkerBuilder
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
-    ) {}
+    ) {
+    }
 
     public function buildPropertyMarker(Property $property, string $locale): Marker
     {
@@ -54,11 +55,19 @@ final class MarkerBuilder
                 <circle cx="%d" cy="%d" r="%d" fill="white"/>
                 <text x="%d" y="%d" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="700" fill="#111827">%s</text>
             </svg>',
-            $size, $size,
-            $size / 2, $size / 2, $size / 2 - 1,
-            $size / 2, $size / 2, (int) ($size * 0.4),
-            $size / 2, $size / 2, (int) ($size * 0.3),
-            $size / 2, $size / 2,
+            $size,
+            $size,
+            $size / 2,
+            $size / 2,
+            $size / 2 - 1,
+            $size / 2,
+            $size / 2,
+            (int) ($size * 0.4),
+            $size / 2,
+            $size / 2,
+            (int) ($size * 0.3),
+            $size / 2,
+            $size / 2,
             $label,
         ));
 
@@ -74,12 +83,12 @@ final class MarkerBuilder
     {
         $onRequest = $this->translator->trans('marketplace.list.card.map.marker.onRequest', [], null, $locale);
 
-        if ($property->priceOnRequest === true) {
+        if (true === $property->priceOnRequest) {
             return $onRequest;
         }
 
-        if ($property->monthlyRent !== null && $property->monthlyRent > 0) {
-            return number_format($property->monthlyRent, 0, ',', ' ') . ' €';
+        if (null !== $property->monthlyRent && $property->monthlyRent > 0) {
+            return number_format($property->monthlyRent, 0, ',', ' ').' €';
         }
 
         return $onRequest;
@@ -102,10 +111,16 @@ final class MarkerBuilder
                 <rect x="0.5" y="0.5" width="%d" height="%d" rx="15" fill="%s" stroke="%s" stroke-width="1" filter="url(#s)"/>
                 <text x="%d" y="%d" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="600" fill="%s">%s</text>
             </svg>',
-            $w + 1, $h + 1,
+            $w + 1,
+            $h + 1,
             $shadow,
-            $w - 1, $h - 1, $fill, $stroke,
-            $cx, $cy, $textFill,
+            $w - 1,
+            $h - 1,
+            $fill,
+            $stroke,
+            $cx,
+            $cy,
+            $textFill,
             $label,
         );
     }

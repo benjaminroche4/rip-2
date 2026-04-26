@@ -102,7 +102,8 @@ final class PropertyRepository
         private readonly SanityService $sanityService,
         private readonly TagAwareCacheInterface $cache,
         private readonly PropertyMapper $mapper,
-    ) {}
+    ) {
+    }
 
     /**
      * Full property list for a given locale, used by the marketplace listing + map.
@@ -113,13 +114,13 @@ final class PropertyRepository
     public function findAll(string $locale): array
     {
         $rows = $this->cache->get(
-            'marketplace_properties_' . $locale,
+            'marketplace_properties_'.$locale,
             function (ItemInterface $item) use ($locale): array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
                 $item->tag(self::CACHE_TAG);
 
                 $results = $this->sanityService->query(
-                    '*[_type == "property" && language == $lang && !(_id in path("drafts.**"))] | order(_createdAt desc) ' . self::PROPERTY_PROJECTION,
+                    '*[_type == "property" && language == $lang && !(_id in path("drafts.**"))] | order(_createdAt desc) '.self::PROPERTY_PROJECTION,
                     ['lang' => $locale]
                 );
 
@@ -142,7 +143,7 @@ final class PropertyRepository
     public function findForSchema(string $locale, int $limit = 12): array
     {
         return $this->cache->get(
-            'marketplace_schema_properties_' . $locale . '_' . $limit,
+            'marketplace_schema_properties_'.$locale.'_'.$limit,
             function (ItemInterface $item) use ($locale, $limit): array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
                 $item->tag(self::CACHE_TAG);
@@ -175,7 +176,7 @@ final class PropertyRepository
     public function countAvailable(string $locale): int
     {
         return $this->cache->get(
-            'marketplace_schema_properties_count_' . $locale,
+            'marketplace_schema_properties_count_'.$locale,
             function (ItemInterface $item) use ($locale): int {
                 $item->expiresAfter(self::TTL_COUNT);
                 $item->tag(self::CACHE_TAG);
@@ -193,13 +194,13 @@ final class PropertyRepository
     public function findOneBySlug(string $slug, string $locale): ?Property
     {
         $row = $this->cache->get(
-            'marketplace_property_slug_' . $locale . '_' . md5($slug),
+            'marketplace_property_slug_'.$locale.'_'.md5($slug),
             function (ItemInterface $item) use ($slug, $locale): ?array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
                 $item->tag(self::CACHE_TAG);
 
                 $result = $this->sanityService->query(
-                    '*[_type == "property" && language == $lang && slug.current == $slug && !(_id in path("drafts.**"))][0] ' . self::PROPERTY_PROJECTION,
+                    '*[_type == "property" && language == $lang && slug.current == $slug && !(_id in path("drafts.**"))][0] '.self::PROPERTY_PROJECTION,
                     ['lang' => $locale, 'slug' => $slug]
                 );
 
@@ -207,7 +208,7 @@ final class PropertyRepository
             }
         );
 
-        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
+        return null !== $row ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
@@ -219,21 +220,21 @@ final class PropertyRepository
         $publishedId = str_starts_with($id, 'drafts.') ? substr($id, 7) : $id;
 
         $row = $this->cache->get(
-            'marketplace_property_id_' . $locale . '_' . md5($publishedId),
+            'marketplace_property_id_'.$locale.'_'.md5($publishedId),
             function (ItemInterface $item) use ($publishedId, $locale): ?array {
                 $item->expiresAfter(self::TTL_PROPERTIES);
                 $item->tag(self::CACHE_TAG);
 
                 $result = $this->sanityService->query(
-                    '*[_type == "property" && language == $lang && (_id == $id || _id == $draftId)] | order(_id asc)[0] ' . self::PROPERTY_PROJECTION,
-                    ['lang' => $locale, 'id' => $publishedId, 'draftId' => 'drafts.' . $publishedId]
+                    '*[_type == "property" && language == $lang && (_id == $id || _id == $draftId)] | order(_id asc)[0] '.self::PROPERTY_PROJECTION,
+                    ['lang' => $locale, 'id' => $publishedId, 'draftId' => 'drafts.'.$publishedId]
                 );
 
                 return is_array($result) ? $result : null;
             }
         );
 
-        return $row !== null ? $this->mapper->fromGroqArray($row) : null;
+        return null !== $row ? $this->mapper->fromGroqArray($row) : null;
     }
 
     /**
@@ -242,7 +243,7 @@ final class PropertyRepository
     public function findPropertyTypes(string $locale): array
     {
         return $this->cache->get(
-            'property_types_' . $locale,
+            'property_types_'.$locale,
             function (ItemInterface $item) use ($locale): array {
                 $item->expiresAfter(self::TTL_TYPES);
                 $item->tag(self::CACHE_TAG);
@@ -262,6 +263,7 @@ final class PropertyRepository
                         $types[$type['slug']] = $type['name'];
                     }
                 }
+
                 return $types;
             }
         );
@@ -275,7 +277,7 @@ final class PropertyRepository
     public function findMatchingTypeSlugs(string $slug): array
     {
         return $this->cache->get(
-            'property_type_slugs_' . $slug,
+            'property_type_slugs_'.$slug,
             function (ItemInterface $item) use ($slug): array {
                 $item->expiresAfter(self::TTL_TYPES);
                 $item->tag(self::CACHE_TAG);
@@ -296,6 +298,7 @@ final class PropertyRepository
 
     /**
      * @param array<int, array<string, mixed>> $results
+     *
      * @return array<int, array<string, mixed>>
      */
     private function dedupeDrafts(array $results): array

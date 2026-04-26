@@ -16,12 +16,11 @@ final class ServiceController extends AbstractController
         ],
         name: 'app_service_find_accommodation',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2026-01-04')
-                ]
+            'sitemap' => [
+                'priority' => 0.8,
+                'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                'lastmod' => new \DateTime('2026-01-04'),
+            ],
         ]
     )]
     public function findAccommodation(): Response
@@ -36,12 +35,11 @@ final class ServiceController extends AbstractController
         ],
         name: 'app_service_companies',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2026-01-04')
-                ]
+            'sitemap' => [
+                'priority' => 0.8,
+                'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                'lastmod' => new \DateTime('2026-01-04'),
+            ],
         ]
     )]
     public function company(): Response
@@ -53,15 +51,14 @@ final class ServiceController extends AbstractController
         path: [
             'fr' => '/{_locale}/services/trouver-un-locataire',
             'en' => '/{_locale}/services/find-a-tenant',
-            ],
+        ],
         name: 'app_service_find_tenant',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2026-01-18')
-                ]
+            'sitemap' => [
+                'priority' => 0.8,
+                'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                'lastmod' => new \DateTime('2026-01-18'),
+            ],
         ]
     )]
     public function findTenant(): Response

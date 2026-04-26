@@ -73,6 +73,7 @@ final class PropertyMapper
 
     /**
      * @param array<int, array<string, mixed>> $rows
+     *
      * @return array<int, Property>
      */
     public function fromGroqArrayList(array $rows): array
@@ -82,7 +83,7 @@ final class PropertyMapper
 
     private function toDateTime(mixed $value): ?\DateTimeImmutable
     {
-        if (!is_string($value) || $value === '') {
+        if (!is_string($value) || '' === $value) {
             return null;
         }
 
@@ -95,15 +96,16 @@ final class PropertyMapper
 
     private function toNullableString(mixed $value): ?string
     {
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return null;
         }
+
         return is_scalar($value) ? (string) $value : null;
     }
 
     private function toNullableInt(mixed $value): ?int
     {
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return null;
         }
         if (is_int($value)) {
@@ -112,14 +114,16 @@ final class PropertyMapper
         if (is_numeric($value)) {
             return (int) $value;
         }
+
         return null;
     }
 
     private function toNullableBool(mixed $value): ?bool
     {
-        if ($value === null) {
+        if (null === $value) {
             return null;
         }
+
         return (bool) $value;
     }
 
@@ -128,6 +132,6 @@ final class PropertyMapper
      */
     private function toNullableArray(mixed $value): ?array
     {
-        return is_array($value) && $value !== [] ? $value : null;
+        return is_array($value) && [] !== $value ? $value : null;
     }
 }

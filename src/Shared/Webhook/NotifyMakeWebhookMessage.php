@@ -12,5 +12,6 @@ final readonly class NotifyMakeWebhookMessage
      */
     public function __construct(
         public array $payload,
-    ) {}
+    ) {
+    }
 }

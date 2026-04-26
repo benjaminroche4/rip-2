@@ -30,7 +30,7 @@ final class ContactFlowTest extends WebTestCase
     {
         $this->client = static::createClient();
         $this->em = static::getContainer()->get('doctrine.orm.entity_manager');
-        $this->em->createQuery('DELETE FROM ' . Contact::class)->execute();
+        $this->em->createQuery('DELETE FROM '.Contact::class)->execute();
     }
 
     public function testValidSubmissionPersistsContactAndDispatchesBothMessages(): void
@@ -111,6 +111,7 @@ final class ContactFlowTest extends WebTestCase
     {
         /** @var InMemoryTransport $transport */
         $transport = static::getContainer()->get('messenger.transport.async');
+
         return $transport;
     }
 }

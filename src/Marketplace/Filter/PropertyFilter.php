@@ -13,10 +13,12 @@ final class PropertyFilter
 {
     public function __construct(
         private readonly PropertyRepository $propertyRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<int, Property> $properties
+     *
      * @return array<int, Property>
      */
     public function apply(
@@ -26,7 +28,7 @@ final class PropertyFilter
         ?int $rentMin = null,
         ?int $rentMax = null,
     ): array {
-        if ($arrondissement !== null) {
+        if (null !== $arrondissement) {
             $code = sprintf('750%02d', $arrondissement);
             $properties = array_values(array_filter(
                 $properties,
@@ -34,7 +36,7 @@ final class PropertyFilter
             ));
         }
 
-        if ($propertyType !== '') {
+        if ('' !== $propertyType) {
             $matchSlugs = $this->propertyRepository->findMatchingTypeSlugs($propertyType);
             $properties = array_values(array_filter(
                 $properties,
@@ -42,17 +44,17 @@ final class PropertyFilter
             ));
         }
 
-        if ($rentMin !== null) {
+        if (null !== $rentMin) {
             $properties = array_values(array_filter(
                 $properties,
-                fn (Property $p) => $p->monthlyRent !== null && $p->monthlyRent >= $rentMin
+                fn (Property $p) => null !== $p->monthlyRent && $p->monthlyRent >= $rentMin
             ));
         }
 
-        if ($rentMax !== null) {
+        if (null !== $rentMax) {
             $properties = array_values(array_filter(
                 $properties,
-                fn (Property $p) => $p->monthlyRent !== null && $p->monthlyRent <= $rentMax
+                fn (Property $p) => null !== $p->monthlyRent && $p->monthlyRent <= $rentMax
             ));
         }
 

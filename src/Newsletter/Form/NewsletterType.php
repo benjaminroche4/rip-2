@@ -5,8 +5,10 @@ namespace App\Newsletter\Form;
 use App\Newsletter\Entity\Newsletter;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class NewsletterType extends AbstractType
@@ -19,7 +21,22 @@ class NewsletterType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'newsletter.form.email.notBlank',
-                    )
+                    ),
+                ],
+            ])
+            // Honeypot: invisible to humans, frequently auto-filled by bots.
+            ->add('website', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'autocomplete' => 'off',
+                    'tabindex' => -1,
+                    'aria-hidden' => 'true',
+                    'class' => 'sr-only',
+                ],
+                'constraints' => [
+                    new Blank(),
                 ],
             ])
         ;

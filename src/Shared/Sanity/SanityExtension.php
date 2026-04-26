@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Shared\Sanity;
+
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -13,7 +14,8 @@ final class SanityExtension extends AbstractExtension
 {
     public function __construct(
         private readonly PortableTextRenderer $renderer,
-    ) {}
+    ) {
+    }
 
     public function getFilters(): array
     {

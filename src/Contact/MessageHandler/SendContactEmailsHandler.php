@@ -16,7 +16,8 @@ final class SendContactEmailsHandler
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function __invoke(SendContactEmailsMessage $message): void
     {
@@ -40,7 +41,7 @@ final class SendContactEmailsHandler
             ->htmlTemplate('emails/contact_admin.html.twig')
             ->context($context);
 
-        $clientSubject = $message->lang === 'fr'
+        $clientSubject = 'fr' === $message->lang
             ? sprintf('%s, votre conseiller vous contacte sous 30 minutes', $message->firstName ?? '')
             : sprintf('%s, your advisor will contact you within 30 minutes', $message->firstName ?? '');
 
@@ -57,14 +58,14 @@ final class SendContactEmailsHandler
         try {
             $this->mailer->send($adminEmail);
         } catch (TransportExceptionInterface $e) {
-            $this->logger->error('Contact admin email failed: ' . $e->getMessage(), ['email' => $message->email]);
+            $this->logger->error('Contact admin email failed: '.$e->getMessage(), ['email' => $message->email]);
         }
 
-        if ($message->email !== null && $message->email !== '') {
+        if (null !== $message->email && '' !== $message->email) {
             try {
                 $this->mailer->send($clientEmail);
             } catch (TransportExceptionInterface $e) {
-                $this->logger->error('Contact client email failed: ' . $e->getMessage(), ['email' => $message->email]);
+                $this->logger->error('Contact client email failed: '.$e->getMessage(), ['email' => $message->email]);
             }
         }
     }

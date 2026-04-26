@@ -14,7 +14,8 @@ final class BlogController extends AbstractController
 
     public function __construct(
         private readonly BlogRepository $blogRepository,
-    ) {}
+    ) {
+    }
 
     #[Route(
         path: [
@@ -66,7 +67,7 @@ final class BlogController extends AbstractController
     public function blogPost(string $slug, string $_locale): Response
     {
         $post = $this->blogRepository->findOneBySlug($slug, $_locale);
-        if ($post === null) {
+        if (null === $post) {
             throw $this->createNotFoundException('The blog post does not exist');
         }
 

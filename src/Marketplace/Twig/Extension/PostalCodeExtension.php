@@ -16,7 +16,7 @@ class PostalCodeExtension extends AbstractExtension
 
     public function formatPostalCode(?string $postalCode, string $locale = 'fr'): string
     {
-        if ($postalCode === null || $postalCode === '') {
+        if (null === $postalCode || '' === $postalCode) {
             return '';
         }
 
@@ -26,8 +26,8 @@ class PostalCodeExtension extends AbstractExtension
 
         $arr = (int) substr($postalCode, -2);
 
-        if ($locale === 'fr') {
-            return $arr === 1 ? '1er arrondissement' : $arr . 'e arrondissement';
+        if ('fr' === $locale) {
+            return 1 === $arr ? '1er arrondissement' : $arr.'e arrondissement';
         }
 
         $suffix = match ($arr % 100) {
@@ -40,6 +40,6 @@ class PostalCodeExtension extends AbstractExtension
             },
         };
 
-        return $arr . $suffix . ' arrondissement';
+        return $arr.$suffix.' arrondissement';
     }
 }

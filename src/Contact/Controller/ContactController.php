@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
@@ -22,7 +23,9 @@ final class ContactController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
         private readonly TranslatorInterface $translator,
-    ) {}
+        private readonly RateLimiterFactoryInterface $formContactLimiter,
+    ) {
+    }
 
     #[Route(
         path: [
@@ -45,6 +48,17 @@ final class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$this->formContactLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+                $form->get('email')->addError(new \Symfony\Component\Form\FormError(
+                    $this->translator->trans('contact.contactForm.error.tooManyRequests'),
+                ));
+
+                $response = $this->render('public/contact/index.html.twig', ['contactForm' => $form->createView()]);
+                $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
+
+                return $response;
+            }
+
             $now = new \DateTimeImmutable();
             $contact->setCreatedAt($now);
             $contact->setLang($request->getLocale());
@@ -80,12 +94,14 @@ final class ContactController extends AbstractController
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
                 return $this->render('public/contact/success.stream.html.twig', [
                     'success' => $contact,
                 ]);
             }
 
             $this->addFlash('contactSuccess', $this->translator->trans('contact.contactForm.success.title'));
+
             return $this->redirectToRoute('app_contact');
         }
 

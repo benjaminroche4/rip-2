@@ -26,11 +26,12 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
-    ) {}
+    ) {
+    }
 
     public function supports(Request $request): ?bool
     {
-        return $request->attributes->get('_route') === 'app_google_login_check';
+        return 'app_google_login_check' === $request->attributes->get('_route');
     }
 
     public function authenticate(Request $request): Passport
@@ -46,17 +47,17 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
                 $googleId = $googleUser->getId();
                 $email = $googleUser->getEmail();
 
-                if ($googleId === null || $email === null) {
+                if (null === $googleId || null === $email) {
                     throw new AuthenticationException('Google returned incomplete profile data.');
                 }
 
                 $user = $this->userRepository->findOneBy(['googleId' => $googleId]);
-                if ($user !== null) {
+                if (null !== $user) {
                     return $user;
                 }
 
                 $user = $this->userRepository->findOneBy(['email' => $email]);
-                if ($user !== null) {
+                if (null !== $user) {
                     $user->setGoogleId($googleId);
                     $this->entityManager->flush();
 
@@ -98,7 +99,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
 
     private function firstName(?string $fullName): string
     {
-        if ($fullName === null) {
+        if (null === $fullName) {
             return '';
         }
 
@@ -109,7 +110,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
 
     private function lastName(?string $fullName): string
     {
-        if ($fullName === null) {
+        if (null === $fullName) {
             return '';
         }
 
