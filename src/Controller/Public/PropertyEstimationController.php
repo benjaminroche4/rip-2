@@ -3,17 +3,14 @@
 namespace App\Controller\Public;
 
 use App\Entity\PropertyEstimation;
-use App\Enum\EmailAddress;
 use App\Form\PropertyEstimationType;
+use App\Message\SendEstimationEmailMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
-use Psr\Log\LoggerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
@@ -22,12 +19,9 @@ final class PropertyEstimationController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly MailerInterface $mailer,
-        private readonly LoggerInterface $logger,
+        private readonly MessageBusInterface $bus,
         private readonly TranslatorInterface $translator,
-    )
-    {
-    }
+    ) {}
 
     #[Route(
         path: [
@@ -36,13 +30,12 @@ final class PropertyEstimationController extends AbstractController
         ],
         name: 'app_service_landlords',
         options: [
-            'sitemap' =>
-                [
-                    'priority' => 0.8,
-                    'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
-                    'lastmod' => new \DateTime('2026-01-04')
-                ]
-        ]
+            'sitemap' => [
+                'priority' => 0.8,
+                'changefreq' => UrlConcrete::CHANGEFREQ_WEEKLY,
+                'lastmod' => new \DateTime('2026-01-04'),
+            ],
+        ],
     )]
     public function index(Request $request): Response
     {
@@ -50,45 +43,33 @@ final class PropertyEstimationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var PropertyEstimation $data */
             $data = $form->getData();
-            $data->setCreatedAt(new \DateTimeImmutable());
+            $now = new \DateTimeImmutable();
+            $data->setCreatedAt($now);
             $data->setIp($request->getClientIp());
             $data->setLang($request->getLocale());
 
             $this->entityManager->persist($data);
             $this->entityManager->flush();
 
-            $estimationEmail = (
-            (new TemplatedEmail())
-                ->from('Contact <contact@relocation-in-paris.fr>')
-                ->to(EmailAddress::CONTACT->value)
-                ->subject('🏠 Demande d\'éstimation | Relocation In Paris')
-                ->htmlTemplate('emails/property_estimation.html.twig')
-                ->context([
-                    'address' => $data->getAddress(),
-                    'propertyCondition' => $data->getPropertyCondition(),
-                    'surface' => $data->getSurface(),
-                    'bathroom' => $data->getBathroom(),
-                    'bedroom' => $data->getBedroom(),
-                    'emailLead' => $data->getEmail(),
-                    'phoneNumber' => $data->getPhoneNumber(),
-
-                    'createdAt' => new \DateTimeImmutable(),
-                    'lang' => $data->getLang(),
-                    'ip' => $data->getIp(),
-                ])
-            );
-
-            try {
-                $this->mailer->send($estimationEmail);
-            } catch (TransportExceptionInterface $e) {
-                $this->logger->error('An error occurred while sending :'. $e->getMessage());
-            }
+            $this->bus->dispatch(new SendEstimationEmailMessage(
+                address: $data->getAddress(),
+                propertyCondition: $data->getPropertyCondition(),
+                surface: $data->getSurface(),
+                bathroom: $data->getBathroom(),
+                bedroom: $data->getBedroom(),
+                email: $data->getEmail(),
+                phoneNumber: $data->getPhoneNumber(),
+                lang: $data->getLang() ?? $request->getLocale(),
+                ip: $data->getIp(),
+                createdAt: $now,
+            ));
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
                 return $this->render('public/property_estimation/success.stream.html.twig', [
-                    'success' => $data
+                    'success' => $data,
                 ]);
             }
 
