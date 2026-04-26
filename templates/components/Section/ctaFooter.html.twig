@@ -1,3 +1,6 @@
+{# Pure marketing block — no user state. Cached per-locale, 1h. Bust the
+   key suffix (currently v1) when copy or assets change. #}
+{% cache "ctafooter_v1_" ~ app.request.locale ttl(3600) %}
 <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
     <div class="relative overflow-hidden max-w-5xl mx-auto lg:py-16 py-12 rounded-3xl px-4 bg-primary">
         <svg class="absolute left-0 bottom-0 top-auto h-1/2 w-auto pointer-events-none lg:top-0 lg:h-full" width="352" height="320" viewBox="0 0 352 320" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -31,3 +34,4 @@
         </div>
     </div>
 </section>
+{% endcache %}

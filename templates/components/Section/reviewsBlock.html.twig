@@ -1,3 +1,6 @@
+{# Reviews carousel — pure presentational. Cached per-locale, 1h. Bust the
+   key suffix (currently v1) when copy or reviews data change. #}
+{% cache "reviews_v1_" ~ app.request.locale ttl(3600) %}
 <section class="px-6 py-12 sm:py-16 lg:px-8 max-w-7xl mx-auto">
     <div class="border border-neutral-200 py-12 px-6 rounded-3xl bg-neutral-50">
         <div class="flex flex-col space-y-3 justify-center text-center">
@@ -87,3 +90,4 @@
         </div>
     </div>
 </section>
+{% endcache %}
