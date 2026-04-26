@@ -1,0 +1,82 @@
+{# @prop form  Symfony form view (PropertyEstimationType) #}
+{%- props form -%}
+
+<div class="px-6 pt-6 pb-1 bg-white rounded-2xl mt-2" id="estimation-form">
+    {{ form_start(form, {'attr': {'data-turbo': 'true', 'novalidate': 'novalidate', 'class': 'space-y-6'}}) }}
+        {% for message in app.flashes('success') %}
+            <div class="rounded-xl bg-green-50 p-4">
+                <div class="flex items-start gap-x-3">
+                    <div class="flex-shrink-0">
+                        {{ ux_icon('lucide:circle-check', {'class':'text-green-600 size-5'}) }}
+                    </div>
+                    <div class="space-y-0.5">
+                        <h3 class="text-base font-medium text-green-800 -mt-0.5">{{ message }}</h3>
+                        <p class="text-sm text-slate-600">
+                            {{ 'propertyManagement.form.success.text'|trans|raw }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div>
+            {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+            {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.address.placeholder'|trans }}) }}
+        </div>
+
+        <div>
+            {{ form_label(form.propertyCondition, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+            {{ form_widget(form.propertyCondition, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6'}}) }}
+        </div>
+
+        {# Three number-stepper fields with same Stimulus wiring; loop the trio. #}
+        {% set steppers = [
+            { field: 'bedroom',  icon: 'ph:bed',                    min: 0, max: 20,  placeholder: 'propertyManagement.form.bedroom.placeholder',  unit: null,  span: false },
+            { field: 'bathroom', icon: 'mdi:shower',                min: 0, max: 10,  placeholder: 'propertyManagement.form.bathroom.placeholder', unit: null,  span: false },
+            { field: 'surface',  icon: 'qlementine-icons:square-2-16', min: 8, max: 900, placeholder: 'propertyManagement.form.bathroom.placeholder', unit: 'm²', span: true },
+        ] %}
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for s in steppers %}
+                <div data-controller="number-stepper" data-number-stepper-min-value="{{ s.min }}" data-number-stepper-max-value="{{ s.max }}"{{ s.span ? ' class="col-span-2 lg:col-span-1"' }}>
+                    <div class="flex items-center gap-x-1 mb-2">
+                        {{ ux_icon(s.icon, {'class':'size-5 text-primary shrink-0'}) }}
+                        {{ form_label(form[s.field], null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block'}}) }}
+                        {% if s.unit %}<span class="text-xs font-light text-gray-400">({{ s.unit }})</span>{% endif %}
+                    </div>
+                    <div class="relative">
+                        <button type="button" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
+                        {{ form_widget(form[s.field], {'attr': {
+                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
+                            'placeholder': s.placeholder|trans,
+                            'data-number-stepper-target': 'input'
+                        }}) }}
+                        <button type="button" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div>
+            {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+            {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.phoneNumber.placeholder'|trans}}) }}
+        </div>
+
+        <div>
+            {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+            {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.email.placeholder'|trans}}) }}
+        </div>
+
+        <twig:Button variant="default" class="w-full" size="lg">
+            {{ 'propertyManagement.form.button'|trans|raw }}
+        </twig:Button>
+
+        <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 items-center mx-auto max-w-sm">
+            <p class="text-xs text-gray-500 text-center mx-0.5">
+                {{ 'propertyManagement.form.trust.1'|trans|raw }}
+            </p>
+            <p class="text-xs text-gray-500 text-center mx-0.5">
+                {{ 'propertyManagement.form.trust.2'|trans|raw }}
+            </p>
+        </div>
+    {{ form_end(form) }}
+</div>
