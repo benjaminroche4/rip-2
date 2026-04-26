@@ -8,7 +8,7 @@
         <title>Relocation In Paris - {% block title %}{% endblock %}</title>
         <meta name="description" content="{% block description %}{% endblock %}">
         {% block meta_robots %}<meta name="robots" content="index, follow">{% endblock %}
-        <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
+        <link rel="canonical" href="{{ site_url }}{% block url %}{% endblock %}" />
         {% block head_preload %}{% endblock %}
 
         {# OG image is captured here so meta partial can receive the resolved value #}
@@ -52,11 +52,11 @@
         <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
             {{ 'a11y.skipToContent'|trans }}
         </a>
-        {{ component('Section/gridBackground') }}
-        {{ component('Layout/header', {post: post|default(null), property: property|default(null)}) }}
+        <twig:Section:gridBackground />
+        <twig:Layout:header :post="post|default(null)" :property="property|default(null)" />
         <main id="main-content" class="relative z-20" tabindex="-1">
             {% block body %}{% endblock %}
         </main>
-        {{ component('Layout/footer') }}
+        <twig:Layout:footer />
     </body>
 </html>

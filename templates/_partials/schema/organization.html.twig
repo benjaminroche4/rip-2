@@ -1,14 +1,15 @@
 {# Schema.org ProfessionalService + WebSite. Always included; the per-page
-   WebPage / Article / Product node is appended via {% block schema_page %}. #}
+   WebPage / Article / Product node is appended via {% block schema_page %}.
+   Site-wide constants come from twig.yaml globals (site_url, site_email, …). #}
 {
     "@type": "ProfessionalService",
-    "@id": "https://relocation-in-paris.fr/#organization",
+    "@id": "{{ site_url }}/#organization",
     "name": "Relocation in Paris",
     "legalName": "SARL Relocation in Paris",
-    "url": "https://relocation-in-paris.fr",
+    "url": "{{ site_url }}",
     "description": "{{ 'schema.description'|trans|e('js') }}",
-    "telephone": "+33184804344",
-    "email": "contact@relocation-in-paris.fr",
+    "telephone": "{{ site_phone }}",
+    "email": "{{ site_email }}",
     "inLanguage": ["fr-FR", "en-GB"],
     "areaServed": {
         "@type": "City",
@@ -16,10 +17,10 @@
     },
     "logo": {
         "@type": "ImageObject",
-        "url": "https://relocation-in-paris.fr/medias/logos/logo_red.svg"
+        "url": "{{ site_url }}/medias/logos/logo_red.svg"
     },
     "image": [
-        "https://relocation-in-paris.fr/medias/banner/relocation-in-paris-banner.webp"
+        "{{ site_url }}/medias/banner/relocation-in-paris-banner.webp"
     ],
     "address": {
         "@type": "PostalAddress",
@@ -59,26 +60,26 @@
         {
             "@type": "ContactPoint",
             "contactType": "customer service",
-            "telephone": "+33184804344",
-            "email": "contact@relocation-in-paris.fr",
+            "telephone": "{{ site_phone }}",
+            "email": "{{ site_email }}",
             "availableLanguage": ["French", "English", "Spanish"]
         },
         {
             "@type": "ContactPoint",
             "contactType": "customer service",
-            "telephone": "+33761719439",
-            "url": "https://wa.me/33761719439",
+            "telephone": "{{ site_phone_whatsapp }}",
+            "url": "{{ site_whatsapp_url }}",
             "availableLanguage": ["French", "English", "Spanish"]
         }
     ]
 },
 {
     "@type": "WebSite",
-    "@id": "https://relocation-in-paris.fr/#website",
-    "url": "https://relocation-in-paris.fr",
+    "@id": "{{ site_url }}/#website",
+    "url": "{{ site_url }}",
     "name": "Relocation in Paris",
     "publisher": {
-        "@id": "https://relocation-in-paris.fr/#organization"
+        "@id": "{{ site_url }}/#organization"
     },
     "inLanguage": ["fr-FR", "en-GB"]
 }

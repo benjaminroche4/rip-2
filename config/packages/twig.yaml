@@ -4,6 +4,15 @@ twig:
     globals:
         phone_number: '%env(PHONE_NUMBER)%'
         google_maps_api_key: '%env(GOOGLE_MAPS_API_KEY)%'
+        # Site-wide constants — single source of truth for canonical URLs,
+        # contact info, and the legal address. Use site_* prefix in templates
+        # to avoid clashing with page-scoped variables.
+        site_url: 'https://relocation-in-paris.fr'
+        site_email: 'contact@relocation-in-paris.fr'
+        site_phone: '+33184804344'
+        site_phone_display: '+(33) 1 84 80 43 44'
+        site_phone_whatsapp: '+33761719439'
+        site_whatsapp_url: 'https://wa.me/33761719439'
 when@test:
     twig:
         strict_variables: true
