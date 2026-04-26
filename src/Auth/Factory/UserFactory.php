@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Factory;
+namespace App\Auth\Factory;
 
-use App\Entity\User;
+use App\Auth\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 

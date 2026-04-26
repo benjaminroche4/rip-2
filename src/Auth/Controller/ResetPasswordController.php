@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Auth\Controller;
 
-use App\Entity\User;
-use App\Form\ChangePasswordFormType;
-use App\Form\ResetPasswordRequestFormType;
+use App\Auth\Entity\User;
+use App\Auth\Form\ChangePasswordFormType;
+use App\Auth\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

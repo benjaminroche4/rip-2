@@ -2,8 +2,8 @@
 
 namespace App\Tests;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Auth\Entity\User;
+use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

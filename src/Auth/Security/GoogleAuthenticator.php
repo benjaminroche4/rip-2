@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Security;
+namespace App\Auth\Security;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Auth\Entity\User;
+use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;

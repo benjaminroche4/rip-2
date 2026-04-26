@@ -7,7 +7,7 @@ security:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\Auth\Entity\User
                 property: email
     firewalls:
         dev:
@@ -18,7 +18,7 @@ security:
             provider: app_user_provider
             entry_point: form_login
             custom_authenticators:
-                - App\Security\GoogleAuthenticator
+                - App\Auth\Security\GoogleAuthenticator
             form_login:
                 login_path: app_login
                 check_path: app_login
