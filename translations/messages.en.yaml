@@ -1499,6 +1499,12 @@ admin:
     dashboard:
         title: Dashboard
         welcome: Hello
+        subtitle: Overview of commercial activity.
+        live: Live
+        stats:
+            thisMonth: This month
+            total12m: Total 12 months
+            monthlyAvg: Monthly average
         contactsMonthly:
             title: Contact requests per month
             subtitle: Last 12 months

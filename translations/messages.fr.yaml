@@ -1500,6 +1500,12 @@ admin:
     dashboard:
         title: Tableau de bord
         welcome: Bonjour
+        subtitle: Vue d'ensemble de l'activité commerciale.
+        live: En direct
+        stats:
+            thisMonth: Ce mois
+            total12m: Total 12 mois
+            monthlyAvg: Moyenne mensuelle
         contactsMonthly:
             title: Demandes de contact par mois
             subtitle: 12 derniers mois
