@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Auth\Domain\Language;
 use App\Auth\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -101,5 +102,88 @@ final class LoginControllerTest extends WebTestCase
             $this->client->getResponse()->headers->get('Location'),
             'Successful login must NOT redirect back to the login page.',
         );
+    }
+
+    public function testRememberMeCookieIsSetWhenChecked(): void
+    {
+        // Prime CSRF + session, then POST directly so we control the request bag
+        // (submitForm() can drop or rewrite the checkbox value depending on its
+        // HTML state, which masks the actual server-side behaviour).
+        $crawler = $this->client->request('GET', self::LOGIN_PATH);
+        $csrf = $crawler->filter('input[name="_csrf_token"]')->attr('value');
+
+        $this->client->request('POST', self::LOGIN_PATH, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+            '_csrf_token' => $csrf,
+            '_remember_me' => 'on',
+        ]);
+
+        $rememberMe = $this->findRememberMeCookie();
+        self::assertNotNull($rememberMe, 'REMEMBERME cookie must be set when the checkbox is ticked.');
+        self::assertTrue($rememberMe->isHttpOnly(), 'REMEMBERME cookie must be HttpOnly.');
+        self::assertGreaterThan(time() + 86400 * 6, $rememberMe->getExpiresTime(), 'REMEMBERME lifetime must be ~1 week.');
+    }
+
+    public function testItRedirectsToFrenchHomeWhenUserHasNoLanguage(): void
+    {
+        // Default user created in setUp() has $language = null → fallback to fr.
+        $this->client->request('GET', self::LOGIN_PATH);
+
+        $this->client->submitForm(self::SUBMIT_BUTTON, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+        ]);
+
+        self::assertResponseRedirects('/');
+    }
+
+    public function testItRedirectsToUserPreferredLanguageOnLogin(): void
+    {
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository(User::class)->findOneBy(['email' => self::TEST_EMAIL]);
+        self::assertNotNull($user);
+        $user->setLanguage(Language::En);
+        $em->flush();
+
+        $this->client->request('GET', self::LOGIN_PATH);
+
+        $this->client->submitForm(self::SUBMIT_BUTTON, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+        ]);
+
+        self::assertResponseRedirects('/en');
+    }
+
+    public function testRememberMeCookieIsNotSetWhenUnchecked(): void
+    {
+        // Same direct POST as the "checked" case but without the `_remember_me`
+        // field — this is what the browser sends when the user unticks the box.
+        $crawler = $this->client->request('GET', self::LOGIN_PATH);
+        $csrf = $crawler->filter('input[name="_csrf_token"]')->attr('value');
+
+        $this->client->request('POST', self::LOGIN_PATH, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+            '_csrf_token' => $csrf,
+        ]);
+
+        self::assertNull($this->findRememberMeCookie(), 'REMEMBERME cookie must NOT be set when unchecked.');
+    }
+
+    /**
+     * Returns the REMEMBERME cookie that *creates* the session (non-empty value),
+     * not the preventive clear-cookie Symfony also emits on every login response.
+     */
+    private function findRememberMeCookie(): ?\Symfony\Component\HttpFoundation\Cookie
+    {
+        foreach ($this->client->getResponse()->headers->getCookies() as $cookie) {
+            if ('REMEMBERME' === $cookie->getName() && null !== $cookie->getValue() && '' !== $cookie->getValue()) {
+                return $cookie;
+            }
+        }
+
+        return null;
     }
 }

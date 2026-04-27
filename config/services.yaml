@@ -5,6 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     admin_path_prefix: '%env(string:ADMIN_PATH_PREFIX)%'
+    allo_api_key: '%env(string:ALLO_API_KEY)%'
+    allo_phone_number: '%env(string:ALLO_PHONE_NUMBER)%'
 
 services:
     # default configuration for services in *this* file

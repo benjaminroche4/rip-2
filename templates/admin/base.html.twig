@@ -14,25 +14,94 @@
     </head>
     <body class="min-h-dvh bg-neutral-50 text-gray-900 antialiased">
         <div class="isolate flex min-h-dvh">
-            <aside class="flex w-64 shrink-0 flex-col border-r border-gray-950/5 bg-white">
-                <div class="px-5 py-6">
-                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" class="flex items-center gap-2.5">
-                        <span class="size-2.5 rounded-full bg-primary"></span>
-                        <span class="text-sm font-semibold tracking-tight text-gray-900">RIP Admin</span>
+            {# Sidebar: sticky h-dvh — logo top, scrollable nav middle, user info bottom #}
+            <aside class="sticky top-0 flex h-dvh w-64 shrink-0 flex-col border-r border-gray-950/5 bg-white">
+                {# ─── Logo ─── #}
+                <div class="flex shrink-0 items-center border-b border-gray-950/5 px-5 py-5">
+                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="Relocation In Paris — Admin">
+                        <img
+                            src="{{ asset('medias/logos/logo_red.svg') }}"
+                            alt="Relocation In Paris"
+                            width="140"
+                            height="28"
+                            class="h-7 w-auto"
+                        >
                     </a>
                 </div>
 
-                <nav class="flex flex-1 flex-col gap-0.5 px-3">
-                    {% set currentRoute = app.request.attributes.get('_route') %}
-                    <a
-                        href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}"
-                        class="rounded-lg px-3 py-2 text-sm transition-colors {% if currentRoute == 'admin_dashboard' %}bg-primary/5 font-medium text-primary{% else %}font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}"
-                    >
-                        {{ 'admin.nav.dashboard'|trans }}
-                    </a>
+                {# ─── Nav (scrollable if content overflows) ─── #}
+                {% set currentRoute = app.request.attributes.get('_route') %}
+                <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+                    {# Section: Pilotage #}
+                    <div>
+                        <p class="mb-1.5 px-3 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+                            {{ 'admin.sidebar.section.piloting'|trans }}
+                        </p>
+                        <ul class="space-y-0.5" role="list">
+                            <li>
+                                <a
+                                    href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}"
+                                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors {% if currentRoute == 'admin_dashboard' %}bg-primary/5 font-medium text-primary{% else %}font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}"
+                                >
+                                    {{ ux_icon('lucide:layout-dashboard', {class: 'size-4 shrink-0'}) }}
+                                    {{ 'admin.nav.dashboard'|trans }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {# Section: Données — placeholders, real routes will land here later #}
+                    <div>
+                        <p class="mb-1.5 px-3 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+                            {{ 'admin.sidebar.section.data'|trans }}
+                        </p>
+                        <ul class="space-y-0.5" role="list">
+                            <li>
+                                <span
+                                    aria-disabled="true"
+                                    class="flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-normal text-gray-400"
+                                >
+                                    {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0'}) }}
+                                    <span class="flex-1">{{ 'admin.sidebar.nav.requests'|trans }}</span>
+                                    <span class="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.sidebar.nav.comingSoon'|trans }}</span>
+                                </span>
+                            </li>
+                            <li>
+                                <span
+                                    aria-disabled="true"
+                                    class="flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-normal text-gray-400"
+                                >
+                                    {{ ux_icon('lucide:phone', {class: 'size-4 shrink-0'}) }}
+                                    <span class="flex-1">{{ 'admin.sidebar.nav.calls'|trans }}</span>
+                                    <span class="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.sidebar.nav.comingSoon'|trans }}</span>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {# Section: Site #}
+                    <div>
+                        <p class="mb-1.5 px-3 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+                            {{ 'admin.sidebar.section.site'|trans }}
+                        </p>
+                        <ul class="space-y-0.5" role="list">
+                            <li>
+                                <a
+                                    href="{{ path('app_home') }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                                >
+                                    {{ ux_icon('lucide:external-link', {class: 'size-4 shrink-0'}) }}
+                                    <span class="flex-1">{{ 'admin.sidebar.nav.viewSite'|trans }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </nav>
 
-                <div class="border-t border-gray-950/5 p-4">
+                {# ─── User info (bottom, fixed) ─── #}
+                <div class="shrink-0 border-t border-gray-950/5 p-4">
                     <div class="flex items-center gap-3">
                         {% if app.user.avatarFilename %}
                             <img
@@ -54,8 +123,9 @@
                     </div>
                     <a
                         href="{{ path('app_logout') }}"
-                        class="mt-3 flex items-center justify-center rounded-lg border border-gray-950/10 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                        class="mt-3 flex items-center justify-center gap-1.5 rounded-lg border border-gray-950/10 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
                     >
+                        {{ ux_icon('lucide:log-out', {class: 'size-3.5 shrink-0'}) }}
                         {{ 'admin.nav.logout'|trans }}
                     </a>
                 </div>

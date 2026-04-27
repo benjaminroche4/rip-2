@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Security;
 
+use App\Auth\Entity\User;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,9 +36,13 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {
+        $user = $token->getUser();
+        $userLanguage = $user instanceof User ? $user->getLanguage() : null;
+        $locale = null !== $userLanguage ? $userLanguage->value : $request->getLocale();
+
         if (\in_array('ROLE_ADMIN', $token->getRoleNames(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard', [
-                '_locale' => $request->getLocale(),
+                '_locale' => $locale,
                 'adminPrefix' => $this->adminPathPrefix,
             ]));
         }
@@ -53,6 +58,6 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
             }
         }
 
-        return new RedirectResponse($this->urlGenerator->generate('app_home'));
+        return new RedirectResponse($this->urlGenerator->generate('app_home', ['_locale' => $locale]));
     }
 }

@@ -1497,16 +1497,43 @@ admin:
     nav:
         dashboard: Tableau de bord
         logout: Se déconnecter
+    sidebar:
+        section:
+            piloting: Pilotage
+            data: Données
+            site: Site public
+        nav:
+            requests: Demandes
+            calls: Appels
+            viewSite: Voir le site
+            comingSoon: Bientôt
     dashboard:
         title: Tableau de bord
         welcome: Bonjour
         subtitle: Vue d'ensemble de l'activité commerciale.
         live: En direct
+        section:
+            overview: Aperçu
+            volume: Volume
+            thisWeek: Cette semaine
+        subtext:
+            formRequests: Demandes via formulaire
+            calls: Appels téléphoniques
+            over12m: Sur les 12 derniers mois
+            vsLastWeek: vs la semaine dernière
         stats:
-            thisMonth: Ce mois
-            total12m: Total 12 mois
-            monthlyAvg: Moyenne mensuelle
-        contactsMonthly:
-            title: Demandes de contact par mois
-            subtitle: 12 derniers mois
-            label: Demandes
+            contactsThisMonth: Demandes ce mois
+            contactsTotal: Demandes 12 mois
+            callsThisMonth: Appels ce mois
+            callsTotal: Appels 12 mois
+        activity:
+            title: Activité commerciale
+            subtitle: Demandes formulaire et appels — 12 derniers mois
+            contactsLabel: Demandes formulaire
+            callsLabel: Appels
+        weekly:
+            title: Comparaison hebdomadaire
+            subtitle: Cette semaine vs la semaine dernière, jour par jour
+            day: Jour
+            thisWeek: Cette sem.
+            lastWeek: Sem. -1

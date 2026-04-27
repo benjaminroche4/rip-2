@@ -93,14 +93,25 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tableau de bord');
 
-        // Contacts chart canvas mounted with a 12-bucket data series.
-        $canvas = $crawler->filter('canvas[data-testid="contacts-chart"]');
+        // Activity chart canvas mounted with 2 series (contacts + calls), 12 buckets each.
+        $canvas = $crawler->filter('canvas[data-testid="activity-chart"]');
         self::assertCount(1, $canvas);
         self::assertSame('chart', $canvas->attr('data-controller'));
         $labels = json_decode((string) $canvas->attr('data-chart-labels-value'), true);
-        $data = json_decode((string) $canvas->attr('data-chart-data-value'), true);
+        $series = json_decode((string) $canvas->attr('data-chart-series-value'), true);
         self::assertCount(12, $labels);
-        self::assertCount(12, $data);
+        self::assertCount(2, $series);
+        foreach ($series as $serie) {
+            self::assertCount(12, $serie['data']);
+            self::assertNotEmpty($serie['label']);
+            self::assertNotEmpty($serie['color']);
+            self::assertNotEmpty($serie['fillColor']);
+        }
+
+        // Weekly comparison table: 7 rows, 7 columns each (day + 3 contact + 3 call cells).
+        $weeklyRows = $crawler->filter('[data-testid="weekly-comparison"] tbody tr');
+        self::assertCount(7, $weeklyRows);
+        self::assertCount(7, $weeklyRows->eq(0)->filter('td'));
 
         $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
         self::assertStringContainsString('noindex', $robots);

@@ -1,0 +1,252 @@
+{% set currentRoute = app.request.attributes.get('_route') ?? 'app_home' %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
+    {% set blogSwitchParams = {
+        'fr': {'_locale': 'fr', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug},
+        'en': {'_locale': 'en', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug}
+    } %}
+{% endif %}
+
+{% if currentRoute == 'app_property_show' and property is defined and property is not null %}
+    {% set _currentLocale = app.request.locale %}
+    {% set _otherLocale = _currentLocale == 'fr' ? 'en' : 'fr' %}
+    {% set _altProperty = property.alternateProperty|default(null) %}
+    {% set propertySwitchParams = {
+        (_currentLocale): property_show_path_params(property, _currentLocale),
+        (_otherLocale): _altProperty
+            ? property_show_path_params(_altProperty, _otherLocale)
+            : property_show_path_params(property, _otherLocale)
+    } %}
+{% endif %}
+
+<header class="relative z-10 bg-white" role="banner">
+    <nav aria-label="{{ 'header.nav.ariaLabel'|trans|default('Navigation principale') }}" class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 gap-x-3">
+        <div class="flex lg:flex-2 items-center justify-start gap-x-4">
+            <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5" aria-label="{{ 'header.logo.ariaLabel'|trans|default('Retour à l accueil - Relocation In Paris') }}">
+                <span class="sr-only">Relocation In Paris</span>
+                <img
+                    src="{{ asset('medias/logos/logo_red.svg') }}"
+                    width="300"
+                    height="68"
+                    loading="eager"
+                    alt="{{ 'header.logo.alt'|trans|raw }}"
+                    class="shrink-0 h-8 w-auto"
+                />
+            </a>
+            <el-popover-group class="hidden lg:flex lg:gap-x-3">
+                <a
+                    href="{{ path('app_service_find_accommodation') }}"
+                    class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                >
+                    {{ 'header.menu.findAccommodation'|trans|raw }}
+                </a>
+                <button
+                    data-controller="popover"
+                    data-popover-popover-id-value="desktop-menu-solutions"
+                    popovertarget="desktop-menu-solutions"
+                    aria-haspopup="true"
+                    class="{% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} aria-expanded:bg-neutral-100 aria-expanded:text-primary text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary cursor-pointer py-2.5 px-3 rounded-lg transition duration-100 inline-flex items-center gap-x-1"
+                >
+                    {{ 'header.menu.propertyManagement'|trans|raw }}
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 transition-transform duration-200">
+                        <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd"/>
+                    </svg>
+                </button>
+                <a
+                    href="{{ path('app_pricing') }}"
+                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                >
+                    {{ 'header.menu.pricing'|trans|raw }}
+                </a>
+            </el-popover-group>
+            <el-popover
+                id="desktop-menu-solutions"
+                popover
+                class="absolute top-19 m-0 w-full overflow-visible bg-white p-0 transition [transition-behavior:allow-discrete] backdrop:bg-transparent open:block data-[closed]:-translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+            >
+                <div aria-hidden="true" class="absolute inset-0 top-1/2 bg-white shadow-lg ring-1 ring-gray-900/5"></div>
+                <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                <div class="relative bg-white">
+                    <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-10 pb-5">
+                        <h3 class="text-base font-medium text-primary">{{ 'header.menu.propertyManagement'|trans|raw }}</h3>
+                    </div>
+                    <div class="mx-auto grid max-w-7xl grid-cols-3 gap-x-4 px-6 pb-10 lg:px-8 xl:gap-x-8">
+                        <a
+                            href="{{ path('app_service_landlords') }}"
+                            class="{% if currentRoute == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                        >
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_landlords' %}bg-white{% endif %}">
+                                    {{ ux_icon('meteor-icons:key', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            {{ 'header.menu.management.title'|trans|raw }}
+                                        </p>
+                                        <div class="flex -space-x-1" aria-label="{{ 'header.text.partners'|trans|raw }}">
+                                            <div class="inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#2446FF] items-center justify-center">
+                                                {{ ux_icon('simple-icons:tripdotcom', {'class': 'size-4 brightness-0 invert', 'aria-hidden': 'true'}) }}
+                                            </div>
+                                            <div class="z-10 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#133B95] items-center justify-center">
+                                                {{ ux_icon('tabler:brand-booking', {'class': 'size-4 brightness-0 invert', 'aria-hidden': 'true'}) }}
+                                            </div>
+                                            <div class="z-20 inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#F5385D] items-center justify-center">
+                                                {{ ux_icon('logos:airbnb-icon', {'class': 'size-4 brightness-0 invert', 'aria-hidden': 'true'}) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">
+                                        {{ 'header.menu.management.text'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <a
+                            href="{{ path('app_service_find_tenant') }}"
+                            class="{% if currentRoute == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                        >
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_find_tenant' %}bg-white{% endif %}">
+                                    {{ ux_icon('lucide:search', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            {{ 'header.menu.findTenant.title'|trans|raw }}
+                                        </p>
+                                        <div class="relative">
+                                            <span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                                                <span class="absolute inline-flex size-5 animate-ping rounded-full bg-slate-400 opacity-40"></span>
+                                            </span>
+                                            <img
+                                                src="{{ asset('medias/team/team_1.webp') }}"
+                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                                loading="lazy"
+                                                width="24"
+                                                height="24"
+                                                class="relative z-10 inline-block size-6 bg-white rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white"
+                                            />
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">
+                                        {{ 'header.menu.findTenant.text'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <a
+                            href="{{ path('app_service_companies') }}"
+                            class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                        >
+                            <div class="flex items-start justify-start gap-x-4">
+                                <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_companies' %}bg-white{% endif %}">
+                                    {{ ux_icon('cuida:building-outline', {'class': 'size-6 text-primary', 'aria-hidden': 'true'}) }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <div class="flex items-center justify-between">
+                                        <p class="block font-semibold text-gray-900">
+                                            {{ 'header.menu.companies.title'|trans|raw }}
+                                        </p>
+                                    </div>
+                                    <p class="mt-2 text-neutral-600">
+                                        {{ 'header.menu.companies.text'|trans|raw }}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="bg-gray-50">
+                        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                            <div class="grid grid-cols-2 divide-x divide-gray-900/5 border-x border-gray-900/5">
+                                <a
+                                    href="{{ path('app_contact') }}"
+                                    class="{% if currentRoute == 'app_contact' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100"
+                                >
+                                    {{ ux_icon('lucide:phone-call', {'class': 'size-5 flex-none text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ 'header.menu.contactExpert'|trans|raw }}
+                                </a>
+                                <a
+                                    href="{{ path('app_blog') }}"
+                                    class="{% if currentRoute == 'app_blog' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100"
+                                >
+                                    {{ ux_icon('lucide:newspaper', {'class': 'size-5 flex-none text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ 'header.menu.blog'|trans|raw }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </el-popover>
+        </div>
+        <div class="flex lg:hidden gap-x-2">
+            <button
+                type="button"
+                command="show-modal"
+                commandfor="mobile-menu"
+                aria-label="{{ 'header.action'|trans|raw  }}"
+                class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100"
+            >
+                <span class="sr-only">{{ 'header.action'|trans|raw }}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
+                    <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="hidden lg:flex lg:justify-end items-center gap-x-2">
+            <twig:Button
+                variant="outline"
+                popovertarget="desktop-lang"
+                size="icon-lg"
+                aria-label="{{ 'header.lang.select'|trans|raw }}"
+                class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+            >
+                {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+            </twig:Button>
+            <el-popover
+                id="desktop-lang"
+                anchor="bottom"
+                popover
+                class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+            >
+                <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                    <a
+                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
+                        hreflang="fr"
+                        lang="fr"
+                        class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                    >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                    </a>
+                    <a
+                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
+                        hreflang="en"
+                        lang="en"
+                        class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                    >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                    </a>
+                </div>
+            </el-popover>
+            <div class="flex items-center gap-x-3">
+                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                    {{ 'header.cta.title'|trans|raw }}
+                </twig:Button>
+            </div>
+        </div>
+    </nav>
+    <twig:Layout:Header:MobileMenu
+        :currentRoute="currentRoute"
+        :currentParameters="currentParameters"
+        :blogSwitchParams="blogSwitchParams|default(null)"
+        :propertySwitchParams="propertySwitchParams|default(null)"
+    />
+    <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20 max-w-7xl mx-auto"></div>
+</header>

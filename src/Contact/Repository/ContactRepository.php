@@ -51,4 +51,34 @@ class ContactRepository extends ServiceEntityRepository
 
         return $series;
     }
+
+    /**
+     * Returns the count of contact requests grouped by Y-m-d for the
+     * [$from, $to) window. Result is keyed by the date string so the caller
+     * can do O(1) lookups when stitching together a calendar view.
+     *
+     * @return array<string, int>
+     */
+    public function countByDay(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $rows = $this->getEntityManager()->getConnection()
+            ->executeQuery(
+                "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS d, COUNT(*) AS total
+                 FROM contact
+                 WHERE created_at >= :from AND created_at < :to
+                 GROUP BY d",
+                [
+                    'from' => $from->format('Y-m-d H:i:s'),
+                    'to' => $to->format('Y-m-d H:i:s'),
+                ],
+            )
+            ->fetchAllAssociative();
+
+        $byDay = [];
+        foreach ($rows as $row) {
+            $byDay[(string) $row['d']] = (int) $row['total'];
+        }
+
+        return $byDay;
+    }
 }

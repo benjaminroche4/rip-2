@@ -2,6 +2,7 @@
 
 namespace App\Auth\Entity;
 
+use App\Auth\Domain\Language;
 use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -53,6 +54,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private bool $isProfileComplete = false;
+
+    #[ORM\Column(length: 5, enumType: Language::class, nullable: true)]
+    private ?Language $language = null;
 
     public function getId(): ?int
     {
@@ -203,6 +207,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setProfileComplete(bool $isProfileComplete): static
     {
         $this->isProfileComplete = $isProfileComplete;
+
+        return $this;
+    }
+
+    public function getLanguage(): ?Language
+    {
+        return $this->language;
+    }
+
+    public function setLanguage(?Language $language): static
+    {
+        $this->language = $language;
 
         return $this;
     }

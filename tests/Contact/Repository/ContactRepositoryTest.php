@@ -69,6 +69,29 @@ final class ContactRepositoryTest extends KernelTestCase
         self::assertSame(0, $totals);
     }
 
+    public function testCountByDayKeyedByDateInsideWindow(): void
+    {
+        $today = new \DateTimeImmutable('today 12:00:00');
+        $yesterday = $today->modify('-1 day');
+        $beforeWindow = $today->modify('-30 days');
+
+        $this->persistContact($today);
+        $this->persistContact($today);
+        $this->persistContact($yesterday);
+        $this->persistContact($beforeWindow);
+
+        $this->em->flush();
+
+        $from = $today->modify('-7 days')->setTime(0, 0);
+        $to = $today->modify('+1 day')->setTime(0, 0);
+
+        $byDay = $this->repository->countByDay($from, $to);
+
+        self::assertSame(2, $byDay[$today->format('Y-m-d')]);
+        self::assertSame(1, $byDay[$yesterday->format('Y-m-d')]);
+        self::assertArrayNotHasKey($beforeWindow->format('Y-m-d'), $byDay);
+    }
+
     private function persistContact(\DateTimeImmutable $createdAt): void
     {
         $contact = (new Contact())

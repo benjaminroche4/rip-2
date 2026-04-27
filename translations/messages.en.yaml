@@ -1496,16 +1496,43 @@ admin:
     nav:
         dashboard: Dashboard
         logout: Log out
+    sidebar:
+        section:
+            piloting: Piloting
+            data: Data
+            site: Public site
+        nav:
+            requests: Requests
+            calls: Calls
+            viewSite: View site
+            comingSoon: Soon
     dashboard:
         title: Dashboard
         welcome: Hello
         subtitle: Overview of commercial activity.
         live: Live
+        section:
+            overview: Overview
+            volume: Volume
+            thisWeek: This week
+        subtext:
+            formRequests: Form-based requests
+            calls: Phone calls
+            over12m: Over the last 12 months
+            vsLastWeek: vs last week
         stats:
-            thisMonth: This month
-            total12m: Total 12 months
-            monthlyAvg: Monthly average
-        contactsMonthly:
-            title: Contact requests per month
-            subtitle: Last 12 months
-            label: Requests
+            contactsThisMonth: Form requests this month
+            contactsTotal: Form requests 12 months
+            callsThisMonth: Calls this month
+            callsTotal: Calls 12 months
+        activity:
+            title: Commercial activity
+            subtitle: Form requests and calls — last 12 months
+            contactsLabel: Form requests
+            callsLabel: Calls
+        weekly:
+            title: Weekly comparison
+            subtitle: This week vs last week, day by day
+            day: Day
+            thisWeek: This wk.
+            lastWeek: Last wk.
