@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#FFFFFF">
+
+        <title>Relocation In Paris - {% block title %}{% endblock %}</title>
+        <meta name="description" content="{% block description %}{% endblock %}">
+        {% block meta_robots %}<meta name="robots" content="index, follow">{% endblock %}
+        <link rel="canonical" href="{{ site_url }}{% block url %}{% endblock %}" />
+        {% block head_preload %}{% endblock %}
+
+        {# OG image is captured here so meta partial can receive the resolved value #}
+        {% set pageOgImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
+
+        {% block hreflang %}
+            {% include '_partials/meta.html.twig' with {
+                pageTitle: block('title'),
+                pageDescription: block('description'),
+                pageUrl: block('url'),
+                pageOgImage: pageOgImage|trim,
+            } only %}
+        {% endblock %}
+
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+
+            {% block google_maps %}{% endblock %}
+
+            {# Schema.org graph: Organization + WebSite always; per-page node via schema_page #}
+            <script type="application/ld+json">
+                {
+                  "@context": "https://schema.org",
+                  "@graph": [
+                    {% include '_partials/schema/organization.html.twig' %}
+                    {% block schema_page %}{% endblock %}
+                  ]
+                }
+            </script>
+        {% endblock %}
+
+        {% block head_tracking %}{% include '_partials/tracking/gtm_head.html.twig' %}{% endblock %}
+    </head>
+    <body>
+        {% include '_partials/tracking/gtm_body.html.twig' %}
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
+            {{ 'a11y.skipToContent'|trans }}
+        </a>
+        <twig:Section:GridBackground />
+        <twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />
+        <main id="main-content" class="relative z-20" tabindex="-1">
+            {% block body %}{% endblock %}
+        </main>
+        <twig:Layout:Footer />
+    </body>
+</html>

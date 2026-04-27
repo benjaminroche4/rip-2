@@ -4,6 +4,7 @@ namespace App\Auth\Security;
 
 use App\Auth\Entity\User;
 use App\Auth\Repository\UserRepository;
+use App\Auth\Service\AvatarDownloader;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
@@ -27,6 +28,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
         private readonly UserRepository $userRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly LoginSuccessHandler $loginSuccessHandler,
+        private readonly AvatarDownloader $avatarDownloader,
     ) {
     }
 
@@ -52,14 +54,20 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
                     throw new AuthenticationException('Google returned incomplete profile data.');
                 }
 
+                $avatarUrl = $googleUser->getAvatar();
+
                 $user = $this->userRepository->findOneBy(['googleId' => $googleId]);
                 if (null !== $user) {
+                    $this->refreshAvatar($user, $avatarUrl);
+                    $this->entityManager->flush();
+
                     return $user;
                 }
 
                 $user = $this->userRepository->findOneBy(['email' => $email]);
                 if (null !== $user) {
                     $user->setGoogleId($googleId);
+                    $this->refreshAvatar($user, $avatarUrl);
                     $this->entityManager->flush();
 
                     return $user;
@@ -72,6 +80,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
                 $user->setLastName($googleUser->getLastName() ?? $this->lastName($googleUser->getName()));
                 $user->setCreatedAt(new \DateTimeImmutable());
                 $user->setRoles(['ROLE_USER']);
+                $this->refreshAvatar($user, $avatarUrl);
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -118,5 +127,29 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
         $parts = explode(' ', trim($fullName), 2);
 
         return $parts[1] ?? '';
+    }
+
+    /**
+     * Pulls the Google account picture into local storage, drops the previous
+     * file if any, updates the user. Silent on failure — a missing avatar is
+     * never a reason to break the login flow.
+     */
+    private function refreshAvatar(User $user, ?string $avatarUrl): void
+    {
+        if (null === $avatarUrl || '' === $avatarUrl) {
+            return;
+        }
+
+        $newFilename = $this->avatarDownloader->downloadAndStore($avatarUrl);
+        if (null === $newFilename) {
+            return;
+        }
+
+        $previous = $user->getAvatarFilename();
+        $user->setAvatarFilename($newFilename);
+
+        if (null !== $previous && $previous !== $newFilename) {
+            $this->avatarDownloader->delete($previous);
+        }
     }
 }

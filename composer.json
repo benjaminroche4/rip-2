@@ -46,6 +46,7 @@
         "symfony/string": "8.0.*",
         "symfony/translation": "8.0.*",
         "symfony/twig-bundle": "8.0.*",
+        "symfony/uid": "8.0.*",
         "symfony/ux-google-map": "^2.34",
         "symfony/ux-icons": "^2.30",
         "symfony/ux-live-component": "^2.34",

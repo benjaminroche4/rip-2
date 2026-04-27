@@ -1,13 +1,14 @@
-{# Google reviews trust badge: "+300 happy customers on Google" pill with
-   five stars + Google logo. Used as a reassurance element in service-page
-   heros (findAccommodation, findTenant, companies, property_estimation).
+{# Google reviews trust badge pill with five stars + Google logo. Used as a
+   reassurance element in service-page heros (findAccommodation, findTenant,
+   companies, property_estimation).
 
    Translation keys derived from `keyPrefix`:
      - {keyPrefix}.1   text before the link (e.g. "Trusted by")
-     - {keyPrefix}.2   text inside the link (after the "+300" prefix)
+     - {keyPrefix}.2   text inside the link (after the count prefix)
 
    The destination URL is the public Google reviews share link, the same
-   across the site. #}
+   across the site. The count comes from the `google_reviews_count` Twig
+   global (env: GOOGLE_REVIEWS_COUNT). #}
 
 {# @prop keyPrefix string Translation namespace (e.g. 'findAccommodation.trust') #}
 {%- props keyPrefix = 'findAccommodation.trust' -%}
@@ -22,7 +23,7 @@
     <p>
         {{ (keyPrefix ~ '.1')|trans|raw }}
         <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 decoration-slate-400/80 hover:decoration-primary decoration-dotted hover:text-primary transition duration-100">
-            +300 {{ (keyPrefix ~ '.2')|trans|raw }}
+            +{{ google_reviews_count }} {{ (keyPrefix ~ '.2')|trans|raw }}
         </a>
     </p>
     <span>{{ ux_icon('material-icon-theme:google', {'class':'size-4 text-yellow-500 shrink-0'}) }}</span>

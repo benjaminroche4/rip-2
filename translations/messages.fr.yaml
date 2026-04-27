@@ -408,7 +408,7 @@ home:
         title: Installez-vous à Paris en moins de 20 jours
         subTitle: Votre recherche d'appartement à Paris, confiée à des experts.
         button: On vous rappelle
-        google: 'sur +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
+        google: 'sur +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
         image:
             alt: Relocation In Paris, agence de relocation à Paris
         service:
@@ -1156,7 +1156,7 @@ reviews:
     title: Ils nous ont fait confiance
     subTitle: Paris, enfin chez eux
     info:
-        number: +370 avis
+        number: +%count% avis
         text: clients
         google: sur Google
 

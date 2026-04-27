@@ -30,7 +30,7 @@
             "itemReviewed": { "@id": "{{ site_url }}/#organization" },
             "ratingValue": "4.9",
             "bestRating": "5",
-            "ratingCount": "370"
+            "ratingCount": "{{ google_reviews_count }}"
         }
     }
 {% endblock %}
@@ -101,7 +101,7 @@
                         <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="eager" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                     </div>
                     <p class="text-white font-light text-sm text-center">
-                        <span class="font-semibold">4.9/5</span> {{ 'home.heroSection.google'|trans|raw }}
+                        <span class="font-semibold">4.9/5</span> {{ 'home.heroSection.google'|trans({'%count%': google_reviews_count})|raw }}
                     </p>
                 </div>
             </div>
@@ -365,7 +365,7 @@
                 <div class="p-4 lg:p-7 rounded-2xl border border-neutral-100 bg-neutral-50">
                     <div class="flex sm:flex-row flex-col sm:items-center gap-x-6 gap-y-4">
                         <div>
-                            <p class="text-4xl font-semibold text-primary">+370</p>
+                            <p class="text-4xl font-semibold text-primary">+{{ google_reviews_count }}</p>
                         </div>
                         <div class="flex flex-col space-y-2">
                             <p class="text-lg font-semibold">{{ 'home.keyMetrics.3.title'|trans|raw }}</p>

@@ -34,9 +34,19 @@
 
                 <div class="border-t border-gray-950/5 p-4">
                     <div class="flex items-center gap-3">
-                        <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                            {{ app.user.firstName|default(app.user.email)|first|upper }}
-                        </div>
+                        {% if app.user.avatarFilename %}
+                            <img
+                                src="{{ path('app_avatar', {filename: app.user.avatarFilename}) }}"
+                                alt=""
+                                width="36"
+                                height="36"
+                                class="size-9 shrink-0 rounded-full object-cover"
+                            >
+                        {% else %}
+                            <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                                {{ app.user.firstName|default(app.user.email)|first|upper }}
+                            </div>
+                        {% endif %}
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-sm font-medium text-gray-900">{{ app.user.firstName|default(app.user.email) }}</p>
                             <p class="truncate text-xs text-gray-500">{{ app.user.email }}</p>

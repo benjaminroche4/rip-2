@@ -405,7 +405,7 @@ home:
         title: Settle in Paris in under 20 days
         subTitle: Your apartment search in Paris, handled by experts.
         button: Get a callback
-        google: 'based on +370 <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">Google reviews</a>'
+        google: 'based on +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">Google reviews</a>'
         image:
             alt: Relocation In Paris, relocation agency in Paris
         service:
@@ -1155,7 +1155,7 @@ reviews:
     title: Testimonials
     subTitle: Real moves, Real stories
     info:
-        number: 370+ clients
+        number: +%count% clients
         text: reviews
         google: on Google
 

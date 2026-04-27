@@ -13,6 +13,7 @@ twig:
         site_phone_display: '+(33) 1 84 80 43 44'
         site_phone_whatsapp: '+33761719439'
         site_whatsapp_url: 'https://wa.me/33761719439'
+        google_reviews_count: '%env(int:GOOGLE_REVIEWS_COUNT)%'
 when@test:
     twig:
         strict_variables: true

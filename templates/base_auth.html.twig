@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-TSHQL7Q6');</script>
+        <!-- End Google Tag Manager -->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="theme-color" content="#FFFFFF">
+
+        <title>Relocation In Paris - {% block title %}{% endblock %}</title>
+        <meta name="description" content="{% block description %}{% endblock %}">
+        <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
+        <meta name="robots" content="noindex, nofollow">
+
+        <link rel="icon" type="image/jpg" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
+
+        <!-- Og Meta Tags -->
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Relocation In Paris - {{ block('title') }}">
+        <meta property="og:url" content="https://relocation-in-paris.fr{{ block('url') }}">
+        <meta property="og:image" content="{{ asset('medias/banner/relocation-in-paris-banner.webp') }}">
+        <meta property="og:description" content="{{ block('description') }}">
+
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="h-full">
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TSHQL7Q6"
+                    height="0" width="0" style="display:none;visibility:hidden">
+            </iframe>
+        </noscript>
+        <main class="flex min-h-full">
+            {% block body %}{% endblock %}
+        </main>
+    </body>
+</html>

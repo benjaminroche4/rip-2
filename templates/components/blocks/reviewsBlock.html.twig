@@ -5,7 +5,7 @@
             <h2 class="text-3xl sm:text-4xl font-medium text-pretty">{{ 'reviews.subTitle'|trans|raw }}</h2>
             <div class="flex items-center justify-center mt-3 gap-x-3">
                 {{ ux_icon('devicon:google', {'class':'size-5 shrink-0'}) }}
-                <p class="text-neutral-600 font-light text-pretty"><span class="font-semibold">{{ 'reviews.info.number'|trans|raw }}</span> {{ 'reviews.info.text'|trans|raw }} <a href="https://share.google/c8msBrKphxqVY03er" target="_blank" rel="noopener noreferrer nofollow" class="underline underline-offset-4 hover:text-primary transition duration-100">{{ 'reviews.info.google'|trans|raw }}</a></p>
+                <p class="text-neutral-600 font-light text-pretty"><span class="font-semibold">{{ 'reviews.info.number'|trans({'%count%': google_reviews_count})|raw }}</span> {{ 'reviews.info.text'|trans|raw }} <a href="https://share.google/c8msBrKphxqVY03er" target="_blank" rel="noopener noreferrer nofollow" class="underline underline-offset-4 hover:text-primary transition duration-100">{{ 'reviews.info.google'|trans|raw }}</a></p>
             </div>
         </div>
         <div

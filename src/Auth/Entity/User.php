@@ -43,6 +43,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true, unique: true)]
     private ?string $googleId = null;
 
+    /**
+     * UUID-based filename of the user's avatar stored under
+     * %kernel.project_dir%/var/uploads/avatars/. Served via AvatarController
+     * (route /avatars/{filename}) — never exposed in /public/ directly.
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $avatarFilename = null;
+
     #[ORM\Column]
     private bool $isProfileComplete = false;
 
@@ -171,6 +179,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGoogleId(?string $googleId): static
     {
         $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getAvatarFilename(): ?string
+    {
+        return $this->avatarFilename;
+    }
+
+    public function setAvatarFilename(?string $avatarFilename): static
+    {
+        $this->avatarFilename = $avatarFilename;
 
         return $this;
     }
