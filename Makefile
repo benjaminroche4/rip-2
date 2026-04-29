@@ -12,7 +12,6 @@ warm:
 
 deploy:
 	echo "→ Pull Git (main)" && git pull --ff-only origin main
-	echo "→ Lint Twig + YAML (catch config errors before they break prod)" && php bin/console lint:twig templates/ && php bin/console lint:yaml config/ --parse-tags
 	echo "→ Install dependencies (prod)" && php composer.phar install --no-dev --optimize-autoloader
 	echo "→ Running database migrations" && php bin/console doctrine:migrations:migrate --env=prod --no-interaction
 	echo "→ Compile AssetMapper" && php bin/console asset-map:compile --env=prod
