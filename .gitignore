@@ -36,6 +36,12 @@
 .DS_Store
 **/.DS_Store
 
+# macOS Finder duplicates ("Header.html 2.twig", "dev 2.log", "var/cache/dev 23/...")
+* 2.*
+* 3.*
+*\ 2/
+*\ 3/
+
 ###> friendsofphp/php-cs-fixer ###
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
