@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contact\Factory;
+namespace App\Tests\Contact\Factory;
 
 use App\Contact\Entity\Contact;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
@@ -12,11 +12,6 @@ final class ContactFactory extends PersistentProxyObjectFactory
 {
     public const HELP_TYPES = ['Question', 'Suggestion', 'Other'];
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
     public function __construct()
     {
     }
@@ -27,11 +22,6 @@ final class ContactFactory extends PersistentProxyObjectFactory
         return Contact::class;
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
-     */
     #[\Override]
     protected function defaults(): array|callable
     {
@@ -49,14 +39,9 @@ final class ContactFactory extends PersistentProxyObjectFactory
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     #[\Override]
     protected function initialize(): static
     {
-        return $this
-            // ->afterInstantiate(function(Contact $contact): void {})
-        ;
+        return $this;
     }
 }

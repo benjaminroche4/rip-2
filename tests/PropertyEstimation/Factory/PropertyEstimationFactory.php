@@ -1,6 +1,6 @@
 <?php
 
-namespace App\PropertyEstimation\Factory;
+namespace App\Tests\PropertyEstimation\Factory;
 
 use App\PropertyEstimation\Entity\PropertyEstimation;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
@@ -12,11 +12,6 @@ final class PropertyEstimationFactory extends PersistentObjectFactory
 {
     public const PROPERTY_CONDITION = ['Usé', 'Standard', 'Premium', 'Luxe'];
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
     public function __construct()
     {
     }
@@ -27,11 +22,6 @@ final class PropertyEstimationFactory extends PersistentObjectFactory
         return PropertyEstimation::class;
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
-     */
     #[\Override]
     protected function defaults(): array|callable
     {
@@ -49,14 +39,9 @@ final class PropertyEstimationFactory extends PersistentObjectFactory
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     #[\Override]
     protected function initialize(): static
     {
-        return $this
-            // ->afterInstantiate(function(PropertyEstimation $propertyEstimation): void {})
-        ;
+        return $this;
     }
 }
