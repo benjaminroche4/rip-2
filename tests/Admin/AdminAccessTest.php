@@ -108,10 +108,8 @@ final class AdminAccessTest extends WebTestCase
             self::assertNotEmpty($serie['fillColor']);
         }
 
-        // Weekly comparison table: 7 rows, 7 columns each (day + 3 contact + 3 call cells).
-        $weeklyRows = $crawler->filter('[data-testid="weekly-comparison"] tbody tr');
-        self::assertCount(7, $weeklyRows);
-        self::assertCount(7, $weeklyRows->eq(0)->filter('td'));
+        // KPI grid: 4 cards (calls 7d, contacts 7d, leads month, leads 12m).
+        self::assertCount(4, $crawler->filter('[data-testid="kpi-grid"] > article'));
 
         $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
         self::assertStringContainsString('noindex', $robots);

@@ -3,253 +3,81 @@
 {% block title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 {% block page_title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 
-{% block header_actions %}
-    <twig:Badge variant="success">
-        <span class="size-1.5 rounded-full bg-green-500"></span>
-        {{ 'admin.dashboard.live'|trans }}
-    </twig:Badge>
-{% endblock %}
-
 {% block body %}
     <div class="space-y-8">
-        {# ─── HERO ─── fills the viewport (topbar 89px + main py-8 64px = 153px ≈ 9rem) #}
-        <div class="flex min-h-[calc(100dvh-9rem)] flex-col gap-8">
-            {# Welcome banner #}
-            <header class="flex items-baseline justify-between gap-6">
-                <div>
-                    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {{ 'admin.dashboard.section.overview'|trans }}
-                    </p>
-                    <h2 class="mt-2 max-w-[40ch] text-3xl font-semibold tracking-tight text-balance text-gray-900">
-                        {{ 'admin.dashboard.welcome'|trans }} {{ app.user.firstName|default(app.user.email) }}
-                    </h2>
-                    <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
-                        {{ 'admin.dashboard.subtitle'|trans }}
-                    </p>
-                </div>
-                <p class="shrink-0 text-sm tabular-nums text-gray-500">{{ todayLabel }}</p>
-            </header>
-
-            {# ─── Section: Volume ─── 4 KPI cards (this month + 12m × contacts + calls) #}
-            <section>
-                <header class="mb-4 flex items-baseline gap-2">
-                    {{ ux_icon('lucide:layout-dashboard', {class: 'size-4 shrink-0 text-gray-500'}) }}
-                    <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                        {{ 'admin.dashboard.section.volume'|trans }}
-                    </h3>
-                </header>
-                <div class="grid grid-cols-4 gap-4">
-                    {# Contacts ce mois #}
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.stats.contactsThisMonth'|trans }}</span>
-                            {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0 text-primary'}) }}
-                        </div>
-                        <p class="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                            {{ stats.contactsThisMonth }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.formRequests'|trans }}</p>
-                    </article>
-
-                    {# Contacts 12 mois #}
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.stats.contactsTotal'|trans }}</span>
-                            {{ ux_icon('lucide:trending-up', {class: 'size-4 shrink-0 text-primary'}) }}
-                        </div>
-                        <p class="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                            {{ stats.contactsTotal }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.over12m'|trans }}</p>
-                    </article>
-
-                    {# Appels ce mois #}
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.stats.callsThisMonth'|trans }}</span>
-                            {{ ux_icon('lucide:phone', {class: 'size-4 shrink-0 text-blue-600'}) }}
-                        </div>
-                        <p class="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                            {{ stats.callsThisMonth }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.calls'|trans }}</p>
-                    </article>
-
-                    {# Appels 12 mois #}
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.stats.callsTotal'|trans }}</span>
-                            {{ ux_icon('lucide:trending-up', {class: 'size-4 shrink-0 text-blue-600'}) }}
-                        </div>
-                        <p class="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                            {{ stats.callsTotal }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.over12m'|trans }}</p>
-                    </article>
-                </div>
-            </section>
-
-            {# ─── Section: Cette semaine ─── pushed to bottom of hero with mt-auto #}
-            <section class="mt-auto">
-                <header class="mb-4 flex items-baseline gap-2">
-                    {{ ux_icon('lucide:calendar-clock', {class: 'size-4 shrink-0 text-gray-500'}) }}
-                    <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                        {{ 'admin.dashboard.section.thisWeek'|trans }}
-                    </h3>
-                </header>
-                <div class="grid grid-cols-2 gap-4">
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.activity.contactsLabel'|trans }}</span>
-                            {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0 text-primary'}) }}
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-3">
-                            <p class="text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                                {{ stats.contactsThisWeek }}
-                            </p>
-                            {% set d = stats.contactsThisWeekDelta %}
-                            {% if d > 0 %}
-                                <span class="text-sm font-medium text-green-600">+{{ d }}</span>
-                            {% elseif d < 0 %}
-                                <span class="text-sm font-medium text-red-600">{{ d }}</span>
-                            {% else %}
-                                <span class="text-sm text-gray-400">±0</span>
-                            {% endif %}
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.vsLastWeek'|trans }}</p>
-                    </article>
-
-                    <article class="rounded-xl border border-gray-950/5 bg-white p-5">
-                        <div class="flex items-center justify-between text-sm font-medium text-gray-600">
-                            <span>{{ 'admin.dashboard.activity.callsLabel'|trans }}</span>
-                            {{ ux_icon('lucide:phone', {class: 'size-4 shrink-0 text-blue-600'}) }}
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-3">
-                            <p class="text-3xl font-semibold tabular-nums tracking-tight text-gray-900">
-                                {{ stats.callsThisWeek }}
-                            </p>
-                            {% set d = stats.callsThisWeekDelta %}
-                            {% if d > 0 %}
-                                <span class="text-sm font-medium text-green-600">+{{ d }}</span>
-                            {% elseif d < 0 %}
-                                <span class="text-sm font-medium text-red-600">{{ d }}</span>
-                            {% else %}
-                                <span class="text-sm text-gray-400">±0</span>
-                            {% endif %}
-                        </div>
-                        <p class="mt-1 text-xs text-gray-500">{{ 'admin.dashboard.subtext.vsLastWeek'|trans }}</p>
-                    </article>
-                </div>
-            </section>
-        </div>
-
-        {# ─── Below the fold ─── existing chart + weekly comparison, glued to the hero by space-y-8 #}
-
-        <section class="rounded-xl border border-gray-950/5 bg-white">
-            <header class="flex items-center justify-between border-b border-gray-950/5 px-6 py-5">
-                <div class="flex items-baseline gap-2">
-                    {{ ux_icon('lucide:line-chart', {class: 'size-4 shrink-0 text-gray-500'}) }}
-                    <div>
-                        <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                            {{ 'admin.dashboard.activity.title'|trans }}
-                        </h3>
-                        <p class="mt-0.5 text-sm text-gray-500">
-                            {{ 'admin.dashboard.activity.subtitle'|trans }}
-                        </p>
-                    </div>
-                </div>
-                <twig:Badge variant="secondary">12M</twig:Badge>
-            </header>
-            <div class="h-80 px-6 py-6">
-                <canvas
-                    data-controller="chart"
-                    data-chart-labels-value="{{ chartLabels|json_encode }}"
-                    data-chart-series-value="{{ chartSeries|json_encode }}"
-                    data-testid="activity-chart"
-                ></canvas>
+        <header class="flex items-baseline justify-between gap-6">
+            <div>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {{ 'admin.dashboard.section.overview'|trans }}
+                </p>
+                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
+                    {{ 'admin.dashboard.welcome'|trans }} {{ app.user.firstName|default(app.user.email) }}
+                </h2>
+                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
+                    {{ 'admin.dashboard.subtitle'|trans }}
+                </p>
             </div>
+            <p class="shrink-0 text-sm tabular-nums text-gray-500">{{ todayLabel }}</p>
+        </header>
+
+        <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" data-testid="kpi-grid">
+            {% for kpi in kpis %}
+                {% set gradient = {
+                    up: 'from-green-100/60 to-green-100/0',
+                    down: 'from-red-100/60 to-red-100/0',
+                    neutral: 'from-neutral-100/50 to-neutral-100/0',
+                }[kpi.trend] %}
+                {% set deltaColor = {
+                    up: 'text-green-700',
+                    down: 'text-red-700',
+                    neutral: 'text-gray-500',
+                }[kpi.trend] %}
+                {% set trendIcon = {
+                    up: 'streamline:graph-arrow-increase',
+                    down: 'streamline:graph-arrow-decrease',
+                    neutral: null,
+                }[kpi.trend] %}
+
+                <article class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                    <div class="space-y-6 rounded-xl bg-linear-to-b p-4 {{ gradient }}">
+                        <div>
+                            <h3 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h3>
+                            <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ kpi.period }}</p>
+                        </div>
+                        <div class="flex items-end justify-between gap-3">
+                            <p class="text-3xl font-medium tabular-nums text-gray-900">{{ kpi.value }}</p>
+                            {% if trendIcon %}
+                                <div class="flex items-center gap-x-2 text-sm font-light {{ deltaColor }}">
+                                    {% if kpi.deltaPercent is not null %}
+                                        {{ kpi.deltaPercent > 0 ? '+' : '' }}{{ kpi.deltaPercent }}%
+                                    {% endif %}
+                                    {{ ux_icon(trendIcon, {class: 'size-4'}) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
         </section>
 
-        <section class="rounded-xl border border-gray-950/5 bg-white" data-testid="weekly-comparison">
-            <header class="border-b border-gray-950/5 px-6 py-5">
-                <div class="flex items-baseline gap-2">
-                    {{ ux_icon('lucide:calendar-days', {class: 'size-4 shrink-0 text-gray-500'}) }}
-                    <div>
-                        <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                            {{ 'admin.dashboard.weekly.title'|trans }}
-                        </h3>
-                        <p class="mt-0.5 text-sm text-gray-500">
-                            {{ 'admin.dashboard.weekly.subtitle'|trans }}
-                        </p>
-                    </div>
+        <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+            <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
+                <div class="px-3 pt-3 pb-5">
+                    <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        {{ 'admin.dashboard.activity.title'|trans }}
+                    </h3>
+                    <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                        {{ 'admin.dashboard.activity.subtitle'|trans }}
+                    </p>
                 </div>
-            </header>
-
-            <div class="overflow-hidden">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-gray-950/5 text-left">
-                            <th class="px-6 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase" rowspan="2">
-                                {{ 'admin.dashboard.weekly.day'|trans }}
-                            </th>
-                            <th class="border-l border-gray-950/5 px-6 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase" colspan="3">
-                                {{ 'admin.dashboard.activity.contactsLabel'|trans }}
-                            </th>
-                            <th class="border-l border-gray-950/5 px-6 py-3 text-xs font-medium tracking-wide text-gray-500 uppercase" colspan="3">
-                                {{ 'admin.dashboard.activity.callsLabel'|trans }}
-                            </th>
-                        </tr>
-                        <tr class="border-b border-gray-950/5 text-left">
-                            <th class="border-l border-gray-950/5 px-6 py-2 text-[11px] font-normal text-gray-500">{{ 'admin.dashboard.weekly.thisWeek'|trans }}</th>
-                            <th class="px-6 py-2 text-[11px] font-normal text-gray-500">{{ 'admin.dashboard.weekly.lastWeek'|trans }}</th>
-                            <th class="px-6 py-2 text-[11px] font-normal text-gray-500">Δ</th>
-                            <th class="border-l border-gray-950/5 px-6 py-2 text-[11px] font-normal text-gray-500">{{ 'admin.dashboard.weekly.thisWeek'|trans }}</th>
-                            <th class="px-6 py-2 text-[11px] font-normal text-gray-500">{{ 'admin.dashboard.weekly.lastWeek'|trans }}</th>
-                            <th class="px-6 py-2 text-[11px] font-normal text-gray-500">Δ</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-950/5">
-                        {% for row in weeklyComparison %}
-                            <tr class="text-sm {% if row.isFuture %}text-gray-400{% else %}text-gray-900{% endif %}">
-                                <td class="px-6 py-3 font-medium capitalize">{{ row.dayLabel }}</td>
-
-                                {% set contactsDelta = row.contacts.delta %}
-                                <td class="border-l border-gray-950/5 px-6 py-3 tabular-nums">
-                                    {{ row.contacts.thisWeek is null ? '—' : row.contacts.thisWeek }}
-                                </td>
-                                <td class="px-6 py-3 tabular-nums text-gray-500">{{ row.contacts.lastWeek }}</td>
-                                <td class="px-6 py-3 tabular-nums">
-                                    {% if contactsDelta is null %}
-                                        <span class="text-gray-300">—</span>
-                                    {% elseif contactsDelta > 0 %}
-                                        <span class="font-medium text-green-600">+{{ contactsDelta }}</span>
-                                    {% elseif contactsDelta < 0 %}
-                                        <span class="font-medium text-red-600">{{ contactsDelta }}</span>
-                                    {% else %}
-                                        <span class="text-gray-400">0</span>
-                                    {% endif %}
-                                </td>
-
-                                {% set callsDelta = row.calls.delta %}
-                                <td class="border-l border-gray-950/5 px-6 py-3 tabular-nums">
-                                    {{ row.calls.thisWeek is null ? '—' : row.calls.thisWeek }}
-                                </td>
-                                <td class="px-6 py-3 tabular-nums text-gray-500">{{ row.calls.lastWeek }}</td>
-                                <td class="px-6 py-3 tabular-nums">
-                                    {% if callsDelta is null %}
-                                        <span class="text-gray-300">—</span>
-                                    {% elseif callsDelta > 0 %}
-                                        <span class="font-medium text-green-600">+{{ callsDelta }}</span>
-                                    {% elseif callsDelta < 0 %}
-                                        <span class="font-medium text-red-600">{{ callsDelta }}</span>
-                                    {% else %}
-                                        <span class="text-gray-400">0</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="h-80 px-3 pt-5 pb-3">
+                    <canvas
+                        data-controller="chart"
+                        data-chart-labels-value="{{ chartLabels|json_encode }}"
+                        data-chart-series-value="{{ chartSeries|json_encode }}"
+                        data-testid="activity-chart"
+                    ></canvas>
+                </div>
             </div>
         </section>
     </div>

@@ -1509,30 +1509,19 @@ admin:
     dashboard:
         title: Dashboard
         welcome: Hello
-        subtitle: Overview of commercial activity.
-        live: Live
+        subtitle: Here's your activity today.
         section:
             overview: Overview
-            volume: Volume
-            thisWeek: This week
-        subtext:
-            formRequests: Form-based requests
-            calls: Phone calls
-            over12m: Over the last 12 months
-            vsLastWeek: vs last week
-        stats:
-            contactsThisMonth: Form requests this month
-            contactsTotal: Form requests 12 months
-            callsThisMonth: Calls this month
-            callsTotal: Calls 12 months
+        kpi:
+            callsLast7d: Calls received
+            contactsLast7d: Contact requests
+            leadsThisMonth: Total leads
+            leadsLast12Months: Total leads
+            period:
+                last7d: Last 7 days
+                last12m: Last 12 months
         activity:
             title: Commercial activity
             subtitle: Form requests and calls — last 12 months
             contactsLabel: Form requests
             callsLabel: Calls
-        weekly:
-            title: Weekly comparison
-            subtitle: This week vs last week, day by day
-            day: Day
-            thisWeek: This wk.
-            lastWeek: Last wk.

@@ -1,0 +1,10 @@
+# En test, on remet ces messages sur le transport `async` (qui devient
+# in-memory via MESSENGER_TRANSPORT_DSN dans .env.test) pour que les tests
+# d'intégration puissent inspecter le bus avec InMemoryTransport::getSent().
+# Le routing prod (sync) reste utilisé dès qu'on quitte l'env test.
+framework:
+    messenger:
+        routing:
+            App\Contact\Message\SendContactEmailsMessage: async
+            App\PropertyEstimation\Message\SendEstimationEmailMessage: async
+            App\Shared\Webhook\NotifyMakeWebhookMessage: async
