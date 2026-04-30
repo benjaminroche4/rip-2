@@ -1406,7 +1406,7 @@ marketplace:
             longTermRange: À partir de 6 mois
         lease:
             dialogTitle: Types de bail
-            dialogDescription: Cinq formules pour encadrer votre location — durée, conditions et protections.
+            dialogDescription: "Cinq formules pour encadrer votre location : durée, conditions et protections."
             thisProperty: Ce bien
             types:
                 civilCode: Bail code civil
@@ -1523,6 +1523,11 @@ admin:
                 last12m: 12 derniers mois
         activity:
             title: Activité commerciale
-            subtitle: Demandes formulaire et appels — 12 derniers mois
+            subtitle: Demandes formulaire et appels sur les 12 derniers mois
             contactsLabel: Demandes formulaire
             callsLabel: Appels
+        weekVsWeek:
+            title: Semaine en cours vs précédente
+            subtitle: Demandes de contact par jour, comparaison hebdomadaire
+            currentWeekLabel: Semaine en cours
+            previousWeekLabel: Semaine précédente

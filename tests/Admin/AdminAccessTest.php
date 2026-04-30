@@ -108,6 +108,21 @@ final class AdminAccessTest extends WebTestCase
             self::assertNotEmpty($serie['fillColor']);
         }
 
+        // Week-over-week bar chart: 7 day labels, 2 series of 7 points (current vs previous week).
+        $weekCanvas = $crawler->filter('canvas[data-testid="week-vs-week-chart"]');
+        self::assertCount(1, $weekCanvas);
+        self::assertSame('chart-bars', $weekCanvas->attr('data-controller'));
+        $weekLabels = json_decode((string) $weekCanvas->attr('data-chart-bars-labels-value'), true);
+        $weekSeries = json_decode((string) $weekCanvas->attr('data-chart-bars-series-value'), true);
+        self::assertCount(7, $weekLabels);
+        self::assertCount(2, $weekSeries);
+        foreach ($weekSeries as $serie) {
+            self::assertCount(7, $serie['data']);
+            self::assertNotEmpty($serie['label']);
+            self::assertNotEmpty($serie['color']);
+            self::assertNotEmpty($serie['fillColor']);
+        }
+
         // KPI grid: 4 cards (calls 7d, contacts 7d, leads month, leads 12m).
         self::assertCount(4, $crawler->filter('[data-testid="kpi-grid"] > article'));
 

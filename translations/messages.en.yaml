@@ -262,7 +262,7 @@ findAccommodation:
             text: All services and subscriptions activated from day one.
         4:
             title: Turnkey installation
-            text: We handle everything — you simply validate your home.
+            text: We handle everything, you simply validate your home.
         5:
             title: Dedicated advisor
             text: A dedicated advisor by your side, from the first exchange to key handover.
@@ -278,7 +278,7 @@ findAccommodation:
             text: We manage the search, administrative steps, and coordination so you can save valuable time.
         2:
             title: A stress-free installation
-            text: "No more complex procedures, refusals, or uncertainty — we secure every step of your installation."
+            text: "No more complex procedures, refusals, or uncertainty: we secure every step of your installation."
         3:
             title: Access to exclusive properties
             text: Benefit from privileged access to off-market properties through our Paris partner network.
@@ -513,7 +513,7 @@ home:
     aboutUs:
         title: A serene arrival
         subTitle: Paris becomes your new home
-        text: We orchestrate every detail of your relocation to make your arrival smooth, comfortable, and effortless. Enjoy your new life — we handle the rest.
+        text: We orchestrate every detail of your relocation to make your arrival smooth, comfortable, and effortless. Enjoy your new life, we handle the rest.
         subText1:
             title: A team of experts.
             text: Passionate professionals who know Paris real estate inside out.
@@ -920,7 +920,7 @@ propertyManagement:
     about:
         title: Peace of mind, guaranteed
         subTitle: Your investment, perfectly managed
-        text: We manage every stage of the rental process with rigor, securing your income and enhancing the long-term value of your property. You stay in control — we take care of the rest.
+        text: We manage every stage of the rental process with rigor, securing your income and enhancing the long-term value of your property. You stay in control, we take care of the rest.
         keyPoints:
             1:
                 text: Exposure across leading international property platforms.
@@ -1241,11 +1241,11 @@ pricing:
             title: How quickly can I be settled in?
             text: On average, our clients sign their lease in under 20 days. In a market as competitive as Paris, that is the difference between searching alone and searching with us.
         3:
-            title: My profile is atypical — can you still help me?
-            text: That is exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor... our network of partner landlords trusts us — and that trust is what gets your application through.
+            title: My profile is atypical, can you still help me?
+            text: That is exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor... our network of partner landlords trusts us, and that trust is what gets your application through.
         4:
             title: Is my budget realistic for finding a good apartment in Paris?
-            text: We always begin with an in-depth conversation to understand your needs. Together, we define a search brief that is realistic and aligned with the Paris market — so your search starts on the right foundations from day one.
+            text: We always begin with an in-depth conversation to understand your needs. Together, we define a search brief that is realistic and aligned with the Paris market, so your search starts on the right foundations from day one.
         5:
             title: Can I switch plans during my search?
             text: Absolutely. If your situation changes, you can move from Guided to Entrusted at any time. We adapt to you, not the other way around.
@@ -1405,7 +1405,7 @@ marketplace:
             longTermRange: From 6 months
         lease:
             dialogTitle: Lease types
-            dialogDescription: Five formats to frame your rental — duration, terms and protections.
+            dialogDescription: "Five formats to frame your rental: duration, terms and protections."
             thisProperty: This property
             types:
                 civilCode: Civil Code lease
@@ -1522,6 +1522,11 @@ admin:
                 last12m: Last 12 months
         activity:
             title: Commercial activity
-            subtitle: Form requests and calls — last 12 months
+            subtitle: Form requests and calls over the last 12 months
             contactsLabel: Form requests
             callsLabel: Calls
+        weekVsWeek:
+            title: This week vs last week
+            subtitle: Contact requests per day, weekly comparison
+            currentWeekLabel: This week
+            previousWeekLabel: Previous week

@@ -74,6 +74,26 @@ final class DashboardController extends AbstractController
         $callsLast7 = $this->sumDays($callsByDay, $last7Start, $next);
         $callsPrev7 = $this->sumDays($callsByDay, $windowStart, $last7Start);
 
+        // Week-over-week contact requests (Mon→Sun, ISO week). Future days
+        // inside the current week stay at 0 so the bars collapse to nothing.
+        $currentWeekStart = $today->modify('monday this week');
+        $previousWeekStart = $currentWeekStart->modify('-7 days');
+        $nextWeekStart = $currentWeekStart->modify('+7 days');
+
+        $contactsByDayWeeks = $this->contactRepository->countByDay($previousWeekStart, $nextWeekStart);
+
+        $weekDayLabels = [];
+        $currentWeekData = [];
+        $previousWeekData = [];
+        for ($i = 0; $i < 7; ++$i) {
+            $currentDay = $currentWeekStart->modify('+'.$i.' days');
+            $previousDay = $previousWeekStart->modify('+'.$i.' days');
+
+            $weekDayLabels[] = $this->formatWeekdayLabel($currentDay, $locale);
+            $currentWeekData[] = $contactsByDayWeeks[$currentDay->format('Y-m-d')] ?? 0;
+            $previousWeekData[] = $contactsByDayWeeks[$previousDay->format('Y-m-d')] ?? 0;
+        }
+
         $contactsThisMonth = end($contactsCounts) ?: 0;
         $contactsLastMonth = $contactsCounts[\count($contactsCounts) - 2] ?? 0;
         $callsThisMonth = end($callsCounts) ?: 0;
@@ -124,6 +144,21 @@ final class DashboardController extends AbstractController
                     'data' => $callsCounts,
                     'color' => '#2563eb',
                     'fillColor' => 'rgba(37, 99, 235, 0.1)',
+                ],
+            ],
+            'weekChartLabels' => $weekDayLabels,
+            'weekChartSeries' => [
+                [
+                    'label' => $this->translator->trans('admin.dashboard.weekVsWeek.previousWeekLabel'),
+                    'data' => $previousWeekData,
+                    'color' => '#9333ea',
+                    'fillColor' => '#faf5ff',
+                ],
+                [
+                    'label' => $this->translator->trans('admin.dashboard.weekVsWeek.currentWeekLabel'),
+                    'data' => $currentWeekData,
+                    'color' => '#16a34a',
+                    'fillColor' => '#f0fdf4',
                 ],
             ],
             'kpis' => $kpis,
@@ -201,6 +236,13 @@ final class DashboardController extends AbstractController
         $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM yyyy');
 
         return $formatter->format($date) ?: $ym;
+    }
+
+    private function formatWeekdayLabel(\DateTimeImmutable $date, string $locale): string
+    {
+        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEE');
+
+        return ucfirst(rtrim((string) $formatter->format($date), '.'));
     }
 
     /**
