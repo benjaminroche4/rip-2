@@ -208,7 +208,11 @@
                                 </div>
                             </div>
                             <div class="mt-auto pt-6">
-                                <twig:Button variant="default" as="a" size="lg" class="w-full" href="{{ path('app_contact') }}">
+                                <twig:Button variant="default" as="a" size="lg" class="w-full gap-x-3" href="{{ path('app_contact') }}">
+                                    <span class="relative flex size-2">
+                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
+                                    </span>
                                     {{ 'pricing.package.2.button'|trans|raw }}
                                 </twig:Button>
                             </div>
