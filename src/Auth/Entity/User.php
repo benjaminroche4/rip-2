@@ -7,6 +7,7 @@ use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -19,6 +20,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
+
+    /**
+     * Public-facing opaque identifier. Used in admin URLs (and any future
+     * public reference) instead of the auto-incremented id, which would
+     * leak signup ordering and user count.
+     */
+    #[ORM\Column(type: 'ulid', unique: true)]
+    private Ulid $uniqueId;
 
     /**
      * @var list<string> The user roles
@@ -58,9 +67,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 5, enumType: Language::class, nullable: true)]
     private ?Language $language = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastLoginAt = null;
+
+    public function __construct()
+    {
+        $this->uniqueId = new Ulid();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUniqueId(): Ulid
+    {
+        return $this->uniqueId;
     }
 
     public function getEmail(): ?string
@@ -219,6 +241,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLanguage(?Language $language): static
     {
         $this->language = $language;
+
+        return $this;
+    }
+
+    public function getLastLoginAt(): ?\DateTimeImmutable
+    {
+        return $this->lastLoginAt;
+    }
+
+    public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): static
+    {
+        $this->lastLoginAt = $lastLoginAt;
 
         return $this;
     }

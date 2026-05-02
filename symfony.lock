@@ -59,6 +59,9 @@
             ".php-cs-fixer.dist.php"
         ]
     },
+    "knplabs/knp-time-bundle": {
+        "version": "2.5.0"
+    },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.20",
         "recipe": {

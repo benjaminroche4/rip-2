@@ -117,6 +117,7 @@ footer:
         contact: Contactez-nous
         login: Connexion
         logout: Déconnexion
+        adminSpace: Espace admin
         aboutUs: À propos
         legalNotice: Mentions légales
         privacyPolicy: Politique de confidentialité
@@ -1496,6 +1497,7 @@ a11y:
 admin:
     nav:
         dashboard: Tableau de bord
+        users: Utilisateurs
         logout: Se déconnecter
     sidebar:
         section:
@@ -1528,6 +1530,40 @@ admin:
             callsLabel: Appels
         weekVsWeek:
             title: Semaine en cours vs précédente
-            subtitle: Demandes de contact par jour, comparaison hebdomadaire
+            subtitle: Demandes via le formulaire de contact par jour, comparaison hebdomadaire
             currentWeekLabel: Semaine en cours
             previousWeekLabel: Semaine précédente
+    users:
+        section: Pilotage
+        title: Utilisateurs
+        subtitle: Gestion des utilisateurs
+        placeholder: La liste des utilisateurs arrivera bientôt.
+        totalCount: '{0}Aucun utilisateur|{1}1 utilisateur|]1,Inf[%count% utilisateurs'
+        empty: Aucun utilisateur enregistré pour le moment.
+        column:
+            name: Nom
+            email: Email
+            role: Rôle
+            lastLogin: Dernière connexion
+            createdAt: Inscrit le
+        role:
+            admin: Admin
+            user: Utilisateur
+        lastLoginNever: Jamais
+        button:
+            loadMore: Charger plus
+            loading: Chargement
+        profile:
+            title: Profil utilisateur
+            backToList: Retour à la liste
+            field:
+                createdAt: Inscrit le
+                lastLogin: Dernière connexion
+                authMethod: Méthode de connexion
+                uniqueId: Identifiant
+            authMethod:
+                google: Google
+                password: Mot de passe
+            profileComplete:
+                yes: Profil complet
+                no: Profil incomplet

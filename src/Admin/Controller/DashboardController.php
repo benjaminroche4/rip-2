@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
+use App\Admin\Repository\AdminUserRepository;
 use App\Admin\Repository\CallRepository;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,6 +38,7 @@ final class DashboardController extends AbstractController
         private readonly string $adminPathPrefix,
         private readonly ContactRepository $contactRepository,
         private readonly CallRepository $callRepository,
+        private readonly AdminUserRepository $adminUserRepository,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -162,6 +164,52 @@ final class DashboardController extends AbstractController
                 ],
             ],
             'kpis' => $kpis,
+        ]);
+    }
+
+    #[Route('/users', name: 'users', methods: ['GET'])]
+    public function users(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/users/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    /**
+     * Resolves a user by its public ULID. The {slug} segment is purely
+     * decorative — if it doesn't match the current display slug (e.g. the
+     * user was renamed), we 302 to the canonical URL so old links keep
+     * working without poisoning bookmarks with a stale slug.
+     */
+    #[Route(
+        '/users/{uniqueId}/{slug}',
+        name: 'user_show',
+        methods: ['GET'],
+        requirements: [
+            'uniqueId' => '[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}',
+            'slug' => '[a-z0-9-]+',
+        ],
+    )]
+    public function showUser(string $adminPrefix, string $uniqueId, string $slug): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        $profile = $this->adminUserRepository->findByUniqueId($uniqueId)
+            ?? throw $this->createNotFoundException();
+
+        if ($slug !== $profile->slug) {
+            return $this->redirectToRoute('admin_user_show', [
+                'adminPrefix' => $adminPrefix,
+                'uniqueId' => $uniqueId,
+                'slug' => $profile->slug,
+            ]);
+        }
+
+        return $this->render('admin/users/show.html.twig', [
+            'adminPrefix' => $adminPrefix,
+            'profile' => $profile,
         ]);
     }
 

@@ -104,6 +104,30 @@ final class LoginControllerTest extends WebTestCase
         );
     }
 
+    public function testInteractiveLoginStampsLastLoginAt(): void
+    {
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $beforeUser = $em->getRepository(User::class)->findOneBy(['email' => self::TEST_EMAIL]);
+        self::assertNotNull($beforeUser);
+        self::assertNull($beforeUser->getLastLoginAt(), 'Fresh user must have lastLoginAt = null.');
+
+        $beforeLogin = new \DateTimeImmutable();
+
+        $this->client->request('GET', self::LOGIN_PATH);
+        $this->client->submitForm(self::SUBMIT_BUTTON, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+        ]);
+
+        // Reload from the DB, the listener has flushed in another EM identity.
+        $em->clear();
+        $afterUser = $em->getRepository(User::class)->findOneBy(['email' => self::TEST_EMAIL]);
+        self::assertNotNull($afterUser);
+        $stamp = $afterUser->getLastLoginAt();
+        self::assertNotNull($stamp, 'lastLoginAt must be set after a successful interactive login.');
+        self::assertGreaterThanOrEqual($beforeLogin->getTimestamp(), $stamp->getTimestamp());
+    }
+
     public function testRememberMeCookieIsSetWhenChecked(): void
     {
         // Prime CSRF + session, then POST directly so we control the request bag

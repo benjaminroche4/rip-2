@@ -47,6 +47,15 @@
                                     {{ 'admin.nav.dashboard'|trans }}
                                 </a>
                             </li>
+                            <li>
+                                <a
+                                    href="{{ path('admin_users', {adminPrefix: adminPrefix}) }}"
+                                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {% if currentRoute == 'admin_users' %}bg-neutral-100 font-medium text-primary{% else %}font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}"
+                                >
+                                    {{ ux_icon('lucide:users', {class: 'size-4 shrink-0'}) }}
+                                    {{ 'admin.nav.users'|trans }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
 

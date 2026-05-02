@@ -131,6 +131,103 @@ final class AdminAccessTest extends WebTestCase
         self::assertStringContainsString('nofollow', $robots);
     }
 
+    public function testAdminSeesUsersPage(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/users');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Utilisateurs');
+        self::assertCount(1, $crawler->filter('[data-testid="users-page"]'));
+
+        // Sidebar exposes the dashboard + users links under the piloting section.
+        self::assertSelectorExists('aside a[href$="/admin"]');
+        self::assertSelectorExists('aside a[href$="/admin/users"]');
+
+        // Two users seeded in setUp() → table rendered with 2 rows, both emails visible.
+        $rows = $crawler->filter('[data-testid="users-table"] tbody tr');
+        self::assertCount(2, $rows);
+        $body = $crawler->filter('[data-testid="users-table"]')->html();
+        self::assertStringContainsString(self::USER_EMAIL, $body);
+        self::assertStringContainsString(self::ADMIN_EMAIL, $body);
+
+        // Admin row carries the admin role badge, the regular user the user one.
+        self::assertStringContainsString('Admin', $body);
+        self::assertStringContainsString('Utilisateur', $body);
+
+        // Fresh users from setUp() never logged in → "Jamais" is the placeholder.
+        self::assertStringContainsString('Jamais', $body);
+    }
+
+    public function testWrongPrefixOnUsersReturns404(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->adminUrl('00000000000000000000000000000000').'/users');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAdminSeesUserProfileByUniqueId(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $target = $this->findUser(self::USER_EMAIL);
+
+        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/test-user';
+        $crawler = $this->client->request('GET', $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Test User');
+        self::assertCount(1, $crawler->filter('[data-testid="user-profile"]'));
+        self::assertStringContainsString(self::USER_EMAIL, $crawler->filter('[data-testid="user-profile"]')->html());
+
+        // Back link points at the list.
+        self::assertSelectorExists('[data-testid="user-profile"] a[href$="/admin/users"]');
+    }
+
+    public function testUserProfileRedirectsWhenSlugIsStale(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $target = $this->findUser(self::USER_EMAIL);
+
+        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/old-slug';
+        $this->client->request('GET', $url);
+
+        self::assertResponseStatusCodeSame(302);
+        $location = (string) $this->client->getResponse()->headers->get('Location');
+        self::assertStringEndsWith('/test-user', $location);
+    }
+
+    public function testUserProfileReturns404OnUnknownUlid(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        // Valid ULID format that doesn't match any persisted user.
+        $url = $this->adminUrl($this->adminPrefix).'/users/01HZZZZZZZZZZZZZZZZZZZZZZZ/anything';
+        $this->client->request('GET', $url);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testUserProfileReturns404WithMalformedUlid(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        // Wrong shape (too short, includes excluded chars) → router doesn't match.
+        $url = $this->adminUrl($this->adminPrefix).'/users/not-a-ulid/whatever';
+        $this->client->request('GET', $url);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testNonAdminCannotSeeUserProfile(): void
+    {
+        $this->loginAs(self::USER_EMAIL);
+        $target = $this->findUser(self::USER_EMAIL);
+
+        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/test-user';
+        $this->client->request('GET', $url);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
     public function testWrongPrefixReturns404EvenForAdmin(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);
@@ -152,12 +249,19 @@ final class AdminAccessTest extends WebTestCase
 
     private function loginAs(string $email): void
     {
+        $user = $this->findUser($email);
+        $this->client->loginUser($user);
+    }
+
+    private function findUser(string $email): User
+    {
         $user = static::getContainer()
             ->get('doctrine.orm.entity_manager')
             ->getRepository(User::class)
             ->findOneBy(['email' => $email]);
 
         self::assertNotNull($user);
-        $this->client->loginUser($user);
+
+        return $user;
     }
 }

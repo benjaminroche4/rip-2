@@ -3,6 +3,7 @@
 namespace App\Auth\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,11 +22,18 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class FooterUserChipController extends AbstractController
 {
+    public function __construct(
+        #[Autowire('%admin_path_prefix%')]
+        private readonly string $adminPathPrefix,
+    ) {
+    }
+
     #[Route('/_fragment/footer/user-chip', name: 'fragment_footer_user_chip', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
         $response = $this->render('components/Layout/Footer/UserChip.html.twig', [
             'currentRoute' => $request->query->get('currentRoute', ''),
+            'adminPrefix' => $this->adminPathPrefix,
         ]);
 
         // Per-session response, never cache publicly.

@@ -114,6 +114,7 @@ footer:
         contact: Contact us
         login: Log in
         logout: Log out
+        adminSpace: Admin space
         aboutUs: About us
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
@@ -1495,6 +1496,7 @@ a11y:
 admin:
     nav:
         dashboard: Dashboard
+        users: Users
         logout: Log out
     sidebar:
         section:
@@ -1527,6 +1529,40 @@ admin:
             callsLabel: Calls
         weekVsWeek:
             title: This week vs last week
-            subtitle: Contact requests per day, weekly comparison
+            subtitle: Contact form requests per day, weekly comparison
             currentWeekLabel: This week
             previousWeekLabel: Previous week
+    users:
+        section: Piloting
+        title: Users
+        subtitle: User management
+        placeholder: The user list is coming soon.
+        totalCount: '{0}No users|{1}1 user|]1,Inf[%count% users'
+        empty: No users registered yet.
+        column:
+            name: Name
+            email: Email
+            role: Role
+            lastLogin: Last login
+            createdAt: Joined on
+        role:
+            admin: Admin
+            user: User
+        lastLoginNever: Never
+        button:
+            loadMore: Load more
+            loading: Loading
+        profile:
+            title: User profile
+            backToList: Back to list
+            field:
+                createdAt: Joined on
+                lastLogin: Last login
+                authMethod: Sign-in method
+                uniqueId: Identifier
+            authMethod:
+                google: Google
+                password: Password
+            profileComplete:
+                yes: Profile complete
+                no: Profile incomplete
