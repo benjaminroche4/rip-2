@@ -13,8 +13,12 @@ contact:
         accept:
             label: "Vous devez accepter les conditions pour continuer."
 newsletter:
+    form:
+        email:
+            notBlank: "Veuillez renseigner votre adresse email."
+            invalid: "Cette adresse email n'est pas valide."
     email:
-        unique: "Cette adresse e-mail est déjà inscrite à la newsletter."
+        unique: "Cette adresse email est déjà inscrite à la newsletter."
 resetPassword:
     empty: "Veuillez entrer un mot de passe."
     minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."

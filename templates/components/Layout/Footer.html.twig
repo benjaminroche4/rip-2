@@ -146,7 +146,7 @@
             <div class="h-[1px] bg-gradient-to-r from-white/20 via-white to-white/20 opacity-20"></div>
             <div class="grid grid-cols-2 gap-8 max-[281px]:grid-cols-1 md:grid-cols-4">
                 <div class="space-y-4 text-sm">
-                    <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.1'|trans|raw }}</h3>
+                    <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.1'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-4">
                         <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
@@ -161,7 +161,7 @@
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
-                    <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.2'|trans|raw }}</h3>
+                    <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.2'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-2 text-sm/6">
                         <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
                         <a href="{{ path('app_pricing') }}" class="{% if app.request.attributes.get('_route') == 'app_pricing' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.pricing'|trans|raw }}</a>
@@ -170,7 +170,7 @@
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
-                    <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.3'|trans|raw }}</h3>
+                    <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.3'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-2 text-sm/6">
                         <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
                         {{ render_esi(path('fragment_footer_user_chip', {currentRoute: app.request.attributes.get('_route')})) }}
@@ -178,7 +178,7 @@
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
-                    <h3 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.4'|trans|raw }}</h3>
+                    <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.4'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-2 text-sm/6">
                         <a href="{{ path('app_legal_notice') }}" class="{% if app.request.attributes.get('_route') == 'app_legal_notice' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.legalNotice'|trans|raw }}</a>
                         <a href="{{ path('app_privacy_policy') }}" class="{% if app.request.attributes.get('_route') == 'app_privacy_policy' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.privacyPolicy'|trans|raw }}</a>

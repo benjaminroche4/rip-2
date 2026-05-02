@@ -13,6 +13,10 @@ contact:
         accept:
             label: "You must accept the terms to continue."
 newsletter:
+    form:
+        email:
+            notBlank: "Please enter your email address."
+            invalid: "This email address is not valid."
     email:
         unique: "This email address is already subscribed to the newsletter."
 resetPassword:

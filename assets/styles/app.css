@@ -85,6 +85,27 @@ turbo-frame#blog-list[busy] {
     display: none;
 }
 
+/* === intl-tel-input overrides ===
+ * .iti is inline-block by default, which collapses around the wrapped input
+ * and makes typing impossible inside our flex layout. Force block + 100%.
+ * Also align the dial-code typography with the input (which uses sm:text-sm/6)
+ * and color it like a placeholder until the field is focused. */
+.iti {
+    display: block;
+    width: 100%;
+}
+
+.iti__selected-dial-code {
+    color: #9ca3af; /* text-gray-400 */
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.iti:focus-within .iti__selected-dial-code,
+.iti:has(.iti__tel-input:not(:placeholder-shown)) .iti__selected-dial-code {
+    color: #111827; /* text-gray-900 */
+}
+
 /* === Google Maps InfoWindow — strip chrome for property cards === */
 .gm-style .gm-style-iw-c {
     background: transparent !important;

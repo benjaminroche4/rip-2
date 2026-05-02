@@ -46,4 +46,11 @@ return [
     '@kurkle/color' => [
         'version' => '0.3.4',
     ],
+    'intl-tel-input' => [
+        'path' => './assets/vendor/intl-tel-input/build/js/intlTelInputWithUtils.mjs',
+    ],
+    'intl-tel-input/css' => [
+        'path' => './assets/vendor/intl-tel-input/build/css/intlTelInput.min.css',
+        'type' => 'css',
+    ],
 ];

@@ -65,7 +65,8 @@
                                                                                 </td>
                                                                                 <td style="background-color:#ffffff;border-radius:0 12px 0 0;padding:12px 12px 0">
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span style="color:#525252">Téléphone :</span> {{ phoneNumber }}
+                                                                                        <span style="color:#525252">Téléphone :</span>
+                                                                                        {% if phoneNumber %}<a href="tel:{{ phoneNumber }}" style="color:#0F172A;text-decoration:none">{{ phoneNumber|phone_format }}</a>{% endif %}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
                                                                                         <span style="color:#525252">Langue :</span>

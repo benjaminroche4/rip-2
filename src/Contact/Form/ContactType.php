@@ -3,10 +3,12 @@
 namespace App\Contact\Form;
 
 use App\Contact\Entity\Contact;
+use App\Shared\Form\DataTransformer\PhoneNumberE164Transformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -44,8 +46,9 @@ class ContactType extends AbstractType
                     ),
                 ],
             ])
-            ->add('phoneNumber', TextType::class, [
+            ->add('phoneNumber', TelType::class, [
                 'label' => 'contact.contactForm.phoneNumber.label',
+                'invalid_message' => 'contact.contactForm.phoneNumber.invalidFormat',
                 'constraints' => [
                     new NotBlank(
                         message: 'contact.contactForm.phoneNumber.notBlank',
@@ -102,6 +105,8 @@ class ContactType extends AbstractType
                 ],
             ])
         ;
+
+        $builder->get('phoneNumber')->addModelTransformer(new PhoneNumberE164Transformer());
     }
 
     public function configureOptions(OptionsResolver $resolver): void

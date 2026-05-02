@@ -122,7 +122,7 @@
                                                                                     <p style="margin:0;padding:0;text-align:center"><br /></p>
 
                                                                                     <p class="box-gray" style="margin:0;padding:12px;background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;font-size:1em;text-align:center">
-                                                                                        <span style="font-size:12px;">{{ fr ? 'Nous vous appelons au :' : 'We will call you at:' }}</span><br /><strong>{{ phoneNumber }}</strong>
+                                                                                        <span style="font-size:12px;">{{ fr ? 'Nous vous appelons au :' : 'We will call you at:' }}</span><br /><strong>{{ phoneNumber|phone_format }}</strong>
                                                                                     </p>
 
                                                                                     <p class="text-muted" style="margin:0;padding:12px 0 8px;font-size:12px;line-height:160%;text-align:center">
@@ -156,7 +156,7 @@
                                                                                         <span class="label-muted" style="color:#525252">{{ fr ? 'Nom/Prénom :' : 'Name:' }}</span> {{ firstName }} {{ lastName }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
-                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Téléphone :' : 'Phone:' }}</span> {{ phoneNumber }}
+                                                                                        <span class="label-muted" style="color:#525252">{{ fr ? 'Téléphone :' : 'Phone:' }}</span> {{ phoneNumber|phone_format }}
                                                                                     </p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">
                                                                                         <span class="label-muted" style="color:#525252">Email :</span> {{ emailContact }}

@@ -28,7 +28,10 @@ contact:
             placeholder: "Email: john@doe.com"
         phoneNumber:
             label: Phone
-            placeholder: "Phone: +33"
+            placeholder: "6 12 34 56 78"
+            notBlank: The phone number must not be empty.
+            invalidFormat: The phone number is invalid.
+            invalidNumber: This phone number does not exist.
         company:
             label: Company
             placeholder: Company
@@ -1030,7 +1033,6 @@ newsletter:
         button: Subscribe
         email:
             label: Your email
-            notBlank: Email must not be empty.
             placeholder: "Your email address"
         error:
             title: Error
