@@ -14,14 +14,14 @@
         {# OG image is captured here so meta partial can receive the resolved value #}
         {% set pageOgImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
 
-        {% block hreflang %}
-            {% include '_partials/meta.html.twig' with {
-                pageTitle: block('title'),
-                pageDescription: block('description'),
-                pageUrl: block('url'),
-                pageOgImage: pageOgImage|trim,
-            } only %}
-        {% endblock %}
+        {% block hreflang %}{% include '_partials/hreflang.html.twig' %}{% endblock %}
+
+        {% include '_partials/meta.html.twig' with {
+            pageTitle: block('title'),
+            pageDescription: block('description'),
+            pageUrl: block('url'),
+            pageOgImage: pageOgImage|trim,
+        } only %}
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}

@@ -1,11 +1,6 @@
 {# Meta block extracted from base.html.twig — included from <head>.
-   Caller passes via {% include … with %}: pageTitle, pageDescription, pageUrl, pageOgImage. #}
-
-{# Hreflang #}
-{% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
-<link rel="alternate" hreflang="fr" href="{{ site_url }}/fr{{ currentPath }}" />
-<link rel="alternate" hreflang="en" href="{{ site_url }}/en{{ currentPath }}" />
-<link rel="alternate" hreflang="x-default" href="{{ site_url }}/fr{{ currentPath }}" />
+   Caller passes via {% include … with %}: pageTitle, pageDescription, pageUrl, pageOgImage.
+   Hreflang lives in its own block in base templates so pages can override it without losing the rest of the <head>. #}
 
 {# Preconnect to external origins used for above-the-fold resources #}
 <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>

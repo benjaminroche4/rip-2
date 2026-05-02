@@ -1,0 +1,7 @@
+{# Default hreflang block: derives FR/EN URLs from the current path.
+   Pages where the slug differs per locale (e.g. property show) should override
+   the `hreflang` block in their own template instead of relying on this. #}
+{% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
+<link rel="alternate" hreflang="fr" href="{{ site_url }}/fr{{ currentPath }}" />
+<link rel="alternate" hreflang="en" href="{{ site_url }}/en{{ currentPath }}" />
+<link rel="alternate" hreflang="x-default" href="{{ site_url }}/fr{{ currentPath }}" />

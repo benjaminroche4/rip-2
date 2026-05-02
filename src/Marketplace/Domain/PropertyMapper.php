@@ -30,7 +30,7 @@ final class PropertyMapper
             chargesIncludes: $this->toNullableBool($row['chargesIncludes'] ?? null),
             showCategoryOnCard: $this->toNullableBool($row['showCategoryOnCard'] ?? null),
             status: $this->toNullableString($row['status'] ?? null),
-            leaseType: $this->toNullableString($row['leaseType'] ?? null),
+            leaseType: $this->toNullableArray($row['leaseType'] ?? null),
             listingTypeName: $this->toNullableString($row['listingTypeName'] ?? null),
             longTerm: $this->toNullableBool($row['longTerm'] ?? null),
             midTerm: $this->toNullableBool($row['midTerm'] ?? null),

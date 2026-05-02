@@ -29,7 +29,8 @@ final readonly class Property
         public ?bool $chargesIncludes = null,
         public ?bool $showCategoryOnCard = null,
         public ?string $status = null,
-        public ?string $leaseType = null,
+        /** @var array<int, string>|null */
+        public ?array $leaseType = null,
         public ?string $listingTypeName = null,
         public ?bool $longTerm = null,
         public ?bool $midTerm = null,

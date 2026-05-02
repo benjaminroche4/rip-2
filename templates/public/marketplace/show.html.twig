@@ -490,7 +490,9 @@
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center">
                                         <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.sidebar.propertyDetails'|trans }}</h2>
-                                        <p class="text-xs font-light text-gray-400">PR5058</p>
+                                        {% if property.uniqueId is defined and property.uniqueId %}
+                                            <p class="text-xs font-light text-gray-400">{{ property.uniqueId }}</p>
+                                        {% endif %}
                                     </div>
                                     <div class="rounded-2xl border border-slate-200 mt-3 divide-y divide-gray-200">
                                         <div class="p-4 space-y-2">
