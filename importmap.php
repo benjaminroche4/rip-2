@@ -47,7 +47,7 @@ return [
         'version' => '0.3.4',
     ],
     'intl-tel-input' => [
-        'path' => './assets/vendor/intl-tel-input/build/js/intlTelInputWithUtils.mjs',
+        'path' => './assets/intl-tel-input/intlTelInputWithUtils.mjs',
     ],
     'intl-tel-input/css' => [
         'path' => './assets/vendor/intl-tel-input/build/css/intlTelInput.min.css',
