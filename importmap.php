@@ -50,7 +50,7 @@ return [
         'path' => './assets/intl-tel-input/intlTelInputWithUtils.mjs',
     ],
     'intl-tel-input/css' => [
-        'path' => './assets/vendor/intl-tel-input/build/css/intlTelInput.min.css',
+        'path' => './assets/intl-tel-input/css/intlTelInput.min.css',
         'type' => 'css',
     ],
 ];
