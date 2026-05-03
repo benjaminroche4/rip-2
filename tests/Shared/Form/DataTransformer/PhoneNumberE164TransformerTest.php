@@ -4,7 +4,6 @@ namespace App\Tests\Shared\Form\DataTransformer;
 
 use App\Shared\Form\DataTransformer\PhoneNumberE164Transformer;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Form\Exception\TransformationFailedException;
 
 final class PhoneNumberE164TransformerTest extends TestCase
 {
@@ -43,18 +42,28 @@ final class PhoneNumberE164TransformerTest extends TestCase
         self::assertNull($t->reverseTransform(null));
     }
 
-    public function testReverseTransformRejectsGarbage(): void
+    public function testReverseTransformReturnsNullForGarbageWithoutDigits(): void
     {
         $t = new PhoneNumberE164Transformer();
-        $this->expectException(TransformationFailedException::class);
-        $t->reverseTransform('abc');
+        // No digits at all — nothing to keep, treat as empty.
+        self::assertNull($t->reverseTransform('abc'));
     }
 
-    public function testReverseTransformRejectsInvalidNumber(): void
+    public function testReverseTransformFallsBackToCleanedDigitsForUnparseable(): void
     {
         $t = new PhoneNumberE164Transformer();
-        $this->expectException(TransformationFailedException::class);
-        // Parses but not a valid number
-        $t->reverseTransform('+33 1');
+        // "+33 1" parses but is not a valid number — keep what the user typed
+        // rather than blocking the form. Admin can clean up later.
+        self::assertSame('+331', $t->reverseTransform('+33 1'));
+    }
+
+    public function testReverseTransformFallsBackForOversizedNumber(): void
+    {
+        $t = new PhoneNumberE164Transformer();
+        // Way too long to be a valid phone number, but we still accept it.
+        $result = $t->reverseTransform('+3333333333333333333333333333');
+        self::assertNotNull($result);
+        self::assertSame('+', $result[0]);
+        self::assertLessThanOrEqual(25, strlen($result));
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Contact\Entity;
 
 use App\Contact\Repository\ContactRepository;
-use App\Shared\Validator\PhoneNumberE164;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -27,7 +26,6 @@ class Contact
     private ?string $email = null;
 
     #[ORM\Column(length: 25, nullable: true)]
-    #[PhoneNumberE164]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 150, nullable: true)]
