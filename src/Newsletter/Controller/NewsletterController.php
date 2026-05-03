@@ -92,6 +92,21 @@ final class NewsletterController extends AbstractController
             return $this->redirectToRoute('app_newsletter');
         }
 
+        // For Turbo-driven invalid submissions, return a Turbo Stream that
+        // replaces the #newsletter-form region in place. We use status 200
+        // (not 422) because shared o2switch infrastructure intercepts 4xx
+        // responses with its own error page, which would prevent Turbo from
+        // rendering our error markup. The stream actions are processed
+        // regardless of the HTTP status code.
+        if ($form->isSubmitted() && !$form->isValid()
+            && TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+            return $this->render('public/newsletter/form.stream.html.twig', [
+                'newsletterForm' => $form->createView(),
+            ]);
+        }
+
         $response = $this->render('public/newsletter/index.html.twig', [
             'newsletterForm' => $form->createView(),
         ]);
