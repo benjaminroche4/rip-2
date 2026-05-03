@@ -93,6 +93,20 @@ final class PropertyEstimationController extends AbstractController
             return $this->redirectToRoute('app_service_landlords', [], Response::HTTP_SEE_OTHER);
         }
 
+        // For Turbo-driven invalid submissions, return a Turbo Stream that
+        // replaces the #estimation-form region in place. We use status 200
+        // because shared o2switch infrastructure intercepts 4xx responses
+        // with its own error page, which would prevent Turbo from rendering
+        // our error markup. Stream actions are processed regardless of status.
+        if ($form->isSubmitted() && !$form->isValid()
+            && TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+            return $this->render('public/property_estimation/form.stream.html.twig', [
+                'form' => $form,
+            ]);
+        }
+
         return $this->render('public/property_estimation/index.html.twig', [
             'form' => $form,
         ]);

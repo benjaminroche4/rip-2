@@ -105,6 +105,20 @@ final class ContactController extends AbstractController
             return $this->redirectToRoute('app_contact');
         }
 
+        // For Turbo-driven invalid submissions, return a Turbo Stream that
+        // replaces the #contact-form region in place. We use status 200
+        // because shared o2switch infrastructure intercepts 4xx responses
+        // with its own error page, which would prevent Turbo from rendering
+        // our error markup. Stream actions are processed regardless of status.
+        if ($form->isSubmitted() && !$form->isValid()
+            && TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+            return $this->render('public/contact/form.stream.html.twig', [
+                'contactForm' => $form->createView(),
+            ]);
+        }
+
         return $this->render('public/contact/index.html.twig', [
             'contactForm' => $form->createView(),
         ]);

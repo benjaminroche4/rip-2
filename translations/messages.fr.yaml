@@ -860,15 +860,12 @@ propertyManagement:
         title: Estimation gratuite
         address:
             label: Adresse
-            notBlank: L'adresse ne doit pas être vide.
             placeholder: Indiquez une adresse
         surface:
             label: Surface
-            notBlank: La surface ne doit pas être vide.
             placeholder: "Ex: 30"
         propertyCondition:
             label: État du logement
-            notBlank: L'état du logement ne doit pas être vide.
             placeholder: Choisissez un état
             choice:
                 1: Récemment rénové
@@ -877,19 +874,15 @@ propertyManagement:
                 4: Rénovation complète à prévoir
         bedroom:
             label: Chambres
-            notBlank: Le nombre de chambre ne doit pas être vide.
             placeholder: 1
         bathroom:
             label: Salles de bain
-            notBlank: Le nombre de salles de baon ne doit pas être vide.
             placeholder: 1
         phoneNumber:
             label: Téléphone
-            notBlank: Le numéro de téléphone ne doit pas être vide.
             placeholder: "Téléphone: +33"
         email:
             label: Email
-            notBlank: L'email ne doit pas être vide.
             placeholder: "Email: john@doe.com"
         button:  Estimer mes revenus locatifs
         trust:
@@ -1035,7 +1028,6 @@ newsletter:
             label: Votre email
             placeholder: "Votre address email"
         error:
-            title: Erreur
             tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
             title: Inscription confirmée !

@@ -860,15 +860,12 @@ propertyManagement:
         title: Free estimate
         address:
             label: Address
-            notBlank: The address must not be empty.
             placeholder: Enter an address
         surface:
             label: Surface
-            notBlank: The surface area must not be empty.
             placeholder: "e.g. 30"
         propertyCondition:
             label: Property condition
-            notBlank: The property condition must not be empty.
             placeholder: Select a condition
             choice:
                 1: Newly renovated
@@ -877,19 +874,15 @@ propertyManagement:
                 4: Full renovation required
         bedroom:
             label: Bedrooms
-            notBlank: The number of bedrooms must not be empty.
             placeholder: 1
         bathroom:
             label: Bathrooms
-            notBlank: The number of bathrooms must not be empty.
             placeholder: 1
         phoneNumber:
             label: Phone
-            notBlank: The phone number must not be empty.
             placeholder: "Phone: +33"
         email:
             label: Email
-            notBlank: The email address must not be empty.
             placeholder: "Email: john@doe.com"
         button: Estimate my rental income
         trust:
@@ -1035,7 +1028,6 @@ newsletter:
             label: Your email
             placeholder: "Your email address"
         error:
-            title: Error
             tooManyRequests: Too many attempts. Please wait a minute before trying again.
         success:
             title: You're subscribed!

@@ -90,7 +90,11 @@ class PropertyEstimationType extends AbstractType
             ])
             ->add('phoneNumber', TextType::class, [
                 'label' => 'propertyManagement.form.phoneNumber.label',
-                'required' => false,
+                'constraints' => [
+                    new NotBlank(
+                        message: 'propertyManagement.form.phoneNumber.notBlank',
+                    ),
+                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'propertyManagement.form.email.label',

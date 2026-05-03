@@ -14,7 +14,7 @@
     </section>
     <section class="max-w-xl lg:max-w-xl mx-auto lg:px-8 px-6 py-6">
         <div id="newsletter-form" class="w-full mx-auto space-y-6">
-            {% include 'public/newsletter/_form.html.twig' %}
+            <twig:Newsletter:NewsletterForm :form="newsletterForm" />
         </div>
     </section>
     <section class="max-w-xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">

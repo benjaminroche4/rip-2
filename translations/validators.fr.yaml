@@ -19,6 +19,22 @@ newsletter:
             invalid: "Cette adresse email n'est pas valide."
     email:
         unique: "Cette adresse email est déjà inscrite à la newsletter."
+propertyManagement:
+    form:
+        address:
+            notBlank: "Veuillez renseigner l'adresse du bien."
+        propertyCondition:
+            notBlank: "Veuillez sélectionner l'état du bien."
+        bedroom:
+            notBlank: "Veuillez indiquer le nombre de chambres."
+        bathroom:
+            notBlank: "Veuillez indiquer le nombre de salles de bain."
+        surface:
+            notBlank: "Veuillez indiquer la surface du bien."
+        phoneNumber:
+            notBlank: "Veuillez renseigner votre numéro de téléphone."
+        email:
+            notBlank: "Veuillez renseigner votre adresse email."
 resetPassword:
     empty: "Veuillez entrer un mot de passe."
     minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."

@@ -19,6 +19,22 @@ newsletter:
             invalid: "This email address is not valid."
     email:
         unique: "This email address is already subscribed to the newsletter."
+propertyManagement:
+    form:
+        address:
+            notBlank: "Please enter the property address."
+        propertyCondition:
+            notBlank: "Please select the property condition."
+        bedroom:
+            notBlank: "Please specify the number of bedrooms."
+        bathroom:
+            notBlank: "Please specify the number of bathrooms."
+        surface:
+            notBlank: "Please specify the property surface area."
+        phoneNumber:
+            notBlank: "Please enter your phone number."
+        email:
+            notBlank: "Please enter your email address."
 resetPassword:
     empty: "Please enter a password."
     minLength: "Your password should be at least {{ limit }} characters."

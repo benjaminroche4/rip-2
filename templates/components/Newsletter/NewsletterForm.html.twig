@@ -1,4 +1,7 @@
-{{ form_start(newsletterForm, {'attr': {'novalidate': 'novalidate'}}) }}
+{# @prop form  Symfony form view (NewsletterType) #}
+{%- props form -%}
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
     {% for message in app.flashes('newsletterSuccess') %}
         <div role="status" aria-live="polite" class="rounded-xl bg-green-50 p-4 mb-5">
             <div class="flex items-start gap-x-3">
@@ -13,27 +16,8 @@
         </div>
     {% endfor %}
 
-    {% set newsletterErrors = newsletterForm.vars.errors|merge(newsletterForm.email.vars.errors|default([])) %}
-    {% if newsletterErrors|length > 0 %}
-        <div data-controller="scroll-into-view" data-scroll-into-view-block-value="center" role="alert" aria-live="assertive" class="scroll-mt-6 rounded-xl bg-red-50 p-4 mb-5">
-            <div class="flex items-start gap-x-3">
-                <div class="flex-shrink-0" aria-hidden="true">
-                    {{ ux_icon('lucide:circle-x', {'class':'text-red-600 size-5'}) }}
-                </div>
-                <div class="space-y-0.5">
-                    <h3 class="text-base font-medium text-red-800 -mt-0.5">{{ 'newsletter.form.error.title'|trans }}</h3>
-                    <div class="text-sm text-slate-600">
-                        {% for error in newsletterErrors %}
-                            <p>{{ error.message }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-
     <div class="flex items-center gap-x-0.5">
-        {{ form_label(newsletterForm.email, null, {
+        {{ form_label(form.email, null, {
             'label_attr': {
                 'class': 'block text-sm/6 font-semibold text-gray-900'
             }
@@ -41,11 +25,14 @@
         <span class="text-red-600" aria-hidden="true">*</span>
     </div>
     <div class="mt-2 flex flex-col sm:flex-row gap-2">
-        {{ form_widget(newsletterForm.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans, 'aria-required': 'true', 'aria-invalid': newsletterForm.email.vars.errors|length > 0 ? 'true' : 'false' }}) }}
+        {{ form_widget(form.email, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'newsletter.form.email.placeholder'|trans, 'aria-required': 'true', 'aria-invalid': form.email.vars.errors|length > 0 ? 'true' : 'false' }}) }}
         <twig:Button variant="default" size="lg" class="md:h-auto cursor-pointer">
             {{ 'newsletter.form.button'|trans }}
         </twig:Button>
     </div>
+    {% for error in form.email.vars.errors %}
+        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+    {% endfor %}
     <div class="mt-5 flex items-center gap-x-2">
         <img
             src="{{ asset('medias/team/team_1.webp') }}"
@@ -59,7 +46,7 @@
             {{ 'newsletter.nextNewsletter'|trans({'%date%': format_next_monday(app.request.locale) })|raw }}
         </p>
     </div>
-{{ form_end(newsletterForm) }}
+{{ form_end(form) }}
 <div class="flex justify-center pt-2">
     <div class="flex items-center gap-x-3 text-sm text-neutral-600 bg-gray-50 px-4 py-2 rounded-lg text-sm">
         {{ ux_icon('heroicons:bell-alert', {'class':'size-5 shrink-0'}) }}
