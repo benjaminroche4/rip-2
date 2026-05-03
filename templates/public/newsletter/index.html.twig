@@ -31,7 +31,7 @@
 
                 {% set newsletterErrors = newsletterForm.vars.errors|merge(newsletterForm.email.vars.errors|default([])) %}
                 {% if newsletterErrors|length > 0 %}
-                    <div role="alert" aria-live="assertive" class="rounded-xl bg-red-50 p-4 mb-5">
+                    <div data-controller="scroll-into-view" data-scroll-into-view-block-value="center" role="alert" aria-live="assertive" class="scroll-mt-6 rounded-xl bg-red-50 p-4 mb-5">
                         <div class="flex items-start gap-x-3">
                             <div class="flex-shrink-0" aria-hidden="true">
                                 {{ ux_icon('lucide:circle-x', {'class':'text-red-600 size-5'}) }}
@@ -62,9 +62,6 @@
                         {{ 'newsletter.form.button'|trans }}
                     </twig:Button>
                 </div>
-                {% for error in newsletterForm.email.vars.errors %}
-                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
-                {% endfor %}
                 <div class="mt-5 flex items-center gap-x-2">
                     <img
                         src="{{ asset('medias/team/team_1.webp') }}"
