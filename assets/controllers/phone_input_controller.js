@@ -1,4 +1,3 @@
-/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
 import intlTelInput from 'intl-tel-input';
 import 'intl-tel-input/css';
@@ -11,6 +10,10 @@ export default class extends Controller {
 
     connect() {
         if (!this.hasInputTarget) {
+            return;
+        }
+
+        if (this.inputTarget.closest('.iti')) {
             return;
         }
 
