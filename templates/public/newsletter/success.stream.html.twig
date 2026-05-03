@@ -1,0 +1,24 @@
+<turbo-stream action="replace" target="newsletter-form">
+    <template>
+        <div id="newsletter-form" data-controller="scroll-into-view" data-scroll-into-view-block-value="center" class="scroll-mt-6 w-full mx-auto space-y-6" role="status" aria-live="polite">
+            <div class="rounded-xl bg-green-50 p-6">
+                <div class="flex items-start gap-x-3">
+                    <div class="flex-shrink-0" aria-hidden="true">
+                        {{ ux_icon('lucide:circle-check', {'class':'text-green-600 size-6'}) }}
+                    </div>
+                    <div class="space-y-1">
+                        <h2 class="text-lg font-medium text-green-800">{{ 'newsletter.form.success.title'|trans }}</h2>
+                        <p class="text-sm text-slate-600">{{ 'newsletter.form.success.text'|trans }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <div class="flex items-center gap-x-3 text-sm text-neutral-600 bg-gray-50 px-4 py-2 rounded-lg">
+                    {{ ux_icon('heroicons:bell-alert', {'class':'size-5 shrink-0'}) }}
+                    <p class="font-light">{{ 'newsletter.noSpam'|trans }}</p>
+                </div>
+            </div>
+        </div>
+    </template>
+</turbo-stream>

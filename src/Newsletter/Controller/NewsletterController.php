@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\Turbo\TurboBundle;
 
 final class NewsletterController extends AbstractController
 {
@@ -77,6 +78,14 @@ final class NewsletterController extends AbstractController
                                 'email' => $newsletter->getEmail(),
                             ]);
                         }*/
+
+            if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+                $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+                return $this->render('public/newsletter/success.stream.html.twig', [
+                    'success' => $newsletter,
+                ]);
+            }
 
             $this->addFlash('newsletterSuccess', $this->translator->trans('newsletter.form.success.title'));
 
