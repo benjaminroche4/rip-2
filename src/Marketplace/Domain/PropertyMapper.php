@@ -67,7 +67,28 @@ final class PropertyMapper
             tags: $this->toNullableArray($row['tags'] ?? null),
             internalNotes: $this->toNullableString($row['internalNotes'] ?? null),
             description: $row['description'] ?? null,
-            alternateProperty: $this->toNullableArray($row['alternateProperty'] ?? null),
+            alternateProperty: $this->buildAlternateProperty($row['alternateProperty'] ?? null),
+        );
+    }
+
+    /**
+     * Builds a partial Property DTO for the alternate-locale version.
+     * Only the fields needed to generate the alternate URL are populated
+     * (slug, title, listingTypeName, propertyTypeName, address).
+     */
+    private function buildAlternateProperty(mixed $row): ?Property
+    {
+        if (!is_array($row) || [] === $row) {
+            return null;
+        }
+
+        return new Property(
+            id: (string) ($row['_key'] ?? ''),
+            title: $this->toNullableString($row['title'] ?? null),
+            slug: $this->toNullableString($row['slug'] ?? null),
+            listingTypeName: $this->toNullableString($row['listingTypeName'] ?? null),
+            propertyTypeName: $this->toNullableString($row['propertyTypeName'] ?? null),
+            address: $this->toNullableArray($row['address'] ?? null),
         );
     }
 

@@ -6,9 +6,9 @@ namespace App\Marketplace\Domain;
  * Typed snapshot of a Sanity property document.
  *
  * Top-level fields are typed; sub-objects (address, mainPhoto, photos,
- * location, agent, tenant, faq, extraFees, alternateProperty) stay as
- * arrays for now — promoting them to DTOs is a follow-up if their schema
- * stabilizes. Twig still accesses them with `property.address.city` etc.
+ * location, agent, tenant, faq, extraFees) stay as arrays for now —
+ * promoting them to DTOs is a follow-up if their schema stabilizes.
+ * Twig still accesses them with `property.address.city` etc.
  *
  * Field names mirror the GROQ projection in PropertyRepository::PROPERTY_PROJECTION
  * so templates can keep using the same dotted accessors.
@@ -79,8 +79,7 @@ final readonly class Property
         public ?array $tags = null,
         public ?string $internalNotes = null,
         public mixed $description = null,
-        /** @var array<string, mixed>|null */
-        public ?array $alternateProperty = null,
+        public ?self $alternateProperty = null,
     ) {
     }
 
