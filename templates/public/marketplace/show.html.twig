@@ -293,6 +293,8 @@
                             wheelchairAccess: { icon: 'iconoir:accessibility', label: 'marketplace.show.equipment.wheelchairAccess'|trans },
                             bikeStorage: { icon: 'iconoir:bicycle', label: 'marketplace.show.equipment.bikeStorage'|trans },
                             workspace: { icon: 'fluent:desk-48-regular', label: 'marketplace.show.equipment.workspace'|trans },
+                            gym: { icon: 'mdi:dumbbell', label: 'marketplace.show.equipment.gym'|trans },
+                            pool: { icon: 'mdi:pool', label: 'marketplace.show.equipment.pool'|trans },
                         } %}
                         {% set exposureMap = {
                             north: 'marketplace.show.exposure.north'|trans,
@@ -325,17 +327,33 @@
                                         <p>{{ 'marketplace.show.building.renovation'|trans }} {{ property.renovationYear }}</p>
                                     </div>
                                 {% endif %}
-                                {% if property.exposure is defined and property.exposure and exposureMap[property.exposure] is defined %}
-                                    <div class="flex items-center gap-2">
-                                        {{ ux_icon('iconoir:compass', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ 'marketplace.show.exposure.label'|trans }} {{ exposureMap[property.exposure] }}</p>
-                                    </div>
+                                {% if property.exposure is defined and property.exposure %}
+                                    {% set _exposureLabels = [] %}
+                                    {% for value in property.exposure %}
+                                        {% if exposureMap[value] is defined %}
+                                            {% set _exposureLabels = _exposureLabels|merge([exposureMap[value]]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if _exposureLabels is not empty %}
+                                        <div class="flex items-center gap-2">
+                                            {{ ux_icon('iconoir:compass', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                            <p>{{ 'marketplace.show.exposure.label'|trans }} {{ _exposureLabels|join(', ') }}</p>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
-                                {% if property.view is defined and property.view and viewMap[property.view] is defined %}
-                                    <div class="flex items-center gap-2">
-                                        {{ ux_icon('iconoir:eye', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ 'marketplace.show.view.label'|trans }} {{ viewMap[property.view]|lower }}</p>
-                                    </div>
+                                {% if property.view is defined and property.view %}
+                                    {% set _viewLabels = [] %}
+                                    {% for value in property.view %}
+                                        {% if viewMap[value] is defined %}
+                                            {% set _viewLabels = _viewLabels|merge([viewMap[value]|lower]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if _viewLabels is not empty %}
+                                        <div class="flex items-center gap-2">
+                                            {{ ux_icon('iconoir:eye', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
+                                            <p>{{ 'marketplace.show.view.label'|trans }} {{ _viewLabels|join(', ') }}</p>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                                 {% for key, info in equipmentMap %}
                                     {% if property.equipment[key]|default(false) %}

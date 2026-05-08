@@ -1357,6 +1357,8 @@ marketplace:
             wheelchairAccess: Accès PMR
             bikeStorage: Local vélo
             workspace: Espace de travail
+            gym: Salle de sport
+            pool: Piscine
         exposure:
             label: Exposition
             north: Nord

@@ -1356,6 +1356,8 @@ marketplace:
             wheelchairAccess: Wheelchair access
             bikeStorage: Bike storage
             workspace: Workspace
+            gym: Gym
+            pool: Swimming pool
         exposure:
             label: Exposure
             north: North

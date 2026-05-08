@@ -57,8 +57,10 @@ final readonly class Property
         public ?array $equipment = null,
         public ?int $floor = null,
         public ?int $totalFloors = null,
-        public ?string $exposure = null,
-        public ?string $view = null,
+        /** @var array<int, string>|null */
+        public ?array $exposure = null,
+        /** @var array<int, string>|null */
+        public ?array $view = null,
         public ?int $constructionYear = null,
         public ?int $renovationYear = null,
         /** @var array<int, array<string, mixed>>|null */
