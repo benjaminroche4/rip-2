@@ -64,14 +64,14 @@
                                 </div>
                                 <div class="space-y-1.5">
                                     <div class="flex items-center gap-2 text-xs">
-                                        <span class="w-16 shrink-0 text-gray-500">{{ 'admin.dashboard.kpi.currentLabel'|trans }}</span>
+                                        <span class="w-16 shrink-0 text-gray-500">{{ kpi.currentLabel ?? 'admin.dashboard.kpi.currentLabel'|trans }}</span>
                                         <div class="h-1.5 grow overflow-hidden rounded-full bg-gray-100">
                                             <div class="h-full rounded-full bg-gray-700 w-(--bar-pct)" style="--bar-pct: {{ _curPct }}%"></div>
                                         </div>
                                         <p class="w-10 shrink-0 text-right text-xs tabular-nums text-gray-700">{{ kpi.value }}</p>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs">
-                                        <span class="w-16 shrink-0 text-gray-500">{{ 'admin.dashboard.kpi.previousLabel'|trans }}</span>
+                                        <span class="w-16 shrink-0 text-gray-500">{{ kpi.previousLabel ?? 'admin.dashboard.kpi.previousLabel'|trans }}</span>
                                         <div class="h-1.5 grow overflow-hidden rounded-full bg-gray-100">
                                             <div class="h-full rounded-full bg-gray-300 w-(--bar-pct)" style="--bar-pct: {{ _prevPct }}%"></div>
                                         </div>
@@ -162,6 +162,29 @@
                             data-chart-labels-value="{{ allTimeChartLabels|json_encode }}"
                             data-chart-series-value="{{ allTimeChartSeries|json_encode }}"
                             data-testid="contacts-all-time-chart"
+                        ></canvas>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {% if weekdayChartSeries|length > 0 %}
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
+                    <div class="px-3 pt-3 pb-5">
+                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.dashboard.contactsWeekdays.title'|trans }}
+                        </h3>
+                        <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                            {{ 'admin.dashboard.contactsWeekdays.subtitle'|trans }}
+                        </p>
+                    </div>
+                    <div class="h-80 px-3 pt-5 pb-3">
+                        <canvas
+                            data-controller="chart-bars"
+                            data-chart-bars-labels-value="{{ weekdayChartLabels|json_encode }}"
+                            data-chart-bars-series-value="{{ weekdayChartSeries|json_encode }}"
+                            data-testid="contacts-weekday-chart"
                         ></canvas>
                     </div>
                 </div>

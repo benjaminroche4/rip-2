@@ -18,10 +18,20 @@ final class AdminKpiBuilder
      * neutral (no comparison data available — e.g. periods that fall
      * outside our reporting window).
      *
-     * @return array{title:string, period:string, value:int, previous:?int, deltaPercent:?int, trend:'up'|'down'|'neutral'}
+     * $currentLabel/$previousLabel let callers override the bar labels
+     * (e.g. "Mai" / "Avril" instead of the generic "Actuel" / "Précédent").
+     * When null, templates fall back to the shared translation keys.
+     *
+     * @return array{title:string, period:string, value:int, previous:?int, deltaPercent:?int, trend:'up'|'down'|'neutral', currentLabel:?string, previousLabel:?string}
      */
-    public function build(string $title, string $period, int $current, ?int $previous): array
-    {
+    public function build(
+        string $title,
+        string $period,
+        int $current,
+        ?int $previous,
+        ?string $currentLabel = null,
+        ?string $previousLabel = null,
+    ): array {
         $trend = 'neutral';
         $deltaPercent = null;
 
@@ -43,6 +53,8 @@ final class AdminKpiBuilder
             'previous' => $previous,
             'deltaPercent' => $deltaPercent,
             'trend' => $trend,
+            'currentLabel' => $currentLabel,
+            'previousLabel' => $previousLabel,
         ];
     }
 }

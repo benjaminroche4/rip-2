@@ -92,6 +92,25 @@ class ContactRepository extends ServiceEntityRepository
     }
 
     /**
+     * Returns the total contact count distributed across the 7 weekdays
+     * (1=Monday, 7=Sunday — ISO 8601). Reuses countByDayAllTime() so this
+     * is essentially free; lets callers spot which weekday brings the most
+     * contacts across the whole project history.
+     *
+     * @return array<int, int>
+     */
+    public function countByWeekdayAllTime(): array
+    {
+        $byWeekday = array_fill_keys(range(1, 7), 0);
+        foreach ($this->countByDayAllTime() as $row) {
+            $weekday = (int) (new \DateTimeImmutable($row['date']))->format('N');
+            $byWeekday[$weekday] += $row['count'];
+        }
+
+        return $byWeekday;
+    }
+
+    /**
      * Returns the count of contact requests grouped by Y-m-d for the
      * [$from, $to) window. Result is keyed by the date string so the caller
      * can do O(1) lookups when stitching together a calendar view.

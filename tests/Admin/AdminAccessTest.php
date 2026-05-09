@@ -128,8 +128,9 @@ final class AdminAccessTest extends WebTestCase
         // KPI grid: 4 cards (calls 7d, contacts 7d, leads month, leads 12m).
         self::assertCount(4, $crawler->filter('[data-testid="kpi-grid"] > article'));
 
-        // No contacts in DB (cleared in setUp) → all-time chart section is hidden.
+        // No contacts in DB (cleared in setUp) → all-time + weekday chart sections are hidden.
         self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-all-time-chart"]'));
+        self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-weekday-chart"]'));
 
         // No STRIPE_SECRET_KEY in .env.test → repo returns []  →  payments
         // chart section is hidden. Confirms the graceful-degradation path.

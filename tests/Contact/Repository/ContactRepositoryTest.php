@@ -120,6 +120,29 @@ final class ContactRepositoryTest extends KernelTestCase
         self::assertSame(0, $series[3]['count']);
     }
 
+    public function testCountByWeekdayAllTimeAggregatesAcrossWeekdays(): void
+    {
+        // Pick a known Monday to anchor the assertions deterministically.
+        $monday = new \DateTimeImmutable('2024-01-01 12:00:00'); // ISO Monday
+        $tuesday = $monday->modify('+1 day');
+        $sunday = $monday->modify('+6 days');
+
+        $this->persistContact($monday);
+        $this->persistContact($monday);
+        $this->persistContact($tuesday);
+        $this->persistContact($sunday);
+        $this->em->flush();
+
+        $byWeekday = $this->repository->countByWeekdayAllTime();
+
+        // All 7 ISO weekday slots present, days without contacts are 0.
+        self::assertCount(7, $byWeekday);
+        self::assertSame(2, $byWeekday[1]); // Monday
+        self::assertSame(1, $byWeekday[2]); // Tuesday
+        self::assertSame(0, $byWeekday[3]);
+        self::assertSame(1, $byWeekday[7]); // Sunday
+    }
+
     private function persistContact(\DateTimeImmutable $createdAt): void
     {
         $contact = (new Contact())

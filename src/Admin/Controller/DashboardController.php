@@ -108,6 +108,20 @@ final class DashboardController extends AbstractController
         );
         $allTimeChartData = array_map(static fn (array $row): int => $row['count'], $contactsAllTime);
 
+        // Weekday distribution (Monday → Sunday across all history) for
+        // the contact form. Reuses the daily series cached by the repo.
+        $contactsByWeekday = $this->contactRepository->countByWeekdayAllTime();
+        $weekdayLabels = $this->buildWeekdayLabels($locale);
+        $weekdayContactsData = [];
+        $weekdayContactsHasData = false;
+        for ($i = 1; $i <= 7; ++$i) {
+            $count = $contactsByWeekday[$i] ?? 0;
+            $weekdayContactsData[] = $count;
+            if ($count > 0) {
+                $weekdayContactsHasData = true;
+            }
+        }
+
         $contactsThisMonth = end($contactsCounts) ?: 0;
         $contactsLastMonth = $contactsCounts[\count($contactsCounts) - 2] ?? 0;
         $callsThisMonth = end($callsCounts) ?: 0;
@@ -144,16 +158,20 @@ final class DashboardController extends AbstractController
             ),
             $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.leadsThisMonth'),
-                period: $this->formatMonthLabel($today, $locale),
+                period: $this->translator->trans('admin.dashboard.kpi.period.thisMonthLeads', [
+                    '%month%' => $this->formatMonthLabel($today, $locale),
+                ]),
                 current: $contactsThisMonth + $callsThisMonth,
                 previous: $contactsLastMonth + $callsLastMonth,
+                currentLabel: $this->formatMonthNameLabel($today, $locale),
+                previousLabel: $this->formatMonthNameLabel($today->modify('first day of this month')->modify('-1 month'), $locale),
             ),
             // Calls API caps at 12 months → no 24-month comparison possible,
             // so this card stays neutral. Renders as a "two stats with
             // divider" (12-month total + year-to-date) in the template.
             $this->kpiBuilder->build(
-                title: $this->translator->trans('admin.dashboard.kpi.leadsLast12Months'),
-                period: $this->translator->trans('admin.dashboard.kpi.period.summary'),
+                title: $this->translator->trans('admin.dashboard.kpi.period.summary'),
+                period: $this->translator->trans('admin.dashboard.kpi.leadsLast12Months'),
                 current: array_sum($contactsCounts) + array_sum($callsCounts),
                 previous: null,
             ),
@@ -185,13 +203,13 @@ final class DashboardController extends AbstractController
                     'label' => $this->translator->trans('admin.dashboard.weekVsWeek.previousWeekLabel'),
                     'data' => $previousWeekData,
                     'color' => '#9333ea',
-                    'fillColor' => '#faf5ff',
+                    'fillColor' => 'rgba(147, 51, 234, 0.1)',
                 ],
                 [
                     'label' => $this->translator->trans('admin.dashboard.weekVsWeek.currentWeekLabel'),
                     'data' => $currentWeekData,
                     'color' => '#16a34a',
-                    'fillColor' => '#f0fdf4',
+                    'fillColor' => 'rgba(22, 163, 74, 0.1)',
                 ],
             ],
             'allTimeChartLabels' => $allTimeChartLabels,
@@ -203,6 +221,15 @@ final class DashboardController extends AbstractController
                     'fillColor' => 'rgba(113, 23, 46, 0.1)',
                 ],
             ],
+            'weekdayChartLabels' => $weekdayLabels,
+            'weekdayChartSeries' => $weekdayContactsHasData ? [
+                [
+                    'label' => $this->translator->trans('admin.dashboard.contactsWeekdays.seriesLabel'),
+                    'data' => $weekdayContactsData,
+                    'color' => '#14b8a6',
+                    'fillColor' => 'rgba(20, 184, 166, 0.1)',
+                ],
+            ] : [],
             'kpis' => $kpis,
         ]);
     }
@@ -282,6 +309,13 @@ final class DashboardController extends AbstractController
         return ucfirst($formatter->format($date) ?: '');
     }
 
+    private function formatMonthNameLabel(\DateTimeImmutable $date, string $locale): string
+    {
+        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM');
+
+        return ucfirst($formatter->format($date) ?: '');
+    }
+
     private function formatYmLabel(string $ym, string $locale): string
     {
         $date = \DateTimeImmutable::createFromFormat('!Y-m', $ym);
@@ -305,6 +339,25 @@ final class DashboardController extends AbstractController
         $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'd MMM yyyy');
 
         return ucfirst(rtrim((string) $formatter->format($date), '.'));
+    }
+
+    /**
+     * Returns localized full weekday names from Monday to Sunday (ISO order).
+     * Anchored on a known Monday so we don't depend on the current date.
+     *
+     * @return list<string>
+     */
+    private function buildWeekdayLabels(string $locale): array
+    {
+        $reference = new \DateTimeImmutable('2024-01-01'); // ISO Monday
+        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE');
+
+        $labels = [];
+        for ($i = 0; $i < 7; ++$i) {
+            $labels[] = ucfirst((string) $formatter->format($reference->modify('+'.$i.' days')));
+        }
+
+        return $labels;
     }
 
     /**

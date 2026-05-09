@@ -113,7 +113,7 @@
         {# ── 12-month chart (toutes activités confondues) ───────────── #}
         {% if monthlyChartSeries|length > 0 %}
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
-                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
                         <h3 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.monthly.title'|trans }}
@@ -148,8 +148,8 @@
                                 {{ 'admin.payments.charts.weekly.subtitle'|trans }}
                             </p>
                         </div>
-                        <p class="shrink-0 text-2xl font-medium tabular-nums text-gray-900" data-testid="payments-weekly-current">
-                            {{ thisWeekAmount|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
+                        <p class="shrink-0 text-sm font-medium tracking-wide text-gray-500 uppercase tabular-nums" data-testid="payments-weekly-current">
+                            {{ 'admin.payments.kpi.period.thisWeek'|trans({'%number%': thisWeekNumber}) }}
                         </p>
                     </div>
                     <div class="h-80 px-3 pt-5 pb-3">
@@ -168,7 +168,7 @@
         {# ── All-time daily chart (paiements depuis le début) ──────── #}
         {% if allTimeChartSeries|length > 0 %}
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
-                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
                         <h3 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.allTime.title'|trans }}
@@ -193,7 +193,7 @@
         {# ── Weekday distribution (Lun → Dim, all-time) ─────────────── #}
         {% if weekdayChartSeries|length > 0 %}
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
-                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
                         <h3 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.weekdays.title'|trans }}

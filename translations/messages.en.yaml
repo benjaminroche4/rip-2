@@ -1514,13 +1514,14 @@ admin:
         kpi:
             callsLast7d: Calls received
             contactsLast7d: Contact requests
-            leadsThisMonth: Total leads
+            leadsThisMonth: Current month
             leadsLast12Months: Total leads
             thisYear: 'Year %year%'
             period:
                 last7d: Last 7 days
                 last12m: Last 12 months
                 summary: Summary
+                thisMonthLeads: '%month%, total leads'
             previousLabel: Previous
             currentLabel: Current
         activity:
@@ -1537,6 +1538,10 @@ admin:
             title: Contact requests since launch
             subtitle: All contact form requests, by day
             seriesLabel: Requests
+        contactsWeekdays:
+            title: Best days of the week
+            subtitle: Contact form requests, since launch
+            seriesLabel: Total requests
     payments:
         title: Payments
         section:
