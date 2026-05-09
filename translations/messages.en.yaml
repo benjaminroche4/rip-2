@@ -1518,6 +1518,8 @@ admin:
             period:
                 last7d: Last 7 days
                 last12m: Last 12 months
+            previousLabel: Previous
+            currentLabel: Current
         activity:
             title: Commercial activity
             subtitle: Form requests and calls over the last 12 months

@@ -1519,6 +1519,8 @@ admin:
             period:
                 last7d: 7 derniers jours
                 last12m: 12 derniers mois
+            previousLabel: Précédent
+            currentLabel: Actuel
         activity:
             title: Activité commerciale
             subtitle: Demandes formulaire et appels sur les 12 derniers mois
