@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
+use App\Admin\Domain\ChartPalette;
 use App\Admin\Repository\AdminUserRepository;
 use App\Admin\Repository\CallRepository;
+use App\Admin\Service\AdminDateFormatter;
 use App\Admin\Service\AdminKpiBuilder;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,6 +43,7 @@ final class DashboardController extends AbstractController
         private readonly CallRepository $callRepository,
         private readonly AdminUserRepository $adminUserRepository,
         private readonly AdminKpiBuilder $kpiBuilder,
+        private readonly AdminDateFormatter $dateFormatter,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -60,7 +63,7 @@ final class DashboardController extends AbstractController
         $callsCounts = array_map(static fn (array $row): int => $row['count'], $callsByMonth);
 
         $chartLabels = array_map(
-            fn (array $row): string => $this->formatYmLabel($row['ym'], $locale),
+            fn (array $row): string => $this->dateFormatter->ymLabel($row['ym'], $locale),
             $contactsByMonth,
         );
 
@@ -93,7 +96,7 @@ final class DashboardController extends AbstractController
             $currentDay = $currentWeekStart->modify('+'.$i.' days');
             $previousDay = $previousWeekStart->modify('+'.$i.' days');
 
-            $weekDayLabels[] = $this->formatWeekdayLabel($currentDay, $locale);
+            $weekDayLabels[] = $this->dateFormatter->weekdayLabel($currentDay, $locale);
             $currentWeekData[] = $contactsByDayWeeks[$currentDay->format('Y-m-d')] ?? 0;
             $previousWeekData[] = $contactsByDayWeeks[$previousDay->format('Y-m-d')] ?? 0;
         }
@@ -103,7 +106,7 @@ final class DashboardController extends AbstractController
         // section in that case so we don't render an empty chart.
         $contactsAllTime = $this->contactRepository->countByDayAllTime();
         $allTimeChartLabels = array_map(
-            fn (array $row): string => $this->formatDayLabel(new \DateTimeImmutable($row['date']), $locale),
+            fn (array $row): string => $this->dateFormatter->dayLabel(new \DateTimeImmutable($row['date']), $locale),
             $contactsAllTime,
         );
         $allTimeChartData = array_map(static fn (array $row): int => $row['count'], $contactsAllTime);
@@ -111,7 +114,7 @@ final class DashboardController extends AbstractController
         // Weekday distribution (Monday → Sunday across all history) for
         // the contact form. Reuses the daily series cached by the repo.
         $contactsByWeekday = $this->contactRepository->countByWeekdayAllTime();
-        $weekdayLabels = $this->buildWeekdayLabels($locale);
+        $weekdayLabels = $this->dateFormatter->weekdayNames($locale);
         $weekdayContactsData = [];
         $weekdayContactsHasData = false;
         for ($i = 1; $i <= 7; ++$i) {
@@ -159,12 +162,12 @@ final class DashboardController extends AbstractController
             $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.leadsThisMonth'),
                 period: $this->translator->trans('admin.dashboard.kpi.period.thisMonthLeads', [
-                    '%month%' => $this->formatMonthLabel($today, $locale),
+                    '%month%' => $this->dateFormatter->monthLabel($today, $locale),
                 ]),
                 current: $contactsThisMonth + $callsThisMonth,
                 previous: $contactsLastMonth + $callsLastMonth,
-                currentLabel: $this->formatMonthNameLabel($today, $locale),
-                previousLabel: $this->formatMonthNameLabel($today->modify('first day of this month')->modify('-1 month'), $locale),
+                currentLabel: $this->dateFormatter->monthName($today, $locale),
+                previousLabel: $this->dateFormatter->monthName($today->modify('first day of this month')->modify('-1 month'), $locale),
             ),
             // Calls API caps at 12 months → no 24-month comparison possible,
             // so this card stays neutral. Renders as a "two stats with
@@ -179,7 +182,7 @@ final class DashboardController extends AbstractController
 
         return $this->render('admin/dashboard/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'todayLabel' => $this->formatToday($today, $locale),
+            'todayLabel' => $this->dateFormatter->today($today, $locale),
             'thisYearLeads' => $thisYearLeads,
             'thisYearLabel' => $today->format('Y'),
             'chartLabels' => $chartLabels,
@@ -187,14 +190,12 @@ final class DashboardController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.dashboard.activity.contactsLabel'),
                     'data' => $contactsCounts,
-                    'color' => '#71172e',
-                    'fillColor' => 'rgba(113, 23, 46, 0.1)',
+                    ...ChartPalette::PRIMARY,
                 ],
                 [
                     'label' => $this->translator->trans('admin.dashboard.activity.callsLabel'),
                     'data' => $callsCounts,
-                    'color' => '#2563eb',
-                    'fillColor' => 'rgba(37, 99, 235, 0.1)',
+                    ...ChartPalette::BLUE,
                 ],
             ],
             'weekChartLabels' => $weekDayLabels,
@@ -202,14 +203,12 @@ final class DashboardController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.dashboard.weekVsWeek.previousWeekLabel'),
                     'data' => $previousWeekData,
-                    'color' => '#9333ea',
-                    'fillColor' => 'rgba(147, 51, 234, 0.1)',
+                    ...ChartPalette::PURPLE,
                 ],
                 [
                     'label' => $this->translator->trans('admin.dashboard.weekVsWeek.currentWeekLabel'),
                     'data' => $currentWeekData,
-                    'color' => '#16a34a',
-                    'fillColor' => 'rgba(22, 163, 74, 0.1)',
+                    ...ChartPalette::GREEN,
                 ],
             ],
             'allTimeChartLabels' => $allTimeChartLabels,
@@ -217,8 +216,7 @@ final class DashboardController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.dashboard.contactsAllTime.seriesLabel'),
                     'data' => $allTimeChartData,
-                    'color' => '#71172e',
-                    'fillColor' => 'rgba(113, 23, 46, 0.1)',
+                    ...ChartPalette::PRIMARY,
                 ],
             ],
             'weekdayChartLabels' => $weekdayLabels,
@@ -226,20 +224,43 @@ final class DashboardController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.dashboard.contactsWeekdays.seriesLabel'),
                     'data' => $weekdayContactsData,
-                    'color' => '#14b8a6',
-                    'fillColor' => 'rgba(20, 184, 166, 0.1)',
+                    ...ChartPalette::TEAL,
                 ],
             ] : [],
             'kpis' => $kpis,
         ]);
     }
 
-    #[Route('/users', name: 'users', methods: ['GET'])]
+    #[Route(
+        path: [
+            'fr' => '/utilisateurs',
+            'en' => '/users',
+        ],
+        name: 'users',
+        methods: ['GET'],
+    )]
     public function users(string $adminPrefix): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
         return $this->render('admin/users/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/outils',
+            'en' => '/tools',
+        ],
+        name: 'tools',
+        methods: ['GET'],
+    )]
+    public function tools(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/tools/index.html.twig', [
             'adminPrefix' => $adminPrefix,
         ]);
     }
@@ -251,7 +272,10 @@ final class DashboardController extends AbstractController
      * working without poisoning bookmarks with a stale slug.
      */
     #[Route(
-        '/users/{uniqueId}/{slug}',
+        path: [
+            'fr' => '/utilisateurs/{uniqueId}/{slug}',
+            'en' => '/users/{uniqueId}/{slug}',
+        ],
         name: 'user_show',
         methods: ['GET'],
         requirements: [
@@ -293,71 +317,6 @@ final class DashboardController extends AbstractController
         }
 
         return $sum;
-    }
-
-    private function formatToday(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::FULL, \IntlDateFormatter::NONE);
-
-        return ucfirst($formatter->format($date) ?: '');
-    }
-
-    private function formatMonthLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM yyyy');
-
-        return ucfirst($formatter->format($date) ?: '');
-    }
-
-    private function formatMonthNameLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM');
-
-        return ucfirst($formatter->format($date) ?: '');
-    }
-
-    private function formatYmLabel(string $ym, string $locale): string
-    {
-        $date = \DateTimeImmutable::createFromFormat('!Y-m', $ym);
-        if (false === $date) {
-            return $ym;
-        }
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM yyyy');
-
-        return $formatter->format($date) ?: $ym;
-    }
-
-    private function formatWeekdayLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEE');
-
-        return ucfirst(rtrim((string) $formatter->format($date), '.'));
-    }
-
-    private function formatDayLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'd MMM yyyy');
-
-        return ucfirst(rtrim((string) $formatter->format($date), '.'));
-    }
-
-    /**
-     * Returns localized full weekday names from Monday to Sunday (ISO order).
-     * Anchored on a known Monday so we don't depend on the current date.
-     *
-     * @return list<string>
-     */
-    private function buildWeekdayLabels(string $locale): array
-    {
-        $reference = new \DateTimeImmutable('2024-01-01'); // ISO Monday
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE');
-
-        $labels = [];
-        for ($i = 0; $i < 7; ++$i) {
-            $labels[] = ucfirst((string) $formatter->format($reference->modify('+'.$i.' days')));
-        }
-
-        return $labels;
     }
 
     /**

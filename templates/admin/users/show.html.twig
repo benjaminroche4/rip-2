@@ -2,6 +2,14 @@
 
 {% set displayName = profile.fullName ?: profile.email %}
 {% set isAdmin = profile.primaryRole == 'admin' %}
+{% set authMethodKey = profile.hasGoogleAuth ? 'google' : 'password' %}
+{% set lastLoginValue = profile.lastLoginAt
+    ? profile.lastLoginAt|format_datetime('medium', 'short', locale=app.request.locale)
+    : 'admin.users.lastLoginNever'|trans %}
+{% set createdAtValue = profile.createdAt|format_date('long', locale=app.request.locale) %}
+{% set authMethodValue = ('admin.users.profile.authMethod.' ~ authMethodKey)|trans %}
+{% set ageDays = date('now').diff(profile.createdAt).days %}
+{% set idleDays = profile.lastLoginAt ? date('now').diff(profile.lastLoginAt).days : null %}
 
 {% block title %}{{ displayName }}{% endblock %}
 {% block page_title %}{{ displayName }}{% endblock %}
@@ -26,84 +34,77 @@
             </a>
         </header>
 
-        <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
-            <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-6">
-                <div class="flex items-start gap-5">
-                    {% if profile.avatarFilename %}
-                        <img
-                            src="{{ path('app_avatar', {filename: profile.avatarFilename}) }}"
-                            alt=""
-                            width="64"
-                            height="64"
-                            class="size-16 shrink-0 rounded-full object-cover"
-                        >
-                    {% else %}
-                        <div class="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
-                            {{ displayName|first|upper }}
-                        </div>
-                    {% endif %}
-                    <div class="min-w-0 flex-1">
-                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
-                            {{ displayName }}
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500">{{ profile.email }}</p>
-                        <div class="mt-3 flex flex-wrap gap-2">
-                            <twig:Badge variant="{{ isAdmin ? 'primary' : 'secondary' }}" class="rounded-full">
-                                {{ ('admin.users.role.' ~ profile.primaryRole)|trans }}
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <aside class="rounded-2xl border border-gray-950/5 bg-white p-2 lg:col-span-1">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 px-6 pt-8 pb-6 text-center">
+                    <twig:Avatar
+                        filename="{{ profile.avatarFilename }}"
+                        name="{{ displayName }}"
+                        size="24"
+                        class="mx-auto"
+                    />
+                    <h3 class="mt-5 text-lg font-semibold tracking-tight text-gray-900">{{ displayName }}</h3>
+                    <p class="mt-1 truncate text-sm text-gray-500">{{ profile.email }}</p>
+                    <div class="mt-4 flex flex-wrap justify-center gap-2">
+                        <twig:Badge variant="{{ isAdmin ? 'primary' : 'secondary' }}" class="rounded-full">
+                            {{ ('admin.users.role.' ~ profile.primaryRole)|trans }}
+                        </twig:Badge>
+                        {% if profile.language %}
+                            <twig:Badge variant="secondary" class="rounded-full">
+                                {{ profile.language.value|upper }}
                             </twig:Badge>
-                            {% if profile.language %}
-                                <twig:Badge variant="secondary" class="rounded-full">
-                                    {{ profile.language.value|upper }}
-                                </twig:Badge>
-                            {% endif %}
-                            {% if profile.isProfileComplete %}
-                                <twig:Badge variant="secondary" class="rounded-full">
-                                    {{ 'admin.users.profile.profileComplete.yes'|trans }}
-                                </twig:Badge>
-                            {% else %}
-                                <twig:Badge variant="secondary" class="rounded-full">
-                                    {{ 'admin.users.profile.profileComplete.no'|trans }}
-                                </twig:Badge>
-                            {% endif %}
+                        {% endif %}
+                        <twig:Badge variant="secondary" class="rounded-full">
+                            {{ profile.isProfileComplete ? 'admin.users.profile.profileComplete.yes'|trans : 'admin.users.profile.profileComplete.no'|trans }}
+                        </twig:Badge>
+                    </div>
+
+                    <dl class="mt-6 grid grid-cols-2 border-t border-gray-950/5 pt-6">
+                        <div class="pr-3 text-left">
+                            <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.accountAge'|trans }}</dt>
+                            <dd class="mt-1 text-sm font-medium tabular-nums text-gray-900">{{ 'admin.users.profile.stat.daysOld'|trans({'%count%': ageDays}) }}</dd>
                         </div>
+                        <div class="border-l border-gray-950/5 pl-3 text-left">
+                            <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.inactivity'|trans }}</dt>
+                            <dd class="mt-1 text-sm font-medium tabular-nums text-gray-900">
+                                {{ idleDays is null ? 'admin.users.profile.stat.neverLogged'|trans : 'admin.users.profile.stat.daysIdle'|trans({'%count%': idleDays}) }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </aside>
+
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2 lg:col-span-2">
+                <div class="divide-y divide-gray-950/5 rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
+                    <div class="p-6">
+                        <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.section.account'|trans }}</p>
+                        <dl class="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                            <div>
+                                <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.createdAt'|trans }}</dt>
+                                <dd class="mt-1 text-sm font-medium text-gray-900">{{ createdAtValue }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.lastLogin'|trans }}</dt>
+                                <dd class="mt-1 text-sm font-medium text-gray-900">{{ lastLoginValue }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <div class="p-6">
+                        <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.section.authentication'|trans }}</p>
+                        <dl class="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                            <div>
+                                <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.authMethod'|trans }}</dt>
+                                <dd class="mt-1 text-sm font-medium text-gray-900">{{ authMethodValue }}</dd>
+                            </div>
+                            <div class="min-w-0">
+                                <dt class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.users.profile.field.uniqueId'|trans }}</dt>
+                                <dd class="mt-1 truncate font-mono text-xs text-gray-700">{{ profile.uniqueId }}</dd>
+                            </div>
+                        </dl>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {% set authMethodKey = profile.hasGoogleAuth ? 'google' : 'password' %}
-            {% set lastLoginValue = profile.lastLoginAt
-                ? profile.lastLoginAt|format_datetime('medium', 'short', locale=app.request.locale)
-                : 'admin.users.lastLoginNever'|trans %}
-
-            {% set facts = [
-                {
-                    label: 'admin.users.profile.field.createdAt'|trans,
-                    value: profile.createdAt|format_date('long', locale=app.request.locale),
-                },
-                {
-                    label: 'admin.users.profile.field.lastLogin'|trans,
-                    value: lastLoginValue,
-                },
-                {
-                    label: 'admin.users.profile.field.authMethod'|trans,
-                    value: ('admin.users.profile.authMethod.' ~ authMethodKey)|trans,
-                },
-                {
-                    label: 'admin.users.profile.field.uniqueId'|trans,
-                    value: profile.uniqueId,
-                },
-            ] %}
-
-            {% for fact in facts %}
-                <article class="rounded-2xl border border-gray-950/5 bg-white p-2">
-                    <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
-                        <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ fact.label }}</p>
-                        <p class="mt-2 truncate font-medium text-gray-900">{{ fact.value }}</p>
-                    </div>
-                </article>
-            {% endfor %}
-        </section>
+            </section>
+        </div>
     </div>
 {% endblock %}

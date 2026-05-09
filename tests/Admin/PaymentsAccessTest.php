@@ -65,7 +65,7 @@ final class PaymentsAccessTest extends WebTestCase
 
     private function paymentsUrl(string $prefix): string
     {
-        return '/fr/'.$prefix.'/admin/payments';
+        return '/fr/'.$prefix.'/admin/paiements';
     }
 
     public function testAnonymousIsRedirectedToLogin(): void
@@ -124,7 +124,7 @@ final class PaymentsAccessTest extends WebTestCase
         $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorExists('aside a[href$="/admin/payments"]');
+        self::assertSelectorExists('aside a[href$="/admin/paiements"]');
     }
 
     private function loginAs(string $email): void

@@ -53,7 +53,7 @@ final class UserListTest extends KernelTestCase
         self::assertStringContainsString('admin@example.com', $html);
         // Each row exposes a profile link so the whole row is clickable.
         self::assertStringContainsString('data-testid="user-row-link"', $html);
-        self::assertStringContainsString('test_admin_prefix_1234567890abcdef/admin/users/', $html);
+        self::assertStringContainsString('test_admin_prefix_1234567890abcdef/admin/utilisateurs/', $html);
     }
 
     public function testMoreActionGrowsTheVisibleSet(): void

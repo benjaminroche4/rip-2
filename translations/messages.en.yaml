@@ -1494,13 +1494,17 @@ admin:
         dashboard: Dashboard
         users: Users
         payments: Payments
+        tools: Tools
         logout: Log out
+        skipToContent: Skip to main content
     sidebar:
+        label: Main navigation
         section:
             piloting: Piloting
             data: Data
             site: Public site
         nav:
+            label: Admin sections
             requests: Requests
             calls: Calls
             viewSite: View site
@@ -1581,6 +1585,8 @@ admin:
             title: Recent payments
             subtitle: '{0}No payments|{1}The last recorded payment|]1,Inf[The last %count% recorded payments'
             viewAll: View all in Stripe
+            loadMore: Load more
+            cappedHint: 'Showing the most recent 100 payments.'
             empty: No payments to show yet.
             unknownClient: Unknown client
             column:
@@ -1597,6 +1603,20 @@ admin:
             requires_confirmation: To confirm
             requires_capture: To capture
             canceled: Canceled
+    tools:
+        title: Tools
+        section:
+            overview: Productivity
+        welcome: Your tools
+        subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
+        documents:
+            title: Request documents
+            description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
+            cta: Send a request
+        comingSoon:
+            title: Coming soon
+            description: A new tool is in the works. Check back shortly.
+            badge: Soon
     users:
         section: Piloting
         title: Users
@@ -1620,11 +1640,24 @@ admin:
         profile:
             title: User profile
             backToList: Back to list
+            section:
+                identity: Identity
+                account: Account
+                authentication: Authentication
+                activity: Activity
             field:
                 createdAt: Joined on
                 lastLogin: Last login
                 authMethod: Sign-in method
                 uniqueId: Identifier
+                role: Role
+                language: Language
+                accountAge: Account age
+                inactivity: Last activity
+            stat:
+                daysOld: '{0}Joined today|{1}1 day|]1,Inf[%count% days'
+                daysIdle: '{0}Active today|{1}Yesterday|]1,Inf[%count% days ago'
+                neverLogged: Never signed in
             authMethod:
                 google: Google
                 password: Password

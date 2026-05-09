@@ -1495,13 +1495,17 @@ admin:
         dashboard: Tableau de bord
         users: Utilisateurs
         payments: Paiements
+        tools: Outils
         logout: Se déconnecter
+        skipToContent: Aller au contenu principal
     sidebar:
+        label: Navigation principale
         section:
             piloting: Pilotage
             data: Données
             site: Site public
         nav:
+            label: Sections de l'administration
             requests: Demandes
             calls: Appels
             viewSite: Voir le site
@@ -1582,6 +1586,8 @@ admin:
             title: Derniers paiements
             subtitle: '{0}Aucun paiement|{1}Le dernier paiement enregistré|]1,Inf[Les %count% derniers paiements enregistrés'
             viewAll: Voir tout sur Stripe
+            loadMore: Voir plus
+            cappedHint: 'Limite de 100 paiements affichée.'
             empty: Aucun paiement à afficher pour le moment.
             unknownClient: Client inconnu
             column:
@@ -1598,6 +1604,20 @@ admin:
             requires_confirmation: À confirmer
             requires_capture: À capturer
             canceled: Annulé
+    tools:
+        title: Outils
+        section:
+            overview: Productivité
+        welcome: Vos outils
+        subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
+        documents:
+            title: Demander des documents
+            description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
+            cta: Envoyer une demande
+        comingSoon:
+            title: Bientôt disponible
+            description: Un nouvel outil est en préparation. Reviens bientôt.
+            badge: À venir
     users:
         section: Pilotage
         title: Utilisateurs
@@ -1621,11 +1641,24 @@ admin:
         profile:
             title: Profil utilisateur
             backToList: Retour à la liste
+            section:
+                identity: Identité
+                account: Compte
+                authentication: Authentification
+                activity: Activité
             field:
                 createdAt: Inscrit le
                 lastLogin: Dernière connexion
                 authMethod: Méthode de connexion
                 uniqueId: Identifiant
+                role: Rôle
+                language: Langue
+                accountAge: Ancienneté
+                inactivity: Dernière activité
+            stat:
+                daysOld: '{0}Inscrit aujourd''hui|{1}1 jour|]1,Inf[%count% jours'
+                daysIdle: '{0}Connecté aujourd''hui|{1}Hier|]1,Inf[il y a %count% jours'
+                neverLogged: Jamais connecté
             authMethod:
                 google: Google
                 password: Mot de passe

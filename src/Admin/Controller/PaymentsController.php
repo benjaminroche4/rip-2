@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
+use App\Admin\Domain\ChartPalette;
 use App\Admin\Repository\StripePaymentRepository;
+use App\Admin\Service\AdminDateFormatter;
 use App\Admin\Service\AdminKpiBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -34,11 +36,19 @@ final class PaymentsController extends AbstractController
         private readonly string $adminPathPrefix,
         private readonly StripePaymentRepository $stripePaymentRepository,
         private readonly AdminKpiBuilder $kpiBuilder,
+        private readonly AdminDateFormatter $dateFormatter,
         private readonly TranslatorInterface $translator,
     ) {
     }
 
-    #[Route('/payments', name: 'payments', methods: ['GET'])]
+    #[Route(
+        path: [
+            'fr' => '/paiements',
+            'en' => '/payments',
+        ],
+        name: 'payments',
+        methods: ['GET'],
+    )]
     public function index(string $adminPrefix, Request $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
@@ -47,9 +57,11 @@ final class PaymentsController extends AbstractController
         $today = new \DateTimeImmutable('today');
 
         // ── Aggregate data fetches ─────────────────────────────────────
+        // The recent payments table itself is rendered by the
+        // <twig:Admin:PaymentList /> component, which fetches and paginates
+        // on its own. Here we only keep what the cards/charts above need.
         $allTime = $this->stripePaymentRepository->revenueAllTime();
         $monthly = $this->stripePaymentRepository->successfulRevenueByMonth(12);
-        $recent = $this->stripePaymentRepository->recentPayments(100);
         $dailyAllTime = $this->stripePaymentRepository->revenueByDayAllTime();
 
         // 4-week comparison: this month vs prior month, week-by-week.
@@ -60,8 +72,8 @@ final class PaymentsController extends AbstractController
         $weeklyMap = $this->stripePaymentRepository->successfulRevenueByWeek($weeklyFrom, $weeklyTo);
 
         // ── Currency resolution ────────────────────────────────────────
-        // Pick the first non-empty currency we see across data sources so
-        // the chart label is consistent with the cards.
+        // Pick the first non-empty currency we see across the aggregate
+        // sources so the chart labels stay consistent with the cards.
         $currency = $allTime->currency;
         if ('' === $currency) {
             foreach ($monthly as $bucket) {
@@ -70,9 +82,6 @@ final class PaymentsController extends AbstractController
                     break;
                 }
             }
-        }
-        if ('' === $currency && [] !== $recent) {
-            $currency = $recent[0]->currency;
         }
 
         // ── KPI cards ─────────────────────────────────────────────────
@@ -119,7 +128,7 @@ final class PaymentsController extends AbstractController
             ),
             $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.payments.kpi.thisMonth'),
-                period: $this->formatMonthLabel($today, $locale),
+                period: $this->dateFormatter->monthLabel($today, $locale),
                 current: (int) round($thisMonthAmount / 100),
                 previous: (int) round($lastMonthAmount / 100),
             ),
@@ -140,7 +149,7 @@ final class PaymentsController extends AbstractController
         $monthlyChartData = [];
         $monthlyHasData = false;
         foreach ($monthly as $bucket) {
-            $monthlyChartLabels[] = $this->formatYmLabel($bucket->ym, $locale);
+            $monthlyChartLabels[] = $this->dateFormatter->ymLabel($bucket->ym, $locale);
             $monthlyChartData[] = round($bucket->totalAmount / 100, 2);
             if ($bucket->totalAmount > 0) {
                 $monthlyHasData = true;
@@ -174,7 +183,7 @@ final class PaymentsController extends AbstractController
 
         // ── All-time daily chart (succeeded only, contiguous series) ───
         $allTimeChartLabels = array_map(
-            fn (array $row): string => $this->formatDayLabel(new \DateTimeImmutable($row['date']), $locale),
+            fn (array $row): string => $this->dateFormatter->dayLabel(new \DateTimeImmutable($row['date']), $locale),
             $dailyAllTime,
         );
         $allTimeChartData = array_map(static fn (array $row): float => round($row['amount'] / 100, 2), $dailyAllTime);
@@ -182,7 +191,7 @@ final class PaymentsController extends AbstractController
         // ── Weekday distribution (Monday → Sunday across all history) ──
         // Reuses the daily series above; no extra API call.
         $byWeekday = $this->stripePaymentRepository->successfulRevenueByWeekday();
-        $weekdayLabels = $this->buildWeekdayLabels($locale);
+        $weekdayLabels = $this->dateFormatter->weekdayNames($locale);
         $weekdayData = [];
         $weekdayHasData = false;
         for ($i = 1; $i <= 7; ++$i) {
@@ -193,24 +202,9 @@ final class PaymentsController extends AbstractController
             }
         }
 
-        // ── Table rows ─────────────────────────────────────────────────
-        $tableRows = array_map(function ($row) use ($locale): array {
-            return [
-                'id' => $row->id,
-                'status' => $row->status,
-                'statusLabel' => $this->translator->trans('admin.payments.status.'.$row->status),
-                'amount' => round($row->amount / 100, 2),
-                'currency' => $row->currency,
-                'currencySymbol' => $this->currencySymbol($row->currency),
-                'customerName' => $row->customerName,
-                'customerEmail' => $row->customerEmail,
-                'createdAtLabel' => $this->formatDateTimeLabel($row->createdAt, $locale),
-            ];
-        }, $recent);
-
         return $this->render('admin/payments/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'todayLabel' => $this->formatToday($today, $locale),
+            'todayLabel' => $this->dateFormatter->today($today, $locale),
             'currency' => $currency,
             'currencySymbol' => $currencySymbol,
             'thisYearAmount' => (int) round($thisYearAmount / 100),
@@ -221,8 +215,7 @@ final class PaymentsController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.payments.charts.monthly.seriesLabel'),
                     'data' => $monthlyChartData,
-                    'color' => '#0ea5e9',
-                    'fillColor' => 'rgba(14, 165, 233, 0.1)',
+                    ...ChartPalette::SKY,
                 ],
             ] : [],
             'allTimeChartLabels' => $allTimeChartLabels,
@@ -230,8 +223,7 @@ final class PaymentsController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.payments.charts.allTime.seriesLabel'),
                     'data' => $allTimeChartData,
-                    'color' => '#0ea5e9',
-                    'fillColor' => 'rgba(14, 165, 233, 0.1)',
+                    ...ChartPalette::SKY,
                 ],
             ],
             'weekdayChartLabels' => $weekdayLabels,
@@ -239,8 +231,7 @@ final class PaymentsController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.payments.charts.weekdays.seriesLabel'),
                     'data' => $weekdayData,
-                    'color' => '#10b981',
-                    'fillColor' => 'rgba(16, 185, 129, 0.1)',
+                    ...ChartPalette::EMERALD,
                 ],
             ] : [],
             'weeklyChartLabels' => $weekLabels,
@@ -249,19 +240,14 @@ final class PaymentsController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.payments.weekly.previousLabel'),
                     'data' => $weekPrevious,
-                    'color' => '#ec4899',
-                    'fillColor' => 'rgba(236, 72, 153, 0.1)',
+                    ...ChartPalette::PINK,
                 ],
                 [
                     'label' => $this->translator->trans('admin.payments.weekly.currentLabel'),
                     'data' => $weekCurrent,
-                    'color' => '#6366f1',
-                    'fillColor' => 'rgba(99, 102, 241, 0.1)',
+                    ...ChartPalette::INDIGO,
                 ],
             ] : [],
-            'tableRows' => $tableRows,
-            'tableEmpty' => [] === $tableRows,
-            'stripeDashboardUrl' => 'https://dashboard.stripe.com/payments',
         ]);
     }
 
@@ -270,64 +256,6 @@ final class PaymentsController extends AbstractController
         if (!hash_equals($this->adminPathPrefix, $adminPrefix)) {
             throw $this->createNotFoundException();
         }
-    }
-
-    private function formatToday(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::FULL, \IntlDateFormatter::NONE);
-
-        return ucfirst($formatter->format($date) ?: '');
-    }
-
-    private function formatMonthLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMMM yyyy');
-
-        return ucfirst($formatter->format($date) ?: '');
-    }
-
-    private function formatYmLabel(string $ym, string $locale): string
-    {
-        $date = \DateTimeImmutable::createFromFormat('!Y-m', $ym);
-        if (false === $date) {
-            return $ym;
-        }
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'MMM yyyy');
-
-        return $formatter->format($date) ?: $ym;
-    }
-
-    private function formatDateTimeLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'd MMM yyyy, HH:mm');
-
-        return $formatter->format($date) ?: $date->format('Y-m-d H:i');
-    }
-
-    private function formatDayLabel(\DateTimeImmutable $date, string $locale): string
-    {
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'd MMM yyyy');
-
-        return ucfirst(rtrim((string) $formatter->format($date), '.'));
-    }
-
-    /**
-     * Returns localized full weekday names from Monday to Sunday (ISO order).
-     * Anchored on a known Monday so we don't depend on the current date.
-     *
-     * @return list<string>
-     */
-    private function buildWeekdayLabels(string $locale): array
-    {
-        $reference = new \DateTimeImmutable('2024-01-01'); // ISO Monday
-        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEEE');
-
-        $labels = [];
-        for ($i = 0; $i < 7; ++$i) {
-            $labels[] = ucfirst((string) $formatter->format($reference->modify('+'.$i.' days')));
-        }
-
-        return $labels;
     }
 
     /**

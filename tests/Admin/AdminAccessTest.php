@@ -184,7 +184,7 @@ final class AdminAccessTest extends WebTestCase
     public function testAdminSeesUsersPage(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);
-        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/users');
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/utilisateurs');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Utilisateurs');
@@ -192,7 +192,7 @@ final class AdminAccessTest extends WebTestCase
 
         // Sidebar exposes the dashboard + users links under the piloting section.
         self::assertSelectorExists('aside a[href$="/admin"]');
-        self::assertSelectorExists('aside a[href$="/admin/users"]');
+        self::assertSelectorExists('aside a[href$="/admin/utilisateurs"]');
 
         // Two users seeded in setUp() → table rendered with 2 rows, both emails visible.
         $rows = $crawler->filter('[data-testid="users-table"] tbody tr');
@@ -212,7 +212,34 @@ final class AdminAccessTest extends WebTestCase
     public function testWrongPrefixOnUsersReturns404(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);
-        $this->client->request('GET', $this->adminUrl('00000000000000000000000000000000').'/users');
+        $this->client->request('GET', $this->adminUrl('00000000000000000000000000000000').'/utilisateurs');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAdminSeesToolsPage(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/outils');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Outils');
+        self::assertCount(1, $crawler->filter('[data-testid="tools-page"]'));
+        self::assertSelectorExists('aside a[href$="/admin/outils"]');
+    }
+
+    public function testNonAdminCannotSeeToolsPage(): void
+    {
+        $this->loginAs(self::USER_EMAIL);
+        $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/outils');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testWrongPrefixOnToolsReturns404(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->adminUrl('00000000000000000000000000000000').'/outils');
 
         self::assertResponseStatusCodeSame(404);
     }
@@ -222,7 +249,7 @@ final class AdminAccessTest extends WebTestCase
         $this->loginAs(self::ADMIN_EMAIL);
         $target = $this->findUser(self::USER_EMAIL);
 
-        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/test-user';
+        $url = $this->adminUrl($this->adminPrefix).'/utilisateurs/'.$target->getUniqueId().'/test-user';
         $crawler = $this->client->request('GET', $url);
 
         self::assertResponseIsSuccessful();
@@ -231,7 +258,7 @@ final class AdminAccessTest extends WebTestCase
         self::assertStringContainsString(self::USER_EMAIL, $crawler->filter('[data-testid="user-profile"]')->html());
 
         // Back link points at the list.
-        self::assertSelectorExists('[data-testid="user-profile"] a[href$="/admin/users"]');
+        self::assertSelectorExists('[data-testid="user-profile"] a[href$="/admin/utilisateurs"]');
     }
 
     public function testUserProfileRedirectsWhenSlugIsStale(): void
@@ -239,7 +266,7 @@ final class AdminAccessTest extends WebTestCase
         $this->loginAs(self::ADMIN_EMAIL);
         $target = $this->findUser(self::USER_EMAIL);
 
-        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/old-slug';
+        $url = $this->adminUrl($this->adminPrefix).'/utilisateurs/'.$target->getUniqueId().'/old-slug';
         $this->client->request('GET', $url);
 
         self::assertResponseStatusCodeSame(302);
@@ -251,7 +278,7 @@ final class AdminAccessTest extends WebTestCase
     {
         $this->loginAs(self::ADMIN_EMAIL);
         // Valid ULID format that doesn't match any persisted user.
-        $url = $this->adminUrl($this->adminPrefix).'/users/01HZZZZZZZZZZZZZZZZZZZZZZZ/anything';
+        $url = $this->adminUrl($this->adminPrefix).'/utilisateurs/01HZZZZZZZZZZZZZZZZZZZZZZZ/anything';
         $this->client->request('GET', $url);
 
         self::assertResponseStatusCodeSame(404);
@@ -261,7 +288,7 @@ final class AdminAccessTest extends WebTestCase
     {
         $this->loginAs(self::ADMIN_EMAIL);
         // Wrong shape (too short, includes excluded chars) → router doesn't match.
-        $url = $this->adminUrl($this->adminPrefix).'/users/not-a-ulid/whatever';
+        $url = $this->adminUrl($this->adminPrefix).'/utilisateurs/not-a-ulid/whatever';
         $this->client->request('GET', $url);
 
         self::assertResponseStatusCodeSame(404);
@@ -272,7 +299,7 @@ final class AdminAccessTest extends WebTestCase
         $this->loginAs(self::USER_EMAIL);
         $target = $this->findUser(self::USER_EMAIL);
 
-        $url = $this->adminUrl($this->adminPrefix).'/users/'.$target->getUniqueId().'/test-user';
+        $url = $this->adminUrl($this->adminPrefix).'/utilisateurs/'.$target->getUniqueId().'/test-user';
         $this->client->request('GET', $url);
 
         self::assertResponseStatusCodeSame(403);
