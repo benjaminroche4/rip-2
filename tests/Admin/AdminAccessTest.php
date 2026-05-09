@@ -244,6 +244,35 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testAdminSeesToolsDocumentsPage(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/outils/documents');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Demander des documents');
+        self::assertCount(1, $crawler->filter('[data-testid="tools-documents-page"]'));
+
+        // Back link points at the tools index.
+        self::assertSelectorExists('[data-testid="tools-documents-page"] a[href$="/admin/outils"]');
+    }
+
+    public function testNonAdminCannotSeeToolsDocumentsPage(): void
+    {
+        $this->loginAs(self::USER_EMAIL);
+        $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/outils/documents');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testWrongPrefixOnToolsDocumentsReturns404(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->adminUrl('00000000000000000000000000000000').'/outils/documents');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testAdminSeesUserProfileByUniqueId(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);

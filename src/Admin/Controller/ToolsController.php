@@ -48,6 +48,23 @@ final class ToolsController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: [
+            'fr' => '/outils/documents',
+            'en' => '/tools/documents',
+        ],
+        name: 'tools_documents',
+        methods: ['GET'],
+    )]
+    public function documents(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/tools/documents.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
     private function ensureValidPrefix(string $adminPrefix): void
     {
         if (!hash_equals($this->adminPathPrefix, $adminPrefix)) {

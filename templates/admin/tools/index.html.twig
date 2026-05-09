@@ -31,7 +31,7 @@
                             {{ 'admin.tools.documents.description'|trans }}
                         </p>
                     </div>
-                    <twig:Button variant="outline" class="mt-auto w-full">
+                    <twig:Button as="a" variant="outline" href="{{ path('admin_tools_documents', {adminPrefix: adminPrefix}) }}" class="mt-auto w-full">
                         {{ 'admin.tools.documents.cta'|trans }}
                     </twig:Button>
                 </div>

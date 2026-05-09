@@ -1612,8 +1612,10 @@ admin:
         subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
         documents:
             title: Demander des documents
+            subtitle: Envoyez à un client une demande de documents avec un lien sécurisé pour les déposer.
             description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
             cta: Envoyer une demande
+            backToTools: Retour aux outils
         comingSoon:
             title: Bientôt disponible
             description: Un nouvel outil est en préparation. Reviens bientôt.

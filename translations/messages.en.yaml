@@ -1611,8 +1611,10 @@ admin:
         subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
         documents:
             title: Request documents
+            subtitle: Send a client a request for documents with a secure upload link.
             description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
             cta: Send a request
+            backToTools: Back to tools
         comingSoon:
             title: Coming soon
             description: A new tool is in the works. Check back shortly.

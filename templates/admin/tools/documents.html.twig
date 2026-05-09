@@ -1,0 +1,29 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.tools.documents.title'|trans }}{% endblock %}
+{% block page_title %}{{ 'admin.tools.documents.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="space-y-8" data-testid="tools-documents-page">
+        <header class="flex items-baseline justify-between gap-6">
+            <div>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {{ 'admin.tools.section.overview'|trans }}
+                </p>
+                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
+                    {{ 'admin.tools.documents.title'|trans }}
+                </h2>
+                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
+                    {{ 'admin.tools.documents.subtitle'|trans }}
+                </p>
+            </div>
+            <a
+                href="{{ path('admin_tools', {adminPrefix: adminPrefix}) }}"
+                class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+            >
+                {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }}
+                {{ 'admin.tools.documents.backToTools'|trans }}
+            </a>
+        </header>
+    </div>
+{% endblock %}

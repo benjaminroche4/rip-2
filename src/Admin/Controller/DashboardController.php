@@ -248,23 +248,6 @@ final class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route(
-        path: [
-            'fr' => '/outils',
-            'en' => '/tools',
-        ],
-        name: 'tools',
-        methods: ['GET'],
-    )]
-    public function tools(string $adminPrefix): Response
-    {
-        $this->ensureValidPrefix($adminPrefix);
-
-        return $this->render('admin/tools/index.html.twig', [
-            'adminPrefix' => $adminPrefix,
-        ]);
-    }
-
     /**
      * Resolves a user by its public ULID. The {slug} segment is purely
      * decorative — if it doesn't match the current display slug (e.g. the
