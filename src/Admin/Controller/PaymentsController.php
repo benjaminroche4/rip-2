@@ -163,6 +163,8 @@ final class PaymentsController extends AbstractController
         $weekLabels = [];
         $weekCurrent = [];
         $weekPrevious = [];
+        $weekCurrentTooltips = [];
+        $weekPreviousTooltips = [];
         $weeklyHasData = false;
         for ($i = 3; $i >= 0; --$i) {
             $current = $now->modify('monday this week')->modify('-'.$i.' weeks');
@@ -171,11 +173,17 @@ final class PaymentsController extends AbstractController
             $pKey = $previous->format('o-W');
             $cAmount = round(($weeklyMap[$cKey] ?? 0) / 100, 2);
             $pAmount = round(($weeklyMap[$pKey] ?? 0) / 100, 2);
-            $weekLabels[] = $this->translator->trans('admin.payments.weekly.weekLabel', [
+            $cLabel = $this->translator->trans('admin.payments.weekly.weekLabel', [
                 '%number%' => (int) $current->format('W'),
             ]);
+            $pLabel = $this->translator->trans('admin.payments.weekly.weekLabel', [
+                '%number%' => (int) $previous->format('W'),
+            ]);
+            $weekLabels[] = $cLabel;
             $weekCurrent[] = $cAmount;
             $weekPrevious[] = $pAmount;
+            $weekCurrentTooltips[] = $cLabel;
+            $weekPreviousTooltips[] = $pLabel;
             if ($cAmount > 0 || $pAmount > 0) {
                 $weeklyHasData = true;
             }
@@ -240,11 +248,13 @@ final class PaymentsController extends AbstractController
                 [
                     'label' => $this->translator->trans('admin.payments.weekly.previousLabel'),
                     'data' => $weekPrevious,
+                    'tooltipLabels' => $weekPreviousTooltips,
                     ...ChartPalette::PINK,
                 ],
                 [
                     'label' => $this->translator->trans('admin.payments.weekly.currentLabel'),
                     'data' => $weekCurrent,
+                    'tooltipLabels' => $weekCurrentTooltips,
                     ...ChartPalette::INDIGO,
                 ],
             ] : [],

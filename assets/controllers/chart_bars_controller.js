@@ -30,6 +30,7 @@ export default class extends Controller {
             type: 'bar',
             label: serie.label,
             data: serie.data,
+            tooltipLabels: serie.tooltipLabels,
             backgroundColor: serie.fillColor,
             borderColor: serie.color,
             borderWidth: 2,
@@ -77,7 +78,9 @@ export default class extends Controller {
                         usePointStyle: true,
                         callbacks: {
                             label: (ctx) => {
-                                const labelPart = ctx.dataset.label ? `${ctx.dataset.label}: ` : '';
+                                const perBar = ctx.dataset.tooltipLabels?.[ctx.dataIndex];
+                                const label = perBar ?? ctx.dataset.label;
+                                const labelPart = label ? `${label}: ` : '';
                                 return labelPart + formatWithSuffix(ctx.formattedValue);
                             },
                         },
