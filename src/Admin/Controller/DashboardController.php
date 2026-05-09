@@ -96,6 +96,16 @@ final class DashboardController extends AbstractController
             $previousWeekData[] = $contactsByDayWeeks[$previousDay->format('Y-m-d')] ?? 0;
         }
 
+        // All-time daily series for the contact form (no calls). Returns []
+        // if no contact has ever been recorded — the template skips the
+        // section in that case so we don't render an empty chart.
+        $contactsAllTime = $this->contactRepository->countByDayAllTime();
+        $allTimeChartLabels = array_map(
+            fn (array $row): string => $this->formatDayLabel(new \DateTimeImmutable($row['date']), $locale),
+            $contactsAllTime,
+        );
+        $allTimeChartData = array_map(static fn (array $row): int => $row['count'], $contactsAllTime);
+
         $contactsThisMonth = end($contactsCounts) ?: 0;
         $contactsLastMonth = $contactsCounts[\count($contactsCounts) - 2] ?? 0;
         $callsThisMonth = end($callsCounts) ?: 0;
@@ -161,6 +171,15 @@ final class DashboardController extends AbstractController
                     'data' => $currentWeekData,
                     'color' => '#16a34a',
                     'fillColor' => '#f0fdf4',
+                ],
+            ],
+            'allTimeChartLabels' => $allTimeChartLabels,
+            'allTimeChartSeries' => [] === $allTimeChartData ? [] : [
+                [
+                    'label' => $this->translator->trans('admin.dashboard.contactsAllTime.seriesLabel'),
+                    'data' => $allTimeChartData,
+                    'color' => '#71172e',
+                    'fillColor' => 'rgba(113, 23, 46, 0.1)',
                 ],
             ],
             'kpis' => $kpis,
@@ -289,6 +308,13 @@ final class DashboardController extends AbstractController
     private function formatWeekdayLabel(\DateTimeImmutable $date, string $locale): string
     {
         $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'EEE');
+
+        return ucfirst(rtrim((string) $formatter->format($date), '.'));
+    }
+
+    private function formatDayLabel(\DateTimeImmutable $date, string $locale): string
+    {
+        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, null, null, 'd MMM yyyy');
 
         return ucfirst(rtrim((string) $formatter->format($date), '.'));
     }

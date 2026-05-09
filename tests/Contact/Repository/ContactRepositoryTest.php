@@ -92,6 +92,34 @@ final class ContactRepositoryTest extends KernelTestCase
         self::assertArrayNotHasKey($beforeWindow->format('Y-m-d'), $byDay);
     }
 
+    public function testCountByDayAllTimeReturnsEmptyWhenNoContacts(): void
+    {
+        self::assertSame([], $this->repository->countByDayAllTime());
+    }
+
+    public function testCountByDayAllTimeFillsGapsBetweenFirstContactAndToday(): void
+    {
+        $today = new \DateTimeImmutable('today 12:00:00');
+        $threeDaysAgo = $today->modify('-3 days');
+        $oneDayAgo = $today->modify('-1 day');
+
+        // 2 on day -3, 0 on day -2, 1 on day -1, 0 today.
+        $this->persistContact($threeDaysAgo);
+        $this->persistContact($threeDaysAgo);
+        $this->persistContact($oneDayAgo);
+        $this->em->flush();
+
+        $series = $this->repository->countByDayAllTime();
+
+        self::assertCount(4, $series, 'series should span first contact to today, inclusive');
+        self::assertSame($threeDaysAgo->format('Y-m-d'), $series[0]['date']);
+        self::assertSame(2, $series[0]['count']);
+        self::assertSame(0, $series[1]['count']);
+        self::assertSame(1, $series[2]['count']);
+        self::assertSame($today->format('Y-m-d'), $series[3]['date']);
+        self::assertSame(0, $series[3]['count']);
+    }
+
     private function persistContact(\DateTimeImmutable $createdAt): void
     {
         $contact = (new Contact())

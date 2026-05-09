@@ -1528,6 +1528,10 @@ admin:
             subtitle: Contact form requests per day, weekly comparison
             currentWeekLabel: This week
             previousWeekLabel: Previous week
+        contactsAllTime:
+            title: Contact requests since launch
+            subtitle: All contact form requests, by day
+            seriesLabel: Requests
     users:
         section: Piloting
         title: Users

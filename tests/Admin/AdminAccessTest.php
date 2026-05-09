@@ -4,6 +4,7 @@ namespace App\Tests\Admin;
 
 use App\Auth\Entity\ResetPasswordRequest;
 use App\Auth\Entity\User;
+use App\Contact\Entity\Contact;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -39,6 +40,7 @@ final class AdminAccessTest extends WebTestCase
 
         $em->createQuery('DELETE FROM '.ResetPasswordRequest::class)->execute();
         $em->createQuery('DELETE FROM '.User::class)->execute();
+        $em->createQuery('DELETE FROM '.Contact::class)->execute();
 
         /** @var UserPasswordHasherInterface $hasher */
         $hasher = $container->get('security.user_password_hasher');
@@ -126,9 +128,52 @@ final class AdminAccessTest extends WebTestCase
         // KPI grid: 4 cards (calls 7d, contacts 7d, leads month, leads 12m).
         self::assertCount(4, $crawler->filter('[data-testid="kpi-grid"] > article'));
 
+        // No contacts in DB (cleared in setUp) → all-time chart section is hidden.
+        self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-all-time-chart"]'));
+
         $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
         self::assertStringContainsString('noindex', $robots);
         self::assertStringContainsString('nofollow', $robots);
+    }
+
+    public function testAdminSeesContactsAllTimeChartWhenContactsExist(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+
+        $today = new \DateTimeImmutable('today 12:00:00');
+        $threeDaysAgo = $today->modify('-3 days');
+
+        foreach ([$threeDaysAgo, $threeDaysAgo, $today] as $i => $createdAt) {
+            $em->persist((new Contact())
+                ->setFirstName('Jane')
+                ->setLastName('Doe')
+                ->setEmail('jane'.$i.'@example.com')
+                ->setPhoneNumber('+33600000000')
+                ->setHelpType('contact.contactForm.helpType.choice.1')
+                ->setMessage('Hello')
+                ->setLang('fr')
+                ->setIp('127.0.0.1')
+                ->setCreatedAt($createdAt));
+        }
+        $em->flush();
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix));
+
+        self::assertResponseIsSuccessful();
+
+        $canvas = $crawler->filter('canvas[data-testid="contacts-all-time-chart"]');
+        self::assertCount(1, $canvas);
+        self::assertSame('chart', $canvas->attr('data-controller'));
+
+        $labels = json_decode((string) $canvas->attr('data-chart-labels-value'), true);
+        $series = json_decode((string) $canvas->attr('data-chart-series-value'), true);
+
+        // 4 contiguous days from first contact (today-3) to today, inclusive.
+        self::assertCount(4, $labels);
+        self::assertCount(1, $series);
+        self::assertSame([2, 0, 0, 1], $series[0]['data']);
     }
 
     public function testAdminSeesUsersPage(): void

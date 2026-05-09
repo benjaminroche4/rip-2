@@ -1529,6 +1529,10 @@ admin:
             subtitle: Demandes via le formulaire de contact par jour, comparaison hebdomadaire
             currentWeekLabel: Semaine en cours
             previousWeekLabel: Semaine précédente
+        contactsAllTime:
+            title: Demandes de contact depuis le début
+            subtitle: Toutes les demandes du formulaire de contact, par jour
+            seriesLabel: Demandes
     users:
         section: Pilotage
         title: Utilisateurs

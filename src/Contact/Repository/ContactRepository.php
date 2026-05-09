@@ -53,6 +53,45 @@ class ContactRepository extends ServiceEntityRepository
     }
 
     /**
+     * Returns the contact request count per day from the very first contact
+     * up to today (inclusive). Days with no contact are filled with 0 so the
+     * series is contiguous, ready to be plotted as a continuous time series.
+     *
+     * @return list<array{date: string, count: int}>
+     */
+    public function countByDayAllTime(): array
+    {
+        $rows = $this->getEntityManager()->getConnection()
+            ->executeQuery(
+                "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS d, COUNT(*) AS total
+                 FROM contact
+                 GROUP BY d
+                 ORDER BY d ASC",
+            )
+            ->fetchAllAssociative();
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        $byDay = [];
+        foreach ($rows as $row) {
+            $byDay[(string) $row['d']] = (int) $row['total'];
+        }
+
+        $first = new \DateTimeImmutable((string) array_key_first($byDay));
+        $today = new \DateTimeImmutable('today');
+
+        $series = [];
+        for ($cursor = $first; $cursor <= $today; $cursor = $cursor->modify('+1 day')) {
+            $key = $cursor->format('Y-m-d');
+            $series[] = ['date' => $key, 'count' => $byDay[$key] ?? 0];
+        }
+
+        return $series;
+    }
+
+    /**
      * Returns the count of contact requests grouped by Y-m-d for the
      * [$from, $to) window. Result is keyed by the date string so the caller
      * can do O(1) lookups when stitching together a calendar view.
