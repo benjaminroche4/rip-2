@@ -1,0 +1,111 @@
+<div {{ attributes }} data-testid="payments-table-section">
+    <div class="mb-4 flex items-end justify-between gap-4">
+        <div>
+            <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                {{ 'admin.payments.table.title'|trans }}
+            </h3>
+            <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                {{ 'admin.payments.table.subtitle'|trans({'%count%': this.totalCount}) }}
+            </p>
+        </div>
+        <a
+            href="{{ this.stripeDashboardUrl }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+            {{ 'admin.payments.table.viewAll'|trans }}
+            {{ ux_icon('lucide:external-link', {class: 'size-3.5'}) }}
+        </a>
+    </div>
+
+    {% if this.empty %}
+        <twig:Admin:EmptyCard message="{{ 'admin.payments.table.empty'|trans }}" />
+    {% else %}
+        {% set statusVariant = {
+            succeeded: 'success',
+            processing: 'info',
+            requires_action: 'warning',
+            requires_payment_method: 'warning',
+            requires_confirmation: 'warning',
+            requires_capture: 'warning',
+            canceled: 'secondary',
+        } %}
+        {% set avatarPalette = ['bg-rose-100 text-rose-700', 'bg-amber-100 text-amber-700', 'bg-emerald-100 text-emerald-700', 'bg-sky-100 text-sky-700', 'bg-violet-100 text-violet-700', 'bg-pink-100 text-pink-700'] %}
+
+        <div class="rounded-2xl border border-gray-950/5 bg-white p-2">
+            <div class="overflow-hidden rounded-xl">
+                <table class="w-full" data-testid="payments-table" aria-label="{{ 'admin.payments.table.title'|trans }}">
+                    <thead>
+                        <tr class="border-b border-gray-950/5">
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.date'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.client'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.amount'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.status'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-950/5">
+                        {% for row in this.items %}
+                            {% set name = row.customerName ?: ('admin.payments.table.unknownClient'|trans) %}
+                            {% set parts = name|split(' ') %}
+                            {% set initials = (parts|first|first|upper) ~ (parts|length > 1 ? (parts|last|first|upper) : '') %}
+                            {% set seed = row.customerEmail ?: row.id %}
+                            {% set avatarColor = avatarPalette[seed|length % avatarPalette|length] %}
+                            {% set badgeVariant = statusVariant[row.status] ?? 'destructive' %}
+                            <tr class="text-sm hover:bg-neutral-50/60">
+                                <td class="px-4 py-4 tabular-nums whitespace-nowrap text-gray-700">
+                                    {{ row.createdAt|format_datetime('medium', 'short', locale=app.request.locale) }}
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold {{ avatarColor }}">
+                                            {{ initials }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="truncate font-medium text-gray-900">{{ name }}</p>
+                                            {% if row.customerEmail %}
+                                                <p class="truncate text-xs text-gray-500">{{ row.customerEmail }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-right font-medium tabular-nums whitespace-nowrap text-gray-900">
+                                    {{ (row.amount / 100)|number_format(2, ',', ' ') }} <span class="text-xs font-normal text-gray-500">{{ currencySymbol }}</span>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <twig:Badge variant="{{ badgeVariant }}" class="rounded-full">
+                                        {{ ('admin.payments.status.' ~ row.status)|trans }}
+                                    </twig:Badge>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if this.hasMore %}
+                <div class="flex justify-center px-4 py-4">
+                    <twig:Button
+                        variant="outline"
+                        data-action="live#action"
+                        data-live-action-param="more"
+                        data-testid="payments-load-more"
+                    >
+                        {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
+                        {{ 'admin.payments.table.loadMore'|trans }}
+                    </twig:Button>
+                </div>
+            {% elseif this.capped %}
+                <p class="px-4 py-4 text-center text-sm text-gray-500">
+                    {{ 'admin.payments.table.cappedHint'|trans }}
+                    <a
+                        href="{{ this.stripeDashboardUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-medium text-primary hover:underline"
+                    >{{ 'admin.payments.table.viewAll'|trans }}</a>
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

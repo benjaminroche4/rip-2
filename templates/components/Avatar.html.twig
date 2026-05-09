@@ -1,0 +1,33 @@
+{# @prop filename ?string Avatar filename served by app_avatar route #}
+{# @prop name ?string Display name used to derive the initial fallback #}
+{# @prop email ?string Email used as initial fallback when name is empty #}
+{# @prop size int Tailwind size unit (8 = size-8 = 32px, 9 = 36px, 16 = 64px, 18 = 72px, 24 = 96px). Default 9. #}
+{%- props filename = null, name = null, email = null, size = 9 -%}
+{%- set _initial = (name|default('') ?: email|default(''))|first|upper -%}
+{%- set _textClass = {
+    8: 'text-xs',
+    9: 'text-xs',
+    10: 'text-sm',
+    12: 'text-sm',
+    14: 'text-base',
+    16: 'text-xl',
+    18: 'text-2xl',
+    20: 'text-2xl',
+    24: 'text-3xl',
+}[size] | default('text-sm') -%}
+{% if filename %}
+    <img
+        src="{{ path('app_avatar', {filename: filename}) }}"
+        alt=""
+        width="{{ size * 4 }}"
+        height="{{ size * 4 }}"
+        class="{{ ('size-' ~ size ~ ' shrink-0 rounded-full object-cover outline-1 -outline-offset-1 outline-black/5 ' ~ attributes.render('class'))|tailwind_merge }}"
+    >
+{% else %}
+    <div
+        class="{{ ('flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary outline-1 -outline-offset-1 outline-black/5 size-' ~ size ~ ' ' ~ _textClass ~ ' ' ~ attributes.render('class'))|tailwind_merge }}"
+        aria-hidden="true"
+    >
+        {{ _initial }}
+    </div>
+{% endif %}
