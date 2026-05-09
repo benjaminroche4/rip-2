@@ -39,8 +39,20 @@ export default class extends Controller {
 
         this.#mapListeners.push(marker.addListener('click', () => {
             const pos = marker.position
-            this.#map.setZoom(this.#map.getZoom() + 2)
-            this.#map.panTo(pos)
+            const currentZoom = this.#map.getZoom()
+            const maxZoom = this.#map.get('maxZoom') ?? 22
+
+            if (currentZoom < maxZoom - 2) {
+                this.#map.setZoom(Math.min(currentZoom + 2, maxZoom))
+                this.#map.panTo(pos)
+                return
+            }
+
+            // At (or near) max zoom: spider-fy server-side instead of zooming further.
+            const ids = (definition.extra.propertyIds ?? []).join(',')
+            if (ids) {
+                this.#component.action('spiderCluster', { propertyIds: ids })
+            }
         }))
     }
 

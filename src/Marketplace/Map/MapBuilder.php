@@ -32,7 +32,7 @@ final class MapBuilder
             ->center(new Point($lat, $lng))
             ->zoom($zoom)
             ->minZoom(9)
-            ->maxZoom(17)
+            ->maxZoom(22)
             ->options(new GoogleOptions(
                 gestureHandling: GestureHandling::GREEDY,
                 mapTypeControl: false,
@@ -45,10 +45,14 @@ final class MapBuilder
      * Adds clustered markers for the given properties to the map. Properties
      * outside the visible bounds (or without coordinates) are skipped.
      *
+     * If $spideredPropertyIds matches a cluster's full set of IDs, that cluster
+     * is rendered as a fan of individual offset markers (spider-fy) instead.
+     *
      * @param array<int, Property>                                        $properties
      * @param array{south: float, north: float, west: float, east: float} $bounds
+     * @param array<int, string>                                          $spideredPropertyIds
      */
-    public function addMarkers(Map $map, array $properties, array $bounds, float $zoom, string $locale): void
+    public function addMarkers(Map $map, array $properties, array $bounds, float $zoom, string $locale, array $spideredPropertyIds = []): void
     {
         $points = [];
         $pointToProperties = [];
@@ -64,9 +68,13 @@ final class MapBuilder
                 continue;
             }
 
-            $point = new Point($lat, $lng);
             $key = $lat.','.$lng;
-            $points[] = $point;
+            // One Point per unique coordinate — properties sharing exact lat/lng must not
+            // produce duplicate Points, otherwise the cluster collection step double-counts.
+            if (!isset($pointToProperties[$key])) {
+                $points[] = new Point($lat, $lng);
+                $pointToProperties[$key] = [];
+            }
             $pointToProperties[$key][] = $property;
         }
 
@@ -76,31 +84,73 @@ final class MapBuilder
 
         $clusters = (new GridClusteringAlgorithm())->cluster($points, $zoom);
 
+        $sortedSpidered = $spideredPropertyIds;
+        sort($sortedSpidered);
+
         foreach ($clusters as $cluster) {
-            if (1 === $cluster->count()) {
-                $singlePoint = $cluster->getPoints()[0];
-                $key = $singlePoint->getLatitude().','.$singlePoint->getLongitude();
-                $property = $pointToProperties[$key][0] ?? null;
-
-                if (null !== $property) {
-                    $map->addMarker($this->markerBuilder->buildPropertyMarker($property, $locale));
-                }
-                continue;
-            }
-
-            $clusterPropertyIds = [];
+            $clusterProperties = [];
             foreach ($cluster->getPoints() as $point) {
                 $key = $point->getLatitude().','.$point->getLongitude();
                 foreach ($pointToProperties[$key] ?? [] as $p) {
-                    $clusterPropertyIds[] = $p->id;
+                    $clusterProperties[] = $p;
                 }
             }
+
+            $effectiveCount = count($clusterProperties);
+            if (0 === $effectiveCount) {
+                continue;
+            }
+
+            if (1 === $effectiveCount) {
+                $map->addMarker($this->markerBuilder->buildPropertyMarker($clusterProperties[0], $locale));
+                continue;
+            }
+
+            $clusterPropertyIds = array_map(static fn (Property $p) => $p->id, $clusterProperties);
+
+            $sortedClusterIds = $clusterPropertyIds;
+            sort($sortedClusterIds);
+
+            if (!empty($spideredPropertyIds) && $sortedClusterIds === $sortedSpidered) {
+                $this->spiderfyCluster($map, $cluster->getCenter(), $clusterProperties, $zoom, $locale);
+                continue;
+            }
+
             $map->addMarker($this->markerBuilder->buildClusterMarker(
                 $cluster->getCenter(),
-                $cluster->count(),
+                $effectiveCount,
                 $clusterPropertyIds,
                 $locale,
             ));
+        }
+    }
+
+    /**
+     * Renders cluster properties in a circular fan around the cluster center,
+     * with a pixel-equivalent radius adapted to the current zoom.
+     *
+     * @param array<int, Property> $clusterProperties
+     */
+    private function spiderfyCluster(Map $map, Point $center, array $clusterProperties, float $zoom, string $locale): void
+    {
+        $count = count($clusterProperties);
+        if (0 === $count) {
+            return;
+        }
+
+        // ~70px radius converted to degrees at the current zoom (Web Mercator: 256px tile = 360°/2^zoom).
+        $pixelRadius = 70;
+        $radius = $pixelRadius * 360 / (256 * 2 ** $zoom);
+        $latRad = deg2rad($center->getLatitude());
+        $lngScale = max(cos($latRad), 0.01);
+
+        foreach ($clusterProperties as $i => $property) {
+            $angle = 2 * M_PI * $i / $count - M_PI_2; // start at top
+            $position = new Point(
+                $center->getLatitude() + $radius * sin($angle),
+                $center->getLongitude() + $radius * cos($angle) / $lngScale,
+            );
+            $map->addMarker($this->markerBuilder->buildPropertyMarker($property, $locale, $position));
         }
     }
 

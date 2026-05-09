@@ -67,6 +67,10 @@ final class MarketplaceSearch
     #[LiveProp(writable: true)]
     public ?float $east = null;
 
+    /** @var array<int, string> */
+    #[LiveProp(writable: true)]
+    public array $spideredPropertyIds = [];
+
     #[LiveProp]
     public int $page = 1;
 
@@ -191,6 +195,21 @@ final class MarketplaceSearch
         $this->refreshMarkers($map);
     }
 
+    #[LiveAction]
+    public function spiderCluster(
+        #[LiveArg]
+        string $propertyIds,
+    ): void {
+        $this->spideredPropertyIds = array_values(array_filter(
+            array_map('trim', explode(',', $propertyIds)),
+            static fn (string $id) => '' !== $id,
+        ));
+
+        $map = $this->getMap();
+        $map->removeAllMarkers();
+        $this->refreshMarkers($map);
+    }
+
     #[PreReRender]
     public function refreshMapMarkers(): void
     {
@@ -203,6 +222,9 @@ final class MarketplaceSearch
         if (!$changed) {
             return;
         }
+
+        // Filter change invalidates any active spider-fy.
+        $this->spideredPropertyIds = [];
 
         if ($arrondissementChanged) {
             // Reset complet de la carte (nouveau centre + zoom).
@@ -259,7 +281,14 @@ final class MarketplaceSearch
     private function refreshMarkers(Map $map): void
     {
         $bounds = $this->mapBuilder->resolveBounds($this->south, $this->north, $this->west, $this->east);
-        $this->mapBuilder->addMarkers($map, $this->getFilteredProperties(), $bounds, $this->zoom, $this->locale);
+        $this->mapBuilder->addMarkers(
+            $map,
+            $this->getFilteredProperties(),
+            $bounds,
+            $this->zoom,
+            $this->locale,
+            $this->spideredPropertyIds,
+        );
     }
 
     private function getFilteredProperties(): array

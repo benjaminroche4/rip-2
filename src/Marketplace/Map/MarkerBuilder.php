@@ -18,7 +18,7 @@ final class MarkerBuilder
     ) {
     }
 
-    public function buildPropertyMarker(Property $property, string $locale): Marker
+    public function buildPropertyMarker(Property $property, string $locale, ?Point $positionOverride = null): Marker
     {
         $label = $this->buildPriceLabel($property, $locale);
 
@@ -33,7 +33,7 @@ final class MarkerBuilder
         $hoverSvg = $this->renderPriceSvg($svgWidth, $svgHeight, $cx, $cy, $label, true);
 
         return new Marker(
-            position: new Point((float) $property->location['lat'], (float) $property->location['lng']),
+            position: $positionOverride ?? new Point((float) $property->location['lat'], (float) $property->location['lng']),
             title: $property->address['street'] ?? $property->title ?? '',
             icon: $icon,
             extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property->id],
