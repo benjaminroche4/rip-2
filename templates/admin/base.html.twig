@@ -56,6 +56,15 @@
                                     {{ 'admin.nav.users'|trans }}
                                 </a>
                             </li>
+                            <li>
+                                <a
+                                    href="{{ path('admin_payments', {adminPrefix: adminPrefix}) }}"
+                                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {% if currentRoute == 'admin_payments' %}bg-neutral-100 font-medium text-primary{% else %}font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}"
+                                >
+                                    {{ ux_icon('lucide:credit-card', {class: 'size-4 shrink-0'}) }}
+                                    {{ 'admin.nav.payments'|trans }}
+                                </a>
+                            </li>
                         </ul>
                     </div>
 

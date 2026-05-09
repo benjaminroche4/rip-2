@@ -1494,6 +1494,7 @@ admin:
     nav:
         dashboard: Tableau de bord
         users: Utilisateurs
+        payments: Paiements
         logout: Se déconnecter
     sidebar:
         section:
@@ -1516,9 +1517,11 @@ admin:
             contactsLast7d: Demandes de contact
             leadsThisMonth: Total leads
             leadsLast12Months: Total leads
+            thisYear: 'Année %year%'
             period:
                 last7d: 7 derniers jours
                 last12m: 12 derniers mois
+                summary: Bilan
             previousLabel: Précédent
             currentLabel: Actuel
         activity:
@@ -1535,6 +1538,61 @@ admin:
             title: Demandes de contact depuis le début
             subtitle: Toutes les demandes du formulaire de contact, par jour
             seriesLabel: Demandes
+    payments:
+        title: Paiements
+        section:
+            overview: Vue financière
+        welcome: Vos paiements Stripe
+        subtitle: 'Chiffre d''affaires, transactions et tendances mensuelles.'
+        kpi:
+            totalAllTime: CA total encaissé
+            thisMonth: CA du mois
+            thisWeek: CA de la semaine
+            thisYear: 'Année %year%'
+            period:
+                allTime: Depuis le début
+                thisWeek: 'Semaine %number%'
+                summary: Bilan
+        charts:
+            monthly:
+                title: Activité mensuelle
+                subtitle: Montant total des paiements par mois sur les 12 derniers mois
+                seriesLabel: Montant
+            weekly:
+                title: 4 dernières semaines vs 4 semaines précédentes
+                subtitle: 'Chiffre d''affaires hebdomadaire, comparaison sur 4 semaines'
+            allTime:
+                title: Paiements depuis le début
+                subtitle: Tous les paiements encaissés, par jour
+                seriesLabel: Montant
+            weekdays:
+                title: Meilleurs jours de la semaine
+                subtitle: Chiffre d'affaires cumulé par jour de la semaine, depuis le début
+                seriesLabel: Montant cumulé
+        weekly:
+            weekLabel: 'Semaine %number%'
+            currentLabel: 4 dernières semaines
+            previousLabel: 4 semaines précédentes
+        table:
+            title: Derniers paiements
+            subtitle: '{0}Aucun paiement|{1}Le dernier paiement enregistré|]1,Inf[Les %count% derniers paiements enregistrés'
+            viewAll: Voir tout sur Stripe
+            empty: Aucun paiement à afficher pour le moment.
+            unknownClient: Client inconnu
+            column:
+                date: Date
+                client: Client
+                email: Email
+                amount: Montant
+                status: Statut
+        status:
+            succeeded: Réussi
+            processing: En cours
+            requires_action: Action requise
+            requires_payment_method: Moyen requis
+            requires_confirmation: À confirmer
+            requires_capture: À capturer
+            canceled: Annulé
     users:
         section: Pilotage
         title: Utilisateurs

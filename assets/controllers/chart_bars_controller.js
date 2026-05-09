@@ -17,10 +17,14 @@ export default class extends Controller {
     static values = {
         labels: Array,
         series: Array,
+        suffix: String,
     };
 
     async connect() {
         const { Chart } = await import('chart.js/auto');
+
+        const suffix = this.suffixValue || '';
+        const formatWithSuffix = (value) => suffix ? `${value} ${suffix}` : `${value}`;
 
         const datasets = this.seriesValue.map((serie) => ({
             type: 'bar',
@@ -71,6 +75,12 @@ export default class extends Controller {
                         boxWidth: 8,
                         boxHeight: 8,
                         usePointStyle: true,
+                        callbacks: {
+                            label: (ctx) => {
+                                const labelPart = ctx.dataset.label ? `${ctx.dataset.label}: ` : '';
+                                return labelPart + formatWithSuffix(ctx.formattedValue);
+                            },
+                        },
                     },
                 },
                 scales: {
@@ -91,6 +101,7 @@ export default class extends Controller {
                             color: '#6b7280',
                             font: { size: 11 },
                             padding: 8,
+                            callback: (value) => formatWithSuffix(value),
                         },
                     },
                 },

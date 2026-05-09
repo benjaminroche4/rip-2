@@ -131,6 +131,10 @@ final class AdminAccessTest extends WebTestCase
         // No contacts in DB (cleared in setUp) → all-time chart section is hidden.
         self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-all-time-chart"]'));
 
+        // No STRIPE_SECRET_KEY in .env.test → repo returns []  →  payments
+        // chart section is hidden. Confirms the graceful-degradation path.
+        self::assertCount(0, $crawler->filter('canvas[data-testid="payments-chart"]'));
+
         $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
         self::assertStringContainsString('noindex', $robots);
         self::assertStringContainsString('nofollow', $robots);

@@ -1,0 +1,309 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.payments.title'|trans }}{% endblock %}
+{% block page_title %}{{ 'admin.payments.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="space-y-8">
+        <header class="flex items-baseline justify-between gap-6">
+            <div>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {{ 'admin.payments.section.overview'|trans }}
+                </p>
+                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
+                    {{ 'admin.payments.welcome'|trans }}
+                </h2>
+                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
+                    {{ 'admin.payments.subtitle'|trans }}
+                </p>
+            </div>
+            <p class="shrink-0 text-sm tabular-nums text-gray-500">{{ todayLabel }}</p>
+        </header>
+
+        {# ── KPI cards (CA total + mois + semaine) ─────────────────── #}
+        <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="payments-kpi-grid">
+            {% for kpi in kpis %}
+                {% set gradient = {
+                    up: 'from-green-100/60 to-green-100/0',
+                    down: 'from-red-100/60 to-red-100/0',
+                    neutral: 'from-neutral-100/50 to-neutral-100/0',
+                }[kpi.trend] %}
+                {% set deltaColor = {
+                    up: 'text-green-700',
+                    down: 'text-red-700',
+                    neutral: 'text-gray-500',
+                }[kpi.trend] %}
+                {% set trendIcon = {
+                    up: 'streamline:graph-arrow-increase',
+                    down: 'streamline:graph-arrow-decrease',
+                    neutral: null,
+                }[kpi.trend] %}
+
+                {% set _maxVal = max(kpi.value, kpi.previous ?? 0) %}
+                {% set _curPct = (_maxVal > 0) ? (kpi.value / _maxVal * 100)|round : 0 %}
+                {% set _prevPct = (_maxVal > 0 and kpi.previous is not null) ? (kpi.previous / _maxVal * 100)|round : 0 %}
+
+                <article class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                    {% if kpi.previous is not null %}
+                        {# Week / Month cards — bar comparison #}
+                        <div class="space-y-6 rounded-xl bg-linear-to-b p-4 {{ gradient }}">
+                            <div>
+                                <h3 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h3>
+                                <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ kpi.period }}</p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-end justify-between gap-3">
+                                    <p class="text-3xl font-medium tabular-nums text-gray-900">
+                                        {{ kpi.value|number_format(0, ',', ' ') }}<span class="ml-1 text-2xl text-gray-500">{{ currencySymbol }}</span>
+                                    </p>
+                                    {% if trendIcon %}
+                                        <div class="flex items-center gap-x-2 text-sm font-light {{ deltaColor }}">
+                                            {% if kpi.deltaPercent is not null %}
+                                                {{ kpi.deltaPercent > 0 ? '+' : '' }}{{ kpi.deltaPercent }}%
+                                            {% endif %}
+                                            {{ ux_icon(trendIcon, {class: 'size-4'}) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <span class="w-16 shrink-0 text-gray-500">{{ 'admin.dashboard.kpi.currentLabel'|trans }}</span>
+                                        <div class="h-1.5 grow overflow-hidden rounded-full bg-gray-100">
+                                            <div class="h-full rounded-full bg-gray-700 w-(--bar-pct)" style="--bar-pct: {{ _curPct }}%"></div>
+                                        </div>
+                                        <p class="w-24 shrink-0 text-right text-xs tabular-nums text-gray-700">{{ kpi.value|number_format(0, ',', ' ') }} {{ currencySymbol }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs">
+                                        <span class="w-16 shrink-0 text-gray-500">{{ 'admin.dashboard.kpi.previousLabel'|trans }}</span>
+                                        <div class="h-1.5 grow overflow-hidden rounded-full bg-gray-100">
+                                            <div class="h-full rounded-full bg-gray-300 w-(--bar-pct)" style="--bar-pct: {{ _prevPct }}%"></div>
+                                        </div>
+                                        <p class="w-24 shrink-0 text-right text-xs tabular-nums text-gray-500">{{ kpi.previous|number_format(0, ',', ' ') }} {{ currencySymbol }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        {# All-time card — two stats with divider (all-time + year-to-date) #}
+                        <div class="rounded-xl bg-linear-to-b p-4 {{ gradient }}">
+                            <div>
+                                <h3 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h3>
+                                <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ kpi.period }}</p>
+                            </div>
+                            <div class="mt-6 divide-y divide-gray-950/5">
+                                <div class="flex items-baseline justify-between gap-3 pb-3">
+                                    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.payments.kpi.period.allTime'|trans }}</p>
+                                    <p class="text-2xl font-medium tabular-nums text-gray-900">
+                                        {{ kpi.value|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
+                                    </p>
+                                </div>
+                                <div class="flex items-baseline justify-between gap-3 pt-3">
+                                    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.payments.kpi.thisYear'|trans({'%year%': thisYearLabel}) }}</p>
+                                    <p class="text-2xl font-medium tabular-nums text-gray-900">
+                                        {{ thisYearAmount|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </section>
+
+        {# ── 12-month chart (toutes activités confondues) ───────────── #}
+        {% if monthlyChartSeries|length > 0 %}
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                    <div class="px-3 pt-3 pb-5">
+                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.payments.charts.monthly.title'|trans }}
+                        </h3>
+                        <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                            {{ 'admin.payments.charts.monthly.subtitle'|trans }}
+                        </p>
+                    </div>
+                    <div class="h-80 px-3 pt-5 pb-3">
+                        <canvas
+                            data-controller="chart"
+                            data-chart-labels-value="{{ monthlyChartLabels|json_encode }}"
+                            data-chart-series-value="{{ monthlyChartSeries|json_encode }}"
+                            data-chart-suffix-value="{{ currencySymbol }}"
+                            data-testid="payments-monthly-chart"
+                        ></canvas>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# ── 4-week comparison chart (ce mois vs mois précédent) ───── #}
+        {% if weeklyChartSeries|length > 0 %}
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
+                    <div class="flex items-baseline justify-between gap-6 px-3 pt-3 pb-5">
+                        <div>
+                            <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                                {{ 'admin.payments.charts.weekly.title'|trans }}
+                            </h3>
+                            <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                                {{ 'admin.payments.charts.weekly.subtitle'|trans }}
+                            </p>
+                        </div>
+                        <p class="shrink-0 text-2xl font-medium tabular-nums text-gray-900" data-testid="payments-weekly-current">
+                            {{ thisWeekAmount|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
+                        </p>
+                    </div>
+                    <div class="h-80 px-3 pt-5 pb-3">
+                        <canvas
+                            data-controller="chart-bars"
+                            data-chart-bars-labels-value="{{ weeklyChartLabels|json_encode }}"
+                            data-chart-bars-series-value="{{ weeklyChartSeries|json_encode }}"
+                            data-chart-bars-suffix-value="{{ currencySymbol }}"
+                            data-testid="payments-weekly-chart"
+                        ></canvas>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# ── All-time daily chart (paiements depuis le début) ──────── #}
+        {% if allTimeChartSeries|length > 0 %}
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                    <div class="px-3 pt-3 pb-5">
+                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.payments.charts.allTime.title'|trans }}
+                        </h3>
+                        <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                            {{ 'admin.payments.charts.allTime.subtitle'|trans }}
+                        </p>
+                    </div>
+                    <div class="h-80 px-3 pt-5 pb-3">
+                        <canvas
+                            data-controller="chart"
+                            data-chart-labels-value="{{ allTimeChartLabels|json_encode }}"
+                            data-chart-series-value="{{ allTimeChartSeries|json_encode }}"
+                            data-chart-suffix-value="{{ currencySymbol }}"
+                            data-testid="payments-all-time-chart"
+                        ></canvas>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# ── Weekday distribution (Lun → Dim, all-time) ─────────────── #}
+        {% if weekdayChartSeries|length > 0 %}
+            <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                <div class="rounded-xl bg-linear-to-b from-sky-100/40 to-sky-100/0">
+                    <div class="px-3 pt-3 pb-5">
+                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.payments.charts.weekdays.title'|trans }}
+                        </h3>
+                        <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                            {{ 'admin.payments.charts.weekdays.subtitle'|trans }}
+                        </p>
+                    </div>
+                    <div class="h-80 px-3 pt-5 pb-3">
+                        <canvas
+                            data-controller="chart-bars"
+                            data-chart-bars-labels-value="{{ weekdayChartLabels|json_encode }}"
+                            data-chart-bars-series-value="{{ weekdayChartSeries|json_encode }}"
+                            data-chart-bars-suffix-value="{{ currencySymbol }}"
+                            data-testid="payments-weekday-chart"
+                        ></canvas>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# ── Recent payments table ──────────────────────────────────── #}
+        <section data-testid="payments-table-section">
+            <div class="mb-4 flex items-end justify-between gap-4">
+                <div>
+                    <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        {{ 'admin.payments.table.title'|trans }}
+                    </h3>
+                    <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                        {{ 'admin.payments.table.subtitle'|trans({'%count%': tableRows|length}) }}
+                    </p>
+                </div>
+                <a
+                    href="{{ stripeDashboardUrl }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                    {{ 'admin.payments.table.viewAll'|trans }}
+                    {{ ux_icon('lucide:external-link', {class: 'size-3.5'}) }}
+                </a>
+            </div>
+
+            {% if tableEmpty %}
+                <div class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                    <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 px-6 py-12 text-center">
+                        <p class="text-sm text-gray-500">{{ 'admin.payments.table.empty'|trans }}</p>
+                    </div>
+                </div>
+            {% else %}
+                {% set statusStyle = {
+                    succeeded: 'bg-green-50 text-green-700 ring-green-700/15',
+                    processing: 'bg-blue-50 text-blue-700 ring-blue-700/15',
+                    requires_action: 'bg-amber-50 text-amber-700 ring-amber-700/15',
+                    requires_payment_method: 'bg-amber-50 text-amber-700 ring-amber-700/15',
+                    requires_confirmation: 'bg-amber-50 text-amber-700 ring-amber-700/15',
+                    requires_capture: 'bg-amber-50 text-amber-700 ring-amber-700/15',
+                    canceled: 'bg-gray-100 text-gray-600 ring-gray-600/15',
+                } %}
+                {% set avatarPalette = ['bg-rose-100 text-rose-700', 'bg-amber-100 text-amber-700', 'bg-emerald-100 text-emerald-700', 'bg-sky-100 text-sky-700', 'bg-violet-100 text-violet-700', 'bg-pink-100 text-pink-700'] %}
+
+                <div class="rounded-2xl border border-gray-950/5 bg-white p-2">
+                    <div class="overflow-hidden rounded-xl">
+                        <table class="w-full" data-testid="payments-table">
+                            <thead>
+                                <tr class="border-b border-gray-950/5">
+                                    <th class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.date'|trans }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.client'|trans }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.amount'|trans }}</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium whitespace-nowrap text-gray-500">{{ 'admin.payments.table.column.status'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-950/5">
+                                {% for row in tableRows %}
+                                    {% set name = row.customerName ?: ('admin.payments.table.unknownClient'|trans) %}
+                                    {% set parts = name|split(' ') %}
+                                    {% set initials = (parts|first|first|upper) ~ (parts|length > 1 ? (parts|last|first|upper) : '') %}
+                                    {% set seed = row.customerEmail ?: row.id %}
+                                    {% set avatarColor = avatarPalette[seed|length % avatarPalette|length] %}
+                                    {% set badgeClass = statusStyle[row.status] ?? 'bg-red-50 text-red-700 ring-red-700/15' %}
+                                    <tr class="text-sm hover:bg-neutral-50/60">
+                                        <td class="px-4 py-4 tabular-nums whitespace-nowrap text-gray-700">{{ row.createdAtLabel }}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold {{ avatarColor }}">
+                                                    {{ initials }}
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="truncate font-medium text-gray-900">{{ name }}</p>
+                                                    {% if row.customerEmail %}
+                                                        <p class="truncate text-xs text-gray-500">{{ row.customerEmail }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-4 text-right font-medium tabular-nums whitespace-nowrap text-gray-900">
+                                            {{ row.amount|number_format(2, ',', ' ') }} <span class="text-xs font-normal text-gray-500">{{ row.currencySymbol }}</span>
+                                        </td>
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ badgeClass }}">
+                                                {{ row.statusLabel }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+{% endblock %}

@@ -110,6 +110,15 @@
     "presta/sitemap-bundle": {
         "version": "v4.2.0"
     },
+    "stripe/stripe-php": {
+        "version": "20.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "19.0",
+            "ref": "d6829c693e3927a8972c7671d74a1a5c505712b0"
+        }
+    },
     "symfony/asset-mapper": {
         "version": "7.3",
         "recipe": {

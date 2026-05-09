@@ -1493,6 +1493,7 @@ admin:
     nav:
         dashboard: Dashboard
         users: Users
+        payments: Payments
         logout: Log out
     sidebar:
         section:
@@ -1515,9 +1516,11 @@ admin:
             contactsLast7d: Contact requests
             leadsThisMonth: Total leads
             leadsLast12Months: Total leads
+            thisYear: 'Year %year%'
             period:
                 last7d: Last 7 days
                 last12m: Last 12 months
+                summary: Summary
             previousLabel: Previous
             currentLabel: Current
         activity:
@@ -1534,6 +1537,61 @@ admin:
             title: Contact requests since launch
             subtitle: All contact form requests, by day
             seriesLabel: Requests
+    payments:
+        title: Payments
+        section:
+            overview: Financial overview
+        welcome: Your Stripe payments
+        subtitle: 'Revenue, transactions, and monthly trends.'
+        kpi:
+            totalAllTime: Total revenue
+            thisMonth: This month
+            thisWeek: This week
+            thisYear: 'Year %year%'
+            period:
+                allTime: Since launch
+                thisWeek: 'Week %number%'
+                summary: Summary
+        charts:
+            monthly:
+                title: Monthly activity
+                subtitle: Total payment amount per month over the last 12 months
+                seriesLabel: Amount
+            weekly:
+                title: Last 4 weeks vs prior 4 weeks
+                subtitle: 'Weekly revenue, 4-week rolling comparison'
+            allTime:
+                title: Payments since launch
+                subtitle: All collected payments, by day
+                seriesLabel: Amount
+            weekdays:
+                title: Best days of the week
+                subtitle: Total revenue per weekday across all history
+                seriesLabel: Total amount
+        weekly:
+            weekLabel: 'Week %number%'
+            currentLabel: Last 4 weeks
+            previousLabel: Prior 4 weeks
+        table:
+            title: Recent payments
+            subtitle: '{0}No payments|{1}The last recorded payment|]1,Inf[The last %count% recorded payments'
+            viewAll: View all in Stripe
+            empty: No payments to show yet.
+            unknownClient: Unknown client
+            column:
+                date: Date
+                client: Client
+                email: Email
+                amount: Amount
+                status: Status
+        status:
+            succeeded: Succeeded
+            processing: Processing
+            requires_action: Action required
+            requires_payment_method: Payment method required
+            requires_confirmation: To confirm
+            requires_capture: To capture
+            canceled: Canceled
     users:
         section: Piloting
         title: Users

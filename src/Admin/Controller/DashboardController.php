@@ -6,6 +6,7 @@ namespace App\Admin\Controller;
 
 use App\Admin\Repository\AdminUserRepository;
 use App\Admin\Repository\CallRepository;
+use App\Admin\Service\AdminKpiBuilder;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -39,6 +40,7 @@ final class DashboardController extends AbstractController
         private readonly ContactRepository $contactRepository,
         private readonly CallRepository $callRepository,
         private readonly AdminUserRepository $adminUserRepository,
+        private readonly AdminKpiBuilder $kpiBuilder,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -111,30 +113,47 @@ final class DashboardController extends AbstractController
         $callsThisMonth = end($callsCounts) ?: 0;
         $callsLastMonth = $callsCounts[\count($callsCounts) - 2] ?? 0;
 
+        // Year-to-date leads (contacts + calls) by summing buckets that
+        // fall in the current civil year. Reuses the 12-month series so
+        // no extra repository call.
+        $currentYearPrefix = $today->format('Y').'-';
+        $thisYearLeads = 0;
+        foreach ($contactsByMonth as $bucket) {
+            if (str_starts_with($bucket['ym'], $currentYearPrefix)) {
+                $thisYearLeads += (int) $bucket['count'];
+            }
+        }
+        foreach ($callsByMonth as $bucket) {
+            if (str_starts_with($bucket['ym'], $currentYearPrefix)) {
+                $thisYearLeads += (int) $bucket['count'];
+            }
+        }
+
         $kpis = [
-            $this->buildKpi(
+            $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.callsLast7d'),
                 period: $this->translator->trans('admin.dashboard.kpi.period.last7d'),
                 current: $callsLast7,
                 previous: $callsPrev7,
             ),
-            $this->buildKpi(
+            $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.contactsLast7d'),
                 period: $this->translator->trans('admin.dashboard.kpi.period.last7d'),
                 current: $contactsLast7,
                 previous: $contactsPrev7,
             ),
-            $this->buildKpi(
+            $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.leadsThisMonth'),
                 period: $this->formatMonthLabel($today, $locale),
                 current: $contactsThisMonth + $callsThisMonth,
                 previous: $contactsLastMonth + $callsLastMonth,
             ),
             // Calls API caps at 12 months → no 24-month comparison possible,
-            // so this card stays neutral (no trend, no arrow).
-            $this->buildKpi(
+            // so this card stays neutral. Renders as a "two stats with
+            // divider" (12-month total + year-to-date) in the template.
+            $this->kpiBuilder->build(
                 title: $this->translator->trans('admin.dashboard.kpi.leadsLast12Months'),
-                period: $this->translator->trans('admin.dashboard.kpi.period.last12m'),
+                period: $this->translator->trans('admin.dashboard.kpi.period.summary'),
                 current: array_sum($contactsCounts) + array_sum($callsCounts),
                 previous: null,
             ),
@@ -143,6 +162,8 @@ final class DashboardController extends AbstractController
         return $this->render('admin/dashboard/index.html.twig', [
             'adminPrefix' => $adminPrefix,
             'todayLabel' => $this->formatToday($today, $locale),
+            'thisYearLeads' => $thisYearLeads,
+            'thisYearLabel' => $today->format('Y'),
             'chartLabels' => $chartLabels,
             'chartSeries' => [
                 [
@@ -245,39 +266,6 @@ final class DashboardController extends AbstractController
         }
 
         return $sum;
-    }
-
-    /**
-     * Builds a KPI card payload comparing $current to $previous. When
-     * $previous is null, the card stays neutral (no comparison data
-     * available — e.g. periods that fall outside our 12-month window).
-     *
-     * @return array{title:string, period:string, value:int, previous:?int, deltaPercent:?int, trend:'up'|'down'|'neutral'}
-     */
-    private function buildKpi(string $title, string $period, int $current, ?int $previous): array
-    {
-        $trend = 'neutral';
-        $deltaPercent = null;
-
-        if (null !== $previous) {
-            if ($previous > 0) {
-                $deltaPercent = (int) round((($current - $previous) / $previous) * 100);
-                $trend = $deltaPercent > 0 ? 'up' : ($deltaPercent < 0 ? 'down' : 'neutral');
-            } elseif ($current > 0) {
-                // 0 → N: real growth, but % is undefined. The template
-                // shows an arrow without a percentage in that case.
-                $trend = 'up';
-            }
-        }
-
-        return [
-            'title' => $title,
-            'period' => $period,
-            'value' => $current,
-            'previous' => $previous,
-            'deltaPercent' => $deltaPercent,
-            'trend' => $trend,
-        ];
     }
 
     private function formatToday(\DateTimeImmutable $date, string $locale): string
