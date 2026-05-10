@@ -189,6 +189,51 @@ final class PaymentsController extends AbstractController
             }
         }
 
+        // ── This-month vs last-month daily chart ──────────────────────
+        // Reuses $dailyAllTime (same cache as the all-time chart) and
+        // slices it into two day-of-month-aligned series. Future days of
+        // the current month are null so the line stops at "today" instead
+        // of dropping to zero across the rest of the month.
+        $dailyByDate = [];
+        foreach ($dailyAllTime as $row) {
+            $dailyByDate[$row['date']] = (int) $row['amount'];
+        }
+        $curMonthStart = $today->modify('first day of this month');
+        $prevMonthStart = $curMonthStart->modify('-1 month');
+        $daysInCurrent = (int) $curMonthStart->format('t');
+        $daysInPrevious = (int) $prevMonthStart->format('t');
+        $daysMax = max($daysInCurrent, $daysInPrevious);
+        $todayDay = (int) $today->format('j');
+        $monthlyDailyLabels = [];
+        $monthlyDailyCurrent = [];
+        $monthlyDailyPrevious = [];
+        $monthlyDailyHasData = false;
+        for ($d = 1; $d <= $daysMax; ++$d) {
+            $monthlyDailyLabels[] = (string) $d;
+
+            if ($d > $daysInCurrent || $d > $todayDay) {
+                $monthlyDailyCurrent[] = null;
+            } else {
+                $key = $curMonthStart->modify('+'.($d - 1).' days')->format('Y-m-d');
+                $amount = round(($dailyByDate[$key] ?? 0) / 100, 2);
+                $monthlyDailyCurrent[] = $amount;
+                if ($amount > 0) {
+                    $monthlyDailyHasData = true;
+                }
+            }
+
+            if ($d > $daysInPrevious) {
+                $monthlyDailyPrevious[] = null;
+            } else {
+                $key = $prevMonthStart->modify('+'.($d - 1).' days')->format('Y-m-d');
+                $amount = round(($dailyByDate[$key] ?? 0) / 100, 2);
+                $monthlyDailyPrevious[] = $amount;
+                if ($amount > 0) {
+                    $monthlyDailyHasData = true;
+                }
+            }
+        }
+
         // ── All-time daily chart (succeeded only, contiguous series) ───
         $allTimeChartLabels = array_map(
             fn (array $row): string => $this->dateFormatter->dayLabel(new \DateTimeImmutable($row['date']), $locale),
@@ -224,6 +269,19 @@ final class PaymentsController extends AbstractController
                     'label' => $this->translator->trans('admin.payments.charts.monthly.seriesLabel'),
                     'data' => $monthlyChartData,
                     ...ChartPalette::SKY,
+                ],
+            ] : [],
+            'monthlyDailyChartLabels' => $monthlyDailyLabels,
+            'monthlyDailyChartSeries' => $monthlyDailyHasData ? [
+                [
+                    'label' => $this->dateFormatter->monthName($prevMonthStart, $locale),
+                    'data' => $monthlyDailyPrevious,
+                    ...ChartPalette::PINK,
+                ],
+                [
+                    'label' => $this->dateFormatter->monthName($curMonthStart, $locale),
+                    'data' => $monthlyDailyCurrent,
+                    ...ChartPalette::INDIGO,
                 ],
             ] : [],
             'allTimeChartLabels' => $allTimeChartLabels,

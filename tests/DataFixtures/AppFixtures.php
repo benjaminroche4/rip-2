@@ -2,6 +2,7 @@
 
 namespace App\Tests\DataFixtures;
 
+use App\Tests\Admin\Factory\DocumentFactory;
 use App\Tests\Auth\Factory\UserFactory;
 use App\Tests\Contact\Factory\ContactFactory;
 use App\Tests\Newsletter\Factory\NewsletterFactory;
@@ -21,5 +22,6 @@ class AppFixtures extends Fixture
 
         PropertyEstimationFactory::createMany(20);
         NewsletterFactory::createMany(20);
+        DocumentFactory::createMany(10);
     }
 }

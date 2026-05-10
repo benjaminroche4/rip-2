@@ -1567,6 +1567,9 @@ admin:
                 title: Activité mensuelle
                 subtitle: Montant total des paiements par mois sur les 12 derniers mois
                 seriesLabel: Montant
+            monthlyDaily:
+                title: Activité du mois
+                subtitle: Paiements journaliers, ce mois vs mois précédent
             weekly:
                 title: 4 dernières semaines vs 4 semaines précédentes
                 subtitle: 'Chiffre d''affaires hebdomadaire, comparaison sur 4 semaines'

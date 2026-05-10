@@ -1566,6 +1566,9 @@ admin:
                 title: Monthly activity
                 subtitle: Total payment amount per month over the last 12 months
                 seriesLabel: Amount
+            monthlyDaily:
+                title: This month's activity
+                subtitle: Daily payments, this month vs prior month
             weekly:
                 title: Last 4 weeks vs prior 4 weeks
                 subtitle: 'Weekly revenue, 4-week rolling comparison'
