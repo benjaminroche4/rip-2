@@ -26,7 +26,7 @@
             <div class="flex items-center gap-1">
                 <twig:Label for="{{ form.nameFr.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
                     {{ 'admin.tools.documents.form.nameFr.label'|trans }}
-                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
+                    <span class="font-medium text-gray-500">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
                 </twig:Label>
                 <span class="text-red-600" aria-hidden="true">*</span>
             </div>
@@ -54,7 +54,7 @@
             <div class="flex items-center gap-1">
                 <twig:Label for="{{ form.nameEn.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
                     {{ 'admin.tools.documents.form.nameEn.label'|trans }}
-                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
+                    <span class="font-medium text-gray-500">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
                 </twig:Label>
                 <span class="text-red-600" aria-hidden="true">*</span>
             </div>
@@ -82,7 +82,7 @@
     <div>
         <twig:Label for="{{ form.descriptionFr.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
             {{ 'admin.tools.documents.form.descriptionFr.label'|trans }}
-            <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
+            <span class="font-medium text-gray-500">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
         </twig:Label>
         <div class="mt-2">
             <textarea
@@ -106,7 +106,7 @@
     <div>
         <twig:Label for="{{ form.descriptionEn.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
             {{ 'admin.tools.documents.form.descriptionEn.label'|trans }}
-            <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
+            <span class="font-medium text-gray-500">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
         </twig:Label>
         <div class="mt-2">
             <textarea
@@ -145,7 +145,7 @@
             </span>
             <span class="min-w-0 flex-1">
                 <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900">
-                    <twig:ux:icon name="lucide:pin" class="size-3.5 shrink-0 text-gray-500" />
+                    <twig:ux:icon name="lucide:pin" class="size-3.5 shrink-0 text-gray-500" aria-hidden="true" />
                     {{ 'admin.tools.documents.form.pinned.label'|trans }}
                 </span>
                 <span class="mt-0.5 block text-xs text-gray-500">{{ 'admin.tools.documents.form.pinned.help'|trans }}</span>

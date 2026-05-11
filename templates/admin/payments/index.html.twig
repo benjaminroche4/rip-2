@@ -1,8 +1,13 @@
 {% extends 'admin/base.html.twig' %}
 
 {% block title %}{{ 'admin.payments.title'|trans }}{% endblock %}
-{% block page_title %}{{ 'admin.payments.title'|trans }}{% endblock %}
-{% block page_subtitle %}{{ 'admin.payments.subtitle'|trans }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ 'admin.payments.title'|trans }}"
+        subtitle="{{ 'admin.payments.subtitle'|trans }}"
+    />
+{% endblock %}
 
 {% block body %}
     <div class="space-y-8">
@@ -14,28 +19,14 @@
                     <twig:Admin:KpiComparisonCard :kpi="kpi" currencySymbol="{{ currencySymbol }}" />
                 {% else %}
                     {# All-time card — two stats with divider (all-time + year-to-date) #}
-                    <article class="rounded-2xl border border-gray-950/5 bg-white p-2">
-                        <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
-                            <div>
-                                <h3 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h3>
-                                <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ kpi.period }}</p>
-                            </div>
-                            <div class="mt-6 divide-y divide-gray-950/5">
-                                <div class="flex items-baseline justify-between gap-3 pb-3">
-                                    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.payments.kpi.period.allTime'|trans }}</p>
-                                    <p class="text-2xl font-medium tabular-nums text-gray-900">
-                                        {{ kpi.value|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
-                                    </p>
-                                </div>
-                                <div class="flex items-baseline justify-between gap-3 pt-3">
-                                    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.payments.kpi.thisYear'|trans({'%year%': thisYearLabel}) }}</p>
-                                    <p class="text-2xl font-medium tabular-nums text-gray-900">
-                                        {{ thisYearAmount|number_format(0, ',', ' ') }}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
+                    <twig:Admin:KpiAllTimeCard
+                        :kpi="kpi"
+                        firstLabel="{{ 'admin.payments.kpi.period.allTime'|trans }}"
+                        :firstValue="kpi.value"
+                        secondLabel="{{ 'admin.payments.kpi.thisYear'|trans({'%year%': thisYearLabel}) }}"
+                        :secondValue="thisYearAmount"
+                        currencySymbol="{{ currencySymbol }}"
+                    />
                 {% endif %}
             {% endfor %}
         </section>
@@ -45,9 +36,9 @@
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
                 <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
-                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.monthly.title'|trans }}
-                        </h3>
+                        </h2>
                         <p class="mt-0.5 text-sm text-pretty text-gray-500">
                             {{ 'admin.payments.charts.monthly.subtitle'|trans }}
                         </p>
@@ -70,9 +61,9 @@
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
                 <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
-                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.monthlyDaily.title'|trans }}
-                        </h3>
+                        </h2>
                         <p class="mt-0.5 text-sm text-pretty text-gray-500">
                             {{ 'admin.payments.charts.monthlyDaily.subtitle'|trans }}
                         </p>
@@ -96,9 +87,9 @@
                 <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="flex items-baseline justify-between gap-6 px-3 pt-3 pb-5">
                         <div>
-                            <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                            <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                                 {{ 'admin.payments.charts.weekly.title'|trans }}
-                            </h3>
+                            </h2>
                             <p class="mt-0.5 text-sm text-pretty text-gray-500">
                                 {{ 'admin.payments.charts.weekly.subtitle'|trans }}
                             </p>
@@ -125,9 +116,9 @@
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
                 <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
-                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.allTime.title'|trans }}
-                        </h3>
+                        </h2>
                         <p class="mt-0.5 text-sm text-pretty text-gray-500">
                             {{ 'admin.payments.charts.allTime.subtitle'|trans }}
                         </p>
@@ -150,9 +141,9 @@
             <section class="rounded-2xl border border-gray-950/5 bg-white p-2">
                 <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0">
                     <div class="px-3 pt-3 pb-5">
-                        <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                        <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                             {{ 'admin.payments.charts.weekdays.title'|trans }}
-                        </h3>
+                        </h2>
                         <p class="mt-0.5 text-sm text-pretty text-gray-500">
                             {{ 'admin.payments.charts.weekdays.subtitle'|trans }}
                         </p>

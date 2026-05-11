@@ -19,11 +19,11 @@
 
     <div class="flex flex-col gap-5">
         <div>
-            <p class="text-sm font-semibold text-gray-900">
+            <p id="{{ personForm.role.vars.id }}-label" class="text-sm font-semibold text-gray-900">
                 {{ 'admin.tools.documents.request.person.role.label'|trans }}
                 <span class="text-red-600" aria-hidden="true">*</span>
             </p>
-            <div role="radiogroup" class="mt-2 inline-flex rounded-lg border border-gray-950/5 bg-neutral-50/50 p-1">
+            <div role="radiogroup" aria-labelledby="{{ personForm.role.vars.id }}-label" class="mt-2 inline-flex rounded-lg border border-gray-950/5 bg-neutral-50/50 p-1">
                 {% for choice in personForm.role.children %}
                     <label for="{{ choice.vars.id }}" class="cursor-pointer rounded-md px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:text-gray-900 has-[input:checked]:bg-white has-[input:checked]:text-primary has-[input:checked]:shadow-sm">
                         <input
@@ -87,11 +87,11 @@
         </div>
 
         <div>
-            <p class="text-sm font-semibold text-gray-900">
+            <p id="{{ personForm.documents.vars.id }}-label" class="text-sm font-semibold text-gray-900">
                 {{ 'admin.tools.documents.request.person.documents.label'|trans }}
                 <span class="text-red-600" aria-hidden="true">*</span>
             </p>
-            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div role="group" aria-labelledby="{{ personForm.documents.vars.id }}-label" class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {% if personForm.documents.children is empty %}
                     <p class="col-span-full rounded-lg border border-dashed border-gray-950/10 bg-gray-50/50 p-3 text-xs italic text-gray-500">
                         {{ 'admin.tools.documents.request.person.documents.emptyCatalogue'|trans }}
@@ -121,6 +121,7 @@
                                             name="lucide:pin"
                                             class="size-3 shrink-0 text-gray-400"
                                             title="{{ 'admin.tools.documents.list.pinnedBadge'|trans }}"
+                                            role="img"
                                             aria-label="{{ 'admin.tools.documents.list.pinnedBadge'|trans }}"
                                             data-testid="document-pinned-badge"
                                         />
@@ -152,7 +153,7 @@
         data-live-action-param="removePerson"
         data-live-index-param="{{ idx }}"
     >
-        <twig:ux:icon name="lucide:x" class="size-3.5 shrink-0" />
+        <twig:ux:icon name="lucide:x" class="size-3.5 shrink-0" aria-hidden="true" />
         {{ label }}
     </button>
 {% endmacro %}
@@ -181,9 +182,9 @@
     {# ───── Persons (sidebar master-detail) ─────────────────────────── #}
     <section data-testid="document-request-persons">
         <div class="mb-3 flex items-baseline justify-between gap-4">
-            <h3 class="text-base font-semibold tracking-tight text-gray-900">
+            <h2 class="text-base font-semibold tracking-tight text-gray-900">
                 {{ 'admin.tools.documents.request.persons.title'|trans }}
-            </h3>
+            </h2>
             <p class="text-xs text-gray-500">
                 {{ 'admin.tools.documents.request.persons.count'|trans({'%count%': personCount, '%max%': maxPersons}) }}
             </p>
@@ -234,7 +235,7 @@
                             data-live-action-param="addPerson"
                             data-testid="document-request-add-person"
                         >
-                            <twig:ux:icon name="lucide:user-plus" class="size-3.5 shrink-0" />
+                            <twig:ux:icon name="lucide:user-plus" class="size-3.5 shrink-0" aria-hidden="true" />
                             {{ 'admin.tools.documents.request.actions.addPerson'|trans }}
                         </button>
                     {% endif %}
@@ -276,9 +277,9 @@
     } %}
     <section data-testid="document-request-typology">
         <div class="mb-3">
-            <h3 class="text-base font-semibold tracking-tight text-gray-900">
+            <h2 class="text-base font-semibold tracking-tight text-gray-900">
                 {{ 'admin.tools.documents.request.typology.title'|trans }}
-            </h3>
+            </h2>
             <p class="mt-0.5 text-sm text-gray-500">{{ 'admin.tools.documents.request.typology.subtitle'|trans }}</p>
         </div>
 
@@ -296,12 +297,12 @@
                     />
                     <span class="flex items-center gap-1.5 text-gray-700 group-has-[input:checked]:text-primary">
                         {% for _ in 1..comp.tenants %}
-                            <twig:ux:icon name="lucide:user" class="size-6 shrink-0" />
+                            <twig:ux:icon name="lucide:user" class="size-6 shrink-0" aria-hidden="true" />
                         {% endfor %}
                         {% if comp.guarantors > 0 %}
                             <span class="mx-1 text-gray-300">+</span>
                             {% for _ in 1..comp.guarantors %}
-                                <twig:ux:icon name="lucide:shield-check" class="size-6 shrink-0" />
+                                <twig:ux:icon name="lucide:shield-check" class="size-6 shrink-0" aria-hidden="true" />
                             {% endfor %}
                         {% endif %}
                     </span>
@@ -322,7 +323,7 @@
         <twig:Label for="{{ form.note.vars.id }}" class="text-sm font-semibold text-gray-900">
             {{ 'admin.tools.documents.request.note.label'|trans }}
         </twig:Label>
-        <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.tools.documents.request.note.help'|trans }}</p>
+        <p id="{{ form.note.vars.id }}-help" class="mt-0.5 text-xs text-gray-500">{{ 'admin.tools.documents.request.note.help'|trans }}</p>
         <div class="mt-2">
             <textarea
                 id="{{ form.note.vars.id }}"
@@ -331,6 +332,7 @@
                 maxlength="2000"
                 placeholder="{{ 'admin.tools.documents.request.note.placeholder'|trans }}"
                 aria-invalid="{{ form.note.vars.errors|length > 0 ? 'true' : 'false' }}"
+                aria-describedby="{{ form.note.vars.id }}-help"
                 class="block min-h-20 w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:ring-primary/60 focus:outline focus:-outline-offset-2 focus:outline-2 focus:outline-primary/80 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm/6"
             >{{ form.note.vars.value }}</textarea>
             {% for error in form.note.vars.errors %}
@@ -396,7 +398,7 @@
     {# ───── Submit ──────────────────────────────────────────────────── #}
     <div class="flex flex-col-reverse items-stretch gap-3 border-t border-gray-950/5 pt-5 sm:flex-row sm:items-center sm:justify-end">
         <twig:Button variant="default" type="submit" data-testid="document-request-submit">
-            <twig:ux:icon name="lucide:download" class="size-4 shrink-0" />
+            <twig:ux:icon name="lucide:download" class="size-4 shrink-0" aria-hidden="true" />
             {{ 'admin.tools.documents.request.actions.generate'|trans }}
         </twig:Button>
     </div>

@@ -1,8 +1,13 @@
 {% extends 'admin/base.html.twig' %}
 
 {% block title %}{{ 'admin.users.title'|trans }}{% endblock %}
-{% block page_title %}{{ 'admin.users.title'|trans }}{% endblock %}
-{% block page_subtitle %}{{ 'admin.users.subtitle'|trans }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ 'admin.users.title'|trans }}"
+        subtitle="{{ 'admin.users.subtitle'|trans }}"
+    />
+{% endblock %}
 
 {% block body %}
     <div class="space-y-8" data-testid="users-page">

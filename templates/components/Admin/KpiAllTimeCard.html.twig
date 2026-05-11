@@ -1,0 +1,29 @@
+{# @prop kpi array{title: string, period: string, value: int} KPI payload (only title + period are read here; value is rendered as firstValue). #}
+{# @prop firstLabel string Upper-row label, e.g. "12 derniers mois" or "Depuis le début". #}
+{# @prop firstValue int Upper-row numeric value. #}
+{# @prop secondLabel string Lower-row label, e.g. "Année 2026". #}
+{# @prop secondValue int Lower-row numeric value. #}
+{# @prop currencySymbol string Optional currency suffix appended after each value. #}
+{%- props kpi, firstLabel, firstValue, secondLabel, secondValue, currencySymbol = '' -%}
+<article {{ attributes.defaults({class: 'rounded-2xl border border-gray-950/5 bg-white p-2'}) }}>
+    <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h2>
+            <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ kpi.period }}</p>
+        </div>
+        <div class="mt-6 divide-y divide-gray-950/5">
+            <div class="flex items-baseline justify-between gap-3 pb-3">
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ firstLabel }}</p>
+                <p class="text-2xl font-medium tabular-nums text-gray-900">
+                    {{ firstValue|number_format(0, ',', ' ') }}{% if currencySymbol|default('') %}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>{% endif %}
+                </p>
+            </div>
+            <div class="flex items-baseline justify-between gap-3 pt-3">
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ secondLabel }}</p>
+                <p class="text-2xl font-medium tabular-nums text-gray-900">
+                    {{ secondValue|number_format(0, ',', ' ') }}{% if currencySymbol|default('') %}<span class="ml-0.5 text-base text-gray-500">{{ currencySymbol }}</span>{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</article>

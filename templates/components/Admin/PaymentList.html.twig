@@ -1,9 +1,9 @@
 <div {{ attributes }} data-testid="payments-table-section">
     <div class="mb-4 flex items-end justify-between gap-4">
         <div>
-            <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+            <h2 class="text-xl font-semibold tracking-tight text-gray-900">
                 {{ 'admin.payments.table.title'|trans }}
-            </h3>
+            </h2>
             <p class="mt-0.5 text-sm text-pretty text-gray-500">
                 {{ 'admin.payments.table.subtitle'|trans({'%count%': this.totalCount}) }}
             </p>
@@ -15,7 +15,7 @@
             class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
             {{ 'admin.payments.table.viewAll'|trans }}
-            {{ ux_icon('lucide:external-link', {class: 'size-3.5'}) }}
+            {{ ux_icon('lucide:external-link', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
         </a>
     </div>
 
@@ -54,7 +54,7 @@
                             {% set badgeVariant = statusVariant[row.status] ?? 'destructive' %}
                             <tr class="text-sm hover:bg-neutral-50/60">
                                 <td class="px-4 py-4 tabular-nums whitespace-nowrap text-gray-700">
-                                    {{ row.createdAt|format_datetime('medium', 'short', locale=app.request.locale) }}
+                                    {{ row.createdAt|format_datetime('medium', 'short', locale=app.locale) }}
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
@@ -91,7 +91,7 @@
                         data-live-action-param="more"
                         data-testid="payments-load-more"
                     >
-                        {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
+                        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
                         {{ 'admin.payments.table.loadMore'|trans }}
                     </twig:Button>
                 </div>

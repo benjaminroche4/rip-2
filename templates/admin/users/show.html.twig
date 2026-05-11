@@ -12,16 +12,20 @@
 {% set idleDays = profile.lastLoginAt ? date('now').diff(profile.lastLoginAt).days : null %}
 
 {% block title %}{{ displayName }}{% endblock %}
-{% block page_title %}{{ displayName }}{% endblock %}
-{% block page_subtitle %}{{ 'admin.users.profile.title'|trans }}{% endblock %}
-{% block page_actions %}
-    <a
-        href="{{ path('admin_users', {adminPrefix: adminPrefix}) }}"
-        class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ displayName }}"
+        subtitle="{{ 'admin.users.profile.title'|trans }}"
     >
-        {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }}
-        {{ 'admin.users.profile.backToList'|trans }}
-    </a>
+        <a
+            href="{{ path('admin_users', {adminPrefix: adminPrefix}) }}"
+            class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+        >
+            {{ ux_icon('lucide:arrow-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            {{ 'admin.users.profile.backToList'|trans }}
+        </a>
+    </twig:Admin:PageHeader>
 {% endblock %}
 
 {% block body %}
@@ -35,7 +39,7 @@
                         size="24"
                         class="mx-auto"
                     />
-                    <h3 class="mt-5 text-lg font-semibold tracking-tight text-gray-900">{{ displayName }}</h3>
+                    <h2 class="mt-5 text-lg font-semibold tracking-tight text-gray-900">{{ displayName }}</h2>
                     <p class="mt-1 truncate text-sm text-gray-500">{{ profile.email }}</p>
                     <div class="mt-4 flex flex-wrap justify-center gap-2">
                         <twig:Badge variant="{{ isAdmin ? 'primary' : 'secondary' }}" class="rounded-full">

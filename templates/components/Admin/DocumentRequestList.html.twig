@@ -30,7 +30,7 @@
                         {% for req in this.items %}
                             <tr data-testid="recent-request-row">
                                 <td class="px-4 py-3 tabular-nums whitespace-nowrap text-gray-700">
-                                    {{ req.createdAt|format_datetime('medium', 'short', locale=app.request.locale) }}
+                                    {{ req.createdAt|format_datetime('medium', 'short', locale=app.locale) }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-700">
                                     {%- set names = req.personNames|slice(0, 3)|join(', ') -%}
@@ -49,7 +49,7 @@
                                         data-testid="recent-request-download"
                                         aria-label="{{ 'admin.tools.documents.recent.download'|trans }}"
                                     >
-                                        {{ ux_icon('lucide:download', {class: 'size-4'}) }}
+                                        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
                                         <span>{{ 'admin.tools.documents.recent.download'|trans }}</span>
                                     </a>
                                 </td>
@@ -67,7 +67,7 @@
                         data-live-action-param="more"
                         data-testid="recent-requests-load-more"
                     >
-                        {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
+                        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
                         {{ 'admin.tools.documents.recent.loadMore'|trans }}
                     </twig:Button>
                 </div>

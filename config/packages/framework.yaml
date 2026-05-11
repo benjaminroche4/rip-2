@@ -3,7 +3,13 @@ framework:
     secret: '%env(APP_SECRET)%'
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # Cookie options are pinned explicitly even though Symfony 7.3 defaults
+    # already match — locks the security posture against future framework
+    # upgrades silently flipping a flag.
+    session:
+        cookie_secure: auto
+        cookie_samesite: lax
+        cookie_httponly: true
 
     # ESI + fragments: enables {{ render_esi(controller(...)) }} for auth-aware
     # footer chip. Without a reverse proxy in front, Symfony renders the
@@ -29,6 +35,13 @@ framework:
             policy: fixed_window
             limit: 5
             interval: '1 minute'
+        # Admin mutations: ROLE_ADMIN is already required, but a per-IP
+        # limiter caps damage if an admin session gets hijacked. Keeps
+        # filesystem-friendly (cache.app) — no Redis needed.
+        admin_mutation:
+            policy: fixed_window
+            limit: 60
+            interval: '1 minute'
 
 when@test:
     framework:
@@ -44,4 +57,6 @@ when@test:
             form_estimation:
                 limit: 1000
             form_newsletter:
+                limit: 1000
+            admin_mutation:
                 limit: 1000
