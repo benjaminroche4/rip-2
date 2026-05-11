@@ -15,21 +15,33 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 /**
- * Aggregates Stripe payment intents into per-month totals for the admin
- * dashboard chart. Includes every status (succeeded, failed, canceled,
- * etc.) so the chart shows raw payment activity, not just realized revenue.
+ * Aggregates Stripe payment intents for the admin Payments dashboard.
  *
- * Wraps every Stripe call in try/catch + 10-min cache so the dashboard
- * stays responsive (and renders) even if Stripe is unreachable or the
- * configured API key is invalid.
+ * Performance contract:
+ *   - Every public projection (all-time, monthly, weekly, weekday) derives
+ *     from one shared `dailyAggregates()` map, so the controller's 4–5
+ *     calls trigger at most 2 Stripe sweeps instead of 4 redundant ones.
+ *   - The heavy 20-year sweep is cached 24h (history is immutable past a
+ *     few weeks) and bounded at the trailing edge by RECENT_WINDOW_DAYS.
+ *   - A short delta sweep (RECENT_WINDOW_DAYS days, cached 5 min) keeps
+ *     the current month/week KPIs fresh without re-paginating history.
+ *
+ * Wraps every Stripe call in try/catch so the dashboard stays renderable
+ * even if Stripe is unreachable or the configured API key is invalid.
  */
 #[WithMonologChannel('stripe')]
 class StripePaymentRepository
 {
-    private const CACHE_TTL_SECONDS = 600;
-    private const CACHE_TTL_RECENT_SECONDS = 300;
-    private const CACHE_TTL_ALL_TIME_SECONDS = 86400;
     private const SUCCEEDED_STATUS = 'succeeded';
+    private const HISTORICAL_TTL_SECONDS = 86400;
+    private const RECENT_TTL_SECONDS = 300;
+    private const FAILURE_TTL_SECONDS = 60;
+    private const CACHE_TTL_RECENT_PAYMENTS_SECONDS = 300;
+    /** Trailing window kept fresh by the short cache; everything before it is served from the long cache. */
+    private const RECENT_WINDOW_DAYS = 35;
+    /** Sentinel cached when a Stripe fetch failed, so callers can distinguish "outage" from "no payments". */
+    private const FAILURE_SENTINEL = ['__failed__' => true];
+    private const HISTORY_YEARS = 20;
 
     public function __construct(
         private readonly StripeApiClient $stripeClient,
@@ -55,7 +67,7 @@ class StripePaymentRepository
         $cacheKey = sprintf('stripe.payments.recent.%d', $limit);
 
         return $this->cache->get($cacheKey, function (ItemInterface $item) use ($limit): array {
-            $item->expiresAfter(self::CACHE_TTL_RECENT_SECONDS);
+            $item->expiresAfter(self::CACHE_TTL_RECENT_PAYMENTS_SECONDS);
 
             try {
                 return $this->fetchRecentPayments($limit);
@@ -64,7 +76,7 @@ class StripePaymentRepository
                     'exception_class' => $e::class,
                     'limit' => $limit,
                 ]);
-                $item->expiresAfter(60);
+                $item->expiresAfter(self::FAILURE_TTL_SECONDS);
 
                 return [];
             }
@@ -112,103 +124,53 @@ class StripePaymentRepository
     }
 
     /**
-     * Total successful revenue across the entire account history. Cached
-     * 24h since closed past months never change — only the current month
-     * delta would justify a faster refresh, but we accept the staleness
-     * here in exchange for a single periodic API sweep.
+     * Total successful revenue across the entire account history. Derived
+     * from the shared daily map — no extra Stripe call.
      */
     public function revenueAllTime(): RevenueSnapshot
     {
         $empty = new RevenueSnapshot(0, '', 0);
-
-        if (!$this->stripeClient->isConfigured()) {
+        $aggregates = $this->dailyAggregates();
+        if (null === $aggregates) {
             return $empty;
         }
 
-        return $this->cache->get('stripe.payments.revenue.all_time', function (ItemInterface $item) use ($empty): RevenueSnapshot {
-            $item->expiresAfter(self::CACHE_TTL_ALL_TIME_SECONDS);
-
-            try {
-                // Stripe API has no "since the beginning" sentinel; pick a
-                // window large enough to cover any plausible account age.
-                $end = new \DateTimeImmutable('first day of next month 00:00:00');
-                $start = $end->modify('-20 years');
-
-                return $this->aggregateSucceededRevenue($start, $end);
-            } catch (\Throwable $e) {
-                $this->logger->warning('Stripe all-time revenue fetch failed', [
-                    'exception_class' => $e::class,
-                ]);
-                $item->expiresAfter(60);
-
-                return $empty;
+        $total = 0;
+        $count = 0;
+        $currency = '';
+        foreach ($aggregates as $row) {
+            $total += $row['amount'];
+            $count += $row['count'];
+            if ('' === $currency && '' !== $row['currency']) {
+                $currency = $row['currency'];
             }
-        });
+        }
+
+        return new RevenueSnapshot($total, $currency, $count);
     }
 
     /**
      * Returns successful revenue per day, from the first ever succeeded
      * payment up to today (inclusive). Days with no payment are filled
      * with 0 so the caller gets a contiguous time series ready to plot.
-     * Cached 24h — the trailing edge stales by at most a day, which is
-     * acceptable for an "all-time" view.
      *
      * @return list<array{date: string, amount: int}>
      */
     public function revenueByDayAllTime(): array
     {
-        if (!$this->stripeClient->isConfigured()) {
+        $aggregates = $this->dailyAggregates();
+        if (null === $aggregates || [] === $aggregates) {
             return [];
         }
 
-        return $this->cache->get('stripe.payments.revenue.daily.all_time', function (ItemInterface $item): array {
-            $item->expiresAfter(self::CACHE_TTL_ALL_TIME_SECONDS);
-
-            try {
-                return $this->fetchRevenueByDayAllTime();
-            } catch (\Throwable $e) {
-                $this->logger->warning('Stripe daily revenue (all time) fetch failed', [
-                    'exception_class' => $e::class,
-                ]);
-                $item->expiresAfter(60);
-
-                return [];
-            }
-        });
-    }
-
-    /**
-     * @return list<array{date: string, amount: int}>
-     */
-    private function fetchRevenueByDayAllTime(): array
-    {
-        // Stripe API has no "since the beginning" sentinel; pick a window
-        // large enough to cover any plausible account age.
-        $end = new \DateTimeImmutable('first day of next month 00:00:00');
-        $start = $end->modify('-20 years');
-
-        $byDay = [];
-        foreach ($this->stripeClient->listPaymentIntents($start, $end) as $intent) {
-            if (self::SUCCEEDED_STATUS !== $intent->status) {
-                continue;
-            }
-            $createdAt = (new \DateTimeImmutable('@'.$intent->created))->setTimezone($end->getTimezone());
-            $key = $createdAt->format('Y-m-d');
-            $byDay[$key] = ($byDay[$key] ?? 0) + (int) $intent->amount;
-        }
-
-        if (empty($byDay)) {
-            return [];
-        }
-
-        ksort($byDay);
-        $first = new \DateTimeImmutable((string) array_key_first($byDay));
+        ksort($aggregates);
+        $first = new \DateTimeImmutable((string) array_key_first($aggregates));
         $today = new \DateTimeImmutable('today');
 
         $series = [];
         for ($cursor = $first; $cursor <= $today; $cursor = $cursor->modify('+1 day')) {
             $key = $cursor->format('Y-m-d');
-            $series[] = ['date' => $key, 'amount' => $byDay[$key] ?? 0];
+            $series[] = ['date' => $key, 'amount' => $aggregates[$key]['amount'] ?? 0];
         }
 
         return $series;
@@ -226,59 +188,30 @@ class StripePaymentRepository
             return [];
         }
 
-        $cacheKey = sprintf('stripe.payments.revenue.monthly.%d', $monthsBack);
-
-        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($monthsBack): array {
-            $item->expiresAfter(self::CACHE_TTL_SECONDS);
-
-            try {
-                return $this->fetchSuccessfulRevenueByMonth($monthsBack);
-            } catch (\Throwable $e) {
-                $this->logger->warning('Stripe monthly revenue fetch failed', [
-                    'exception_class' => $e::class,
-                    'months_back' => $monthsBack,
-                ]);
-                $item->expiresAfter(60);
-
-                return [];
-            }
-        });
-    }
-
-    /**
-     * @return list<MonthlyPaymentTotal>
-     */
-    private function fetchSuccessfulRevenueByMonth(int $monthsBack): array
-    {
-        $end = new \DateTimeImmutable('first day of next month 00:00:00');
-        $start = $end->modify('-'.$monthsBack.' months');
+        $aggregates = $this->dailyAggregates();
+        if (null === $aggregates) {
+            return [];
+        }
 
         $byYm = [];
-        $currencyByYm = [];
-
-        foreach ($this->stripeClient->listPaymentIntents($start, $end) as $intent) {
-            if (self::SUCCEEDED_STATUS !== $intent->status) {
-                continue;
-            }
-            $createdAt = (new \DateTimeImmutable('@'.$intent->created))->setTimezone($end->getTimezone());
-            $ym = $createdAt->format('Y-m');
-
-            $byYm[$ym] = ($byYm[$ym] ?? ['amount' => 0, 'count' => 0]);
-            $byYm[$ym]['amount'] += (int) $intent->amount;
-            ++$byYm[$ym]['count'];
-
-            if (!isset($currencyByYm[$ym])) {
-                $currencyByYm[$ym] = strtoupper((string) $intent->currency);
+        foreach ($aggregates as $date => $row) {
+            $ym = substr($date, 0, 7);
+            $byYm[$ym] ??= ['amount' => 0, 'count' => 0, 'currency' => ''];
+            $byYm[$ym]['amount'] += $row['amount'];
+            $byYm[$ym]['count'] += $row['count'];
+            if ('' === $byYm[$ym]['currency']) {
+                $byYm[$ym]['currency'] = $row['currency'];
             }
         }
 
+        $end = new \DateTimeImmutable('first day of next month 00:00:00');
         $series = [];
         for ($i = $monthsBack; $i >= 1; --$i) {
             $ym = $end->modify('-'.$i.' months')->format('Y-m');
             $series[] = new MonthlyPaymentTotal(
                 ym: $ym,
                 totalAmount: $byYm[$ym]['amount'] ?? 0,
-                currency: $currencyByYm[$ym] ?? '',
+                currency: $byYm[$ym]['currency'] ?? '',
                 count: $byYm[$ym]['count'] ?? 0,
             );
         }
@@ -288,9 +221,7 @@ class StripePaymentRepository
 
     /**
      * Returns total successful revenue distributed across the 7 weekdays
-     * (1=Monday, 7=Sunday — ISO 8601). Reuses the cached daily series so
-     * this is essentially free; lets callers spot which weekday brings
-     * the most revenue across the whole account history.
+     * (1=Monday, 7=Sunday — ISO 8601). Derived from the shared daily map.
      *
      * @return array<int, int>
      */
@@ -306,9 +237,9 @@ class StripePaymentRepository
     }
 
     /**
-     * Returns successful revenue grouped by ISO week (Y-\WW) for the
-     * window [$from, $to). Result is keyed by the ISO week label so the
-     * caller can stitch together comparison series.
+     * Returns successful revenue grouped by ISO week (o-W) for the window
+     * [$from, $to). Result is keyed by the ISO week label so callers can
+     * stitch comparison series together.
      *
      * @return array<string, int>
      */
@@ -318,55 +249,158 @@ class StripePaymentRepository
             return [];
         }
 
-        $cacheKey = sprintf('stripe.payments.revenue.weekly.%s.%s', $from->format('Ymd'), $to->format('Ymd'));
+        $aggregates = $this->dailyAggregates();
+        if (null === $aggregates) {
+            return [];
+        }
 
-        return $this->cache->get($cacheKey, function (ItemInterface $item) use ($from, $to): array {
-            $item->expiresAfter(self::CACHE_TTL_SECONDS);
+        $tz = $from->getTimezone();
+        $fromKey = $from->format('Y-m-d');
+        $toKey = $to->format('Y-m-d');
 
-            try {
-                $byWeek = [];
-                foreach ($this->stripeClient->listPaymentIntents($from, $to) as $intent) {
-                    if (self::SUCCEEDED_STATUS !== $intent->status) {
-                        continue;
-                    }
-                    $createdAt = (new \DateTimeImmutable('@'.$intent->created))->setTimezone($from->getTimezone());
-                    $key = $createdAt->format('o-W'); // ISO 8601 year-week
-                    $byWeek[$key] = ($byWeek[$key] ?? 0) + (int) $intent->amount;
-                }
-
-                return $byWeek;
-            } catch (\Throwable $e) {
-                $this->logger->warning('Stripe weekly revenue fetch failed', [
-                    'exception_class' => $e::class,
-                ]);
-                $item->expiresAfter(60);
-
-                return [];
+        $byWeek = [];
+        foreach ($aggregates as $date => $row) {
+            if ($date < $fromKey || $date >= $toKey) {
+                continue;
             }
-        });
+            $weekKey = (new \DateTimeImmutable($date, $tz))->format('o-W');
+            $byWeek[$weekKey] = ($byWeek[$weekKey] ?? 0) + $row['amount'];
+        }
+
+        return $byWeek;
     }
 
     /**
-     * Sums every succeeded payment intent in [$from, $to) into a single
-     * snapshot. Used by the all-time KPI.
+     * Merged daily aggregates (succeeded only) keyed by YYYY-MM-DD, value
+     * carries amount/count/currency for the day. Splits the fetch into a
+     * long-cached historical slice and a short-cached recent slice so the
+     * page stays both fast and fresh. Returns null when either Stripe
+     * fetch failed (callers downgrade to an empty projection instead of
+     * surfacing "0 payments since the dawn of time").
+     *
+     * @return array<string, array{amount: int, count: int, currency: string}>|null
      */
-    private function aggregateSucceededRevenue(\DateTimeImmutable $from, \DateTimeImmutable $to): RevenueSnapshot
+    private function dailyAggregates(): ?array
     {
-        $total = 0;
-        $count = 0;
-        $currency = '';
+        if (!$this->stripeClient->isConfigured()) {
+            return null;
+        }
+
+        $historical = $this->historicalAggregates();
+        $recent = $this->recentAggregates();
+
+        if (null === $historical || null === $recent) {
+            return null;
+        }
+
+        // Recent overrides historical on overlapping days (PHP `+` keeps
+        // left-side keys), so the trailing edge always reflects the 5-min
+        // sweep instead of the day-old snapshot.
+        return $recent + $historical;
+    }
+
+    /**
+     * Heavy 20-year sweep, cached 24h. Stops at the start of the recent
+     * window so the cached slice is effectively immutable.
+     *
+     * @return array<string, array{amount: int, count: int, currency: string}>|null
+     */
+    private function historicalAggregates(): ?array
+    {
+        $result = $this->cache->get('stripe.payments.aggregates.historical', function (ItemInterface $item): array {
+            $item->expiresAfter(self::HISTORICAL_TTL_SECONDS);
+
+            try {
+                $end = (new \DateTimeImmutable('today'))->modify('-'.self::RECENT_WINDOW_DAYS.' days');
+                $start = $end->modify('-'.self::HISTORY_YEARS.' years');
+
+                return $this->aggregateByDay($start, $end);
+            } catch (\Throwable $e) {
+                $this->logger->warning('Stripe historical aggregates fetch failed', [
+                    'exception_class' => $e::class,
+                ]);
+                $item->expiresAfter(self::FAILURE_TTL_SECONDS);
+
+                return self::FAILURE_SENTINEL;
+            }
+        });
+
+        return $this->unwrapSentinel($result);
+    }
+
+    /**
+     * Lightweight recent-window sweep, cached 5 min.
+     *
+     * @return array<string, array{amount: int, count: int, currency: string}>|null
+     */
+    private function recentAggregates(): ?array
+    {
+        $result = $this->cache->get('stripe.payments.aggregates.recent', function (ItemInterface $item): array {
+            $item->expiresAfter(self::RECENT_TTL_SECONDS);
+
+            try {
+                $end = new \DateTimeImmutable('first day of next month 00:00:00');
+                $start = (new \DateTimeImmutable('today'))->modify('-'.self::RECENT_WINDOW_DAYS.' days');
+
+                return $this->aggregateByDay($start, $end);
+            } catch (\Throwable $e) {
+                $this->logger->warning('Stripe recent aggregates fetch failed', [
+                    'exception_class' => $e::class,
+                ]);
+                $item->expiresAfter(self::FAILURE_TTL_SECONDS);
+
+                return self::FAILURE_SENTINEL;
+            }
+        });
+
+        return $this->unwrapSentinel($result);
+    }
+
+    /**
+     * Iterates Stripe payment intents in [$from, $to) and folds the
+     * succeeded ones into per-day totals.
+     *
+     * @return array<string, array{amount: int, count: int, currency: string}>
+     */
+    private function aggregateByDay(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $tz = $to->getTimezone();
+        $byDay = [];
 
         foreach ($this->stripeClient->listPaymentIntents($from, $to) as $intent) {
             if (self::SUCCEEDED_STATUS !== $intent->status) {
                 continue;
             }
-            $total += (int) $intent->amount;
-            ++$count;
-            if ('' === $currency) {
-                $currency = strtoupper((string) $intent->currency);
+            $key = (new \DateTimeImmutable('@'.$intent->created))
+                ->setTimezone($tz)
+                ->format('Y-m-d');
+
+            $byDay[$key] ??= ['amount' => 0, 'count' => 0, 'currency' => ''];
+            $byDay[$key]['amount'] += (int) $intent->amount;
+            ++$byDay[$key]['count'];
+            if ('' === $byDay[$key]['currency']) {
+                $byDay[$key]['currency'] = strtoupper((string) $intent->currency);
             }
         }
 
-        return new RevenueSnapshot($total, $currency, $count);
+        return $byDay;
+    }
+
+    /**
+     * Returns null when the cached payload is the failure sentinel, the
+     * raw array otherwise. Lets callers downgrade an outage to an empty
+     * projection without confusing it with a legitimate "no payments yet".
+     *
+     * @param  array<string, array{amount: int, count: int, currency: string}>|array{__failed__: true} $payload
+     * @return array<string, array{amount: int, count: int, currency: string}>|null
+     */
+    private function unwrapSentinel(array $payload): ?array
+    {
+        if (isset($payload['__failed__'])) {
+            return null;
+        }
+
+        /** @var array<string, array{amount: int, count: int, currency: string}> $payload */
+        return $payload;
     }
 }

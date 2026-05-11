@@ -127,6 +127,32 @@
         </div>
     </div>
 
+    {# Pin-to-top option — surfaces this doc at the top of the catalogue list. #}
+    <div>
+        <label for="{{ form.pinned.vars.id }}" class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-950/5 bg-white p-3 transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
+            <span class="group inline-grid size-4 grid-cols-1 mt-0.5 shrink-0">
+                <input
+                    type="checkbox"
+                    id="{{ form.pinned.vars.id }}"
+                    name="{{ form.pinned.vars.full_name }}"
+                    value="1"
+                    {% if form.pinned.vars.checked %}checked{% endif %}
+                    class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-primary checked:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-gray-300 disabled:bg-gray-100 forced-colors:appearance-auto"
+                />
+                <svg viewBox="0 0 14 14" fill="none" class="pointer-events-none col-start-1 row-start-1 size-7/8 self-center justify-self-center stroke-white">
+                    <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-not-has-checked:opacity-0" />
+                </svg>
+            </span>
+            <span class="min-w-0 flex-1">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+                    <twig:ux:icon name="lucide:pin" class="size-3.5 shrink-0 text-gray-500" />
+                    {{ 'admin.tools.documents.form.pinned.label'|trans }}
+                </span>
+                <span class="mt-0.5 block text-xs text-gray-500">{{ 'admin.tools.documents.form.pinned.help'|trans }}</span>
+            </span>
+        </label>
+    </div>
+
     <twig:Dialog:Footer class="mt-2 pt-3 border-t border-gray-950/5">
         <twig:Button variant="outline" type="button" data-action="dialog#close">
             {{ 'admin.tools.documents.form.cancel'|trans }}

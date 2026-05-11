@@ -64,3 +64,13 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+        firewalls:
+            main:
+                # Bump login_throttling in test so the suite, which fires repeated
+                # logins for the same test user, doesn't trip the production limit
+                # (3/15min) — the rate-limiter cache is filesystem-backed and
+                # persists between runs, which would otherwise flake LoginControllerTest
+                # and any test that calls submitForm() on the login form. The
+                # production limit stays at 3 attempts above.
+                login_throttling:
+                    max_attempts: 1000

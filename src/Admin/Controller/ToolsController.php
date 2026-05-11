@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
+use App\Admin\Entity\DocumentRequest;
+use App\Admin\Service\DocumentRequestPdfRenderer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -97,6 +100,42 @@ final class ToolsController extends AbstractController
         return $this->render('admin/tools/documents/request.html.twig', [
             'adminPrefix' => $adminPrefix,
         ]);
+    }
+
+    /**
+     * Serves the generated PDF for a saved DocumentRequest. Locked behind the
+     * admin prefix + ROLE_ADMIN, identified by id. Content-Disposition is set
+     * to attachment so navigating here triggers a download instead of opening
+     * the PDF inline — which is what the form's download_trigger Stimulus
+     * controller relies on.
+     */
+    #[Route(
+        path: [
+            'fr' => '/outils/documents/demande/{id}/pdf',
+            'en' => '/tools/documents/request/{id}/pdf',
+        ],
+        name: 'tools_documents_request_pdf',
+        requirements: ['id' => '\d+'],
+        methods: ['GET'],
+    )]
+    public function documentsRequestPdf(
+        string $adminPrefix,
+        DocumentRequest $request,
+        DocumentRequestPdfRenderer $renderer,
+    ): Response {
+        $this->ensureValidPrefix($adminPrefix);
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $pdf = $renderer->render($request);
+
+        $response = new Response($pdf);
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $renderer->filename($request),
+        ));
+
+        return $response;
     }
 
     private function ensureValidPrefix(string $adminPrefix): void

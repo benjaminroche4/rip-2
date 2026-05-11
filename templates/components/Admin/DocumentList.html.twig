@@ -68,6 +68,7 @@
                                 <span class="sr-only">{{ 'admin.tools.documents.list.column.expand'|trans }}</span>
                             </th>
                             <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.name'|trans }}</th>
+                            <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.status'|trans }}</th>
                             <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.slug'|trans }}</th>
                             <th scope="col" class="whitespace-nowrap px-4 py-3 text-right font-semibold">{{ 'admin.tools.documents.list.column.createdAt'|trans }}</th>
                             <th scope="col" class="w-10 px-2 py-3">
@@ -105,6 +106,14 @@
                                     <p class="font-medium text-gray-900" data-testid="document-name-fr">{{ doc.nameFr }}</p>
                                     {% if doc.nameEn and doc.nameEn != doc.nameFr %}
                                         <p class="text-xs text-gray-500" data-testid="document-name-en">{{ doc.nameEn }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 align-middle">
+                                    {% if doc.pinned %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1 pr-2 pl-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-600" data-testid="document-pinned-badge">
+                                            <twig:ux:icon name="lucide:pin" class="size-3 shrink-0 text-gray-500" />
+                                            {{ 'admin.tools.documents.list.pinnedBadge'|trans }}
+                                        </span>
                                     {% endif %}
                                 </td>
                                 <td class="px-4 py-3 align-middle font-mono text-xs text-gray-500">{{ doc.slug }}</td>
@@ -155,7 +164,7 @@
                                inner div height; the <td> stays at p-0 so the
                                row is flush with the main row when expanded. #}
                             <tr data-testid="document-row-details">
-                                <td colspan="5" class="p-0">
+                                <td colspan="6" class="p-0">
                                     <div
                                         data-collapsible-target="content"
                                         id="document-{{ doc.id }}-description"

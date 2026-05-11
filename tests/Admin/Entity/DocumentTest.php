@@ -81,4 +81,20 @@ final class DocumentTest extends TestCase
         self::assertNull($doc->getDescription('fr'));
         self::assertNull($doc->getDescription('en'));
     }
+
+    public function testNewDocumentIsNotPinnedByDefault(): void
+    {
+        // Default must be false so existing flows (admin creates a doc
+        // without ticking the box) don't accidentally pin everything.
+        self::assertFalse((new Document())->isPinned());
+    }
+
+    public function testPinnedFlagIsSettable(): void
+    {
+        $doc = (new Document())->setPinned(true);
+        self::assertTrue($doc->isPinned());
+
+        $doc->setPinned(false);
+        self::assertFalse($doc->isPinned());
+    }
 }

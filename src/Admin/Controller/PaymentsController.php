@@ -257,7 +257,6 @@ final class PaymentsController extends AbstractController
 
         return $this->render('admin/payments/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'todayLabel' => $this->dateFormatter->today($today, $locale),
             'currency' => $currency,
             'currencySymbol' => $currencySymbol,
             'thisYearAmount' => (int) round($thisYearAmount / 100),

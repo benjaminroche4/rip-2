@@ -135,6 +135,44 @@ final class DocumentListComponentTest extends KernelTestCase
         $component->call('delete', ['id' => $doc->getId()]);
     }
 
+    public function testPinnedDocumentsAreSurfacedFirst(): void
+    {
+        $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        // Older, not pinned — should land last.
+        $this->seedDocument('Ancien', 'Old', 'ancien', new \DateTimeImmutable('2026-01-01'));
+        // Newer, not pinned — second within the unpinned bucket.
+        $this->seedDocument('Récent', 'Recent', 'recent', new \DateTimeImmutable('2026-03-01'));
+        // Pinned but older — must float above both unpinned despite the date.
+        $pinned = $this->seedDocument('Épinglé', 'Pinned', 'epingle', new \DateTimeImmutable('2026-02-01'));
+        $pinned->setPinned(true);
+        $this->em->flush();
+
+        $this->loginAs('admin@example.com');
+
+        $component = $this->mountTwigComponent('Admin:DocumentList', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+        $docs = $component->getDocuments();
+
+        self::assertSame('Épinglé', $docs[0]->getNameFr(), 'Pinned doc must come first regardless of date.');
+        self::assertSame('Récent', $docs[1]->getNameFr());
+        self::assertSame('Ancien', $docs[2]->getNameFr());
+    }
+
+    public function testPinnedBadgeIsRenderedOnlyForPinnedRows(): void
+    {
+        $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        $this->seedDocument('Normal', 'Normal', 'normal', new \DateTimeImmutable());
+        $pinned = $this->seedDocument('Épinglé', 'Pinned', 'epingle', new \DateTimeImmutable());
+        $pinned->setPinned(true);
+        $this->em->flush();
+
+        $this->loginAs('admin@example.com');
+        $html = (string) $this->renderTwigComponent('Admin:DocumentList', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+
+        // Exactly one badge — the unpinned row stays plain.
+        self::assertSame(1, substr_count($html, 'data-testid="document-pinned-badge"'));
+        self::assertStringContainsString('Épinglé', $html);
+    }
+
     public function testListenerInvalidatesCache(): void
     {
         $this->seedUser('admin@example.com', ['ROLE_ADMIN']);

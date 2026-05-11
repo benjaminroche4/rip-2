@@ -2,80 +2,47 @@
 
 {% block title %}{{ 'admin.tools.documents.title'|trans }}{% endblock %}
 {% block page_title %}{{ 'admin.tools.documents.title'|trans }}{% endblock %}
+{% block page_subtitle %}{{ 'admin.tools.documents.subtitle'|trans }}{% endblock %}
+{% block page_actions %}
+    <a
+        href="{{ path('admin_tools', {adminPrefix: adminPrefix}) }}"
+        class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+    >
+        {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }}
+        {{ 'admin.tools.documents.backToTools'|trans }}
+    </a>
+{% endblock %}
 
 {% block body %}
-    <div class="space-y-8" data-testid="tools-documents-page">
-        <header class="flex items-baseline justify-between gap-6">
-            <div>
-                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {{ 'admin.tools.section.overview'|trans }}
-                </p>
-                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
-                    {{ 'admin.tools.documents.title'|trans }}
-                </h2>
-                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
-                    {{ 'admin.tools.documents.subtitle'|trans }}
-                </p>
-            </div>
-            <a
-                href="{{ path('admin_tools', {adminPrefix: adminPrefix}) }}"
-                class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
-            >
-                {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }}
-                {{ 'admin.tools.documents.backToTools'|trans }}
-            </a>
-        </header>
-
-        <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="documents-hub-grid">
-            <article class="rounded-2xl border border-gray-950/5 bg-white p-2" data-testid="tool-catalogue-card">
-                <div class="flex h-full flex-col items-center gap-4 rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-6 text-center">
-                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        {{ ux_icon('lucide:library', {class: 'size-6'}) }}
-                    </div>
-                    <div class="space-y-1.5">
-                        <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                            {{ 'admin.tools.documents.catalogue.title'|trans }}
-                        </h3>
-                        <p class="text-sm text-pretty text-gray-500">
-                            {{ 'admin.tools.documents.catalogue.description'|trans }}
-                        </p>
-                    </div>
+    <div class="space-y-6" data-testid="tools-documents-page">
+        <section class="flex flex-wrap items-center justify-end gap-x-4 gap-y-3" data-testid="documents-hub-actions">
+            <div class="flex flex-wrap items-center gap-2">
+                <span data-testid="tool-catalogue-card" class="contents">
                     <twig:Button
                         as="a"
-                        variant="outline"
+                        variant="ghost"
                         href="{{ path('admin_tools_documents_catalogue', {adminPrefix: adminPrefix}) }}"
-                        class="mt-auto w-full"
+                        class="border border-gray-950/10 text-gray-700 hover:bg-neutral-100"
                         data-testid="tool-catalogue-cta"
                     >
-                        {{ 'admin.tools.documents.catalogue.cta'|trans }}
+                        {{ ux_icon('lucide:library', {class: 'size-4'}) }}
+                        <span>{{ 'admin.tools.documents.catalogue.title'|trans }}</span>
                     </twig:Button>
-                </div>
-            </article>
-
-            <article class="rounded-2xl border border-gray-950/5 bg-white p-2" data-testid="tool-request-card">
-                <div class="flex h-full flex-col items-center gap-4 rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-6 text-center">
-                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        {{ ux_icon('lucide:send', {class: 'size-6'}) }}
-                    </div>
-                    <div class="space-y-1.5">
-                        <h3 class="text-base font-semibold tracking-tight text-gray-900">
-                            {{ 'admin.tools.documents.request.title'|trans }}
-                        </h3>
-                        <p class="text-sm text-pretty text-gray-500">
-                            {{ 'admin.tools.documents.request.description'|trans }}
-                        </p>
-                    </div>
+                </span>
+                <span data-testid="tool-request-card" class="contents">
                     <twig:Button
                         as="a"
-                        variant="outline"
+                        variant="default"
                         href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix}) }}"
-                        class="mt-auto w-full"
                         data-testid="tool-request-cta"
                     >
-                        {{ 'admin.tools.documents.request.cta'|trans }}
+                        {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
+                        <span>{{ 'admin.tools.documents.request.cta'|trans }}</span>
                     </twig:Button>
-                </div>
-            </article>
+                </span>
+            </div>
         </section>
+
+        <twig:Admin:DocumentRequestList adminPrefix="{{ adminPrefix }}" />
     </div>
 {% endblock %}

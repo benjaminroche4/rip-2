@@ -182,7 +182,6 @@ final class DashboardController extends AbstractController
 
         return $this->render('admin/dashboard/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'todayLabel' => $this->dateFormatter->today($today, $locale),
             'thisYearLeads' => $thisYearLeads,
             'thisYearLabel' => $today->format('Y'),
             'chartLabels' => $chartLabels,

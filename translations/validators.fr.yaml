@@ -12,6 +12,29 @@ admin:
                     length: "La description ne peut pas dépasser 5000 caractères."
                 slug:
                     unique: "Un document avec un identifiant similaire existe déjà."
+            request:
+                persons:
+                    min: "Renseigne au moins une personne."
+                    max: "Le foyer ne peut pas dépasser {{ limit }} personnes."
+                typology:
+                    notNull: "Choisis une typologie de foyer."
+                note:
+                    length: "La note ne peut pas dépasser 2000 caractères."
+                driveLink:
+                    notBlank: "Le lien du drive est obligatoire."
+                    url: "Le lien doit être une URL valide (commence par https://...)."
+                    length: "Le lien ne peut pas dépasser 512 caractères."
+                person:
+                    role:
+                        notNull: "Choisis un rôle pour cette personne."
+                    firstName:
+                        notBlank: "Le prénom est obligatoire."
+                        length: "Le prénom doit faire entre 2 et 50 caractères."
+                    lastName:
+                        notBlank: "Le nom est obligatoire."
+                        length: "Le nom doit faire entre 2 et 50 caractères."
+                    documents:
+                        min: "Sélectionne au moins une pièce pour cette personne."
 contact:
     contactForm:
         firstName:

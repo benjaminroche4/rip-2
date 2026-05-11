@@ -3,10 +3,24 @@
 
 @theme {
     --color-primary: #71172e;
+    /* Override the default `ring` color (blue) used by shadcn-style components
+       (Button, Accordion, …) so `focus-visible:ring-ring` adopts the brand. */
+    --color-ring: var(--color-primary);
 }
 
 .turbo-progress-bar {
     background-color: var(--color-primary);
+}
+
+/* @tailwindcss/forms applies a hard-coded blue focus ring + border to every
+   form input (text, email, url, textarea, select) and to checkbox / radio
+   inputs (`--tw-ring-color: #2563eb`, `border-color: #2563eb`). Override
+   both with our brand color so the focus state stays on-brand. */
+input:focus,
+select:focus,
+textarea:focus {
+    --tw-ring-color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
 select {

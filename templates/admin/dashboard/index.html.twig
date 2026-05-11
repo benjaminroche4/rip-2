@@ -2,24 +2,10 @@
 
 {% block title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 {% block page_title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
+{% block page_subtitle %}{{ 'admin.dashboard.subtitle'|trans }}{% endblock %}
 
 {% block body %}
     <div class="space-y-8">
-        <header class="flex items-baseline justify-between gap-6">
-            <div>
-                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {{ 'admin.dashboard.section.overview'|trans }}
-                </p>
-                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
-                    {{ 'admin.dashboard.welcome'|trans }} {{ app.user.firstName|default(app.user.email) }}
-                </h2>
-                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
-                    {{ 'admin.dashboard.subtitle'|trans }}
-                </p>
-            </div>
-            <p class="shrink-0 text-sm tabular-nums text-gray-500">{{ todayLabel }}</p>
-        </header>
-
         <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" data-testid="kpi-grid">
             {% for kpi in kpis %}
                 {% if kpi.previous is not null %}

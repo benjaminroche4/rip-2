@@ -2,23 +2,10 @@
 
 {% block title %}{{ 'admin.payments.title'|trans }}{% endblock %}
 {% block page_title %}{{ 'admin.payments.title'|trans }}{% endblock %}
+{% block page_subtitle %}{{ 'admin.payments.subtitle'|trans }}{% endblock %}
 
 {% block body %}
     <div class="space-y-8">
-        <header class="flex items-baseline justify-between gap-6">
-            <div>
-                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {{ 'admin.payments.section.overview'|trans }}
-                </p>
-                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
-                    {{ 'admin.payments.welcome'|trans }}
-                </h2>
-                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
-                    {{ 'admin.payments.subtitle'|trans }}
-                </p>
-            </div>
-            <p class="shrink-0 text-sm tabular-nums text-gray-500">{{ todayLabel }}</p>
-        </header>
 
         {# ── KPI cards (CA total + mois + semaine) ─────────────────── #}
         <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="payments-kpi-grid">

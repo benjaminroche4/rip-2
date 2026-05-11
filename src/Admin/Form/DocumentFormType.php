@@ -6,6 +6,7 @@ namespace App\Admin\Form;
 
 use App\Admin\Entity\Document;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -40,6 +41,11 @@ class DocumentFormType extends AbstractType
                 'label' => 'admin.tools.documents.form.descriptionEn.label',
                 'required' => false,
                 'attr' => ['maxlength' => 5000, 'rows' => 4],
+            ])
+            ->add('pinned', CheckboxType::class, [
+                'label' => 'admin.tools.documents.form.pinned.label',
+                'help' => 'admin.tools.documents.form.pinned.help',
+                'required' => false,
             ])
         ;
     }

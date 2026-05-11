@@ -257,8 +257,8 @@ final class AdminAccessTest extends WebTestCase
         self::assertSelectorExists('[data-testid="tool-catalogue-card"]');
         self::assertSelectorExists('[data-testid="tool-catalogue-cta"][href$="/admin/outils/documents/catalogue"]');
 
-        // Back link points at the tools index.
-        self::assertSelectorExists('[data-testid="tools-documents-page"] a[href$="/admin/outils"]');
+        // Back link in the page header points at the tools index.
+        self::assertSelectorExists('a[href$="/admin/outils"]');
     }
 
     public function testNonAdminCannotSeeToolsDocumentsPage(): void
@@ -290,8 +290,8 @@ final class AdminAccessTest extends WebTestCase
         self::assertCount(1, $crawler->filter('[data-testid="user-profile"]'));
         self::assertStringContainsString(self::USER_EMAIL, $crawler->filter('[data-testid="user-profile"]')->html());
 
-        // Back link points at the list.
-        self::assertSelectorExists('[data-testid="user-profile"] a[href$="/admin/utilisateurs"]');
+        // Back link in the page header points at the list.
+        self::assertSelectorExists('a[href$="/admin/utilisateurs"]');
     }
 
     public function testUserProfileRedirectsWhenSlugIsStale(): void

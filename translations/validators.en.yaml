@@ -12,6 +12,29 @@ admin:
                     length: "The description cannot exceed 5000 characters."
                 slug:
                     unique: "A document with a similar identifier already exists."
+            request:
+                persons:
+                    min: "Add at least one person."
+                    max: "The household cannot exceed {{ limit }} people."
+                typology:
+                    notNull: "Pick a household composition."
+                note:
+                    length: "The note cannot exceed 2000 characters."
+                driveLink:
+                    notBlank: "The drive link is required."
+                    url: "The link must be a valid URL (starting with https://...)."
+                    length: "The link cannot exceed 512 characters."
+                person:
+                    role:
+                        notNull: "Pick a role for this person."
+                    firstName:
+                        notBlank: "First name is required."
+                        length: "The first name must be between 2 and 50 characters."
+                    lastName:
+                        notBlank: "Last name is required."
+                        length: "The last name must be between 2 and 50 characters."
+                    documents:
+                        min: "Select at least one document for this person."
 contact:
     contactForm:
         firstName:

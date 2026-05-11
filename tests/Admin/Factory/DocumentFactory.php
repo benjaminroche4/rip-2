@@ -33,6 +33,7 @@ final class DocumentFactory extends PersistentObjectFactory
             'nameEn' => ucfirst(self::faker()->sentence(3, false)),
             'descriptionFr' => self::faker()->optional(0.7)->paragraph(),
             'descriptionEn' => self::faker()->optional(0.7)->paragraph(),
+            'pinned' => self::faker()->boolean(20),
             'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime('-6 month')),
         ];
     }

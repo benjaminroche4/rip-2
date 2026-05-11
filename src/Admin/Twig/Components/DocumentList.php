@@ -81,7 +81,14 @@ final class DocumentList
      */
     public function getDocuments(): array
     {
-        return $this->documentsCache ??= $this->repository->findBy([], ['createdAt' => 'DESC'], 100);
+        // Pinned items float to the top, then most-recent-first within each
+        // bucket. Limit 100 is enough headroom for the catalogue without
+        // paginating.
+        return $this->documentsCache ??= $this->repository->findBy(
+            [],
+            ['pinned' => 'DESC', 'createdAt' => 'DESC'],
+            100,
+        );
     }
 
     public function getTotalCount(): int

@@ -1511,10 +1511,7 @@ admin:
             comingSoon: Soon
     dashboard:
         title: Dashboard
-        welcome: Hello
         subtitle: Here's your activity today.
-        section:
-            overview: Overview
         kpi:
             callsLast7d: Calls received
             contactsLast7d: Contact requests
@@ -1548,9 +1545,6 @@ admin:
             seriesLabel: Total requests
     payments:
         title: Payments
-        section:
-            overview: Financial overview
-        welcome: Your Stripe payments
         subtitle: 'Revenue, transactions, and monthly trends.'
         kpi:
             totalAllTime: Total revenue
@@ -1608,9 +1602,6 @@ admin:
             canceled: Canceled
     tools:
         title: Tools
-        section:
-            overview: Productivity
-        welcome: Your tools
         subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
         documents:
             title: Documents
@@ -1618,6 +1609,18 @@ admin:
             description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
             cta: Open
             backToTools: Back to tools
+            recent:
+                title: Recent requests
+                subtitle: '{0}No requests sent yet.|{1}1 request sent. Re-download the PDF in one click.|]1,Inf[%count% requests sent. Re-download the PDF in one click.'
+                empty: No requests sent yet.
+                download: Download
+                loadMore: Load more
+                column:
+                    date: Date
+                    household: Household
+                    persons: People
+                    language: Language
+                    actions: Actions
             catalogue:
                 title: Catalogue
                 subtitle: Library of bilingual templates used across the client journey.
@@ -1626,11 +1629,66 @@ admin:
                 backToDocuments: Back to Documents
             request:
                 title: Request documents
-                subtitle: Send a client a request for documents with a secure upload link.
+                subtitle: Compose a request for a household, generate a recap PDF and share it.
                 description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
                 cta: Send a request
                 backToDocuments: Back to Documents
                 comingSoon: This feature is coming soon.
+                persons:
+                    title: Household members
+                    count: '{0}No person yet|{1}1 person of %max%|]1,Inf[%count% people of %max%'
+                    min: Add at least one person.
+                    max: The household cannot exceed %limit% people.
+                person:
+                    heading: 'Person %number%'
+                    toComplete: to complete
+                    role:
+                        label: Role
+                        tenant: Tenant
+                        guarantor: Guarantor
+                    firstName:
+                        label: First name
+                        notBlank: First name is required.
+                        length: The first name must be between 2 and 50 characters.
+                    lastName:
+                        label: Last name
+                        notBlank: Last name is required.
+                        length: The last name must be between 2 and 50 characters.
+                    documents:
+                        label: Requested documents
+                        min: Select at least one document for this person.
+                        emptyCatalogue: 'The catalogue is empty. Add documents from the Catalogue tab before creating a request.'
+                typology:
+                    title: Household composition
+                    subtitle: Pick the matching composition.
+                    label: Household composition
+                    notNull: Pick a household composition.
+                    two_tenants_two_guarantors: 2 tenants + 2 guarantors
+                    two_tenants_one_guarantor: 2 tenants + 1 guarantor
+                    one_tenant_two_guarantors: 1 tenant + 2 guarantors
+                    one_tenant_one_guarantor: 1 tenant + 1 guarantor
+                    two_tenants: 2 tenants
+                    one_tenant: 1 tenant
+                note:
+                    label: Note
+                    help: Free message for the client (rendered in the PDF).
+                    placeholder: Add a personal intro, special instructions, a deadline reminder...
+                driveLink:
+                    label: Drive link
+                    help: Secure link where the client will upload their files. Included in the PDF.
+                    notBlank: The drive link is required.
+                    url: The link must be a valid URL (starting with https://...).
+                    length: The link cannot exceed 512 characters.
+                language:
+                    title: Language
+                    subtitle: Language for the PDF and the send-out.
+                    label: Language
+                    fr: Français
+                    en: English
+                actions:
+                    addPerson: Add a person
+                    removePerson: Remove
+                    generate: Generate PDF
             actions:
                 add: New document
                 delete: Delete
@@ -1645,10 +1703,12 @@ admin:
                 empty: No documents yet. Create the first one with the button above.
                 column:
                     name: Name
+                    status: Status
                     slug: Identifier
                     createdAt: Created on
                     expand: Show descriptions
                 noDescription: No description provided
+                pinnedBadge: Pinned
             form:
                 title: New document
                 subtitle: A name is required in both languages. The unique identifier is generated automatically from the French name.
@@ -1662,6 +1722,9 @@ admin:
                     label: Description
                 descriptionEn:
                     label: Description
+                pinned:
+                    label: Pin to top
+                    help: The document floats to the top of the catalogue and shows a "Pinned" badge.
                 language:
                     fr: French
                     en: English
@@ -1670,7 +1733,6 @@ admin:
             description: A new tool is in the works. Check back shortly.
             badge: Soon
     users:
-        section: Piloting
         title: Users
         subtitle: User management
         placeholder: The user list is coming soon.

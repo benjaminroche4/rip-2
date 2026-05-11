@@ -45,6 +45,14 @@ class Document
     #[Assert\Length(max: 5000, maxMessage: 'admin.tools.documents.form.description.length')]
     private ?string $descriptionEn = null;
 
+    /**
+     * Pinned documents are surfaced at the top of the catalogue listing.
+     * Used by the admin to keep "high-priority" pieces (e.g. ID card,
+     * proof of income) immediately reachable without scrolling.
+     */
+    #[ORM\Column]
+    private bool $pinned = false;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -109,6 +117,18 @@ class Document
     public function setDescriptionEn(?string $descriptionEn): static
     {
         $this->descriptionEn = $descriptionEn;
+
+        return $this;
+    }
+
+    public function isPinned(): bool
+    {
+        return $this->pinned;
+    }
+
+    public function setPinned(bool $pinned): static
+    {
+        $this->pinned = $pinned;
 
         return $this;
     }

@@ -1512,10 +1512,7 @@ admin:
             comingSoon: Bientôt
     dashboard:
         title: Tableau de bord
-        welcome: Bonjour
         subtitle: Voici votre activité du jour.
-        section:
-            overview: Aperçu
         kpi:
             callsLast7d: Appels reçus
             contactsLast7d: Demandes de contact
@@ -1549,9 +1546,6 @@ admin:
             seriesLabel: Demandes cumulées
     payments:
         title: Paiements
-        section:
-            overview: Vue financière
-        welcome: Vos paiements Stripe
         subtitle: 'Chiffre d''affaires, transactions et tendances mensuelles.'
         kpi:
             totalAllTime: CA total encaissé
@@ -1609,9 +1603,6 @@ admin:
             canceled: Annulé
     tools:
         title: Outils
-        section:
-            overview: Productivité
-        welcome: Vos outils
         subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
         documents:
             title: Documents
@@ -1619,6 +1610,18 @@ admin:
             description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
             cta: Ouvrir
             backToTools: Retour aux outils
+            recent:
+                title: Demandes récentes
+                subtitle: '{0}Aucune demande envoyée pour le moment.|{1}1 demande envoyée. Retéléchargez le PDF en un clic.|]1,Inf[%count% demandes envoyées. Retéléchargez le PDF en un clic.'
+                empty: Aucune demande envoyée pour le moment.
+                download: Télécharger
+                loadMore: Voir plus
+                column:
+                    date: Date
+                    household: Foyer
+                    persons: Personnes
+                    language: Langue
+                    actions: Actions
             catalogue:
                 title: Catalogue
                 subtitle: Bibliothèque de modèles bilingues utilisés dans le tunnel client.
@@ -1627,11 +1630,66 @@ admin:
                 backToDocuments: Retour aux documents
             request:
                 title: Demander des documents
-                subtitle: Envoyez à un client une demande de pièces avec un lien sécurisé pour les déposer.
+                subtitle: Composez la demande pour un foyer, générez un PDF récapitulatif et partagez-le.
                 description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
                 cta: Envoyer une demande
                 backToDocuments: Retour aux documents
                 comingSoon: Cette fonctionnalité arrive bientôt.
+                persons:
+                    title: Personnes du foyer
+                    count: '{0}Aucune personne|{1}1 personne sur %max%|]1,Inf[%count% personnes sur %max%'
+                    min: Renseigne au moins une personne.
+                    max: Le foyer ne peut pas dépasser %limit% personnes.
+                person:
+                    heading: 'Personne %number%'
+                    toComplete: à compléter
+                    role:
+                        label: Rôle
+                        tenant: Locataire
+                        guarantor: Garant
+                    firstName:
+                        label: Prénom
+                        notBlank: Le prénom est obligatoire.
+                        length: Le prénom doit faire entre 2 et 50 caractères.
+                    lastName:
+                        label: Nom
+                        notBlank: Le nom est obligatoire.
+                        length: Le nom doit faire entre 2 et 50 caractères.
+                    documents:
+                        label: Pièces demandées
+                        min: Sélectionne au moins une pièce pour cette personne.
+                        emptyCatalogue: 'Le catalogue est vide. Ajoute des documents depuis l''onglet Catalogue avant de créer une demande.'
+                typology:
+                    title: Typologie du foyer
+                    subtitle: Sélectionne la composition correspondante.
+                    label: Typologie du foyer
+                    notNull: Choisis une typologie de foyer.
+                    two_tenants_two_guarantors: 2 locataires + 2 garants
+                    two_tenants_one_guarantor: 2 locataires + 1 garant
+                    one_tenant_two_guarantors: 1 locataire + 2 garants
+                    one_tenant_one_guarantor: 1 locataire + 1 garant
+                    two_tenants: 2 locataires
+                    one_tenant: 1 locataire
+                note:
+                    label: Note
+                    help: Message libre pour le client (affiché dans le PDF).
+                    placeholder: Ajoute un mot d'introduction, des consignes particulières, un rappel d'échéance...
+                driveLink:
+                    label: Lien du drive
+                    help: Lien sécurisé où le client déposera ses pièces. Sera inclus dans le PDF.
+                    notBlank: Le lien du drive est obligatoire.
+                    url: Le lien doit être une URL valide (commence par https://...).
+                    length: Le lien ne peut pas dépasser 512 caractères.
+                language:
+                    title: Langue
+                    subtitle: Langue du PDF et de l'envoi.
+                    label: Langue
+                    fr: Français
+                    en: English
+                actions:
+                    addPerson: Ajouter une personne
+                    removePerson: Retirer
+                    generate: Générer le PDF
             actions:
                 add: Nouveau document
                 delete: Supprimer
@@ -1646,10 +1704,12 @@ admin:
                 empty: Aucun document pour le moment. Crée le premier avec le bouton ci-dessus.
                 column:
                     name: Nom
+                    status: Statut
                     slug: Identifiant
                     createdAt: Créé le
                     expand: Voir les descriptions
                 noDescription: Aucune description fournie
+                pinnedBadge: Épinglé
             form:
                 title: Nouveau document
                 subtitle: Le nom est demandé dans les deux langues. L'identifiant unique est généré automatiquement à partir du nom français.
@@ -1663,6 +1723,9 @@ admin:
                     label: Description
                 descriptionEn:
                     label: Description
+                pinned:
+                    label: Épingler en tête de liste
+                    help: Le document remonte tout en haut du catalogue et reçoit un badge « Épinglé ».
                 language:
                     fr: Français
                     en: Anglais
@@ -1671,7 +1734,6 @@ admin:
             description: Un nouvel outil est en préparation. Reviens bientôt.
             badge: À venir
     users:
-        section: Pilotage
         title: Utilisateurs
         subtitle: Gestion des utilisateurs
         placeholder: La liste des utilisateurs arrivera bientôt.

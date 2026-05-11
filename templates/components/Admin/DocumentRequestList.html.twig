@@ -1,0 +1,77 @@
+<div {{ attributes }} data-testid="recent-requests">
+    <div class="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+        <div>
+            <h2 class="text-xl font-semibold tracking-tight text-gray-900">
+                {{ 'admin.tools.documents.recent.title'|trans }}
+            </h2>
+            <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                {{ 'admin.tools.documents.recent.subtitle'|trans({'%count%': this.totalCount}) }}
+            </p>
+        </div>
+    </div>
+
+    {% if this.empty %}
+        <twig:Admin:EmptyCard message="{{ 'admin.tools.documents.recent.empty'|trans }}" />
+    {% else %}
+        <div class="rounded-2xl border border-gray-950/5 bg-white p-2">
+            <div class="overflow-hidden rounded-xl">
+                <table class="w-full text-left text-sm" data-testid="recent-requests-table" aria-label="{{ 'admin.tools.documents.recent.title'|trans }}">
+                    <thead class="border-b border-gray-950/5 bg-neutral-50/50">
+                        <tr class="text-xs font-semibold tracking-wide text-gray-500">
+                            <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.date'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.persons'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.language'|trans }}</th>
+                            <th scope="col" class="px-4 py-3 text-right font-semibold whitespace-nowrap">
+                                <span class="sr-only">{{ 'admin.tools.documents.recent.column.actions'|trans }}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-950/5">
+                        {% for req in this.items %}
+                            <tr data-testid="recent-request-row">
+                                <td class="px-4 py-3 tabular-nums whitespace-nowrap text-gray-700">
+                                    {{ req.createdAt|format_datetime('medium', 'short', locale=app.request.locale) }}
+                                </td>
+                                <td class="px-4 py-3 text-gray-700">
+                                    {%- set names = req.personNames|slice(0, 3)|join(', ') -%}
+                                    {{ names }}
+                                    {%- if req.personCount > 3 %}
+                                        <span class="ml-1 text-xs text-gray-400">+{{ req.personCount - 3 }}</span>
+                                    {% endif -%}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <twig:Badge variant="secondary" class="rounded-full uppercase">{{ req.language.value }}</twig:Badge>
+                                </td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    <a
+                                        href="{{ path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) }}"
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-100 hover:text-primary"
+                                        data-testid="recent-request-download"
+                                        aria-label="{{ 'admin.tools.documents.recent.download'|trans }}"
+                                    >
+                                        {{ ux_icon('lucide:download', {class: 'size-4'}) }}
+                                        <span>{{ 'admin.tools.documents.recent.download'|trans }}</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if this.hasMore %}
+                <div class="flex justify-center px-4 py-4">
+                    <twig:Button
+                        variant="outline"
+                        data-action="live#action"
+                        data-live-action-param="more"
+                        data-testid="recent-requests-load-more"
+                    >
+                        {{ ux_icon('lucide:plus', {class: 'size-4'}) }}
+                        {{ 'admin.tools.documents.recent.loadMore'|trans }}
+                    </twig:Button>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

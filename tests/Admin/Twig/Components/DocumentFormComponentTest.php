@@ -71,11 +71,34 @@ final class DocumentFormComponentTest extends KernelTestCase
         self::assertSame('Commercial lease', $doc->getNameEn());
         self::assertSame('bail-commercial', $doc->getSlug());
         self::assertNotNull($doc->getCreatedAt());
+        // Pin defaults to false when the checkbox is not ticked.
+        self::assertFalse($doc->isPinned());
 
         // Component emitted the cross-component event + the browser event
         // the dialog listens for to close itself.
         $this->assertComponentEmitEvent($component, 'document:created');
         $this->assertComponentDispatchBrowserEvent($component, 'document-dialog:close');
+    }
+
+    public function testSubmitWithPinnedTruePersistsThePinnedFlag(): void
+    {
+        $admin = $this->seedAdmin('admin@example.com');
+        $component = $this->createLiveComponent('Admin:DocumentForm')->actingAs($admin);
+
+        $formName = $component->component()->getFormName();
+        $component->submitForm([
+            $formName => [
+                'nameFr' => 'Pièce d\'identité',
+                'nameEn' => 'ID card',
+                'descriptionFr' => '',
+                'descriptionEn' => '',
+                'pinned' => '1',
+            ],
+        ], 'save');
+
+        $docs = $this->repository->findAll();
+        self::assertCount(1, $docs);
+        self::assertTrue($docs[0]->isPinned(), 'pinned=1 in the form should persist as true on the entity.');
     }
 
     public function testSubmitWithBlankNameFrFailsValidation(): void
