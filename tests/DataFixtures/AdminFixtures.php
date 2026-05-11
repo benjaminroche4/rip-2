@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DataFixtures;
+namespace App\Tests\DataFixtures;
 
 use App\Admin\Domain\HouseholdTypology;
 use App\Admin\Domain\PersonRole;
@@ -25,6 +25,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  *
  * Lancement :  php bin/console doctrine:fixtures:load --env=dev
  * (un prompt confirme avant le DELETE FROM des tables concernées)
+ *
+ * Vit sous tests/DataFixtures/ (et non src/) pour ne pas être autoloadé en
+ * prod où doctrine/doctrine-fixtures-bundle est require-dev. Sans ça,
+ * `composer install --no-dev` casse au cache:clear faute du parent `Fixture`.
  */
 final class AdminFixtures extends Fixture
 {
