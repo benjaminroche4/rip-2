@@ -2,15 +2,20 @@
 {# @block content The default block #}
 {%- props showCloseButton = true -%}
 
+{#- Concat the caller's data-action onto the built-ins so listeners passed
+    via <twig:Dialog:Content data-action="..."> coexist with esc/click-outside,
+    instead of producing a duplicate attribute the browser would drop. -#}
+{%- set extra_action = attributes.render('data-action') -%}
 <dialog
     id="{{ _dialog_id }}"
-    class="{{ 'bg-background fixed top-[50%] left-[50%] z-50 max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] scale-95 gap-4 rounded-lg border p-6 opacity-0 shadow-lg transition-all transition-discrete duration-200 backdrop:transition-discrete backdrop:duration-150 open:grid open:scale-100 open:opacity-100 open:backdrop:bg-black/50 sm:max-w-lg starting:open:scale-95 starting:open:opacity-0 ' ~ attributes.render('class')|tailwind_merge }}"
+    class="{{ 'bg-white fixed top-[50%] left-[50%] z-50 max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] scale-95 gap-4 rounded-2xl ring-1 ring-gray-950/5 p-6 opacity-0 shadow-xl transition-all transition-discrete duration-200 backdrop:transition-discrete backdrop:duration-150 open:grid open:scale-100 open:opacity-100 open:backdrop:bg-gray-950/50 sm:max-w-lg starting:open:scale-95 starting:open:opacity-0 ' ~ attributes.render('class')|tailwind_merge }}"
     data-dialog-target="dialog"
-    data-action="keydown.esc->dialog#close:prevent click->dialog#closeOnClickOutside"
+    data-action="keydown.esc->dialog#close:prevent click->dialog#closeOnClickOutside{{ extra_action ? ' ' ~ extra_action : '' }}"
+    {{ attributes.without('class').without('data-action') }}
 >
     {%- block content %}{% endblock -%}
     {% if showCloseButton %}
-        <button type="button" class="ring-offset-background focus:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" data-action="click->dialog#close">
+        <button type="button" class="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" data-action="click->dialog#close">
             <twig:ux:icon name="lucide:x" />
             <span class="sr-only">Close</span>
         </button>

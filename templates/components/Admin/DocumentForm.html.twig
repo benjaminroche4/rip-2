@@ -1,0 +1,138 @@
+{#
+    Admin:DocumentForm — bilingual form, lives inside the dialog rendered by
+    DocumentList. Submit is wired to the `save` LiveAction; validation errors
+    keep the dialog open thanks to data-live-ignore on the parent.
+    Error styling mirrors the public ContactForm pattern:
+      <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+#}
+<form
+    {{ attributes.defaults({
+        'data-action': 'live#action:prevent',
+        'data-live-action-param': 'save',
+        'data-model': 'on(change)|*',
+        novalidate: true,
+        autocomplete: 'off',
+    }) }}
+    class="space-y-5"
+    data-testid="document-form"
+>
+    {% set hasNameFrErrors = form.nameFr.vars.errors|length > 0 %}
+    {% set hasNameEnErrors = form.nameEn.vars.errors|length > 0 %}
+    {% set hasDescFrErrors = form.descriptionFr.vars.errors|length > 0 %}
+    {% set hasDescEnErrors = form.descriptionEn.vars.errors|length > 0 %}
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+            <div class="flex items-center gap-1">
+                <twig:Label for="{{ form.nameFr.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
+                    {{ 'admin.tools.documents.form.nameFr.label'|trans }}
+                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
+                </twig:Label>
+                <span class="text-red-600" aria-hidden="true">*</span>
+            </div>
+            <div class="mt-2">
+                <twig:Input
+                    type="text"
+                    id="{{ form.nameFr.vars.id }}"
+                    name="{{ form.nameFr.vars.full_name }}"
+                    value="{{ form.nameFr.vars.value }}"
+                    maxlength="255"
+                    required="required"
+                    aria-invalid="{{ hasNameFrErrors ? 'true' : 'false' }}"
+                    aria-describedby="{{ hasNameFrErrors ? form.nameFr.vars.id ~ '-error' : '' }}"
+                    data-testid="document-form-name-fr"
+                />
+                {% for error in form.nameFr.vars.errors %}
+                    <p id="{{ form.nameFr.vars.id }}-error" class="mt-1.5 text-sm text-red-600" role="alert" data-testid="document-form-name-fr-error">
+                        {{ error.message }}
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <div class="flex items-center gap-1">
+                <twig:Label for="{{ form.nameEn.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
+                    {{ 'admin.tools.documents.form.nameEn.label'|trans }}
+                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
+                </twig:Label>
+                <span class="text-red-600" aria-hidden="true">*</span>
+            </div>
+            <div class="mt-2">
+                <twig:Input
+                    type="text"
+                    id="{{ form.nameEn.vars.id }}"
+                    name="{{ form.nameEn.vars.full_name }}"
+                    value="{{ form.nameEn.vars.value }}"
+                    maxlength="255"
+                    required="required"
+                    aria-invalid="{{ hasNameEnErrors ? 'true' : 'false' }}"
+                    aria-describedby="{{ hasNameEnErrors ? form.nameEn.vars.id ~ '-error' : '' }}"
+                    data-testid="document-form-name-en"
+                />
+                {% for error in form.nameEn.vars.errors %}
+                    <p id="{{ form.nameEn.vars.id }}-error" class="mt-1.5 text-sm text-red-600" role="alert" data-testid="document-form-name-en-error">
+                        {{ error.message }}
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <twig:Label for="{{ form.descriptionFr.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
+            {{ 'admin.tools.documents.form.descriptionFr.label'|trans }}
+            <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
+        </twig:Label>
+        <div class="mt-2">
+            <textarea
+                id="{{ form.descriptionFr.vars.id }}"
+                name="{{ form.descriptionFr.vars.full_name }}"
+                rows="4"
+                maxlength="5000"
+                aria-invalid="{{ hasDescFrErrors ? 'true' : 'false' }}"
+                aria-describedby="{{ hasDescFrErrors ? form.descriptionFr.vars.id ~ '-error' : '' }}"
+                data-testid="document-form-description-fr"
+                class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-base text-gray-900 sm:text-sm/6 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 disabled:cursor-not-allowed disabled:opacity-50 resize-y min-h-[6rem]"
+            >{{ form.descriptionFr.vars.value }}</textarea>
+            {% for error in form.descriptionFr.vars.errors %}
+                <p id="{{ form.descriptionFr.vars.id }}-error" class="mt-1.5 text-sm text-red-600" role="alert">
+                    {{ error.message }}
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div>
+        <twig:Label for="{{ form.descriptionEn.vars.id }}" class="gap-1.5 text-sm/6 font-semibold text-gray-900">
+            {{ 'admin.tools.documents.form.descriptionEn.label'|trans }}
+            <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
+        </twig:Label>
+        <div class="mt-2">
+            <textarea
+                id="{{ form.descriptionEn.vars.id }}"
+                name="{{ form.descriptionEn.vars.full_name }}"
+                rows="4"
+                maxlength="5000"
+                aria-invalid="{{ hasDescEnErrors ? 'true' : 'false' }}"
+                aria-describedby="{{ hasDescEnErrors ? form.descriptionEn.vars.id ~ '-error' : '' }}"
+                data-testid="document-form-description-en"
+                class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-base text-gray-900 sm:text-sm/6 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 disabled:cursor-not-allowed disabled:opacity-50 resize-y min-h-[6rem]"
+            >{{ form.descriptionEn.vars.value }}</textarea>
+            {% for error in form.descriptionEn.vars.errors %}
+                <p id="{{ form.descriptionEn.vars.id }}-error" class="mt-1.5 text-sm text-red-600" role="alert">
+                    {{ error.message }}
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <twig:Dialog:Footer class="mt-2 pt-3 border-t border-gray-950/5">
+        <twig:Button variant="outline" type="button" data-action="dialog#close">
+            {{ 'admin.tools.documents.form.cancel'|trans }}
+        </twig:Button>
+        <twig:Button variant="default" type="submit" data-testid="document-form-submit">
+            {{ 'admin.tools.documents.form.submit'|trans }}
+        </twig:Button>
+    </twig:Dialog:Footer>
+</form>

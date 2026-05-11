@@ -1,3 +1,17 @@
+admin:
+    tools:
+        documents:
+            form:
+                nameFr:
+                    notBlank: "The French name is required."
+                    length: "The name must be between 2 and 255 characters."
+                nameEn:
+                    notBlank: "The English name is required."
+                    length: "The name must be between 2 and 255 characters."
+                description:
+                    length: "The description cannot exceed 5000 characters."
+                slug:
+                    unique: "A document with a similar identifier already exists."
 contact:
     contactForm:
         firstName:

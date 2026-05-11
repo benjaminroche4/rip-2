@@ -1613,11 +1613,58 @@ admin:
         welcome: Your tools
         subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
         documents:
-            title: Request documents
-            subtitle: Send a client a request for documents with a secure upload link.
+            title: Documents
+            subtitle: 'Everything document-related in one place: bilingual catalogue and client requests.'
             description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
-            cta: Send a request
+            cta: Open
             backToTools: Back to tools
+            catalogue:
+                title: Catalogue
+                subtitle: Library of bilingual templates used across the client journey.
+                description: Manage the library of bilingual (FR/EN) templates used across the client journey.
+                cta: Open catalogue
+                backToDocuments: Back to Documents
+            request:
+                title: Request documents
+                subtitle: Send a client a request for documents with a secure upload link.
+                description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
+                cta: Send a request
+                backToDocuments: Back to Documents
+                comingSoon: This feature is coming soon.
+            actions:
+                add: New document
+                delete: Delete
+            delete:
+                title: Delete this document?
+                description: This action is permanent. The document "%name%" will be deleted.
+                cancel: Cancel
+                confirm: Delete permanently
+            list:
+                title: Document catalogue
+                subtitle: '{0}No document yet|{1}1 document on file|]1,Inf[%count% documents on file'
+                empty: No documents yet. Create the first one with the button above.
+                column:
+                    name: Name
+                    slug: Identifier
+                    createdAt: Created on
+                    expand: Show descriptions
+                noDescription: No description provided
+            form:
+                title: New document
+                subtitle: A name is required in both languages. The unique identifier is generated automatically from the French name.
+                cancel: Cancel
+                submit: Save
+                nameFr:
+                    label: Name
+                nameEn:
+                    label: Name
+                descriptionFr:
+                    label: Description
+                descriptionEn:
+                    label: Description
+                language:
+                    fr: French
+                    en: English
         comingSoon:
             title: Coming soon
             description: A new tool is in the works. Check back shortly.

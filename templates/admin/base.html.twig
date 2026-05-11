@@ -47,7 +47,7 @@
                                 {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments'},
                                 {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools'},
                             ] %}
-                                {% set isActive = currentRoute == item.route %}
+                                {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
                                 <li>
                                     <a
                                         href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"

@@ -1,0 +1,197 @@
+{#
+    Admin:DocumentList — page-level component that hosts both the add-dialog
+    and the documents table. The dialog DOM is data-live-ignored so its
+    open/closed state survives re-renders triggered by the document:created
+    listener (the table itself re-renders to show the new row).
+#}
+<div {{ attributes }} data-testid="document-list">
+    {# Capture values from `this` BEFORE entering <twig:Dialog>: inside the
+       Dialog block, `this` resolves to the (anonymous) Dialog component,
+       not the parent DocumentList. #}
+    {% set docs = this.documents %}
+    {% set totalCount = this.totalCount %}
+
+    <twig:Dialog id="document-form">
+        <header class="mb-6 flex items-center justify-between gap-4">
+            <div>
+                <h3 class="text-xl font-semibold tracking-tight text-gray-900">
+                    {{ 'admin.tools.documents.list.title'|trans }}
+                </h3>
+                <p class="mt-0.5 text-sm text-pretty text-gray-500">
+                    {{ 'admin.tools.documents.list.subtitle'|trans({'%count%': totalCount}) }}
+                </p>
+            </div>
+            <twig:Button
+                variant="default"
+                data-action="click->dialog#open"
+                data-dialog-target="trigger"
+                aria-haspopup="dialog"
+                data-testid="document-add-button"
+            >
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                {{ 'admin.tools.documents.actions.add'|trans }}
+            </twig:Button>
+        </header>
+
+        <twig:Dialog:Content
+            data-live-ignore
+            data-action="document-dialog:close@window->dialog#close"
+            class="sm:max-w-2xl"
+        >
+            <twig:Dialog:Header>
+                <twig:Dialog:Title>
+                    {{ 'admin.tools.documents.form.title'|trans }}
+                </twig:Dialog:Title>
+                <twig:Dialog:Description>
+                    {{ 'admin.tools.documents.form.subtitle'|trans }}
+                </twig:Dialog:Description>
+            </twig:Dialog:Header>
+
+            <div class="mt-4">
+                <twig:Admin:DocumentForm />
+            </div>
+        </twig:Dialog:Content>
+    </twig:Dialog>
+
+    {% if docs is empty %}
+        <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center" data-testid="document-list-empty">
+            <twig:ux:icon name="lucide:file-text" class="mx-auto size-8 text-gray-400" />
+            <p class="mt-3 text-sm text-gray-500">{{ 'admin.tools.documents.list.empty'|trans }}</p>
+        </div>
+    {% else %}
+        <div class="rounded-2xl border border-gray-950/5 bg-white p-2">
+            <div class="overflow-hidden rounded-xl">
+                <table class="w-full text-left text-sm" data-testid="document-table" aria-label="{{ 'admin.tools.documents.list.title'|trans }}">
+                    <thead class="border-b border-gray-950/5 bg-neutral-50/50">
+                        <tr class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                            <th scope="col" class="w-10 px-2 py-3">
+                                <span class="sr-only">{{ 'admin.tools.documents.list.column.expand'|trans }}</span>
+                            </th>
+                            <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.name'|trans }}</th>
+                            <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.slug'|trans }}</th>
+                            <th scope="col" class="whitespace-nowrap px-4 py-3 text-right font-semibold">{{ 'admin.tools.documents.list.column.createdAt'|trans }}</th>
+                            <th scope="col" class="w-10 px-2 py-3">
+                                <span class="sr-only">{{ 'admin.tools.documents.actions.delete'|trans }}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    {# One <tbody> per doc — lets each row pair (main + disclosure)
+                       share a single `collapsible` Stimulus scope, while
+                       border-b on each <tbody> draws separators between docs. #}
+                    {% for doc in docs %}
+                        <tbody
+                            data-controller="collapsible"
+                            data-testid="document-row-group"
+                            class="border-b border-gray-950/5 last:border-b-0"
+                        >
+                            <tr class="group transition-colors hover:bg-neutral-50/60" data-testid="document-row">
+                                <td class="px-2 py-3 align-middle">
+                                    <button
+                                        type="button"
+                                        data-action="click->collapsible#toggle"
+                                        class="relative inline-flex size-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gray-300"
+                                        aria-controls="document-{{ doc.id }}-description"
+                                        aria-label="{{ 'admin.tools.documents.list.column.expand'|trans }} — {{ doc.nameFr }}"
+                                        data-testid="document-expand-trigger-{{ doc.id }}"
+                                    >
+                                        <twig:ux:icon
+                                            name="lucide:chevron-down"
+                                            class="size-4 shrink-0 transition-transform duration-200"
+                                            data-collapsible-target="chevron"
+                                        />
+                                    </button>
+                                </td>
+                                <td class="px-4 py-3 align-middle">
+                                    <p class="font-medium text-gray-900" data-testid="document-name-fr">{{ doc.nameFr }}</p>
+                                    {% if doc.nameEn and doc.nameEn != doc.nameFr %}
+                                        <p class="text-xs text-gray-500" data-testid="document-name-en">{{ doc.nameEn }}</p>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 align-middle font-mono text-xs text-gray-500">{{ doc.slug }}</td>
+                                <td class="px-4 py-3 align-middle text-right tabular-nums text-gray-500">
+                                    {{ doc.createdAt|format_datetime(pattern='dd MMM yyyy', locale=app.locale) }}
+                                </td>
+                                <td class="px-2 py-3 align-middle text-right">
+                                    <twig:AlertDialog id="delete-{{ doc.id }}">
+                                        <twig:Button
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            data-action="click->alert-dialog#open"
+                                            data-alert-dialog-target="trigger"
+                                            aria-haspopup="dialog"
+                                            aria-label="{{ 'admin.tools.documents.actions.delete'|trans }} — {{ doc.nameFr }}"
+                                            class="text-gray-400 hover:bg-red-50 hover:text-red-600"
+                                            data-testid="document-delete-trigger-{{ doc.id }}"
+                                        >
+                                            <twig:ux:icon name="lucide:trash-2" class="size-4 shrink-0" />
+                                        </twig:Button>
+                                        <twig:AlertDialog:Content class="sm:max-w-md">
+                                            <twig:AlertDialog:Header>
+                                                <twig:AlertDialog:Title>
+                                                    {{ 'admin.tools.documents.delete.title'|trans }}
+                                                </twig:AlertDialog:Title>
+                                                <twig:AlertDialog:Description>
+                                                    {{ 'admin.tools.documents.delete.description'|trans({'%name%': doc.nameFr}) }}
+                                                </twig:AlertDialog:Description>
+                                            </twig:AlertDialog:Header>
+                                            <twig:AlertDialog:Footer class="mt-4">
+                                                <twig:AlertDialog:Cancel>
+                                                    {{ 'admin.tools.documents.delete.cancel'|trans }}
+                                                </twig:AlertDialog:Cancel>
+                                                <twig:AlertDialog:Action
+                                                    data-action="live#action click->alert-dialog#close"
+                                                    data-live-action-param="delete"
+                                                    data-live-id-param="{{ doc.id }}"
+                                                    data-testid="document-delete-confirm-{{ doc.id }}"
+                                                >
+                                                    {{ 'admin.tools.documents.delete.confirm'|trans }}
+                                                </twig:AlertDialog:Action>
+                                            </twig:AlertDialog:Footer>
+                                        </twig:AlertDialog:Content>
+                                    </twig:AlertDialog>
+                                </td>
+                            </tr>
+                            {# Disclosure row — collapsible#toggle animates the
+                               inner div height; the <td> stays at p-0 so the
+                               row is flush with the main row when expanded. #}
+                            <tr data-testid="document-row-details">
+                                <td colspan="5" class="p-0">
+                                    <div
+                                        data-collapsible-target="content"
+                                        id="document-{{ doc.id }}-description"
+                                        class="overflow-hidden"
+                                    >
+                                        <div class="grid grid-cols-1 gap-4 bg-neutral-50/40 px-4 py-4 sm:grid-cols-2">
+                                            <div>
+                                                <p class="text-xs font-medium tracking-wide text-gray-500">
+                                                    {{ 'admin.tools.documents.form.descriptionFr.label'|trans }}
+                                                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.fr'|trans }})</span>
+                                                </p>
+                                                {% if doc.descriptionFr is not empty %}
+                                                    <p class="mt-1 text-sm whitespace-pre-line text-gray-700">{{ doc.descriptionFr }}</p>
+                                                {% else %}
+                                                    <p class="mt-1 text-sm italic text-gray-400">{{ 'admin.tools.documents.list.noDescription'|trans }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-medium tracking-wide text-gray-500">
+                                                    {{ 'admin.tools.documents.form.descriptionEn.label'|trans }}
+                                                    <span class="font-medium text-gray-400">({{ 'admin.tools.documents.form.language.en'|trans }})</span>
+                                                </p>
+                                                {% if doc.descriptionEn is not empty %}
+                                                    <p class="mt-1 text-sm whitespace-pre-line text-gray-700">{{ doc.descriptionEn }}</p>
+                                                {% else %}
+                                                    <p class="mt-1 text-sm italic text-gray-400">{{ 'admin.tools.documents.list.noDescription'|trans }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>

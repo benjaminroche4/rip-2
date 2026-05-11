@@ -250,8 +250,12 @@ final class AdminAccessTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/outils/documents');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Demander des documents');
+        self::assertSelectorTextContains('h1', 'Documents');
         self::assertCount(1, $crawler->filter('[data-testid="tools-documents-page"]'));
+
+        // Hub exposes the catalogue card with a CTA pointing at the sub-page.
+        self::assertSelectorExists('[data-testid="tool-catalogue-card"]');
+        self::assertSelectorExists('[data-testid="tool-catalogue-cta"][href$="/admin/outils/documents/catalogue"]');
 
         // Back link points at the tools index.
         self::assertSelectorExists('[data-testid="tools-documents-page"] a[href$="/admin/outils"]');

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Admin\Factory;
 
 use App\Admin\Entity\Document;
-use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
+use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
- * @extends PersistentProxyObjectFactory<Document>
+ * @extends PersistentObjectFactory<Document>
  */
-final class DocumentFactory extends PersistentProxyObjectFactory
+final class DocumentFactory extends PersistentObjectFactory
 {
     #[\Override]
     public static function class(): string

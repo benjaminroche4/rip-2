@@ -1,3 +1,17 @@
+admin:
+    tools:
+        documents:
+            form:
+                nameFr:
+                    notBlank: "Le nom français est obligatoire."
+                    length: "Le nom doit faire entre 2 et 255 caractères."
+                nameEn:
+                    notBlank: "Le nom anglais est obligatoire."
+                    length: "Le nom doit faire entre 2 et 255 caractères."
+                description:
+                    length: "La description ne peut pas dépasser 5000 caractères."
+                slug:
+                    unique: "Un document avec un identifiant similaire existe déjà."
 contact:
     contactForm:
         firstName:

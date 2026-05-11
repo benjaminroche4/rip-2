@@ -1,0 +1,47 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.tools.documents.request.title'|trans }}{% endblock %}
+{% block page_title %}{{ 'admin.tools.documents.request.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="space-y-8" data-testid="tools-documents-request-page">
+        <header class="flex items-baseline justify-between gap-6">
+            <div>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {{ 'admin.tools.section.overview'|trans }}
+                </p>
+                <h2 class="mt-2 max-w-[40ch] text-2xl font-semibold tracking-tight text-balance text-gray-900">
+                    {{ 'admin.tools.documents.request.title'|trans }}
+                </h2>
+                <p class="mt-2 max-w-[60ch] text-sm text-pretty text-gray-500">
+                    {{ 'admin.tools.documents.request.subtitle'|trans }}
+                </p>
+            </div>
+            <a
+                href="{{ path('admin_tools_documents', {adminPrefix: adminPrefix}) }}"
+                class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+            >
+                {{ ux_icon('lucide:arrow-left', {class: 'size-4'}) }}
+                {{ 'admin.tools.documents.request.backToDocuments'|trans }}
+            </a>
+        </header>
+
+        {# Placeholder until the feature ships — kept on-brand with the same
+           dashed surface treatment used elsewhere for "coming soon" states. #}
+        <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-10">
+            <div class="mx-auto flex max-w-md flex-col items-center gap-4 text-center">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                    {{ ux_icon('lucide:sparkles', {class: 'size-6'}) }}
+                </div>
+                <div class="space-y-1.5">
+                    <h3 class="text-base font-semibold tracking-tight text-gray-900">
+                        {{ 'admin.tools.comingSoon.title'|trans }}
+                    </h3>
+                    <p class="text-sm text-pretty text-gray-500">
+                        {{ 'admin.tools.documents.request.comingSoon'|trans }}
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

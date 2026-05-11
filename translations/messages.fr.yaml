@@ -1614,11 +1614,58 @@ admin:
         welcome: Vos outils
         subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
         documents:
-            title: Demander des documents
-            subtitle: Envoyez à un client une demande de documents avec un lien sécurisé pour les déposer.
+            title: Documents
+            subtitle: 'Centralisez tout ce qui touche aux documents : catalogue bilingue et envois aux clients.'
             description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
-            cta: Envoyer une demande
+            cta: Ouvrir
             backToTools: Retour aux outils
+            catalogue:
+                title: Catalogue
+                subtitle: Bibliothèque de modèles bilingues utilisés dans le tunnel client.
+                description: Gérez la bibliothèque des modèles bilingues (FR/EN) utilisés dans le tunnel client.
+                cta: Voir le catalogue
+                backToDocuments: Retour aux documents
+            request:
+                title: Demander des documents
+                subtitle: Envoyez à un client une demande de pièces avec un lien sécurisé pour les déposer.
+                description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
+                cta: Envoyer une demande
+                backToDocuments: Retour aux documents
+                comingSoon: Cette fonctionnalité arrive bientôt.
+            actions:
+                add: Nouveau document
+                delete: Supprimer
+            delete:
+                title: Supprimer ce document ?
+                description: Cette action est définitive. Le document « %name% » sera supprimé.
+                cancel: Annuler
+                confirm: Supprimer définitivement
+            list:
+                title: Catalogue des documents
+                subtitle: '{0}Aucun document enregistré|{1}1 document enregistré|]1,Inf[%count% documents enregistrés'
+                empty: Aucun document pour le moment. Crée le premier avec le bouton ci-dessus.
+                column:
+                    name: Nom
+                    slug: Identifiant
+                    createdAt: Créé le
+                    expand: Voir les descriptions
+                noDescription: Aucune description fournie
+            form:
+                title: Nouveau document
+                subtitle: Le nom est demandé dans les deux langues. L'identifiant unique est généré automatiquement à partir du nom français.
+                cancel: Annuler
+                submit: Enregistrer
+                nameFr:
+                    label: Nom
+                nameEn:
+                    label: Nom
+                descriptionFr:
+                    label: Description
+                descriptionEn:
+                    label: Description
+                language:
+                    fr: Français
+                    en: Anglais
         comingSoon:
             title: Bientôt disponible
             description: Un nouvel outil est en préparation. Reviens bientôt.

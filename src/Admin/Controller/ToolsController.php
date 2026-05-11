@@ -60,7 +60,41 @@ final class ToolsController extends AbstractController
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        return $this->render('admin/tools/documents.html.twig', [
+        return $this->render('admin/tools/documents/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/outils/documents/catalogue',
+            'en' => '/tools/documents/catalogue',
+        ],
+        name: 'tools_documents_catalogue',
+        methods: ['GET'],
+    )]
+    public function documentsCatalogue(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/tools/documents/catalogue.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/outils/documents/demande',
+            'en' => '/tools/documents/request',
+        ],
+        name: 'tools_documents_request',
+        methods: ['GET'],
+    )]
+    public function documentsRequest(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/tools/documents/request.html.twig', [
             'adminPrefix' => $adminPrefix,
         ]);
     }
