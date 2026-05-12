@@ -19,6 +19,7 @@ enum DocumentCategory: string
     case HOUSING = 'housing';
     case FINANCIAL = 'financial';
     case EDUCATION = 'education';
+    case GUARANTEE = 'guarantee';
     case OTHER = 'other';
 
     public function labelKey(): string

@@ -1718,8 +1718,9 @@ admin:
                 identity: Identité
                 work: Travail
                 housing: Logement
-                financial: Financier
+                financial: Finance
                 education: Études
+                guarantee: Garantie
                 other: Autres
             form:
                 title:
