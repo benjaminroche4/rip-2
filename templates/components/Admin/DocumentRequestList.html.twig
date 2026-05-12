@@ -43,14 +43,25 @@
                                     <twig:Badge variant="secondary" class="rounded-full uppercase">{{ req.language.value }}</twig:Badge>
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
                                     <a
-                                        href="{{ path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) }}"
+                                        href="{{ pdfUrl }}"
                                         class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-100 hover:text-primary"
                                         data-testid="recent-request-download"
                                         aria-label="{{ 'admin.tools.documents.recent.download'|trans }}"
+                                        data-controller="pdf-download"
+                                        data-pdf-download-url-value="{{ pdfUrl }}"
+                                        data-action="click->pdf-download#download"
                                     >
-                                        {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                        <span>{{ 'admin.tools.documents.recent.download'|trans }}</span>
+                                        <span class="relative inline-flex items-center justify-center gap-1.5">
+                                            <span class="inline-flex items-center gap-1.5" data-pdf-download-target="label">
+                                                {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                                <span>{{ 'admin.tools.documents.recent.download'|trans }}</span>
+                                            </span>
+                                            <span class="hidden absolute inset-0 flex items-center justify-center" data-pdf-download-target="spinner">
+                                                <twig:Spinner />
+                                            </span>
+                                        </span>
                                     </a>
                                 </td>
                             </tr>

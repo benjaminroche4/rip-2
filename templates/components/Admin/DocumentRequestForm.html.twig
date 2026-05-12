@@ -396,10 +396,26 @@
     </section>
 
     {# ───── Submit ──────────────────────────────────────────────────── #}
+    {# Loader pattern mirrors templates/components/MarketplaceSearch.html.twig:
+       the `generate` LiveAction can take a few seconds (validation +
+       persist + DocRaptor render), so we disable the button and swap
+       the label for a spinner while it runs. #}
     <div class="flex flex-col-reverse items-stretch gap-3 border-t border-gray-950/5 pt-5 sm:flex-row sm:items-center sm:justify-end">
-        <twig:Button variant="default" type="submit" data-testid="document-request-submit">
-            <twig:ux:icon name="lucide:download" class="size-4 shrink-0" aria-hidden="true" />
-            {{ 'admin.tools.documents.request.actions.generate'|trans }}
+        <twig:Button
+            variant="default"
+            type="submit"
+            data-testid="document-request-submit"
+            data-loading="action(generate)|addAttribute(disabled)"
+        >
+            <span class="relative inline-flex items-center justify-center gap-2">
+                <span class="inline-flex items-center gap-2" data-loading="action(generate)|addClass(invisible)">
+                    <twig:ux:icon name="lucide:download" class="size-4 shrink-0" aria-hidden="true" />
+                    {{ 'admin.tools.documents.request.actions.generate'|trans }}
+                </span>
+                <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(generate)|removeClass(hidden)">
+                    <twig:Spinner />
+                </span>
+            </span>
         </twig:Button>
     </div>
 </form>

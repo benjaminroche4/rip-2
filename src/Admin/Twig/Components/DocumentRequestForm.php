@@ -35,7 +35,8 @@ use Symfony\UX\LiveComponent\LiveCollectionTrait;
  *   2. persist the DocumentRequest (cascade saves PersonRequest + M2M Document)
  *   3. dispatch browser event 'document-request:download' with the PDF URL,
  *      picked up by the download_trigger Stimulus controller on the form
- *   4. mount a fresh DocumentRequest so the form is clean for the next admin
+ *   4. the form keeps its data on screen so the admin can fix a typo and
+ *      re-download without re-typing everything from scratch
  */
 #[AsLiveComponent(
     name: 'Admin:DocumentRequestForm',
@@ -163,10 +164,43 @@ final class DocumentRequestForm extends AbstractController
             'url' => $downloadUrl,
         ]);
 
-        // Reset form so the admin can immediately start another request.
-        $this->request = $this->buildEmptyRequest();
-        $this->activePersonIndex = 0;
-        $this->resetForm();
+        // Keep the form populated with what the admin just submitted so
+        // they can tweak a field and re-download via the same flow. The
+        // detach() call is important: $request is now persisted and
+        // re-submitting would otherwise hit a managed-entity conflict on
+        // the next request when LiveComponent re-hydrates a copy.
+        $em->detach($request);
+        $this->request = $this->cloneAsDraft($request);
+    }
+
+    /**
+     * Returns a fresh, unmanaged DocumentRequest carrying the same field
+     * values as $source (typology, language, drive link, note, persons
+     * with their documents). Used right after a successful save so the
+     * form keeps its UI state without holding a reference to a persisted
+     * entity — a re-submit then creates a brand-new DocumentRequest row
+     * rather than updating the previous one.
+     */
+    private function cloneAsDraft(DocumentRequest $source): DocumentRequest
+    {
+        $draft = new DocumentRequest();
+        $draft->setTypology($source->getTypology());
+        $draft->setLanguage($source->getLanguage());
+        $draft->setDriveLink($source->getDriveLink());
+        $draft->setNote($source->getNote());
+
+        foreach ($source->getPersons() as $person) {
+            $copy = new PersonRequest();
+            $copy->setRole($person->getRole());
+            $copy->setFirstName($person->getFirstName());
+            $copy->setLastName($person->getLastName());
+            foreach ($person->getDocuments() as $doc) {
+                $copy->addDocument($doc);
+            }
+            $draft->addPerson($copy);
+        }
+
+        return $draft;
     }
 
     /**

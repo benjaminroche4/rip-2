@@ -1,14 +1,8 @@
-{# Bilingual PDF for a DocumentRequest. Rendered through Dompdf v3 — limited
-   CSS subset (no flex/grid), so layout is built with HTML tables exactly like
-   our transactional emails (templates/emails/contact_*).
-
-   We borrow the email visual language: centered logo, centered title,
-   nested gray→white info cards (#F7F7F7 outer with #E5E5E5 border,
-   #ffffff inner, all rounded 12pt), muted #525252 labels, green accent
-   box (#EFFDF4 / #BBF7D0) for the prominent call-to-action. We skip the
-   "outer gray viewport" wrap because PDFs have no scroll viewport — the
-   page itself IS the surface, so we use the full printable area as the
-   white canvas. #}
+{# Bilingual PDF for a DocumentRequest. Rendered through DocRaptor
+   (Chrome headless), so modern CSS is allowed. The visual language
+   follows the transactional emails (templates/emails/contact_*):
+   nested gray→white cards, muted #525252 labels, green accent for
+   the call-to-action. #}
 {% set fr = locale == 'fr' %}
 {% set t = {
     title: fr ? 'Demande de pièces' : 'Document request',
@@ -22,7 +16,7 @@
     summary: fr ? 'Récapitulatif de la demande' : 'Request summary',
     typologyLabel: fr ? 'Composition du foyer' : 'Household composition',
     issuedOn: fr ? 'Émis le' : 'Issued on',
-    reference: fr ? 'Référence' : 'Reference',
+    noteLabel: fr ? 'Mot de l\'agence' : 'A note from us',
     persons: fr ? 'Personnes concernées' : 'People involved',
     docsForPerson: fr ? 'Pièces à transmettre' : 'Documents to provide',
     drive: fr ? 'Votre lien de dépôt sécurisé' : 'Your secure upload link',
@@ -50,9 +44,9 @@
     <meta charset="UTF-8">
     <title>{{ t.title }}</title>
     <style>
-        @page { margin: 36pt 40pt 56pt 40pt; }
+        @page { margin: 18mm 16mm 22mm 16mm; }
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
             color: #1f2937;
             font-size: 10.5pt;
             line-height: 1.55;
@@ -60,19 +54,14 @@
             padding: 0;
         }
         a { color: #71172e; }
-        .page-footer {
-            position: fixed;
-            bottom: -34pt;
-            left: 0; right: 0;
-            text-align: center;
-            color: #9ca3af;
-            font-size: 7.5pt;
-            line-height: 1.5;
-        }
-        .page-footer .brand { color: #71172e; font-weight: 600; }
-        /* Outer "gray rail" wrapper card — drawn around content blocks
-           via a div + bg color since Dompdf renders <div> backgrounds
-           more reliably than <table> backgrounds. */
+        h1, h2, h3 { font-weight: 600; color: #111827; }
+        .muted { color: #525252; }
+        .narrow { max-width: 480pt; margin: 0 auto; }
+        .row-2col { display: table; width: 100%; }
+        .row-2col > .col { display: table-cell; vertical-align: top; }
+        .row-2col > .col-right { text-align: right; }
+
+        /* Shared card chrome (gray rail → white inner), matches emails. */
         .gray-card {
             background-color: #F7F7F7;
             border: 1px solid #E5E5E5;
@@ -99,43 +88,17 @@
             padding: 18pt 22pt;
             margin-top: 8pt;
             page-break-inside: avoid;
+            text-align: center;
         }
-        .section-label {
-            margin: 0 0 8pt;
-            padding: 0 4pt;
-            font-size: 11pt;
-            color: #111827;
-        }
-        .muted { color: #525252; }
-        .role-tenant {
-            display: inline-block;
-            padding: 2pt 10pt;
-            border-radius: 999pt;
-            background-color: #EFFDF4;
-            border: 1px solid #BBF7D0;
+        .drive-label {
+            margin: 0 0 4pt;
+            font-size: 8pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2pt;
             color: #15803d;
-            font-weight: 600;
-            font-size: 9pt;
         }
-        .role-guarantor {
-            display: inline-block;
-            padding: 2pt 10pt;
-            border-radius: 999pt;
-            background-color: #EFF6FF;
-            border: 1px solid #BFDBFE;
-            color: #1d4ed8;
-            font-weight: 600;
-            font-size: 9pt;
-        }
-        hr.sep {
-            width: 100%;
-            border: none;
-            border-top: 2px solid #eaeaea;
-            margin: 10pt 0;
-        }
-        .doc-row { margin: 0; padding: 5pt 0; font-size: 10pt; }
-        .doc-name { color: #111827; font-weight: 600; }
-        .doc-desc { color: #525252; font-size: 9pt; line-height: 1.5; }
+        .drive-help { margin: 0 0 12pt; font-size: 10pt; color: #166534; }
         .cta-link {
             display: inline-block;
             background-color: #71172e;
@@ -147,123 +110,126 @@
             border-radius: 8pt;
             word-break: break-all;
         }
+        .role-tenant, .role-guarantor {
+            display: inline-block;
+            padding: 2pt 10pt;
+            border-radius: 999pt;
+            font-weight: 600;
+            font-size: 9pt;
+            border: 1px solid;
+        }
+        .role-tenant { background-color: #EFFDF4; border-color: #BBF7D0; color: #15803d; }
+        .role-guarantor { background-color: #EFF6FF; border-color: #BFDBFE; color: #1d4ed8; }
+        hr.sep { width: 100%; border: none; border-top: 2px solid #eaeaea; margin: 10pt 0; }
+        .section-label { margin: 0 0 8pt; font-size: 11pt; color: #111827; }
+        .doc-row { margin: 0; padding: 5pt 0; font-size: 10pt; }
+        .doc-name { color: #111827; font-weight: 600; }
+        .doc-desc { color: #525252; font-size: 9pt; line-height: 1.5; }
+        .footer-brand { margin: 14pt 0 0; font-size: 9pt; text-align: center; color: #525252; }
+        .footer-address { margin: 4pt 0 0; font-size: 9pt; text-align: center; color: #9ca3af; }
+        .page-footer {
+            position: fixed;
+            bottom: -14mm;
+            left: 0; right: 0;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 7.5pt;
+            line-height: 1.5;
+        }
+        .page-footer .brand { color: #71172e; font-weight: 600; }
     </style>
 </head>
 <body>
-
-    {# ---- Centered logo (same as emails) ---- #}
-    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tr>
-            <td align="center" style="padding-bottom:8pt">
-                {% if logoDataUri %}
-                    <img src="{{ logoDataUri }}" alt="Relocation in Paris" width="166" height="38" style="display:block;border:none;outline:none;text-decoration:none">
-                {% else %}
-                    <span style="font-size:15pt;font-weight:700;color:#71172e;letter-spacing:0.6pt">Relocation in Paris</span>
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-
-    {# ---- Title block, centered like the email header ---- #}
-    <h1 style="margin:0;padding:14pt 0 0;font-size:22pt;line-height:1.3;font-weight:600;text-align:center;color:#111827">
-        {{ t.title }}
-    </h1>
-    <p style="margin:8pt 0 0;font-size:9pt;text-align:center;color:#9ca3af">
-        {{ t.issuedOn }} {{ request.createdAt|format_date(pattern='dd MMMM yyyy', locale=locale) }}{% if request.id %} &middot; {{ t.reference }} #{{ request.id }}{% endif %}
-    </p>
-
-    {# ---- Intro paragraph ---- #}
-    <p style="margin:18pt 0 16pt;padding:0 16pt;font-size:10.5pt;line-height:1.6;color:#374151;text-align:center">
-        {{ t.intro }}
-    </p>
-
-    {# ---- PDF format notice (warning highlight box, email-style soft card) ---- #}
-    <div class="notice-card">
-        <p style="margin:0 0 4pt;font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#71172e;text-align:center">
-            {{ t.noticeLabel }}
-        </p>
-        <p style="margin:0;font-size:10pt;line-height:1.55;color:#4b1320;text-align:center">
-            {{ t.noticeBody }}
-        </p>
-    </div>
-
-    {# ---- Summary card (gray outer → white inner, mirrors emails contact info card) ---- #}
-    <div class="gray-card">
-        <p class="section-label"><strong>{{ t.summary }}</strong></p>
-        <div class="white-inner">
-            <p style="margin:0;padding:4pt 0;font-size:10pt">
-                <span class="muted">{{ t.typologyLabel }} :</span> <strong>{{ t.typology[request.typology.value] }}</strong>
-            </p>
-            <p style="margin:0;padding:4pt 0;font-size:10pt">
-                <span class="muted">{{ t.persons }} :</span> <strong>{{ request.persons|length }}</strong>
-            </p>
+    <div class="narrow">
+        {# ---- Centered logo (mirrors email header) ---- #}
+        <div style="text-align:center">
+            {% if logoDataUri %}
+                <img src="{{ logoDataUri }}" alt="Relocation in Paris" width="166" height="38" style="display:block;border:none;outline:none;text-decoration:none;height:38px;width:166px;margin:0 auto">
+            {% else %}
+                <span style="font-size:15pt;font-weight:700;color:#71172e;letter-spacing:0.6pt">Relocation in Paris</span>
+            {% endif %}
         </div>
-    </div>
 
-    {# ---- Persons section — one gray→white card per person ---- #}
-    <p class="section-label" style="margin-top:6pt"><strong>{{ t.persons }}</strong></p>
-    {% for person in request.persons %}
-        <div class="gray-card" style="page-break-inside:avoid">
+        <h1 style="font-size:22pt;line-height:1.3;text-align:center;margin:14pt 0 0">{{ t.title }}</h1>
+        <p style="margin:8pt 0 0;font-size:9pt;text-align:center;color:#9ca3af">
+            {{ t.issuedOn }} {{ request.createdAt|format_date(pattern='dd MMMM yyyy', locale=locale) }}
+        </p>
+
+        <p style="margin:18pt 0 16pt;padding:0 16pt;font-size:10.5pt;line-height:1.6;color:#374151;text-align:center">
+            {{ t.intro }}
+        </p>
+
+        {# ---- Format notice (rose accent box) ---- #}
+        <div class="notice-card">
+            <p style="margin:0 0 4pt;font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#71172e;text-align:center">{{ t.noticeLabel }}</p>
+            <p style="margin:0;font-size:10pt;line-height:1.55;color:#4b1320;text-align:center">{{ t.noticeBody }}</p>
+        </div>
+
+        {# ---- Summary card (gray outer → white inner, mirrors emails contact info) ---- #}
+        <div class="gray-card">
+            <p class="section-label"><strong>{{ t.summary }}</strong></p>
             <div class="white-inner">
-                <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-                    <tr>
-                        <td style="font-size:11pt;color:#111827">
-                            <span class="muted" style="font-size:9pt">#{{ '%02d'|format(loop.index) }}</span>
-                            &nbsp;<strong>{{ person.firstName }} {{ person.lastName }}</strong>
-                        </td>
-                        <td align="right" style="font-size:9pt">
-                            {% if person.role.value == 'tenant' %}
-                                <span class="role-tenant">{{ t.role.tenant }}</span>
-                            {% else %}
-                                <span class="role-guarantor">{{ t.role.guarantor }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-
-                <hr class="sep">
-
-                <p style="margin:0;padding:0 0 6pt;font-size:9pt" class="muted">{{ t.docsForPerson }} :</p>
-
-                {% for doc in person.documents %}
-                    <p class="doc-row">
-                        <span class="doc-name">{{ doc.getName(locale) }}</span>
-                        {% set desc = doc.getDescription(locale) %}
-                        {% if desc %}<br><span class="doc-desc">{{ desc }}</span>{% endif %}
-                    </p>
-                {% endfor %}
+                <p style="margin:0;padding:4pt 0;font-size:10pt"><span class="muted">{{ t.typologyLabel }} :</span> <strong>{{ t.typology[request.typology.value] }}</strong></p>
+                <p style="margin:0;padding:4pt 0;font-size:10pt"><span class="muted">{{ t.persons }} :</span> <strong>{{ request.persons|length }}</strong></p>
             </div>
         </div>
-    {% endfor %}
 
-    {# ---- Drive link — green highlight box (email's 'response within 30min' style) ---- #}
-    <div class="drive-card">
-        <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-            <tr>
-                <td align="center">
-                    <p style="margin:0 0 4pt;font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#15803d">
-                        {{ t.drive }}
-                    </p>
-                    <p style="margin:0 0 12pt;font-size:10pt;color:#166534">
-                        {{ t.driveHelp }}
-                    </p>
-                    <a class="cta-link" href="{{ request.driveLink }}">{{ request.driveLink }}</a>
-                </td>
-            </tr>
-        </table>
+        {# ---- Persons section — one gray→white card per person ---- #}
+        <p class="section-label" style="margin-top:6pt"><strong>{{ t.persons }}</strong></p>
+        {% for person in request.persons %}
+            <div class="gray-card" style="page-break-inside:avoid">
+                <div class="white-inner">
+                    <div class="row-2col">
+                        <div class="col" style="font-size:11pt;color:#111827">
+                            <span class="muted" style="font-size:9pt">#{{ '%02d'|format(loop.index) }}</span>
+                            &nbsp;<strong>{{ person.firstName }} {{ person.lastName }}</strong>
+                        </div>
+                        <div class="col col-right" style="font-size:9pt">
+                            <span class="{{ person.role.value == 'tenant' ? 'role-tenant' : 'role-guarantor' }}">{{ t.role[person.role.value] }}</span>
+                        </div>
+                    </div>
+                    <hr class="sep">
+                    <p class="muted" style="margin:0;padding:0 0 6pt;font-size:9pt">{{ t.docsForPerson }} :</p>
+                    {% for doc in person.documents %}
+                        <p class="doc-row">
+                            <span class="doc-name">{{ doc.getName(locale) }}</span>
+                            {% set desc = doc.getDescription(locale) %}
+                            {% if desc %}<br><span class="doc-desc">{{ desc }}</span>{% endif %}
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        {# ---- Personalised note (only when the advisor wrote one).
+               Sits right above the drive CTA so the message is the last
+               thing the recipient reads before clicking the upload link. #}
+        {% if request.note|default('')|trim is not empty %}
+            <div class="gray-card">
+                <p class="section-label"><strong>{{ t.noteLabel }}</strong></p>
+                <div class="white-inner">
+                    <p style="margin:0;padding:2pt 0;font-size:10pt;line-height:1.65;color:#374151;white-space:pre-line">{{ request.note|trim }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {# ---- Drive link — green highlight box (mirrors email's 30-min CTA) ---- #}
+        <div class="drive-card">
+            <p class="drive-label">{{ t.drive }}</p>
+            <p class="drive-help">{{ t.driveHelp }}</p>
+            <a class="cta-link" href="{{ request.driveLink }}">{{ request.driveLink }}</a>
+        </div>
+
+        {# ---- Bottom signature, centered like email footer ---- #}
+        <hr class="sep" style="margin-top:20pt">
+        <p class="footer-brand">
+            <strong style="color:#71172e">Relocation in Paris</strong> &middot; {{ t.footerTag }}
+        </p>
+        <p class="footer-address">{{ t.footerAddress }}</p>
     </div>
 
-    {# ---- Bottom signature, centered like email footer ---- #}
-    <hr class="sep" style="margin-top:20pt">
-    <p style="margin:14pt 0 0;font-size:9pt;text-align:center;color:#525252">
-        <strong style="color:#71172e">Relocation in Paris</strong> &middot; {{ t.footerTag }}
-    </p>
-    <p style="margin:4pt 0 0;font-size:9pt;text-align:center;color:#9ca3af">
-        {{ t.footerAddress }}
-    </p>
-
     <div class="page-footer">
-        <span class="brand">Relocation in Paris</span> &middot; {{ request.id ? t.reference ~ ' #' ~ request.id : t.title }}
+        <span class="brand">Relocation in Paris</span> &middot; {{ t.title }}
     </div>
 </body>
 </html>

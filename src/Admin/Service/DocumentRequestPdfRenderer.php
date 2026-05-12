@@ -5,25 +5,31 @@ declare(strict_types=1);
 namespace App\Admin\Service;
 
 use App\Admin\Entity\DocumentRequest;
-use Dompdf\Dompdf;
-use Dompdf\Options;
+use App\Shared\Pdf\PdfFormat;
+use App\Shared\Pdf\PdfOptions;
+use App\Shared\Pdf\PdfOrientation;
+use App\Shared\Pdf\PdfRenderer;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 /**
  * Renders a DocumentRequest into a downloadable PDF. The Twig template is
- * locale-aware (driven by the request's language enum), so the same render
- * call produces either a French or English PDF.
+ * locale-aware (driven by the request's language enum), so the same call
+ * produces either a French or English document.
  *
- * Dompdf is configured for o2switch compatibility — pure PHP, no shell,
- * isRemoteEnabled disabled (defense-in-depth against injected <img> tags).
+ * Layout/styling decisions live entirely in the template — this class
+ * only assembles inputs (HTML + a few page-level options) and hands the
+ * job off to the generic {@see PdfRenderer}. Swapping the backend later
+ * (PDFShift, Browserless, a self-hosted Gotenberg) is a one-line change
+ * in services config; the contract stays the same.
  */
 final readonly class DocumentRequestPdfRenderer
 {
     public function __construct(
         private Environment $twig,
         private TranslatorInterface $translator,
+        private PdfRenderer $pdfRenderer,
         #[Autowire('%kernel.project_dir%')]
         private string $projectDir,
     ) {
@@ -31,26 +37,25 @@ final readonly class DocumentRequestPdfRenderer
 
     public function render(DocumentRequest $request): string
     {
+        return $this->pdfRenderer->render($this->renderHtml($request), $this->options());
+    }
+
+    /**
+     * Renders the source HTML without sending it to the PDF backend. Used
+     * by tests that inspect the rendered markup; can also be reused if
+     * the team ever needs to preview the template in the browser without
+     * touching the DocRaptor quota.
+     */
+    public function renderHtml(DocumentRequest $request): string
+    {
         $locale = $request->getLanguage()->value;
 
-        $html = $this->twig->render('pdf/document_request.html.twig', [
+        return $this->twig->render('pdf/document_request.html.twig', [
             'request' => $request,
             'locale' => $locale,
             'translator' => $this->translator,
             'logoDataUri' => $this->logoDataUri(),
         ]);
-
-        $options = new Options();
-        $options->setIsRemoteEnabled(false);
-        $options->setIsHtml5ParserEnabled(true);
-        $options->setDefaultFont('DejaVu Sans');
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        return (string) $dompdf->output();
     }
 
     public function filename(DocumentRequest $request): string
@@ -61,15 +66,33 @@ final readonly class DocumentRequestPdfRenderer
     }
 
     /**
-     * Inline the brand wordmark as a base64 data URI so Dompdf can render it
-     * without enabling remote fetching or widening its chroot.
+     * A4 portrait with generous margins so the bilingual content breathes.
+     * Pulled into a dedicated method so individual tweaks stay close to
+     * the use case and the renderer stays purely about wiring.
+     */
+    private function options(): PdfOptions
+    {
+        return new PdfOptions(
+            format: PdfFormat::A4,
+            orientation: PdfOrientation::Portrait,
+            marginTop: '18mm',
+            marginRight: '16mm',
+            marginBottom: '20mm',
+            marginLeft: '16mm',
+        );
+    }
+
+    /**
+     * Inline the brand wordmark as a base64 data URI so the renderer can
+     * embed it without depending on a public asset URL — keeps the PDF
+     * usable when downloaded and viewed offline.
      */
     private function logoDataUri(): string
     {
         $path = $this->projectDir.'/public/medias/logos/logo_red.svg';
         $svg = @file_get_contents($path);
 
-        if ($svg === false) {
+        if (false === $svg) {
             return '';
         }
 
