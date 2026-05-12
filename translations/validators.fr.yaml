@@ -12,6 +12,8 @@ admin:
                     length: "La description ne peut pas dépasser 5000 caractères."
                 slug:
                     unique: "Un document avec un identifiant similaire existe déjà."
+                category:
+                    notNull: "Choisis une catégorie pour ce document."
             request:
                 persons:
                     min: "Renseigne au moins une personne."

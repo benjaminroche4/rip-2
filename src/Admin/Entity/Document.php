@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Admin\Entity;
 
+use App\Admin\Domain\DocumentCategory;
 use App\Admin\Repository\DocumentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -44,6 +45,10 @@ class Document
     #[ORM\Column(type: 'text', nullable: true)]
     #[Assert\Length(max: 5000, maxMessage: 'admin.tools.documents.form.description.length')]
     private ?string $descriptionEn = null;
+
+    #[ORM\Column(length: 30, enumType: DocumentCategory::class)]
+    #[Assert\NotNull(message: 'admin.tools.documents.form.category.notNull')]
+    private ?DocumentCategory $category = null;
 
     /**
      * Pinned documents are surfaced at the top of the catalogue listing.
@@ -117,6 +122,18 @@ class Document
     public function setDescriptionEn(?string $descriptionEn): static
     {
         $this->descriptionEn = $descriptionEn;
+
+        return $this;
+    }
+
+    public function getCategory(): ?DocumentCategory
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?DocumentCategory $category): static
+    {
+        $this->category = $category;
 
         return $this;
     }

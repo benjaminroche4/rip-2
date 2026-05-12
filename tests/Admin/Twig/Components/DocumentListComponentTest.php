@@ -273,6 +273,7 @@ final class DocumentListComponentTest extends KernelTestCase
             ->setNameFr($nameFr)
             ->setNameEn($nameEn)
             ->setSlug($slug)
+            ->setCategory(\App\Admin\Domain\DocumentCategory::OTHER)
             ->setCreatedAt($createdAt);
         $this->em->persist($doc);
 

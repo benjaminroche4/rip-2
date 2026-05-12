@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Admin\Factory;
 
+use App\Admin\Domain\DocumentCategory;
 use App\Admin\Entity\Document;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
@@ -33,6 +34,7 @@ final class DocumentFactory extends PersistentObjectFactory
             'nameEn' => ucfirst(self::faker()->sentence(3, false)),
             'descriptionFr' => self::faker()->optional(0.7)->paragraph(),
             'descriptionEn' => self::faker()->optional(0.7)->paragraph(),
+            'category' => self::faker()->randomElement(DocumentCategory::cases()),
             'pinned' => self::faker()->boolean(20),
             'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime('-6 month')),
         ];

@@ -56,11 +56,12 @@ class PersonRequestType extends AbstractType
                 'multiple' => true,
                 'expanded' => true,
                 'choice_label' => fn (Document $doc): string => $doc->getName($locale),
-                // Pinned docs first (matches the catalogue ordering), then
-                // alphabetical within each bucket — keeps "priority" pieces
-                // at the top so the admin spots them while building a request.
+                // Group by category first, then float pinned to the top of
+                // each category bucket, then alphabetical. The template
+                // re-groups visually using these stable boundaries.
                 'query_builder' => fn (EntityRepository $r) => $r->createQueryBuilder('d')
-                    ->orderBy('d.pinned', 'DESC')
+                    ->orderBy('d.category', 'ASC')
+                    ->addOrderBy('d.pinned', 'DESC')
                     ->addOrderBy('d.nameFr', 'ASC'),
                 'label' => false,
                 'by_reference' => false,

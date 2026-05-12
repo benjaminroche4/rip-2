@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Admin\Twig\Components;
 
+use App\Admin\Domain\DocumentCategory;
 use App\Admin\Entity\Document;
 use App\Admin\Repository\DocumentRepository;
 use App\Auth\Entity\User;
@@ -59,6 +60,7 @@ final class DocumentFormComponentTest extends KernelTestCase
                 'nameEn' => 'Commercial lease',
                 'descriptionFr' => 'Modèle de bail commercial.',
                 'descriptionEn' => 'Commercial lease template.',
+                'category' => 'other',
             ],
         ], 'save');
 
@@ -92,6 +94,7 @@ final class DocumentFormComponentTest extends KernelTestCase
                 'nameEn' => 'ID card',
                 'descriptionFr' => '',
                 'descriptionEn' => '',
+                'category' => 'identity',
                 'pinned' => '1',
             ],
         ], 'save');
@@ -114,6 +117,7 @@ final class DocumentFormComponentTest extends KernelTestCase
                     'nameEn' => 'Lease',
                     'descriptionFr' => '',
                     'descriptionEn' => '',
+                    'category' => 'other',
                 ],
             ], 'save');
         } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
@@ -138,6 +142,7 @@ final class DocumentFormComponentTest extends KernelTestCase
                     'nameEn' => 'b',
                     'descriptionFr' => '',
                     'descriptionEn' => '',
+                    'category' => 'other',
                 ],
             ], 'save');
         } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
@@ -162,6 +167,7 @@ final class DocumentFormComponentTest extends KernelTestCase
             ->setNameFr('Pré-existant')
             ->setNameEn('Pre-existing')
             ->setSlug('pre-existant')
+            ->setCategory(DocumentCategory::OTHER)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($existing);
         $this->em->flush();
@@ -183,6 +189,7 @@ final class DocumentFormComponentTest extends KernelTestCase
             ->setDescriptionFr('Description FR')
             ->setDescriptionEn('Description EN')
             ->setSlug('original')
+            ->setCategory(DocumentCategory::OTHER)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($existing);
         $this->em->flush();
@@ -205,6 +212,7 @@ final class DocumentFormComponentTest extends KernelTestCase
             ->setNameFr('Bail original')
             ->setNameEn('Original lease')
             ->setSlug('bail-original')
+            ->setCategory(DocumentCategory::OTHER)
             ->setCreatedAt(new \DateTimeImmutable('-1 month'));
         $this->em->persist($existing);
         $this->em->flush();
@@ -221,6 +229,7 @@ final class DocumentFormComponentTest extends KernelTestCase
                 'nameEn' => 'Revised lease',
                 'descriptionFr' => 'Nouvelle description.',
                 'descriptionEn' => 'New description.',
+                'category' => 'other',
             ],
         ], 'save');
 
@@ -246,6 +255,7 @@ final class DocumentFormComponentTest extends KernelTestCase
             ->setNameFr('Bail type')
             ->setNameEn('Standard lease')
             ->setSlug('bail-type')
+            ->setCategory(DocumentCategory::OTHER)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($existing);
         $this->em->flush();
@@ -256,6 +266,7 @@ final class DocumentFormComponentTest extends KernelTestCase
             $formName => [
                 'nameFr' => 'Bail type',
                 'nameEn' => 'Standard lease v2',
+                'category' => 'other',
                 'descriptionFr' => '',
                 'descriptionEn' => '',
             ],

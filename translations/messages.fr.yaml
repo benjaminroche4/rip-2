@@ -1706,6 +1706,7 @@ admin:
                 empty: Aucun document pour le moment. Crée le premier avec le bouton ci-dessus.
                 column:
                     name: Nom
+                    category: Catégorie
                     status: Statut
                     slug: Identifiant
                     createdAt: Créé le
@@ -1713,6 +1714,13 @@ admin:
                     actions: Actions
                 noDescription: Aucune description fournie
                 pinnedBadge: Épinglé
+            category:
+                identity: Identité
+                work: Travail
+                housing: Logement
+                financial: Financier
+                education: Études
+                other: Autres
             form:
                 title:
                     new: Nouveau document
@@ -1728,6 +1736,8 @@ admin:
                     label: Description
                 descriptionEn:
                     label: Description
+                category:
+                    label: Catégorie
                 pinned:
                     label: Épingler en tête de liste
                     help: Le document remonte tout en haut du catalogue et reçoit un badge « Épinglé ».

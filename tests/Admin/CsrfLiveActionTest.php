@@ -92,6 +92,7 @@ final class CsrfLiveActionTest extends WebTestCase
             ->setNameFr('Test FR')
             ->setNameEn('Test EN')
             ->setSlug('csrf-test-doc')
+            ->setCategory(\App\Admin\Domain\DocumentCategory::OTHER)
             ->setCreatedAt(new \DateTimeImmutable());
         $em->persist($doc);
         $em->flush();

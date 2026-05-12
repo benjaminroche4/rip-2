@@ -40,6 +40,31 @@
     {% set hasDescFrErrors = form.descriptionFr.vars.errors|length > 0 %}
     {% set hasDescEnErrors = form.descriptionEn.vars.errors|length > 0 %}
 
+    <div>
+        <p id="{{ form.category.vars.id }}-label" class="text-sm/6 font-semibold text-gray-900">
+            {{ 'admin.tools.documents.form.category.label'|trans }}
+            <span class="text-red-600" aria-hidden="true">*</span>
+        </p>
+        <div role="radiogroup" aria-labelledby="{{ form.category.vars.id }}-label" class="mt-2 flex flex-wrap gap-2">
+            {% for choice in form.category.children %}
+                <label for="{{ choice.vars.id }}" class="cursor-pointer rounded-lg border border-gray-950/5 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-50/60 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                    <input
+                        type="radio"
+                        id="{{ choice.vars.id }}"
+                        name="{{ choice.vars.full_name }}"
+                        value="{{ choice.vars.value }}"
+                        {% if choice.vars.checked %}checked{% endif %}
+                        class="sr-only"
+                    />
+                    {{ choice.vars.label|trans }}
+                </label>
+            {% endfor %}
+        </div>
+        {% for error in form.category.vars.errors %}
+            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+        {% endfor %}
+    </div>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <div class="flex items-center gap-1">

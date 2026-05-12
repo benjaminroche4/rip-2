@@ -84,6 +84,7 @@ final class AdminFixtures extends Fixture
         ];
 
         $documents = [];
+        $categories = \App\Admin\Domain\DocumentCategory::cases();
         foreach ($catalogue as [$slug, $nameFr, $nameEn, $descFr, $descEn, $pinned]) {
             $doc = (new Document())
                 ->setSlug($slug)
@@ -91,6 +92,7 @@ final class AdminFixtures extends Fixture
                 ->setNameEn($nameEn)
                 ->setDescriptionFr($descFr)
                 ->setDescriptionEn($descEn)
+                ->setCategory($categories[array_rand($categories)])
                 ->setPinned($pinned)
                 ->setCreatedAt(new \DateTimeImmutable('-'.random_int(7, 180).' days'));
             $manager->persist($doc);

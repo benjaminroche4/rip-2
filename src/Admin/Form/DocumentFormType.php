@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Admin\Form;
 
+use App\Admin\Domain\DocumentCategory;
 use App\Admin\Entity\Document;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -24,6 +26,14 @@ class DocumentFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('category', EnumType::class, [
+                'class' => DocumentCategory::class,
+                'choice_label' => fn (DocumentCategory $c): string => $c->labelKey(),
+                'expanded' => true,
+                'multiple' => false,
+                'placeholder' => false,
+                'label' => 'admin.tools.documents.form.category.label',
+            ])
             ->add('nameFr', TextType::class, [
                 'label' => 'admin.tools.documents.form.nameFr.label',
                 'attr' => ['maxlength' => 255, 'autocomplete' => 'off'],
