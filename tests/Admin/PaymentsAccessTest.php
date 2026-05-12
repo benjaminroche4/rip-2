@@ -68,9 +68,23 @@ final class PaymentsAccessTest extends WebTestCase
         return '/fr/'.$prefix.'/admin/paiements';
     }
 
+    private function paymentsDataUrl(string $prefix): string
+    {
+        return '/fr/'.$prefix.'/admin/paiements/donnees';
+    }
+
     public function testAnonymousIsRedirectedToLogin(): void
     {
         $this->client->request('GET', $this->paymentsUrl($this->adminPrefix));
+
+        self::assertResponseStatusCodeSame(302);
+        $location = (string) $this->client->getResponse()->headers->get('Location');
+        self::assertStringContainsString('connexion', $location);
+    }
+
+    public function testAnonymousIsRedirectedToLoginOnDataEndpoint(): void
+    {
+        $this->client->request('GET', $this->paymentsDataUrl($this->adminPrefix));
 
         self::assertResponseStatusCodeSame(302);
         $location = (string) $this->client->getResponse()->headers->get('Location');
@@ -85,13 +99,44 @@ final class PaymentsAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminSeesPaymentsPage(): void
+    public function testNonAdminGetsAccessDeniedOnDataEndpoint(): void
+    {
+        $this->loginAs(self::USER_EMAIL);
+        $this->client->request('GET', $this->paymentsDataUrl($this->adminPrefix));
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testAdminSeesShellWithLazyFrameAndSpinner(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);
         $crawler = $this->client->request('GET', $this->paymentsUrl($this->adminPrefix));
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Paiements');
+
+        // Shell ships a lazy turbo-frame pointing at the data endpoint
+        // + a default spinner child so the admin sees a loading state
+        // immediately rather than an empty middle of the page.
+        $frame = $crawler->filter('turbo-frame[data-testid="payments-body"]');
+        self::assertCount(1, $frame);
+        self::assertSame('lazy', $frame->attr('loading'));
+        self::assertStringEndsWith('/admin/paiements/donnees', (string) $frame->attr('src'));
+        self::assertCount(1, $crawler->filter('[data-testid="payments-loading"]'));
+
+        // Heavy data is NOT in the shell — proves the deferral worked.
+        self::assertCount(0, $crawler->filter('[data-testid="payments-kpi-grid"]'));
+    }
+
+    public function testAdminSeesPaymentsDataFragment(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->paymentsDataUrl($this->adminPrefix));
+
+        self::assertResponseIsSuccessful();
+        // Fragment wraps the content in the matching turbo-frame so Turbo
+        // can swap it in place.
+        self::assertCount(1, $crawler->filter('turbo-frame#payments-body'));
 
         // 3 KPI cards: total all-time + this month vs last month + this week vs last week.
         self::assertCount(3, $crawler->filter('[data-testid="payments-kpi-grid"] > article'));
@@ -114,6 +159,14 @@ final class PaymentsAccessTest extends WebTestCase
     {
         $this->loginAs(self::ADMIN_EMAIL);
         $this->client->request('GET', $this->paymentsUrl('00000000000000000000000000000000'));
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testWrongPrefixOnDataEndpointReturns404EvenAuthenticated(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->paymentsDataUrl('00000000000000000000000000000000'));
 
         self::assertResponseStatusCodeSame(404);
     }

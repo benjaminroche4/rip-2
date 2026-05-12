@@ -1547,6 +1547,7 @@ admin:
     payments:
         title: Paiements
         subtitle: 'Chiffre d''affaires, transactions et tendances mensuelles.'
+        loading: Récupération des paiements Stripe...
         kpi:
             totalAllTime: CA total encaissé
             thisMonth: CA du mois

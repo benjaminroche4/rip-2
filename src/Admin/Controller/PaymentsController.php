@@ -41,6 +41,13 @@ final class PaymentsController extends AbstractController
     ) {
     }
 
+    /**
+     * Light shell: renders the page header + an empty turbo-frame whose
+     * `src` points at the data endpoint. The Stripe API roundtrips are
+     * deferred to that secondary request so the admin gets visual
+     * feedback immediately (header + spinner) instead of staring at a
+     * blank screen for ~1-2s.
+     */
     #[Route(
         path: [
             'fr' => '/paiements',
@@ -49,7 +56,29 @@ final class PaymentsController extends AbstractController
         name: 'payments',
         methods: ['GET'],
     )]
-    public function index(string $adminPrefix, Request $request): Response
+    public function index(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/payments/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    /**
+     * Heavy data fragment — hit by the lazy turbo-frame on the page above.
+     * Doing all Stripe work here lets the shell render in <100ms while
+     * this endpoint takes the hit (cached internally by StripePaymentRepository).
+     */
+    #[Route(
+        path: [
+            'fr' => '/paiements/donnees',
+            'en' => '/payments/data',
+        ],
+        name: 'payments_data',
+        methods: ['GET'],
+    )]
+    public function data(string $adminPrefix, Request $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -255,7 +284,7 @@ final class PaymentsController extends AbstractController
             }
         }
 
-        return $this->render('admin/payments/index.html.twig', [
+        return $this->render('admin/payments/_data.html.twig', [
             'adminPrefix' => $adminPrefix,
             'currency' => $currency,
             'currencySymbol' => $currencySymbol,

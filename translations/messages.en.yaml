@@ -1546,6 +1546,7 @@ admin:
     payments:
         title: Payments
         subtitle: 'Revenue, transactions, and monthly trends.'
+        loading: Fetching Stripe payments...
         kpi:
             totalAllTime: Total revenue
             thisMonth: This month
