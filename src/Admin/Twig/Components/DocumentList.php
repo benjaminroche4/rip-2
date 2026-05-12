@@ -14,6 +14,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -30,6 +31,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 final class DocumentList
 {
     use DefaultActionTrait;
+    use ComponentToolsTrait;
 
     #[LiveProp]
     public string $adminPrefix = '';
@@ -74,6 +76,25 @@ final class DocumentList
             $em->flush();
         }
         $this->documentsCache = null;
+    }
+
+    /**
+     * Opens the shared dialog pre-filled with the requested document. The
+     * actual fetching + form population happens in the sibling DocumentForm
+     * component, which listens for `document:edit-requested` and dispatches
+     * the browser event that opens the <dialog>. Silently no-ops on an
+     * unknown id for the same race-protection reason as delete().
+     */
+    #[LiveAction]
+    public function edit(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+
+        if (null === $this->repository->find($id)) {
+            return;
+        }
+
+        $this->emit('document:edit-requested', ['id' => $id]);
     }
 
     /**

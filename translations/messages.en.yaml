@@ -1692,6 +1692,7 @@ admin:
                     generate: Generate PDF
             actions:
                 add: New document
+                edit: Edit
                 delete: Delete
             delete:
                 title: Delete this document?
@@ -1708,10 +1709,13 @@ admin:
                     slug: Identifier
                     createdAt: Created on
                     expand: Show descriptions
+                    actions: Actions
                 noDescription: No description provided
                 pinnedBadge: Pinned
             form:
-                title: New document
+                title:
+                    new: New document
+                    edit: Edit document
                 subtitle: A name is required in both languages. The unique identifier is generated automatically from the French name.
                 cancel: Cancel
                 submit: Save

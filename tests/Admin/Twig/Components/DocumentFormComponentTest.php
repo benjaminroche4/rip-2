@@ -147,6 +147,97 @@ final class DocumentFormComponentTest extends KernelTestCase
         self::assertCount(0, $this->repository->findAll());
     }
 
+    public function testHeadingSwitchesToEditWordingWhenEditing(): void
+    {
+        $admin = $this->seedAdmin('admin@example.com');
+        $this->loginAs($admin);
+
+        // Fresh component (no document loaded): heading uses the "new" copy.
+        $newHtml = (string) $this->renderTwigComponent('Admin:DocumentForm');
+        self::assertStringContainsString('Nouveau document', $newHtml);
+        self::assertStringNotContainsString('Modifier le document', $newHtml);
+
+        // Edit-requested: heading switches to the "edit" copy.
+        $existing = (new Document())
+            ->setNameFr('Pré-existant')
+            ->setNameEn('Pre-existing')
+            ->setSlug('pre-existant')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($existing);
+        $this->em->flush();
+
+        $component = $this->createLiveComponent('Admin:DocumentForm')->actingAs($admin);
+        $component->call('onEditRequested', ['id' => $existing->getId()]);
+
+        $editHtml = (string) $component->render();
+        self::assertStringContainsString('Modifier le document', $editHtml);
+        self::assertStringNotContainsString('Nouveau document', $editHtml);
+    }
+
+    public function testEditRequestedLoadsDocumentAndOpensDialog(): void
+    {
+        $admin = $this->seedAdmin('admin@example.com');
+        $existing = (new Document())
+            ->setNameFr('Original FR')
+            ->setNameEn('Original EN')
+            ->setDescriptionFr('Description FR')
+            ->setDescriptionEn('Description EN')
+            ->setSlug('original')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($existing);
+        $this->em->flush();
+
+        $component = $this->createLiveComponent('Admin:DocumentForm')->actingAs($admin);
+
+        $component->call('onEditRequested', ['id' => $existing->getId()]);
+
+        // The component now targets the existing document and is in editing mode.
+        self::assertSame($existing->getId(), $component->component()->document?->getId());
+        self::assertTrue($component->component()->isEditing());
+        // The browser event the dialog listens to was dispatched.
+        $this->assertComponentDispatchBrowserEvent($component, 'document-dialog:open');
+    }
+
+    public function testEditingExistingDocumentDoesNotChangeSlug(): void
+    {
+        $admin = $this->seedAdmin('admin@example.com');
+        $existing = (new Document())
+            ->setNameFr('Bail original')
+            ->setNameEn('Original lease')
+            ->setSlug('bail-original')
+            ->setCreatedAt(new \DateTimeImmutable('-1 month'));
+        $this->em->persist($existing);
+        $this->em->flush();
+        $originalId = $existing->getId();
+        $originalCreatedAt = $existing->getCreatedAt();
+
+        $component = $this->createLiveComponent('Admin:DocumentForm')->actingAs($admin);
+        $component->call('onEditRequested', ['id' => $originalId]);
+
+        $formName = $component->component()->getFormName();
+        $component->submitForm([
+            $formName => [
+                'nameFr' => 'Bail révisé',
+                'nameEn' => 'Revised lease',
+                'descriptionFr' => 'Nouvelle description.',
+                'descriptionEn' => 'New description.',
+            ],
+        ], 'save');
+
+        $this->em->clear();
+        $updated = $this->repository->find($originalId);
+        self::assertNotNull($updated);
+        self::assertSame('Bail révisé', $updated->getNameFr());
+        self::assertSame('Revised lease', $updated->getNameEn());
+        self::assertSame('Nouvelle description.', $updated->getDescriptionFr());
+        // Slug stays stable on edit — renaming must not break references.
+        self::assertSame('bail-original', $updated->getSlug());
+        // createdAt is preserved (not stamped again at update time).
+        self::assertEquals($originalCreatedAt->format('U'), $updated->getCreatedAt()?->format('U'));
+        // Only one row in the DB — we updated, didn't insert.
+        self::assertCount(1, $this->repository->findAll());
+    }
+
     public function testSlugIsDeduplicatedAcrossSubmits(): void
     {
         $admin = $this->seedAdmin('admin@example.com');

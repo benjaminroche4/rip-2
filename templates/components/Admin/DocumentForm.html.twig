@@ -4,6 +4,12 @@
     keep the dialog open thanks to data-live-ignore on the parent.
     Error styling mirrors the public ContactForm pattern:
       <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+
+    The dialog's title + description live here (not in the parent template)
+    because this component re-renders on edit/create, while the parent
+    Dialog:Content is data-live-ignored. The ids are intentionally hardcoded
+    to match the parent <twig:Dialog id="document-form"> wrapper so that
+    aria-labelledby/describedby on the dialog host still resolve correctly.
 #}
 <form
     {{ attributes.defaults({
@@ -16,6 +22,19 @@
     class="space-y-5"
     data-testid="document-form"
 >
+    <header class="flex flex-col gap-2 text-center sm:text-left">
+        <h2
+            id="dialog-document-form-title"
+            class="text-lg leading-none font-semibold text-gray-900"
+            data-testid="document-form-heading"
+        >
+            {{ (this.editing ? 'admin.tools.documents.form.title.edit' : 'admin.tools.documents.form.title.new')|trans }}
+        </h2>
+        <p id="dialog-document-form-description" class="text-sm text-pretty text-gray-500">
+            {{ 'admin.tools.documents.form.subtitle'|trans }}
+        </p>
+    </header>
+
     {% set hasNameFrErrors = form.nameFr.vars.errors|length > 0 %}
     {% set hasNameEnErrors = form.nameEn.vars.errors|length > 0 %}
     {% set hasDescFrErrors = form.descriptionFr.vars.errors|length > 0 %}

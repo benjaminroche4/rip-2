@@ -1693,6 +1693,7 @@ admin:
                     generate: Générer le PDF
             actions:
                 add: Nouveau document
+                edit: Modifier
                 delete: Supprimer
             delete:
                 title: Supprimer ce document ?
@@ -1709,10 +1710,13 @@ admin:
                     slug: Identifiant
                     createdAt: Créé le
                     expand: Voir les descriptions
+                    actions: Actions
                 noDescription: Aucune description fournie
                 pinnedBadge: Épinglé
             form:
-                title: Nouveau document
+                title:
+                    new: Nouveau document
+                    edit: Modifier le document
                 subtitle: Le nom est demandé dans les deux langues. L'identifiant unique est généré automatiquement à partir du nom français.
                 cancel: Annuler
                 submit: Enregistrer

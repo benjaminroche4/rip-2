@@ -6,6 +6,7 @@ namespace App\Admin\Twig\Components;
 
 use App\Admin\Entity\Document;
 use App\Admin\Form\DocumentFormType;
+use App\Admin\Repository\DocumentRepository;
 use App\Admin\Service\DocumentSlugger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,18 +15,26 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
+use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
- * Admin form for creating a Document, rendered inside the <dialog> that
- * Admin:DocumentList puts around it. The component is publicly reachable
+ * Admin form for creating or editing a Document, rendered inside the <dialog>
+ * that Admin:DocumentList puts around it. The component is publicly reachable
  * on the /_components/... route, so we re-check ROLE_ADMIN on every mount
  * and LiveAction. The dialog's open/close state is preserved across
  * re-renders via data-live-ignore on the host element — only this inner
  * form region morphs when validation errors come back.
+ *
+ * Edit flow: clicking an "Edit" row button on DocumentList calls its `edit`
+ * LiveAction, which emits 'document:edit-requested' with the id. The
+ * listener below hydrates `$document` from the repo, resets the form so the
+ * new bound data is used, and dispatches `document-dialog:open` to pop the
+ * modal open.
  */
 #[AsLiveComponent(name: 'Admin:DocumentForm', template: 'components/Admin/DocumentForm.html.twig')]
 final class DocumentForm extends AbstractController
@@ -39,6 +48,7 @@ final class DocumentForm extends AbstractController
 
     public function __construct(
         private readonly Security $security,
+        private readonly DocumentRepository $repository,
     ) {
     }
 
@@ -53,6 +63,32 @@ final class DocumentForm extends AbstractController
         return $this->createForm(DocumentFormType::class, $this->document ??= new Document());
     }
 
+    /**
+     * Whether the form currently targets an existing document (has an id).
+     * Used by the template to switch the submit button label.
+     */
+    public function isEditing(): bool
+    {
+        return null !== $this->document?->getId();
+    }
+
+    #[LiveListener('document:edit-requested')]
+    public function onEditRequested(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+
+        $doc = $this->repository->find($id);
+        if (null === $doc) {
+            return;
+        }
+
+        $this->document = $doc;
+        // Drop any stale form bound to the previous document, so the next
+        // render hydrates inputs from the freshly-loaded entity.
+        $this->resetForm();
+        $this->dispatchBrowserEvent('document-dialog:open');
+    }
+
     #[LiveAction]
     public function save(EntityManagerInterface $em, DocumentSlugger $slugger): void
     {
@@ -63,19 +99,27 @@ final class DocumentForm extends AbstractController
 
         /** @var Document $document */
         $document = $this->getForm()->getData();
-        $document->setSlug($slugger->slugify((string) $document->getNameFr()));
-        $document->setCreatedAt(new \DateTimeImmutable());
+        $isNew = null === $document->getId();
 
-        $em->persist($document);
+        // Slugs are stable identifiers: only generate on create. Re-slugging
+        // an existing doc on every edit risks orphaning anything referencing
+        // the old slug and could trip the unique index for trivial renames.
+        if ($isNew) {
+            $document->setSlug($slugger->slugify((string) $document->getNameFr()));
+            $document->setCreatedAt(new \DateTimeImmutable());
+            $em->persist($document);
+        }
         $em->flush();
 
-        // Notify the sibling Admin:DocumentList to re-render its rows.
+        // Notify the sibling Admin:DocumentList to re-render its rows. Same
+        // event for create and update — the parent only cares "something
+        // changed, refresh me".
         $this->emit('document:created');
         // Tell the host <dialog> (in DocumentList template) to close itself.
         $this->dispatchBrowserEvent('document-dialog:close');
 
         // Reset so the next opening starts on a blank Document, not the
-        // one we just persisted.
+        // one we just persisted/updated.
         $this->document = new Document();
         $this->resetForm();
     }

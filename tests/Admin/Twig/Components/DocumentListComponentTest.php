@@ -173,6 +173,63 @@ final class DocumentListComponentTest extends KernelTestCase
         self::assertStringContainsString('Épinglé', $html);
     }
 
+    public function testEditActionEmitsEditRequestedWithId(): void
+    {
+        $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        $doc = $this->seedDocument('À éditer', 'To edit', 'a-editer', new \DateTimeImmutable());
+        $this->em->flush();
+
+        $component = $this->createLiveComponent('Admin:DocumentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ])->actingAs($admin);
+
+        $component->call('edit', ['id' => $doc->getId()]);
+
+        $this->assertComponentEmitEvent($component, 'document:edit-requested');
+    }
+
+    public function testEditActionIsNoOpOnUnknownId(): void
+    {
+        $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+
+        $component = $this->createLiveComponent('Admin:DocumentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ])->actingAs($admin);
+
+        $component->call('edit', ['id' => 999999]);
+
+        // Nothing emitted for an unknown doc — the dialog must not pop open
+        // in that case.
+        self::assertNull($component->getEmittedEvent($component->render(), 'document:edit-requested'));
+    }
+
+    public function testEditActionRequiresAdmin(): void
+    {
+        $user = $this->seedUser('user@example.com');
+        $doc = $this->seedDocument('Test', 'Test', 'test', new \DateTimeImmutable());
+        $this->em->flush();
+
+        $component = $this->createLiveComponent('Admin:DocumentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ])->actingAs($user);
+
+        $this->expectException(AccessDeniedException::class);
+        $component->call('edit', ['id' => $doc->getId()]);
+    }
+
+    public function testEditButtonIsRenderedPerRow(): void
+    {
+        $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        $doc = $this->seedDocument('Existe', 'Exists', 'existe', new \DateTimeImmutable());
+        $this->em->flush();
+
+        $this->loginAs('admin@example.com');
+        $html = (string) $this->renderTwigComponent('Admin:DocumentList', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+
+        self::assertStringContainsString('data-testid="document-edit-trigger-'.$doc->getId().'"', $html);
+        self::assertStringContainsString('data-live-action-param="edit"', $html);
+    }
+
     public function testListenerInvalidatesCache(): void
     {
         $this->seedUser('admin@example.com', ['ROLE_ADMIN']);

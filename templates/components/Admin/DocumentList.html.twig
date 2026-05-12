@@ -35,21 +35,15 @@
 
         <twig:Dialog:Content
             data-live-ignore
-            data-action="document-dialog:close@window->dialog#close"
+            data-action="document-dialog:close@window->dialog#close document-dialog:open@window->dialog#open"
             class="sm:max-w-2xl"
         >
-            <twig:Dialog:Header>
-                <twig:Dialog:Title>
-                    {{ 'admin.tools.documents.form.title'|trans }}
-                </twig:Dialog:Title>
-                <twig:Dialog:Description>
-                    {{ 'admin.tools.documents.form.subtitle'|trans }}
-                </twig:Dialog:Description>
-            </twig:Dialog:Header>
-
-            <div class="mt-4">
-                <twig:Admin:DocumentForm />
-            </div>
+            {# Dialog title/description live INSIDE the form component (which
+               re-renders independently) so the heading swaps between "Nouveau
+               document" and "Modifier le document" based on edit state.
+               aria-labelledby/describedby on the outer host still resolve via
+               their hardcoded ids written inside DocumentForm. #}
+            <twig:Admin:DocumentForm />
         </twig:Dialog:Content>
     </twig:Dialog>
 
@@ -71,8 +65,8 @@
                             <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.status'|trans }}</th>
                             <th scope="col" class="whitespace-nowrap px-4 py-3 font-semibold">{{ 'admin.tools.documents.list.column.slug'|trans }}</th>
                             <th scope="col" class="whitespace-nowrap px-4 py-3 text-right font-semibold">{{ 'admin.tools.documents.list.column.createdAt'|trans }}</th>
-                            <th scope="col" class="w-10 px-2 py-3">
-                                <span class="sr-only">{{ 'admin.tools.documents.actions.delete'|trans }}</span>
+                            <th scope="col" class="w-20 px-2 py-3 text-right">
+                                <span class="sr-only">{{ 'admin.tools.documents.list.column.actions'|trans }}</span>
                             </th>
                         </tr>
                     </thead>
@@ -121,7 +115,20 @@
                                 <td class="px-4 py-3 align-middle text-right tabular-nums text-gray-500">
                                     {{ doc.createdAt|format_datetime(pattern='dd MMM yyyy', locale=app.locale) }}
                                 </td>
-                                <td class="px-2 py-3 align-middle text-right">
+                                <td class="px-2 py-3 align-middle">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <twig:Button
+                                            variant="ghost"
+                                            size="icon-sm"
+                                            data-action="live#action"
+                                            data-live-action-param="edit"
+                                            data-live-id-param="{{ doc.id }}"
+                                            aria-label="{{ 'admin.tools.documents.actions.edit'|trans }} — {{ doc.nameFr }}"
+                                            class="text-gray-400 hover:bg-neutral-100 hover:text-primary"
+                                            data-testid="document-edit-trigger-{{ doc.id }}"
+                                        >
+                                            <twig:ux:icon name="lucide:pencil" class="size-4 shrink-0" aria-hidden="true" />
+                                        </twig:Button>
                                     <twig:AlertDialog id="delete-{{ doc.id }}">
                                         <twig:Button
                                             variant="ghost"
@@ -159,6 +166,7 @@
                                             </twig:AlertDialog:Footer>
                                         </twig:AlertDialog:Content>
                                     </twig:AlertDialog>
+                                    </div>
                                 </td>
                             </tr>
                             {# Disclosure row — collapsible#toggle animates the
