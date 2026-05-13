@@ -1326,9 +1326,14 @@ marketplace:
             publishedOn: Date de mise en ligne
             lastUpdated: Dernière mise à jour
             internalNote: Note interne
+            listingUrl: Lien de l'annonce
             tenantLabel: Propriétaire
             professional: Professionnel
             individual: Particulier
+        charges:
+            rent: loyer
+            label: charges
+            notIncluded: Charges non incluses
         propertyKey:
             bedrooms: Chambres
             furnished: Meublé
@@ -1347,6 +1352,7 @@ marketplace:
             elevator: Ascenseur
             intercom: Interphone
             microwave: Micro-ondes
+            oven: Four
             parking: Parking
             television: Télévision
             washingMachine: Lave-linge

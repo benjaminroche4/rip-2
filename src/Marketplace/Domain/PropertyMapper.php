@@ -28,6 +28,8 @@ final class PropertyMapper
             monthlyRent: $this->toNullableInt($row['monthlyRent'] ?? null),
             priceOnRequest: $this->toNullableBool($row['priceOnRequest'] ?? null),
             chargesIncludes: $this->toNullableBool($row['chargesIncludes'] ?? null),
+            chargesAmount: $this->toNullableInt($row['chargesAmount'] ?? null),
+            listingUrl: $this->toNullableString($row['listingUrl'] ?? null),
             showCategoryOnCard: $this->toNullableBool($row['showCategoryOnCard'] ?? null),
             status: $this->toNullableString($row['status'] ?? null),
             leaseType: $this->toNullableArray($row['leaseType'] ?? null),

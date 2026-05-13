@@ -135,6 +135,16 @@
                                             <p class="text-sm">{{ property.internalNotes }}</p>
                                         </div>
                                     {% endif %}
+                                    {% if property.listingUrl is defined and property.listingUrl %}
+                                        <div class="p-4 space-y-2">
+                                            <p class="font-light text-neutral-600 text-sm">{{ 'marketplace.show.admin.listingUrl'|trans }}</p>
+                                            <p class="text-sm">
+                                                <a href="{{ property.listingUrl }}" target="_blank" rel="noopener noreferrer" class="hover:underline break-all">
+                                                    {{ property.listingUrl|replace({'https://': '', 'http://': ''})|trim('/') }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                    {% endif %}
                                     {% if property.tenant is defined and property.tenant %}
                                         {% set tenant = property.tenant %}
                                         {% set isPro = tenant.tenantType == 'professional' %}
@@ -283,6 +293,7 @@
                             elevator: { icon: 'iconoir:elevator', label: 'marketplace.show.equipment.elevator'|trans },
                             intercom: { icon: 'lucide-lab:intercom', label: 'marketplace.show.equipment.intercom'|trans },
                             microwave: { icon: 'mdi:microwave', label: 'marketplace.show.equipment.microwave'|trans },
+                            oven: { icon: 'material-symbols:oven-outline-rounded', label: 'marketplace.show.equipment.oven'|trans },
                             parking: { icon: 'iconoir:parking', label: 'marketplace.show.equipment.parking'|trans },
                             television: { icon: 'iconoir:tv', label: 'marketplace.show.equipment.television'|trans },
                             washingMachine: { icon: 'iconoir:washing-machine', label: 'marketplace.show.equipment.washingMachine'|trans },
@@ -487,16 +498,32 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
                         <div class="rounded-2xl p-4 sm:p-5 bg-neutral-50 divide-y divide-gray-200 [&>*]:py-4 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
-                            <div class="flex flex-wrap items-end gap-x-2 gap-y-2">
+                            <div class="space-y-2.5">
                                 {% if property.monthlyRent and not property.priceOnRequest|default(false) %}
                                     <p class="text-2xl sm:text-3xl font-semibold text-primary">
                                         {{ property.monthlyRent|number_format(0, ',', ' ') }}€
                                         <span class="text-gray-600 font-light text-base">/{{ 'marketplace.list.card.price.month'|trans|raw }}</span>
                                     </p>
-                                    {% if property.chargesIncludes|default(false) %}
-                                        <div class="px-2 py-0.5 rounded-full bg-white text-xs">
-                                            {{ 'marketplace.list.card.price.chargesIncludes'|trans|raw }}
+                                    {% if property.chargesIncludes|default(false) and property.chargesAmount %}
+                                        {% set baseRent = property.monthlyRent - property.chargesAmount %}
+                                        <div class="inline-flex items-center gap-1.5 text-xs">
+                                            <span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-full bg-white border border-neutral-200">
+                                                <span class="font-medium tabular-nums text-neutral-900">{{ baseRent|number_format(0, ',', ' ') }}€</span>
+                                                <span class="text-neutral-500">{{ 'marketplace.show.charges.rent'|trans }}</span>
+                                            </span>
+                                            <span class="text-neutral-400">+</span>
+                                            <span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-full bg-white border border-neutral-200">
+                                                <span class="font-medium tabular-nums text-neutral-900">{{ property.chargesAmount|number_format(0, ',', ' ') }}€</span>
+                                                <span class="text-neutral-500">{{ 'marketplace.show.charges.label'|trans }}</span>
+                                            </span>
                                         </div>
+                                    {% elseif property.chargesIncludes|default(false) %}
+                                        <p class="text-xs text-neutral-500">{{ 'marketplace.list.card.price.chargesIncludes'|trans|raw }}</p>
+                                    {% elseif property.chargesIncludes is same as(false) %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-neutral-200 text-xs text-neutral-700">
+                                            {{ ux_icon('iconoir:xmark-circle', {'class': 'size-3.5 text-neutral-400'}) }}
+                                            {{ 'marketplace.show.charges.notIncluded'|trans }}
+                                        </span>
                                     {% endif %}
                                 {% else %}
                                     <p class="text-xl sm:text-2xl font-semibold text-primary">

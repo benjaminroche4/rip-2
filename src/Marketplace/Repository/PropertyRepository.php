@@ -32,6 +32,8 @@ final class PropertyRepository
         "monthlyRent": rents.monthlyRent,
         priceOnRequest,
         chargesIncludes,
+        chargesAmount,
+        listingUrl,
         "showCategoryOnCard": showCategoryOnCard,
         status,
         leaseType,

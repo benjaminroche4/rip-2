@@ -1325,9 +1325,14 @@ marketplace:
             publishedOn: Published on
             lastUpdated: Last updated
             internalNote: Internal note
+            listingUrl: Listing link
             tenantLabel: Owner
             professional: Professional
             individual: Individual
+        charges:
+            rent: rent
+            label: utilities
+            notIncluded: Utilities not included
         propertyKey:
             bedrooms: Bedrooms
             furnished: Furnished
@@ -1346,6 +1351,7 @@ marketplace:
             elevator: Elevator
             intercom: Intercom
             microwave: Microwave
+            oven: Oven
             parking: Parking
             television: Television
             washingMachine: Washing machine

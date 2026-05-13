@@ -27,6 +27,8 @@ final readonly class Property
         public ?int $monthlyRent = null,
         public ?bool $priceOnRequest = null,
         public ?bool $chargesIncludes = null,
+        public ?int $chargesAmount = null,
+        public ?string $listingUrl = null,
         public ?bool $showCategoryOnCard = null,
         public ?string $status = null,
         /** @var array<int, string>|null */
