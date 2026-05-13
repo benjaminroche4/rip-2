@@ -1376,6 +1376,7 @@ marketplace:
             street: Street
         building:
             floor: Floor
+            groundFloor: Ground floor
             construction: Built
             renovation: Renovated
         location:

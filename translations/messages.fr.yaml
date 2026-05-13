@@ -1377,6 +1377,7 @@ marketplace:
             street: Rue
         building:
             floor: Étage
+            groundFloor: RDC
             construction: Construction
             renovation: Rénovation
         location:

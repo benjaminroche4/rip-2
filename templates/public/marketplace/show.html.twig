@@ -320,10 +320,10 @@
                         <div class="space-y-5">
                             <h2 class="text-lg font-semibold font-secondary">{{ 'marketplace.show.equipment.title'|trans }}</h2>
                             <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                                {% if property.floor is defined and property.floor %}
+                                {% if property.floor is defined and property.floor is not null %}
                                     <div class="flex items-center gap-2">
                                         {{ ux_icon('iconoir:building', {'class':'size-5 text-primary', 'aria-hidden':'true'}) }}
-                                        <p>{{ 'marketplace.show.building.floor'|trans }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}</p>
+                                        <p>{% if property.floor == 0 %}{{ 'marketplace.show.building.groundFloor'|trans }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}{% else %}{{ 'marketplace.show.building.floor'|trans }} {{ property.floor }}{% if property.totalFloors %}/{{ property.totalFloors }}{% endif %}{% endif %}</p>
                                     </div>
                                 {% endif %}
                                 {% if property.constructionYear is defined and property.constructionYear %}
