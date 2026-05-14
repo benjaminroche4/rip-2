@@ -116,6 +116,7 @@ footer:
         blog: Blog
         contact: Contact us
         login: Log in
+        register: Sign up
         logout: Log out
         adminSpace: Admin space
         aboutUs: About us
@@ -392,6 +393,12 @@ meta:
     login:
         title: Login
         description: Log in to your Relocation in Paris account to track your relocation, access your documents, and manage your housing search in Paris.
+    register:
+        title: Sign up
+        description: Create your Relocation in Paris account to access your personal area, track your requests, and manage your housing search in Paris.
+        checkEmail:
+            title: Confirm your email
+            description: A confirmation email has just been sent to you. Click the link to activate your Relocation in Paris account.
     forgotPassword:
         title: Forgot Password
         description: "Reset your password for your Relocation in Paris account. Enter your email address, and we will send you a link to create a new password."
@@ -550,9 +557,11 @@ login:
         email:
             label: Email
             placeholder: Your email address
+            required: Email address is required.
         password:
             label: Password
             placeholder: Your password
+            required: Password is required.
         button: Sign in
         rememberMe: Remember me
         forgotPassword: Forgot your password?
@@ -586,6 +595,87 @@ login:
             placeholder:
                 password: Your new password
                 repeatPassword: Repeat your new password
+register:
+    step:
+        indicator: 'Step %current% of %total%'
+    personal:
+        title: Your information
+        subTitle: A few details to get started.
+    account:
+        title: Secure your account
+        subTitle: Pick a strong password.
+    form:
+        firstName:
+            label: First name
+            placeholder: Your first name
+            required: First name is required.
+        lastName:
+            label: Last name
+            placeholder: Your last name
+            required: Last name is required.
+        email:
+            label: Email
+            placeholder: Your email address
+            required: Email address is required.
+        password:
+            label: Password
+            placeholder: At least 8 characters
+            required: Password is required.
+        terms:
+            label: I accept the terms of use and the privacy policy.
+            required: You must accept the terms of use to continue.
+        button:
+            previous: Back
+            next: Continue
+            finish: Create my account
+        hasAccount: Already have an account?
+        signIn: Sign in
+        error:
+            title: Check your details
+            description: Some fields need your attention.
+    firstName:
+        notBlank: First name is required.
+        minLength: First name must be at least 2 characters long.
+        maxLength: First name cannot exceed 50 characters.
+    lastName:
+        notBlank: Last name is required.
+        minLength: Last name must be at least 2 characters long.
+        maxLength: Last name cannot exceed 50 characters.
+    email:
+        notBlank: Email address is required.
+        invalid: This email address is not valid.
+        maxLength: Email address is too long.
+        alreadyUsed: This email address is already in use.
+    password:
+        notBlank: Password is required.
+        minLength: Password must be at least 8 characters long.
+        weak: This password is too weak. Mix upper case, digits, and symbols.
+        compromised: This password has appeared in a data breach. Please pick another one.
+    passwordStrength:
+        label: Password strength
+        weak: Weak
+        medium: Medium
+        good: Good
+        strong: Strong
+    terms:
+        required: You must accept the terms of use to continue.
+    verify:
+        success: Your email has been confirmed. You can now sign in.
+        invalidLink: This confirmation link is no longer valid.
+    checkEmail:
+        title: Confirm your email address
+        subTitle: A confirmation email has just been sent
+        to: to
+        spam: Check your spam folder if you don't see it.
+        backToLogin: Back to sign in
+    confirmationEmail:
+        greeting: Welcome!
+        intro: To activate your Relocation in Paris account, click the link below.
+        cta: Confirm my email address
+        expires: 'This link expires in %duration%.'
+        signature: The Relocation in Paris team
+    image:
+        alt: Relocation In Paris, relocation agency in Paris
 adminTab:
     logout: Log out
     dashboard: Dashboard

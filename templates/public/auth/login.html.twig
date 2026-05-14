@@ -89,7 +89,13 @@
                 </div>
             </div>
             <div class="mt-8">
-                <form method="POST" class="space-y-6">
+                <form
+                    method="POST"
+                    class="space-y-6"
+                    novalidate
+                    data-controller="inline-validation"
+                    data-action="submit->inline-validation#validate"
+                >
                     {% if error %}
                         <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
                             <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
@@ -102,14 +108,24 @@
                     <div>
                         <twig:Label for="username">{{ 'login.form.email.label'|trans|raw }}</twig:Label>
                         <div class="mt-2">
-                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" class="max-w-sm" />
+                            <twig:Input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" placeholder="{{ 'login.form.email.placeholder'|trans|raw }}" required />
                         </div>
+                        <p
+                            data-inline-validation-target="error"
+                            data-error-for="username"
+                            class="mt-1 hidden text-xs text-red-600"
+                        >{{ 'login.form.email.required'|trans|raw }}</p>
                     </div>
                     <div>
                         <twig:Label for="password">{{ 'login.form.password.label'|trans|raw }}</twig:Label>
                         <div class="mt-2">
-                            <twig:Input type="password" id="password" name="_password" autocomplete="current-password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" class="max-w-sm" />
+                            <twig:Input type="password" id="password" name="_password" autocomplete="current-password" placeholder="{{ 'login.form.password.placeholder'|trans|raw }}" required />
                         </div>
+                        <p
+                            data-inline-validation-target="error"
+                            data-error-for="password"
+                            class="mt-1 hidden text-xs text-red-600"
+                        >{{ 'login.form.password.required'|trans|raw }}</p>
                     </div>
                     <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
                     <div class="flex max-[344px]:flex-col max-[344px]:justify-start gap-2 max-[344px]:items-start items-center justify-between">

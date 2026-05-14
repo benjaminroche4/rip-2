@@ -74,6 +74,26 @@ propertyManagement:
             notBlank: "Veuillez renseigner votre numéro de téléphone."
         email:
             notBlank: "Veuillez renseigner votre adresse email."
+register:
+    firstName:
+        notBlank: "Le prénom est obligatoire."
+        minLength: "Le prénom doit contenir au moins 2 caractères."
+        maxLength: "Le prénom ne peut pas dépasser 50 caractères."
+    lastName:
+        notBlank: "Le nom est obligatoire."
+        minLength: "Le nom doit contenir au moins 2 caractères."
+        maxLength: "Le nom ne peut pas dépasser 50 caractères."
+    email:
+        notBlank: "L'adresse email est obligatoire."
+        invalid: "Cette adresse email n'est pas valide."
+        maxLength: "L'adresse email est trop longue."
+    password:
+        notBlank: "Le mot de passe est obligatoire."
+        minLength: "Le mot de passe doit contenir au moins 8 caractères."
+        weak: "Ce mot de passe est trop faible. Combinez majuscules, chiffres et symboles."
+        compromised: "Ce mot de passe a été exposé dans une fuite de données. Choisissez-en un autre."
+    terms:
+        required: "Vous devez accepter les conditions d'utilisation pour continuer."
 resetPassword:
     empty: "Veuillez entrer un mot de passe."
     minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."

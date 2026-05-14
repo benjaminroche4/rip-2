@@ -64,6 +64,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $isProfileComplete = false;
 
+    #[ORM\Column]
+    private bool $isVerified = false;
+
     #[ORM\Column(length: 5, enumType: Language::class, nullable: true)]
     private ?Language $language = null;
 
@@ -253,6 +256,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): static
     {
         $this->lastLoginAt = $lastLoginAt;
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

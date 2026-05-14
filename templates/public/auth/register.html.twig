@@ -1,0 +1,292 @@
+{% extends 'public/base_auth.html.twig' %}
+
+{% block title %}{{ 'meta.register.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.register.description'|trans }}{% endblock %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% block body %}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        <twig:Section:GridBackground :auth="true" />
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                            <span class="flex items-center gap-x-3">
+                                {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                                {{ 'header.lang.type.fr'|trans|raw }}
+                            </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                            <span class="flex items-center gap-x-3">
+                                {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                                {{ 'header.lang.type.en'|trans|raw }}
+                            </span>
+                        </a>
+                    </div>
+                </el-popover>
+            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <p class="mt-12 text-xs font-medium uppercase tracking-wider text-neutral-500">
+                    {{ 'register.step.indicator'|trans({'%current%': stepIndex + 1, '%total%': stepCount}) }}
+                </p>
+                <h1 class="text-2xl/9 font-semibold tracking-tight text-gray-900">
+                    {{ ('register.' ~ currentStep ~ '.title')|trans|raw }}
+                </h1>
+                <p class="font-light text-neutral-400 text-pretty text-center">
+                    {{ ('register.' ~ currentStep ~ '.subTitle')|trans|raw }}
+                </p>
+            </div>
+        </div>
+        <div class="mt-10 mx-auto w-full max-w-sm">
+            {% for flashMessage in app.flashes('register_error') %}
+                <twig:Alert class="max-w-md mb-4 border-amber-200 bg-amber-50 text-amber-900">
+                    <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                    <twig:Alert:Title>{{ 'register.form.error.title'|trans|raw }}</twig:Alert:Title>
+                    <twig:Alert:Description>
+                        {{ flashMessage|trans|raw }}
+                    </twig:Alert:Description>
+                </twig:Alert>
+            {% endfor %}
+            {{ form_start(form, {'attr': {
+                'class': 'space-y-6',
+                'novalidate': 'novalidate',
+                'data-controller': 'inline-validation',
+                'data-action': 'submit->inline-validation#validate',
+            }}) }}
+                {% if not form.vars.valid and form.vars.submitted %}
+                    <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
+                        <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                        <twig:Alert:Title>{{ 'register.form.error.title'|trans|raw }}</twig:Alert:Title>
+                        <twig:Alert:Description>
+                            {{ 'register.form.error.description'|trans|raw }}
+                        </twig:Alert:Description>
+                    </twig:Alert>
+                {% endif %}
+
+                {% if currentStep == 'personal' %}
+                    {% set stepFields = form.personal %}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <twig:Label for="{{ stepFields.firstName.vars.id }}">{{ 'register.form.firstName.label'|trans|raw }}</twig:Label>
+                            <div class="mt-2">
+                                <twig:Input
+                                    type="text"
+                                    id="{{ stepFields.firstName.vars.id }}"
+                                    name="{{ stepFields.firstName.vars.full_name }}"
+                                    value="{{ stepFields.firstName.vars.value }}"
+                                    autocomplete="given-name"
+                                    placeholder="{{ 'register.form.firstName.placeholder'|trans|raw }}"
+                                    required
+                                />
+                            </div>
+                            <p
+                                data-inline-validation-target="error"
+                                data-error-for="{{ stepFields.firstName.vars.id }}"
+                                class="mt-1 text-xs text-red-600{% if stepFields.firstName.vars.valid %} hidden{% endif %}"
+                            >
+                                {%- if not stepFields.firstName.vars.valid -%}
+                                    {% for err in stepFields.firstName.vars.errors %}{{ err.message }}{% endfor %}
+                                {%- else -%}
+                                    {{ 'register.form.firstName.required'|trans|raw }}
+                                {%- endif -%}
+                            </p>
+                        </div>
+                        <div>
+                            <twig:Label for="{{ stepFields.lastName.vars.id }}">{{ 'register.form.lastName.label'|trans|raw }}</twig:Label>
+                            <div class="mt-2">
+                                <twig:Input
+                                    type="text"
+                                    id="{{ stepFields.lastName.vars.id }}"
+                                    name="{{ stepFields.lastName.vars.full_name }}"
+                                    value="{{ stepFields.lastName.vars.value }}"
+                                    autocomplete="family-name"
+                                    placeholder="{{ 'register.form.lastName.placeholder'|trans|raw }}"
+                                    required
+                                />
+                            </div>
+                            <p
+                                data-inline-validation-target="error"
+                                data-error-for="{{ stepFields.lastName.vars.id }}"
+                                class="mt-1 text-xs text-red-600{% if stepFields.lastName.vars.valid %} hidden{% endif %}"
+                            >
+                                {%- if not stepFields.lastName.vars.valid -%}
+                                    {% for err in stepFields.lastName.vars.errors %}{{ err.message }}{% endfor %}
+                                {%- else -%}
+                                    {{ 'register.form.lastName.required'|trans|raw }}
+                                {%- endif -%}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <twig:Label for="{{ stepFields.email.vars.id }}">{{ 'register.form.email.label'|trans|raw }}</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input
+                                type="email"
+                                id="{{ stepFields.email.vars.id }}"
+                                name="{{ stepFields.email.vars.full_name }}"
+                                value="{{ stepFields.email.vars.value }}"
+                                autocomplete="email"
+                                placeholder="{{ 'register.form.email.placeholder'|trans|raw }}"
+                                required
+                            />
+                        </div>
+                        <p
+                            data-inline-validation-target="error"
+                            data-error-for="{{ stepFields.email.vars.id }}"
+                            class="mt-1 text-xs text-red-600{% if stepFields.email.vars.valid %} hidden{% endif %}"
+                        >
+                            {%- if not stepFields.email.vars.valid -%}
+                                {% for err in stepFields.email.vars.errors %}{{ err.message }}{% endfor %}
+                            {%- else -%}
+                                {{ 'register.form.email.required'|trans|raw }}
+                            {%- endif -%}
+                        </p>
+                    </div>
+                    <div>
+                        <twig:Label for="{{ stepFields.plainPassword.vars.id }}">{{ 'register.form.password.label'|trans|raw }}</twig:Label>
+                        <div class="mt-2">
+                            <twig:Input
+                                type="password"
+                                id="{{ stepFields.plainPassword.vars.id }}"
+                                name="{{ stepFields.plainPassword.vars.full_name }}"
+                                autocomplete="new-password"
+                                placeholder="{{ 'register.form.password.placeholder'|trans|raw }}"
+                                required
+                            />
+                        </div>
+                        <twig:PasswordStrength :inputId="stepFields.plainPassword.vars.id" />
+                        <p
+                            data-inline-validation-target="error"
+                            data-error-for="{{ stepFields.plainPassword.vars.id }}"
+                            class="mt-1 text-xs text-red-600{% if stepFields.plainPassword.vars.valid %} hidden{% endif %}"
+                        >
+                            {%- if not stepFields.plainPassword.vars.valid -%}
+                                {% for err in stepFields.plainPassword.vars.errors %}{{ err.message }}{% endfor %}
+                            {%- else -%}
+                                {{ 'register.form.password.required'|trans|raw }}
+                            {%- endif -%}
+                        </p>
+                    </div>
+                {% elseif currentStep == 'account' %}
+                    {% set stepFields = form.account %}
+                    <div class="flex items-start gap-3">
+                        <twig:Checkbox
+                            id="{{ stepFields.acceptTerms.vars.id }}"
+                            name="{{ stepFields.acceptTerms.vars.full_name }}"
+                            :checked="stepFields.acceptTerms.vars.checked"
+                            required
+                        />
+                        <label for="{{ stepFields.acceptTerms.vars.id }}" class="block text-sm/6 font-light text-gray-900">
+                            {{ 'register.form.terms.label'|trans|raw }}
+                        </label>
+                    </div>
+                    <p
+                        data-inline-validation-target="error"
+                        data-error-for="{{ stepFields.acceptTerms.vars.id }}"
+                        class="-mt-3 text-xs text-red-600{% if stepFields.acceptTerms.vars.valid %} hidden{% endif %}"
+                    >
+                        {%- if not stepFields.acceptTerms.vars.valid -%}
+                            {% for err in stepFields.acceptTerms.vars.errors %}{{ err.message }}{% endfor %}
+                        {%- else -%}
+                            {{ 'register.form.terms.required'|trans|raw }}
+                        {%- endif -%}
+                    </p>
+                {% endif %}
+
+                <div class="flex gap-3 {% if isFirstStep %}justify-end{% else %}justify-between{% endif %}">
+                    {% if not isFirstStep and form.navigator.previous is defined %}
+                        <twig:Button
+                            type="submit"
+                            name="{{ form.navigator.previous.vars.full_name }}"
+                            variant="outline"
+                            size="lg"
+                            class="cursor-pointer"
+                            formnovalidate
+                        >
+                            {{ 'register.form.button.previous'|trans|raw }}
+                        </twig:Button>
+                    {% endif %}
+                    {% if isLastStep and form.navigator.finish is defined %}
+                        <twig:Button
+                            type="submit"
+                            name="{{ form.navigator.finish.vars.full_name }}"
+                            variant="default"
+                            size="lg"
+                            class="cursor-pointer"
+                        >
+                            {{ 'register.form.button.finish'|trans|raw }}
+                        </twig:Button>
+                    {% elseif not isLastStep and form.navigator.next is defined %}
+                        <twig:Button
+                            type="submit"
+                            name="{{ form.navigator.next.vars.full_name }}"
+                            variant="default"
+                            size="lg"
+                            class="cursor-pointer"
+                        >
+                            {{ 'register.form.button.next'|trans|raw }}
+                        </twig:Button>
+                    {% endif %}
+                </div>
+
+                {# CSRF token — required since render_rest is disabled. #}
+                {% if form._token is defined %}
+                    {{ form_widget(form._token) }}
+                {% endif %}
+            {{ form_end(form, {'render_rest': false}) }}
+
+            <p class="mt-8 text-center text-sm text-neutral-500">
+                {{ 'register.form.hasAccount'|trans|raw }}
+                <a href="{{ path('app_login') }}" class="font-medium text-gray-800 hover:text-primary transition duration-100">
+                    {{ 'register.form.signIn'|trans|raw }}
+                </a>
+            </p>
+        </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_register.webp') }}"
+            alt="{{ 'register.image.alt'|trans|raw }}"
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/10"></div>
+    </section>
+{% endblock %}

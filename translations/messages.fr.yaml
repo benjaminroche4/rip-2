@@ -119,6 +119,7 @@ footer:
         blog: Blog
         contact: Contactez-nous
         login: Connexion
+        register: Créer un compte
         logout: Déconnexion
         adminSpace: Espace admin
         aboutUs: À propos
@@ -395,6 +396,12 @@ meta:
     login:
         title: Connexion
         description: Connectez-vous à votre espace Relocation in Paris pour suivre votre installation, accéder à vos documents et gérer votre recherche de logement à Paris.
+    register:
+        title: Créer un compte
+        description: Créez votre compte Relocation in Paris pour accéder à votre espace personnel, suivre vos demandes et gérer votre recherche de logement à Paris.
+        checkEmail:
+            title: Confirmez votre email
+            description: Un email de confirmation vient de vous être envoyé. Cliquez sur le lien pour activer votre compte Relocation in Paris.
     forgotPassword:
         title: Mot de Passe Oublié
         description: "Réinitialisez votre mot de passe pour accéder à votre espace Relocation in Paris et suivre votre projet d’installation à Paris."
@@ -553,9 +560,11 @@ login:
         email:
             label: Email
             placeholder: Votre adresse email
+            required: L'adresse email est obligatoire.
         password:
             label: Mot de passe
             placeholder: Votre mot de passe
+            required: Le mot de passe est obligatoire.
         button: Se connecter
         rememberMe: Se souvenir de moi
         forgotPassword: Mot de passe oublié ?
@@ -589,6 +598,87 @@ login:
             placeholder:
                 password: Votre nouveau mot de passe
                 repeatPassword: Répétez votre nouveau mot de passe
+register:
+    step:
+        indicator: 'Étape %current% sur %total%'
+    personal:
+        title: Vos informations
+        subTitle: Quelques infos pour démarrer.
+    account:
+        title: Sécurisez votre compte
+        subTitle: Choisissez un mot de passe robuste.
+    form:
+        firstName:
+            label: Prénom
+            placeholder: Votre prénom
+            required: Le prénom est obligatoire.
+        lastName:
+            label: Nom
+            placeholder: Votre nom
+            required: Le nom est obligatoire.
+        email:
+            label: Email
+            placeholder: Votre adresse email
+            required: L'adresse email est obligatoire.
+        password:
+            label: Mot de passe
+            placeholder: Au moins 8 caractères
+            required: Le mot de passe est obligatoire.
+        terms:
+            label: J'accepte les conditions d'utilisation et la politique de confidentialité.
+            required: Vous devez accepter les conditions d'utilisation pour continuer.
+        button:
+            previous: Retour
+            next: Continuer
+            finish: Créer mon compte
+        hasAccount: Vous avez déjà un compte ?
+        signIn: Se connecter
+        error:
+            title: Vérifiez vos informations
+            description: Certains champs nécessitent votre attention.
+    firstName:
+        notBlank: Le prénom est obligatoire.
+        minLength: Le prénom doit contenir au moins 2 caractères.
+        maxLength: Le prénom ne peut pas dépasser 50 caractères.
+    lastName:
+        notBlank: Le nom est obligatoire.
+        minLength: Le nom doit contenir au moins 2 caractères.
+        maxLength: Le nom ne peut pas dépasser 50 caractères.
+    email:
+        notBlank: L'adresse email est obligatoire.
+        invalid: Cette adresse email n'est pas valide.
+        maxLength: L'adresse email est trop longue.
+        alreadyUsed: Cette adresse email est déjà utilisée.
+    password:
+        notBlank: Le mot de passe est obligatoire.
+        minLength: Le mot de passe doit contenir au moins 8 caractères.
+        weak: Ce mot de passe est trop faible. Combinez majuscules, chiffres et symboles.
+        compromised: Ce mot de passe a été exposé dans une fuite de données. Choisissez-en un autre.
+    passwordStrength:
+        label: Force du mot de passe
+        weak: Faible
+        medium: Moyen
+        good: Bon
+        strong: Fort
+    terms:
+        required: Vous devez accepter les conditions d'utilisation pour continuer.
+    verify:
+        success: Votre adresse email a été confirmée. Vous pouvez vous connecter.
+        invalidLink: Ce lien de confirmation n'est plus valide.
+    checkEmail:
+        title: Confirmez votre adresse email
+        subTitle: Un email avec un lien de confirmation vient de vous être envoyé
+        to: à
+        spam: Pensez à vérifier vos spams si vous ne le voyez pas.
+        backToLogin: Retour à la connexion
+    confirmationEmail:
+        greeting: Bienvenue !
+        intro: Pour activer votre compte Relocation in Paris, cliquez sur le lien ci-dessous.
+        cta: Confirmer mon adresse email
+        expires: 'Ce lien est valable %duration%.'
+        signature: L'équipe Relocation in Paris
+    image:
+        alt: Relocation In Paris, agence de relocation à Paris
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans

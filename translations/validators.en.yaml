@@ -74,6 +74,26 @@ propertyManagement:
             notBlank: "Please enter your phone number."
         email:
             notBlank: "Please enter your email address."
+register:
+    firstName:
+        notBlank: "First name is required."
+        minLength: "First name must be at least 2 characters long."
+        maxLength: "First name cannot exceed 50 characters."
+    lastName:
+        notBlank: "Last name is required."
+        minLength: "Last name must be at least 2 characters long."
+        maxLength: "Last name cannot exceed 50 characters."
+    email:
+        notBlank: "Email address is required."
+        invalid: "This email address is not valid."
+        maxLength: "Email address is too long."
+    password:
+        notBlank: "Password is required."
+        minLength: "Password must be at least 8 characters long."
+        weak: "This password is too weak. Mix upper case, digits, and symbols."
+        compromised: "This password has appeared in a data breach. Please pick another one."
+    terms:
+        required: "You must accept the terms of use to continue."
 resetPassword:
     empty: "Please enter a password."
     minLength: "Your password should be at least {{ limit }} characters."

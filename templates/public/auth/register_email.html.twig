@@ -1,0 +1,9 @@
+<h1>{{ 'register.confirmationEmail.greeting'|trans|raw }}</h1>
+
+<p>{{ 'register.confirmationEmail.intro'|trans|raw }}</p>
+
+<p><a href="{{ signedUrl }}">{{ 'register.confirmationEmail.cta'|trans|raw }}</a></p>
+
+<p>{{ 'register.confirmationEmail.expires'|trans({'%duration%': expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle')})|raw }}</p>
+
+<p>{{ 'register.confirmationEmail.signature'|trans|raw }}</p>
