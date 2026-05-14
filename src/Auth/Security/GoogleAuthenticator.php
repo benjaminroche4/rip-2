@@ -87,6 +87,11 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
                 $user->setLastName($googleUser->getLastName() ?? $this->lastName($googleUser->getName()));
                 $user->setCreatedAt(new \DateTimeImmutable());
                 $user->setRoles(['ROLE_USER']);
+                // Google supplied identity but not phone / nationality / terms consent —
+                // ProfileCompletionListener will gate every request until the user
+                // submits CompleteProfileController.
+                $user->setProfileComplete(false);
+                $user->setVerified(true);
                 $this->refreshAvatar($user, $avatarUrl);
 
                 $this->entityManager->persist($user);

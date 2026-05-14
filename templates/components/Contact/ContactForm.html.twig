@@ -95,7 +95,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div data-controller="phone-input" data-phone-input-initial-country-value="{{ app.request.locale == 'en' ? 'gb' : 'fr' }}" class="text-base sm:text-sm/6">
+        <div data-controller="phone-input" data-phone-input-initial-country-value="{{ app.request.locale == 'en' ? 'gb' : 'fr' }}" data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}" class="text-base sm:text-sm/6">
             <div class="flex items-center gap-x-0.5">
                 {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
                 <span class="text-red-600" aria-hidden="true">*</span>
@@ -127,16 +127,44 @@
         </div>
     </div>
 
-    <div>
+    <div data-controller="select" class="relative">
         <div class="flex items-center gap-x-0.5">
             {{ form_label(form.helpType, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
             <span class="text-red-600" aria-hidden="true">*</span>
         </div>
         <div class="mt-2">
             {{ form_widget(form.helpType, {'attr': {
-                'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
-                'aria-required': 'true'
+                'class': 'sr-only',
+                'data-select-target': 'select',
+                'tabindex': -1,
+                'aria-hidden': 'true',
             }}) }}
+            <button
+                type="button"
+                data-select-target="button"
+                data-action="click->select#toggle"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="{{ form.helpType.vars.id }}-panel"
+                class="flex w-full items-center justify-between rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 cursor-pointer"
+            >
+                <span data-select-target="display" class="text-gray-400">{{ 'contact.contactForm.helpType.placeholder'|trans }}</span>
+                <svg aria-hidden="true" class="size-4 text-gray-400 ml-2 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 1 1 1.08 1.04l-4.25 4.39a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/></svg>
+            </button>
+            <div
+                id="{{ form.helpType.vars.id }}-panel"
+                data-select-target="panel"
+                hidden
+                class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 shadow-lg"
+            >
+                <ul
+                    role="listbox"
+                    tabindex="-1"
+                    data-select-target="list"
+                    data-action="click->select#choose keydown->select#keydown"
+                    class="max-h-60 overflow-auto py-1 outline-none"
+                ></ul>
+            </div>
             {% for error in form.helpType.vars.errors %}
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}

@@ -59,6 +59,8 @@ final class RegisterControllerTest extends WebTestCase
         self::assertSelectorExists('input[name="register_flow[personal][email]"]');
         self::assertSelectorExists('input[name="register_flow[personal][plainPassword]"]');
         self::assertSelectorNotExists('input[name="register_flow[account][acceptTerms]"]');
+        self::assertSelectorNotExists('input[name="register_flow[account][phoneNumber]"]');
+        self::assertSelectorNotExists('select[name="register_flow[account][nationality]"]');
     }
 
     public function testStepOneRejectsBlankFieldsWith422(): void
@@ -99,8 +101,14 @@ final class RegisterControllerTest extends WebTestCase
             csrf: $csrf,
         ));
 
-        // On step 2 the personal inputs disappear and the terms checkbox appears.
+        // Step-1 POST returns a 303 (PRG pattern) so Turbo Drive swaps the page.
+        self::assertResponseRedirects(self::REGISTER_PATH);
+        $this->client->followRedirect();
+
+        // On step 2 the personal inputs disappear and the contact/consent fields appear.
         self::assertResponseIsSuccessful();
+        self::assertSelectorExists('input[name="register_flow[account][phoneNumber]"]');
+        self::assertSelectorExists('select[name="register_flow[account][nationality]"]');
         self::assertSelectorExists('input[name="register_flow[account][acceptTerms]"]');
         self::assertSelectorNotExists('input[name="register_flow[personal][firstName]"]');
     }
@@ -115,13 +123,15 @@ final class RegisterControllerTest extends WebTestCase
             button: 'next',
             csrf: $csrf,
         ));
+        self::assertResponseRedirects(self::REGISTER_PATH);
+        $this->client->followRedirect();
         self::assertResponseIsSuccessful();
 
         // Step 2 — must read the new CSRF from the freshly rendered step-2 form.
         $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
 
         $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['acceptTerms' => '1'],
+            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
             button: 'finish',
             csrf: $csrf2,
         ));
@@ -135,6 +145,8 @@ final class RegisterControllerTest extends WebTestCase
         self::assertFalse($user->isVerified(), 'User starts as not verified.');
         self::assertSame('Alice', $user->getFirstName());
         self::assertSame('Martin', $user->getLastName());
+        self::assertSame('+33612345678', $user->getPhoneNumber());
+        self::assertSame('FR', $user->getNationality());
 
         // Exactly one confirmation email sent.
         self::assertEmailCount(1);
@@ -182,11 +194,13 @@ final class RegisterControllerTest extends WebTestCase
             button: 'next',
             csrf: $csrf,
         ));
+        self::assertResponseRedirects(self::REGISTER_PATH);
+        $this->client->followRedirect();
         self::assertResponseIsSuccessful();
 
         $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
         $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['acceptTerms' => '1'],
+            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
             button: 'finish',
             csrf: $csrf2,
         ));
@@ -268,10 +282,11 @@ final class RegisterControllerTest extends WebTestCase
             button: 'next',
             csrf: $csrf,
         ));
+        $this->client->followRedirect();
 
         $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
         $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['acceptTerms' => '1'],
+            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
             button: 'finish',
             csrf: $csrf2,
         ));

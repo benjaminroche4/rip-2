@@ -102,7 +102,7 @@ final class AdminUserRepositoryTest extends KernelTestCase
         self::assertSame('jean-dupont', $profile->slug);
         self::assertTrue($profile->hasPasswordAuth);
         self::assertFalse($profile->hasGoogleAuth);
-        self::assertFalse($profile->isProfileComplete);
+        self::assertTrue($profile->isProfileComplete);
     }
 
     public function testFindByUniqueIdReturnsNullForUnknownUlid(): void

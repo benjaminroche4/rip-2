@@ -148,6 +148,13 @@
                     </div>
                 </form>
             </div>
+
+            <p class="mt-8 text-center text-sm text-neutral-500">
+                {{ 'login.form.noAccount'|trans|raw }}
+                <a href="{{ path('app_register') }}" class="font-medium text-gray-800 hover:text-primary transition duration-100">
+                    {{ 'login.form.signUp'|trans|raw }}
+                </a>
+            </p>
         </div>
     </section>
     <section class="relative hidden w-0 flex-1 lg:block">

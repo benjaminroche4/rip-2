@@ -120,6 +120,73 @@ turbo-frame#blog-list[busy] {
     color: #111827; /* text-gray-900 */
 }
 
+/* === intl-tel-input dropdown — align with the nationality combobox ===
+ * Same panel chrome (white bg, gray-300 border, rounded-lg, shadow-lg) and the
+ * same item rhythm (px-3 py-2 text-sm, hover: bg-neutral-100). Targets both the
+ * inline dropdown and the fullscreen popup container variants.
+ *
+ * `!important` is required because intl-tel-input's CSS is lazy-imported from
+ * the phone_input controller (`import 'intl-tel-input/css'`), so it lands in
+ * the DOM AFTER app.css and wins the cascade on equal specificity otherwise. */
+.iti__dropdown-content,
+.iti--inline-dropdown .iti__dropdown-content {
+    border: 1px solid #d1d5db !important; /* border-gray-300 */
+    border-radius: 0.5rem !important; /* rounded-lg */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important; /* shadow-lg */
+    overflow: hidden !important;
+    background-color: #fff !important;
+}
+
+.iti__search-input-wrapper {
+    border-bottom: 1px solid #e5e7eb !important; /* border-gray-200 */
+    padding: 0.5rem !important; /* p-2 */
+}
+
+.iti__search-input {
+    background-color: #fff !important;
+    border: 1px solid #e5e7eb !important; /* border-gray-200 */
+    border-radius: 0.375rem !important; /* rounded-md */
+    padding: 0.5rem 0.75rem !important; /* py-2 px-3 — no icon, no extra left padding */
+    font-size: 0.875rem !important; /* text-sm */
+    line-height: 1.25rem !important;
+    color: #111827 !important; /* text-gray-900 */
+}
+
+.iti__search-input:focus {
+    outline: 2px solid rgba(113, 23, 46, 0.6) !important; /* focus:ring-primary/60 */
+    outline-offset: -2px !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* Hide the magnifier icon — the localized placeholder ("Rechercher un indicatif")
+   already signals the field's purpose, and the icon clashes with the cleaner
+   look of the nationality combobox we're aligning to. */
+.iti__search-icon {
+    display: none !important;
+}
+
+.iti__country-list {
+    max-height: 15rem !important; /* max-h-60 */
+    padding: 0.25rem 0 !important; /* py-1 */
+}
+
+.iti__country {
+    padding: 0.5rem 0.75rem !important; /* py-2 px-3 */
+    font-size: 0.875rem !important; /* text-sm */
+    line-height: 1.25rem !important;
+    color: #111827 !important; /* text-gray-900 */
+    gap: 0.5rem !important;
+}
+
+.iti__country.iti__highlight,
+.iti__country:hover {
+    background-color: #f5f5f5 !important; /* neutral-100 */
+}
+
+.iti__country-list .iti__flag {
+    margin-right: 0 !important;
+}
+
 /* === Google Maps InfoWindow — strip chrome for property cards === */
 .gm-style .gm-style-iw-c {
     background: transparent !important;

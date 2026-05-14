@@ -47,6 +47,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     private ?string $lastName = null;
 
+    #[ORM\Column(length: 25, nullable: true)]
+    private ?string $phoneNumber = null;
+
+    /**
+     * ISO 3166-1 alpha-2 country code (e.g. "FR"). Captured during registration
+     * and used for greeting/legal flows that depend on the user's nationality.
+     */
+    #[ORM\Column(length: 2, nullable: true)]
+    private ?string $nationality = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -61,8 +71,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $avatarFilename = null;
 
+    /**
+     * Profile-completion gate. Defaults to true so users created via the classic flow
+     * (which always collects phone + nationality + terms consent in the same request)
+     * never trip the ProfileCompletionListener. Google-driven sign-ups are the only
+     * path that explicitly flips this to false until the completion step is filled.
+     */
     #[ORM\Column]
-    private bool $isProfileComplete = false;
+    private bool $isProfileComplete = true;
 
     #[ORM\Column]
     private bool $isVerified = false;
@@ -184,6 +200,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): static
+    {
+        $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function getNationality(): ?string
+    {
+        return $this->nationality;
+    }
+
+    public function setNationality(?string $nationality): static
+    {
+        $this->nationality = $nationality;
 
         return $this;
     }

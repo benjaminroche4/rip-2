@@ -40,6 +40,15 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
         $userLanguage = $user instanceof User ? $user->getLanguage() : null;
         $locale = null !== $userLanguage ? $userLanguage->value : $request->getLocale();
 
+        // Profile incomplete (typically a fresh Google sign-in that hasn't yet provided
+        // phone / nationality / terms consent) — funnel them to the completion gate
+        // directly, before any admin / target-path routing.
+        if ($user instanceof User && !$user->isProfileComplete()) {
+            return new RedirectResponse($this->urlGenerator->generate('app_register_complete', [
+                '_locale' => $locale,
+            ]));
+        }
+
         if (\in_array('ROLE_ADMIN', $token->getRoleNames(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard', [
                 '_locale' => $locale,

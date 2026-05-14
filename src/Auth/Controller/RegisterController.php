@@ -64,6 +64,21 @@ final class RegisterController extends AbstractController
         ]);
         $flow->handleRequest($request);
 
+        // Intermediate step validated (next/previous) — PRG redirect so Turbo Drive
+        // performs the swap to the new step. Without the redirect, Turbo ignores a
+        // 200 response to a successful POST and keeps the previous step on screen
+        // (the user only sees the new step after a manual refresh).
+        //
+        // getStepForm() must be called first to handle the clicked navigator button:
+        // that's what advances the cursor and persists the new step in the session.
+        // Without it, the redirect would re-render the previous step.
+        if ($flow->isSubmitted() && $flow->isValid() && !$flow->isFinished()) {
+            /** @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
+            $flow->getStepForm();
+
+            return $this->redirectToRoute('app_register', [], Response::HTTP_SEE_OTHER);
+        }
+
         if ($flow->isSubmitted() && $flow->isValid() && $flow->isFinished()) {
             /** @var RegisterDto $data */
             $data = $flow->getData();
@@ -86,7 +101,10 @@ final class RegisterController extends AbstractController
                 ->setEmail((string) $data->personal->email)
                 ->setFirstName((string) $data->personal->firstName)
                 ->setLastName((string) $data->personal->lastName)
+                ->setPhoneNumber($data->account->phoneNumber)
+                ->setNationality($data->account->nationality)
                 ->setCreatedAt(new \DateTimeImmutable())
+                ->setProfileComplete(true)
             ;
             $user->setPassword($this->passwordHasher->hashPassword($user, (string) $data->personal->plainPassword));
 

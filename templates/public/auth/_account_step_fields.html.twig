@@ -1,0 +1,137 @@
+{# Step 2 (Account) fields shared by the FormFlow-driven registration (register.html.twig)
+   and the Google-driven profile-completion page (complete_profile.html.twig).
+   `fields` must expose `phoneNumber`, `nationality`, `acceptTerms` form views. #}
+<div data-controller="phone-input" data-phone-input-initial-country-value="{{ app.request.locale == 'en' ? 'gb' : 'fr' }}" data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}" class="text-base sm:text-sm/6">
+    <twig:Label for="{{ fields.phoneNumber.vars.id }}">{{ 'register.form.phoneNumber.label'|trans|raw }}</twig:Label>
+    <div class="mt-2">
+        <twig:Input
+            type="tel"
+            id="{{ fields.phoneNumber.vars.id }}"
+            name="{{ fields.phoneNumber.vars.full_name }}"
+            value="{{ fields.phoneNumber.vars.value }}"
+            autocomplete="tel"
+            placeholder=" "
+            data-phone-input-target="input"
+            required
+        />
+    </div>
+    <p
+        data-inline-validation-target="error"
+        data-error-for="{{ fields.phoneNumber.vars.id }}"
+        class="mt-1 text-xs text-red-600{% if fields.phoneNumber.vars.valid %} hidden{% endif %}"
+    >
+        {%- if not fields.phoneNumber.vars.valid -%}
+            {% for err in fields.phoneNumber.vars.errors %}{{ err.message }}{% endfor %}
+        {%- else -%}
+            {{ 'register.form.phoneNumber.required'|trans|raw }}
+        {%- endif -%}
+    </p>
+</div>
+<div
+    data-controller="country-select"
+    data-country-select-search-placeholder-value="{{ 'register.form.nationality.searchPlaceholder'|trans }}"
+    data-country-select-empty-label-value="{{ 'register.form.nationality.empty'|trans }}"
+    class="relative"
+>
+    <twig:Label for="{{ fields.nationality.vars.id }}">{{ 'register.form.nationality.label'|trans|raw }}</twig:Label>
+    <div class="mt-2">
+        {{ form_widget(fields.nationality, {
+            'attr': {
+                'class': 'sr-only',
+                'data-country-select-target': 'select',
+                'tabindex': -1,
+                'aria-hidden': 'true',
+            }
+        }) }}
+        <button
+            type="button"
+            data-country-select-target="button"
+            data-action="click->country-select#toggle"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="{{ fields.nationality.vars.id }}-panel"
+            class="flex w-full items-center justify-between rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 cursor-pointer"
+        >
+            <span data-country-select-target="display" class="text-gray-400">{{ 'register.form.nationality.placeholder'|trans|raw }}</span>
+            <svg aria-hidden="true" class="size-4 text-gray-400 ml-2 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 1 1 1.08 1.04l-4.25 4.39a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/></svg>
+        </button>
+        <div
+            id="{{ fields.nationality.vars.id }}-panel"
+            data-country-select-target="panel"
+            hidden
+            class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 shadow-lg"
+        >
+            <div class="border-b border-gray-200 p-2">
+                <input
+                    type="text"
+                    data-country-select-target="search"
+                    data-action="input->country-select#filter keydown->country-select#keydown"
+                    placeholder="{{ 'register.form.nationality.searchPlaceholder'|trans }}"
+                    class="block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-200 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80"
+                    autocomplete="off"
+                />
+            </div>
+            <ul
+                role="listbox"
+                data-country-select-target="list"
+                data-action="click->country-select#choose"
+                class="max-h-60 overflow-auto py-1"
+            ></ul>
+        </div>
+    </div>
+    <p
+        data-inline-validation-target="error"
+        data-error-for="{{ fields.nationality.vars.id }}"
+        class="mt-1 text-xs text-red-600{% if fields.nationality.vars.valid %} hidden{% endif %}"
+    >
+        {%- if not fields.nationality.vars.valid -%}
+            {% for err in fields.nationality.vars.errors %}{{ err.message }}{% endfor %}
+        {%- else -%}
+            {{ 'register.form.nationality.required'|trans|raw }}
+        {%- endif -%}
+    </p>
+</div>
+{% set situationChoices = [
+    { value: 'employee',     label: 'register.form.situation.choice.employee'|trans,     icon: 'lucide:briefcase' },
+    { value: 'freelance',    label: 'register.form.situation.choice.freelance'|trans,    icon: 'lucide:laptop' },
+    { value: 'entrepreneur', label: 'register.form.situation.choice.entrepreneur'|trans, icon: 'lucide:rocket' },
+    { value: 'student',      label: 'register.form.situation.choice.student'|trans,      icon: 'lucide:graduation-cap' },
+    { value: 'retired',      label: 'register.form.situation.choice.retired'|trans,      icon: 'lucide:sun' },
+    { value: 'other',        label: 'register.form.situation.choice.other'|trans,        icon: 'lucide:circle-help' },
+] %}
+<div>
+    <twig:Label>{{ 'register.form.situation.label'|trans|raw }}</twig:Label>
+    <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {% for c in situationChoices %}
+            <label class="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-2 py-3 cursor-pointer transition has-checked:border-primary has-checked:bg-primary/5 text-xs font-light text-gray-900 text-center">
+                <input type="radio" name="situation" value="{{ c.value }}" class="sr-only" />
+                {{ ux_icon(c.icon, {'class': 'size-5 text-primary', 'aria-hidden': 'true'}) }}
+                {{ c.label }}
+            </label>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="flex items-start gap-3">
+    <twig:Checkbox
+        id="{{ fields.acceptTerms.vars.id }}"
+        name="{{ fields.acceptTerms.vars.full_name }}"
+        :checked="fields.acceptTerms.vars.checked"
+        class="mt-1 shrink-0"
+        required
+    />
+    <label for="{{ fields.acceptTerms.vars.id }}" class="block text-sm/6 font-light text-gray-900">
+        {{ 'register.form.terms.label'|trans|raw }}
+    </label>
+</div>
+<p
+    data-inline-validation-target="error"
+    data-error-for="{{ fields.acceptTerms.vars.id }}"
+    class="-mt-3 text-xs text-red-600{% if fields.acceptTerms.vars.valid %} hidden{% endif %}"
+>
+    {%- if not fields.acceptTerms.vars.valid -%}
+        {% for err in fields.acceptTerms.vars.errors %}{{ err.message }}{% endfor %}
+    {%- else -%}
+        {{ 'register.form.terms.required'|trans|raw }}
+    {%- endif -%}
+</p>

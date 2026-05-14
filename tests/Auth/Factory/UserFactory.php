@@ -37,6 +37,7 @@ final class UserFactory extends PersistentProxyObjectFactory
             'password' => 'admin',
             'roles' => [self::faker()->randomElement(self::USER_ROLES)],
             'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime('-6 month')),
+            'profileComplete' => true,
         ];
     }
 

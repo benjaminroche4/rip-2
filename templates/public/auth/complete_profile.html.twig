@@ -1,0 +1,76 @@
+{% extends 'public/base_auth.html.twig' %}
+
+{% block title %}{{ 'meta.register.complete.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.register.complete.description'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+        <twig:Section:GridBackground :auth="true" />
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">
+                    {{ 'register.complete.title'|trans|raw }}
+                </h1>
+                <p class="font-light text-neutral-400 text-pretty text-center">
+                    {{ 'register.complete.subTitle'|trans|raw }}
+                </p>
+            </div>
+        </div>
+        <div class="mt-10 mx-auto w-full max-w-sm">
+            {{ form_start(form, {'attr': {
+                'class': 'space-y-6',
+                'novalidate': 'novalidate',
+                'data-controller': 'inline-validation',
+                'data-action': 'submit->inline-validation#validate',
+            }}) }}
+                {% if not form.vars.valid and form.vars.submitted %}
+                    <twig:Alert class="max-w-md border-amber-200 bg-amber-50 text-amber-900">
+                        <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                        <twig:Alert:Title>{{ 'register.form.error.title'|trans|raw }}</twig:Alert:Title>
+                        <twig:Alert:Description>
+                            {{ 'register.form.error.description'|trans|raw }}
+                        </twig:Alert:Description>
+                    </twig:Alert>
+                {% endif %}
+
+                {% include 'public/auth/_account_step_fields.html.twig' with {fields: form} only %}
+
+                <div class="flex justify-end">
+                    <twig:Button
+                        type="submit"
+                        variant="default"
+                        size="lg"
+                        class="cursor-pointer"
+                    >
+                        {{ 'register.form.button.finish'|trans|raw }}
+                    </twig:Button>
+                </div>
+
+                {% if form._token is defined %}
+                    {{ form_widget(form._token) }}
+                {% endif %}
+            {{ form_end(form, {'render_rest': false}) }}
+        </div>
+    </section>
+    <section class="relative hidden w-0 flex-1 lg:block">
+        <img
+            src="{{ asset('medias/website/rip_1_register.webp') }}"
+            alt="{{ 'register.image.alt'|trans|raw }}"
+            loading="eager"
+            class="absolute inset-0 size-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/10"></div>
+    </section>
+{% endblock %}

@@ -399,6 +399,9 @@ meta:
         checkEmail:
             title: Confirm your email
             description: A confirmation email has just been sent to you. Click the link to activate your Relocation in Paris account.
+        complete:
+            title: Complete your profile
+            description: A few more details to activate your Relocation in Paris account.
     forgotPassword:
         title: Forgot Password
         description: "Reset your password for your Relocation in Paris account. Enter your email address, and we will send you a link to create a new password."
@@ -565,6 +568,8 @@ login:
         button: Sign in
         rememberMe: Remember me
         forgotPassword: Forgot your password?
+        noAccount: Don't have an account yet?
+        signUp: Create an account
         error:
             title: Error
     continueWith:
@@ -599,11 +604,17 @@ register:
     step:
         indicator: 'Step %current% of %total%'
     personal:
-        title: Your information
+        title: Create your account
         subTitle: A few details to get started.
     account:
-        title: Secure your account
-        subTitle: Pick a strong password.
+        title: Complete your profile
+        subTitle: A few details so we can support you properly.
+    complete:
+        title: Complete your profile
+        subTitle: A few more details to activate your account.
+    google:
+        button: Continue with Google
+        separator: OR
     form:
         firstName:
             label: First name
@@ -617,6 +628,25 @@ register:
             label: Email
             placeholder: Your email address
             required: Email address is required.
+        phoneNumber:
+            label: Phone
+            required: Phone number is required.
+        nationality:
+            label: Nationality
+            placeholder: Select your nationality
+            searchPlaceholder: Search a country
+            empty: No country found
+            required: Nationality is required.
+        situation:
+            label: Professional situation
+            required: Professional situation is required.
+            choice:
+                employee: Employee
+                freelance: Freelance
+                entrepreneur: Entrepreneur
+                student: Student
+                retired: Retired
+                other: Other
         password:
             label: Password
             placeholder: At least 8 characters
@@ -626,7 +656,7 @@ register:
             required: You must accept the terms of use to continue.
         button:
             previous: Back
-            next: Continue
+            next: Sign up
             finish: Create my account
         hasAccount: Already have an account?
         signIn: Sign in
@@ -646,6 +676,13 @@ register:
         invalid: This email address is not valid.
         maxLength: Email address is too long.
         alreadyUsed: This email address is already in use.
+    phoneNumber:
+        notBlank: Phone number is required.
+        maxLength: Phone number is too long.
+        invalidFormat: The phone number format is not valid.
+    nationality:
+        notBlank: Nationality is required.
+        invalid: This nationality is not valid.
     password:
         notBlank: Password is required.
         minLength: Password must be at least 8 characters long.
@@ -676,6 +713,8 @@ register:
         signature: The Relocation in Paris team
     image:
         alt: Relocation In Paris, relocation agency in Paris
+phoneInput:
+    searchPlaceholder: Search a dial code
 adminTab:
     logout: Log out
     dashboard: Dashboard

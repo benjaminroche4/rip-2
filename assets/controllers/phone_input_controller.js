@@ -6,6 +6,7 @@ export default class extends Controller {
     static targets = ['input'];
     static values = {
         initialCountry: { type: String, default: 'fr' },
+        searchPlaceholder: { type: String, default: 'Rechercher un indicatif' },
     };
 
     connect() {
@@ -31,6 +32,9 @@ export default class extends Controller {
             formatAsYouType: true,
             nationalMode: false,
             autoPlaceholder: 'off',
+            i18n: {
+                searchPlaceholder: this.searchPlaceholderValue,
+            },
         });
 
         this.form = this.inputTarget.closest('form');

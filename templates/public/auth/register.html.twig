@@ -63,10 +63,7 @@
                 </el-popover>
             </div>
             <div class="flex flex-col justify-center items-center w-full space-y-2">
-                <p class="mt-12 text-xs font-medium uppercase tracking-wider text-neutral-500">
-                    {{ 'register.step.indicator'|trans({'%current%': stepIndex + 1, '%total%': stepCount}) }}
-                </p>
-                <h1 class="text-2xl/9 font-semibold tracking-tight text-gray-900">
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">
                     {{ ('register.' ~ currentStep ~ '.title')|trans|raw }}
                 </h1>
                 <p class="font-light text-neutral-400 text-pretty text-center">
@@ -84,6 +81,26 @@
                     </twig:Alert:Description>
                 </twig:Alert>
             {% endfor %}
+
+            {% if currentStep == 'personal' %}
+                <div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <a href="{{ path('app_google_login') }}" class="flex h-10 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm/6 font-semibold text-gray-900 hover:bg-neutral-50 transition duration-100 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none" data-turbo="false">
+                            {{ ux_icon('material-icon-theme:google', {'class': 'size-5', 'aria-hidden': 'true'}) }}
+                            <span class="text-sm/6 font-semibold">{{ 'register.google.button'|trans|raw }}</span>
+                        </a>
+                    </div>
+                    <div class="relative mt-6 mb-8">
+                        <div aria-hidden="true" class="absolute inset-0 flex items-center">
+                            <div class="w-full h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm/6 font-medium">
+                            <span class="bg-white px-6 text-gray-900 text-center">{{ 'register.google.separator'|trans|raw }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             {{ form_start(form, {'attr': {
                 'class': 'space-y-6',
                 'novalidate': 'novalidate',
@@ -205,32 +222,10 @@
                         </p>
                     </div>
                 {% elseif currentStep == 'account' %}
-                    {% set stepFields = form.account %}
-                    <div class="flex items-start gap-3">
-                        <twig:Checkbox
-                            id="{{ stepFields.acceptTerms.vars.id }}"
-                            name="{{ stepFields.acceptTerms.vars.full_name }}"
-                            :checked="stepFields.acceptTerms.vars.checked"
-                            required
-                        />
-                        <label for="{{ stepFields.acceptTerms.vars.id }}" class="block text-sm/6 font-light text-gray-900">
-                            {{ 'register.form.terms.label'|trans|raw }}
-                        </label>
-                    </div>
-                    <p
-                        data-inline-validation-target="error"
-                        data-error-for="{{ stepFields.acceptTerms.vars.id }}"
-                        class="-mt-3 text-xs text-red-600{% if stepFields.acceptTerms.vars.valid %} hidden{% endif %}"
-                    >
-                        {%- if not stepFields.acceptTerms.vars.valid -%}
-                            {% for err in stepFields.acceptTerms.vars.errors %}{{ err.message }}{% endfor %}
-                        {%- else -%}
-                            {{ 'register.form.terms.required'|trans|raw }}
-                        {%- endif -%}
-                    </p>
+                    {% include 'public/auth/_account_step_fields.html.twig' with {fields: form.account} only %}
                 {% endif %}
 
-                <div class="flex gap-3 {% if isFirstStep %}justify-end{% else %}justify-between{% endif %}">
+                <div class="flex gap-3 {% if isFirstStep %}w-full{% else %}justify-between{% endif %}">
                     {% if not isFirstStep and form.navigator.previous is defined %}
                         <twig:Button
                             type="submit"
@@ -259,7 +254,7 @@
                             name="{{ form.navigator.next.vars.full_name }}"
                             variant="default"
                             size="lg"
-                            class="cursor-pointer"
+                            :class="isFirstStep ? 'cursor-pointer flex-1' : 'cursor-pointer'"
                         >
                             {{ 'register.form.button.next'|trans|raw }}
                         </twig:Button>

@@ -402,6 +402,9 @@ meta:
         checkEmail:
             title: Confirmez votre email
             description: Un email de confirmation vient de vous être envoyé. Cliquez sur le lien pour activer votre compte Relocation in Paris.
+        complete:
+            title: Finalisez votre profil
+            description: Encore quelques informations pour activer votre compte Relocation in Paris.
     forgotPassword:
         title: Mot de Passe Oublié
         description: "Réinitialisez votre mot de passe pour accéder à votre espace Relocation in Paris et suivre votre projet d’installation à Paris."
@@ -568,6 +571,8 @@ login:
         button: Se connecter
         rememberMe: Se souvenir de moi
         forgotPassword: Mot de passe oublié ?
+        noAccount: Pas encore de compte ?
+        signUp: Créer un compte
         error:
             title: Erreur
     continueWith:
@@ -602,11 +607,17 @@ register:
     step:
         indicator: 'Étape %current% sur %total%'
     personal:
-        title: Vos informations
+        title: Créez votre compte
         subTitle: Quelques infos pour démarrer.
     account:
-        title: Sécurisez votre compte
-        subTitle: Choisissez un mot de passe robuste.
+        title: Finalisez votre profil
+        subTitle: Quelques informations pour vous accompagner au mieux.
+    complete:
+        title: Finalisez votre profil
+        subTitle: Encore quelques informations pour activer votre compte.
+    google:
+        button: Continuer avec Google
+        separator: OU
     form:
         firstName:
             label: Prénom
@@ -620,6 +631,25 @@ register:
             label: Email
             placeholder: Votre adresse email
             required: L'adresse email est obligatoire.
+        phoneNumber:
+            label: Téléphone
+            required: Le numéro de téléphone est obligatoire.
+        nationality:
+            label: Nationalité
+            placeholder: Sélectionnez votre nationalité
+            searchPlaceholder: Rechercher un pays
+            empty: Aucun pays trouvé
+            required: La nationalité est obligatoire.
+        situation:
+            label: Situation professionnelle
+            required: La situation professionnelle est obligatoire.
+            choice:
+                employee: Salarié·e
+                freelance: Indépendant·e
+                entrepreneur: Entrepreneur
+                student: Étudiant·e
+                retired: Retraité·e
+                other: Autre
         password:
             label: Mot de passe
             placeholder: Au moins 8 caractères
@@ -629,7 +659,7 @@ register:
             required: Vous devez accepter les conditions d'utilisation pour continuer.
         button:
             previous: Retour
-            next: Continuer
+            next: S'inscrire
             finish: Créer mon compte
         hasAccount: Vous avez déjà un compte ?
         signIn: Se connecter
@@ -649,6 +679,13 @@ register:
         invalid: Cette adresse email n'est pas valide.
         maxLength: L'adresse email est trop longue.
         alreadyUsed: Cette adresse email est déjà utilisée.
+    phoneNumber:
+        notBlank: Le numéro de téléphone est obligatoire.
+        maxLength: Le numéro de téléphone est trop long.
+        invalidFormat: Le format du numéro de téléphone n'est pas valide.
+    nationality:
+        notBlank: La nationalité est obligatoire.
+        invalid: Cette nationalité n'est pas valide.
     password:
         notBlank: Le mot de passe est obligatoire.
         minLength: Le mot de passe doit contenir au moins 8 caractères.
@@ -679,6 +716,8 @@ register:
         signature: L'équipe Relocation in Paris
     image:
         alt: Relocation In Paris, agence de relocation à Paris
+phoneInput:
+    searchPlaceholder: Rechercher un indicatif
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans
