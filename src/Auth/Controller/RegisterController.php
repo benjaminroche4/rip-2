@@ -48,6 +48,8 @@ final class RegisterController extends AbstractController
         private readonly RequestStack $requestStack,
         #[Autowire(service: 'limiter.register_attempts')]
         private readonly RateLimiterFactory $registerLimiter,
+        #[Autowire(service: 'limiter.email_verification_resend')]
+        private readonly RateLimiterFactory $resendLimiter,
     ) {
     }
 
@@ -135,7 +137,17 @@ final class RegisterController extends AbstractController
             $this->entityManager->flush();
 
             $this->codeService->generateAndSend($user);
-            $this->requestStack->getSession()->set('register_check_email', $user->getEmail());
+            // Consume the resend slot the initial email just used, so a click
+            // on "Renvoyer un code" within 60 s is rejected server-side, not
+            // only hidden by the JS countdown.
+            $this->resendLimiter
+                ->create($user->getId().':'.($request->getClientIp() ?? 'unknown'))
+                ->consume();
+            $session = $this->requestStack->getSession();
+            $session->set('register_check_email', $user->getEmail());
+            // Seed the UI countdown so the verify page renders the button
+            // disabled with the matching remaining-seconds hint.
+            $session->set('otp_resend_available_at', time() + 60);
 
             return $this->redirectToRoute('app_register_verify_code');
         }
