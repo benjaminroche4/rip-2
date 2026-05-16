@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
@@ -136,7 +137,30 @@ final class RegisterController extends AbstractController
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            $this->codeService->generateAndSend($user);
+            // Sending the OTP can fail (transport rejects the address, SMTP
+            // outage, quota burned, …). If it does, the user row is already
+            // flushed — leaving it there would trap the visitor on step 1 on
+            // their next attempt (UniqueUserEmail constraint blocks the same
+            // address). Roll the row back (CASCADE wipes any partial
+            // EmailVerificationRequest), drop the FormFlow session so the form
+            // re-opens empty, and re-render step 1 with a friendly flash.
+            try {
+                $this->codeService->generateAndSend($user);
+            } catch (TransportExceptionInterface $e) {
+                $this->entityManager->remove($user);
+                $this->entityManager->flush();
+
+                /** @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
+                $flow->reset();
+                $this->addFlash('register_error', 'register.email.sendFailed');
+
+                $freshFlow = $this->createForm(RegisterFlowType::class, new RegisterDto(), [
+                    'data_storage' => new SessionDataStorage(self::SESSION_KEY, $this->requestStack),
+                ]);
+
+                return $this->renderStep($freshFlow)->setStatusCode(422);
+            }
+
             // Consume the resend slot the initial email just used, so a click
             // on "Renvoyer un code" within 60 s is rejected server-side, not
             // only hidden by the JS countdown.

@@ -678,6 +678,7 @@ register:
         invalid: This email address is not valid.
         maxLength: Email address is too long.
         alreadyUsed: An account already exists with this email. Please sign in.
+        sendFailed: Could not send the confirmation code. Please check your email address and try again.
     phoneNumber:
         notBlank: Phone number is required.
         maxLength: Phone number is too long.

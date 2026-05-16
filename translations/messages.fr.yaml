@@ -681,6 +681,7 @@ register:
         invalid: Cette adresse email n'est pas valide.
         maxLength: L'adresse email est trop longue.
         alreadyUsed: Un compte existe déjà avec cette adresse email. Connectez-vous.
+        sendFailed: Impossible d'envoyer le code de confirmation. Vérifiez votre adresse email et réessayez.
     phoneNumber:
         notBlank: Le numéro de téléphone est obligatoire.
         maxLength: Le numéro de téléphone est trop long.
