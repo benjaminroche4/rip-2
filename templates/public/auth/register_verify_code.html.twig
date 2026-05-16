@@ -198,15 +198,17 @@
             {% endif %}
         </div>
     </section>
-    <aside class="relative hidden w-0 flex-1 lg:block" aria-hidden="true">
-        <img
-            src="{{ asset('medias/website/rip_1_register.webp') }}"
-            alt=""
-            width="960"
-            height="1080"
-            loading="eager"
-            class="absolute inset-0 size-full object-cover"
-        />
-        <div class="absolute inset-0 bg-black/10"></div>
+    <aside class="hidden w-0 flex-1 bg-white p-3 lg:block" aria-hidden="true">
+        <div class="relative h-full w-full overflow-hidden rounded-3xl border border-black/5">
+            <img
+                src="{{ asset('medias/website/rip_1_register.webp') }}"
+                alt=""
+                width="960"
+                height="1080"
+                loading="eager"
+                class="absolute inset-0 size-full object-cover"
+            />
+            <div class="absolute inset-0 bg-black/10"></div>
+        </div>
     </aside>
 {% endblock %}
