@@ -2,15 +2,26 @@
 
 {% block title %}{{ 'meta.register.title'|trans }}{% endblock %}
 {% block description %}{{ 'meta.register.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_register', {_locale: app.request.locale}) }}{% endblock %}
+
+{% block hreflang %}
+    <link rel="alternate" hreflang="fr" href="{{ site_url }}{{ path('app_register', {_locale: 'fr'}) }}" />
+    <link rel="alternate" hreflang="en" href="{{ site_url }}{{ path('app_register', {_locale: 'en'}) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path('app_register', {_locale: 'fr'}) }}" />
+{% endblock %}
+
+{% block head_preload %}
+    <link rel="preload" as="image" href="{{ asset('medias/website/rip_1_register.webp') }}" media="(min-width: 1024px)">
+{% endblock %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentParameters = app.request.attributes.get('_route_params') %}
 
 {% block body %}
-    <section class="relative overflow-hidden flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2">
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-8 py-12 lg:w-1/2">
         <twig:Section:GridBackground :auth="true" />
         <div class="mx-auto w-full max-w-xl lg:w-full">
-            <div class="flex justify-between items-center gap-4">
+            <header class="flex justify-between items-center gap-4">
                 <a href="{{ path('app_home') }}">
                     <img
                         src="{{ asset('medias/logos/logo_red.svg') }}"
@@ -61,12 +72,12 @@
                         </a>
                     </div>
                 </el-popover>
-            </div>
+            </header>
             <div class="flex flex-col justify-center items-center w-full space-y-2">
                 <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">
                     {{ ('register.' ~ currentStep ~ '.title')|trans|raw }}
                 </h1>
-                <p class="font-light text-neutral-400 text-pretty text-center">
+                <p class="font-light text-neutral-400 text-balance text-center max-w-sm mx-auto">
                     {{ ('register.' ~ currentStep ~ '.subTitle')|trans|raw }}
                 </p>
             </div>
@@ -101,6 +112,13 @@
                 </div>
             {% endif %}
 
+            {% if currentStep != 'personal' %}
+                <div class="mb-8">
+                    <p class="sr-only">{{ 'register.step.indicator'|trans({'%current%': 2, '%total%': 3}) }}</p>
+                    <twig:Auth:StepIndicator :current="2" :total="3" />
+                </div>
+            {% endif %}
+
             {{ form_start(form, {'attr': {
                 'class': 'space-y-6',
                 'novalidate': 'novalidate',
@@ -130,10 +148,13 @@
                                     value="{{ stepFields.firstName.vars.value }}"
                                     autocomplete="given-name"
                                     placeholder="{{ 'register.form.firstName.placeholder'|trans|raw }}"
+                                    aria-describedby="{{ stepFields.firstName.vars.id }}-error"
+                                    aria-invalid="{{ stepFields.firstName.vars.valid ? 'false' : 'true' }}"
                                     required
                                 />
                             </div>
                             <p
+                                id="{{ stepFields.firstName.vars.id }}-error"
                                 data-inline-validation-target="error"
                                 data-error-for="{{ stepFields.firstName.vars.id }}"
                                 class="mt-1 text-xs text-red-600{% if stepFields.firstName.vars.valid %} hidden{% endif %}"
@@ -155,10 +176,13 @@
                                     value="{{ stepFields.lastName.vars.value }}"
                                     autocomplete="family-name"
                                     placeholder="{{ 'register.form.lastName.placeholder'|trans|raw }}"
+                                    aria-describedby="{{ stepFields.lastName.vars.id }}-error"
+                                    aria-invalid="{{ stepFields.lastName.vars.valid ? 'false' : 'true' }}"
                                     required
                                 />
                             </div>
                             <p
+                                id="{{ stepFields.lastName.vars.id }}-error"
                                 data-inline-validation-target="error"
                                 data-error-for="{{ stepFields.lastName.vars.id }}"
                                 class="mt-1 text-xs text-red-600{% if stepFields.lastName.vars.valid %} hidden{% endif %}"
@@ -181,10 +205,13 @@
                                 value="{{ stepFields.email.vars.value }}"
                                 autocomplete="email"
                                 placeholder="{{ 'register.form.email.placeholder'|trans|raw }}"
+                                aria-describedby="{{ stepFields.email.vars.id }}-error"
+                                aria-invalid="{{ stepFields.email.vars.valid ? 'false' : 'true' }}"
                                 required
                             />
                         </div>
                         <p
+                            id="{{ stepFields.email.vars.id }}-error"
                             data-inline-validation-target="error"
                             data-error-for="{{ stepFields.email.vars.id }}"
                             class="mt-1 text-xs text-red-600{% if stepFields.email.vars.valid %} hidden{% endif %}"
@@ -205,11 +232,14 @@
                                 name="{{ stepFields.plainPassword.vars.full_name }}"
                                 autocomplete="new-password"
                                 placeholder="{{ 'register.form.password.placeholder'|trans|raw }}"
+                                aria-describedby="{{ stepFields.plainPassword.vars.id }}-error"
+                                aria-invalid="{{ stepFields.plainPassword.vars.valid ? 'false' : 'true' }}"
                                 required
                             />
                         </div>
                         <twig:PasswordStrength :inputId="stepFields.plainPassword.vars.id" />
                         <p
+                            id="{{ stepFields.plainPassword.vars.id }}-error"
                             data-inline-validation-target="error"
                             data-error-for="{{ stepFields.plainPassword.vars.id }}"
                             class="mt-1 text-xs text-red-600{% if stepFields.plainPassword.vars.valid %} hidden{% endif %}"
@@ -231,11 +261,12 @@
                             type="submit"
                             name="{{ form.navigator.previous.vars.full_name }}"
                             variant="outline"
-                            size="lg"
-                            class="cursor-pointer"
+                            size="icon-lg"
+                            class="cursor-pointer rounded-full"
+                            aria-label="{{ 'register.form.button.previous'|trans }}"
                             formnovalidate
                         >
-                            {{ 'register.form.button.previous'|trans|raw }}
+                            {{ ux_icon('lucide:arrow-left', {'class': 'size-5', 'aria-hidden': 'true'}) }}
                         </twig:Button>
                     {% endif %}
                     {% if isLastStep and form.navigator.finish is defined %}
@@ -261,27 +292,40 @@
                     {% endif %}
                 </div>
 
+                {% if currentStep == 'account' %}
+                    <p class="text-center text-xs font-light text-neutral-400 [&_a]:text-neutral-500 [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-neutral-700 [&_a]:transition">
+                        {{ 'register.form.terms.disclaimer'|trans({
+                            '%termsUrl%': path('app_terms_and_conditions'),
+                            '%privacyUrl%': path('app_privacy_policy'),
+                        })|raw }}
+                    </p>
+                {% endif %}
+
                 {# CSRF token — required since render_rest is disabled. #}
                 {% if form._token is defined %}
                     {{ form_widget(form._token) }}
                 {% endif %}
             {{ form_end(form, {'render_rest': false}) }}
 
-            <p class="mt-8 text-center text-sm text-neutral-500">
-                {{ 'register.form.hasAccount'|trans|raw }}
-                <a href="{{ path('app_login') }}" class="font-medium text-gray-800 hover:text-primary transition duration-100">
-                    {{ 'register.form.signIn'|trans|raw }}
-                </a>
-            </p>
+            {% if currentStep == 'personal' %}
+                <p class="mt-8 text-center text-sm text-neutral-500">
+                    {{ 'register.form.hasAccount'|trans|raw }}
+                    <a href="{{ path('app_login') }}" class="font-medium text-gray-800 hover:text-primary transition duration-100">
+                        {{ 'register.form.signIn'|trans|raw }}
+                    </a>
+                </p>
+            {% endif %}
         </div>
     </section>
-    <section class="relative hidden w-0 flex-1 lg:block">
+    <aside class="relative hidden w-0 flex-1 lg:block" aria-hidden="true">
         <img
             src="{{ asset('medias/website/rip_1_register.webp') }}"
-            alt="{{ 'register.image.alt'|trans|raw }}"
+            alt=""
+            width="960"
+            height="1080"
             loading="eager"
             class="absolute inset-0 size-full object-cover"
         />
         <div class="absolute inset-0 bg-black/10"></div>
-    </section>
+    </aside>
 {% endblock %}

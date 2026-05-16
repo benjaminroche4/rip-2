@@ -26,6 +26,7 @@ security:
                 success_handler: App\Auth\Security\LoginSuccessHandler
             logout:
                 path: app_logout
+                enable_csrf: true
                 # where to redirect after logout
                 # target: app_any_route
             login_throttling:

@@ -2,6 +2,7 @@
 
 namespace App\Auth\Domain\Register;
 
+use App\Auth\Validator\Constraint\UniqueUserEmail;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -21,6 +22,7 @@ final class Personal
         #[Assert\NotBlank(message: 'register.email.notBlank', groups: ['personal'])]
         #[Assert\Email(message: 'register.email.invalid', groups: ['personal'])]
         #[Assert\Length(max: 180, maxMessage: 'register.email.maxLength', groups: ['personal'])]
+        #[UniqueUserEmail(groups: ['personal'])]
         public ?string $email = null,
 
         #[Assert\NotBlank(message: 'register.password.notBlank', groups: ['personal'])]

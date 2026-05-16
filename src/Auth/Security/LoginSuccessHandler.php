@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Auth\Security;
 
 use App\Auth\Entity\User;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -29,8 +31,11 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
+        private RequestStack $requestStack,
         #[Autowire('%admin_path_prefix%')]
         private string $adminPathPrefix,
+        #[Autowire(service: 'monolog.logger.security')]
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -41,10 +46,30 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
         $locale = null !== $userLanguage ? $userLanguage->value : $request->getLocale();
 
         // Profile incomplete (typically a fresh Google sign-in that hasn't yet provided
-        // phone / nationality / terms consent) — funnel them to the completion gate
-        // directly, before any admin / target-path routing.
+        // phone / nationality / situation / terms consent) — funnel them to the
+        // completion gate directly, before any admin / target-path routing.
         if ($user instanceof User && !$user->isProfileComplete()) {
+            $this->logger->info('Authenticated user has incomplete profile, redirecting to completion gate', [
+                'user_id' => $user->getId(),
+            ]);
+
             return new RedirectResponse($this->urlGenerator->generate('app_register_complete', [
+                '_locale' => $locale,
+            ]));
+        }
+
+        // Profile complete but email not yet verified (classic sign-up that
+        // dropped before typing the 6-digit OTP). Re-seed the session marker
+        // EmailVerificationController reads to identify the pending user, then
+        // funnel to the verify gate before any admin / target-path routing.
+        if ($user instanceof User && !$user->isVerified()) {
+            $this->logger->info('Authenticated user email not verified, redirecting to verification gate', [
+                'user_id' => $user->getId(),
+            ]);
+
+            $this->requestStack->getSession()->set('register_check_email', $user->getUserIdentifier());
+
+            return new RedirectResponse($this->urlGenerator->generate('app_register_verify_code', [
                 '_locale' => $locale,
             ]));
         }

@@ -2,6 +2,7 @@
 
 namespace App\Auth\Domain\Register;
 
+use App\Auth\Domain\Situation;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -10,6 +11,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * The plain password lives only in memory during request handling; it is hashed
  * before the User entity is persisted and never written to the session storage.
+ *
+ * Consent to the terms of use & privacy policy is captured implicitly by the act
+ * of submitting the form — surfaced as a disclaimer below the submit button —
+ * so no `acceptTerms` checkbox lives here.
  */
 final class Account
 {
@@ -22,8 +27,8 @@ final class Account
         #[Assert\Country(message: 'register.nationality.invalid', groups: ['account'])]
         public ?string $nationality = null,
 
-        #[Assert\IsTrue(message: 'register.terms.required', groups: ['account'])]
-        public bool $acceptTerms = false,
+        #[Assert\NotNull(message: 'register.situation.required', groups: ['account'])]
+        public ?Situation $situation = null,
     ) {
     }
 }

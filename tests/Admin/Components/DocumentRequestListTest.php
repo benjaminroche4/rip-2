@@ -142,7 +142,9 @@ final class DocumentRequestListTest extends KernelTestCase
             ->setLastName('Last')
             ->setRoles($roles)
             ->setPassword('x')
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $this->em->persist($user);
 
         return $user;

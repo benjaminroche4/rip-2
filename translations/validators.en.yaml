@@ -87,13 +87,12 @@ register:
         notBlank: "Email address is required."
         invalid: "This email address is not valid."
         maxLength: "Email address is too long."
+        alreadyUsed: "An account already exists with this email. Please sign in."
     password:
         notBlank: "Password is required."
         minLength: "Password must be at least 8 characters long."
         weak: "This password is too weak. Mix upper case, digits, and symbols."
         compromised: "This password has appeared in a data breach. Please pick another one."
-    terms:
-        required: "You must accept the terms of use to continue."
 resetPassword:
     empty: "Please enter a password."
     minLength: "Your password should be at least {{ limit }} characters."

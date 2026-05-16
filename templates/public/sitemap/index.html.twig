@@ -27,9 +27,10 @@
                         <li><a href="{{ path('app_about_us') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.aboutUs'|trans }}</a></li>
                         <li><a href="{{ path('app_sitemap') }}" class="hover:text-primary transition duration-100">Sitemap</a></li>
                         {% if app.user %}
-                            <li><a href="{{ path('app_logout') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.logout'|trans }}</a></li>
+                            <li><a href="{{ logout_path() }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.logout'|trans }}</a></li>
                         {% else %}
                             <li><a href="{{ path('app_login') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.login'|trans }}</a></li>
+                            <li><a href="{{ path('app_register') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.register'|trans }}</a></li>
                         {% endif %}
                         <li><a href="{{ path('app_faq') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.faq'|trans }}</a></li>
                         <li><a href="{{ path('app_newsletter') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.newsletter'|trans }}</a></li>

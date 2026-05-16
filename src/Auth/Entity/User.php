@@ -3,15 +3,17 @@
 namespace App\Auth\Entity;
 
 use App\Auth\Domain\Language;
+use App\Auth\Domain\Situation;
 use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -57,6 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 2, nullable: true)]
     private ?string $nationality = null;
 
+    #[ORM\Column(length: 80, enumType: Situation::class, nullable: true)]
+    private ?Situation $situation = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -71,14 +76,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $avatarFilename = null;
 
-    /**
-     * Profile-completion gate. Defaults to true so users created via the classic flow
-     * (which always collects phone + nationality + terms consent in the same request)
-     * never trip the ProfileCompletionListener. Google-driven sign-ups are the only
-     * path that explicitly flips this to false until the completion step is filled.
-     */
     #[ORM\Column]
-    private bool $isProfileComplete = true;
+    private bool $isProfileComplete = false;
 
     #[ORM\Column]
     private bool $isVerified = false;
@@ -180,6 +179,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // @deprecated, to be removed when upgrading to Symfony 8
     }
 
+    /**
+     * Session invalidation on password change.
+     *
+     * After {@see __serialize()} the session-side password slot stores a
+     * CRC32C of the original hash. When the security layer refreshes the user
+     * from DB on every request, it compares the freshly-loaded hash (via this
+     * method) to what the session preserved. If they no longer match — typical
+     * of a password reset — Symfony invalidates the session immediately, so
+     * other devices / attackers already inside the account are kicked out as
+     * soon as the next request hits.
+     */
+    public function isEqualTo(UserInterface $user): bool
+    {
+        if (!$user instanceof self) {
+            return false;
+        }
+
+        if ($this->getUserIdentifier() !== $user->getUserIdentifier()) {
+            return false;
+        }
+
+        // $this->password holds the CRC32C from the session, $user->getPassword()
+        // holds the live argon2id hash from DB. Recompute and compare.
+        return hash('crc32c', (string) $user->getPassword()) === $this->password;
+    }
+
     public function getFirstName(): ?string
     {
         return $this->firstName;
@@ -224,6 +249,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNationality(?string $nationality): static
     {
         $this->nationality = $nationality;
+
+        return $this;
+    }
+
+    public function getSituation(): ?Situation
+    {
+        return $this->situation;
+    }
+
+    public function setSituation(?Situation $situation): static
+    {
+        $this->situation = $situation;
 
         return $this;
     }
@@ -311,4 +348,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
 }

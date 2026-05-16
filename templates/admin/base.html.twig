@@ -96,7 +96,7 @@
                             <p class="truncate text-xs text-gray-500">{{ app.user.email }}</p>
                         </div>
                     </div>
-                    <twig:Button as="a" variant="ghost" size="sm" href="{{ path('app_logout') }}" class="mt-3 w-full border border-gray-950/10 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-700">
+                    <twig:Button as="a" variant="ghost" size="sm" href="{{ logout_path() }}" class="mt-3 w-full border border-gray-950/10 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-700">
                         {{ ux_icon('lucide:log-out', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
                         {{ 'admin.nav.logout'|trans }}
                     </twig:Button>

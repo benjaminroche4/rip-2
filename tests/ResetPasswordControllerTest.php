@@ -53,6 +53,8 @@ final class ResetPasswordControllerTest extends WebTestCase
             ->setFirstName('Reset')
             ->setLastName('Tester')
             ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true)
             ->setPassword('placeholder-not-used-in-this-test');
 
         $this->em->persist($user);

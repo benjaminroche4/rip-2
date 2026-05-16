@@ -64,7 +64,9 @@ final class DocumentsToolsAccessTest extends WebTestCase
             ->setEmail(self::USER_EMAIL)
             ->setFirstName('Test')
             ->setLastName('User')
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $user->setPassword($hasher->hashPassword($user, self::PASSWORD));
 
         $admin = (new User())
@@ -72,7 +74,9 @@ final class DocumentsToolsAccessTest extends WebTestCase
             ->setFirstName('Test')
             ->setLastName('Admin')
             ->setRoles(['ROLE_ADMIN'])
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $admin->setPassword($hasher->hashPassword($admin, self::PASSWORD));
 
         $em->persist($user);

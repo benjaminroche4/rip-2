@@ -2,6 +2,8 @@
 
 namespace App\Auth\Controller;
 
+use App\Auth\Attribute\AllowIncompleteProfile;
+use App\Auth\Domain\Language;
 use App\Auth\Domain\Register\Account;
 use App\Auth\Entity\User;
 use App\Auth\Form\Register\AccountStepType;
@@ -39,6 +41,7 @@ final class CompleteProfileController extends AbstractController
         name: 'app_register_complete',
     )]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[AllowIncompleteProfile]
     public function complete(Request $request): Response
     {
         $user = $this->getUser();
@@ -53,6 +56,7 @@ final class CompleteProfileController extends AbstractController
         $account = new Account(
             phoneNumber: $user->getPhoneNumber(),
             nationality: $user->getNationality(),
+            situation: $user->getSituation(),
         );
 
         $form = $this->createForm(AccountStepType::class, $account, [
@@ -64,6 +68,8 @@ final class CompleteProfileController extends AbstractController
             $user
                 ->setPhoneNumber($account->phoneNumber)
                 ->setNationality($account->nationality)
+                ->setSituation($account->situation)
+                ->setLanguage(Language::tryFrom($request->getLocale()) ?? $user->getLanguage())
                 ->setProfileComplete(true)
             ;
             $this->entityManager->flush();

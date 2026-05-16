@@ -12,6 +12,13 @@ final class GoogleAuthController extends AbstractController
     #[Route('/connect/google', name: 'app_google_login')]
     public function connect(ClientRegistry $clientRegistry): Response
     {
+        // Already-authenticated users have no business going through the OAuth
+        // dance again — funnel them back home rather than triggering a new
+        // Google redirect that would silently log them out and back in.
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         return $clientRegistry
             ->getClient('google')
             ->redirect(['openid', 'email', 'profile']);

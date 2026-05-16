@@ -8,6 +8,18 @@ nelmio_security:
     content_type:
         nosniff: true
 
+    # Strict-Transport-Security — locked in for 1 year, includes subdomains,
+    # opted into Chrome's HSTS preload list (https://hstspreload.org). Required
+    # before submitting the domain to the preload programme.
+    #
+    # NOTE: enabling this on a domain that is sometimes served over HTTP will
+    # lock browsers into HTTPS-only for `max_age` seconds. Confirm the entire
+    # surface is HTTPS-ready before deploying this change.
+    forced_ssl:
+        hsts_max_age: 31536000           # 1 year
+        hsts_subdomains: true
+        hsts_preload: true
+
     # Send a full URL in the `Referer` header when performing a same-origin request,
     # only send the origin of the document to secure destination (HTTPS->HTTPS),
     # and send no header to a less secure destination (HTTPS->HTTP).
@@ -18,37 +30,49 @@ nelmio_security:
         policies:
             - 'no-referrer'
             - 'strict-origin-when-cross-origin'
+
+    # X-XSS-Protection: 0 — the modern recommendation per OWASP. The legacy
+    # XSS auditors were a footgun; CSP is the right protection. We send `0` to
+    # explicitly disable any latent browser heuristic that might mis-fire.
+    xss_protection:
+        enabled: true
+        mode_block: false
+        report_uri: ~
+
+    # CSP — kept disabled for now because the current stack still relies on
+    # `'unsafe-inline'` and `'unsafe-eval'` on script-src (Stimulus / Turbo
+    # bootstrap + EasyAdmin). Re-enable in `report_only` first, address the
+    # violations one by one (switch to nonces, externalise inline scripts),
+    # then flip to `enforce` once the report stream goes quiet.
     csp:
         enabled: false
         enforce:
-            # Base sûre
             default-src: ["'self'"]
-
-            # ➜ Ton patch pour faire tourner du code qui utilise eval/new Function
             script-src:
                 - "'self'"
                 - "'unsafe-eval'"
                 - "'unsafe-inline'"
-
-            # ImportMap + styles inline (Tailwind/EasyAdmin)
             style-src:
                 - "'self'"
                 - "'unsafe-inline'"
-
-            # Images & SVG inline (data:)
             img-src:
                 - "'self'"
                 - "data:"
-
-            # Polices locales (woff/woff2) + data:
             font-src:
                 - "'self'"
                 - "data:"
-
-            # XHR/fetch (Turbo/Stimulus, API interne)
             connect-src: ["'self'"]
-
-            # Durscisseurs basiques
             object-src: ["'none'"]
             base-uri: ["'self'"]
             frame-ancestors: ["'self'"]
+
+# Dev + test run over http://localhost / 127.0.0.1 — HSTS forces the browser
+# into https-only and a single request would lock you out of the local server
+# for a year (browser HSTS cache, not server-side). Only enable HSTS in prod.
+when@dev:
+    nelmio_security:
+        forced_ssl: false
+
+when@test:
+    nelmio_security:
+        forced_ssl: false

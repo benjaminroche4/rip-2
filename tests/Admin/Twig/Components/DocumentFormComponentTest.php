@@ -290,7 +290,9 @@ final class DocumentFormComponentTest extends KernelTestCase
             ->setLastName('Last')
             ->setRoles($roles)
             ->setPassword('x')
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $this->em->persist($user);
         $this->em->flush();
 

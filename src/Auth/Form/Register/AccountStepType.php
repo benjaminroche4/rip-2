@@ -3,10 +3,11 @@
 namespace App\Auth\Form\Register;
 
 use App\Auth\Domain\Register\Account;
+use App\Auth\Domain\Situation;
 use App\Shared\Form\DataTransformer\PhoneNumberE164Transformer;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CountryType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -32,9 +33,12 @@ final class AccountStepType extends AbstractType
                     'autocomplete' => 'country',
                 ],
             ])
-            ->add('acceptTerms', CheckboxType::class, [
-                'label' => 'register.form.terms.label',
-                'required' => true,
+            ->add('situation', EnumType::class, [
+                'class' => Situation::class,
+                'label' => 'register.form.situation.label',
+                'expanded' => true,
+                'multiple' => false,
+                'choice_label' => fn (Situation $s) => $s->value,
             ])
         ;
 

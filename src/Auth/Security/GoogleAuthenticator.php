@@ -2,7 +2,9 @@
 
 namespace App\Auth\Security;
 
+use App\Auth\Domain\Language;
 use App\Auth\Entity\User;
+use App\Auth\Repository\EmailVerificationRequestRepository;
 use App\Auth\Repository\UserRepository;
 use App\Auth\Service\AvatarDownloader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +38,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly LoginSuccessHandler $loginSuccessHandler,
         private readonly AvatarDownloader $avatarDownloader,
+        private readonly EmailVerificationRequestRepository $verificationRequestRepository,
     ) {
     }
 
@@ -48,9 +51,12 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
     {
         $client = $this->clientRegistry->getClient('google');
         $accessToken = $this->fetchAccessToken($client);
+        // Snapshot the locale before the closure runs — `$request` is not captured
+        // in the UserBadge callback's scope.
+        $locale = $request->getLocale();
 
         return new SelfValidatingPassport(
-            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client): User {
+            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client, $locale): User {
                 /** @var GoogleUser $googleUser */
                 $googleUser = $client->fetchUserFromToken($accessToken);
 
@@ -61,46 +67,80 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
                     throw new AuthenticationException('Google returned incomplete profile data.');
                 }
 
-                $avatarUrl = $googleUser->getAvatar();
-
-                $user = $this->userRepository->findOneBy(['googleId' => $googleId]);
-                if (null !== $user) {
-                    $this->refreshAvatar($user, $avatarUrl);
-                    $this->entityManager->flush();
-
-                    return $user;
-                }
-
-                $user = $this->userRepository->findOneBy(['email' => $email]);
-                if (null !== $user) {
-                    $user->setGoogleId($googleId);
-                    $this->refreshAvatar($user, $avatarUrl);
-                    $this->entityManager->flush();
-
-                    return $user;
-                }
-
-                $user = new User();
-                $user->setEmail($email);
-                $user->setGoogleId($googleId);
-                $user->setFirstName($googleUser->getFirstName() ?? $this->firstName($googleUser->getName()));
-                $user->setLastName($googleUser->getLastName() ?? $this->lastName($googleUser->getName()));
-                $user->setCreatedAt(new \DateTimeImmutable());
-                $user->setRoles(['ROLE_USER']);
-                // Google supplied identity but not phone / nationality / terms consent —
-                // ProfileCompletionListener will gate every request until the user
-                // submits CompleteProfileController.
-                $user->setProfileComplete(false);
-                $user->setVerified(true);
-                $this->refreshAvatar($user, $avatarUrl);
-
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-
-                return $user;
+                return $this->findOrCreateUser(
+                    googleId: $googleId,
+                    email: $email,
+                    firstName: $googleUser->getFirstName(),
+                    lastName: $googleUser->getLastName(),
+                    fullName: $googleUser->getName(),
+                    avatarUrl: $googleUser->getAvatar(),
+                    locale: $locale,
+                );
             }),
             [(new RememberMeBadge())->enable()],
         );
+    }
+
+    /**
+     * Resolves the local User entity backing a successful Google identity:
+     *  - matches by googleId first (returning user already linked),
+     *  - then by email (legacy classic account adopting Google as second auth method),
+     *  - otherwise creates a new User in incomplete-profile state so the completion
+     *    gate forces phone / nationality / situation / terms consent on the next request.
+     *
+     * Public so the find-or-create logic can be unit-tested without spinning up
+     * the full OAuth round-trip.
+     */
+    public function findOrCreateUser(
+        string $googleId,
+        string $email,
+        ?string $firstName,
+        ?string $lastName,
+        ?string $fullName,
+        ?string $avatarUrl,
+        ?string $locale = null,
+    ): User {
+        $user = $this->userRepository->findOneBy(['googleId' => $googleId]);
+        if (null !== $user) {
+            $this->refreshAvatar($user, $avatarUrl);
+            $this->entityManager->flush();
+
+            return $user;
+        }
+
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+        if (null !== $user) {
+            $user->setGoogleId($googleId);
+            // Google just validated the email — drop any pending OTP and flip the
+            // verified flag so the EmailVerificationListener never sends a returning
+            // classic-flow user back to the verification page.
+            $user->setVerified(true);
+            $this->verificationRequestRepository->removeForUser($user, flush: false);
+            $this->refreshAvatar($user, $avatarUrl);
+            $this->entityManager->flush();
+
+            return $user;
+        }
+
+        $user = new User();
+        $user->setEmail($email);
+        $user->setGoogleId($googleId);
+        $user->setFirstName($firstName ?? $this->firstName($fullName));
+        $user->setLastName($lastName ?? $this->lastName($fullName));
+        $user->setLanguage(null !== $locale ? Language::tryFrom($locale) : null);
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setRoles(['ROLE_USER']);
+        // Google supplied identity but not phone / nationality / situation / terms
+        // consent — ProfileCompletionListener will gate every request until the
+        // user submits CompleteProfileController.
+        $user->setProfileComplete(false);
+        $user->setVerified(true);
+        $this->refreshAvatar($user, $avatarUrl);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

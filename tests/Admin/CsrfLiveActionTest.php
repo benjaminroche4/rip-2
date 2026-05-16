@@ -54,7 +54,9 @@ final class CsrfLiveActionTest extends WebTestCase
             ->setFirstName('CSRF')
             ->setLastName('Admin')
             ->setRoles(['ROLE_ADMIN'])
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $admin->setPassword($hasher->hashPassword($admin, self::PASSWORD));
 
         $em->persist($admin);

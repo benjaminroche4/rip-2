@@ -7,7 +7,7 @@
     {% if is_granted('ROLE_ADMIN') %}
         <a href="{{ path('admin_dashboard', {_locale: app.request.locale, adminPrefix: adminPrefix}) }}" class="{% if route == 'admin_dashboard' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.adminSpace'|trans|raw }}</a>
     {% else %}
-        <a href="{{ path('app_logout') }}" class="{% if route == 'app_logout' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
+        <a href="{{ logout_path() }}" class="{% if route == 'app_logout' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.logout'|trans|raw }}</a>
     {% endif %}
 {% else %}
     <a href="{{ path('app_register') }}" class="{% if route == 'app_register' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.register'|trans|raw }}</a>

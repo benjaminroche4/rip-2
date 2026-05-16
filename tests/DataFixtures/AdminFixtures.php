@@ -53,7 +53,9 @@ final class AdminFixtures extends Fixture
             ->setFirstName('Aurélie')
             ->setLastName('Dubois')
             ->setRoles(['ROLE_ADMIN'])
-            ->setCreatedAt(new \DateTimeImmutable('-1 year'));
+            ->setCreatedAt(new \DateTimeImmutable('-1 year'))
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $admin->setPassword($this->hasher->hashPassword($admin, 'password'));
         $manager->persist($admin);
 
@@ -62,7 +64,9 @@ final class AdminFixtures extends Fixture
             ->setFirstName('Camille')
             ->setLastName('Martin')
             ->setRoles([])
-            ->setCreatedAt(new \DateTimeImmutable('-3 months'));
+            ->setCreatedAt(new \DateTimeImmutable('-3 months'))
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $user->setPassword($this->hasher->hashPassword($user, 'password'));
         $manager->persist($user);
     }

@@ -116,7 +116,9 @@ final class UserListTest extends KernelTestCase
             ->setLastName('Last')
             ->setRoles($roles)
             ->setPassword('x')
-            ->setCreatedAt($createdAt);
+            ->setCreatedAt($createdAt)
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $this->em->persist($user);
 
         return $user;

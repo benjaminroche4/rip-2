@@ -94,6 +94,7 @@ sitemap:
         blog: Blog
         contact: Contactez-nous
         login: Connexion
+        register: S'inscrire
         logout: Déconnexion
         aboutUs: À propos
         legalNotice: Mentions légales
@@ -399,9 +400,9 @@ meta:
     register:
         title: Créer un compte
         description: Créez votre compte Relocation in Paris pour accéder à votre espace personnel, suivre vos demandes et gérer votre recherche de logement à Paris.
-        checkEmail:
-            title: Confirmez votre email
-            description: Un email de confirmation vient de vous être envoyé. Cliquez sur le lien pour activer votre compte Relocation in Paris.
+        verify:
+            title: Vérifiez votre email
+            description: Saisissez le code à 6 chiffres que vous venez de recevoir par email pour activer votre compte Relocation in Paris.
         complete:
             title: Finalisez votre profil
             description: Encore quelques informations pour activer votre compte Relocation in Paris.
@@ -582,6 +583,7 @@ login:
     resetPassword:
         title: Mot de passe oublié
         subTitle: Un email avec un lien pour réinitialiser le mot de passe va vous être envoyé.
+        tooManyAttempts: Trop de demandes de réinitialisation depuis cette adresse. Réessayez dans quelques minutes.
         form:
             label: Email
             placeholder: Votre adresse email
@@ -604,11 +606,12 @@ login:
                 password: Votre nouveau mot de passe
                 repeatPassword: Répétez votre nouveau mot de passe
 register:
+    tooManyAttempts: Trop d'inscriptions depuis cette adresse. Réessayez dans quelques minutes.
     step:
         indicator: 'Étape %current% sur %total%'
     personal:
         title: Créez votre compte
-        subTitle: Quelques infos pour démarrer.
+        subTitle: Accédez à votre espace et lancez votre recherche en quelques minutes.
     account:
         title: Finalisez votre profil
         subTitle: Quelques informations pour vous accompagner au mieux.
@@ -617,7 +620,7 @@ register:
         subTitle: Encore quelques informations pour activer votre compte.
     google:
         button: Continuer avec Google
-        separator: OU
+        separator: Ou
     form:
         firstName:
             label: Prénom
@@ -655,8 +658,7 @@ register:
             placeholder: Au moins 8 caractères
             required: Le mot de passe est obligatoire.
         terms:
-            label: J'accepte les conditions d'utilisation et la politique de confidentialité.
-            required: Vous devez accepter les conditions d'utilisation pour continuer.
+            disclaimer: 'En créant mon compte, j''accepte les <a href="%termsUrl%">conditions d''utilisation</a> et la <a href="%privacyUrl%">politique de confidentialité</a>.'
         button:
             previous: Retour
             next: S'inscrire
@@ -678,7 +680,7 @@ register:
         notBlank: L'adresse email est obligatoire.
         invalid: Cette adresse email n'est pas valide.
         maxLength: L'adresse email est trop longue.
-        alreadyUsed: Cette adresse email est déjà utilisée.
+        alreadyUsed: Un compte existe déjà avec cette adresse email. Connectez-vous.
     phoneNumber:
         notBlank: Le numéro de téléphone est obligatoire.
         maxLength: Le numéro de téléphone est trop long.
@@ -686,6 +688,8 @@ register:
     nationality:
         notBlank: La nationalité est obligatoire.
         invalid: Cette nationalité n'est pas valide.
+    situation:
+        required: La situation professionnelle est obligatoire.
     password:
         notBlank: Le mot de passe est obligatoire.
         minLength: Le mot de passe doit contenir au moins 8 caractères.
@@ -700,20 +704,32 @@ register:
     terms:
         required: Vous devez accepter les conditions d'utilisation pour continuer.
     verify:
-        success: Votre adresse email a été confirmée. Vous pouvez vous connecter.
-        invalidLink: Ce lien de confirmation n'est plus valide.
-    checkEmail:
-        title: Confirmez votre adresse email
-        subTitle: Un email avec un lien de confirmation vient de vous être envoyé
-        to: à
-        spam: Pensez à vérifier vos spams si vous ne le voyez pas.
-        backToLogin: Retour à la connexion
+        success: Votre adresse email a été confirmée. Bienvenue chez Relocation in Paris !
+        code:
+            title: Vérifiez votre adresse email
+            subTitle: Nous venons d'envoyer un code à 6 chiffres à
+            label: Code de confirmation
+            placeholder: '••••••'
+            submit: Accéder à mon espace
+            verifying: Vérification…
+            resend: Renvoyer un code
+            resent: Un nouveau code vient de vous être envoyé.
+            resentTitle: Code envoyé
+            resendThrottled: Attendez une minute avant de demander un nouveau code.
+            resendThrottledTitle: Patientez un instant
+            invalid: Code incorrect ou expiré. Réessayez ou demandez un nouveau code.
+            required: Saisissez le code reçu par email.
+            format: Le code doit comporter 6 chiffres.
+            tooManyAttempts: Trop de tentatives. Réessayez dans quelques minutes.
+            spam: Pensez à vérifier vos spams si vous ne le voyez pas.
+            help: Vous n'avez pas reçu le code ?
     confirmationEmail:
-        greeting: Bienvenue !
-        intro: Pour activer votre compte Relocation in Paris, cliquez sur le lien ci-dessous.
-        cta: Confirmer mon adresse email
-        expires: 'Ce lien est valable %duration%.'
-        signature: L'équipe Relocation in Paris
+        subject: Votre code de confirmation
+        greeting: 'Bonjour %firstName% !'
+        intro: Voici votre code de confirmation pour activer votre compte Relocation in Paris.
+        copyHint: Touchez ou double-cliquez pour sélectionner le code, puis copiez-le.
+        expires: Ce code est valable 15 minutes.
+        tagline: Agence de Relocation pour Particuliers et Professionnels
     image:
         alt: Relocation In Paris, agence de relocation à Paris
 phoneInput:

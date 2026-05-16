@@ -2,36 +2,39 @@
 
 namespace App\Auth\Controller;
 
+use App\Auth\Domain\Language;
 use App\Auth\Domain\Register\RegisterDto;
 use App\Auth\Entity\User;
 use App\Auth\Form\Register\RegisterFlowType;
 use App\Auth\Repository\UserRepository;
-use App\Auth\Service\EmailVerifier;
+use App\Auth\Service\EmailVerificationCodeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\Flow\DataStorage\SessionDataStorage;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
-use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 /**
- * Multi-step registration flow + email verification.
+ * Multi-step registration flow.
  *
- * Flow:
- *   1. /inscription (GET)  → step 1 (Personal: firstName, lastName, email)
- *   2. /inscription (POST) → step 1 validated, advances to step 2 (Account: password, terms)
- *   3. /inscription (POST) → step 2 validated → persist user + send confirmation email →
- *                            redirect to /inscription/verification-email
- *   4. /inscription/verifier-email/{id} (GET) → validates signature, flips isVerified, redirects to /connexion
+ *   1. /inscription (GET)  → step 1 (Personal: firstName, lastName, email, password)
+ *   2. /inscription (POST) → step 1 validated (email uniqueness, password strength,
+ *      …) → advances to step 2 (Account: phone, nationality, situation, terms)
+ *   3. /inscription (POST) → step 2 validated → persist user + generate 6-digit OTP
+ *      sent by email → redirect to {@see EmailVerificationController::verify}.
  *
- * Intermediate data lives in the session under the `register_flow` key via SessionDataStorage,
- * so a page reload between steps preserves the user's input. Cleared once the user submits the
- * final step.
+ * Intermediate data lives in the session under the `register_flow` key via
+ * SessionDataStorage, so a page reload between steps preserves the user's input.
+ * The session is cleared once the final step is submitted; the pending email is
+ * stashed under `register_check_email` so the OTP verification controller knows
+ * which user is waiting on a code.
  */
 final class RegisterController extends AbstractController
 {
@@ -39,10 +42,12 @@ final class RegisterController extends AbstractController
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly EmailVerifier $emailVerifier,
+        private readonly EmailVerificationCodeService $codeService,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly RequestStack $requestStack,
+        #[Autowire(service: 'limiter.register_attempts')]
+        private readonly RateLimiterFactory $registerLimiter,
     ) {
     }
 
@@ -52,6 +57,13 @@ final class RegisterController extends AbstractController
             'en' => '/{_locale}/register',
         ],
         name: 'app_register',
+        options: [
+            'sitemap' => [
+                'priority' => 0.3,
+                'changefreq' => UrlConcrete::CHANGEFREQ_YEARLY,
+                'lastmod' => new \DateTime('2026-04-16'),
+            ],
+        ],
     )]
     public function register(Request $request): Response
     {
@@ -80,12 +92,20 @@ final class RegisterController extends AbstractController
         }
 
         if ($flow->isSubmitted() && $flow->isValid() && $flow->isFinished()) {
+            // Per-IP throttle on full-flow completions — caps bot signups that
+            // would otherwise burn the SMTP quota on OTP emails.
+            $limit = $this->registerLimiter->create($request->getClientIp() ?? 'unknown')->consume();
+            if (!$limit->isAccepted()) {
+                $this->addFlash('register_error', 'register.tooManyAttempts');
+
+                return $this->renderStep($flow)->setStatusCode(429);
+            }
+
             /** @var RegisterDto $data */
             $data = $flow->getData();
 
-            // The flow's `auto_reset` cleared the session data when the finish button was
-            // handled, so re-rendering the current step would mix a stale form with a fresh
-            // cursor. Build a clean step-1 form and surface the duplicate as a flash error.
+            // Race-condition safety net: step-1 UniqueUserEmail already rejects taken
+            // addresses, but somebody could race a signup between the two steps.
             $existing = $this->userRepository->findOneBy(['email' => $data->personal->email]);
             if (null !== $existing) {
                 $this->addFlash('register_error', 'register.email.alreadyUsed');
@@ -103,75 +123,24 @@ final class RegisterController extends AbstractController
                 ->setLastName((string) $data->personal->lastName)
                 ->setPhoneNumber($data->account->phoneNumber)
                 ->setNationality($data->account->nationality)
+                ->setSituation($data->account->situation)
+                ->setLanguage(Language::tryFrom($request->getLocale()))
                 ->setCreatedAt(new \DateTimeImmutable())
                 ->setProfileComplete(true)
+                ->setRoles(['ROLE_USER'])
             ;
             $user->setPassword($this->passwordHasher->hashPassword($user, (string) $data->personal->plainPassword));
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            $this->emailVerifier->sendEmailConfirmation(
-                'app_register_verify_email',
-                $user,
-                $this->emailVerifier->buildRegistrationEmail($user),
-            );
-
+            $this->codeService->generateAndSend($user);
             $this->requestStack->getSession()->set('register_check_email', $user->getEmail());
 
-            return $this->redirectToRoute('app_register_check_email');
+            return $this->redirectToRoute('app_register_verify_code');
         }
 
         return $this->renderStep($flow);
-    }
-
-    #[Route(
-        path: [
-            'fr' => '/{_locale}/inscription/verification-email',
-            'en' => '/{_locale}/register/check-email',
-        ],
-        name: 'app_register_check_email',
-    )]
-    public function checkEmail(): Response
-    {
-        $email = $this->requestStack->getSession()->get('register_check_email');
-        if (null === $email) {
-            return $this->redirectToRoute('app_register');
-        }
-
-        return $this->render('public/auth/register_check_email.html.twig', [
-            'email' => $email,
-        ]);
-    }
-
-    #[Route(
-        path: [
-            'fr' => '/{_locale}/inscription/verifier-email/{id}',
-            'en' => '/{_locale}/register/verify-email/{id}',
-        ],
-        name: 'app_register_verify_email',
-        requirements: ['id' => '\d+'],
-    )]
-    public function verifyUserEmail(Request $request, int $id): Response
-    {
-        $user = $this->userRepository->find($id);
-        if (null === $user) {
-            $this->addFlash('register_error', 'register.verify.invalidLink');
-
-            return $this->redirectToRoute('app_register');
-        }
-
-        try {
-            $this->emailVerifier->handleEmailConfirmation($request, $user);
-        } catch (VerifyEmailExceptionInterface $exception) {
-            $this->addFlash('register_error', $exception->getReason());
-
-            return $this->redirectToRoute('app_register');
-        }
-
-        $this->addFlash('register_success', 'register.verify.success');
-
-        return $this->redirectToRoute('app_login');
     }
 
     private function renderStep(FormInterface $flow): Response

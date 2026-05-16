@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Auth\Controller;
 
+use App\Auth\Attribute\AllowIncompleteProfile;
+use App\Auth\Attribute\AllowUnverifiedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -21,6 +23,8 @@ use Symfony\Component\Routing\Attribute\Route;
  *    a new avatar gets a new UUID, so we can serve with `immutable`.
  *  - Single point to add ACL later if avatars become non-public.
  */
+#[AllowIncompleteProfile]
+#[AllowUnverifiedEmail]
 final class AvatarController extends AbstractController
 {
     public function __construct(

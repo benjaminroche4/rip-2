@@ -72,7 +72,8 @@ final class CompleteProfileControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('input[name="account_step[phoneNumber]"]');
         self::assertSelectorExists('select[name="account_step[nationality]"]');
-        self::assertSelectorExists('input[name="account_step[acceptTerms]"]');
+        self::assertSelectorExists('input[name="account_step[situation]"]');
+        self::assertSelectorNotExists('input[name="account_step[acceptTerms]"]');
     }
 
     public function testValidSubmitPersistsProfileAndFlipsFlag(): void
@@ -88,7 +89,7 @@ final class CompleteProfileControllerTest extends WebTestCase
                 '_token' => $csrf,
                 'phoneNumber' => '+33612345678',
                 'nationality' => 'FR',
-                'acceptTerms' => '1',
+                'situation' => \App\Auth\Domain\Situation::Freelance->value,
             ],
         ]);
 
@@ -102,6 +103,7 @@ final class CompleteProfileControllerTest extends WebTestCase
         self::assertTrue($saved->isProfileComplete());
         self::assertSame('+33612345678', $saved->getPhoneNumber());
         self::assertSame('FR', $saved->getNationality());
+        self::assertSame(\App\Auth\Domain\Situation::Freelance, $saved->getSituation());
     }
 
     public function testInvalidSubmitReturns422AndKeepsProfileIncomplete(): void
@@ -117,7 +119,6 @@ final class CompleteProfileControllerTest extends WebTestCase
                 '_token' => $csrf,
                 'phoneNumber' => '',
                 'nationality' => '',
-                'acceptTerms' => '0',
             ],
         ]);
 
@@ -131,11 +132,13 @@ final class CompleteProfileControllerTest extends WebTestCase
 
     public function testListenerForcesIncompleteUserToCompletionPage(): void
     {
+        // Profile data (phone / nationality / situation / terms consent) is mandatory
+        // for the agents to follow up on every lead, so the gate stays hard: every
+        // request from an authenticated incomplete-profile user funnels back to
+        // /inscription/profil, even after clicking the logo.
         $user = $this->makeUser('incomplete@example.com', profileComplete: false);
         $this->client->loginUser($user);
 
-        // Hits the register page, which would normally bounce an authenticated
-        // user to home — the listener short-circuits it to the completion page.
         $this->client->request('GET', '/fr/inscription');
 
         self::assertResponseStatusCodeSame(302);

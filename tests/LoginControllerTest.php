@@ -48,7 +48,9 @@ final class LoginControllerTest extends WebTestCase
             ->setEmail(self::TEST_EMAIL)
             ->setFirstName('Test')
             ->setLastName('User')
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $user->setPassword($hasher->hashPassword($user, self::TEST_PASSWORD));
 
         $em->persist($user);

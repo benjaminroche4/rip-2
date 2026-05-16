@@ -6,14 +6,17 @@ use App\Auth\Entity\User;
 use App\Auth\Form\ChangePasswordFormType;
 use App\Auth\Form\ResetPasswordRequestFormType;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
@@ -32,7 +35,11 @@ class ResetPasswordController extends AbstractController
 
     public function __construct(
         private ResetPasswordHelperInterface $resetPasswordHelper,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        #[Autowire(service: 'limiter.reset_password_request')]
+        private RateLimiterFactory $resetRequestLimiter,
+        #[Autowire(service: 'monolog.logger.security')]
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -42,10 +49,25 @@ class ResetPasswordController extends AbstractController
     #[Route('', name: 'app_forgot_password_request')]
     public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator): Response
     {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Per-IP throttle on reset requests — prevents inbox-bombing the
+            // victim with legitimate-looking reset emails.
+            $limit = $this->resetRequestLimiter->create($request->getClientIp() ?? 'unknown')->consume();
+            if (!$limit->isAccepted()) {
+                $this->addFlash('reset_password_error', 'resetPassword.tooManyAttempts');
+
+                return $this->render('public/reset_password/request.html.twig', [
+                    'requestForm' => $form,
+                ], new Response(null, 429));
+            }
+
             /** @var string $email */
             $email = $form->get('email')->getData();
 
@@ -73,6 +95,10 @@ class ResetPasswordController extends AbstractController
     )]
     public function checkEmail(): Response
     {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         // Generate a fake token if the user does not exist or someone hit this page directly.
         // This prevents exposing whether or not a user was found with the given email address or not
         if (null === ($resetToken = $this->getTokenObjectFromSession())) {
@@ -96,6 +122,10 @@ class ResetPasswordController extends AbstractController
     )]
     public function reset(Request $request, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator, ?string $token = null): Response
     {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
             // loaded in a browser and potentially leaking the token to 3rd party JavaScript.
@@ -137,6 +167,14 @@ class ResetPasswordController extends AbstractController
             // Encode(hash) the plain password, and set it.
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             $this->entityManager->flush();
+
+            // Forensic trail — combined with the EquatableInterface session
+            // invalidation, this lets us reconstruct who reset what & when
+            // if a compromise is suspected.
+            $this->logger->info('Password reset completed, sessions invalidated', [
+                'user_id' => $user->getId(),
+                'ip' => $request->getClientIp(),
+            ]);
 
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();

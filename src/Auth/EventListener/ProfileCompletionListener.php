@@ -4,71 +4,91 @@ declare(strict_types=1);
 
 namespace App\Auth\EventListener;
 
+use App\Auth\Attribute\AllowIncompleteProfile;
 use App\Auth\Entity\User;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Gate that keeps users with isProfileComplete=false stuck on the profile-completion
- * page (typically reached after a Google sign-in that created the account without
- * phone / nationality / terms consent).
+ * Hard gate keeping users with isProfileComplete=false stuck on the profile-
+ * completion page. Email verification (isVerified) is intentionally NOT gated
+ * here — the OTP redirect is one-shot at login (LoginSuccessHandler) so the
+ * user can browse the site even before clicking the email code. Profile data
+ * (phone / nationality / situation / terms consent) is treated as mandatory
+ * because the agents need it to follow up on every lead.
  *
- * Force-redirects every main request from such a user to app_register_complete,
- * except for a small allowlist (the completion page itself, logout, avatar
- * serving, and the profiler/asset paths already excluded from the firewall).
+ * Force-redirects every main request from an incomplete-profile user to
+ * app_register_complete, unless the resolved controller (class or method)
+ * carries the AllowIncompleteProfile attribute.
  *
- * Runs after the firewall (priority < 8) so the token storage is populated.
+ * Runs on kernel.controller — the opt-out attribute is read first so opt-out
+ * routes never touch Security::getUser() (which would force a session start
+ * and flip Cache-Control to private on otherwise cacheable routes like
+ * /avatars).
  */
 final readonly class ProfileCompletionListener
 {
-    private const ALLOWED_ROUTES = [
-        'app_register_complete',
-        'app_logout',
-        'app_avatar',
-    ];
-
     public function __construct(
         private Security $security,
         private UrlGeneratorInterface $urlGenerator,
+        #[Autowire(service: 'monolog.logger.security')]
+        private LoggerInterface $logger,
     ) {
     }
 
-    #[AsEventListener(RequestEvent::class, priority: 4)]
-    public function __invoke(RequestEvent $event): void
+    #[AsEventListener(ControllerEvent::class)]
+    public function __invoke(ControllerEvent $event): void
     {
         if (!$event->isMainRequest()) {
             return;
         }
 
+        if ($this->controllerAllowsIncompleteProfile($event)) {
+            return;
+        }
+
         $user = $this->security->getUser();
-        if (!$user instanceof User) {
+        if (!$user instanceof User || $user->isProfileComplete()) {
             return;
         }
 
-        if ($user->isProfileComplete()) {
-            return;
+        $this->logger->info('Profile incomplete, redirecting to completion page', [
+            'user_id' => $user->getId(),
+            'route' => $event->getRequest()->attributes->get('_route'),
+        ]);
+
+        $url = $this->urlGenerator->generate('app_register_complete', [
+            '_locale' => $event->getRequest()->getLocale(),
+        ]);
+        $event->setController(fn () => new RedirectResponse($url));
+    }
+
+    private function controllerAllowsIncompleteProfile(ControllerEvent $event): bool
+    {
+        $controller = $event->getController();
+
+        if (\is_array($controller)) {
+            $reflection = new \ReflectionMethod($controller[0], $controller[1]);
+        } elseif ($controller instanceof \Closure) {
+            $reflection = new \ReflectionFunction($controller);
+        } elseif (\is_object($controller) && method_exists($controller, '__invoke')) {
+            $reflection = new \ReflectionMethod($controller, '__invoke');
+        } else {
+            return false;
         }
 
-        $request = $event->getRequest();
-        $route = (string) $request->attributes->get('_route');
-
-        // Profiler / dev toolbar paths start with `_` and are already disabled
-        // by the security firewall — they never carry a user, but guard anyway.
-        if ('' === $route || str_starts_with($route, '_')) {
-            return;
+        if ([] !== $reflection->getAttributes(AllowIncompleteProfile::class)) {
+            return true;
         }
 
-        if (\in_array($route, self::ALLOWED_ROUTES, true)) {
-            return;
-        }
+        $declaringClass = $reflection instanceof \ReflectionMethod ? $reflection->getDeclaringClass() : null;
 
-        $event->setResponse(new RedirectResponse(
-            $this->urlGenerator->generate('app_register_complete', [
-                '_locale' => $request->getLocale(),
-            ]),
-        ));
+        return null !== $declaringClass
+            && [] !== $declaringClass->getAttributes(AllowIncompleteProfile::class);
     }
 }

@@ -1,0 +1,15 @@
+{#
+    Segmented progress bar for the multi-step registration funnel.
+    Renders `total` equal-width bars; the first `current` are filled with the
+    primary colour, the rest stay neutral. Decorative only — `aria-hidden`
+    because the textual step heading already announces progress to AT.
+
+    @var int current — 1-based index of the current step
+    @var int total   — total number of steps in the funnel
+#}
+{% props current, total %}
+<div class="flex items-center gap-1.5" aria-hidden="true">
+    {% for i in 1..total %}
+        <div class="h-1 flex-1 rounded-full transition-colors duration-300 {% if i <= current %}bg-primary{% else %}bg-neutral-200{% endif %}"></div>
+    {% endfor %}
+</div>

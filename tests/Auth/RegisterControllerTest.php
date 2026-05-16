@@ -45,6 +45,7 @@ final class RegisterControllerTest extends WebTestCase
         $this->em = $em;
         $this->userRepository = $container->get(UserRepository::class);
 
+        $this->em->createQuery('DELETE FROM '.\App\Auth\Entity\EmailVerificationRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.\App\Auth\Entity\ResetPasswordRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class)->execute();
     }
@@ -109,7 +110,7 @@ final class RegisterControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('input[name="register_flow[account][phoneNumber]"]');
         self::assertSelectorExists('select[name="register_flow[account][nationality]"]');
-        self::assertSelectorExists('input[name="register_flow[account][acceptTerms]"]');
+        self::assertSelectorNotExists('input[name="register_flow[account][acceptTerms]"]');
         self::assertSelectorNotExists('input[name="register_flow[personal][firstName]"]');
     }
 
@@ -131,22 +132,27 @@ final class RegisterControllerTest extends WebTestCase
         $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
 
         $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
+            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'situation' => \App\Auth\Domain\Situation::Employee->value],
             button: 'finish',
             csrf: $csrf2,
         ));
 
-        // After finish: redirected to the check-email confirmation page.
-        self::assertResponseRedirects('/fr/inscription/verification-email');
+        // After finish: redirected to the OTP verification form.
+        self::assertResponseRedirects('/fr/inscription/verification');
 
-        // User is persisted but not yet verified.
+        // User is persisted but not yet verified — the OTP flow toggles isVerified
+        // only after the user types the 6-digit code emailed to them.
         $user = $this->userRepository->findOneBy(['email' => self::TEST_EMAIL]);
         self::assertNotNull($user, 'User must be persisted after the final step.');
         self::assertFalse($user->isVerified(), 'User starts as not verified.');
+        $request = static::getContainer()->get(\App\Auth\Repository\EmailVerificationRequestRepository::class)->findOneForUser($user);
+        self::assertNotNull($request, 'Verification request must be stored.');
+        self::assertGreaterThan(new \DateTimeImmutable(), $request->getExpiresAt(), 'Verification expiration must be in the future.');
         self::assertSame('Alice', $user->getFirstName());
         self::assertSame('Martin', $user->getLastName());
         self::assertSame('+33612345678', $user->getPhoneNumber());
         self::assertSame('FR', $user->getNationality());
+        self::assertSame(\App\Auth\Domain\Language::Fr, $user->getLanguage(), 'Language is captured from the current locale.');
 
         // Exactly one confirmation email sent.
         self::assertEmailCount(1);
@@ -154,36 +160,15 @@ final class RegisterControllerTest extends WebTestCase
         self::assertEmailAddressContains($email, 'to', self::TEST_EMAIL);
     }
 
-    public function testConfirmationLinkActivatesAccountAndRedirectsToLogin(): void
-    {
-        $this->registerOneUser(self::TEST_EMAIL);
-
-        $email = $this->getMailerMessages()[0];
-        $body = $email->getHtmlBody() ?? '';
-        self::assertMatchesRegularExpression('#href="([^"]+)"#', (string) $body, 'Email must embed a signed URL.');
-
-        preg_match('#href="([^"]+)"#', (string) $body, $matches);
-        $signedUrl = html_entity_decode($matches[1]);
-
-        // Hit the signed URL — bundle validates the signature against UriSigner + kernel secret.
-        $this->client->request('GET', $signedUrl);
-
-        self::assertResponseRedirects('/fr/connexion');
-
-        $em = static::getContainer()->get('doctrine')->getManager();
-        $em->clear();
-        $user = $em->getRepository(User::class)->findOneBy(['email' => self::TEST_EMAIL]);
-        self::assertNotNull($user);
-        self::assertTrue($user->isVerified(), 'Hitting the signed URL must flip isVerified=true.');
-    }
-
-    public function testDuplicateEmailIsRejectedOnFinalStep(): void
+    public function testDuplicateEmailIsRejectedAtStepOne(): void
     {
         $existing = (new User())
             ->setEmail(self::TEST_EMAIL)
             ->setFirstName('Existing')
             ->setLastName('User')
             ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true)
             ->setPassword('placeholder-not-used-in-this-test');
         $this->em->persist($existing);
         $this->em->flush();
@@ -194,19 +179,11 @@ final class RegisterControllerTest extends WebTestCase
             button: 'next',
             csrf: $csrf,
         ));
-        self::assertResponseRedirects(self::REGISTER_PATH);
-        $this->client->followRedirect();
-        self::assertResponseIsSuccessful();
 
-        $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
-        $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
-            button: 'finish',
-            csrf: $csrf2,
-        ));
-
-        // Duplicate is surfaced as a form error → re-renders the form (422), no second user created.
+        // Email is checked at step 1 (UniqueUserEmail constraint on Personal DTO) so
+        // the user never reaches step 2 — fail fast with the "go sign in" message.
         self::assertResponseStatusCodeSame(422);
+        self::assertSelectorExists('input[name="register_flow[personal][firstName]"]', 'Stays on step 1.');
         self::assertCount(1, $this->userRepository->findAll(), 'Duplicate email must not create a second user.');
         self::assertEmailCount(0);
     }
@@ -220,7 +197,9 @@ final class RegisterControllerTest extends WebTestCase
             ->setEmail('already-in@example.com')
             ->setFirstName('Existing')
             ->setLastName('User')
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
         $existing->setPassword($hasher->hashPassword($existing, self::VALID_PASSWORD));
         $this->em->persist($existing);
         $this->em->flush();
@@ -286,7 +265,7 @@ final class RegisterControllerTest extends WebTestCase
 
         $csrf2 = $this->client->getCrawler()->filter('input[name="register_flow[_token]"]')->attr('value');
         $this->client->request('POST', self::REGISTER_PATH, $this->postPayload(
-            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'acceptTerms' => '1'],
+            account: ['phoneNumber' => '+33612345678', 'nationality' => 'FR', 'situation' => \App\Auth\Domain\Situation::Employee->value],
             button: 'finish',
             csrf: $csrf2,
         ));

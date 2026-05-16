@@ -42,6 +42,33 @@ framework:
             policy: fixed_window
             limit: 60
             interval: '1 minute'
+        # OTP verification attempts. 6-digit numeric space (1M codes) is
+        # tractable without a hard cap, so 5 attempts / 15 min per IP is
+        # enough for legitimate typos and shuts down enumeration.
+        email_verification_attempts:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
+        # Resend a fresh OTP. 1 / 60 s caps inbox-bombing of the user and
+        # our SMTP quota.
+        email_verification_resend:
+            policy: fixed_window
+            limit: 1
+            interval: '1 minute'
+        # Account creation throttle — bots spraying the register form would
+        # otherwise pollute the DB and burn the SMTP quota on OTP emails. 5
+        # signups / 15 min per IP is generous for legit users (corporate NAT)
+        # while shutting down volumetric attacks.
+        register_attempts:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
+        # Reset-password request throttle — without this an attacker can mail-
+        # bomb a victim's inbox with legitimate-looking reset emails.
+        reset_password_request:
+            policy: fixed_window
+            limit: 3
+            interval: '15 minutes'
 
 when@test:
     framework:
@@ -59,4 +86,12 @@ when@test:
             form_newsletter:
                 limit: 1000
             admin_mutation:
+                limit: 1000
+            email_verification_attempts:
+                limit: 1000
+            email_verification_resend:
+                limit: 1000
+            register_attempts:
+                limit: 1000
+            reset_password_request:
                 limit: 1000
