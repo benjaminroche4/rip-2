@@ -200,9 +200,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
             return false;
         }
 
+        // Google-only accounts have a NULL password in DB — __serialize() also
+        // writes NULL into the session slot, so both sides agree without any
+        // CRC32C round-trip. Without this short-circuit the live NULL would
+        // get coerced to "" and then hashed, mismatch the stored NULL, and
+        // Symfony would invalidate the session on every request (kicking the
+        // Google user back to /connexion immediately after a successful OAuth).
+        $live = $user->getPassword();
+        if (null === $this->password || null === $live) {
+            return $this->password === $live;
+        }
+
         // $this->password holds the CRC32C from the session, $user->getPassword()
         // holds the live argon2id hash from DB. Recompute and compare.
-        return hash('crc32c', (string) $user->getPassword()) === $this->password;
+        return hash('crc32c', $live) === $this->password;
     }
 
     public function getFirstName(): ?string
