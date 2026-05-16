@@ -16,18 +16,27 @@
 
         <title>Relocation In Paris - {% block title %}{% endblock %}</title>
         <meta name="description" content="{% block description %}{% endblock %}">
-        <link rel="canonical" href="https://relocation-in-paris.fr{% block url %}{% endblock %}" />
-        <meta name="robots" content="noindex, nofollow">
+        {% block meta_robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+        <link rel="canonical" href="{{ site_url }}{% block url %}{% endblock %}" />
 
-        <link rel="icon" type="image/jpg" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
+        {# Per-page critical asset preload (e.g. LCP hero image). Empty by default. #}
+        {% block head_preload %}{% endblock %}
 
-        <!-- Og Meta Tags -->
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="Relocation In Paris - {{ block('title') }}">
-        <meta property="og:url" content="https://relocation-in-paris.fr{{ block('url') }}">
-        <meta property="og:image" content="{{ asset('medias/banner/relocation-in-paris-banner.webp') }}">
-        <meta property="og:description" content="{{ block('description') }}">
+        {# OG image captured once so the meta partial receives the resolved value #}
+        {% set pageOgImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
+
+        {# Hreflang: empty by default. Auth routes are localised asymmetrically
+           (/inscription vs /register), so each template must override this
+           block with explicit path(_locale: …) calls instead of relying on
+           the naive locale-substitution fallback used on public pages. #}
+        {% block hreflang %}{% endblock %}
+
+        {% include '_partials/meta.html.twig' with {
+            pageTitle: block('title'),
+            pageDescription: block('description'),
+            pageUrl: block('url'),
+            pageOgImage: pageOgImage|trim,
+        } only %}
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
@@ -44,7 +53,10 @@
                     height="0" width="0" style="display:none;visibility:hidden">
             </iframe>
         </noscript>
-        <main class="flex min-h-full">
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2">
+            {{ 'a11y.skipToContent'|trans }}
+        </a>
+        <main id="main-content" tabindex="-1" class="flex min-h-full">
             {% block body %}{% endblock %}
         </main>
     </body>
