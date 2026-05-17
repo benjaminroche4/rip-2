@@ -616,7 +616,7 @@ register:
         title: Complete your profile
         subTitle: A few more details to activate your account.
     google:
-        button: Continue with Google
+        button: Sign up with Google
         separator: Or
     form:
         firstName:

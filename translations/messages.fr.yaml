@@ -619,7 +619,7 @@ register:
         title: Finalisez votre profil
         subTitle: Encore quelques informations pour activer votre compte.
     google:
-        button: Continuer avec Google
+        button: S'inscrire avec Google
         separator: Ou
     form:
         firstName:
