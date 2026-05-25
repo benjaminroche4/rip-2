@@ -189,66 +189,6 @@
         imageSrc="medias/website/relocation-in-paris-8.webp"
         imageAlt="Relocation In Paris, trouver un locataire"
     />
-    <section class="bg-white py-24 sm:py-32">
-        <div class="mx-auto max-w-5xl px-6 lg:px-8">
-            <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center max-w-xl">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'findTenant.price.title'|trans|raw }}</h2>
-                <h3 class="text-3xl font-medium text-balance">{{ 'findTenant.price.subTitle'|trans|raw }}</h3>
-            </div>
-            <div class="mx-auto max-w-xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none">
-                <div class="p-8 sm:p-10 lg:flex-auto">
-                    <h4 class="text-2xl font-semibold tracking-tight text-gray-900">
-                        {{ 'findTenant.price.text1'|trans|raw }}
-                    </h4>
-                    <p class="mt-6 text-base/7 text-gray-600">
-                        {{ 'findTenant.price.text2'|trans|raw }}
-                    </p>
-                    <div class="mt-10 flex items-center gap-x-4">
-                        <h4 class="flex-none text-sm/6 font-semibold text-primary">
-                            {{ 'findTenant.price.guarantee.title'|trans|raw }}
-                        </h4>
-                        <div class="h-px flex-auto bg-gray-100"></div>
-                    </div>
-                    <ul role="list" class="mt-8 grid gap-4 text-sm/6 text-gray-600 grid-cols-2 sm:gap-6">
-                        <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'findTenant.price.guarantee.1'|trans|raw }}
-                        </li>
-                        <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'findTenant.price.guarantee.3'|trans|raw }}
-                        </li>
-                        <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'findTenant.price.guarantee.4'|trans|raw }}
-                        </li>
-                        <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'findTenant.price.guarantee.5'|trans|raw }}
-                        </li>
-                        <li class="flex gap-x-3">
-                            {{ ux_icon('material-symbols:check-rounded', {'class':'size-6 flex-none shrink-0 text-green-600'}) }}
-                            {{ 'findTenant.price.guarantee.6'|trans|raw }}
-                        </li>
-                    </ul>
-                </div>
-                <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">
-                    <div class="rounded-2xl bg-slate-50 py-10 h-full text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-                        <div class="mx-auto max-w-xs px-8">
-                            <p class="mt-6 flex items-baseline justify-center gap-x-0.5">
-                                <span data-pricing-tabs-target="percentage" class="text-5xl font-semibold tracking-tight text-gray-900">80</span>
-                                <span class="text-4xl font-semibold tracking-wide text-gray-900">%</span>
-                            </p>
-                            <p class="mt-6 text-balance text-sm/5 text-gray-600 uppercase">{{ 'findTenant.price.text3'|trans|raw }}</p>
-                            <twig:Button variant="default" as="a" size="lg" class="mt-6" href="{{ path('app_contact') }}">
-                                {{ 'propertyManagement.price.fees.button'|trans|raw }}
-                            </twig:Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-3xl mx-auto">
             <div class="pb-12 lg:pb-16 space-y-3 mx-auto space-y-3 text-center">

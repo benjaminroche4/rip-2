@@ -211,21 +211,20 @@ companies:
             text: Successful local integration through fast orientation and city familiarization.
     advantage:
         title: A unique experience
-        subtitle: Make Paris a key asset in your recruitment strategy
+        subTitle: Make Paris a key asset in your recruitment strategy
         text: Delegate the complexity of geographic mobility to an expert partner.
-        features:
-            1:
-                title: Strategic time savings
-                text: "Delegate logistical complexity and stay focused on what matters most: successful recruitment."
-            2:
-                title: Enhanced employer attractiveness
-                text: Increase your chances of securing top talent with an exceptional onboarding experience.
-            3:
-                title: Real estate expertise
-                text: Benefit from privileged access to the Parisian market (off-market) and full security in building your files.
-            4:
-                title: Peace of mind and trust
-                text: Tailored support and a dedicated point of contact to ensure a smooth and immediate integration.
+        1:
+            title: Strategic time savings
+            text: "Delegate logistical complexity and stay focused on what matters most: successful recruitment."
+        2:
+            title: Enhanced employer attractiveness
+            text: Increase your chances of securing top talent with an exceptional onboarding experience.
+        3:
+            title: Real estate expertise
+            text: Benefit from privileged access to the Parisian market (off-market) and full security in building your files.
+        4:
+            title: Peace of mind and trust
+            text: Tailored support and a dedicated point of contact to ensure a smooth and immediate integration.
     faq:
         title: Your questions, our answers
         question:
@@ -1278,20 +1277,6 @@ findTenant:
             5:
                 title: Do you require an exclusivity mandate on the property?
                 text: "Our service includes a 15-day exclusivity period to ensure immediate action and maximum mobilization of our network."
-    price:
-        title: Our fees
-        subTitle: Clear pricing, aligned with the success of the mission
-        text1: Tenant search
-        text2: We select the best candidates for you with maximum responsiveness.
-        guarantee:
-            title: Our commitments
-            1: No upfront fees
-            2: Success-based payment
-            3: Qualified tenants
-            4: Short mandate
-            5: Professional photography
-            6: Multichannel distribution
-        text3: of the rent excluding charges
 reviews:
     title: Testimonials
     subTitle: Real moves, Real stories

@@ -213,22 +213,21 @@ companies:
             title: Immersion locale
             text: Une intégration locale réussie grâce à une prise de marques rapide.
     advantage:
-        title: Une experience unique
-        subtitle: Faites de Paris l'atout majeur de vos recrutements
+        title: Une expérience unique
+        subTitle: Faites de Paris l'atout majeur de vos recrutements
         text: Déléguez la complexité de la mobilité géographique à un partenaire expert.
-        features:
-            1:
-                title: Gain de temps stratégique
-                text: "Déléguez la complexité logistique et restez concentrés sur l’essentiel : la réussite de votre recrutement."
-            2:
-                title: Attractivité renforcée
-                text: Augmentez vos chances de convaincre les meilleurs profils grâce à une expérience d'accueil d'exception.
-            3:
-                title: Expertise immobilière
-                text: Bénéficiez d’un accès privilégié au marché parisien (off-market) et d’une sécurité totale dans la constitution de vos dossiers.
-            4:
-                title: Sérénité et confiance
-                text: Un accompagnement sur-mesure et un interlocuteur dédié pour garantir une intégration sereine et immédiate.
+        1:
+            title: Gain de temps stratégique
+            text: "Déléguez la complexité logistique et restez concentrés sur l’essentiel : la réussite de votre recrutement."
+        2:
+            title: Attractivité renforcée
+            text: Augmentez vos chances de convaincre les meilleurs profils grâce à une expérience d'accueil d'exception.
+        3:
+            title: Expertise immobilière
+            text: Bénéficiez d’un accès privilégié au marché parisien (off-market) et d’une sécurité totale dans la constitution de vos dossiers.
+        4:
+            title: Sérénité et confiance
+            text: Un accompagnement sur-mesure et un interlocuteur dédié pour garantir une intégration sereine et immédiate.
     faq:
         title: Vos questions, nos réponses
         question:
@@ -1279,20 +1278,6 @@ findTenant:
             5:
                 title: Avez-vous un mandat d'exclusivité sur le bien ?
                 text: "Notre service s'appuie sur une exclusivité de 15 jours pour garantir une mobilisation immédiate et maximale de notre réseau."
-    price:
-        title: Nos honoraires
-        subTitle: Une tarification claire, alignée sur la réussite de la mission
-        text1: Recherche de locataire
-        text2: Nous sélectionnons pour vous les meilleurs profils avec une réactivité maximale.
-        guarantee:
-            title: Nos engagements
-            1: Aucun frais initial
-            2: Paiement à la réussite
-            3: Locataires qualifiés
-            4: Mandat court
-            5: Photos professionnelles
-            6: Diffusion multicanal
-        text3: du loyer hors charge
 reviews:
     title: Ils nous ont fait confiance
     subTitle: Paris, enfin chez eux
