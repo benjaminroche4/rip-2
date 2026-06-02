@@ -179,6 +179,56 @@ final class DocumentsToolsAccessTest extends WebTestCase
         self::assertStringEndsWith('/admin/outils/documents/demande/'.$request2->getId().'/pdf', $firstHref);
     }
 
+    public function testRecentRequestsTableExposesEditLinks(): void
+    {
+        $request = $this->persistRequest(HouseholdTypology::ONE_TENANT, RequestLanguage::FR, [['Bernard', 'Paul']], new \DateTimeImmutable('-1 hour'));
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->documentsUrl($this->adminPrefix));
+
+        self::assertResponseIsSuccessful();
+        $edits = $crawler->filter('[data-testid="recent-request-edit"]');
+        self::assertCount(1, $edits);
+        self::assertStringEndsWith(
+            '/admin/outils/documents/demande/'.$request->getId().'/modifier',
+            (string) $edits->first()->attr('href'),
+        );
+    }
+
+    public function testNonAdminGetsAccessDeniedOnEdit(): void
+    {
+        $request = $this->persistRequest(HouseholdTypology::ONE_TENANT, RequestLanguage::FR, [['Bernard', 'Paul']], new \DateTimeImmutable('-1 hour'));
+
+        $this->loginAs(self::USER_EMAIL);
+        $this->client->request('GET', $this->requestUrl($this->adminPrefix).'/'.$request->getId().'/modifier');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testEditRouteReturns404ForUnknownRequest(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->requestUrl($this->adminPrefix).'/999999/modifier');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAdminOpensRequestInEditModePrefilled(): void
+    {
+        $request = $this->persistRequest(HouseholdTypology::TWO_TENANTS, RequestLanguage::EN, [['Dupont', 'Jean'], ['Martin', 'Marie']], new \DateTimeImmutable('-1 hour'));
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->requestUrl($this->adminPrefix).'/'.$request->getId().'/modifier');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-testid="document-request-form"]');
+        // Both saved persons are pre-filled.
+        self::assertCount(2, $crawler->filter('[data-testid="document-request-person"]'));
+        self::assertSelectorTextContains('[data-testid="document-request-form"]', 'Jean');
+        // The primary button switches to the "save" wording in edit mode.
+        self::assertSelectorTextContains('[data-testid="document-request-submit"]', 'Sauvegarder');
+    }
+
     /**
      * @param list<array{0:string,1:string}> $persons last name + first name pairs
      */

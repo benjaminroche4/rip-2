@@ -19,6 +19,6 @@
 
 {% block body %}
     <div data-testid="tools-documents-request-page">
-        <twig:Admin:DocumentRequestForm :adminPrefix="adminPrefix" />
+        <twig:Admin:DocumentRequestForm :adminPrefix="adminPrefix" :editId="editId|default(null)" />
     </div>
 {% endblock %}

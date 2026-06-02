@@ -1753,6 +1753,7 @@ admin:
                 subtitle: '{0}No requests sent yet.|{1}1 request sent. Re-download the PDF in one click.|]1,Inf[%count% requests sent. Re-download the PDF in one click.'
                 empty: No requests sent yet.
                 download: Download
+                edit: Edit
                 loadMore: Load more
                 column:
                     date: Date
@@ -1827,7 +1828,13 @@ admin:
                 actions:
                     addPerson: Add a person
                     removePerson: Remove
-                    generate: Generate PDF
+                    save: Save
+                    download: Download
+                unsavedChanges:
+                    title: Unsaved changes
+                    description: You have unsaved changes. Do you want to save them before leaving?
+                    save: Save and leave
+                    discard: Leave without saving
             actions:
                 add: New document
                 edit: Edit

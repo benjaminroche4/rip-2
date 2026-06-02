@@ -170,7 +170,7 @@
     <button
         type="button"
         class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gray-300"
-        data-action="live#action"
+        data-action="live#action unsaved-changes#markDirty"
         data-live-action-param="removePerson"
         data-live-index-param="{{ idx }}"
     >
@@ -191,9 +191,10 @@
 <form
     {{ attributes.defaults({
         'data-action': 'live#action:prevent document-request:download@window->download-trigger#download',
-        'data-live-action-param': 'generate',
+        'data-live-action-param': 'save',
         'data-model': 'on(change)|*',
-        'data-controller': 'download-trigger',
+        'data-controller': 'download-trigger unsaved-changes',
+        'data-unsaved-changes-redirect-url-value': path('admin_tools_documents', {adminPrefix: this.adminPrefix}),
         novalidate: true,
         autocomplete: 'off',
     }) }}
@@ -252,7 +253,7 @@
                         <button
                             type="button"
                             class="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-950/10 px-2 py-2 text-xs font-medium whitespace-nowrap text-gray-600 transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gray-300"
-                            data-action="live#action"
+                            data-action="live#action unsaved-changes#markDirty"
                             data-live-action-param="addPerson"
                             data-testid="document-request-add-person"
                         >
@@ -416,27 +417,80 @@
         </div>
     </section>
 
-    {# ───── Submit ──────────────────────────────────────────────────── #}
+    {# ───── Actions: Save (persist only) + Download (persist + PDF) ───── #}
     {# Loader pattern mirrors templates/components/MarketplaceSearch.html.twig:
-       the `generate` LiveAction can take a few seconds (validation +
-       persist + DocRaptor render), so we disable the button and swap
+       both LiveActions can take a few seconds (validation + persist, plus a
+       DocRaptor render for the download), so we disable the button and swap
        the label for a spinner while it runs. #}
     <div class="flex flex-col-reverse items-stretch gap-3 border-t border-gray-950/5 pt-5 sm:flex-row sm:items-center sm:justify-end">
+        {# Download: upserts then streams the PDF. #}
+        <twig:Button
+            variant="outline"
+            type="button"
+            data-testid="document-request-download"
+            data-action="live#action:prevent"
+            data-live-action-param="download"
+            data-loading="action(download)|addAttribute(disabled)"
+        >
+            <span class="relative inline-flex items-center justify-center gap-2">
+                <span class="inline-flex items-center gap-2" data-loading="action(download)|addClass(invisible)">
+                    <twig:ux:icon name="lucide:download" class="size-4 shrink-0" aria-hidden="true" />
+                    {{ 'admin.tools.documents.request.actions.download'|trans }}
+                </span>
+                <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(download)|removeClass(hidden)">
+                    <twig:Spinner />
+                </span>
+            </span>
+        </twig:Button>
+
+        {# Save: persists without downloading. type=submit → the form's default
+           `save` action; also tagged as the unsaved-changes save target so the
+           "save and leave" modal choice can trigger it. #}
         <twig:Button
             variant="default"
             type="submit"
             data-testid="document-request-submit"
-            data-loading="action(generate)|addAttribute(disabled)"
+            data-unsaved-changes-target="saveButton"
+            data-loading="action(save)|addAttribute(disabled)"
         >
             <span class="relative inline-flex items-center justify-center gap-2">
-                <span class="inline-flex items-center gap-2" data-loading="action(generate)|addClass(invisible)">
-                    <twig:ux:icon name="lucide:download" class="size-4 shrink-0" aria-hidden="true" />
-                    {{ 'admin.tools.documents.request.actions.generate'|trans }}
+                <span class="inline-flex items-center gap-2" data-loading="action(save)|addClass(invisible)">
+                    <twig:ux:icon name="lucide:save" class="size-4 shrink-0" aria-hidden="true" />
+                    {{ 'admin.tools.documents.request.actions.save'|trans }}
                 </span>
-                <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(generate)|removeClass(hidden)">
+                <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(save)|removeClass(hidden)">
                     <twig:Spinner />
                 </span>
             </span>
         </twig:Button>
     </div>
+
+    {# ───── Unsaved-changes guard modal ──────────────────────────────────
+       Driven entirely by the unsaved_changes controller (not dialog_controller)
+       so it can coordinate save→navigate. data-live-ignore keeps LiveComponent
+       morphing from touching it across re-renders. #}
+    <dialog
+        data-unsaved-changes-target="dialog"
+        data-action="cancel->unsaved-changes#cancel:prevent"
+        data-live-ignore
+        class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-gray-950/5 bg-white p-0 shadow-xl backdrop:bg-gray-950/50"
+        data-testid="unsaved-changes-dialog"
+    >
+        <div class="p-6">
+            <h2 class="text-base font-semibold text-gray-900">
+                {{ 'admin.tools.documents.request.unsavedChanges.title'|trans }}
+            </h2>
+            <p class="mt-1.5 text-sm text-gray-500">
+                {{ 'admin.tools.documents.request.unsavedChanges.description'|trans }}
+            </p>
+            <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <twig:Button variant="outline" type="button" data-action="unsaved-changes#leaveWithoutSaving">
+                    {{ 'admin.tools.documents.request.unsavedChanges.discard'|trans }}
+                </twig:Button>
+                <twig:Button variant="default" type="button" data-action="unsaved-changes#saveAndLeave">
+                    {{ 'admin.tools.documents.request.unsavedChanges.save'|trans }}
+                </twig:Button>
+            </div>
+        </div>
+    </dialog>
 </form>

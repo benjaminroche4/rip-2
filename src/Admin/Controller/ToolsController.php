@@ -103,6 +103,31 @@ final class ToolsController extends AbstractController
     }
 
     /**
+     * Re-opens an existing DocumentRequest in the request form so the admin can
+     * tweak its persons/documents and regenerate the PDF. Renders the same page
+     * as the create flow, but seeds the form with the saved request via editId.
+     */
+    #[Route(
+        path: [
+            'fr' => '/outils/documents/demande/{id}/modifier',
+            'en' => '/tools/documents/request/{id}/edit',
+        ],
+        name: 'tools_documents_request_edit',
+        requirements: ['id' => '\d+'],
+        methods: ['GET'],
+    )]
+    public function documentsRequestEdit(string $adminPrefix, DocumentRequest $request): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        return $this->render('admin/tools/documents/request.html.twig', [
+            'adminPrefix' => $adminPrefix,
+            'editId' => $request->getId(),
+        ]);
+    }
+
+    /**
      * Serves the generated PDF for a saved DocumentRequest. Locked behind the
      * admin prefix + ROLE_ADMIN, identified by id. Content-Disposition is set
      * to attachment so navigating here triggers a download instead of opening

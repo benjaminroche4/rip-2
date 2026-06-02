@@ -43,6 +43,17 @@
                                     <twig:Badge variant="secondary" class="rounded-full uppercase">{{ req.language.value }}</twig:Badge>
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
+                                  <div class="inline-flex items-center justify-end gap-1">
+                                    {% set editUrl = path('admin_tools_documents_request_edit', {adminPrefix: adminPrefix, id: req.id}) %}
+                                    <a
+                                        href="{{ editUrl }}"
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-100 hover:text-primary"
+                                        data-testid="recent-request-edit"
+                                        aria-label="{{ 'admin.tools.documents.recent.edit'|trans }}"
+                                    >
+                                        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                        <span>{{ 'admin.tools.documents.recent.edit'|trans }}</span>
+                                    </a>
                                     {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
                                     <a
                                         href="{{ pdfUrl }}"
@@ -63,6 +74,7 @@
                                             </span>
                                         </span>
                                     </a>
+                                  </div>
                                 </td>
                             </tr>
                         {% endfor %}

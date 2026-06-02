@@ -10,6 +10,7 @@ use App\Admin\Entity\DocumentRequest;
 use App\Admin\Entity\PersonRequest;
 use App\Admin\Form\DocumentRequestType;
 use App\Admin\Repository\DocumentRepository;
+use App\Admin\Repository\DocumentRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -55,6 +56,15 @@ final class DocumentRequestForm extends AbstractController
     public string $adminPrefix = '';
 
     /**
+     * Id of the DocumentRequest being edited, or null in create mode. Drives
+     * the `save` LiveAction (update the existing row vs. insert a new one) and
+     * the submit button's label/icon. The form data still round-trips as an
+     * id-less draft (see cloneAsDraft) so live edits survive re-renders.
+     */
+    #[LiveProp]
+    public ?int $editId = null;
+
+    /**
      * Visual position (0-based) of the person currently shown in the
      * sidebar's right panel. Bumped to the new last index when a person
      * is added, clamped after a removal so we don't point past the end.
@@ -65,6 +75,7 @@ final class DocumentRequestForm extends AbstractController
     public function __construct(
         private readonly Security $security,
         private readonly DocumentRepository $documentRepository,
+        private readonly DocumentRequestRepository $requestRepository,
     ) {
     }
 
@@ -81,9 +92,20 @@ final class DocumentRequestForm extends AbstractController
         return $byId;
     }
 
-    public function mount(): void
+    public function mount(?int $editId = null): void
     {
         $this->ensureAdmin();
+        // Taken as a mount argument (not just the post-mount property
+        // assignment) so it's already set while we seed the form below.
+        $this->editId = $editId;
+        if (null === $this->request && null !== $this->editId) {
+            // Edit mode: seed the form from the saved request, but as an id-less
+            // draft so live edits round-trip without Doctrine re-fetching (and
+            // discarding) the managed entity between renders. The id stays in
+            // $editId; save() uses it to update the right row.
+            $existing = $this->requestRepository->find($this->editId);
+            $this->request = $existing ? $this->cloneAsDraft($existing) : null;
+        }
         if (null === $this->request) {
             $this->request = $this->buildEmptyRequest();
         }
@@ -135,24 +157,31 @@ final class DocumentRequestForm extends AbstractController
         }
     }
 
+    /**
+     * Persists the form without downloading. Create mode inserts a new row;
+     * edit mode updates the one identified by $editId. Dispatches
+     * 'document-request:saved' so the client can clear its unsaved-changes flag.
+     */
     #[LiveAction]
-    public function generate(EntityManagerInterface $em, UrlGeneratorInterface $urls): void
+    public function save(EntityManagerInterface $em): void
     {
         $this->ensureAdmin();
-        $this->submitForm();
+        $request = $this->upsert($em);
 
-        /** @var DocumentRequest $request */
-        $request = $this->getForm()->getData();
-        $request->setCreatedAt(new \DateTimeImmutable());
+        $this->dispatchBrowserEvent('document-request:saved', [
+            'id' => $request->getId(),
+        ]);
+    }
 
-        // Repair position numbering — collection removals can leave holes.
-        $i = 0;
-        foreach ($request->getPersons() as $person) {
-            $person->setPosition($i++);
-        }
-
-        $em->persist($request);
-        $em->flush();
+    /**
+     * Persists the form (a PDF can only be served from a saved row) and then
+     * triggers the download via 'document-request:download'.
+     */
+    #[LiveAction]
+    public function download(EntityManagerInterface $em, UrlGeneratorInterface $urls): void
+    {
+        $this->ensureAdmin();
+        $request = $this->upsert($em);
 
         $downloadUrl = $urls->generate('admin_tools_documents_request_pdf', [
             '_locale' => $request->getLanguage()->value,
@@ -163,14 +192,66 @@ final class DocumentRequestForm extends AbstractController
         $this->dispatchBrowserEvent('document-request:download', [
             'url' => $downloadUrl,
         ]);
+    }
 
-        // Keep the form populated with what the admin just submitted so
-        // they can tweak a field and re-download via the same flow. The
-        // detach() call is important: $request is now persisted and
-        // re-submitting would otherwise hit a managed-entity conflict on
-        // the next request when LiveComponent re-hydrates a copy.
+    /**
+     * Create-or-update the request from the submitted form, then re-seed the
+     * form as an id-less draft so further edits round-trip and a re-submit
+     * targets the same row (via $editId) instead of inserting a duplicate.
+     */
+    private function upsert(EntityManagerInterface $em): DocumentRequest
+    {
+        $this->submitForm();
+
+        /** @var DocumentRequest $draft */
+        $draft = $this->getForm()->getData();
+
+        $existing = null !== $this->editId ? $this->requestRepository->find($this->editId) : null;
+
+        if (null !== $existing) {
+            $existing->setTypology($draft->getTypology());
+            $existing->setLanguage($draft->getLanguage());
+            $existing->setDriveLink($draft->getDriveLink());
+            $existing->setNote($draft->getNote());
+
+            // Replace the person collection wholesale: orphanRemoval drops the
+            // old rows, the freshly bound PersonRequest objects (with their
+            // documents) are re-attached in form order.
+            foreach ($existing->getPersons()->toArray() as $person) {
+                $existing->removePerson($person);
+            }
+            $i = 0;
+            foreach ($draft->getPersons() as $person) {
+                $existing->addPerson($person);
+                $person->setPosition($i++);
+            }
+
+            $request = $existing;
+        } else {
+            $draft->setCreatedAt(new \DateTimeImmutable());
+
+            // Repair position numbering — collection removals can leave holes.
+            $i = 0;
+            foreach ($draft->getPersons() as $person) {
+                $person->setPosition($i++);
+            }
+
+            $em->persist($draft);
+            $request = $draft;
+        }
+
+        $em->flush();
+
+        // Subsequent saves/downloads now update this row in place.
+        $this->editId = $request->getId();
+
+        // detach() matters: $request is persisted and re-submitting would
+        // otherwise hit a managed-entity conflict when LiveComponent
+        // re-hydrates a copy on the next request.
         $em->detach($request);
         $this->request = $this->cloneAsDraft($request);
+
+        return $request;
     }
 
     /**

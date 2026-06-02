@@ -1754,6 +1754,7 @@ admin:
                 subtitle: '{0}Aucune demande envoyée pour le moment.|{1}1 demande envoyée. Retéléchargez le PDF en un clic.|]1,Inf[%count% demandes envoyées. Retéléchargez le PDF en un clic.'
                 empty: Aucune demande envoyée pour le moment.
                 download: Télécharger
+                edit: Modifier
                 loadMore: Voir plus
                 column:
                     date: Date
@@ -1828,7 +1829,13 @@ admin:
                 actions:
                     addPerson: Ajouter une personne
                     removePerson: Retirer
-                    generate: Générer le PDF
+                    save: Sauvegarder
+                    download: Télécharger
+                unsavedChanges:
+                    title: Modifications non enregistrées
+                    description: Vous avez des modifications non enregistrées. Voulez-vous les sauvegarder avant de quitter ?
+                    save: Sauvegarder et quitter
+                    discard: Quitter sans enregistrer
             actions:
                 add: Nouveau document
                 edit: Modifier
