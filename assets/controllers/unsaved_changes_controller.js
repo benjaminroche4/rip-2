@@ -22,7 +22,8 @@ import { Controller } from '@hotwired/stimulus';
  * 'document-request:download' on success; both clear the dirty flag, and a
  * pending "save & leave" continues the navigation once 'saved' arrives.
  *
- * Both modal choices land back on the documents hub (redirectUrl). The save
+ * Both modal choices resume the navigation the admin originally clicked
+ * (redirectUrl is only a fallback when no destination was captured). The save
  * button is disabled while the form is pristine, so it only becomes clickable
  * once the admin actually changes something.
  *
@@ -82,9 +83,10 @@ export default class extends Controller {
         this._syncSaveButton();
         if (this.leaving) {
             this.leaving = false;
+            const url = this._targetUrl();
             this.pendingUrl = null;
             this._close();
-            this._visit(this._targetUrl());
+            this._visit(url);
         }
     }
 
@@ -123,12 +125,13 @@ export default class extends Controller {
     }
 
     leaveWithoutSaving() {
+        const url = this._targetUrl();
         this.pendingUrl = null;
         this.leaving = false;
         this.dirty = false;
         this._syncSaveButton();
         this._close();
-        this._visit(this._targetUrl());
+        this._visit(url);
     }
 
     // Bound to the dialog's `cancel` event (ESC) so the modal can still be
@@ -149,9 +152,9 @@ export default class extends Controller {
     }
 
     _targetUrl() {
-        // Both modal choices return to the documents hub; fall back to the
-        // intercepted destination, then to the current page.
-        return this.redirectUrlValue || this.pendingUrl || window.location.href;
+        // Honour the link the admin actually clicked; fall back to the
+        // documents hub, then to the current page.
+        return this.pendingUrl || this.redirectUrlValue || window.location.href;
     }
 
     _open() {
