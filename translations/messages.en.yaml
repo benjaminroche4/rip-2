@@ -426,6 +426,16 @@ home:
             1: Fast search
             2: 100% remote
             3: Turnkey service
+    highlights:
+        1:
+            title: Vetted properties
+            text: Carefully selected for their quality.
+        2:
+            title: Dedicated agent
+            text: By your side, from start to signing.
+        3:
+            title: Smooth transition
+            text: All the paperwork handled for you.
     services:
         title: The essentials, nothing more
         subTitle: Paris, differently

@@ -125,35 +125,53 @@
             </div>
         </div>
     </section>
-    <section class="max-w-7xl lg:px-8 px-6 py-10 mx-auto">
-        <div class="grid grid-cols-3 divide-x divide-slate-200">
-            <div class="flex items-center gap-x-4 px-6">
+    <section class="max-w-7xl lg:px-8 px-6 py-8 mx-auto" data-controller="snap-carousel" data-snap-carousel-interval-value="4000">
+        {# Mobile: horizontal snap carousel — one card per view with the next
+           peeking (w-[85%]), mouse-draggable + autoplay (snap_carousel
+           controller). lg: 3-column grid with vertical dividers between cards. #}
+        <div data-snap-carousel-target="track" class="flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:cursor-default lg:grid-cols-3 lg:gap-0 lg:overflow-visible lg:pb-0">
+            <div class="flex w-[85%] shrink-0 snap-start items-center gap-x-4 lg:w-auto lg:shrink lg:px-6">
                 <div class="p-2 bg-neutral-50 rounded-full">
                     {{ ux_icon('iconoir:badge-check', {'class':'size-7 text-primary'}) }}
                 </div>
                 <div class="flex flex-col items-start">
-                    <p class="font-semibold text-lg">Verified properties</p>
-                    <p class="font-light text-sm text-slate-600">Trusted and carefully selected homes.</p>
+                    <p class="font-semibold text-lg">{{ 'home.highlights.1.title'|trans }}</p>
+                    <p class="font-light text-base text-slate-600 sm:text-sm">{{ 'home.highlights.1.text'|trans }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-x-4 px-6">
+            <div class="flex w-[85%] shrink-0 snap-start items-center gap-x-4 lg:w-auto lg:shrink lg:border-l lg:border-slate-200 lg:px-6">
                 <div class="p-2 bg-neutral-50 rounded-full">
-                    {{ ux_icon('iconoir:badge-check', {'class':'size-7 text-primary'}) }}
+                    {{ ux_icon('lineicons:message-2-question', {'class':'size-7 text-primary'}) }}
                 </div>
                 <div class="flex flex-col items-start">
-                    <p class="font-semibold text-lg">Verified properties</p>
-                    <p class="font-light text-sm text-slate-600">Trusted and carefully selected homes.</p>
+                    <p class="font-semibold text-lg">{{ 'home.highlights.2.title'|trans }}</p>
+                    <p class="font-light text-base text-slate-600 sm:text-sm">{{ 'home.highlights.2.text'|trans }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-x-4 px-6">
+            <div class="flex w-[85%] shrink-0 snap-start items-center gap-x-4 lg:w-auto lg:shrink lg:border-l lg:border-slate-200 lg:px-6">
                 <div class="p-2 bg-neutral-50 rounded-full">
-                    {{ ux_icon('iconoir:badge-check', {'class':'size-7 text-primary'}) }}
+                    {{ ux_icon('iconoir:home-simple', {'class':'size-7 text-primary'}) }}
                 </div>
                 <div class="flex flex-col items-start">
-                    <p class="font-semibold text-lg">Verified properties</p>
-                    <p class="font-light text-sm text-slate-600">Trusted and carefully selected homes.</p>
+                    <p class="font-semibold text-lg">{{ 'home.highlights.3.title'|trans }}</p>
+                    <p class="font-light text-base text-slate-600 sm:text-sm">{{ 'home.highlights.3.text'|trans }}</p>
                 </div>
             </div>
+        </div>
+
+        {# Dot indicators (mobile only). Active dot stretches into a primary bar. #}
+        <div class="mt-5 flex justify-center gap-2 lg:hidden">
+            {% for i in 0..2 %}
+                <button
+                    type="button"
+                    data-snap-carousel-target="dot"
+                    data-index="{{ i }}"
+                    data-active="{{ i == 0 ? 'true' : 'false' }}"
+                    data-action="snap-carousel#to"
+                    aria-label="Slide {{ i + 1 }}"
+                    class="h-2 w-2 rounded-full bg-slate-300 transition-all duration-300 data-[active=true]:w-6 data-[active=true]:bg-primary"
+                ></button>
+            {% endfor %}
         </div>
     </section>
     <section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">

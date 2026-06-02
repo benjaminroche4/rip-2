@@ -429,6 +429,16 @@ home:
             1: Recherche rapide
             2: 100% à distance
             3: Service clé en main
+    highlights:
+        1:
+            title: Biens vérifiés
+            text: Sélectionnés avec soin pour leur qualité.
+        2:
+            title: Agent dédié
+            text: À vos côtés, du début jusqu'à la signature.
+        3:
+            title: Installation sereine
+            text: Toutes les démarches gérées pour vous.
     services:
         title: L'essentiel, sans le superflu
         subTitle: Paris autrement
