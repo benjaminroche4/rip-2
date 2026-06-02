@@ -2,15 +2,18 @@
 import { Controller } from '@hotwired/stimulus';
 
 /**
- * Native scroll-snap carousel (mobile) with dot indicators, mouse-drag and
- * autoplay.
+ * Native scroll-snap carousel (mobile/tablet) with dot indicators, mouse-drag
+ * and autoplay.
  *
- * The carousel itself is plain CSS overflow-x scroll-snap. This controller:
- *   - reflects the current slide into the dots (data-active="true|false")
- *   - lets the user drag with the mouse (touch keeps native momentum scroll)
- *   - auto-advances every `interval` ms, pausing on hover/drag and resuming
- *     after; disabled when prefers-reduced-motion is set or when the track
- *     isn't scrollable (i.e. the lg grid layout)
+ * The carousel itself is plain CSS overflow-x scroll-snap. This controller
+ * tracks a logical active index (0..count-1) that drives the dots and autoplay.
+ * It is decoupled from the raw scroll position on purpose: when several cards
+ * are visible at once (e.g. ~2-up on tablet) the last card can never be
+ * scrolled flush to the left, so the scroll position alone would top out one
+ * step short. With a logical index the dot still advances to the last slide
+ * (carousel stays put) and then loops back to the first.
+ *
+ * Optional targets: dot (toggled via data-active="true|false").
  *
  * Wiring:
  *   <section data-controller="snap-carousel" data-snap-carousel-interval-value="4000">
@@ -23,8 +26,12 @@ export default class extends Controller {
     static values = { interval: { type: Number, default: 4000 } };
 
     connect() {
+        this._active = 0;
         this._ticking = false;
         this._dragging = false;
+        this._interacting = false;
+        this._autoScrolling = false;
+        this._autoScrollTimer = null;
         this._timer = null;
         this._reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -45,7 +52,7 @@ export default class extends Controller {
         this.element.addEventListener('pointerleave', this._onLeave);
         this.element.addEventListener('click', this._onClickCapture, true);
 
-        this._update();
+        this._render();
         this._startAutoplay();
     }
 
@@ -59,10 +66,15 @@ export default class extends Controller {
         this.element.removeEventListener('pointerleave', this._onLeave);
         this.element.removeEventListener('click', this._onClickCapture, true);
         this._pauseAutoplay();
+        if (this._autoScrollTimer) {
+            window.clearTimeout(this._autoScrollTimer);
+        }
     }
 
     // ── Indicators ───────────────────────────────────────────────────────
 
+    // Scroll-driven update (user wheel/drag). Ignored while we drive the
+    // scroll ourselves, so the logical index set by autoplay/click wins.
     _schedule() {
         if (this._ticking) {
             return;
@@ -70,15 +82,18 @@ export default class extends Controller {
         this._ticking = true;
         requestAnimationFrame(() => {
             this._ticking = false;
-            this._update();
+            if (this._autoScrolling) {
+                return;
+            }
+            this._active = this._indexFromScroll;
+            this._render();
         });
     }
 
-    _update() {
-        const index = this._index;
+    _render() {
         this.dotTargets.forEach((dot, i) => {
-            dot.dataset.active = i === index ? 'true' : 'false';
-            dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+            dot.dataset.active = i === this._active ? 'true' : 'false';
+            dot.setAttribute('aria-current', i === this._active ? 'true' : 'false');
         });
     }
 
@@ -95,7 +110,7 @@ export default class extends Controller {
         return children[1].offsetLeft - children[0].offsetLeft || 1;
     }
 
-    get _index() {
+    get _indexFromScroll() {
         return Math.max(0, Math.min(this._count - 1, Math.round(this.trackTarget.scrollLeft / this._step)));
     }
 
@@ -106,43 +121,69 @@ export default class extends Controller {
     // ── Navigation ───────────────────────────────────────────────────────
 
     to(event) {
-        this._scrollTo(parseInt(event.currentTarget.dataset.index ?? '0', 10));
+        this._goTo(parseInt(event.currentTarget.dataset.index ?? '0', 10));
         this._restartAutoplay();
     }
 
     prev() {
-        this._scrollTo(this._index - 1);
+        this._goTo(this._active - 1);
         this._restartAutoplay();
     }
 
     next() {
-        this._scrollTo(this._index + 1);
+        this._goTo(this._active + 1);
         this._restartAutoplay();
     }
 
-    _scrollTo(index) {
-        const target = Math.max(0, Math.min(this._count - 1, index));
-        const child = this.trackTarget.children[target];
+    // Sets the logical index and scrolls as far as the track allows (the
+    // browser clamps scrollLeft, so the last "page" may not move the cards —
+    // that's intended: the dot still advances).
+    _goTo(index) {
+        this._active = Math.max(0, Math.min(this._count - 1, index));
+        this._render();
+
+        const child = this.trackTarget.children[this._active];
         if (child) {
+            this._beginAutoScroll();
             this.trackTarget.scrollTo({ left: child.offsetLeft, behavior: 'smooth' });
         }
+    }
+
+    // Suppress scroll-driven index updates for the duration of a programmatic
+    // scroll so a clamped target (no movement) keeps its logical index.
+    _beginAutoScroll() {
+        this._autoScrolling = true;
+        if (this._autoScrollTimer) {
+            window.clearTimeout(this._autoScrollTimer);
+        }
+        this._autoScrollTimer = window.setTimeout(() => {
+            this._autoScrolling = false;
+            this._autoScrollTimer = null;
+        }, 600);
     }
 
     // ── Mouse drag (touch keeps native scrolling) ────────────────────────
 
     _pointerDown(event) {
-        if (event.pointerType !== 'mouse' || !this._scrollable) {
+        if (!this._scrollable) {
             return;
         }
-        this._dragging = true;
-        this._moved = false;
-        this._startX = event.clientX;
-        this._startScroll = this.trackTarget.scrollLeft;
-        // Suspend snap while dragging so scrollLeft tracks the cursor 1:1.
-        this.trackTarget.style.scrollSnapType = 'none';
-        this.trackTarget.style.cursor = 'grabbing';
-        this.trackTarget.style.userSelect = 'none';
+        // Any pointer (finger or mouse) pauses autoplay while the user
+        // interacts; it resumes on pointer up.
+        this._interacting = true;
         this._pauseAutoplay();
+
+        // Only the mouse gets JS drag-to-scroll; touch keeps native momentum
+        // scrolling (and snap), which feels better on a phone/tablet.
+        if (event.pointerType === 'mouse') {
+            this._dragging = true;
+            this._moved = false;
+            this._startX = event.clientX;
+            this._startScroll = this.trackTarget.scrollLeft;
+            this.trackTarget.style.scrollSnapType = 'none';
+            this.trackTarget.style.cursor = 'grabbing';
+            this.trackTarget.style.userSelect = 'none';
+        }
     }
 
     _pointerMove(event) {
@@ -157,16 +198,20 @@ export default class extends Controller {
     }
 
     _pointerUp() {
-        if (!this._dragging) {
-            return;
+        if (this._dragging) {
+            this._dragging = false;
+            this.trackTarget.style.scrollSnapType = '';
+            this.trackTarget.style.cursor = '';
+            this.trackTarget.style.userSelect = '';
+            // Mouse drag disabled snap, so settle on the nearest slide.
+            this._goTo(this._indexFromScroll);
         }
-        this._dragging = false;
-        this.trackTarget.style.scrollSnapType = '';
-        this.trackTarget.style.cursor = '';
-        this.trackTarget.style.userSelect = '';
-        // Settle on the nearest slide, then resume autoplay.
-        this._scrollTo(this._index);
-        this._resumeAutoplay();
+        if (this._interacting) {
+            this._interacting = false;
+            // Touch keeps native snap; just resume autoplay from wherever the
+            // scroll landed (the scroll handler keeps the active dot in sync).
+            this._resumeAutoplay();
+        }
     }
 
     // Swallow the click that ends a drag so a dot/card underneath doesn't fire.
@@ -191,7 +236,7 @@ export default class extends Controller {
         if (!this._scrollable || this._dragging) {
             return;
         }
-        this._scrollTo((this._index + 1) % this._count);
+        this._goTo((this._active + 1) % this._count);
     }
 
     _pauseAutoplay() {
