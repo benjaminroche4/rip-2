@@ -9,7 +9,7 @@ contact:
             headOffice: Head Office
             viewOn: View on Google Maps
         2:
-            openHours: Monday to Sunday - 8am to 8pm
+            openHours: 'Monday to Friday 8am to 8pm, Saturday 8am to 12pm, closed Sunday'
             whatsapp: Available on
         3:
             time: Reply within 30 minutes, during opening hours.

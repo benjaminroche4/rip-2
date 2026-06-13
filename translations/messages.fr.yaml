@@ -9,7 +9,7 @@ contact:
             headOffice: Bureau principal
             viewOn: Voir sur Google Maps
         2:
-            openHours: Lundi au Dimanche - 8h à 20h
+            openHours: 'Lundi au vendredi 8h à 20h, samedi 8h à 12h, fermé le dimanche'
             whatsapp: Disponible sur
         3:
             time: Réponse sous 30mn, aux heures d'ouverture.
