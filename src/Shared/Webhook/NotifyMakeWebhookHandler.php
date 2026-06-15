@@ -14,6 +14,6 @@ final class NotifyMakeWebhookHandler
 
     public function __invoke(NotifyMakeWebhookMessage $message): void
     {
-        $this->client->notify($message->payload);
+        $this->client->notify($message->payload, $message->webhook);
     }
 }

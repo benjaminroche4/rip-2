@@ -4,6 +4,8 @@ namespace App\Tests\Flow;
 
 use App\PropertyEstimation\Entity\PropertyEstimation;
 use App\PropertyEstimation\Message\SendEstimationEmailMessage;
+use App\Shared\Webhook\MakeWebhookTarget;
+use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -14,7 +16,7 @@ use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
  *
  * Same pattern as ContactFlowTest. Hits /fr/services/gestion-locative-paris,
  * fills the form, asserts the controller persists a PropertyEstimation row
- * and dispatches a SendEstimationEmailMessage on the async bus.
+ * and dispatches both async messages (email + Make webhook) on the bus.
  */
 final class PropertyEstimationFlowTest extends WebTestCase
 {
@@ -30,7 +32,7 @@ final class PropertyEstimationFlowTest extends WebTestCase
         $this->em->createQuery('DELETE FROM '.PropertyEstimation::class)->execute();
     }
 
-    public function testValidSubmissionPersistsAndDispatchesEmail(): void
+    public function testValidSubmissionPersistsAndDispatchesEmailAndWebhook(): void
     {
         $crawler = $this->client->request('GET', self::FORM_PATH);
         self::assertResponseIsSuccessful();
@@ -60,19 +62,32 @@ final class PropertyEstimationFlowTest extends WebTestCase
         self::assertSame('fr', $estimation->getLang());
         self::assertNotNull($estimation->getCreatedAt());
 
-        // Exactly one async email message dispatched, carrying the form fields.
+        // Two messages on the async transport (in-memory in tests):
+        //   SendEstimationEmailMessage (admin email)
+        //   NotifyMakeWebhookMessage (Make.com webhook payload, ESTIMATION webhook)
         $envelopes = $this->asyncTransport()->getSent();
-        $messages = array_filter(
-            array_map(fn ($e) => $e->getMessage(), $envelopes),
-            fn ($m) => $m instanceof SendEstimationEmailMessage,
-        );
-        self::assertCount(1, $messages);
+        $messages = array_map(fn ($e) => $e->getMessage(), $envelopes);
+
+        $emailMessages = array_filter($messages, fn ($m) => $m instanceof SendEstimationEmailMessage);
+        $webhookMessages = array_filter($messages, fn ($m) => $m instanceof NotifyMakeWebhookMessage);
+
+        self::assertCount(1, $emailMessages, 'Expected exactly one SendEstimationEmailMessage on the async bus.');
+        self::assertCount(1, $webhookMessages, 'Expected exactly one NotifyMakeWebhookMessage on the async bus.');
 
         /** @var SendEstimationEmailMessage $msg */
-        $msg = array_values($messages)[0];
+        $msg = array_values($emailMessages)[0];
         self::assertSame('landlord@example.com', $msg->email);
         self::assertSame(45, $msg->surface);
         self::assertSame('fr', $msg->lang);
+
+        /** @var NotifyMakeWebhookMessage $webhookMsg */
+        $webhookMsg = array_values($webhookMessages)[0];
+        self::assertSame(MakeWebhookTarget::ESTIMATION, $webhookMsg->webhook);
+        self::assertSame('landlord@example.com', $webhookMsg->payload['email']);
+        self::assertSame('12 rue de Test, 75011 Paris', $webhookMsg->payload['address']);
+        self::assertSame(45, $webhookMsg->payload['surface']);
+        // propertyCondition is forwarded as the translated label, not the i18n key.
+        self::assertSame('Récemment rénové', $webhookMsg->payload['propertyCondition']);
     }
 
     public function testInvalidSubmissionReturnsFormWithoutDispatch(): void

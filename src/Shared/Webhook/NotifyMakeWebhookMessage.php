@@ -3,7 +3,7 @@
 namespace App\Shared\Webhook;
 
 /**
- * Asks the async handler to forward an arbitrary payload to the Make.com webhook.
+ * Asks the async handler to forward an arbitrary payload to a Make.com webhook.
  */
 final readonly class NotifyMakeWebhookMessage
 {
@@ -12,6 +12,7 @@ final readonly class NotifyMakeWebhookMessage
      */
     public function __construct(
         public array $payload,
+        public MakeWebhookTarget $webhook,
     ) {
     }
 }

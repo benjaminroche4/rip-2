@@ -5,6 +5,7 @@ namespace App\Contact\Controller;
 use App\Contact\Entity\Contact;
 use App\Contact\Form\ContactType;
 use App\Contact\Message\SendContactEmailsMessage;
+use App\Shared\Webhook\MakeWebhookTarget;
 use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -80,17 +81,21 @@ final class ContactController extends AbstractController
                 createdAt: $now,
             ));
 
+            $helpType = $contact->getHelpType();
+
             $this->bus->dispatch(new NotifyMakeWebhookMessage([
                 'firstName' => $contact->getFirstName(),
                 'lastName' => $contact->getLastName(),
                 'email' => $contact->getEmail(),
                 'phone' => $contact->getPhoneNumber(),
-                'helpType' => $contact->getHelpType(),
+                'helpType' => null !== $helpType
+                    ? $this->translator->trans($helpType, locale: $contact->getLang())
+                    : null,
                 'message' => $contact->getMessage(),
                 'company' => $contact->getCompany(),
                 'lang' => $contact->getLang(),
                 'createdAt' => $now->format(\DateTimeInterface::ATOM),
-            ]));
+            ], MakeWebhookTarget::CONTACT));
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);

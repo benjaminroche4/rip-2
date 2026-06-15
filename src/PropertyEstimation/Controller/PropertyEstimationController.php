@@ -5,6 +5,8 @@ namespace App\PropertyEstimation\Controller;
 use App\PropertyEstimation\Entity\PropertyEstimation;
 use App\PropertyEstimation\Form\PropertyEstimationType;
 use App\PropertyEstimation\Message\SendEstimationEmailMessage;
+use App\Shared\Webhook\MakeWebhookTarget;
+use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -79,6 +81,22 @@ final class PropertyEstimationController extends AbstractController
                 ip: $data->getIp(),
                 createdAt: $now,
             ));
+
+            $propertyCondition = $data->getPropertyCondition();
+
+            $this->bus->dispatch(new NotifyMakeWebhookMessage([
+                'address' => $data->getAddress(),
+                'propertyCondition' => null !== $propertyCondition
+                    ? $this->translator->trans($propertyCondition, locale: $data->getLang())
+                    : null,
+                'surface' => $data->getSurface(),
+                'bedroom' => $data->getBedroom(),
+                'bathroom' => $data->getBathroom(),
+                'email' => $data->getEmail(),
+                'phone' => $data->getPhoneNumber(),
+                'lang' => $data->getLang(),
+                'createdAt' => $now->format(\DateTimeInterface::ATOM),
+            ], MakeWebhookTarget::ESTIMATION));
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);

@@ -87,6 +87,8 @@ final class ContactFlowTest extends WebTestCase
         $webhookMsg = array_values($webhookMessages)[0];
         self::assertSame('john.doe@example.com', $webhookMsg->payload['email']);
         self::assertSame('Acme Inc.', $webhookMsg->payload['company']);
+        // helpType is forwarded as the translated label, not the i18n key.
+        self::assertSame('Recherche de logement', $webhookMsg->payload['helpType']);
     }
 
     public function testInvalidSubmissionReturns200WithoutDispatch(): void
