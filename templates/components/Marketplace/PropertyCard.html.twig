@@ -48,7 +48,7 @@
 >
     {% if property.slug|default(false) %}<a href="{{ property_show_path(property, locale) }}" target="_blank" rel="noopener" class="contents">{% endif %}
     <div
-        class="relative aspect-3/2 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
+        class="relative aspect-4/3 border border-slate-100 rounded-xl bg-slate-50 overflow-hidden group"
         data-controller="carousel"
     >
         <div
@@ -58,15 +58,15 @@
             {% for photo in allPhotos[:5] %}
                 <div class="w-full h-full shrink-0">
                     <img
-                        src="{{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75"
-                        srcset="{{ photo.url }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=75 400w,
-                                {{ photo.url }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=75 600w,
-                                {{ photo.url }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=75 900w"
+                        src="{{ photo.url }}?w=600&h=450&fit=crop&auto=format&fm=webp&q=75"
+                        srcset="{{ photo.url }}?w=400&h=300&fit=crop&auto=format&fm=webp&q=75 400w,
+                                {{ photo.url }}?w=600&h=450&fit=crop&auto=format&fm=webp&q=75 600w,
+                                {{ photo.url }}?w=900&h=675&fit=crop&auto=format&fm=webp&q=75 900w"
                         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                         alt="{{ photo.alt|default(property.title) }}"
                         {% if not loop.first %}loading="lazy" decoding="async"{% endif %}
                         width="600"
-                        height="400"
+                        height="450"
                         draggable="false"
                         class="w-full h-full object-cover pointer-events-none select-none"
                     />
@@ -75,6 +75,25 @@
         </div>
 
         {% if allPhotos|length > 1 %}
+            <button
+                type="button"
+                data-carousel-target="prev"
+                data-action="carousel#prev"
+                aria-label="{{ 'marketplace.list.card.carousel.prev'|trans }}"
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-700 shadow-md opacity-0 scale-95 pointer-events-none transition duration-200 ease-out group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto max-md:opacity-100 max-md:scale-100 max-md:pointer-events-auto hover:bg-white focus-visible:opacity-100 focus-visible:scale-100 focus-visible:pointer-events-auto focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+            >
+                {{ ux_icon('lucide:chevron-left', {'class': 'size-5 shrink-0'}) }}
+            </button>
+            <button
+                type="button"
+                data-carousel-target="next"
+                data-action="carousel#next"
+                aria-label="{{ 'marketplace.list.card.carousel.next'|trans }}"
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-gray-700 shadow-md opacity-0 scale-95 pointer-events-none transition duration-200 ease-out group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto max-md:opacity-100 max-md:scale-100 max-md:pointer-events-auto hover:bg-white focus-visible:opacity-100 focus-visible:scale-100 focus-visible:pointer-events-auto focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+            >
+                {{ ux_icon('lucide:chevron-right', {'class': 'size-5 shrink-0'}) }}
+            </button>
+
             <div
                 class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 bg-gray-900/40 group-hover:bg-gray-900/70 transition duration-100 rounded-full px-1.5 py-1"
                 data-carousel-target="dots"

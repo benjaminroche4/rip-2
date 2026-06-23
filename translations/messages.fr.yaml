@@ -1450,6 +1450,8 @@ marketplace:
             verified: Propriété vérifiée
             carousel:
                 goTo: 'Aller à la photo %n%'
+                prev: 'Photo précédente'
+                next: 'Photo suivante'
             map:
                 marker:
                     onRequest: 'Sur demande'

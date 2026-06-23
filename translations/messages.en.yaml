@@ -1449,6 +1449,8 @@ marketplace:
             verified: Property verified
             carousel:
                 goTo: 'Go to photo %n%'
+                prev: 'Previous photo'
+                next: 'Next photo'
             map:
                 marker:
                     onRequest: 'On request'
