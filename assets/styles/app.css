@@ -2,6 +2,9 @@
 @plugin "@tailwindcss/forms";
 
 @theme {
+    /* Custom breakpoint above 2xl (1536px) for ultra-wide layouts. */
+    --breakpoint-3xl: 2100px;
+
     --color-primary: #71172e;
     /* Override the default `ring` color (blue) used by shadcn-style components
        (Button, Accordion, …) so `focus-visible:ring-ring` adopts the brand. */

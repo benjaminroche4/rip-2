@@ -118,7 +118,7 @@
                 </div>
 
                 <div class="hidden" data-loading="action(search)|show">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid sm:grid-cols-2 3xl:grid-cols-3! gap-6">
                         {% for i in 1..4 %}
                             <div class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
                                 <twig:Skeleton class="aspect-4/3 rounded-xl bg-neutral-800/10" />
@@ -152,7 +152,7 @@
                             </button>
                         </div>
                     {% else %}
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <div class="grid sm:grid-cols-2 3xl:grid-cols-3! gap-6">
                             {% for property in this.items %}
                                 {% include 'components/Marketplace/PropertyCard.html.twig' with { property, locale } only %}
                             {% endfor %}
