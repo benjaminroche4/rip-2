@@ -1424,6 +1424,8 @@ marketplace:
             button: Load more properties
             loading: Loading
             closeMap: Close the map
+            expandMap: Expand the map
+            collapseMap: Shrink the map
             noResults: No properties found
             clearFilters: Clear filters
         card:

@@ -97,12 +97,17 @@
     <section class="max-w-full mx-auto lg:px-8 px-6 lg:pb-16 pb-12">
         <div
             class="grid grid-cols-1 lg:grid-cols-2 gap-x-8"
-            data-controller="map-markers map-teleport"
+            data-controller="map-markers map-teleport map-expand"
             data-map-markers-card-url-value="{{ path('app_property_card_fragment', {locale: locale, id: '__ID__'}) }}"
             data-map-markers-locale-value="{{ locale }}"
             data-map-teleport-open-class="!translate-y-0 !opacity-100 !pointer-events-auto"
+            data-map-expand-grid-default-class="lg:grid-cols-2"
+            data-map-expand-grid-expanded-class="lg:grid-cols-1"
+            data-map-expand-list-hidden-class="lg:hidden"
+            data-map-expand-expand-label-value="{{ 'marketplace.list.properties.expandMap'|trans }}"
+            data-map-expand-collapse-label-value="{{ 'marketplace.list.properties.collapseMap'|trans }}"
         >
-            <div>
+            <div data-map-expand-target="list">
                 <div class="max-[360px]:flex-col min-[361px]:flex-row flex justify-between min-[361px]:items-center gap-2 mb-8">
                     <h1 class="text-base font-medium font-secondary flex gap-x-1">
                         {{ this.totalCount }} {{ 'marketplace.list.properties.title'|trans|raw }}
@@ -194,6 +199,22 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
                         <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
+                </button>
+
+                <button
+                    type="button"
+                    data-map-expand-target="button"
+                    data-action="map-expand#toggle"
+                    aria-pressed="false"
+                    aria-label="{{ 'marketplace.list.properties.expandMap'|trans }}"
+                    class="hidden lg:flex cursor-pointer absolute top-4 right-4 z-20 size-10 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/5 text-gray-700 hover:bg-neutral-100 transition duration-100 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+                >
+                    <span data-map-expand-target="expandIcon" class="flex">
+                        {{ ux_icon('lucide:maximize-2', {'class': 'size-5 shrink-0'}) }}
+                    </span>
+                    <span data-map-expand-target="collapseIcon" class="hidden">
+                        {{ ux_icon('lucide:minimize-2', {'class': 'size-5 shrink-0'}) }}
+                    </span>
                 </button>
                 {{ ux_map(map, {style: 'height: 100%; width: 100%;', 'class': 'lg:rounded-2xl', 'data-controller': 'map-cluster map-restriction'}) }}
             </div>
