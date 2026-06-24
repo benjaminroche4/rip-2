@@ -38,11 +38,12 @@
     {% endif %}
 {% endif %}
 
-{% set isNew = property.createdAt|date('U') > 'now'|date_modify('-3 days')|date('U') %}
+{# Premium border only when the Premium badge is the one actually shown. #}
+{% set isPremium = property_badge(property).type == 'premium' %}
 
 <article
     id="property-{{ property.slug|default(property._id) }}"
-    class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }} group/card"
+    class="flex flex-col border {{ isPremium ? 'card-premium-border' : 'border-slate-200' }} rounded-2xl bg-white p-1.5 {{ compact ? 'w-[280px] shadow-xl' }} group/card"
     data-property-id="{{ property._id }}"
     data-action="mouseenter->map-markers#highlightMarker mouseleave->map-markers#unhighlightMarker"
 >
@@ -92,13 +93,7 @@
             </div>
         {% endif %}
 
-        {% if isNew or (property.showCategoryOnCard|default(false) and property.categoryName|default(false)) %}
-            <div class="absolute top-1.5 left-2">
-                <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md">
-                    {{ isNew ? 'marketplace.list.card.category.new'|trans|raw : property.categoryName }}
-                </span>
-            </div>
-        {% endif %}
+        <twig:Marketplace:PropertyBadge :property="property" />
     </div>
 
     <div class="px-2 py-3 flex flex-col flex-1 space-y-4">

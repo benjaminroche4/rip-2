@@ -15,6 +15,19 @@
     background-color: var(--color-primary);
 }
 
+/* Premium property card: gradient (top -> bottom) border on a white card.
+   border-image ignores border-radius, so we layer two backgrounds: an opaque
+   white fill clipped to the padding-box (card interior) over a top-to-bottom
+   gradient clipped to the border-box (visible only in the transparent border). */
+.card-premium-border {
+    border-color: transparent;
+    background-image:
+        linear-gradient(#fff, #fff),
+        linear-gradient(to bottom, #e97a99, #da476d);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
 /* @tailwindcss/forms applies a hard-coded blue focus ring + border to every
    form input (text, email, url, textarea, select) and to checkbox / radio
    inputs (`--tw-ring-color: #2563eb`, `border-color: #2563eb`). Override

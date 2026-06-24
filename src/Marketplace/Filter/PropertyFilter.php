@@ -24,7 +24,7 @@ final class PropertyFilter
     public function apply(
         array $properties,
         ?int $arrondissement = null,
-        string $propertyType = '',
+        ?string $propertyType = null,
         ?int $rentMin = null,
         ?int $rentMax = null,
     ): array {
@@ -36,7 +36,7 @@ final class PropertyFilter
             ));
         }
 
-        if ('' !== $propertyType) {
+        if (null !== $propertyType && '' !== $propertyType) {
             $matchSlugs = $this->propertyRepository->findMatchingTypeSlugs($propertyType);
             $properties = array_values(array_filter(
                 $properties,

@@ -1436,6 +1436,11 @@ marketplace:
                 soon: From
             category:
                 new: New
+                featured: Featured
+                exclusive: Exclusive
+                renovated: Renovated
+                premium: Premium
+                readyToMove: Ready to move
             agent:
                 alt: rental manager at Relocation In Paris
             price:

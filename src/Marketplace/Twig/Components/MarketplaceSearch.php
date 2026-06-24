@@ -30,7 +30,7 @@ final class MarketplaceSearch
     public ?int $arrondissement = null;
 
     #[LiveProp(writable: true, url: true)]
-    public string $propertyType = '';
+    public ?string $propertyType = null;
 
     #[LiveProp(writable: true, url: true)]
     public ?int $rentMin = null;
@@ -44,7 +44,7 @@ final class MarketplaceSearch
     public ?int $draftArrondissement = null;
 
     #[LiveProp(writable: true)]
-    public string $draftPropertyType = '';
+    public ?string $draftPropertyType = null;
 
     #[LiveProp(writable: true)]
     public ?int $draftRentMin = null;
@@ -83,7 +83,7 @@ final class MarketplaceSearch
     public ?int $prevArrondissement = null;
 
     #[LiveProp(writable: false)]
-    public string $prevPropertyType = '';
+    public ?string $prevPropertyType = null;
 
     #[LiveProp(writable: false)]
     public ?int $prevRentMin = null;
@@ -107,13 +107,13 @@ final class MarketplaceSearch
     public function mount(
         string $locale = 'fr',
         ?int $arrondissement = null,
-        string $propertyType = '',
+        ?string $propertyType = null,
         ?int $rentMin = null,
         ?int $rentMax = null,
     ): void {
         $this->locale = in_array($locale, self::ALLOWED_LOCALES, true) ? $locale : 'fr';
         $this->arrondissement = $arrondissement;
-        $this->propertyType = $propertyType;
+        $this->propertyType = $propertyType ?: null;
         $this->rentMin = $rentMin;
         $this->rentMax = $rentMax;
 
@@ -142,7 +142,8 @@ final class MarketplaceSearch
         $this->normalizeRentBounds();
 
         $this->arrondissement = $this->draftArrondissement;
-        $this->propertyType = $this->draftPropertyType;
+        // Empty select ("Tous les biens") maps to null so it stays out of the URL.
+        $this->propertyType = $this->draftPropertyType ?: null;
         $this->rentMin = $this->draftRentMin;
         $this->rentMax = $this->draftRentMax;
 
@@ -153,12 +154,12 @@ final class MarketplaceSearch
     public function clearFilters(): void
     {
         $this->arrondissement = null;
-        $this->propertyType = '';
+        $this->propertyType = null;
         $this->rentMin = null;
         $this->rentMax = null;
 
         $this->draftArrondissement = null;
-        $this->draftPropertyType = '';
+        $this->draftPropertyType = null;
         $this->draftRentMin = null;
         $this->draftRentMax = null;
 
@@ -293,7 +294,7 @@ final class MarketplaceSearch
 
     private function getFilteredProperties(): array
     {
-        $key = sprintf('%s|%s|%s|%s', $this->arrondissement ?? '', $this->propertyType, $this->rentMin ?? '', $this->rentMax ?? '');
+        $key = sprintf('%s|%s|%s|%s', $this->arrondissement ?? '', $this->propertyType ?? '', $this->rentMin ?? '', $this->rentMax ?? '');
         if (null !== $this->filteredCache && $this->filteredCacheKey === $key) {
             return $this->filteredCache;
         }

@@ -1437,6 +1437,11 @@ marketplace:
                 soon: À partir du
             category:
                 new: Nouveau
+                featured: Coup de cœur
+                exclusive: Exclusivité
+                renovated: Rénové
+                premium: Premium
+                readyToMove: Disponible de suite
             agent:
                 alt: responsable de la location du bien chez Relocation In Paris
             price:

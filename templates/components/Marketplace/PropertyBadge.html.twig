@@ -1,0 +1,34 @@
+{#
+    Property card badge (Figma "Badges/Type"), frosted glass.
+
+    Pass the property; the single badge to display is resolved by the
+    `property_badge()` Twig function (`new` wins over the category, and only the
+    first category drives the badge). The component owns its own absolute
+    placement, so callers just drop it inside the card's image container.
+#}
+{% props property %}
+
+{% set styles = {
+    new:         { class: 'bg-[#effdf4]/80 text-[#21b758]', icon: 'ph:sparkle-fill' },
+    featured:    { class: 'bg-[#fffbe8]/80 text-[#dc8400]', icon: 'ph:star-fill' },
+    exclusive:   { class: 'bg-[#f0f0ff]/80 text-[#5048e7]', icon: 'ph:medal-fill' },
+    renovated:   { class: 'bg-[#f0feff]/80 text-[#10bce7]', icon: 'ph:paint-roller-fill' },
+    premium:     { class: 'bg-[#fff4f6]/80 text-[#c62851]', icon: 'ph:crown-simple-fill' },
+    readyToMove: { class: 'bg-[#f0f8ff]/80 text-[#1e7ce7]', icon: 'ph:lightning-fill' },
+} %}
+
+{% set badge = property_badge(property) %}
+{% set style = badge.type ? styles[badge.type]|default(null) : null %}
+
+{% if style %}
+    <div class="absolute top-1.5 left-2">
+        <span class="inline-flex items-center gap-1 py-1 pr-2 pl-1 rounded-lg border border-white/55 shadow-sm backdrop-blur-sm text-xs font-medium whitespace-nowrap {{ style.class }}">
+            {{ ux_icon(style.icon, {'class': 'size-3 shrink-0'}) }}
+            {{ ('marketplace.list.card.category.' ~ badge.type)|trans }}
+        </span>
+    </div>
+{% elseif badge.label %}
+    <div class="absolute top-1.5 left-2">
+        <span class="bg-white/80 backdrop-blur-sm text-xs font-medium text-gray-700 px-2 py-1 rounded-md whitespace-nowrap">{{ badge.label }}</span>
+    </div>
+{% endif %}
