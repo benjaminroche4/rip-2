@@ -1422,7 +1422,13 @@ marketplace:
                 apply: Apply
                 areas:
                     marais: Le Marais
-                    neuilly: Neuilly-sur-Seine
+                    saintMichel: Saint-Michel
+                    champsElysees: Champs-Élysées
+                    montmartre: Montmartre
+                    beaugrenelle: Beaugrenelle
+                    auteuil: Auteuil
+                    batignolles: Batignolles
+                    bercy: Bercy
             type: All properties
             price:
                 min: Min

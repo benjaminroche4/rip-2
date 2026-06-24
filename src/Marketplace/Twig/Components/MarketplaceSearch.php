@@ -24,6 +24,27 @@ final class MarketplaceSearch
     private const PER_PAGE = 24;
     private const ALLOWED_LOCALES = ['fr', 'en'];
 
+    /**
+     * Curated Paris spots shown in the filter panel. Clicking one selects the
+     * arrondissement(s) it spans, so nearby properties are filtered.
+     *
+     * @var array<int, array{key: string, arrondissements: array<int, int>}>
+     */
+    private const POPULAR_AREAS = [
+        ['key' => 'marais', 'arrondissements' => [3, 4]],
+        ['key' => 'saintMichel', 'arrondissements' => [5, 6]],
+        ['key' => 'champsElysees', 'arrondissements' => [8]],
+        ['key' => 'montmartre', 'arrondissements' => [18]],
+    ];
+
+    /** @var array<int, array{key: string, arrondissements: array<int, int>}> */
+    private const FAMILY_AREAS = [
+        ['key' => 'beaugrenelle', 'arrondissements' => [15]],
+        ['key' => 'auteuil', 'arrondissements' => [16]],
+        ['key' => 'batignolles', 'arrondissements' => [17]],
+        ['key' => 'bercy', 'arrondissements' => [12]],
+    ];
+
     /* ----------------- Live state ----------------- */
 
     /** @var array<int, int> */
@@ -205,6 +226,20 @@ final class MarketplaceSearch
         $this->page = 1;
     }
 
+    /**
+     * Select a curated area: filters properties in its arrondissement(s).
+     */
+    #[LiveAction]
+    public function selectArea(
+        #[LiveArg]
+        string $arrondissements,
+    ): void {
+        $list = $this->normalizeArrondissements(explode(',', $arrondissements));
+        $this->arrondissements = $list;
+        $this->draftArrondissements = $list;
+        $this->page = 1;
+    }
+
     #[LiveAction]
     public function normalizeRents(): void
     {
@@ -306,6 +341,36 @@ final class MarketplaceSearch
     public function getPropertyTypes(): array
     {
         return $this->propertyRepository->findPropertyTypes($this->locale);
+    }
+
+    /**
+     * Curated "popular areas" for the panel: each entry carries its i18n key and
+     * a comma-joined list of arrondissements to select on click.
+     *
+     * @return array<int, array{key: string, csv: string}>
+     */
+    public function getPopularAreas(): array
+    {
+        return $this->mapAreas(self::POPULAR_AREAS);
+    }
+
+    /** @return array<int, array{key: string, csv: string}> */
+    public function getFamilyAreas(): array
+    {
+        return $this->mapAreas(self::FAMILY_AREAS);
+    }
+
+    /**
+     * @param array<int, array{key: string, arrondissements: array<int, int>}> $areas
+     *
+     * @return array<int, array{key: string, csv: string}>
+     */
+    private function mapAreas(array $areas): array
+    {
+        return array_map(
+            static fn (array $a) => ['key' => $a['key'], 'csv' => implode(',', $a['arrondissements'])],
+            $areas,
+        );
     }
 
     /**

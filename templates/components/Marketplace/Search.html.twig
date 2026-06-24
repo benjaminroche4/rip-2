@@ -54,12 +54,12 @@
                 {# Mobile backdrop #}
                 <div
                     data-action="click->arrondissement-dropdown#close"
-                    class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 transition-opacity duration-200 group-data-open/dd:visible group-data-open/dd:opacity-100 lg:hidden"
+                    class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100 group-data-open/dd:transition-opacity group-data-open/dd:duration-200 lg:hidden"
                 ></div>
 
                 {# Arrondissement panel: centered dropdown on desktop, bottom sheet on mobile #}
                 <div
-                    class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left transition duration-200 ease-out invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100
+                    class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100 group-data-open/dd:transition group-data-open/dd:duration-200 group-data-open/dd:ease-out
                            max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/dd:translate-y-0
                            lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:w-[840px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10"
                 >
@@ -71,11 +71,19 @@
                                         {{ ux_icon('lucide:trending-up', {'class': 'size-4.5 shrink-0 text-primary'}) }}
                                         <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.popular'|trans }}</p>
                                     </div>
-                                    <ul role="list" class="flex flex-col gap-0.5 text-sm text-gray-500">
-                                        {% for label in [ui.arrondissementLabel(16, locale), ui.arrondissementLabel(7, locale), 'marketplace.list.search.arrondissementPanel.areas.marais'|trans] %}
-                                            <li class="flex items-center gap-x-2 px-2 py-1">
-                                                {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
-                                                <span class="truncate">{{ label }}</span>
+                                    <ul role="list" class="flex flex-col gap-0.5">
+                                        {% for area in this.popularAreas %}
+                                            <li>
+                                                <button
+                                                    type="button"
+                                                    data-action="live#action:prevent arrondissement-dropdown#close"
+                                                    data-live-action-param="selectArea"
+                                                    data-live-arrondissements-param="{{ area.csv }}"
+                                                    class="flex items-center gap-x-2 w-full px-2 py-1 rounded-md text-sm text-gray-500 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900"
+                                                >
+                                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                    <span class="truncate">{{ ('marketplace.list.search.arrondissementPanel.areas.' ~ area.key)|trans }}</span>
+                                                </button>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -85,11 +93,19 @@
                                         {{ ux_icon('lucide:users', {'class': 'size-4.5 shrink-0 text-primary'}) }}
                                         <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.family'|trans }}</p>
                                     </div>
-                                    <ul role="list" class="flex flex-col gap-0.5 text-sm text-gray-500">
-                                        {% for label in [ui.arrondissementLabel(15, locale), 'marketplace.list.search.arrondissementPanel.areas.neuilly'|trans] %}
-                                            <li class="flex items-center gap-x-2 px-2 py-1">
-                                                {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
-                                                <span class="truncate">{{ label }}</span>
+                                    <ul role="list" class="flex flex-col gap-0.5">
+                                        {% for area in this.familyAreas %}
+                                            <li>
+                                                <button
+                                                    type="button"
+                                                    data-action="live#action:prevent arrondissement-dropdown#close"
+                                                    data-live-action-param="selectArea"
+                                                    data-live-arrondissements-param="{{ area.csv }}"
+                                                    class="flex items-center gap-x-2 w-full px-2 py-1 rounded-md text-sm text-gray-500 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900"
+                                                >
+                                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                    <span class="truncate">{{ ('marketplace.list.search.arrondissementPanel.areas.' ~ area.key)|trans }}</span>
+                                                </button>
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -189,7 +205,7 @@
             <twig:Button
                 variant="default"
                 size="lg"
-                data-action="live#action"
+                data-action="live#action arrondissement-dropdown#close"
                 data-live-action-param="search"
                 data-loading="action(search)|addAttribute(disabled)"
                 class="w-full lg:w-auto"
