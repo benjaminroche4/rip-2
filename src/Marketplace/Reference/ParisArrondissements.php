@@ -32,6 +32,35 @@ final class ParisArrondissements
         20 => [48.8631, 2.4007],
     ];
 
+    /**
+     * Well-known neighbourhood label per arrondissement, shown next to the number
+     * in the filter panel (e.g. "1st · Louvre"). Bilingual only where it differs.
+     *
+     * @var array<int, array{fr: string, en: string}>
+     */
+    public const NAMES = [
+        1 => ['fr' => 'Louvre', 'en' => 'Louvre'],
+        2 => ['fr' => 'Bourse', 'en' => 'Bourse'],
+        3 => ['fr' => 'Le Marais', 'en' => 'Le Marais'],
+        4 => ['fr' => 'Hôtel de Ville', 'en' => 'Hôtel de Ville'],
+        5 => ['fr' => 'Quartier latin', 'en' => 'Latin Quarter'],
+        6 => ['fr' => 'Saint-Germain', 'en' => 'Saint-Germain'],
+        7 => ['fr' => 'Tour Eiffel', 'en' => 'Eiffel Tower'],
+        8 => ['fr' => 'Champs-Élysées', 'en' => 'Champs-Élysées'],
+        9 => ['fr' => 'Opéra', 'en' => 'Opéra'],
+        10 => ['fr' => 'Gare du Nord', 'en' => 'Gare du Nord'],
+        11 => ['fr' => 'Bastille', 'en' => 'Bastille'],
+        12 => ['fr' => 'Bercy', 'en' => 'Bercy'],
+        13 => ['fr' => 'Quartier chinois', 'en' => 'Chinatown'],
+        14 => ['fr' => 'Montparnasse', 'en' => 'Montparnasse'],
+        15 => ['fr' => 'Beaugrenelle', 'en' => 'Beaugrenelle'],
+        16 => ['fr' => 'Trocadéro', 'en' => 'Trocadéro'],
+        17 => ['fr' => 'Batignolles', 'en' => 'Batignolles'],
+        18 => ['fr' => 'Montmartre', 'en' => 'Montmartre'],
+        19 => ['fr' => 'Parc des Buttes', 'en' => 'Parc des Buttes'],
+        20 => ['fr' => 'Belleville', 'en' => 'Belleville'],
+    ];
+
     /** Default fallback: Notre-Dame de Paris area. */
     public const DEFAULT_CENTER = [48.8566, 2.3522];
 
@@ -60,5 +89,11 @@ final class ParisArrondissements
     public static function defaultZoom(?int $arrondissement): int
     {
         return (null !== $arrondissement && isset(self::CENTERS[$arrondissement])) ? 14 : 12;
+    }
+
+    /** Neighbourhood label for the given arrondissement and locale. */
+    public static function name(int $arrondissement, string $locale = 'fr'): string
+    {
+        return self::NAMES[$arrondissement][$locale] ?? self::NAMES[$arrondissement]['fr'] ?? '';
     }
 }

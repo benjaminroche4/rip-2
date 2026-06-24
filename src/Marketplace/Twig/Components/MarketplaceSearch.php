@@ -26,8 +26,9 @@ final class MarketplaceSearch
 
     /* ----------------- Live state ----------------- */
 
+    /** @var array<int, int> */
     #[LiveProp(writable: true, url: true)]
-    public ?int $arrondissement = null;
+    public array $arrondissements = [];
 
     #[LiveProp(writable: true, url: true)]
     public ?string $propertyType = null;
@@ -40,8 +41,9 @@ final class MarketplaceSearch
 
     /* Drafts modifiés par les inputs sans déclencher de re-render. Appliqués au clic "Rechercher". */
 
+    /** @var array<int, int> */
     #[LiveProp(writable: true)]
-    public ?int $draftArrondissement = null;
+    public array $draftArrondissements = [];
 
     #[LiveProp(writable: true)]
     public ?string $draftPropertyType = null;
@@ -79,8 +81,9 @@ final class MarketplaceSearch
 
     /* Snapshots used by PreReRender to detect filter changes. */
 
+    /** @var array<int, int> */
     #[LiveProp(writable: false)]
-    public ?int $prevArrondissement = null;
+    public array $prevArrondissements = [];
 
     #[LiveProp(writable: false)]
     public ?string $prevPropertyType = null;
@@ -104,28 +107,56 @@ final class MarketplaceSearch
     ) {
     }
 
+    /**
+     * @param array<int, int|string> $arrondissements
+     */
     public function mount(
         string $locale = 'fr',
-        ?int $arrondissement = null,
+        array $arrondissements = [],
         ?string $propertyType = null,
         ?int $rentMin = null,
         ?int $rentMax = null,
     ): void {
         $this->locale = in_array($locale, self::ALLOWED_LOCALES, true) ? $locale : 'fr';
-        $this->arrondissement = $arrondissement;
+        $this->arrondissements = $this->normalizeArrondissements($arrondissements);
         $this->propertyType = $propertyType ?: null;
         $this->rentMin = $rentMin;
         $this->rentMax = $rentMax;
 
-        $this->draftArrondissement = $this->arrondissement;
+        $this->draftArrondissements = $this->arrondissements;
         $this->draftPropertyType = $this->propertyType;
         $this->draftRentMin = $this->rentMin;
         $this->draftRentMax = $this->rentMax;
 
-        $this->prevArrondissement = $this->arrondissement;
+        $this->prevArrondissements = $this->arrondissements;
         $this->prevPropertyType = $this->propertyType;
         $this->prevRentMin = $this->rentMin;
         $this->prevRentMax = $this->rentMax;
+    }
+
+    /**
+     * Keep only valid Paris arrondissements (1–20), unique and sorted.
+     *
+     * @param array<int, int|string> $values
+     *
+     * @return array<int, int>
+     */
+    private function normalizeArrondissements(array $values): array
+    {
+        $valid = array_filter(
+            array_map(static fn ($v) => (int) $v, $values),
+            static fn (int $i) => $i >= 1 && $i <= 20,
+        );
+        $valid = array_values(array_unique($valid));
+        sort($valid);
+
+        return $valid;
+    }
+
+    /** The single arrondissement to recenter the map on, or null when 0 or many are selected. */
+    private function focusArrondissement(): ?int
+    {
+        return 1 === count($this->arrondissements) ? $this->arrondissements[0] : null;
     }
 
     /* ----------------- Live actions ----------------- */
@@ -141,7 +172,7 @@ final class MarketplaceSearch
     {
         $this->normalizeRentBounds();
 
-        $this->arrondissement = $this->draftArrondissement;
+        $this->arrondissements = $this->normalizeArrondissements($this->draftArrondissements);
         // Empty select ("Tous les biens") maps to null so it stays out of the URL.
         $this->propertyType = $this->draftPropertyType ?: null;
         $this->rentMin = $this->draftRentMin;
@@ -153,16 +184,24 @@ final class MarketplaceSearch
     #[LiveAction]
     public function clearFilters(): void
     {
-        $this->arrondissement = null;
+        $this->arrondissements = [];
         $this->propertyType = null;
         $this->rentMin = null;
         $this->rentMax = null;
 
-        $this->draftArrondissement = null;
+        $this->draftArrondissements = [];
         $this->draftPropertyType = null;
         $this->draftRentMin = null;
         $this->draftRentMax = null;
 
+        $this->page = 1;
+    }
+
+    #[LiveAction]
+    public function clearArrondissements(): void
+    {
+        $this->arrondissements = [];
+        $this->draftArrondissements = [];
         $this->page = 1;
     }
 
@@ -214,7 +253,7 @@ final class MarketplaceSearch
     #[PreReRender]
     public function refreshMapMarkers(): void
     {
-        $arrondissementChanged = $this->arrondissement !== $this->prevArrondissement;
+        $arrondissementChanged = $this->arrondissements !== $this->prevArrondissements;
         $changed = $arrondissementChanged
             || $this->propertyType !== $this->prevPropertyType
             || $this->rentMin !== $this->prevRentMin
@@ -233,7 +272,7 @@ final class MarketplaceSearch
             $this->north = null;
             $this->west = null;
             $this->east = null;
-            $this->zoom = ParisArrondissements::defaultZoom($this->arrondissement);
+            $this->zoom = ParisArrondissements::defaultZoom($this->focusArrondissement());
             $this->map = null;
         } else {
             $map = $this->getMap();
@@ -241,7 +280,7 @@ final class MarketplaceSearch
             $this->refreshMarkers($map);
         }
 
-        $this->prevArrondissement = $this->arrondissement;
+        $this->prevArrondissements = $this->arrondissements;
         $this->prevPropertyType = $this->propertyType;
         $this->prevRentMin = $this->rentMin;
         $this->prevRentMax = $this->rentMax;
@@ -269,11 +308,27 @@ final class MarketplaceSearch
         return $this->propertyRepository->findPropertyTypes($this->locale);
     }
 
+    /**
+     * Neighbourhood label for each arrondissement (1–20) in the current locale,
+     * used by the arrondissement filter panel.
+     *
+     * @return array<int, string>
+     */
+    public function getArrondissementNames(): array
+    {
+        $names = [];
+        foreach (array_keys(ParisArrondissements::NAMES) as $i) {
+            $names[$i] = ParisArrondissements::name($i, $this->locale);
+        }
+
+        return $names;
+    }
+
     /* ----------------- Internals ----------------- */
 
     protected function instantiateMap(): Map
     {
-        $map = $this->mapBuilder->buildMap($this->arrondissement, $this->zoom);
+        $map = $this->mapBuilder->buildMap($this->focusArrondissement(), $this->zoom);
         $this->refreshMarkers($map);
 
         return $map;
@@ -294,14 +349,14 @@ final class MarketplaceSearch
 
     private function getFilteredProperties(): array
     {
-        $key = sprintf('%s|%s|%s|%s', $this->arrondissement ?? '', $this->propertyType ?? '', $this->rentMin ?? '', $this->rentMax ?? '');
+        $key = sprintf('%s|%s|%s|%s', implode(',', $this->arrondissements), $this->propertyType ?? '', $this->rentMin ?? '', $this->rentMax ?? '');
         if (null !== $this->filteredCache && $this->filteredCacheKey === $key) {
             return $this->filteredCache;
         }
 
         $filtered = $this->propertyFilter->apply(
             $this->propertyRepository->findAll($this->locale),
-            $this->arrondissement,
+            $this->arrondissements,
             $this->propertyType,
             $this->rentMin,
             $this->rentMax,

@@ -18,21 +18,22 @@ final class PropertyFilter
 
     /**
      * @param array<int, Property> $properties
+     * @param array<int, int>      $arrondissements
      *
      * @return array<int, Property>
      */
     public function apply(
         array $properties,
-        ?int $arrondissement = null,
+        array $arrondissements = [],
         ?string $propertyType = null,
         ?int $rentMin = null,
         ?int $rentMax = null,
     ): array {
-        if (null !== $arrondissement) {
-            $code = sprintf('750%02d', $arrondissement);
+        if ([] !== $arrondissements) {
+            $codes = array_map(static fn (int $a) => sprintf('750%02d', $a), $arrondissements);
             $properties = array_values(array_filter(
                 $properties,
-                fn (Property $p) => ($p->address['postalCode'] ?? '') === $code
+                fn (Property $p) => in_array($p->address['postalCode'] ?? '', $codes, true)
             ));
         }
 

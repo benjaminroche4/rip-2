@@ -1414,6 +1414,16 @@ marketplace:
                 rooms: "%count% pièces"
         search:
             arrondissement: Arrondissement
+            arrondissementSelected: "{1}1 arrondissement|]1,Inf[%count% arrondissements"
+            arrondissementPanel:
+                popular: Zones prisées
+                family: Familles
+                all: Tous les arrondissements
+                clear: Effacer
+                apply: Appliquer
+                areas:
+                    marais: Le Marais
+                    neuilly: Neuilly-sur-Seine
             type: Tous les biens
             price:
                 min: Min

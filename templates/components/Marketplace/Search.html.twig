@@ -7,6 +7,15 @@
     {%- endif -%}
 {% endmacro %}
 
+{% macro arrondissementShort(i, locale) %}
+    {%- if locale == 'fr' -%}
+        {{ i == 1 ? '1er' : i ~ 'e' }}
+    {%- else -%}
+        {%- set suffix = {1: 'st', 2: 'nd', 3: 'rd'}[i]|default('th') -%}
+        {{ i ~ suffix }}
+    {%- endif -%}
+{% endmacro %}
+
 {% import _self as ui %}
 
 {% set selectClass = 'font-light w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light' %}
@@ -16,19 +25,122 @@
 
 <div {{ attributes }}>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-10">
-        <div class="border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full">
+        <div
+            class="relative group/dd border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full"
+            data-controller="arrondissement-dropdown"
+        >
             <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
                 <div class="{{ fieldWrapper }}">
                     {{ ux_icon('lucide:map-pin', {'class': iconClass}) }}
-                    <select data-model="norender|draftArrondissement" data-action="keydown.enter->live#action" data-live-action-param="search" required aria-label="{{ 'marketplace.list.search.arrondissement'|trans }}" class="{{ selectClass }}">
-                        <option value="">{{ 'marketplace.list.search.arrondissement'|trans|raw }}</option>
-                        {% for i in 1..20 %}
-                            <option value="{{ i }}" {{ (draftArrondissement ?? arrondissement) == i ? 'selected' }}>
-                                {{ ui.arrondissementLabel(i, locale) }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <button
+                        type="button"
+                        data-action="arrondissement-dropdown#toggle"
+                        aria-label="{{ 'marketplace.list.search.arrondissement'|trans }}"
+                        class="flex items-center gap-x-2 flex-1 min-w-0 bg-transparent cursor-pointer text-left {{ draftArrondissements is empty ? 'text-gray-400 font-light' : 'text-gray-900' }}"
+                    >
+                        <span class="flex-1 truncate">
+                            {%- if draftArrondissements is empty -%}
+                                {{ 'marketplace.list.search.arrondissement'|trans }}
+                            {%- elseif draftArrondissements|length == 1 -%}
+                                {{ ui.arrondissementLabel(draftArrondissements|first, locale) }}
+                            {%- else -%}
+                                {{ 'marketplace.list.search.arrondissementSelected'|trans({'%count%': draftArrondissements|length}) }}
+                            {%- endif -%}
+                        </span>
+                        {{ ux_icon('lucide:chevron-down', {'class': 'size-4 text-gray-400 shrink-0 transition-transform duration-200 group-data-open/dd:rotate-180'}) }}
+                    </button>
                 </div>
+
+                {# Mobile backdrop #}
+                <div
+                    data-action="click->arrondissement-dropdown#close"
+                    class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 transition-opacity duration-200 group-data-open/dd:visible group-data-open/dd:opacity-100 lg:hidden"
+                ></div>
+
+                {# Arrondissement panel: centered dropdown on desktop, bottom sheet on mobile #}
+                <div
+                    class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left transition duration-200 ease-out invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100
+                           max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/dd:translate-y-0
+                           lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:w-[840px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10"
+                >
+                    <div class="flex flex-col lg:flex-row gap-5">
+                            {# Curated areas (decorative) #}
+                            <div class="flex flex-col gap-5 lg:w-[230px] shrink-0">
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex items-center gap-x-2 px-2">
+                                        {{ ux_icon('lucide:trending-up', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                                        <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.popular'|trans }}</p>
+                                    </div>
+                                    <ul role="list" class="flex flex-col gap-0.5 text-sm text-gray-500">
+                                        {% for label in [ui.arrondissementLabel(16, locale), ui.arrondissementLabel(7, locale), 'marketplace.list.search.arrondissementPanel.areas.marais'|trans] %}
+                                            <li class="flex items-center gap-x-2 px-2 py-1">
+                                                {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                <span class="truncate">{{ label }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <div class="flex items-center gap-x-2 px-2">
+                                        {{ ux_icon('lucide:users', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                                        <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.family'|trans }}</p>
+                                    </div>
+                                    <ul role="list" class="flex flex-col gap-0.5 text-sm text-gray-500">
+                                        {% for label in [ui.arrondissementLabel(15, locale), 'marketplace.list.search.arrondissementPanel.areas.neuilly'|trans] %}
+                                            <li class="flex items-center gap-x-2 px-2 py-1">
+                                                {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                <span class="truncate">{{ label }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="hidden lg:block w-px self-stretch bg-linear-to-b from-transparent via-slate-200 to-transparent"></div>
+
+                            {# All arrondissements (multi-select) #}
+                            <div class="flex flex-col gap-3 flex-1 min-w-0">
+                                <div class="flex items-center gap-x-2 px-2">
+                                    {{ ux_icon('lucide:map', {'class': 'size-4.5 shrink-0 text-primary'}) }}
+                                    <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.all'|trans }}</p>
+                                </div>
+                                <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
+                                    {% for i in 1..20 %}
+                                        <label class="flex items-center gap-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-500">
+                                            <input
+                                                type="checkbox"
+                                                data-model="norender|draftArrondissements"
+                                                value="{{ i }}"
+                                                {{ i in draftArrondissements ? 'checked' }}
+                                                class="size-3.5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary/40"
+                                            />
+                                            <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ this.arrondissementNames[i] }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Mobile actions #}
+                        <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 lg:hidden">
+                            <button
+                                type="button"
+                                data-action="live#action:prevent arrondissement-dropdown#close"
+                                data-live-action-param="clearArrondissements"
+                                class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-slate-50"
+                            >
+                                {{ 'marketplace.list.search.arrondissementPanel.clear'|trans }}
+                            </button>
+                            <button
+                                type="button"
+                                data-action="live#action:prevent arrondissement-dropdown#close"
+                                data-live-action-param="search"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90"
+                            >
+                                {{ 'marketplace.list.search.arrondissementPanel.apply'|trans }}
+                            </button>
+                        </div>
+                    </div>
 
                 <div class="{{ fieldWrapper }}">
                     {{ ux_icon('iconoir:home-simple', {'class': iconClass}) }}
