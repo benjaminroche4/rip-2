@@ -28,7 +28,14 @@
         <div
             class="relative group/dd border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full"
             data-controller="arrondissement-dropdown"
+            data-arrondissement-dropdown-loaded-value="{{ panelLoaded ? 'true' : 'false' }}"
         >
+            {# Hidden trigger: lazy-loads the panel content on first open #}
+            <button type="button" class="hidden" aria-hidden="true" tabindex="-1"
+                data-arrondissement-dropdown-target="loadTrigger"
+                data-action="live#action"
+                data-live-action-param="openPanel"
+            ></button>
             <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
                 <div class="{{ fieldWrapper }}">
                     {{ ux_icon('lucide:map-pin', {'class': iconClass}) }}
@@ -63,6 +70,7 @@
                            max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/dd:translate-y-0
                            lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:w-[840px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10"
                 >
+                    {% if panelLoaded %}
                     <div class="flex flex-col lg:flex-row gap-5">
                             {# Curated areas (decorative) #}
                             <div class="flex flex-col gap-5 lg:w-[230px] shrink-0">
@@ -120,6 +128,7 @@
                                     {{ ux_icon('lucide:map', {'class': 'size-4.5 shrink-0 text-primary'}) }}
                                     <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.all'|trans }}</p>
                                 </div>
+                                {% set arrondissementNames = this.arrondissementNames %}
                                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
                                     {% for i in 1..20 %}
                                         <label class="flex items-center gap-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-500">
@@ -130,7 +139,7 @@
                                                 {{ i in draftArrondissements ? 'checked' }}
                                                 class="size-3.5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary/40"
                                             />
-                                            <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ this.arrondissementNames[i] }}</span>
+                                            <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ arrondissementNames[i] }}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
@@ -156,6 +165,11 @@
                                 {{ 'marketplace.list.search.arrondissementPanel.apply'|trans }}
                             </button>
                         </div>
+                    {% else %}
+                        <div class="flex items-center justify-center py-12 lg:py-16">
+                            <twig:Spinner />
+                        </div>
+                    {% endif %}
                     </div>
 
                 <div class="{{ fieldWrapper }}">

@@ -97,6 +97,10 @@ final class MarketplaceSearch
     #[LiveProp]
     public int $page = 1;
 
+    /** Lazily rendered: the arrondissement panel content loads on first open. */
+    #[LiveProp]
+    public bool $panelLoaded = false;
+
     #[LiveProp]
     public string $locale = 'fr';
 
@@ -224,6 +228,13 @@ final class MarketplaceSearch
         $this->arrondissements = [];
         $this->draftArrondissements = [];
         $this->page = 1;
+    }
+
+    /** Render the (lazy) arrondissement panel content on first open. */
+    #[LiveAction]
+    public function openPanel(): void
+    {
+        $this->panelLoaded = true;
     }
 
     /**

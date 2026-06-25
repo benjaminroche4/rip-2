@@ -8,7 +8,11 @@ import { Controller } from '@hotwired/stimulus'
  * Closes on outside click, Escape, or backdrop tap.
  */
 export default class extends Controller {
+    static targets = ['loadTrigger']
+    static values = { loaded: Boolean }
+
     #open = false
+    #loadRequested = false
     #mobileQuery = window.matchMedia('(max-width: 1023px)')
 
     toggle() {
@@ -20,6 +24,12 @@ export default class extends Controller {
         this.#open = true
         this.element.setAttribute('data-open', '')
         if (this.#mobileQuery.matches) document.body.style.overflow = 'hidden'
+
+        // Lazy-load the panel content on first open.
+        if (!this.loadedValue && !this.#loadRequested && this.hasLoadTriggerTarget) {
+            this.#loadRequested = true
+            this.loadTriggerTarget.click()
+        }
 
         document.addEventListener('keydown', this.#onKeydown)
         // Defer so the opening click doesn't immediately close the panel.
