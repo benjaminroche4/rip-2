@@ -41,6 +41,27 @@ final class MarkerBuilder
     }
 
     /**
+     * A standalone location pin (no property) used to highlight a selected
+     * arrondissement or curated area's center on the map.
+     */
+    public function buildPingMarker(Point $position): Marker
+    {
+        $icon = Icon::svg(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+                <ellipse cx="16" cy="37" rx="6" ry="2.5" fill="#00000022"/>
+                <path d="M16 1C8.27 1 2 7.27 2 15c0 9.5 12 22 13.1 23.1a1.3 1.3 0 0 0 1.8 0C18 37 30 24.5 30 15 30 7.27 23.73 1 16 1Z" fill="#71172e" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="16" cy="15" r="5" fill="#ffffff"/>
+            </svg>'
+        );
+
+        return new Marker(
+            position: $position,
+            icon: $icon,
+            extra: ['isPing' => true],
+        );
+    }
+
+    /**
      * @param array<int, string> $propertyIds
      */
     public function buildClusterMarker(Point $center, int $count, array $propertyIds, string $locale): Marker

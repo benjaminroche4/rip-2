@@ -22,7 +22,7 @@
     </div>
 </div>
 
-{{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate', 'data-controller': 'form-loader'}}) }}
 
 {% for message in app.flashes('contactSuccess') %}
     <div role="alert" aria-live="polite" class="rounded-xl bg-green-50 p-4">
@@ -127,7 +127,7 @@
         </div>
     </div>
 
-    <div data-controller="select" class="relative">
+    <div data-controller="select" data-select-featured-value="contact.contactForm.helpType.choice.1" data-select-featured-label-value="{{ 'contact.contactForm.helpType.featured'|trans }}" class="relative">
         <div class="flex items-center gap-x-0.5">
             {{ form_label(form.helpType, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
             <span class="text-red-600" aria-hidden="true">*</span>
@@ -162,7 +162,7 @@
                     tabindex="-1"
                     data-select-target="list"
                     data-action="click->select#choose keydown->select#keydown"
-                    class="max-h-60 overflow-auto py-1 outline-none"
+                    class="max-h-60 overflow-auto p-1 space-y-0.5 outline-none"
                 ></ul>
             </div>
             {% for error in form.helpType.vars.errors %}
@@ -200,9 +200,14 @@
 </div>
 
 <div class="pt-4">
-    <twig:Button variant="default" size="lg" class="w-full cursor-pointer">
-        {{ ux_icon('famicons:paper-plane-outline', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-        {{ 'contact.contactForm.button'|trans|raw }}
+    <twig:Button variant="default" size="lg" class="w-full cursor-pointer" data-form-loader-target="submit">
+        <span class="inline-flex items-center gap-2" data-form-loader-target="label">
+            {{ ux_icon('famicons:paper-plane-outline', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ 'contact.contactForm.button'|trans|raw }}
+        </span>
+        <span class="hidden items-center justify-center" data-form-loader-target="spinner">
+            <twig:Spinner />
+        </span>
     </twig:Button>
 </div>
 

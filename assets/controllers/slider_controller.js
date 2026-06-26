@@ -85,6 +85,17 @@ export default class extends Controller {
         return -(this.currentValue * this.step);
     }
 
+    // Decide whether a drag/swipe should change slide, based on distance OR flick velocity.
+    resolveSwipe(deltaX, elapsed) {
+        const distanceThreshold = Math.min(this.step * 0.15, 50);
+        const velocityThreshold = 0.3; // px/ms, a quick flick of the finger
+        const velocity = elapsed > 0 ? deltaX / elapsed : 0;
+
+        if (deltaX < -distanceThreshold || velocity < -velocityThreshold) this.next();
+        else if (deltaX > distanceThreshold || velocity > velocityThreshold) this.prev();
+        else this.render(true);
+    }
+
     prev() {
         if (this.currentValue > 0) this.currentValue--;
         this.render(true);
@@ -98,7 +109,7 @@ export default class extends Controller {
     render(animate = true) {
         if (!this.hasTrackTarget) return;
 
-        this.trackTarget.style.transition = animate ? 'transform 500ms ease-in-out' : 'none';
+        this.trackTarget.style.transition = animate ? 'transform 450ms cubic-bezier(0.33, 1, 0.68, 1)' : 'none';
         this.trackTarget.style.transform = `translateX(${this.getCurrentOffset()}px)`;
 
         const atStart = this.currentValue === 0;
@@ -139,8 +150,10 @@ export default class extends Controller {
         event.preventDefault();
         this.isDragging = false;
         this.startX = event.clientX;
+        this.startTime = event.timeStamp;
         this.baseOffset = this.getCurrentOffset();
         this.trackTarget.style.transition = 'none';
+        this.trackTarget.style.willChange = 'transform';
         this.trackTarget.style.cursor = 'grabbing';
 
         window.addEventListener('mousemove', this.boundHandleMouseMove);
@@ -158,13 +171,10 @@ export default class extends Controller {
         window.removeEventListener('mousemove', this.boundHandleMouseMove);
         window.removeEventListener('mouseup',   this.boundHandleMouseUp);
         this.trackTarget.style.cursor = '';
+        this.trackTarget.style.willChange = 'auto';
         if (!this.isDragging) return;
 
-        const deltaX = event.clientX - this.startX;
-        const threshold = this.step * 0.25;
-        if      (deltaX < -threshold) this.next();
-        else if (deltaX >  threshold) this.prev();
-        else { this.render(true); }
+        this.resolveSwipe(event.clientX - this.startX, event.timeStamp - this.startTime);
     }
 
     handleTouchStart(event) {
@@ -172,8 +182,10 @@ export default class extends Controller {
         this.isVerticalScroll = false;
         this.startX = event.changedTouches[0].clientX;
         this.startY = event.changedTouches[0].clientY;
+        this.startTime = event.timeStamp;
         this.baseOffset = this.getCurrentOffset();
         this.trackTarget.style.transition = 'none';
+        this.trackTarget.style.willChange = 'transform';
     }
 
     handleTouchMove(event) {
@@ -191,11 +203,8 @@ export default class extends Controller {
     }
 
     handleTouchEnd(event) {
+        this.trackTarget.style.willChange = 'auto';
         if (this.isVerticalScroll || !this.isDragging) return;
-        const deltaX = event.changedTouches[0].clientX - this.startX;
-        const threshold = this.step * 0.25;
-        if      (deltaX < -threshold) this.next();
-        else if (deltaX >  threshold) this.prev();
-        else { this.render(true); }
+        this.resolveSwipe(event.changedTouches[0].clientX - this.startX, event.timeStamp - this.startTime);
     }
 }

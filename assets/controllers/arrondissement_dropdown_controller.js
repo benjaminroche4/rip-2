@@ -1,4 +1,4 @@
-/* stimulusFetch: 'lazy' */
+/* stimulusFetch: 'eager' */
 import { Controller } from '@hotwired/stimulus'
 
 /**
@@ -15,6 +15,10 @@ export default class extends Controller {
     #loadRequested = false
     #mobileQuery = window.matchMedia('(max-width: 1023px)')
 
+    get #toggleButton() {
+        return this.element.querySelector('button[aria-haspopup]')
+    }
+
     toggle() {
         this.#open ? this.close() : this.open()
     }
@@ -23,6 +27,7 @@ export default class extends Controller {
         if (this.#open) return
         this.#open = true
         this.element.setAttribute('data-open', '')
+        this.#toggleButton?.setAttribute('aria-expanded', 'true')
         if (this.#mobileQuery.matches) document.body.style.overflow = 'hidden'
 
         // Lazy-load the panel content on first open.
@@ -40,6 +45,7 @@ export default class extends Controller {
         if (!this.#open) return
         this.#open = false
         this.element.removeAttribute('data-open')
+        this.#toggleButton?.setAttribute('aria-expanded', 'false')
         document.body.style.overflow = ''
 
         document.removeEventListener('keydown', this.#onKeydown)

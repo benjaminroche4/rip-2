@@ -38,6 +38,7 @@ contact:
         helpType:
             label: How can we help you?
             placeholder: Choose your request
+            featured: Most requested
             choice:
                 1: Housing Search
                 2: Solutions for Businesses
@@ -155,11 +156,11 @@ header:
     menu:
         findAccommodation: Property search
         propertyManagement: Management & services
-        aboutUs: Our story
+        aboutUs: About
         pricing: Pricing
         management:
             title: Property management
-            text: Tailor-made management for your short and medium-term rentals in Paris.
+            text: Tailor-made management for your short-, medium- and long-term rentals in Paris.
         findTenant:
             title: Find a tenant
             text: We find the ideal tenant and secure your rental process.
@@ -368,7 +369,7 @@ meta:
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
     landlords:
         title: Property Management in Paris
-        description: "Tailored property management services in Paris for short- and medium-term rentals. Secure and optimize your real estate investment with dedicated expertise."
+        description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your real estate investment with dedicated expertise."
     sitemap:
         title: Sitemap
         description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
@@ -1005,12 +1006,20 @@ faq:
 propertyManagement:
     hero:
         title: Your Property, Perfectly Managed
-        text: A tailored property management service for short- and medium-term rentals, designed to secure and optimize your investment in Paris.
+        text: "Tailored property management in Paris for short-, medium- and long-term rentals. We select your tenants, secure your rent and enhance your property, so you earn your income with complete peace of mind."
         service:
             1: Seamless care
             2: Reliable tenants
             3: Optimized value
-        subButton: Direct line – Free call
+        rating:
+            score: '5.0'
+            label: based on
+            reviews: reviews
+        subButton: Direct line, free call
+        team:
+            1: Photo of Mélanie, Relocation in Paris agent
+            2: Photo of Fabien, Relocation in Paris agent
+            3: Photo of Vincent, Relocation in Paris agent
     form:
         title: Free estimate
         address:
@@ -1033,12 +1042,19 @@ propertyManagement:
         bathroom:
             label: Bathrooms
             placeholder: 1
+        stepper:
+            decrease: Decrease value
+            increase: Increase value
         phoneNumber:
             label: Phone
             placeholder: "Phone: +33"
+            notBlank: The phone number must not be empty.
+            invalidFormat: The phone number is invalid.
         email:
             label: Email
             placeholder: "Email: john@doe.com"
+            notBlank: The email address must not be empty.
+            invalid: The email address is not valid.
         button: Estimate my rental income
         trust:
             1: Response in 2h
@@ -1047,76 +1063,78 @@ propertyManagement:
             tooManyRequests: Too many attempts. Please wait a minute before trying again.
         success:
             title: Request sent successfully!
-            text: Your estimate is being processed. An expert will contact you shortly.
+            text: Your request has been received. An expert will contact you shortly.
+            box:
+                advisor: Your management expert has been assigned
+                altPhoto: Photo of a Relocation in Paris management expert who will contact you back
+                expertJob: Rental management expert
+                callBack:
+                    text: "He will contact you within:"
+                    time: 2 hours maximum
+                    info: During opening hours.
+                number:
+                    text: "We will call you at:"
+            goodToKnow:
+                text: If you are unavailable, he will leave you an SMS or an email.
     service:
-        title: Our Expertise
+        title: Our expertise
         subTitle: Management and enhancement of your property
         1:
             title: Rental Strategy
-            text: A tailored approach to maximize performance.
+            text: The right rent and positioning to let quickly, at the best price.
         2:
             title: Property Enhancement
-            text: Professional presentation designed to attract the right profiles.
+            text: A professional photo shoot and staging to attract the best applicants.
         3:
             title: Tenant Selection
-            text: A rigorous selection process for a secure rental.
+            text: Verified applications and solid guarantees for a fully secured tenancy.
         4:
             title: Full Management
-            text: Comprehensive management for complete peace of mind.
+            text: From the inventory of fixtures to rent collection, we take care of everything.
         5:
             title: Ongoing Maintenance
-            text: Careful oversight to preserve quality and long-term value.
+            text: Regular monitoring and fast action to preserve your property's value.
         6:
             title: Secured Income
-            text: Clear and reliable management of your rental income.
+            text: Rent reliably paid and clear reporting, in full transparency.
     about:
         title: Peace of mind, guaranteed
-        subTitle: Your investment, perfectly managed
+        subTitle: 'Your investment,<br>expertly managed'
         text: We manage every stage of the rental process with rigor, securing your income and enhancing the long-term value of your property. You stay in control, we take care of the rest.
+        text2: Your income secured, your property protected, your time preserved.
+        imageAlt: Haussmann building in Paris managed by Relocation in Paris
         keyPoints:
             1:
                 text: Exposure across leading international property platforms.
             2:
-                number: 250+
+                number: 250
                 text: properties managed in Paris and the Île-de-France region.
             3:
-                number: 25+
+                number: 25
                 text: years of expertise in property management.
             4:
-                number: 8
+                number: 12
                 text: experts dedicated to managing your assets.
         button: Speak with an expert
     price:
-        title: Fees
-        subTitle: A remuneration model aligned with your property’s performance
-        text1: A long-term partnership
-        text2: The better your property performs, thse more value our support creates. A transparent partnership, fully aligned with your interests.
-        guarantee:
-            title: Your guarantees
-            1: No setup fees
-            2: No long-term commitment
-            3: No upfront costs
-            4: Transparent fees
-            5: Monthly income tracking
-            6: No unpleasant surprises
         fees:
-            shortTerm:
-                title: Short-term
-                text: based on generated rental income
-            longTerm:
-                title: Medium-term
-                text: based on generated turnover
             button: Speak with an expert
+    story:
+        title: 'Trust & discretion'
+        subTitle: Your property, our standards
+        text: "For over ten years, Relocation in Paris has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimising your income and delivering exceptional management, with complete peace of mind."
+        award: 'Best agency<br>in <span class="font-semibold">Paris 2025</span>'
     faq:
         title: FAQ
         subTitle: Your questions, our answers
+        text: "Our answers to the most common questions about property management."
         question:
             1:
-                title: Do you manage short- and medium-term rentals?
-                text: Yes. We provide property management services for short-term rentals (up to 30 days) and medium-term rentals (from 1 to 12 months), with an approach tailored to each rental type.
+                title: Do you manage short-, medium- and long-term rentals?
+                text: Yes. We provide property management services for short-term rentals (up to 30 days), medium-term rentals (from 1 to 6 months) and long-term rentals (over 6 months), with an approach tailored to each rental type.
             2:
                 title: Do you enhance the property before it is listed?
-                text: Yes. We focus on property enhancement (presentation, positioning and distribution) to attract high-quality tenants and optimize rental performance.
+                text: Yes. We enhance the property with a professional photo shoot, then handle its presentation, positioning and distribution to attract high-quality tenants and optimize rental performance.
             3:
                 title: Do you handle everything from start to finish?
                 text: "Absolutely. We take care of the entire management process: strategy, listing, tenant relations, operational follow-up and income management. You stay in control, we handle the rest."
@@ -1412,6 +1430,12 @@ marketplace:
                 fallback: Apartment
                 rooms: "%count% rooms"
         search:
+            q: Search apartments, areas, features...
+            localisation: Localisation
+            propertyType: Property type
+            typeCount: "%count% filters"
+            moreFilters: More filters
+            reset: Reset
             arrondissement: Arrondissement
             arrondissementSelected: "{1}1 arrondissement|]1,Inf[%count% arrondissements"
             arrondissementPanel:
@@ -1429,10 +1453,45 @@ marketplace:
                     auteuil: Auteuil
                     batignolles: Batignolles
                     bercy: Bercy
-            type: All properties
-            price:
-                min: Min
-                max: Max
+            layout:
+                title: Layout
+                studio: Studio
+                bed1: 1 Bedroom
+                bed2: 2 Bedrooms
+                bed3: 3 Bedrooms
+                bed4: 4+ Bedrooms
+            style:
+                title: Style
+                furnished: Furnished
+                unfurnished: Unfurnished
+            rental:
+                title: Rental category
+                longTerm: Long-term rental
+                midTerm: Mid-term rental
+            budget:
+                title: Budget
+                label: Minimum Monthly Rent
+            features:
+                title: Apartment features
+                balcony: Balcony
+                elevator: Elevator
+                parking: Parking
+                airConditioning: Air conditioning
+            availability:
+                title: Availability
+                now: Available now
+                days30: Within 30 days
+            transport:
+                title: Transport
+                metro: Near metro
+                rer: Near RER
+            moreFiltersModal:
+                title: More filters
+                subtitle: Refine your apartment search
+                close: Close
+                reset: Reset filters
+                selected: selected
+                apply: Apply filters
             button: Search
         properties:
             title: 'properties <span class="hidden lg:block">for rent in Paris</span>'

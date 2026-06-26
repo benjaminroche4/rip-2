@@ -18,8 +18,6 @@ export default class extends Controller {
     };
 
     connect() {
-        console.log('Number stepper controller connected');
-
         // Variables pour le hold
         this.holdTimer = null;
         this.holdInterval = null;

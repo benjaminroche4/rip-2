@@ -3,14 +3,17 @@
 namespace App\PropertyEstimation\Form;
 
 use App\PropertyEstimation\Entity\PropertyEstimation;
+use App\Shared\Form\DataTransformer\PhoneNumberE164Transformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Blank;
+use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class PropertyEstimationType extends AbstractType
@@ -26,9 +29,12 @@ class PropertyEstimationType extends AbstractType
                     ),
                 ],
                 'attr' => [
-                    'data-controller' => 'google-places',
-                    'data-google-places-target' => 'input',
+                    'data-places-autocomplete-target' => 'input',
+                    'data-action' => 'input->places-autocomplete#search keydown->places-autocomplete#navigate',
                     'autocomplete' => 'off',
+                    'role' => 'combobox',
+                    'aria-autocomplete' => 'list',
+                    'aria-expanded' => 'false',
                 ],
             ])
             ->add('propertyCondition', ChoiceType::class, [
@@ -88,8 +94,9 @@ class PropertyEstimationType extends AbstractType
                     'step' => 1,
                 ],
             ])
-            ->add('phoneNumber', TextType::class, [
+            ->add('phoneNumber', TelType::class, [
                 'label' => 'propertyManagement.form.phoneNumber.label',
+                'invalid_message' => 'propertyManagement.form.phoneNumber.invalidFormat',
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.phoneNumber.notBlank',
@@ -101,6 +108,9 @@ class PropertyEstimationType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: 'propertyManagement.form.email.notBlank',
+                    ),
+                    new Email(
+                        message: 'propertyManagement.form.email.invalid',
                     ),
                 ],
             ])
@@ -120,6 +130,8 @@ class PropertyEstimationType extends AbstractType
                 ],
             ])
         ;
+
+        $builder->get('phoneNumber')->addModelTransformer(new PhoneNumberE164Transformer());
     }
 
     public function configureOptions(OptionsResolver $resolver): void

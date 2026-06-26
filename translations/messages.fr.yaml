@@ -38,6 +38,7 @@ contact:
         helpType:
             label: Comment pouvons-nous vous aider ?
             placeholder: Choisissez un type de demande
+            featured: Le plus demandé
             choice:
                 1: Recherche de logement
                 2: Solutions pour entreprises
@@ -158,11 +159,11 @@ header:
     menu:
         findAccommodation: Recherche de logement
         propertyManagement: Gestion et services
-        aboutUs: Notre histoire
+        aboutUs: À propos
         pricing: Tarifs
         management:
             title: Gestion locative
-            text: Une gestion sur mesure pour vos locations courte et moyenne durée à Paris.
+            text: Une gestion sur mesure pour vos locations courte, moyenne et longue durée à Paris.
         findTenant:
             title: Trouver un locataire
             text: Nous sélectionnons le locataire idéal et sécurisons votre mise en location.
@@ -371,7 +372,7 @@ meta:
         description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
     landlords:
         title: Gestion Locative à Paris
-        description: "Service de gestion locative sur mesure à Paris, en court et moyen terme. Sécurisez et optimisez votre investissement immobilier grâce à une expertise dédiée."
+        description: "Service de gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Sécurisez et optimisez votre investissement immobilier grâce à une expertise dédiée."
     sitemap:
         title: Plan du Site
         description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
@@ -1005,12 +1006,20 @@ faq:
 propertyManagement:
     hero:
         title: Confiez-nous la gestion de votre bien
-        text: Un service de gestion locative sur mesure, en court et moyen terme, pour sécuriser et optimiser votre investissement à Paris.
+        text: "Gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Nous sélectionnons vos locataires, sécurisons vos loyers et valorisons votre bien : vous percevez vos revenus, en toute tranquillité."
         service:
             1: Gestion sereine
             2: Locataires fiables
             3: Valeur optimisée
-        subButton: Ligne direct - Appel gratuit
+        rating:
+            score: '5.0'
+            label: basé sur
+            reviews: avis
+        subButton: Ligne directe, appel gratuit
+        team:
+            1: Photo de Mélanie, agent de Relocation in Paris
+            2: Photo de Fabien, agent de Relocation in Paris
+            3: Photo de Vincent, agent de Relocation in Paris
     form:
         title: Estimation gratuite
         address:
@@ -1033,12 +1042,19 @@ propertyManagement:
         bathroom:
             label: Salles de bain
             placeholder: 1
+        stepper:
+            decrease: Diminuer la valeur
+            increase: Augmenter la valeur
         phoneNumber:
             label: Téléphone
             placeholder: "Téléphone: +33"
+            notBlank: Le numéro de téléphone ne doit pas être vide.
+            invalidFormat: Le numéro de téléphone est invalide.
         email:
             label: Email
             placeholder: "Email: john@doe.com"
+            notBlank: L'adresse email ne doit pas être vide.
+            invalid: L'adresse email n'est pas valide.
         button:  Estimer mes revenus locatifs
         trust:
             1: Réponse sous 2h
@@ -1047,76 +1063,78 @@ propertyManagement:
             tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
             title: Demande envoyée avec succès !
-            text: Votre estimation est en cours de traitement. Un expert vous contactera très prochainement.
+            text: Votre demande a bien été reçue. Un expert vous contactera très prochainement.
+            box:
+                advisor: Votre expert en gestion est assigné
+                altPhoto: Photo d'un expert en gestion de Relocation in Paris qui va vous recontacter
+                expertJob: Expert en gestion locative
+                callBack:
+                    text: "Il vous contactera dans un délai de :"
+                    time: 2 heures maximum
+                    info: Durant les heures d'ouverture.
+                number:
+                    text: "Nous vous appelons au :"
+            goodToKnow:
+                text: Si vous n'êtes pas disponible, il vous laissera un SMS ou un email.
     service:
         title: Nos expertises
         subTitle: Gestion et valorisation de votre bien
         1:
             title: Stratégie locative
-            text: Une approche sur mesure pour maximiser la performance.
+            text: Le juste loyer et le bon positionnement pour louer rapidement, au meilleur prix.
         2:
             title: Valorisation du bien
-            text: Une mise en valeur professionnelle pour attirer les meilleurs profils.
+            text: Reportage photo professionnel et mise en valeur pour attirer les meilleurs profils.
         3:
             title: Sélection locataire
-            text: Une sélection rigoureuse pour une location sécurisée.
+            text: Dossiers vérifiés et garanties solides pour une location en toute sécurité.
         4:
             title: Gestion intégrale
-            text: Une prise en charge complète pour une tranquillité absolue.
+            text: De l'état des lieux à la perception des loyers, nous prenons tout en charge.
         5:
-            title: Entretien continules
-            text: Un suivi journalier pour préserver la qualité et la valeur du bien.
+            title: Entretien continu
+            text: Suivi régulier et interventions rapides pour préserver la valeur de votre bien.
         6:
             title: Revenus sécurisés
-            text: Un pilotage clair et fiable de vos loyers et revenus.
+            text: Des loyers reversés ponctuellement et un suivi limpide, en toute transparence.
     about:
         title: Une gestion en toute sérénité
-        subTitle: Votre investissement, parfaitement maîtrisé
+        subTitle: 'Votre investissement,<br>parfaitement maîtrisé'
         text: Nous gérons chaque étape de la location avec rigueur, pour sécuriser vos revenus et valoriser durablement votre bien. Vous conservez le contrôle, nous gérons le reste.
+        text2: Vos revenus sécurisés, votre bien protégé, votre temps préservé.
+        imageAlt: Immeuble haussmannien à Paris géré par Relocation in Paris
         keyPoints:
             1:
                 text: Diffusion sur les principales plateformes internationales.
             2:
-                number: +250
-                text: biens en gérés à Paris et en Île-de-France.
+                number: 250
+                text: biens gérés à Paris et en Île-de-France.
             3:
-                number: +25
+                number: 25
                 text: ans d’expertise en gestion locative.
             4:
-                number: 8
+                number: 12
                 text: experts engagés dans la gestion de votre patrimoine.
         button: Contactez un expert
     price:
-        title: Honoraires
-        subTitle: Une rémunération alignée sur la performance de votre bien
-        text1: Un partenariat durable
-        text2: Plus votre bien performe, plus notre accompagnement crée de la valeur. Un partenariat transparent, aligné sur vos intérêts.
-        guarantee:
-            title: Vos garanties
-            1: Aucun frais de mise en place
-            2: Sans engagement de durée
-            3: Aucun coût à avancer
-            4: Honoraires transparents
-            5: Revenus suivis chaque mois
-            6: Aucune mauvaise surprise
         fees:
-            shortTerm:
-                title: Court terme
-                text: sur les revenus générés
-            longTerm:
-                title: Moyen terme
-                text: sur le chiffre d'affaires généré
             button: Contactez un expert
+    story:
+        title: 'Confiance & discrétion'
+        subTitle: Votre patrimoine, notre exigence
+        text: "Depuis plus de dix ans, Relocation in Paris gère les biens des propriétaires les plus exigeants de la capitale. De la valorisation de votre appartement à la sélection rigoureuse des locataires, nous prenons en charge chaque détail avec discrétion et savoir-faire. Notre exigence : préserver la valeur de votre patrimoine, optimiser vos revenus et vous offrir une gestion d'exception, en toute sérénité."
+        award: 'Meilleure agence<br>à <span class="font-semibold">Paris 2025</span>'
     faq:
         title: FAQ
         subTitle: Vos questions, nos réponses
+        text: "Nos réponses aux questions les plus fréquentes sur la gestion locative."
         question:
             1:
-                title: Gérez-vous les biens en courte et moyenne durée ?
-                text: Oui. Nous assurons la gestion locative en courte durée (jusqu’à 30 jours) et en moyenne durée (de 1 à 12 mois), avec une approche adaptée à chaque typologie de location.
+                title: Gérez-vous les biens en courte, moyenne et longue durée ?
+                text: Oui. Nous assurons la gestion locative en courte durée (jusqu’à 30 jours), en moyenne durée (de 1 à 6 mois) et en longue durée (au-delà de 6 mois), avec une approche adaptée à chaque typologie de location.
             2:
                 title: Mettez-vous en valeur le bien avant la mise en location ?
-                text: Oui. Nous travaillons la valorisation du bien (présentation, positionnement, diffusion) afin d’attirer des profils de qualité et d’optimiser la performance locative.
+                text: Oui. Nous travaillons la valorisation du bien avec un shooting photo professionnel, puis sa présentation, son positionnement et sa diffusion, afin d’attirer des profils de qualité et d’optimiser la performance locative.
             3:
                 title: Gérez-vous tout de bout en bout ?
                 text: "Absolument. Nous prenons en charge l’intégralité de la gestion : stratégie, diffusion, relation locataire, suivi opérationnel et gestion des revenus. Vous conservez le contrôle, nous gérons le reste."
@@ -1413,6 +1431,12 @@ marketplace:
                 fallback: Appartement
                 rooms: "%count% pièces"
         search:
+            q: Rechercher un bien, un quartier, une caractéristique...
+            localisation: Localisation
+            propertyType: Type de bien
+            typeCount: "%count% filtres"
+            moreFilters: Plus de filtres
+            reset: Réinitialiser
             arrondissement: Arrondissement
             arrondissementSelected: "{1}1 arrondissement|]1,Inf[%count% arrondissements"
             arrondissementPanel:
@@ -1430,10 +1454,45 @@ marketplace:
                     auteuil: Auteuil
                     batignolles: Batignolles
                     bercy: Bercy
-            type: Tous les biens
-            price:
-                min: Min
-                max: Max
+            layout:
+                title: Agencement
+                studio: Studio
+                bed1: 1 chambre
+                bed2: 2 chambres
+                bed3: 3 chambres
+                bed4: 4 chambres et plus
+            style:
+                title: Style
+                furnished: Meublé
+                unfurnished: Non meublé
+            rental:
+                title: Type de location
+                longTerm: Longue durée
+                midTerm: Moyenne durée
+            budget:
+                title: Budget
+                label: Loyer mensuel minimum
+            features:
+                title: Équipements
+                balcony: Balcon
+                elevator: Ascenseur
+                parking: Parking
+                airConditioning: Climatisation
+            availability:
+                title: Disponibilité
+                now: Disponible maintenant
+                days30: Sous 30 jours
+            transport:
+                title: Transports
+                metro: Proche métro
+                rer: Proche RER
+            moreFiltersModal:
+                title: Plus de filtres
+                subtitle: Affinez votre recherche de bien
+                close: Fermer
+                reset: Réinitialiser les filtres
+                selected: sélectionnés
+                apply: Appliquer les filtres
             button: Rechercher
         properties:
             title: 'offres <span class="hidden lg:block">en location à Paris</span>'

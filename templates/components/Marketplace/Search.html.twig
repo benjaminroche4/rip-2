@@ -18,221 +18,283 @@
 
 {% import _self as ui %}
 
-{% set selectClass = 'font-light w-full bg-transparent appearance-none cursor-pointer border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 invalid:text-gray-400 invalid:font-light' %}
-{% set inputClass = 'font-light text-gray-900 w-full bg-transparent placeholder:text-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none border-none shadow-none focus:ring-0 focus:outline-none' %}
-{% set fieldWrapper = 'px-3 py-3 lg:py-2 flex items-center gap-x-2 max-lg:border border-slate-200 max-lg:rounded-xl' %}
-{% set iconClass = 'size-5 text-gray-400 shrink-0' %}
+{% set t = 'marketplace.list.search.' %}
+{% set pillClass = 'flex items-center gap-2 h-[44px] px-3.5 rounded-xl bg-[#f7f7f7] hover:bg-[#efefef] text-sm text-gray-900 cursor-pointer transition-colors w-full lg:w-auto' %}
+{% set pillIcon = 'size-[18px] shrink-0 text-gray-500' %}
+{% set sectionHead = 'flex items-center gap-2 px-1 text-sm font-medium text-gray-900' %}
+{% set sectionIcon = 'size-[18px] shrink-0 text-primary' %}
+{% set checkboxClass = 'size-3.5 shrink-0 rounded-[4px] border-slate-300 text-primary focus:ring-primary/40' %}
+{% set optionRow = 'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-600' %}
+
+{# Property type pill summary (built from draft selections) #}
+{% set typeLabels = [] %}
+{% for b in draftBedrooms %}
+    {% set typeLabels = typeLabels|merge([(t ~ 'layout.' ~ (b == 'studio' ? 'studio' : 'bed' ~ b))|trans]) %}
+{% endfor %}
+{% if 'yes' in draftFurnished %}{% set typeLabels = typeLabels|merge([(t ~ 'style.furnished')|trans]) %}{% endif %}
+{% if 'no' in draftFurnished %}{% set typeLabels = typeLabels|merge([(t ~ 'style.unfurnished')|trans]) %}{% endif %}
+{% if draftLongTerm %}{% set typeLabels = typeLabels|merge([(t ~ 'rental.longTerm')|trans]) %}{% endif %}
+{% if draftMidTerm %}{% set typeLabels = typeLabels|merge([(t ~ 'rental.midTerm')|trans]) %}{% endif %}
 
 <div {{ attributes }}>
     <section class="max-w-4xl mx-auto lg:px-8 px-6 lg:py-16 py-10">
-        <div
-            class="relative group/dd border border-slate-200 rounded-2xl px-3 py-3 lg:py-2 shadow-lg shadow-gray-500/10 bg-white space-y-3 lg:space-y-0 lg:flex items-center w-full"
-            data-controller="arrondissement-dropdown"
-            data-arrondissement-dropdown-loaded-value="{{ panelLoaded ? 'true' : 'false' }}"
-        >
-            {# Hidden trigger: lazy-loads the panel content on first open #}
-            <button type="button" class="hidden" aria-hidden="true" tabindex="-1"
-                data-arrondissement-dropdown-target="loadTrigger"
-                data-action="live#action"
-                data-live-action-param="openPanel"
-            ></button>
-            <div class="grid lg:grid-cols-3 divide-slate-200 lg:divide-x flex-1 w-full space-y-3 lg:space-y-0">
-                <div class="{{ fieldWrapper }}">
-                    {{ ux_icon('lucide:map-pin', {'class': iconClass}) }}
-                    <button
-                        type="button"
-                        data-action="arrondissement-dropdown#toggle"
-                        aria-label="{{ 'marketplace.list.search.arrondissement'|trans }}"
-                        class="flex items-center gap-x-2 flex-1 min-w-0 bg-transparent cursor-pointer text-left {{ draftArrondissements is empty ? 'text-gray-400 font-light' : 'text-gray-900' }}"
-                    >
-                        <span class="flex-1 truncate">
-                            {%- if draftArrondissements is empty -%}
-                                {{ 'marketplace.list.search.arrondissement'|trans }}
-                            {%- elseif draftArrondissements|length == 1 -%}
-                                {{ ui.arrondissementLabel(draftArrondissements|first, locale) }}
-                            {%- else -%}
-                                {{ 'marketplace.list.search.arrondissementSelected'|trans({'%count%': draftArrondissements|length}) }}
-                            {%- endif -%}
-                        </span>
-                        {{ ux_icon('lucide:chevron-down', {'class': 'size-4 text-gray-400 shrink-0 transition-transform duration-200 group-data-open/dd:rotate-180'}) }}
-                    </button>
-                </div>
+        <div class="relative border border-slate-200 rounded-2xl p-3 lg:p-3.5 shadow-lg shadow-gray-500/10 bg-white">
+            {# ---- Free-text search + custom Google Places autocomplete ---- #}
+            <div class="relative flex items-center gap-2.5 px-2 pb-3 lg:pb-3.5 border-b border-slate-100" data-controller="places-autocomplete">
+                {{ ux_icon('lucide:search', {'class': 'size-5 shrink-0 text-gray-400'}) }}
+                <input
+                    type="search"
+                    data-model="norender|draftQ"
+                    data-places-autocomplete-target="input"
+                    data-action="input->places-autocomplete#search keydown->places-autocomplete#navigate keydown.enter->live#action"
+                    data-live-action-param="search"
+                    value="{{ draftQ }}"
+                    placeholder="{{ (t ~ 'q')|trans }}"
+                    aria-label="{{ (t ~ 'q')|trans }}"
+                    autocomplete="off"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    class="font-light w-full bg-transparent placeholder:text-gray-400 border-none shadow-none focus:ring-0 focus:outline-none text-gray-900 [&::-webkit-search-cancel-button]:appearance-none"
+                />
+                {# Hidden bridge: a picked Google address fires the searchAddress LiveAction #}
+                <button type="button" class="hidden" aria-hidden="true" tabindex="-1"
+                    data-places-autocomplete-target="trigger"
+                    data-action="places-autocomplete:select->live#action"
+                    data-live-action-param="searchAddress"></button>
+                {# Custom suggestions dropdown (populated by the controller) #}
+                <ul data-places-autocomplete-target="results" role="listbox"
+                    class="hidden absolute left-0 right-0 top-full mt-2 z-50 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl shadow-gray-500/10 p-1"></ul>
+            </div>
 
-                {# Mobile backdrop #}
-                <div
-                    data-action="click->arrondissement-dropdown#close"
-                    class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100 group-data-open/dd:transition-opacity group-data-open/dd:duration-200 lg:hidden"
-                ></div>
+            {# ---- Pills + actions ---- #}
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3 pt-3 lg:pt-3.5">
+                <div class="flex flex-col lg:flex-row gap-3 lg:flex-1">
 
-                {# Arrondissement panel: centered dropdown on desktop, bottom sheet on mobile #}
-                <div
-                    class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/dd:visible group-data-open/dd:opacity-100 group-data-open/dd:transition group-data-open/dd:duration-200 group-data-open/dd:ease-out
-                           max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/dd:translate-y-0
-                           lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-1/2 lg:-translate-x-1/2 lg:w-[840px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10"
-                >
-                    {% if panelLoaded %}
-                    <div class="flex flex-col lg:flex-row gap-5">
-                            {# Curated areas (decorative) #}
-                            <div class="flex flex-col gap-5 lg:w-[230px] shrink-0">
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex items-center gap-x-2 px-2">
-                                        {{ ux_icon('lucide:trending-up', {'class': 'size-4.5 shrink-0 text-primary'}) }}
-                                        <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.popular'|trans }}</p>
+                    {# ===== Localisation ===== #}
+                    <div class="relative group/loc w-full lg:w-auto" data-controller="arrondissement-dropdown">
+                        <button type="button" data-action="arrondissement-dropdown#toggle"
+                            aria-label="{{ (t ~ 'localisation')|trans }}" aria-haspopup="true" aria-expanded="false"
+                            class="{{ pillClass }} justify-between {{ draftArrondissements is not empty ? 'ring-1 ring-primary/30' }}">
+                            <span class="flex items-center gap-2 min-w-0">
+                                {{ ux_icon('lucide:map-pin', {'class': pillIcon}) }}
+                                <span class="truncate {{ draftArrondissements is empty ? 'text-gray-500' }}">
+                                    {%- if draftArrondissements is empty -%}
+                                        {{ (t ~ 'localisation')|trans }}
+                                    {%- elseif draftArrondissements|length == 1 -%}
+                                        {{ ui.arrondissementLabel(draftArrondissements|first, locale) }}
+                                    {%- else -%}
+                                        {{ (t ~ 'arrondissementSelected')|trans({'%count%': draftArrondissements|length}) }}
+                                    {%- endif -%}
+                                </span>
+                            </span>
+                            {{ ux_icon('lucide:chevron-down', {'class': 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-data-open/loc:rotate-180'}) }}
+                        </button>
+
+                        {# Mobile backdrop #}
+                        <div data-action="click->arrondissement-dropdown#close"
+                            class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/loc:visible group-data-open/loc:opacity-100 group-data-open/loc:transition-opacity group-data-open/loc:duration-200 lg:hidden"></div>
+
+                        <div class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/loc:visible group-data-open/loc:opacity-100 group-data-open/loc:transition group-data-open/loc:duration-200 group-data-open/loc:ease-out
+                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/loc:translate-y-0
+                                    lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-0 lg:w-[820px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10">
+                            <div class="flex flex-col lg:flex-row gap-5">
+                                {# Curated areas #}
+                                <div class="flex flex-col gap-5 lg:w-[230px] shrink-0">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="{{ sectionHead }}">
+                                            {{ ux_icon('lucide:trending-up', {'class': sectionIcon}) }}
+                                            {{ (t ~ 'arrondissementPanel.popular')|trans }}
+                                        </div>
+                                        <ul role="list" class="flex flex-col gap-0.5">
+                                            {% for area in this.popularAreas %}
+                                                <li>
+                                                    <button type="button"
+                                                        data-action="live#action:prevent arrondissement-dropdown#close"
+                                                        data-live-action-param="selectArea"
+                                                        data-live-arrondissements-param="{{ area.csv }}"
+                                                        class="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-gray-600 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900">
+                                                        {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                        <span class="truncate">{{ (t ~ 'arrondissementPanel.areas.' ~ area.key)|trans }}</span>
+                                                    </button>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
                                     </div>
-                                    <ul role="list" class="flex flex-col gap-0.5">
-                                        {% for area in this.popularAreas %}
-                                            <li>
-                                                <button
-                                                    type="button"
-                                                    data-action="live#action:prevent arrondissement-dropdown#close"
-                                                    data-live-action-param="selectArea"
-                                                    data-live-arrondissements-param="{{ area.csv }}"
-                                                    class="flex items-center gap-x-2 w-full px-2 py-1 rounded-md text-sm text-gray-500 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900"
-                                                >
-                                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
-                                                    <span class="truncate">{{ ('marketplace.list.search.arrondissementPanel.areas.' ~ area.key)|trans }}</span>
-                                                </button>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="{{ sectionHead }}">
+                                            {{ ux_icon('lucide:users', {'class': sectionIcon}) }}
+                                            {{ (t ~ 'arrondissementPanel.family')|trans }}
+                                        </div>
+                                        <ul role="list" class="flex flex-col gap-0.5">
+                                            {% for area in this.familyAreas %}
+                                                <li>
+                                                    <button type="button"
+                                                        data-action="live#action:prevent arrondissement-dropdown#close"
+                                                        data-live-action-param="selectArea"
+                                                        data-live-arrondissements-param="{{ area.csv }}"
+                                                        class="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-gray-600 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900">
+                                                        {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
+                                                        <span class="truncate">{{ (t ~ 'arrondissementPanel.areas.' ~ area.key)|trans }}</span>
+                                                    </button>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex items-center gap-x-2 px-2">
-                                        {{ ux_icon('lucide:users', {'class': 'size-4.5 shrink-0 text-primary'}) }}
-                                        <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.family'|trans }}</p>
+
+                                <div class="hidden lg:block w-px self-stretch bg-linear-to-b from-transparent via-slate-200 to-transparent"></div>
+
+                                {# All arrondissements #}
+                                <div class="flex flex-col gap-3 flex-1 min-w-0">
+                                    <div class="{{ sectionHead }}">
+                                        {{ ux_icon('lucide:map', {'class': sectionIcon}) }}
+                                        {{ (t ~ 'arrondissementPanel.all')|trans }}
                                     </div>
-                                    <ul role="list" class="flex flex-col gap-0.5">
-                                        {% for area in this.familyAreas %}
-                                            <li>
-                                                <button
-                                                    type="button"
-                                                    data-action="live#action:prevent arrondissement-dropdown#close"
-                                                    data-live-action-param="selectArea"
-                                                    data-live-arrondissements-param="{{ area.csv }}"
-                                                    class="flex items-center gap-x-2 w-full px-2 py-1 rounded-md text-sm text-gray-500 text-left cursor-pointer transition-colors hover:bg-slate-50 hover:text-gray-900"
-                                                >
-                                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-gray-400'}) }}
-                                                    <span class="truncate">{{ ('marketplace.list.search.arrondissementPanel.areas.' ~ area.key)|trans }}</span>
-                                                </button>
-                                            </li>
+                                    {% set arrondissementNames = this.arrondissementNames %}
+                                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
+                                        {% for i in 1..20 %}
+                                            <label class="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-600">
+                                                <input type="checkbox" data-model="norender|draftArrondissements" value="{{ i }}" {{ i in draftArrondissements ? 'checked' }} class="{{ checkboxClass }}" />
+                                                <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ arrondissementNames[i] }}</span>
+                                            </label>
                                         {% endfor %}
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="hidden lg:block w-px self-stretch bg-linear-to-b from-transparent via-slate-200 to-transparent"></div>
+                            {# Mobile actions #}
+                            <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 lg:hidden">
+                                <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="clearArrondissements"
+                                    class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-slate-50">{{ (t ~ 'arrondissementPanel.clear')|trans }}</button>
+                                <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="search"
+                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
+                            </div>
+                        </div>
+                    </div>
 
-                            {# All arrondissements (multi-select) #}
-                            <div class="flex flex-col gap-3 flex-1 min-w-0">
-                                <div class="flex items-center gap-x-2 px-2">
-                                    {{ ux_icon('lucide:map', {'class': 'size-4.5 shrink-0 text-primary'}) }}
-                                    <p class="text-sm font-medium text-gray-900">{{ 'marketplace.list.search.arrondissementPanel.all'|trans }}</p>
-                                </div>
-                                {% set arrondissementNames = this.arrondissementNames %}
-                                <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
-                                    {% for i in 1..20 %}
-                                        <label class="flex items-center gap-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-500">
-                                            <input
-                                                type="checkbox"
-                                                data-model="norender|draftArrondissements"
-                                                value="{{ i }}"
-                                                {{ i in draftArrondissements ? 'checked' }}
-                                                class="size-3.5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary/40"
-                                            />
-                                            <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ arrondissementNames[i] }}</span>
+                    {# ===== Property type ===== #}
+                    <div class="relative group/type w-full lg:w-auto" data-controller="arrondissement-dropdown">
+                        <button type="button" data-action="arrondissement-dropdown#toggle"
+                            aria-label="{{ (t ~ 'propertyType')|trans }}" aria-haspopup="true" aria-expanded="false"
+                            class="{{ pillClass }} justify-between {{ typeLabels is not empty ? 'ring-1 ring-primary/30' }}">
+                            <span class="flex items-center gap-2 min-w-0">
+                                {{ ux_icon('iconoir:home-simple', {'class': pillIcon}) }}
+                                <span class="truncate {{ typeLabels is empty ? 'text-gray-500' }}">
+                                    {%- if typeLabels is empty -%}
+                                        {{ (t ~ 'propertyType')|trans }}
+                                    {%- elseif typeLabels|length == 1 -%}
+                                        {{ typeLabels|first }}
+                                    {%- else -%}
+                                        {{ (t ~ 'typeCount')|trans({'%count%': typeLabels|length}) }}
+                                    {%- endif -%}
+                                </span>
+                            </span>
+                            {{ ux_icon('lucide:chevron-down', {'class': 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-data-open/type:rotate-180'}) }}
+                        </button>
+
+                        <div data-action="click->arrondissement-dropdown#close"
+                            class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/type:visible group-data-open/type:opacity-100 group-data-open/type:transition-opacity group-data-open/type:duration-200 lg:hidden"></div>
+
+                        <div class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/type:visible group-data-open/type:opacity-100 group-data-open/type:transition group-data-open/type:duration-200 group-data-open/type:ease-out
+                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/type:translate-y-0
+                                    lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-0 lg:w-[620px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-6 gap-y-5">
+                                {# Layout (bedrooms) #}
+                                <div class="flex flex-col gap-2">
+                                    <div class="{{ sectionHead }}">
+                                        {{ ux_icon('lucide:trending-up', {'class': sectionIcon}) }}
+                                        {{ (t ~ 'layout.title')|trans }}
+                                    </div>
+                                    {% for b in this.bedroomOptions %}
+                                        <label class="{{ optionRow }}">
+                                            <input type="checkbox" data-model="norender|draftBedrooms" value="{{ b }}" {{ b in draftBedrooms ? 'checked' }} class="{{ checkboxClass }}" />
+                                            <span class="truncate">{{ (t ~ 'layout.' ~ (b == 'studio' ? 'studio' : 'bed' ~ b))|trans }}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
+                                {# Style (furnished) #}
+                                <div class="flex flex-col gap-2">
+                                    <div class="{{ sectionHead }}">
+                                        {{ ux_icon('iconoir:building', {'class': sectionIcon}) }}
+                                        {{ (t ~ 'style.title')|trans }}
+                                    </div>
+                                    <label class="{{ optionRow }}">
+                                        <input type="checkbox" data-model="norender|draftFurnished" value="yes" {{ 'yes' in draftFurnished ? 'checked' }} class="{{ checkboxClass }}" />
+                                        <span class="truncate">{{ (t ~ 'style.furnished')|trans }}</span>
+                                    </label>
+                                    <label class="{{ optionRow }}">
+                                        <input type="checkbox" data-model="norender|draftFurnished" value="no" {{ 'no' in draftFurnished ? 'checked' }} class="{{ checkboxClass }}" />
+                                        <span class="truncate">{{ (t ~ 'style.unfurnished')|trans }}</span>
+                                    </label>
+                                </div>
+                                {# Rental category #}
+                                <div class="flex flex-col gap-2">
+                                    <div class="{{ sectionHead }}">
+                                        {{ ux_icon('lucide:file-text', {'class': sectionIcon}) }}
+                                        {{ (t ~ 'rental.title')|trans }}
+                                    </div>
+                                    <label class="{{ optionRow }}">
+                                        <input type="checkbox" data-model="norender|draftLongTerm" {{ draftLongTerm ? 'checked' }} class="{{ checkboxClass }}" />
+                                        <span class="truncate">{{ (t ~ 'rental.longTerm')|trans }}</span>
+                                    </label>
+                                    <label class="{{ optionRow }}">
+                                        <input type="checkbox" data-model="norender|draftMidTerm" {{ draftMidTerm ? 'checked' }} class="{{ checkboxClass }}" />
+                                        <span class="truncate">{{ (t ~ 'rental.midTerm')|trans }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 lg:hidden">
+                                <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="search"
+                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
                             </div>
                         </div>
-
-                        {# Mobile actions #}
-                        <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 lg:hidden">
-                            <button
-                                type="button"
-                                data-action="live#action:prevent arrondissement-dropdown#close"
-                                data-live-action-param="clearArrondissements"
-                                class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-slate-50"
-                            >
-                                {{ 'marketplace.list.search.arrondissementPanel.clear'|trans }}
-                            </button>
-                            <button
-                                type="button"
-                                data-action="live#action:prevent arrondissement-dropdown#close"
-                                data-live-action-param="search"
-                                class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90"
-                            >
-                                {{ 'marketplace.list.search.arrondissementPanel.apply'|trans }}
-                            </button>
-                        </div>
-                    {% else %}
-                        <div class="flex items-center justify-center py-12 lg:py-16">
-                            <twig:Spinner />
-                        </div>
-                    {% endif %}
                     </div>
 
-                <div class="{{ fieldWrapper }}">
-                    {{ ux_icon('iconoir:home-simple', {'class': iconClass}) }}
-                    <select data-model="norender|draftPropertyType" data-action="keydown.enter->live#action" data-live-action-param="search" required aria-label="{{ 'marketplace.list.search.type'|trans }}" class="{{ selectClass }}">
-                        <option value="">{{ 'marketplace.list.search.type'|trans|raw }}</option>
-                        {% for slug, name in this.propertyTypes %}
-                            <option value="{{ slug }}" {{ (draftPropertyType ?: propertyType) == slug ? 'selected' }}>{{ name }}</option>
-                        {% endfor %}
-                    </select>
+                    {# ===== More filters ===== #}
+                    {% set moreCount = this.moreFiltersCount %}
+                    <div class="w-full lg:w-auto group/mf" data-controller="more-filters-modal">
+                        <button type="button" data-action="more-filters-modal#open"
+                            aria-haspopup="dialog" aria-expanded="false"
+                            class="{{ pillClass }} justify-between">
+                            <span class="flex items-center gap-2 min-w-0">
+                                {# funnel #}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="{{ pillIcon }}" aria-hidden="true">
+                                    <path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="truncate text-gray-900">{{ (t ~ 'moreFilters')|trans }}</span>
+                            </span>
+                            <span class="shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold {{ moreCount > 0 ? 'bg-primary text-white' : 'bg-slate-200 text-gray-500' }}"
+                                data-more-filters-modal-target="badge">{{ moreCount }}</span>
+                        </button>
+
+                        {% include 'components/Marketplace/_partials/MoreFiltersModal.html.twig' %}
+                    </div>
                 </div>
 
-                <div class="{{ fieldWrapper }}">
-                    {{ ux_icon('iconoir:euro', {'class': iconClass}) }}
-                    <div class="flex items-center gap-x-1 flex-1 min-w-0">
-                        <input
-                            type="number"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                            data-model="norender|draftRentMin"
-                            data-action="keydown.enter->live#action"
-                            data-live-action-param="search"
-                            placeholder="{{ 'marketplace.list.search.price.min'|trans|raw }}"
-                            min="0"
-                            step="100"
-                            value="{{ draftRentMin ?? rentMin }}"
-                            class="{{ inputClass }}"
-                        />
-                        <span class="text-gray-300 shrink-0">–</span>
-                        <input
-                            type="number"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                            data-model="norender|draftRentMax"
-                            data-action="keydown.enter->live#action"
-                            data-live-action-param="search"
-                            placeholder="{{ 'marketplace.list.search.price.max'|trans|raw }}"
-                            min="0"
-                            step="100"
-                            value="{{ draftRentMax ?? rentMax }}"
-                            class="{{ inputClass }}"
-                        />
-                    </div>
+                {# Reset + Search #}
+                <div class="flex items-center gap-2 lg:gap-3 shrink-0">
+                    <button type="button" data-action="live#action" data-live-action-param="clearFilters"
+                        class="hidden lg:inline-flex px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-slate-50 transition-colors cursor-pointer">
+                        {{ (t ~ 'reset')|trans }}
+                    </button>
+                    <twig:Button
+                        variant="default"
+                        size="lg"
+                        data-action="live#action arrondissement-dropdown#close"
+                        data-live-action-param="search"
+                        data-loading="action(search)|addAttribute(disabled)"
+                        class="w-full lg:w-auto">
+                        <span class="relative inline-flex items-center justify-center">
+                            <span data-loading="action(search)|addClass(invisible)">{{ (t ~ 'button')|trans|raw }}</span>
+                            <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(search)|removeClass(hidden)">
+                                <twig:Spinner />
+                            </span>
+                        </span>
+                    </twig:Button>
                 </div>
             </div>
-
-            <twig:Button
-                variant="default"
-                size="lg"
-                data-action="live#action arrondissement-dropdown#close"
-                data-live-action-param="search"
-                data-loading="action(search)|addAttribute(disabled)"
-                class="w-full lg:w-auto"
-            >
-                <span class="relative inline-flex items-center justify-center">
-                    <span data-loading="action(search)|addClass(invisible)">
-                        {{ 'marketplace.list.search.button'|trans|raw }}
-                    </span>
-                    <span class="hidden absolute inset-0 flex items-center justify-center" data-loading="action(search)|removeClass(hidden)">
-                        <twig:Spinner />
-                    </span>
-                </span>
-            </twig:Button>
         </div>
     </section>
 

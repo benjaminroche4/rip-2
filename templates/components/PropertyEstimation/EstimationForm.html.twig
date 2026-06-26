@@ -2,7 +2,7 @@
 {%- props form -%}
 
 <div class="px-6 pt-6 pb-1 bg-white rounded-2xl mt-2" id="estimation-form">
-    {{ form_start(form, {'attr': {'data-turbo': 'true', 'novalidate': 'novalidate', 'class': 'space-y-6'}}) }}
+    {{ form_start(form, {'attr': {'data-turbo': 'true', 'novalidate': 'novalidate', 'class': 'space-y-6', 'data-controller': 'form-loader'}}) }}
         {% for message in app.flashes('success') %}
             <div class="rounded-xl bg-green-50 p-4">
                 <div class="flex items-start gap-x-3">
@@ -21,15 +21,54 @@
 
         <div>
             {{ form_label(form.address, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-            {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.address.placeholder'|trans }}) }}
+            <div class="relative" data-controller="places-autocomplete" data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    {{ ux_icon('lucide:map-pin', {'class':'size-5 text-gray-400'}) }}
+                </div>
+                {{ form_widget(form.address, {'attr': {'class': 'block w-full rounded-lg bg-white pl-10 pr-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.address.placeholder'|trans }}) }}
+                {# Custom suggestions dropdown (populated by the controller) #}
+                <ul data-places-autocomplete-target="results" role="listbox"
+                    class="hidden absolute left-0 right-0 top-full mt-2 z-50 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl shadow-gray-500/10 p-1"></ul>
+            </div>
             {% for error in form.address.vars.errors %}
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}
         </div>
 
-        <div>
+        <div data-controller="select" class="relative">
             {{ form_label(form.propertyCondition, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-            {{ form_widget(form.propertyCondition, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6'}}) }}
+            {{ form_widget(form.propertyCondition, {'attr': {
+                'class': 'sr-only',
+                'data-select-target': 'select',
+                'tabindex': -1,
+                'aria-hidden': 'true',
+            }}) }}
+            <button
+                type="button"
+                data-select-target="button"
+                data-action="click->select#toggle"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="{{ form.propertyCondition.vars.id }}-panel"
+                class="flex w-full items-center justify-between rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 cursor-pointer"
+            >
+                <span data-select-target="display" class="text-gray-400">{{ 'propertyManagement.form.propertyCondition.placeholder'|trans }}</span>
+                <svg aria-hidden="true" class="size-4 text-gray-400 ml-2 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.06l3.71-3.83a.75.75 0 1 1 1.08 1.04l-4.25 4.39a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/></svg>
+            </button>
+            <div
+                id="{{ form.propertyCondition.vars.id }}-panel"
+                data-select-target="panel"
+                hidden
+                class="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-white border border-gray-300 shadow-lg"
+            >
+                <ul
+                    role="listbox"
+                    tabindex="-1"
+                    data-select-target="list"
+                    data-action="click->select#choose keydown->select#keydown"
+                    class="max-h-60 overflow-auto p-1 space-y-0.5 outline-none"
+                ></ul>
+            </div>
             {% for error in form.propertyCondition.vars.errors %}
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}
@@ -39,24 +78,29 @@
         {% set steppers = [
             { field: 'bedroom',  icon: 'ph:bed',                    min: 0, max: 20,  placeholder: 'propertyManagement.form.bedroom.placeholder',  unit: null,  span: false },
             { field: 'bathroom', icon: 'mdi:shower',                min: 0, max: 10,  placeholder: 'propertyManagement.form.bathroom.placeholder', unit: null,  span: false },
-            { field: 'surface',  icon: 'qlementine-icons:square-2-16', min: 8, max: 900, placeholder: 'propertyManagement.form.bathroom.placeholder', unit: 'm²', span: true },
+            { field: 'surface',  icon: 'solar:ruler-outline', min: 8, max: 900, placeholder: 'propertyManagement.form.bathroom.placeholder', unit: 'm²', span: true },
         ] %}
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {% for s in steppers %}
                 <div data-controller="number-stepper" data-number-stepper-min-value="{{ s.min }}" data-number-stepper-max-value="{{ s.max }}"{{ s.span ? ' class="col-span-2 lg:col-span-1"' }}>
-                    <div class="flex items-center gap-x-1 mb-2">
-                        {{ ux_icon(s.icon, {'class':'size-5 text-primary shrink-0'}) }}
-                        {{ form_label(form[s.field], null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block'}}) }}
-                        {% if s.unit %}<span class="text-xs font-light text-gray-400">({{ s.unit }})</span>{% endif %}
-                    </div>
-                    <div class="relative">
-                        <button type="button" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">-</button>
-                        {{ form_widget(form[s.field], {'attr': {
-                            'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6 text-center',
-                            'placeholder': s.placeholder|trans,
-                            'data-number-stepper-target': 'input'
-                        }}) }}
-                        <button type="button" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-900 text-xl font-light bg-gray-50 rounded-full w-7 h-7 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors">+</button>
+                    <div class="flex flex-col items-center gap-1 rounded-lg bg-gray-50 p-1">
+                        <div class="flex items-center justify-center gap-1.5 py-0.5">
+                            {{ ux_icon(s.icon, {'class':'size-4 text-gray-700 shrink-0'}) }}
+                            {{ form_label(form[s.field], null, {'label_attr': {'class': 'text-xs font-medium text-gray-900'}}) }}
+                            {% if s.unit %}<span class="text-xs font-normal text-gray-500">({{ s.unit }})</span>{% endif %}
+                        </div>
+                        <div class="flex w-full items-center justify-between gap-2 rounded-md bg-white p-1.5">
+                            <button type="button" aria-label="{{ 'propertyManagement.form.stepper.decrease'|trans }}" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-900 transition-colors hover:bg-gray-200 active:bg-gray-300">
+                                {{ ux_icon('lucide:minus', {'class':'size-3.5'}) }}
+                            </button>
+                            {{ form_widget(form[s.field], {'attr': {
+                                'class': 'min-w-0 flex-1 border-0 bg-transparent p-0 text-center text-base font-medium text-gray-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+                                'data-number-stepper-target': 'input'
+                            }}) }}
+                            <button type="button" aria-label="{{ 'propertyManagement.form.stepper.increase'|trans }}" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-900 transition-colors hover:bg-gray-200 active:bg-gray-300">
+                                {{ ux_icon('lucide:plus', {'class':'size-3.5'}) }}
+                            </button>
+                        </div>
                     </div>
                     {% for error in form[s.field].vars.errors %}
                         <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
@@ -65,9 +109,14 @@
             {% endfor %}
         </div>
 
-        <div>
+        <div data-controller="phone-input" data-phone-input-initial-country-value="{{ (app.request and app.request.locale == 'en') ? 'gb' : 'fr' }}" data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}" class="text-base sm:text-sm/6">
             {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
-            {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6', 'placeholder': 'propertyManagement.form.phoneNumber.placeholder'|trans}}) }}
+            {{ form_widget(form.phoneNumber, {'attr': {
+                'class': 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6',
+                'placeholder': ' ',
+                'autocomplete': 'tel',
+                'data-phone-input-target': 'input'
+            }}) }}
             {% for error in form.phoneNumber.vars.errors %}
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}
@@ -81,17 +130,20 @@
             {% endfor %}
         </div>
 
-        <twig:Button variant="default" class="w-full" size="lg">
-            {{ 'propertyManagement.form.button'|trans|raw }}
+        <twig:Button variant="default" class="w-full" size="lg" data-form-loader-target="submit">
+            <span class="inline-flex items-center gap-2" data-form-loader-target="label">{{ 'propertyManagement.form.button'|trans|raw }}</span>
+            <span class="hidden items-center justify-center" data-form-loader-target="spinner"><twig:Spinner /></span>
         </twig:Button>
 
-        <div class="grid grid-cols-2 gap-4 mt-4 divide-x divide-gray-200 items-center mx-auto max-w-sm">
-            <p class="text-xs text-gray-500 text-center mx-0.5">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
+                {{ ux_icon('lucide:clock', {'class':'size-3.5 text-gray-400 shrink-0'}) }}
                 {{ 'propertyManagement.form.trust.1'|trans|raw }}
-            </p>
-            <p class="text-xs text-gray-500 text-center mx-0.5">
+            </span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-2.5 py-1 text-xs text-gray-600">
+                {{ ux_icon('lucide:lock', {'class':'size-3.5 text-gray-400 shrink-0'}) }}
                 {{ 'propertyManagement.form.trust.2'|trans|raw }}
-            </p>
+            </span>
         </div>
     {{ form_end(form) }}
 </div>

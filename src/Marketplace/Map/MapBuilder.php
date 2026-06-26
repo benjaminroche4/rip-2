@@ -24,9 +24,13 @@ final class MapBuilder
     ) {
     }
 
-    public function buildMap(?int $arrondissement, float $zoom): Map
+    public function buildMap(?int $arrondissement, float $zoom, ?float $centerLat = null, ?float $centerLng = null): Map
     {
-        [$lat, $lng] = ParisArrondissements::getCenter($arrondissement);
+        if (null !== $centerLat && null !== $centerLng) {
+            [$lat, $lng] = [$centerLat, $centerLng];
+        } else {
+            [$lat, $lng] = ParisArrondissements::getCenter($arrondissement);
+        }
 
         return (new Map('default'))
             ->center(new Point($lat, $lng))
@@ -123,6 +127,20 @@ final class MapBuilder
                 $locale,
             ));
         }
+    }
+
+    /**
+     * Drops a standalone location pin at the given coordinates (selected
+     * arrondissement / curated area center) so the user can place the filter
+     * geographically. No-op when coordinates are missing.
+     */
+    public function addPing(Map $map, ?float $lat, ?float $lng): void
+    {
+        if (null === $lat || null === $lng) {
+            return;
+        }
+
+        $map->addMarker($this->markerBuilder->buildPingMarker(new Point($lat, $lng)));
     }
 
     /**
