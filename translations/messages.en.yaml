@@ -251,6 +251,16 @@ findAccommodation:
     title: Property Search
     subTitle: Your Turnkey Housing Solution in Paris
     text: "Let us handle your home search in Paris: a turnkey service that is simple and tailored to you."
+    badge:
+        1: Off-market homes
+        2: Move-in within 20 days
+    process:
+        approach: Our approach
+        title: A personalized housing search, built around you
+        text1: We take the time to understand your needs and find a home in Paris that truly fits you.
+        text2: Our local expertise gives you access to both listed and off-market opportunities.
+        eyebrow: Our process
+        subTitle: A clear and proven process
     trust:
         1: 5.0 based on
         2: reviews
@@ -291,6 +301,10 @@ findAccommodation:
         4:
             title: Human support you can trust
             text: A dedicated advisor supports you end to end, ensuring a smooth, controlled, and seamless installation.
+        stats:
+            relocations: Successful relocations
+            partners: Real estate partners
+            reviews: Google reviews
     faq:
         title: Your questions, our answers
         question:

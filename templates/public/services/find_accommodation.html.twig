@@ -12,219 +12,176 @@
     } only %}
 {% endblock %}
 
+{% block head_preload %}
+    <link rel="preload" as="image" href="{{ asset('medias/website/relocation-in-paris-9.webp') }}" fetchpriority="high">
+{% endblock %}
+
 {% block body %}
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-8">
-        <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">
-            <twig:Section:PageHeader
-                caption="findAccommodation.title"
-                subtitle="findAccommodation.subTitle"
-                intro="findAccommodation.text"
-            />
-            <twig:Section:GoogleTrustBadge keyPrefix="findAccommodation.trust" />
-        </div>
-        <div class="max-w-5xl mx-auto mt-12">
-            <img width="546" height="350" loading="eager" src="{{ asset('medias/website/relocation-in-paris-9.webp') }}" alt="Relocation In Paris, trouver un logement à Paris" class="w-full aspect-3/2 lg:h-[400px] object-cover rounded-2xl" />
+    <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-16">
+        <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
+            <div class="text-center lg:text-left">
+                <p class="font-semibold font-secondary text-primary">{{ 'findAccommodation.title'|trans|raw }}</p>
+                <h1 class="mt-3 text-4xl sm:text-5xl font-medium text-gray-900 text-balance leading-[1.15]">{{ 'findAccommodation.subTitle'|trans|raw }}</h1>
+                <p class="mt-5 max-w-lg mx-auto lg:mx-0 text-base sm:text-lg font-light text-slate-600 text-pretty">{{ 'findAccommodation.text'|trans|raw }}</p>
+                {% set heroBadges = [
+                    { icon: 'lucide:gem',   key: 1 },
+                    { icon: 'lucide:clock', key: 2 },
+                ] %}
+                <div class="mt-6 flex flex-wrap gap-3 justify-center lg:justify-start">
+                    {% for b in heroBadges %}
+                        <div class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f7f7f7] px-4 py-2">
+                            {{ ux_icon(b.icon, {'class':'size-4 text-primary shrink-0'}) }}
+                            <p class="text-sm text-black">{{ ('findAccommodation.badge.' ~ b.key)|trans|raw }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-6 flex justify-center lg:justify-start">
+                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                        {{ 'home.heroSection.button'|trans|raw }}
+                        {{ ux_icon('lucide:arrow-right', {'class':'size-4 shrink-0'}) }}
+                    </twig:Button>
+                </div>
+            </div>
+            <div>
+                <img src="{{ asset('medias/website/relocation-in-paris-9.webp') }}" alt="Relocation In Paris, trouver un logement à Paris" width="640" height="520" loading="eager" fetchpriority="high" class="w-full aspect-4/3 lg:aspect-square object-cover rounded-3xl" />
+            </div>
         </div>
     </section>
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12 bg-white">
-        <div class="max-w-4xl mx-auto">
-            <div
-                data-controller="vertical-timeline"
-                data-vertical-timeline-threshold-value="0.5"
-                class="relative"
-            >
-                {# Vertical Progress Rail #}
-                <div class="absolute left-4 lg:left-8 top-0 bottom-0 w-0.5 bg-gray-200" data-vertical-timeline-target="rail">
-                    <div
-                        data-vertical-timeline-target="progressBar"
-                        class="absolute top-0 left-0 w-full bg-gradient-to-b from-primary via-primary/90 to-primary/80 transition-all duration-500 ease-out"
-                        style="height: 0%;"
-                    ></div>
-                </div>
-
-                {# Timeline Steps #}
-                <div class="relative space-y-12 lg:space-y-16">
-                    {# Step 1 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-0 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">01</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.1.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.1.description'|trans|raw }}</p>
-                        </div>
-                    </div>
-
-                    {# Step 2 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">02</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.2.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.2.description'|trans|raw }}</p>
-                            <div class="max-w-lg mt-8">
-                                <div class="grid max-[331px]:grid-cols-1 min-[331px]:grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
-                                        {{ ux_icon('mdi:paris', {'class':'size-8 text-primary'}) }}
-                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
-                                            {{ 'findAccommodation.timeline.steps.2.cards.1'|trans }}
-                                        </h4>
-                                    </div>
-                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
-                                        {{ ux_icon('solar:calendar-outline', {'class':'size-8 text-primary'}) }}
-                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
-                                            {{ 'findAccommodation.timeline.steps.2.cards.2'|trans }}
-                                        </h4>
-                                    </div>
-                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
-                                        {{ ux_icon('cil:couch', {'class':'size-8 text-primary'}) }}
-                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
-                                            {{ 'findAccommodation.timeline.steps.2.cards.3'|trans }}
-                                        </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {# Step 3 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">03</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.3.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.3.description'|trans|raw }}</p>
-                        </div>
-                    </div>
-
-                    {# Step 4 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">04</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.4.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.4.description'|trans|raw }}</p>
-                            <div class="max-w-sm mt-8">
-                                <div class="grid max-[331px]:grid-cols-1 min-[331px]:grid-cols-2 gap-4">
-                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
-                                        {{ ux_icon('lineicons:phone', {'class':'size-8 text-primary'}) }}
-                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
-                                            {{ 'findAccommodation.timeline.steps.4.cards.1'|trans }}
-                                        </h4>
-                                    </div>
-                                    <div class="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition duration-100 hover:border-primary/20 shadow-lg shadow-gray-300/30">
-                                        {{ ux_icon('icon-park-outline:eyes', {'class':'size-8 text-primary'}) }}
-                                        <h4 class="text-xs sm:text-sm text-center text-gray-600 text-balance">
-                                            {{ 'findAccommodation.timeline.steps.4.cards.2'|trans }}
-                                        </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {# Step 5 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">05</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.5.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.5.description'|trans|raw }}</p>
-                        </div>
-                    </div>
-
-                    {# Step 6 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">06</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.6.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.6.description'|trans|raw }}</p>
-                        </div>
-                    </div>
-
-                    {# Step 7 #}
-                    <div
-                        data-vertical-timeline-target="step"
-                        class="relative pl-12 lg:pl-20 transition-all duration-400"
-                    >
-                        <div class="absolute left-1.5 lg:left-5.5 top-2 flex items-center justify-center w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
-                             data-vertical-timeline-target="dot">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 transition-all duration-300" data-vertical-timeline-target="dotInner"></div>
-                        </div>
-                        <div class="transition-opacity duration-300" style="opacity: 0.4;">
-                            <div class="flex flex-col sm:flex-row items-baseline gap-3 mb-2">
-                                <div class="text-sm font-mono font-semibold text-primary/40 transition-all duration-300 bg-gray-50 p-2 rounded-xl" data-vertical-timeline-target="stepNumber">07</div>
-                                <h3 class="text-xl lg:text-2xl font-semibold text-gray-900 transition-colors duration-300">{{ 'findAccommodation.timeline.steps.7.title'|trans|raw }}</h3>
-                            </div>
-                            <p class="text-base text-gray-600 leading-relaxed">{{ 'findAccommodation.timeline.steps.7.description'|trans|raw }}</p>
-                        </div>
-                    </div>
-                </div>
+        {# Section header: title (left) + intro paragraphs (right) #}
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-12 mb-10 lg:mb-16">
+            <div class="lg:w-[55%]">
+                <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.process.approach'|trans|raw }}</p>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-medium text-black leading-[1.3] text-balance">{{ 'findAccommodation.process.title'|trans|raw }}</h2>
+            </div>
+            <div class="flex flex-col gap-3 text-lg font-light text-[#525252] lg:flex-1 lg:pb-1">
+                <p>{{ 'findAccommodation.process.text1'|trans|raw }}</p>
+                <p>{{ 'findAccommodation.process.text2'|trans|raw }}</p>
             </div>
         </div>
-        <div class="mt-12 lg:mt-20 flex items-center justify-center">
-            <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                {{ 'home.heroSection.button'|trans|raw }}
-            </twig:Button>
+
+        {# Animated process stepper #}
+        <div class="rounded-[28px] border border-neutral-200 p-2">
+            <div class="rounded-3xl bg-linear-to-b from-[#f7f7f7] to-[#f7f7f7]/0 px-5 py-10 sm:px-10 lg:px-16 lg:py-14">
+                <div class="text-center mb-10 lg:mb-14">
+                    <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.process.eyebrow'|trans|raw }}</p>
+                    <h2 class="mt-2 text-3xl sm:text-4xl font-medium text-black leading-[1.3] text-balance">{{ 'findAccommodation.process.subTitle'|trans|raw }}</h2>
+                </div>
+
+                {% set prefix = 'findAccommodation.timeline.steps.' %}
+                {% set steps = [
+                    { icon: 'lucide:messages-square',  chips: [] },
+                    { icon: 'lucide:compass',          chips: [{ icon: 'lucide:map-pin', key: 'cards.1' }, { icon: 'lucide:calendar-check', key: 'cards.2' }, { icon: 'lucide:armchair', key: 'cards.3' }] },
+                    { icon: 'lucide:target',           chips: [] },
+                    { icon: 'lucide:calendar',         chips: [{ icon: 'lucide:video', key: 'cards.1' }, { icon: 'lucide:handshake', key: 'cards.2' }] },
+                    { icon: 'lucide:file-search',      chips: [] },
+                    { icon: 'lucide:clipboard-pen-line', chips: [] },
+                    { icon: 'lucide:handshake',        chips: [] },
+                ] %}
+
+                <div data-controller="process-stepper" class="mx-auto max-w-3xl">
+                    <div class="relative space-y-6 lg:space-y-8">
+                        {# Vertical rail behind the number circles #}
+                        <div class="absolute left-[21px] lg:left-[25px] top-6 bottom-6 w-px bg-neutral-200" aria-hidden="true">
+                            <div data-process-stepper-target="progressBar" class="absolute inset-x-0 top-0 bg-primary transition-all duration-500 ease-out" style="height: 0%;"></div>
+                        </div>
+
+                        {% for step in steps %}
+                            {% set stepNum = loop.index %}
+                            <div data-process-stepper-target="step" class="relative flex items-start gap-4 lg:gap-6">
+                                <span
+                                    data-process-stepper-target="circle"
+                                    class="relative z-10 flex size-11 lg:size-13 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-black text-lg lg:text-xl font-semibold transition-all duration-300"
+                                >{{ stepNum }}</span>
+                                <div
+                                    data-process-stepper-target="card"
+                                    class="flex-1 rounded-2xl border border-transparent bg-white p-5 lg:p-6 shadow-[0_2px_15px_rgba(0,0,0,0.05)] transition-all duration-300"
+                                >
+                                    <div class="flex items-center gap-2.5">
+                                        {{ ux_icon(step.icon, {'class':'size-5 text-primary shrink-0'}) }}
+                                        <h3 class="text-base lg:text-lg font-medium text-black text-pretty">{{ (prefix ~ stepNum ~ '.title')|trans|raw }}</h3>
+                                    </div>
+                                    <div class="my-3 h-px w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent"></div>
+                                    <p class="text-sm lg:text-base font-light text-[#525252]">{{ (prefix ~ stepNum ~ '.description')|trans|raw }}</p>
+                                    {% if step.chips is not empty %}
+                                        <div class="mt-4 flex flex-wrap gap-2">
+                                            {% for chip in step.chips %}
+                                                <span class="inline-flex items-center gap-1.5 rounded-md bg-primary/5 px-2 py-1 text-sm text-gray-900">
+                                                    {{ ux_icon(chip.icon, {'class':'size-3.5 text-primary shrink-0'}) }}
+                                                    {{ (prefix ~ stepNum ~ '.' ~ chip.key)|trans|raw }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mt-10 lg:mt-14 flex justify-center">
+                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                        <img src="{{ asset('medias/team/team_2.webp') }}" alt="" aria-hidden="true" width="20" height="20" class="size-5 rounded-full object-cover" />
+                        {{ 'home.heroSection.button'|trans|raw }}
+                    </twig:Button>
+                </div>
+            </div>
         </div>
     </section>
     <twig:Section:SolutionGrid
         keyPrefix="findAccommodation.solution"
         :icons="['gg:search', 'hugeicons:diamond-02', 'mdi:paper-check-outline', 'humbleicons:key', 'icon-park-outline:people', 'mdi:paris']"
     />
-    <twig:Section:AdvantageList
-        keyPrefix="findAccommodation.advantage"
-        imageSrc="medias/website/relocation-paris-6.webp"
-        imageAlt="Relocation In Paris, votre agence de relocation à Paris"
-    />
+    <section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+        {# Header: title (left) + intro + stats (right) #}
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-16 mb-12 lg:mb-16">
+            <div class="lg:flex-1">
+                <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.advantage.title'|trans|raw }}</p>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'findAccommodation.advantage.subTitle'|trans|raw }}</h2>
+            </div>
+            <div class="flex flex-col gap-6 lg:w-[560px]">
+                <p class="text-lg font-light text-[#525252] text-pretty">{{ 'findAccommodation.advantage.text'|trans|raw }}</p>
+                <div class="flex items-stretch gap-4">
+                    <div class="flex-1">
+                        <p class="text-2xl sm:text-3xl font-semibold text-black">+350</p>
+                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.relocations'|trans|raw }}</p>
+                    </div>
+                    <div class="w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
+                    <div class="flex-1">
+                        <p class="text-2xl sm:text-3xl font-semibold text-black">+80</p>
+                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.partners'|trans|raw }}</p>
+                    </div>
+                    <div class="w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-1.5">
+                            {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-yellow-500 shrink-0'}) }}
+                            <p class="text-2xl sm:text-3xl font-semibold text-black">{{ 'propertyManagement.hero.rating.score'|trans }}</p>
+                        </div>
+                        <p class="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-[#525252]">
+                            Sur +{{ google_reviews_count }}
+                            {{ ux_icon('logos:google-icon', {'class':'size-3.5 shrink-0'}) }}
+                            {{ 'findAccommodation.advantage.stats.reviews'|trans|raw }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 4 image cards #}
+        {% set advImages = ['medias/website/paris_1.webp', 'medias/website/paris_2.webp', 'medias/website/paris_3.webp', 'medias/website/paris_4.webp'] %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {% for img in advImages %}
+                {% set n = loop.index %}
+                <div class="rounded-2xl border border-neutral-200 bg-white p-2.5">
+                    <img src="{{ asset(img) }}" alt="" aria-hidden="true" width="640" height="360" loading="lazy" class="w-full aspect-video object-cover rounded-lg" />
+                    <div class="flex flex-col gap-2 p-5">
+                        <h3 class="text-xl sm:text-2xl font-medium text-black text-pretty">{{ ('findAccommodation.advantage.' ~ n ~ '.title')|trans|raw }}</h3>
+                        <p class="text-base font-light text-[#525252] text-pretty">{{ ('findAccommodation.advantage.' ~ n ~ '.text')|trans|raw }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
     <section class="max-w-2xl mx-auto lg:max-w-7xl px-6 lg:px-8 lg:py-16 py-12">
         <div class="lg:grid lg:grid-cols-12 lg:gap-8">
             <div class="lg:col-span-5">

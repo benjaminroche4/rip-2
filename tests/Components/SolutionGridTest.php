@@ -34,13 +34,13 @@ final class SolutionGridTest extends KernelTestCase
         // 6 cards rendered (one <h3> per card).
         $this->assertSame(6, substr_count($html, '<h3'), 'Expected one <h3> per card.');
 
-        // Section wrapper applied.
-        $this->assertStringContainsString('rounded-2xl bg-neutral-100/80', $html);
-        $this->assertStringContainsString('grid grid-cols-1 sm:grid-cols-2 gap-6 lg:grid-cols-3', $html);
+        // Grid + framed gradient cards applied.
+        $this->assertStringContainsString('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4', $html);
+        $this->assertSame(6, substr_count($html, 'group-hover:from-primary'), 'Expected one gradient card per item.');
 
         // 6 paragraph descriptions (one per card) — checks the second
         // translation lookup `.text` is wired up, not just the title.
-        $this->assertSame(6, substr_count($html, 'class="flex-auto text-neutral-800/70'));
+        $this->assertSame(6, substr_count($html, 'group-hover:text-white/90'));
     }
 
     public function testCardCountFollowsIconsArrayLength(): void

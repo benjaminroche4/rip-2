@@ -254,6 +254,16 @@ findAccommodation:
     title: Recherche de logement
     subTitle: Votre logement clé en main à Paris
     text: "Confiez-nous la recherche de votre logement à Paris : un service clé en main, simple et sur-mesure."
+    badge:
+        1: Logements off-market
+        2: Installation sous 20 jours
+    process:
+        approach: Notre approche
+        title: Une recherche de logement personnalisée, pensée pour vous
+        text1: Nous prenons le temps de comprendre vos besoins et de trouver à Paris un logement qui vous ressemble vraiment.
+        text2: Notre expertise locale vous donne accès aux biens du marché comme aux opportunités off-market.
+        eyebrow: Notre processus
+        subTitle: Un accompagnement clair et éprouvé
     trust:
         1: 5.0 basé sur
         2: avis
@@ -294,6 +304,10 @@ findAccommodation:
         4:
             title: Sérénité et accompagnement humain
             text: Un conseiller dédié vous accompagne de bout en bout pour une installation fluide, maîtrisée et sans imprévus.
+        stats:
+            relocations: Installations réussies
+            partners: Partenaires immobiliers
+            reviews: avis Google
     faq:
         title: Vos questions, nos réponses
         question:
