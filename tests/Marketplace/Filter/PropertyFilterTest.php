@@ -98,11 +98,12 @@ final class PropertyFilterTest extends TestCase
         $this->assertSame(['mid'], $this->ids($this->filter->apply($all, new PropertySearchCriteria(midTerm: true))));
     }
 
-    public function testRentMinFilter(): void
+    public function testRentMaxFilter(): void
     {
         $all = [$this->property('cheap', rent: 1200), $this->property('pricey', rent: 3000)];
 
-        $this->assertSame(['pricey'], $this->ids($this->filter->apply($all, new PropertySearchCriteria(rentMin: 2000))));
+        // rentMax: 2000 keeps only 'cheap' (1200 <= 2000).
+        $this->assertSame(['cheap'], $this->ids($this->filter->apply($all, new PropertySearchCriteria(rentMax: 2000))));
     }
 
     public function testFeaturesRequireEveryRequestedEquipment(): void

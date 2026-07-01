@@ -260,6 +260,7 @@ companies:
                 text: "Working with a relocation agency simplifies employee relocation, strengthens your employer brand, and saves valuable time. We collaborate with over 80 partners in Paris and provide access to a unique off-market housing network across the city."
 findAccommodation:
     title: Property Search
+    imageAlt: Finding a home in Paris with Relocation In Paris
     subTitle: Your Turnkey Housing Solution in Paris
     text: "Let us handle your home search in Paris: a turnkey service that is simple and tailored to you."
     badge:
@@ -318,6 +319,7 @@ findAccommodation:
         stats:
             relocations: Successful relocations
             partners: Real estate partners
+            reviewsPrefix: From +
             reviews: Google reviews
     faq:
         title: Your questions, our answers
@@ -777,6 +779,7 @@ adminTab:
 aboutUs:
     title: About Us
     subTitle: Together For 10 Years
+    galleryAlt: Paris, where our clients live
     team:
         1: Housing Consultant
         2: International Mobility Consultant
@@ -1033,6 +1036,7 @@ faq:
         title: Do you handle administrative formalities?
         text: Yes. Depending on your offer, we support you with the essential steps of settling in, setting up electricity, gas and internet contracts, as well as visa-related procedures and your administrative situation in France.
 propertyManagement:
+    galleryAlt: Paris apartment managed by Relocation In Paris
     hero:
         title: Your Property, Perfectly Managed
         text: "Tailored property management in Paris for short-, medium- and long-term rentals. We select your tenants, secure your rent and enhance your property, so you earn your income with complete peace of mind."
@@ -1250,6 +1254,7 @@ termsConditions:
             button: Download
 findTenant:
     title: Find a Tenant
+    imageAlt: Finding a tenant in Paris with Relocation In Paris
     subTitle: Delegate The Search For Your Next Tenant
     text: "Find the right tenant in Paris with complete peace of mind thanks to our turnkey service."
     steps:
@@ -1499,7 +1504,7 @@ marketplace:
                 midTerm: Mid-term rental
             budget:
                 title: Budget
-                label: Minimum Monthly Rent
+                label: Maximum Monthly Rent
             features:
                 title: Apartment features
                 balcony: Balcony
@@ -2032,6 +2037,7 @@ admin:
             createdAt: Joined on
         role:
             admin: Admin
+            editor: Editor
             user: User
         lastLoginNever: Never
         button:

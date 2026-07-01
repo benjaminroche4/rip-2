@@ -26,7 +26,7 @@ final class MarketplaceControllerTest extends WebTestCase
             'furnished' => ['yes'],
             'longTerm' => 1,
             'nearMetro' => 1,
-            'rentMin' => 2000,
+            'rentMax' => 2000,
         ]);
 
         self::assertResponseIsSuccessful();

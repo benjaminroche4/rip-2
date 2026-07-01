@@ -17,9 +17,10 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerI
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 /**
- * Routes ROLE_ADMIN users straight to the admin dashboard upon successful
- * authentication. Other users keep Symfony's default behavior (target path
- * stored in session before login, or the homepage as a fallback).
+ * Routes ROLE_ADMIN users straight to the admin dashboard, and ROLE_EDITOR
+ * users straight to the Outils section, upon successful authentication. Other
+ * users keep Symfony's default behavior (target path stored in session before
+ * login, or the homepage as a fallback).
  *
  * Wired into form_login (security.yaml: form_login.success_handler) and
  * called from GoogleAuthenticator::onAuthenticationSuccess so both flows
@@ -76,6 +77,15 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
 
         if (\in_array('ROLE_ADMIN', $token->getRoleNames(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard', [
+                '_locale' => $locale,
+                'adminPrefix' => $this->adminPathPrefix,
+            ]));
+        }
+
+        // Editors only have access to the Outils section — the dashboard would
+        // 403 them, so land them straight on the tools page.
+        if (\in_array('ROLE_EDITOR', $token->getRoleNames(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_tools', [
                 '_locale' => $locale,
                 'adminPrefix' => $this->adminPathPrefix,
             ]));

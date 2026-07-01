@@ -1,3 +1,4 @@
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus';
 import intlTelInput from 'intl-tel-input';
 import 'intl-tel-input/css';

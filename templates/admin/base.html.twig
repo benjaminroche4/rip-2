@@ -42,22 +42,24 @@
                         </p>
                         <ul class="space-y-0.5" role="list">
                             {% for item in [
-                                {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard'},
-                                {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users'},
-                                {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments'},
-                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools'},
+                                {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_ADMIN'},
+                                {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
+                                {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments', role: 'ROLE_ADMIN'},
+                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
                             ] %}
-                                {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
-                                <li>
-                                    <a
-                                        href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
-                                        {% if isActive %}aria-current="page"{% endif %}
-                                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                    >
-                                        {{ ux_icon(item.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ item.label|trans }}
-                                    </a>
-                                </li>
+                                {% if is_granted(item.role) %}
+                                    {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
+                                    <li>
+                                        <a
+                                            href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
+                                            {% if isActive %}aria-current="page"{% endif %}
+                                            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        >
+                                            {{ ux_icon(item.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ item.label|trans }}
+                                        </a>
+                                    </li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>

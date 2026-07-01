@@ -263,6 +263,7 @@ companies:
                 text: Faire appel à une agence de relocation facilite l’installation de vos collaborateurs, renforce votre attractivité auprès des meilleurs profils et vous fait gagner un temps précieux. Nous travaillons avec plus de 80 partenaires à Paris et disposons d’un réseau unique de logements off-market sur la capitale.
 findAccommodation:
     title: Recherche de logement
+    imageAlt: Recherche de logement à Paris avec Relocation In Paris
     subTitle: Votre logement clé en main à Paris
     text: "Confiez-nous la recherche de votre logement à Paris : un service clé en main, simple et sur-mesure."
     badge:
@@ -321,6 +322,7 @@ findAccommodation:
         stats:
             relocations: Installations réussies
             partners: Partenaires immobiliers
+            reviewsPrefix: Sur +
             reviews: avis Google
     faq:
         title: Vos questions, nos réponses
@@ -777,6 +779,7 @@ phoneInput:
 aboutUs:
     title: À propos de nous
     subTitle: Ensemble depuis 10 ans
+    galleryAlt: Paris, cadre de vie de nos clients
     team:
         1: Consultant logement
         2: Consultante mobilité internationale
@@ -1033,6 +1036,7 @@ faq:
         title: Vous occupez-vous des démarches administratives ?
         text: "Oui. Nous vous accompagnons sur les démarches essentielles à votre installation selon l'offre : ouverture des contrats d'électricité, de gaz, d'internet, mais aussi les démarches liées au visa et à votre situation administrative en France."
 propertyManagement:
+    galleryAlt: Appartement à Paris géré par Relocation In Paris
     hero:
         title: Confiez-nous la gestion de votre bien
         text: "Gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Nous sélectionnons vos locataires, sécurisons vos loyers et valorisons votre bien : vous percevez vos revenus, en toute tranquillité."
@@ -1250,6 +1254,7 @@ termsConditions:
             button: Télécharger
 findTenant:
     title: Trouver un locataire
+    imageAlt: Recherche de locataire à Paris avec Relocation In Paris
     subTitle: Déléguez la recherche de votre futur locataire
     text: "Trouvez le bon locataire en toute confiance à Paris grâce à notre service clé en main."
     steps:
@@ -1500,7 +1505,7 @@ marketplace:
                 midTerm: Moyenne durée
             budget:
                 title: Budget
-                label: Loyer mensuel minimum
+                label: Loyer mensuel maximum
             features:
                 title: Équipements
                 balcony: Balcon
@@ -2033,6 +2038,7 @@ admin:
             createdAt: Inscrit le
         role:
             admin: Admin
+            editor: Éditeur
             user: Utilisateur
         lastLoginNever: Jamais
         button:

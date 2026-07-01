@@ -91,6 +91,26 @@ final class ParisArrondissements
         return (null !== $arrondissement && isset(self::CENTERS[$arrondissement])) ? 14 : 12;
     }
 
+    /**
+     * Best-effort arrondissement for a Paris coordinate: the one whose center is
+     * closest. Used as a fallback when a picked address carries no postal code
+     * (e.g. a street spanning several arrondissements, like Rue de Rivoli).
+     */
+    public static function nearest(float $lat, float $lng): int
+    {
+        $best = 1;
+        $bestDistance = \PHP_FLOAT_MAX;
+        foreach (self::CENTERS as $arrondissement => [$centerLat, $centerLng]) {
+            $distance = (($lat - $centerLat) ** 2) + (($lng - $centerLng) ** 2);
+            if ($distance < $bestDistance) {
+                $bestDistance = $distance;
+                $best = $arrondissement;
+            }
+        }
+
+        return $best;
+    }
+
     /** Neighbourhood label for the given arrondissement and locale. */
     public static function name(int $arrondissement, string $locale = 'fr'): string
     {

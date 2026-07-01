@@ -44,7 +44,7 @@
             </div>
             <div>
                 <div class="rounded-3xl border border-neutral-200 p-2">
-                    <img src="{{ asset('medias/website/rip-find-accomodation.webp') }}" alt="Relocation In Paris, trouver un logement à Paris" width="640" height="520" loading="eager" fetchpriority="high" class="w-full aspect-4/3 lg:aspect-square object-cover rounded-2xl" />
+                    <img src="{{ asset('medias/website/rip-find-accomodation.webp') }}" alt="{{ 'findAccommodation.imageAlt'|trans }}" width="640" height="520" loading="eager" fetchpriority="high" class="w-full aspect-4/3 lg:aspect-square object-cover rounded-2xl" />
                 </div>
             </div>
         </div>
@@ -189,7 +189,7 @@
                             <p class="text-2xl sm:text-3xl font-semibold text-primary">{{ 'propertyManagement.hero.rating.score'|trans }}</p>
                         </div>
                         <p class="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-[#525252]">
-                            Sur +{{ google_reviews_count }}
+                            {{ 'findAccommodation.advantage.stats.reviewsPrefix'|trans }}{{ google_reviews_count }}
                             {{ ux_icon('logos:google-icon', {'class':'size-3.5 shrink-0'}) }}
                             {{ 'findAccommodation.advantage.stats.reviews'|trans|raw }}
                         </p>

@@ -95,10 +95,15 @@
                         <div data-action="click->arrondissement-dropdown#close"
                             class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/loc:visible group-data-open/loc:opacity-100 group-data-open/loc:transition-opacity group-data-open/loc:duration-200 lg:hidden"></div>
 
-                        <div class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/loc:visible group-data-open/loc:opacity-100 group-data-open/loc:transition group-data-open/loc:duration-200 group-data-open/loc:ease-out
-                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/loc:translate-y-0
+                        <div class="flex flex-col z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/loc:visible group-data-open/loc:opacity-100 group-data-open/loc:transition group-data-open/loc:duration-200 group-data-open/loc:ease-out
+                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:rounded-t-2xl max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/loc:translate-y-0
                                     lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-0 lg:w-[820px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10">
-                            <div class="flex flex-col lg:flex-row gap-5">
+                            {# Grab handle + title (mobile bottom sheet only) #}
+                            <div class="lg:hidden shrink-0">
+                                <div class="flex justify-center pt-3 pb-1"><span class="h-1.5 w-10 rounded-full bg-gray-300"></span></div>
+                                <p class="px-5 pt-1 pb-3 text-base font-medium text-gray-900">{{ (t ~ 'localisation')|trans }}</p>
+                            </div>
+                            <div class="flex flex-col lg:flex-row gap-5 max-lg:flex-1 max-lg:min-h-0 max-lg:overflow-y-auto max-lg:px-5 max-lg:pb-4">
                                 {# Curated areas #}
                                 <div class="flex flex-col gap-5 lg:w-[230px] shrink-0">
                                     <div class="flex flex-col gap-2">
@@ -163,12 +168,12 @@
                                 </div>
                             </div>
 
-                            {# Mobile actions #}
-                            <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 lg:hidden">
+                            {# Mobile sticky action bar #}
+                            <div class="shrink-0 flex items-center gap-3 px-5 py-4 border-t border-slate-100 bg-white lg:hidden">
                                 <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="clearArrondissements"
-                                    class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-slate-50">{{ (t ~ 'arrondissementPanel.clear')|trans }}</button>
+                                    class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-900 bg-[#f7f7f7] hover:bg-[#efefef] transition-colors">{{ (t ~ 'arrondissementPanel.clear')|trans }}</button>
                                 <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="search"
-                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
+                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
                             </div>
                         </div>
                     </div>
@@ -196,10 +201,15 @@
                         <div data-action="click->arrondissement-dropdown#close"
                             class="fixed inset-0 z-40 bg-gray-900/40 invisible opacity-0 group-data-open/type:visible group-data-open/type:opacity-100 group-data-open/type:transition-opacity group-data-open/type:duration-200 lg:hidden"></div>
 
-                        <div class="flex flex-col gap-5 z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/type:visible group-data-open/type:opacity-100 group-data-open/type:transition group-data-open/type:duration-200 group-data-open/type:ease-out
-                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:overflow-y-auto max-lg:rounded-t-2xl max-lg:p-5 max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/type:translate-y-0
+                        <div class="flex flex-col z-50 bg-white border border-slate-200 text-left invisible opacity-0 group-data-open/type:visible group-data-open/type:opacity-100 group-data-open/type:transition group-data-open/type:duration-200 group-data-open/type:ease-out
+                                    max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:rounded-t-2xl max-lg:shadow-2xl max-lg:translate-y-full max-lg:group-data-open/type:translate-y-0
                                     lg:absolute lg:top-[calc(100%_+_0.75rem)] lg:left-0 lg:w-[620px] lg:max-w-[calc(100vw_-_2rem)] lg:rounded-2xl lg:p-6 lg:shadow-xl lg:shadow-gray-500/10">
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-6 gap-y-5">
+                            {# Grab handle + title (mobile bottom sheet only) #}
+                            <div class="lg:hidden shrink-0">
+                                <div class="flex justify-center pt-3 pb-1"><span class="h-1.5 w-10 rounded-full bg-gray-300"></span></div>
+                                <p class="px-5 pt-1 pb-3 text-base font-medium text-gray-900">{{ (t ~ 'propertyType')|trans }}</p>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-6 gap-y-5 max-lg:flex-1 max-lg:min-h-0 max-lg:overflow-y-auto max-lg:px-5 max-lg:pb-4">
                                 {# Layout (bedrooms) #}
                                 <div class="flex flex-col gap-2">
                                     <div class="{{ sectionHead }}">
@@ -245,9 +255,12 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 lg:hidden">
+                            {# Mobile sticky action bar #}
+                            <div class="shrink-0 flex items-center gap-3 px-5 py-4 border-t border-slate-100 bg-white lg:hidden">
+                                <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="clearPropertyType"
+                                    class="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-900 bg-[#f7f7f7] hover:bg-[#efefef] transition-colors">{{ (t ~ 'arrondissementPanel.clear')|trans }}</button>
                                 <button type="button" data-action="live#action:prevent arrondissement-dropdown#close" data-live-action-param="search"
-                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
+                                    class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors">{{ (t ~ 'arrondissementPanel.apply')|trans }}</button>
                             </div>
                         </div>
                     </div>

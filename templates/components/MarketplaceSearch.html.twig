@@ -47,27 +47,14 @@
                             type="number"
                             inputmode="numeric"
                             pattern="[0-9]*"
-                            data-model="norender|draftRentMin"
-                            data-action="keydown.enter->live#action"
-                            data-live-action-param="search"
-                            placeholder="{{ 'marketplace.list.search.price.min'|trans|raw }}"
-                            min="0"
-                            step="100"
-                            value="{{ draftRentMin ?? rentMin }}"
-                            class="{{ inputClass }}"
-                        />
-                        <span class="text-gray-300 shrink-0">–</span>
-                        <input
-                            type="number"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
                             data-model="norender|draftRentMax"
                             data-action="keydown.enter->live#action"
                             data-live-action-param="search"
                             placeholder="{{ 'marketplace.list.search.price.max'|trans|raw }}"
                             min="0"
                             step="100"
-                            value="{{ draftRentMax ?? rentMax }}"
+                            {# Empty when there is no max (draft sits at the ceiling = "no maximum"). #}
+                            value="{{ (draftRentMax is not null and draftRentMax < 10000) ? draftRentMax : (rentMax ?? '') }}"
                             class="{{ inputClass }}"
                         />
                     </div>

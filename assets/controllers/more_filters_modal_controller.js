@@ -58,8 +58,10 @@ export default class extends Controller {
         let n = 0
         this.element.querySelectorAll('input[type=checkbox]').forEach((i) => i.checked && n++)
         if (this.element.querySelector('input[type=radio]:checked')) n++
+        // Budget is a MAX-rent slider: the ceiling means "no maximum", so it
+        // only counts as an active filter once dragged below its max.
         const slider = this.element.querySelector('input[type=range]')
-        if (slider && Number(slider.value) > Number(slider.min)) n++
+        if (slider && Number(slider.value) < Number(slider.max)) n++
         this.countTarget.textContent = String(n)
     }
 
@@ -72,7 +74,8 @@ export default class extends Controller {
         })
         const slider = this.element.querySelector('input[type=range]')
         if (slider) {
-            slider.value = slider.min
+            // Max-rent slider: "no maximum" is the ceiling, so reset to max.
+            slider.value = slider.max
             slider.dispatchEvent(new Event('input', { bubbles: true }))
             slider.dispatchEvent(new Event('change', { bubbles: true }))
         }

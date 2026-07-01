@@ -7,7 +7,7 @@
 
 {# Backdrop #}
 <div data-action="more-filters-modal#close"
-    class="fixed inset-0 z-50 bg-black/60 invisible opacity-0 group-data-open/mf:visible group-data-open/mf:opacity-100 transition-opacity duration-200"></div>
+    class="fixed inset-0 z-50 bg-gray-900/40 invisible opacity-0 group-data-open/mf:visible group-data-open/mf:opacity-100 transition-opacity duration-200"></div>
 
 {# Panel #}
 <div role="dialog" aria-modal="true" tabindex="-1" aria-label="{{ (t ~ 'moreFiltersModal.title')|trans }}"
@@ -16,8 +16,13 @@
            max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[90vh] max-lg:rounded-t-2xl max-lg:translate-y-full max-lg:group-data-open/mf:translate-y-0 max-lg:shadow-2xl
            lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-[560px] lg:max-w-[calc(100vw-2rem)] lg:max-h-[calc(100vh-4rem)] lg:rounded-2xl lg:shadow-xl">
 
+    {# Grab handle (mobile bottom sheet only) #}
+    <div class="lg:hidden shrink-0 flex justify-center pt-3 pb-1">
+        <span class="h-1.5 w-10 rounded-full bg-gray-300"></span>
+    </div>
+
     {# Header #}
-    <div class="flex items-start justify-between gap-4 p-5 shrink-0">
+    <div class="flex items-start justify-between gap-4 px-5 pt-2 pb-4 lg:p-5 shrink-0">
         <div class="flex flex-col">
             <p class="font-secondary font-medium text-xl text-gray-900">{{ (t ~ 'moreFiltersModal.title')|trans }}</p>
             <p class="text-base text-gray-500">{{ (t ~ 'moreFiltersModal.subtitle')|trans }}</p>
@@ -31,30 +36,31 @@
     </div>
 
     {# Body #}
-    <div class="flex flex-col gap-5 px-5 overflow-y-auto">
+    <div class="flex-1 min-h-0 flex flex-col gap-5 px-5 overflow-y-auto">
         {# Budget #}
         <div class="flex flex-col gap-3">
             <div class="{{ sectionHead }} text-base">
                 {{ ux_icon('iconoir:euro', {'class': sectionIcon}) }}
                 {{ (t ~ 'budget.title')|trans }}
             </div>
-            <div class="bg-[#f7f7f7] rounded-xl p-3 flex flex-col gap-4"
+
+            <div class="bg-[#f7f7f7] rounded-2xl p-6 sm:p-7 flex flex-col gap-5"
                 data-controller="range-slider"
                 data-range-slider-locale-value="{{ locale }}"
                 data-range-slider-floor-value="800">
                 <div class="text-center">
-                    <p class="font-secondary font-semibold text-xl text-gray-900" data-range-slider-target="output">€{{ (draftRentMin ?? 800)|number_format(0, '.', ',') }}</p>
-                    <p class="text-xs text-gray-500">{{ (t ~ 'budget.label')|trans }}</p>
+                    <p class="font-secondary font-semibold text-5xl sm:text-6xl tracking-tight text-gray-900" data-range-slider-target="output">{{ (draftRentMax ?? 10000)|number_format(0, '.', ',') }} €</p>
+                    <p class="mt-1.5 text-sm text-gray-500">{{ (t ~ 'budget.label')|trans }}</p>
                 </div>
-                <input type="range" min="800" max="10000" step="100" value="{{ draftRentMin ?? 800 }}"
-                    data-model="norender|draftRentMin"
+                <input type="range" min="800" max="10000" step="100" value="{{ draftRentMax ?? 10000 }}"
+                    data-model="norender|draftRentMax"
                     data-range-slider-target="input"
                     data-action="input->range-slider#update change->more-filters-modal#recount"
                     aria-label="{{ (t ~ 'budget.title')|trans }}"
-                    class="budget-slider w-full" />
-                <div class="flex items-center justify-between text-xs font-semibold text-gray-900">
-                    <span>€800</span>
-                    <span>€10000+</span>
+                    class="budget-slider w-full" style="--track-h:8px;--thumb:22px;--thumb-border:4px" />
+                <div class="flex items-center justify-between text-sm font-semibold text-gray-900">
+                    <span>800 €</span>
+                    <span>10000+ €</span>
                 </div>
             </div>
         </div>
@@ -93,29 +99,6 @@
             </div>
         </div>
 
-        {# Transport #}
-        <div class="flex flex-col gap-2">
-            <div class="{{ sectionHead }}">
-                {# tram #}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="{{ sectionIcon }}" aria-hidden="true">
-                    <rect x="6" y="3" width="12" height="13" rx="2"/><path d="M6 9h12M10 3V2m4 1V2M9 20l-2 2m8-2 2 2" stroke-linecap="round"/>
-                    <circle cx="9" cy="12.5" r="0.6" fill="currentColor"/><circle cx="15" cy="12.5" r="0.6" fill="currentColor"/>
-                </svg>
-                {{ (t ~ 'transport.title')|trans }}
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-5">
-                <label class="{{ optionRow }}">
-                    <input type="checkbox" data-model="norender|draftNearMetro" {{ draftNearMetro ? 'checked' }}
-                        data-action="more-filters-modal#recount" class="{{ checkboxClass }}" />
-                    <span class="truncate">{{ (t ~ 'transport.metro')|trans }}</span>
-                </label>
-                <label class="{{ optionRow }}">
-                    <input type="checkbox" data-model="norender|draftNearRer" {{ draftNearRer ? 'checked' }}
-                        data-action="more-filters-modal#recount" class="{{ checkboxClass }}" />
-                    <span class="truncate">{{ (t ~ 'transport.rer')|trans }}</span>
-                </label>
-            </div>
-        </div>
     </div>
 
     {# Footer #}

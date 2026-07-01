@@ -44,13 +44,20 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     role_hierarchy:
-        ROLE_ADMIN: ROLE_USER
+        # ROLE_EDITOR : accès restreint à la seule section Outils du back-office.
+        # ROLE_ADMIN l'englobe (garde donc l'accès Outils en plus de tout le reste).
+        ROLE_ADMIN: [ROLE_USER, ROLE_EDITOR]
+        ROLE_EDITOR: ROLE_USER
 
     access_control:
         # Espace admin : URL = /{_locale}/{adminPrefix}/admin où adminPrefix est un secret
         # stocké dans %admin_path_prefix% (env ADMIN_PATH_PREFIX). Tout chemin différent
         # renvoie un 404 du router → pas de leak du format. Les sous-routes /admin/...
         # héritent de la même règle.
+        #
+        # La section Outils (/outils en fr, /tools en en) est accessible dès ROLE_EDITOR.
+        # Cette règle DOIT précéder la règle générale (first match wins).
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(outils|tools)($|/)', roles: ROLE_EDITOR }
         - { path: '^/(fr|en)/%admin_path_prefix%/admin($|/)', roles: ROLE_ADMIN }
 
 when@test:

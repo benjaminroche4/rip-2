@@ -31,7 +31,7 @@ final class MarketplaceSearch
     private const ALLOWED_FEATURES = ['balcony', 'elevator', 'parking', 'airConditioning'];
     private const ALLOWED_FURNISHED = ['yes', 'no'];
     private const ALLOWED_AVAILABILITY = ['now', '30days'];
-    /** Budget slider bounds; the floor means "no minimum". */
+    /** Budget slider bounds; the ceiling means "no maximum". */
     public const RENT_FLOOR = 800;
     public const RENT_CEILING = 10000;
 
@@ -45,7 +45,6 @@ final class MarketplaceSearch
         ['key' => 'marais', 'arrondissements' => [3, 4]],
         ['key' => 'saintMichel', 'arrondissements' => [5, 6]],
         ['key' => 'champsElysees', 'arrondissements' => [8]],
-        ['key' => 'montmartre', 'arrondissements' => [18]],
     ];
 
     /** @var array<int, array{key: string, arrondissements: array<int, int>}> */
@@ -53,7 +52,6 @@ final class MarketplaceSearch
         ['key' => 'beaugrenelle', 'arrondissements' => [15]],
         ['key' => 'auteuil', 'arrondissements' => [16]],
         ['key' => 'batignolles', 'arrondissements' => [17]],
-        ['key' => 'bercy', 'arrondissements' => [12]],
     ];
 
     /* ----------------- Applied filters (URL-synced) ----------------- */
@@ -73,14 +71,16 @@ final class MarketplaceSearch
     #[LiveProp(writable: true, url: true)]
     public array $furnished = [];
 
+    // Boolean filters are nullable (null = off): a false would serialise to the
+    // URL as `longTerm=0` and never get cleaned up; null is dropped entirely.
     #[LiveProp(writable: true, url: true)]
-    public bool $longTerm = false;
+    public ?bool $longTerm = null;
 
     #[LiveProp(writable: true, url: true)]
-    public bool $midTerm = false;
+    public ?bool $midTerm = null;
 
     #[LiveProp(writable: true, url: true)]
-    public ?int $rentMin = null;
+    public ?int $rentMax = null;
 
     /** @var array<int, string> */
     #[LiveProp(writable: true, url: true)]
@@ -90,17 +90,23 @@ final class MarketplaceSearch
     public ?string $availability = null;
 
     #[LiveProp(writable: true, url: true)]
-    public bool $nearMetro = false;
+    public ?bool $nearMetro = null;
 
     #[LiveProp(writable: true, url: true)]
-    public bool $nearRer = false;
+    public ?bool $nearRer = null;
 
     /* ----------------- Drafts (mutated by inputs, applied on search) ----------------- */
 
     #[LiveProp(writable: true)]
     public ?string $draftQ = null;
 
-    /** @var array<int, int> */
+    /**
+     * Kept as strings to match the checkbox `value` attributes: the live model
+     * toggles a checkbox with a strict `indexOf`, so an int draft could never be
+     * unticked once set server-side (address / curated area / URL).
+     *
+     * @var array<int, string>
+     */
     #[LiveProp(writable: true)]
     public array $draftArrondissements = [];
 
@@ -119,7 +125,7 @@ final class MarketplaceSearch
     public bool $draftMidTerm = false;
 
     #[LiveProp(writable: true)]
-    public ?int $draftRentMin = null;
+    public ?int $draftRentMax = null;
 
     /** @var array<int, string> */
     #[LiveProp(writable: true)]
@@ -161,6 +167,14 @@ final class MarketplaceSearch
     /** True when the pin sits on a precise address (Google Places) rather than an arrondissement centroid. */
     #[LiveProp(writable: true)]
     public bool $pingExplicit = false;
+
+    /** Text of the picked address currently held in the search field (null when it is a free-text query). */
+    #[LiveProp(writable: false)]
+    public ?string $pinnedAddress = null;
+
+    /** Arrondissement the picked address resolved to; used to drop the address when it gets unticked. */
+    #[LiveProp(writable: false)]
+    public ?int $pinnedArrondissement = null;
 
     /** @var array<int, string> */
     #[LiveProp(writable: true)]
@@ -207,7 +221,7 @@ final class MarketplaceSearch
         array $furnished = [],
         bool $longTerm = false,
         bool $midTerm = false,
-        ?int $rentMin = null,
+        ?int $rentMax = null,
         array $features = [],
         ?string $availability = null,
         bool $nearMetro = false,
@@ -219,13 +233,13 @@ final class MarketplaceSearch
         $this->arrondissements = $this->normalizeArrondissements($arrondissements);
         $this->bedrooms = $this->normalizeWhitelist($bedrooms, self::ALLOWED_BEDROOMS);
         $this->furnished = $this->normalizeWhitelist($furnished, self::ALLOWED_FURNISHED);
-        $this->longTerm = $longTerm;
-        $this->midTerm = $midTerm;
-        $this->rentMin = $this->normalizeRentMin($rentMin);
+        $this->longTerm = $this->normalizeFlag($longTerm);
+        $this->midTerm = $this->normalizeFlag($midTerm);
+        $this->rentMax = $this->normalizeRentMax($rentMax);
         $this->features = $this->normalizeWhitelist($features, self::ALLOWED_FEATURES);
         $this->availability = in_array($availability, self::ALLOWED_AVAILABILITY, true) ? $availability : null;
-        $this->nearMetro = $nearMetro;
-        $this->nearRer = $nearRer;
+        $this->nearMetro = $this->normalizeFlag($nearMetro);
+        $this->nearRer = $this->normalizeFlag($nearRer);
 
         $this->copyAppliedToDraft();
         $this->updatePing();
@@ -243,10 +257,16 @@ final class MarketplaceSearch
         return '' !== $q ? mb_substr($q, 0, 120) : null;
     }
 
-    /** A min rent at (or below) the slider floor means "no minimum". */
-    private function normalizeRentMin(?int $v): ?int
+    /** A max rent at (or above) the slider ceiling means "no maximum". */
+    private function normalizeRentMax(?int $v): ?int
     {
-        return null !== $v && $v > self::RENT_FLOOR ? min($v, self::RENT_CEILING) : null;
+        return null !== $v && $v < self::RENT_CEILING ? max($v, self::RENT_FLOOR) : null;
+    }
+
+    /** A boolean filter is stored as true (on) or null (off), never false, so it stays out of the URL when off. */
+    private function normalizeFlag(?bool $v): ?bool
+    {
+        return true === $v ? true : null;
     }
 
     /**
@@ -283,17 +303,17 @@ final class MarketplaceSearch
     private function copyAppliedToDraft(): void
     {
         $this->draftQ = $this->q;
-        $this->draftArrondissements = $this->arrondissements;
+        $this->draftArrondissements = array_map('strval', $this->arrondissements);
         $this->draftBedrooms = $this->bedrooms;
         $this->draftFurnished = $this->furnished;
-        $this->draftLongTerm = $this->longTerm;
-        $this->draftMidTerm = $this->midTerm;
-        // The slider always sits on a concrete value; the floor means "no minimum".
-        $this->draftRentMin = $this->rentMin ?? self::RENT_FLOOR;
+        $this->draftLongTerm = (bool) $this->longTerm;
+        $this->draftMidTerm = (bool) $this->midTerm;
+        // The slider always sits on a concrete value; the ceiling means "no maximum".
+        $this->draftRentMax = $this->rentMax ?? self::RENT_CEILING;
         $this->draftFeatures = $this->features;
         $this->draftAvailability = $this->availability;
-        $this->draftNearMetro = $this->nearMetro;
-        $this->draftNearRer = $this->nearRer;
+        $this->draftNearMetro = (bool) $this->nearMetro;
+        $this->draftNearRer = (bool) $this->nearRer;
     }
 
     /** Recompute the map pin from the currently applied arrondissements (centroid). */
@@ -336,7 +356,7 @@ final class MarketplaceSearch
             implode(',', $this->furnished),
             $this->longTerm ? '1' : '0',
             $this->midTerm ? '1' : '0',
-            $this->rentMin ?? '',
+            $this->rentMax ?? '',
             implode(',', $this->features),
             $this->availability ?? '',
             $this->nearMetro ? '1' : '0',
@@ -355,20 +375,67 @@ final class MarketplaceSearch
     #[LiveAction]
     public function search(): void
     {
-        $this->q = $this->normalizeQ($this->draftQ);
         $this->arrondissements = $this->normalizeArrondissements($this->draftArrondissements);
         $this->bedrooms = $this->normalizeWhitelist($this->draftBedrooms, self::ALLOWED_BEDROOMS);
         $this->furnished = $this->normalizeWhitelist($this->draftFurnished, self::ALLOWED_FURNISHED);
-        $this->longTerm = $this->draftLongTerm;
-        $this->midTerm = $this->draftMidTerm;
-        $this->rentMin = $this->normalizeRentMin($this->draftRentMin);
+        $this->longTerm = $this->normalizeFlag($this->draftLongTerm);
+        $this->midTerm = $this->normalizeFlag($this->draftMidTerm);
+        $this->rentMax = $this->normalizeRentMax($this->draftRentMax);
         $this->features = $this->normalizeWhitelist($this->draftFeatures, self::ALLOWED_FEATURES);
         $this->availability = in_array($this->draftAvailability, self::ALLOWED_AVAILABILITY, true) ? $this->draftAvailability : null;
-        $this->nearMetro = $this->draftNearMetro;
-        $this->nearRer = $this->draftNearRer;
+        $this->nearMetro = $this->normalizeFlag($this->draftNearMetro);
+        $this->nearRer = $this->normalizeFlag($this->draftNearRer);
 
-        $this->updatePing();
+        if (!$this->reconcilePinnedAddress()) {
+            // Free-text query (or no active address): the input drives `q` and the
+            // pin follows the selected arrondissements.
+            $this->q = $this->normalizeQ($this->draftQ);
+            $this->updatePing();
+        }
+
         $this->page = 1;
+    }
+
+    /**
+     * Reconcile a picked address with the current arrondissement selection.
+     *
+     * A picked address is a location, never a free-text filter. When the user
+     * unticks its arrondissement, the address is dropped from the search field.
+     *
+     * @return bool true when the explicit address pin stays in effect
+     */
+    private function reconcilePinnedAddress(): bool
+    {
+        $active = null !== $this->pinnedAddress
+            && null !== $this->pinnedArrondissement
+            && $this->draftQ === $this->pinnedAddress;
+
+        if (!$active) {
+            // No address, or the user edited the field: treat it as a free-text query.
+            $this->pinnedAddress = null;
+            $this->pinnedArrondissement = null;
+
+            return false;
+        }
+
+        if (!in_array($this->pinnedArrondissement, $this->arrondissements, true)) {
+            // Its arrondissement was unticked: remove the address from the field.
+            $this->q = null;
+            $this->draftQ = null;
+            $this->pinnedAddress = null;
+            $this->pinnedArrondissement = null;
+            $this->pingExplicit = false;
+            $this->pingLat = null;
+            $this->pingLng = null;
+
+            return false;
+        }
+
+        // Address still selected: keep the precise pin, ignore the label as a query.
+        $this->q = null;
+        $this->pingExplicit = true;
+
+        return true;
     }
 
     #[LiveAction]
@@ -378,13 +445,15 @@ final class MarketplaceSearch
         $this->arrondissements = [];
         $this->bedrooms = [];
         $this->furnished = [];
-        $this->longTerm = false;
-        $this->midTerm = false;
-        $this->rentMin = null;
+        $this->longTerm = null;
+        $this->midTerm = null;
+        $this->rentMax = null;
         $this->features = [];
         $this->availability = null;
-        $this->nearMetro = false;
-        $this->nearRer = false;
+        $this->nearMetro = null;
+        $this->nearRer = null;
+        $this->pinnedAddress = null;
+        $this->pinnedArrondissement = null;
 
         $this->copyAppliedToDraft();
         $this->updatePing();
@@ -397,6 +466,16 @@ final class MarketplaceSearch
         $this->draftArrondissements = [];
     }
 
+    /** Reset the "Property type" draft group (bedrooms, furnished, rental term) from its sheet. */
+    #[LiveAction]
+    public function clearPropertyType(): void
+    {
+        $this->draftBedrooms = [];
+        $this->draftFurnished = [];
+        $this->draftLongTerm = false;
+        $this->draftMidTerm = false;
+    }
+
     /** Select a curated area: filters its arrondissement(s) and pins it on the map. */
     #[LiveAction]
     public function selectArea(
@@ -405,7 +484,7 @@ final class MarketplaceSearch
     ): void {
         $list = $this->normalizeArrondissements(explode(',', $arrondissements));
         $this->arrondissements = $list;
-        $this->draftArrondissements = $list;
+        $this->draftArrondissements = array_map('strval', $list);
         $this->updatePing();
         $this->page = 1;
     }
@@ -423,10 +502,19 @@ final class MarketplaceSearch
         #[LiveArg]
         int $arrondissement = 0,
     ): void {
-        if ($arrondissement >= 1 && $arrondissement <= 20) {
-            $this->arrondissements = [$arrondissement];
-            $this->draftArrondissements = [$arrondissement];
-        }
+        // A picked address is a single-location search: it selects exactly its
+        // arrondissement (from the postal code, or the nearest one when the
+        // address carries none) and replaces any prior selection, so the results
+        // always match the pinned spot instead of leaking from other areas.
+        $resolved = $arrondissement >= 1 && $arrondissement <= 20
+            ? $arrondissement
+            : ParisArrondissements::nearest($lat, $lng);
+        $this->arrondissements = [$resolved];
+        $this->draftArrondissements = [(string) $resolved];
+
+        // Remember the address so unticking its arrondissement later clears the field.
+        $this->pinnedAddress = $this->draftQ;
+        $this->pinnedArrondissement = $resolved;
 
         $this->pingLat = $lat;
         $this->pingLng = $lng;
@@ -646,7 +734,7 @@ final class MarketplaceSearch
                 furnished: $this->draftFurnished,
                 longTerm: $this->draftLongTerm,
                 midTerm: $this->draftMidTerm,
-                rentMin: $this->normalizeRentMin($this->draftRentMin),
+                rentMax: $this->normalizeRentMax($this->draftRentMax),
                 features: $this->draftFeatures,
                 availability: $this->draftAvailability,
                 nearMetro: $this->draftNearMetro,
@@ -657,13 +745,13 @@ final class MarketplaceSearch
                 arrondissements: $this->arrondissements,
                 bedrooms: $this->bedrooms,
                 furnished: $this->furnished,
-                longTerm: $this->longTerm,
-                midTerm: $this->midTerm,
-                rentMin: $this->rentMin,
+                longTerm: (bool) $this->longTerm,
+                midTerm: (bool) $this->midTerm,
+                rentMax: $this->rentMax,
                 features: $this->features,
                 availability: $this->availability,
-                nearMetro: $this->nearMetro,
-                nearRer: $this->nearRer,
+                nearMetro: (bool) $this->nearMetro,
+                nearRer: (bool) $this->nearRer,
             );
     }
 

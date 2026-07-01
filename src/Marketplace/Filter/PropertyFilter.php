@@ -47,8 +47,8 @@ final class PropertyFilter
             $properties = $this->keep($properties, fn (Property $p) => true === $p->midTerm);
         }
 
-        if (null !== $criteria->rentMin) {
-            $properties = $this->keep($properties, fn (Property $p) => null !== $p->monthlyRent && $p->monthlyRent >= $criteria->rentMin);
+        if (null !== $criteria->rentMax) {
+            $properties = $this->keep($properties, fn (Property $p) => null !== $p->monthlyRent && $p->monthlyRent <= $criteria->rentMax);
         }
 
         if ([] !== $criteria->features) {

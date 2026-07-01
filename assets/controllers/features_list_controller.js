@@ -19,8 +19,6 @@ export default class extends Controller {
      * Initialisation du controller
      */
     connect() {
-        console.log('Features list controller connected');
-
         // Index de l'item actif
         this.activeIndex = 0;
 

@@ -27,7 +27,7 @@ export default class extends Controller {
         if (this.hasOutputTarget) {
             const locale = this.localeValue || 'en'
             const suffix = value >= max ? '+' : ''
-            this.outputTarget.textContent = `€${value.toLocaleString(locale)}${suffix}`
+            this.outputTarget.textContent = `${value.toLocaleString(locale)}${suffix} €`
         }
     }
 }

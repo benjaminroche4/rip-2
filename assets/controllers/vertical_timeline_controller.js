@@ -21,7 +21,6 @@ export default class extends Controller {
      * Initialisation du controller
      */
     connect() {
-        console.log('Vertical timeline controller connected');
         this.activeSteps = new Set();
         this.setupIntersectionObserver();
         this.setupScrollListener();

@@ -36,12 +36,20 @@ final readonly class UserListItem
     }
 
     /**
-     * Highest role for display (admin > user). The list of granted roles
-     * always contains ROLE_USER as a baseline (User::getRoles), so the
+     * Highest role for display (admin > editor > user). The list of granted
+     * roles always contains ROLE_USER as a baseline (User::getRoles), so the
      * "user" branch is the sane fallback.
      */
     public function primaryRole(): string
     {
-        return \in_array('ROLE_ADMIN', $this->roles, true) ? 'admin' : 'user';
+        if (\in_array('ROLE_ADMIN', $this->roles, true)) {
+            return 'admin';
+        }
+
+        if (\in_array('ROLE_EDITOR', $this->roles, true)) {
+            return 'editor';
+        }
+
+        return 'user';
     }
 }

@@ -1,4 +1,4 @@
-/* stimulusFetch: 'eager' */
+/* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus'
 
 /**

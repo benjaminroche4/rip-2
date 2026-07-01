@@ -39,29 +39,49 @@ nelmio_security:
         mode_block: false
         report_uri: ~
 
-    # CSP — kept disabled for now because the current stack still relies on
-    # `'unsafe-inline'` and `'unsafe-eval'` on script-src (Stimulus / Turbo
-    # bootstrap + EasyAdmin). Re-enable in `report_only` first, address the
-    # violations one by one (switch to nonces, externalise inline scripts),
-    # then flip to `enforce` once the report stream goes quiet.
+    # CSP — enabled in REPORT-ONLY mode: the browser reports violations but
+    # never blocks, so shipping this cannot break the site. The current stack
+    # still relies on `'unsafe-inline'`/`'unsafe-eval'` on script-src (Stimulus
+    # / Turbo bootstrap + EasyAdmin). Address the reported violations one by one
+    # (switch to nonces, externalise inline scripts), then move these directives
+    # under an `enforce:` block once the report stream goes quiet.
     csp:
-        enabled: false
-        enforce:
+        enabled: true
+        report:
             default-src: ["'self'"]
             script-src:
                 - "'self'"
                 - "'unsafe-eval'"
                 - "'unsafe-inline'"
+                - "https://www.googletagmanager.com"
+                - "https://maps.googleapis.com"
             style-src:
                 - "'self'"
                 - "'unsafe-inline'"
+                - "https://fonts.googleapis.com"
             img-src:
                 - "'self'"
                 - "data:"
+                - "https://cdn.sanity.io"
+                - "https://maps.googleapis.com"
+                - "https://maps.gstatic.com"
+                - "https://*.googleusercontent.com"
+                - "https://www.googletagmanager.com"
+                - "https://www.google-analytics.com"
             font-src:
                 - "'self'"
                 - "data:"
-            connect-src: ["'self'"]
+                - "https://fonts.gstatic.com"
+            connect-src:
+                - "'self'"
+                - "https://*.sanity.io"
+                - "https://maps.googleapis.com"
+                - "https://www.google-analytics.com"
+                - "https://region1.google-analytics.com"
+            frame-src:
+                - "https://www.youtube.com"
+                - "https://www.youtube-nocookie.com"
+                - "https://www.google.com"
             object-src: ["'none'"]
             base-uri: ["'self'"]
             frame-ancestors: ["'self'"]

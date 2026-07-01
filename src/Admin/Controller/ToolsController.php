@@ -119,7 +119,7 @@ final class ToolsController extends AbstractController
     public function documentsRequestEdit(string $adminPrefix, DocumentRequest $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_EDITOR');
 
         return $this->render('admin/tools/documents/request.html.twig', [
             'adminPrefix' => $adminPrefix,
@@ -149,7 +149,7 @@ final class ToolsController extends AbstractController
         DocumentRequestPdfRenderer $renderer,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_EDITOR');
 
         $pdf = $renderer->render($request);
 

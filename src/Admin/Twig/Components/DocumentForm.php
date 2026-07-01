@@ -124,10 +124,11 @@ final class DocumentForm extends AbstractController
         $this->resetForm();
     }
 
+    // Part of the Outils section: ROLE_EDITOR suffices (ROLE_ADMIN includes it).
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
-            throw new AccessDeniedException('Admin access required.');
+        if (!$this->security->isGranted('ROLE_EDITOR')) {
+            throw new AccessDeniedException('Tools access required.');
         }
     }
 }

@@ -22,7 +22,7 @@ final readonly class PropertySearchCriteria
         public array $furnished = [],
         public bool $longTerm = false,
         public bool $midTerm = false,
-        public ?int $rentMin = null,
+        public ?int $rentMax = null,
         public array $features = [],
         public ?string $availability = null, // 'now' | '30days'
         public bool $nearMetro = false,
@@ -33,7 +33,7 @@ final readonly class PropertySearchCriteria
     /** Number of active "More filters" selections, for the pill badge. */
     public function moreFiltersCount(): int
     {
-        return (null !== $this->rentMin ? 1 : 0)
+        return (null !== $this->rentMax ? 1 : 0)
             + count($this->features)
             + (null !== $this->availability ? 1 : 0)
             + ($this->nearMetro ? 1 : 0)

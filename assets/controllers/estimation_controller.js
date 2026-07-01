@@ -21,7 +21,6 @@ export default class extends Controller {
      * Initialisation du controller
      */
     connect() {
-        console.log('Estimation controller connected');
         this.previousValue = null;
         this.updateDisplay();
         this.updateSliderBackground();

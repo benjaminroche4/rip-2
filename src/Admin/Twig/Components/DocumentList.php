@@ -117,10 +117,13 @@ final class DocumentList
         return \count($this->getDocuments());
     }
 
+    // Tools components render on the public /_components route (outside the admin
+    // access_control prefix), so they self-guard. ROLE_EDITOR is enough here
+    // (ROLE_ADMIN includes it) since this is part of the Outils section.
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
-            throw new AccessDeniedException('Admin access required.');
+        if (!$this->security->isGranted('ROLE_EDITOR')) {
+            throw new AccessDeniedException('Tools access required.');
         }
     }
 }
