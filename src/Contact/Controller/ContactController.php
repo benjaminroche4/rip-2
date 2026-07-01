@@ -68,6 +68,9 @@ final class ContactController extends AbstractController
             $this->entityManager->persist($contact);
             $this->entityManager->flush();
 
+            // Unmapped field: only meaningful for the housing-search help type.
+            $offer = \is_string($form->get('offer')->getData()) ? $form->get('offer')->getData() : null;
+
             $this->bus->dispatch(new SendContactEmailsMessage(
                 firstName: $contact->getFirstName(),
                 lastName: $contact->getLastName(),
@@ -79,6 +82,7 @@ final class ContactController extends AbstractController
                 lang: $contact->getLang() ?? $request->getLocale(),
                 ip: $contact->getIp(),
                 createdAt: $now,
+                offer: $offer,
             ));
 
             $helpType = $contact->getHelpType();
@@ -90,6 +94,9 @@ final class ContactController extends AbstractController
                 'phone' => $contact->getPhoneNumber(),
                 'helpType' => null !== $helpType
                     ? $this->translator->trans($helpType, locale: $contact->getLang())
+                    : null,
+                'offer' => null !== $offer
+                    ? $this->translator->trans('contact.contactForm.offer.'.$offer.'.title', locale: $contact->getLang())
                     : null,
                 'message' => $contact->getMessage(),
                 'company' => $contact->getCompany(),

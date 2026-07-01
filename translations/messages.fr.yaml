@@ -44,6 +44,17 @@ contact:
                 2: Solutions pour entreprises
                 3: Gestion locative et service de location
                 4: Autre demande ou information
+        offer:
+            label: Quelle formule vous intéresse ?
+            notBlank: Sélectionnez une formule.
+            accompagne:
+                title: Accompagné
+                price: 1 190 €
+                text: Gagnez des semaines de recherche. Vous visitez, nous gérons tout le reste.
+            confie:
+                title: Confié
+                price: 2 190 €
+                text: Nous gérons tout, de la recherche à l'installation complète. Vous n'avez plus qu'à valider.
         message:
             label: Message
             placeholder: Décrivez votre projet en quelques mots...
@@ -261,9 +272,13 @@ findAccommodation:
         approach: Notre approche
         title: Une recherche de logement personnalisée, pensée pour vous
         text1: Nous prenons le temps de comprendre vos besoins et de trouver à Paris un logement qui vous ressemble vraiment.
-        text2: Notre expertise locale vous donne accès aux biens du marché comme aux opportunités off-market.
         eyebrow: Notre processus
         subTitle: Un accompagnement clair et éprouvé
+    story:
+        title: 'Confiance & sérénité'
+        subTitle: Votre recherche, notre engagement
+        text: "Depuis plus de dix ans, Relocation in Paris accompagne celles et ceux qui s'installent dans la capitale. De la sélection des biens à la constitution de votre dossier, nous prenons en charge chaque étape avec rigueur et bienveillance. Notre engagement : vous trouver le logement qui vous ressemble, sécuriser vos démarches et vous offrir une installation sereine, même à distance."
+        award: 'Meilleure agence<br>à <span class="font-semibold">Paris 2025</span>'
     trust:
         1: 5.0 basé sur
         2: avis
@@ -291,19 +306,18 @@ findAccommodation:
     advantage:
         title: Une expérience sur-mesure
         subTitle: Faites de votre installation à Paris une transition fluide et maîtrisée
-        text: Déléguez la complexité de la recherche et de l’installation à un partenaire expert, et profitez pleinement de votre nouveau départ à Paris.
         1:
             title: Gain de temps immédiat
-            text: Nous gérons la recherche, les démarches et l’organisation pour vous faire gagner un temps précieux.
+            text: "Recherche, visites, démarches : nous prenons tout en charge pendant que vous restez concentré sur l’essentiel. Vous ne courez plus après les annonces."
         2:
-            title: Une installation en toute sérénité
-            text: "Fini les démarches complexes, les refus et les incertitudes : nous sécurisons chaque étape de votre installation."
+            title: Un dossier qui inspire confiance
+            text: Sur un marché où les refus sont fréquents, nous construisons un dossier solide et rassurant pour les propriétaires, même sans garant français.
         3:
             title: Accès à des logements exclusifs
-            text: Bénéficiez d’un accès privilégié à des logements off-market grâce à notre réseau de partenaires à Paris.
+            text: Notre réseau de partenaires vous ouvre les portes de biens off-market, souvent avant qu’ils n’arrivent sur les plateformes. Vous voyez ce que les autres ne voient pas.
         4:
-            title: Sérénité et accompagnement humain
-            text: Un conseiller dédié vous accompagne de bout en bout pour une installation fluide, maîtrisée et sans imprévus.
+            title: Un interlocuteur unique, à vos côtés
+            text: "Fini le sentiment d’être seul face aux démarches : un conseiller dédié vous guide à chaque étape, en français comme en anglais, jusqu’à la remise des clés."
         stats:
             relocations: Installations réussies
             partners: Partenaires immobiliers
@@ -344,6 +358,7 @@ findAccommodation:
             3:
                 title: Recherche ciblée
                 description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne (off market).
+                badge: Off market
             4:
                 title: Organisation des visites
                 description: Nous planifions les visites selon votre emploi du temps, en présentiel ou virtuellement, et vous conseillons à chaque étape de votre sélection.
@@ -355,7 +370,7 @@ findAccommodation:
                 description: Nous préparons votre dossier locatif dès le début du processus afin d'être réactifs sur le marché. Après sélection du bien, nous finalisons les pièces nécessaires, négocions les meilleures conditions et gérons les formalités administratives.
             6:
                 title: Signature du bail
-                description: Nous vous accompagnons lors de la signature, vérifions chaque document et assurons la conformité du contrat.
+                description: Nous restons à vos côtés lors de la signature et vous accompagnons dans la relecture des documents.
             7:
                 title: Remise des clés et suivi
                 description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
@@ -500,11 +515,11 @@ home:
                 title: "J'ai un profil atypique, pouvez-vous m'aider ?"
                 text: "Oui, c'est notre spécialité. Entrepreneurs, expatriés, profils sans garant français : nous construisons un dossier solide et défendons votre candidature auprès de notre réseau de bailleurs."
             8:
-                title: Gérez-vous l'administratif ?
-                text: Oui, nous prenons en charge l'ouverture de vos contrats d'électricité, gaz, internet et assurance habitation.
-            9:
                 title: Sous combien de temps peut démarrer ma recherche ?
                 text: Dès réception de vos critères, nous lançons la recherche sans attendre. Le marché parisien est tendu, chaque jour compte.
+            9:
+                title: Prenez-vous en charge l'ouverture des contrats ?
+                text: Oui, nous prenons en charge l'ouverture de vos contrats d'électricité, gaz, internet et assurance habitation.
     features:
         title: Paris ne s'improvise pas
         subTitle: Un marché difficile, un accès privilégié
@@ -1736,6 +1751,8 @@ marketplace:
             furnished: meublé
 a11y:
     skipToContent: Aller au contenu principal
+    previous: Précédent
+    next: Suivant
 admin:
     nav:
         dashboard: Tableau de bord

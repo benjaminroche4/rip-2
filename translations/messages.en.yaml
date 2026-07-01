@@ -44,6 +44,17 @@ contact:
                 2: Solutions for Businesses
                 3: Property Management and Rental Services
                 4: Other Requests or Information
+        offer:
+            label: Which package are you interested in?
+            notBlank: Please select a package.
+            accompagne:
+                title: Guided
+                price: "€1,190"
+                text: Save weeks of searching. You visit, we handle everything else.
+            confie:
+                title: Full-service
+                price: "€2,190"
+                text: We handle everything, from the search to your complete move-in. All you have to do is approve.
         message:
             label: Message
             placeholder: Tell us about your project in a few words...
@@ -258,9 +269,13 @@ findAccommodation:
         approach: Our approach
         title: A personalized housing search, built around you
         text1: We take the time to understand your needs and find a home in Paris that truly fits you.
-        text2: Our local expertise gives you access to both listed and off-market opportunities.
         eyebrow: Our process
         subTitle: A clear and proven process
+    story:
+        title: 'Trust & peace of mind'
+        subTitle: Your search, our commitment
+        text: "For over ten years, Relocation in Paris has supported everyone settling in the capital. From selecting the right homes to building your application file, we handle every step with care and precision. Our commitment: to find the home that fits you, secure your process and give you a smooth move-in, even from abroad."
+        award: 'Best agency<br>in <span class="font-semibold">Paris 2025</span>'
     trust:
         1: 5.0 based on
         2: reviews
@@ -288,19 +303,18 @@ findAccommodation:
     advantage:
         title: A tailored experience
         subTitle: Make your move to Paris a smooth and well-managed transition
-        text: Delegate the complexity of housing search and relocation to an expert partner, and fully enjoy your new beginning in Paris.
         1:
             title: Immediate time savings
-            text: We manage the search, administrative steps, and coordination so you can save valuable time.
+            text: "Search, viewings, paperwork: we handle it all while you stay focused on what matters. No more chasing listings."
         2:
-            title: A stress-free installation
-            text: "No more complex procedures, refusals, or uncertainty: we secure every step of your installation."
+            title: An application that inspires confidence
+            text: In a market where rejections are common, we build a solid, reassuring application for landlords, even without a French guarantor.
         3:
             title: Access to exclusive properties
-            text: Benefit from privileged access to off-market properties through our Paris partner network.
+            text: Our partner network opens the doors to off-market properties, often before they reach the platforms. You see what others don't.
         4:
-            title: Human support you can trust
-            text: A dedicated advisor supports you end to end, ensuring a smooth, controlled, and seamless installation.
+            title: A single point of contact, by your side
+            text: "No more feeling alone with the paperwork: a dedicated advisor guides you at every step, in French and English, right up to the handover of the keys."
         stats:
             relocations: Successful relocations
             partners: Real estate partners
@@ -341,6 +355,7 @@ findAccommodation:
             3:
                 title: Targeted Search
                 description: Thanks to our exclusive network of real estate partners, we quickly identify the best opportunities, often before they go public (off market).
+                badge: Off market
             4:
                 title: Visit Coordination
                 description: We schedule property visits at your convenience, either in person or virtually, and advise you throughout your selection process.
@@ -497,11 +512,11 @@ home:
                 title: "I have an atypical profile, can you help me?"
                 text: "Yes, it's our specialty. Entrepreneurs, expats, profiles without a French guarantor: we build a solid application and defend your candidacy with our network of landlords."
             8:
-                title: "Do you handle the administrative setup?"
-                text: "Yes, we take care of opening your electricity, gas, internet and home insurance contracts."
-            9:
                 title: "How quickly can my search start?"
                 text: "As soon as we receive your criteria, we start the search right away. The Paris market moves fast, every day counts."
+            9:
+                title: "Do you handle contract setup?"
+                text: "Yes, we take care of opening your electricity, gas, internet and home insurance contracts."
     keyMetrics:
         title: Proven Results
         subTitle: Paris is waiting, We handle everything
@@ -1735,6 +1750,8 @@ marketplace:
             furnished: furnished
 a11y:
     skipToContent: Skip to main content
+    previous: Previous
+    next: Next
 admin:
     nav:
         dashboard: Dashboard

@@ -27,6 +27,7 @@ final class SendContactEmailsHandler
             'emailContact' => $message->email,
             'phoneNumber' => $message->phoneNumber,
             'helpType' => $message->helpType,
+            'offer' => $message->offer,
             'message' => $message->message,
             'company' => $message->company,
             'createdAt' => $message->createdAt,

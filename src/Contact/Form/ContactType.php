@@ -12,13 +12,27 @@ use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ContactType extends AbstractType
 {
+    /**
+     * helpType value that unlocks the offer selection (housing search).
+     */
+    public const string HOUSING_HELP_TYPE = 'contact.contactForm.helpType.choice.1';
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -74,6 +88,24 @@ class ContactType extends AbstractType
                     ),
                 ],
             ])
+            // Conditional offer selection, only relevant (and only shown) when
+            // the help type is "housing search". Unmapped: it does not persist
+            // on the Contact entity, it only enriches the emails / webhook.
+            ->add('offer', ChoiceType::class, [
+                'label' => false,
+                'mapped' => false,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                // Suppress the empty "placeholder" radio Symfony would otherwise
+                // add for a non-required expanded choice (the phantom 3rd option).
+                'placeholder' => false,
+                'choices' => [
+                    'contact.contactForm.offer.accompagne.title' => 'accompagne',
+                    'contact.contactForm.offer.confie.title' => 'confie',
+                ],
+                'choice_attr' => static fn (): array => ['data-conditional-offer-target' => 'input'],
+            ])
             ->add('message', TextareaType::class, [
                 'label' => 'contact.contactForm.message.label',
                 'required' => false,
@@ -107,6 +139,25 @@ class ContactType extends AbstractType
         ;
 
         $builder->get('phoneNumber')->addModelTransformer(new PhoneNumberE164Transformer());
+
+        // Require an offer only when the user selected the housing-search help
+        // type; otherwise the field stays optional (and hidden client-side).
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
+            $form = $event->getForm();
+
+            if (!$form->has('helpType') || !$form->has('offer')) {
+                return;
+            }
+
+            $offer = $form->get('offer')->getData();
+
+            if (self::HOUSING_HELP_TYPE === $form->get('helpType')->getData()
+                && (null === $offer || '' === $offer)) {
+                $form->get('offer')->addError(new FormError(
+                    $this->translator->trans('contact.contactForm.offer.notBlank'),
+                ));
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

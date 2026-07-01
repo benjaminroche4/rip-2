@@ -6,6 +6,7 @@ export default class extends Controller {
     static values = {
         current: { type: Number, default: 0 },
         max: { type: Number, default: 0 },
+        autoplay: { type: Boolean, default: false },
         autoplayDelay: { type: Number, default: 4000 }
     };
 
@@ -25,9 +26,13 @@ export default class extends Controller {
 
         this.boundHandleResize = () => { this.updateStep(); this.render(false); };
         window.addEventListener('resize', this.boundHandleResize);
+
+        if (this.autoplayValue) this.startAutoplay();
     }
 
     disconnect() {
+        this.stopAutoplay();
+        if (this.resumeTimer) clearTimeout(this.resumeTimer);
         window.removeEventListener('resize', this.boundHandleResize);
         window.removeEventListener('mousemove', this.boundHandleMouseMove);
         window.removeEventListener('mouseup', this.boundHandleMouseUp);
@@ -42,8 +47,29 @@ export default class extends Controller {
 
     startAutoplay() {
         this.stopAutoplay();
-        if (this.isHovering || this.maxValue === 0) return;
+        if (!this.autoplayValue || this.isHovering || this.maxValue === 0) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         this.autoplayTimer = setInterval(() => this.tick(), this.autoplayDelayValue);
+    }
+
+    // Pause on hover / focus, resume when the pointer leaves.
+    pause() {
+        this.isHovering = true;
+        this.stopAutoplay();
+    }
+
+    resume() {
+        this.isHovering = false;
+        this.startAutoplay();
+    }
+
+    // After a manual change (button / swipe), hold autoplay for a few seconds
+    // before it takes over again.
+    pauseThenResume(delay = 3500) {
+        if (!this.autoplayValue) return;
+        this.stopAutoplay();
+        if (this.resumeTimer) clearTimeout(this.resumeTimer);
+        this.resumeTimer = setTimeout(() => this.startAutoplay(), delay);
     }
 
     stopAutoplay() {
@@ -93,17 +119,19 @@ export default class extends Controller {
 
         if (deltaX < -distanceThreshold || velocity < -velocityThreshold) this.next();
         else if (deltaX > distanceThreshold || velocity > velocityThreshold) this.prev();
-        else this.render(true);
+        else { this.render(true); this.pauseThenResume(); }
     }
 
     prev() {
         if (this.currentValue > 0) this.currentValue--;
         this.render(true);
+        this.pauseThenResume();
     }
 
     next() {
         if (this.currentValue < this.maxValue) this.currentValue++;
         this.render(true);
+        this.pauseThenResume();
     }
 
     render(animate = true) {

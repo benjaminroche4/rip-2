@@ -36,6 +36,7 @@ final class ContactControllerTest extends WebTestCase
             'contact[email]' => 'jane.doe+'.bin2hex(random_bytes(4)).'@example.com',
             'contact[phoneNumber]' => '06 12 34 56 78',
             'contact[helpType]' => 'contact.contactForm.helpType.choice.1',
+            'contact[offer]' => 'accompagne',
             'contact[message]' => 'Hello',
             'contact[accept]' => '1',
         ]);
@@ -46,6 +47,46 @@ final class ContactControllerTest extends WebTestCase
         $contact = $em->getRepository(Contact::class)->findOneBy(['lastName' => 'Doe']);
         self::assertNotNull($contact);
         self::assertSame('+33612345678', $contact->getPhoneNumber());
+    }
+
+    public function testItRequiresAnOfferWhenHousingSearchIsSelected(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', self::PATH);
+
+        // Housing search (choice.1) selected but no offer picked → invalid.
+        $client->submitForm(self::SUBMIT, [
+            'contact[firstName]' => 'Jane',
+            'contact[lastName]' => 'Doe',
+            'contact[email]' => 'jane@example.com',
+            'contact[phoneNumber]' => '06 12 34 56 78',
+            'contact[helpType]' => 'contact.contactForm.helpType.choice.1',
+            'contact[message]' => 'Hello',
+            'contact[accept]' => '1',
+        ]);
+
+        $status = $client->getResponse()->getStatusCode();
+        self::assertContains($status, [Response::HTTP_OK, Response::HTTP_UNPROCESSABLE_ENTITY]);
+        self::assertFalse($client->getResponse()->isRedirection(), 'Missing offer for housing search must not redirect.');
+    }
+
+    public function testItDoesNotRequireAnOfferForOtherHelpTypes(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', self::PATH);
+
+        // A non-housing help type (choice.2) does not require an offer.
+        $client->submitForm(self::SUBMIT, [
+            'contact[firstName]' => 'Jane',
+            'contact[lastName]' => 'Doe',
+            'contact[email]' => 'jane.doe+'.bin2hex(random_bytes(4)).'@example.com',
+            'contact[phoneNumber]' => '06 12 34 56 78',
+            'contact[helpType]' => 'contact.contactForm.helpType.choice.2',
+            'contact[message]' => 'Hello',
+            'contact[accept]' => '1',
+        ]);
+
+        self::assertResponseRedirects(self::PATH);
     }
 
     public function testItRejectsInvalidPhoneNumberWith422(): void

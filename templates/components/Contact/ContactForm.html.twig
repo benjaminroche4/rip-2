@@ -127,6 +127,11 @@
         </div>
     </div>
 
+    <div
+        data-controller="conditional-offer"
+        data-conditional-offer-match-value="contact.contactForm.helpType.choice.1"
+        class="space-y-6"
+    >
     <div data-controller="select" data-select-featured-value="contact.contactForm.helpType.choice.1" data-select-featured-label-value="{{ 'contact.contactForm.helpType.featured'|trans }}" class="relative">
         <div class="flex items-center gap-x-0.5">
             {{ form_label(form.helpType, null, {'label_attr': {'class': 'block text-sm/6 font-semibold text-gray-900'}}) }}
@@ -136,6 +141,8 @@
             {{ form_widget(form.helpType, {'attr': {
                 'class': 'sr-only',
                 'data-select-target': 'select',
+                'data-conditional-offer-target': 'trigger',
+                'data-action': 'change->conditional-offer#toggle',
                 'tabindex': -1,
                 'aria-hidden': 'true',
             }}) }}
@@ -169,6 +176,40 @@
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}
         </div>
+    </div>
+
+    {# Offer selection — shown only when the housing-search help type is chosen #}
+    <div data-conditional-offer-target="panel" hidden>
+        <fieldset>
+            <legend class="block text-sm/6 font-semibold text-gray-900">{{ 'contact.contactForm.offer.label'|trans }}</legend>
+            <div class="mt-2 divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-300">
+                {% for choice in form.offer %}
+                    {% set okey = 'contact.contactForm.offer.' ~ choice.vars.value %}
+                    <label class="group flex cursor-pointer items-start gap-3 p-4 transition-colors duration-100 ease-out has-checked:bg-linear-to-br has-checked:from-primary/10 has-checked:to-transparent">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        <span class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-gray-300 transition-colors duration-100 ease-out group-has-[:checked]:border-primary">
+                            <span class="size-2 rounded-full bg-primary opacity-0 transition-opacity duration-100 ease-out group-has-[:checked]:opacity-100"></span>
+                        </span>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-pretty text-gray-900 transition-colors duration-100 ease-out group-has-[:checked]:text-primary">{{ (okey ~ '.title')|trans }}</span>
+                                    {% if 'confie' == choice.vars.value %}
+                                        <span class="max-[420px]:hidden rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out group-has-[:checked]:bg-white">{{ 'pricing.package.2.eyebrow'|trans }}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="shrink-0 rounded-full bg-primary/5 px-2.5 py-0.5 text-sm font-semibold text-primary transition-colors duration-100 ease-out group-has-[:checked]:bg-white">{{ (okey ~ '.price')|trans }}</span>
+                            </div>
+                            <p class="mt-2 text-sm font-light text-slate-600 text-pretty">{{ (okey ~ '.text')|trans }}</p>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+            {% for error in form.offer.vars.errors %}
+                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+            {% endfor %}
+        </fieldset>
+    </div>
     </div>
 
     <div>

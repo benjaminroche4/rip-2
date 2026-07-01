@@ -88,6 +88,11 @@
                                                                                     <p style="margin:0;padding:8px 0 16px;font-size:1em">
                                                                                         <span style="color:#525252">Type de demande :</span> {{ helpType|trans }}
                                                                                     </p>
+                                                                                    {% if offer is defined and offer %}
+                                                                                        <p style="margin:0;padding:0 0 16px;font-size:1em">
+                                                                                            <span style="color:#525252">Offre choisie :</span> {{ ('contact.contactForm.offer.' ~ offer ~ '.title')|trans }} ({{ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans }})
+                                                                                        </p>
+                                                                                    {% endif %}
                                                                                     <hr style="width:100%;border:none;border-top:2px solid #eaeaea;margin-bottom:1em" />
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em;color:#525252">Message :</p>
                                                                                     <p style="margin:0;padding:0.5em 0;font-size:1em">{{ message }}</p>

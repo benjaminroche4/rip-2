@@ -19,6 +19,7 @@ final readonly class SendContactEmailsMessage
         public string $lang,
         public ?string $ip,
         public \DateTimeImmutable $createdAt,
+        public ?string $offer = null,
     ) {
     }
 }

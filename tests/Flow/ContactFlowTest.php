@@ -44,6 +44,7 @@ final class ContactFlowTest extends WebTestCase
         $form['contact[email]'] = 'john.doe@example.com';
         $form['contact[phoneNumber]'] = '+33612345678';
         $form['contact[helpType]'] = 'contact.contactForm.helpType.choice.1';
+        $form['contact[offer]'] = 'accompagne';
         $form['contact[message]'] = 'I would like a 2-bedroom apartment.';
         $form['contact[company]'] = 'Acme Inc.';
         $form['contact[accept]']->tick();
@@ -82,6 +83,7 @@ final class ContactFlowTest extends WebTestCase
         self::assertSame('John', $emailMsg->firstName);
         self::assertSame('john.doe@example.com', $emailMsg->email);
         self::assertSame('fr', $emailMsg->lang);
+        self::assertSame('accompagne', $emailMsg->offer);
 
         /** @var NotifyMakeWebhookMessage $webhookMsg */
         $webhookMsg = array_values($webhookMessages)[0];
@@ -89,6 +91,8 @@ final class ContactFlowTest extends WebTestCase
         self::assertSame('Acme Inc.', $webhookMsg->payload['company']);
         // helpType is forwarded as the translated label, not the i18n key.
         self::assertSame('Recherche de logement', $webhookMsg->payload['helpType']);
+        // The selected offer is forwarded as its translated title.
+        self::assertSame('Accompagné', $webhookMsg->payload['offer']);
     }
 
     public function testInvalidSubmissionReturns200WithoutDispatch(): void
