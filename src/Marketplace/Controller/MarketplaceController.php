@@ -90,11 +90,18 @@ final class MarketplaceController extends AbstractController
                 ));
         }
 
-        return $this->render('public/marketplace/show.html.twig', [
+        $response = $this->render('public/marketplace/show.html.twig', [
             'property' => $property,
             'locale' => $_locale,
             'map' => $map,
         ]);
+
+        // Rented listings are gone for good: 410 tells crawlers to drop them fast
+        if ('rented' === $property->status) {
+            $response->setStatusCode(Response::HTTP_GONE);
+        }
+
+        return $response;
     }
 
     #[Route(

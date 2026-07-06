@@ -379,37 +379,37 @@ findAccommodation:
 meta:
     marketplace:
         title: Nos Appartements à Louer à Paris
-        description: Trouvez votre appartement à louer à Paris, dans tous les arrondissements. Sélectionnés, visités et vérifiés. Du studio au grand appartement familial, meublé ou vide.
+        description: Trouvez votre appartement à louer à Paris, dans tous les arrondissements. Biens sélectionnés, visités et vérifiés, du studio à l’appartement familial.
     pricing:
         title: Tarifs
         description: Trouvez votre appartement à Paris avec un expert à vos côtés. Découvrez nos tarifs et choisissez la formule faite pour vous.
     blog:
-        title: Le Blog pour Vivre et S’installer à Paris
+        title: "Blog : Vivre et S’installer à Paris"
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
     home:
         title: Agence de Relocation à Paris
-        description: "Service clé en main de recherche de logement à Paris pour particuliers et professionnels. Accédez à des biens exclusifs et bénéficiez d’un accompagnement sur mesure."
+        description: "Service clé en main de recherche de logement à Paris pour particuliers et professionnels. Biens exclusifs et accompagnement sur mesure."
     findTenant:
         title: Trouver un Locataire à Paris
-        description: "Service premium pour trouver un locataire à Paris : sélection rigoureuse, réseau exclusif, dossiers vérifiés et accompagnement sur-mesure jusqu’à l’installation."
+        description: "Service premium pour trouver un locataire à Paris : sélection rigoureuse, réseau exclusif, dossiers vérifiés et accompagnement jusqu’à l’installation."
     companies:
-        title: Recherche de Logement Pour Vos Collaborateurs à Paris
+        title: Logez Vos Collaborateurs à Paris
         description: "Logez vos collaborateurs à Paris facilement. Relocation clé-en-main, recherche sur-mesure, support administratif et accompagnement expert."
     contact:
-        title: Contactez Nos Experts en Relocation à Paris
+        title: Contacter un Expert Relocation à Paris
         description: "Échangez avec nos experts en relocation à Paris. Nous accompagnons particuliers et entreprises dans leurs projets d’installation dans la capitale."
     findAccommodation:
         title: Recherche de Logement à Paris
         description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
     landlords:
         title: Gestion Locative à Paris
-        description: "Service de gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Sécurisez et optimisez votre investissement immobilier grâce à une expertise dédiée."
+        description: "Service de gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Sécurisez et optimisez votre investissement avec une expertise dédiée."
     sitemap:
         title: Plan du Site
         description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
     aboutUs:
         title: À Propos de Nous
-        description: Découvrez l’histoire et les valeurs de Relocation in Paris, une agence de relocation haut de gamme dédiée au confort, à la confiance et à l’excellence de ses clients.
+        description: Découvrez l’histoire et les valeurs de Relocation in Paris, une agence de relocation haut de gamme dédiée à la confiance et à l’excellence de ses clients.
     termsConditions:
         title: Conditions Générales de Vente
         description: "Conditions générales de vente de Relocation In Paris : modalités applicables à nos prestations de services."

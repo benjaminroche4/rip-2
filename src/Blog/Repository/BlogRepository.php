@@ -184,6 +184,7 @@ final class BlogRepository
                             }
                         },
                         _createdAt,
+                        _updatedAt,
                         publishedAt,
                         "category": category->{name, "color": color.hex},
                         "authors": authors[]->{fullName, "photo": photo.asset->url},
@@ -226,6 +227,7 @@ final class BlogRepository
                         "mainPhotoAlt": mainPhoto.alt,
                         readTime,
                         _createdAt,
+                        _updatedAt,
                         publishedAt,
                         "category": category->{name, "color": color.hex},
                         "authors": authors[]->{fullName, "photo": photo.asset->url}

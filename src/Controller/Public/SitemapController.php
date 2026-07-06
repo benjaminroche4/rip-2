@@ -41,9 +41,14 @@ final class SitemapController extends AbstractController
             ['locale' => $_locale]
         );
 
+        $properties = array_values(array_filter(
+            $this->propertyRepository->findAll($_locale),
+            static fn ($property): bool => 'rented' !== $property->status,
+        ));
+
         return $this->render('public/sitemap/index.html.twig', [
             'posts' => $posts,
-            'properties' => $this->propertyRepository->findAll($_locale),
+            'properties' => $properties,
         ]);
     }
 }

@@ -77,8 +77,12 @@ readonly class SiteMapEventListener
             $propertyListUrl->setPriority(0.9);
             $urlContainer->addUrl($propertyListUrl, 'properties');
 
-            // Property detail pages
+            // Property detail pages (rented listings are noindex/410, keep them out)
             foreach ($this->propertyRepository->findAll($locale) as $property) {
+                if ('rented' === $property->status) {
+                    continue;
+                }
+
                 $url = new UrlConcrete(
                     $this->propertyUrlExtension->propertyShowPath($property, $locale, true)
                 );

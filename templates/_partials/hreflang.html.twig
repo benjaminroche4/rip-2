@@ -1,7 +1,14 @@
-{# Default hreflang block: derives FR/EN URLs from the current path.
-   Pages where the slug differs per locale (e.g. property show) should override
-   the `hreflang` block in their own template instead of relying on this. #}
-{% set currentPath = app.request.pathinfo|replace({('/' ~ app.request.locale): ''}) %}
-<link rel="alternate" hreflang="fr" href="{{ site_url }}/fr{{ currentPath }}" />
-<link rel="alternate" hreflang="en" href="{{ site_url }}/en{{ currentPath }}" />
-<link rel="alternate" hreflang="x-default" href="{{ site_url }}/fr{{ currentPath }}" />
+{# Default hreflang block: regenerates the current route in each locale via the
+   router, so localized paths (/fr/nos-biens vs /en/our-properties) resolve to
+   real URLs instead of naive locale-prefix substitution.
+   Pages where the CONTENT slug differs per locale (blog posts, property pages)
+   still override the `hreflang` block with content-aware URLs. #}
+{% set _hreflangRoute = app.request.attributes.get('_canonical_route') ?? app.request.attributes.get('_route') %}
+{% if _hreflangRoute %}
+    {# Keep only real route params: internal attributes (_canonical_route, ...)
+       would leak into the query string, but _locale must stay overridable. #}
+    {% set _hreflangParams = (app.request.attributes.get('_route_params') ?? [])|filter((v, k) => '_locale' == k or not (k starts with '_')) %}
+    <link rel="alternate" hreflang="fr" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'fr'})) }}" />
+    <link rel="alternate" hreflang="en" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'en'})) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'fr'})) }}" />
+{% endif %}

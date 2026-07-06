@@ -24,6 +24,7 @@ final class PostMapper
             readTime: $this->toNullableInt($row['readTime'] ?? null),
             body: $this->toNullableArray($row['body'] ?? null),
             createdAt: $this->toDateTime($row['_createdAt'] ?? null),
+            updatedAt: $this->toDateTime($row['_updatedAt'] ?? null),
             publishedAt: $this->toDateTime($row['publishedAt'] ?? null),
             category: $this->toNullableArray($row['category'] ?? null),
             authors: $this->toNullableArray($row['authors'] ?? null),

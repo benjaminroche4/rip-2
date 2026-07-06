@@ -2,6 +2,8 @@
 
 namespace App\Shared\Sanity;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
 /**
  * Pure-PHP renderer for Sanity Portable Text content.
  *
@@ -12,6 +14,12 @@ namespace App\Shared\Sanity;
  */
 final class PortableTextRenderer
 {
+    public function __construct(
+        #[Autowire('%site_url%')]
+        private readonly string $siteUrl = 'https://relocation-in-paris.fr',
+    ) {
+    }
+
     /**
      * Splits a Portable Text array into renderable segments:
      *  - { type: 'text',    html: '<p>...</p><ul>...</ul>' }
@@ -125,6 +133,27 @@ final class PortableTextRenderer
     }
 
     /**
+     * Internal links (relative paths or same-host absolute URLs) must open in
+     * the same tab so link equity and UX stay on-site; only true external
+     * destinations get target="_blank".
+     */
+    private function isExternalUrl(string $url): bool
+    {
+        if ('' === $url || str_starts_with($url, '/') || str_starts_with($url, '#')) {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+        if (null === $host || false === $host) {
+            return false;
+        }
+
+        $siteHost = (string) parse_url($this->siteUrl, PHP_URL_HOST);
+
+        return !in_array(strtolower($host), [$siteHost, 'www.'.$siteHost], true);
+    }
+
+    /**
      * @param array<string, mixed> $block
      */
     private function renderBlock(array $block): string
@@ -137,6 +166,7 @@ final class PortableTextRenderer
         }
 
         return match ($style) {
+            'h2' => '<h2 class="text-3xl font-semibold text-gray-900 mt-6 mb-3">'.$content.'</h2>',
             'h3' => '<h3 class="text-2xl font-semibold text-gray-900 mt-5 mb-2">'.$content.'</h3>',
             'h4' => '<h4 class="text-xl font-semibold text-gray-900 mt-4 mb-2">'.$content.'</h4>',
             'h5' => '<h5 class="text-lg font-semibold text-gray-900 mt-3 mb-1">'.$content.'</h5>',
@@ -170,8 +200,10 @@ final class PortableTextRenderer
                 if (isset($markDefs[$mark])) {
                     $def = $markDefs[$mark];
                     if (($def['_type'] ?? '') === 'link') {
-                        $href = htmlspecialchars($def['href'] ?? '', ENT_QUOTES);
-                        $text = '<a href="'.$href.'" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-4 hover:text-primary/70 transition duration-100">'.$text.'</a>';
+                        $rawHref = $def['href'] ?? '';
+                        $href = htmlspecialchars($rawHref, ENT_QUOTES);
+                        $externalAttrs = $this->isExternalUrl($rawHref) ? ' target="_blank" rel="noopener noreferrer"' : '';
+                        $text = '<a href="'.$href.'"'.$externalAttrs.' class="text-primary underline underline-offset-4 hover:text-primary/70 transition duration-100">'.$text.'</a>';
                     }
                 } else {
                     $text = match ($mark) {

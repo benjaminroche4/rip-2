@@ -7,12 +7,12 @@
 {% set _seoTitle = property_display_title(property, locale) %}
 
 {% block title %}{{ _seoTitle }}{% endblock %}
-{% block description %}{{ property.metaDescription }}{% endblock %}
+{% block description %}{{ (property.metaDescription ?? '')|u.truncate(157, '...') }}{% endblock %}
 {% block url %}{{ property_show_path(property, locale) }}{% endblock %}
 
-{# noindex for rented properties so old listings don't pollute the index #}
+{# noindex for rented (served as 410) and under-offer properties so unavailable listings don't pollute the index #}
 {% block meta_robots %}
-    {% if property.status == 'rented' %}
+    {% if property.status in ['rented', 'underOffer'] %}
         <meta name="robots" content="noindex, follow">
     {% else %}
         <meta name="robots" content="index, follow">

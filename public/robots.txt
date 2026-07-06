@@ -2,13 +2,19 @@
 # Robots.txt - Relocation In Paris
 # ================================
 
-# General rules
+# General rules (routes are locale-prefixed: /fr/..., /en/...)
 User-agent: *
-Disallow: /admin/
-Disallow: /login
-Disallow: /logout
-Disallow: /register
-Disallow: /reset-password
+Disallow: /fr/connexion
+Disallow: /en/login
+Disallow: /fr/deconnexion
+Disallow: /en/logout
+Disallow: /fr/inscription
+Disallow: /en/register
+Disallow: /fr/reinitialiser-mot-de-passe
+Disallow: /en/reset-password
+Disallow: /*/admin
+Disallow: /_marketplace/
+Disallow: /_fragment
 Disallow: /_profiler/
 Disallow: /_wdt/
 

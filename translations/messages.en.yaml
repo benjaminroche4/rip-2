@@ -376,12 +376,12 @@ findAccommodation:
 meta:
     marketplace:
         title: Our Apartments for Rent in Paris
-        description: Find your apartment for rent in Paris, across all arrondissements. Handpicked, visited and verified. From studios to large family apartments, furnished or unfurnished.
+        description: Find your apartment for rent in Paris, across all arrondissements. Handpicked and verified, from studios to family apartments, furnished or unfurnished.
     pricing:
         title: Pricing
         description: Find your apartment in Paris with an expert by your side. Discover our plans and choose the one made for you.
     blog:
-        title: The Blog For Living And Settling in Paris
+        title: "Blog: Living and Settling in Paris"
         description: "The essential blog for living, working, and settling in Paris: practical tips, neighborhoods, housing, paperwork, and everyday life insights."
     home:
         title: Relocation Agency in Paris
@@ -390,17 +390,17 @@ meta:
         title: Find a Tenant in Paris
         description: "Premium service to find a tenant in Paris: rigorous selection, exclusive network, verified applications, and tailored support through to move-in."
     companies:
-        title: Property Search in Paris for Your Employees
+        title: House Your Employees in Paris
         description: "Easily house your employees in Paris. End-to-end relocation, tailored property search, administrative support and expert guidance."
     contact:
-        title: Contact Our Relocation Experts in Paris
+        title: Contact Relocation Experts in Paris
         description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
     findAccommodation:
         title: Property Search in Paris
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
     landlords:
         title: Property Management in Paris
-        description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your real estate investment with dedicated expertise."
+        description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your investment with dedicated expertise."
     sitemap:
         title: Sitemap
         description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
@@ -442,7 +442,7 @@ meta:
         description: "An email with a password reset link has just been sent to you. Follow the instructions to create a new password and regain access to your account."
     resetPassword:
         title: Reset Your Password
-        description: "Create a new password for your Relocation in Paris account. Enter your new password, confirm it, and click the button to reset your password and regain access to your account."
+        description: "Create a new password for your Relocation in Paris account. Enter and confirm your new password to regain access to your account."
 home:
     heroSection:
         top:

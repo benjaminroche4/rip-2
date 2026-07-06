@@ -26,6 +26,7 @@ final readonly class Post
         /** @var array<int, array<string, mixed>>|null Portable Text blocks. */
         public ?array $body = null,
         public ?\DateTimeImmutable $createdAt = null,
+        public ?\DateTimeImmutable $updatedAt = null,
         public ?\DateTimeImmutable $publishedAt = null,
         /** @var array{name?: string, slug?: string, color?: string}|null */
         public ?array $category = null,

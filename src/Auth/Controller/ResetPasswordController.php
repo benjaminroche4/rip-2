@@ -88,8 +88,8 @@ class ResetPasswordController extends AbstractController
      */
     #[Route(
         path: [
-            'fr' => '/{_locale}/verification-email',
-            'en' => '/{_locale}/check-email',
+            'fr' => '/verification-email',
+            'en' => '/check-email',
         ],
         name: 'app_check_email'
     )]
@@ -115,8 +115,8 @@ class ResetPasswordController extends AbstractController
      */
     #[Route(
         path: [
-            'fr' => '/{_locale}/nouveau/{token}',
-            'en' => '/{_locale}/reset/{token}',
+            'fr' => '/nouveau/{token}',
+            'en' => '/reset/{token}',
         ],
         name: 'app_reset_password'
     )]

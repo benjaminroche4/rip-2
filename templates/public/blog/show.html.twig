@@ -1,8 +1,21 @@
 {% extends 'public/base.html.twig' %}
 
 {% block title %}{{ post.title }}{% endblock %}
-{% block description %}{{ post.metaDescription ?? post.shortDescription ?? post.title }}{% endblock %}
+{% block description %}{{ (post.metaDescription ?? post.shortDescription ?? post.title)|u.truncate(157, '...') }}{% endblock %}
 {% block url %}/{{ app.request.locale }}/blog/{{ post.slug }}{% endblock %}
+
+{% block hreflang %}
+    {% set localizedSlugs = { (app.request.locale): post.slug } %}
+    {% if post.alternateSlug and post.alternateSlug.slug is defined and post.alternateSlug.slug %}
+        {% set otherLocale = post.alternateSlug._key ?? (app.request.locale == 'fr' ? 'en' : 'fr') %}
+        {% set localizedSlugs = localizedSlugs|merge({ (otherLocale): post.alternateSlug.slug }) %}
+    {% endif %}
+    {% for hreflangLocale, hreflangSlug in localizedSlugs %}
+        <link rel="alternate" hreflang="{{ hreflangLocale }}" href="{{ url('app_blog_show', {'_locale': hreflangLocale, 'slug': hreflangSlug}) }}" />
+    {% endfor %}
+    {% set xDefaultLocale = localizedSlugs.fr is defined ? 'fr' : app.request.locale %}
+    <link rel="alternate" hreflang="x-default" href="{{ url('app_blog_show', {'_locale': xDefaultLocale, 'slug': localizedSlugs[xDefaultLocale]}) }}" />
+{% endblock %}
 {% block og_image %}{{ post.mainPhoto }}?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80{% endblock %}
 
 {% set postDate = post.publishedAt is defined and post.publishedAt ? post.publishedAt : post._createdAt %}
