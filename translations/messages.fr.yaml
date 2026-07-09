@@ -10,7 +10,6 @@ contact:
             viewOn: Voir sur Google Maps
         2:
             openHours: 'Lundi au vendredi 8h à 20h, samedi 8h à 12h, fermé le dimanche'
-            whatsapp: Disponible sur
         3:
             time: Réponse sous 30mn, aux heures d'ouverture.
     contactForm:
@@ -809,12 +808,12 @@ aboutUs:
 legal:
     title: Mentions légales
     subTitle: Transparence et conformité
-    lastUpdate: "31 octobre 2025"
+    lastUpdate: "9 juillet 2026"
     sections:
         1:
             title: 1. Éditeur du site
             text1: "Le présent site, accessible à l’adresse <i>relocation-in-paris.fr</i>, est édité par :"
-            text2: "Relocation in Paris, marque commerciale de BR Roche Consulting (CH-660.0.478.025-0)."
+            text2: "Relocation in Paris, marque commerciale de Veylam OÜ (17548179)."
             list:
                 phone: "<span class='font-semibold'>Téléphone</span> : +33 (0)1 84 80 43 44"
                 email: "<span class='font-semibold'>E-mail</span> : contact@relocation-in-paris.fr"
@@ -884,7 +883,7 @@ legal:
             p2: "Tout litige relatif à l’utilisation du site sera soumis à la compétence exclusive des tribunaux de Paris."
         10:
             title: 10. Dernière mise à jour
-            p1: "<span class='font-semibold'>Dernière mise à jour :</span> 31 octobre 2025"
+            p1: "<span class='font-semibold'>Dernière mise à jour :</span> 9 juillet 2026"
 privacy:
     title: Politique de confidentialité
     subTitle: Protection de vos données personnelles
@@ -1250,7 +1249,7 @@ termsConditions:
             title: Conditions Générales de Vente et de Services
             text: Ce document présente les conditions générales encadrant nos prestations de services et les engagements des parties.
             text2: Dernière MàJ
-            updatedAt: 12 février 2026
+            updatedAt: 9 juillet 2026
             button: Télécharger
 findTenant:
     title: Trouver un locataire

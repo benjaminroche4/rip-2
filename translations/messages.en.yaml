@@ -10,7 +10,6 @@ contact:
             viewOn: View on Google Maps
         2:
             openHours: 'Monday to Friday 8am to 8pm, Saturday 8am to 12pm, closed Sunday'
-            whatsapp: Available on
         3:
             time: Reply within 30 minutes, during opening hours.
     contactForm:
@@ -809,12 +808,12 @@ aboutUs:
 legal:
     title: Legal Notice
     subTitle: Transparency and Compliance
-    lastUpdate: "October 31, 2025"
+    lastUpdate: "July 9, 2026"
     sections:
         1:
             title: 1. Website Publisher
             text1: "This website, accessible at <i>relocation-in-paris.fr</i>, is published by:"
-            text2: "Relocation in Paris, a registered trademark of BR Roche Consulting (CH-660.0.478.025-0)."
+            text2: "Relocation in Paris, a registered trademark of Veylam OÜ (17548179)."
             list:
                 phone: "<span class='font-semibold'>Phone</span>: +33 (0)1 84 80 43 44"
                 email: "<span class='font-semibold'>Email</span>: contact@relocation-in-paris.fr"
@@ -884,7 +883,7 @@ legal:
             p2: "Any dispute related to the use of the website shall fall under the exclusive jurisdiction of the courts of Paris."
         10:
             title: 10. Last Update
-            p1: "<span class='font-semibold'>Last update:</span> October 31, 2025"
+            p1: "<span class='font-semibold'>Last update:</span> July 9, 2026"
 privacy:
     title: Privacy Policy
     subTitle: Protection of Your Personal Data
@@ -1250,7 +1249,7 @@ termsConditions:
             title: General Terms and Conditions of Sale and Services
             text: This document outlines the general terms governing our service offerings and the commitments of all parties involved.
             text2: Last Updated
-            updatedAt: February 12, 2026
+            updatedAt: July 9, 2026
             button: Download
 findTenant:
     title: Find a Tenant
