@@ -1,0 +1,77 @@
+{# Video testimonials carousel. Sources live in medias/testimonials/{webm,mp4}/<i>,
+   posters are the first frame of each video (medias/testimonials/posters/<i>.webp). #}
+<section class="max-w-2xl lg:max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12" aria-labelledby="video-stories-heading">
+    <div data-controller="slider">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div class="space-y-3 max-w-md">
+                <p class="font-semibold text-primary font-secondary">{{ 'videoStories.title'|trans|raw }}</p>
+                <h2 id="video-stories-heading" class="text-3xl sm:text-4xl font-medium text-pretty">
+                    {{ 'videoStories.subTitle'|trans|raw }}
+                </h2>
+            </div>
+            <p class="max-w-md text-slate-600 font-light text-pretty">
+                {{ 'videoStories.text'|trans|raw }}
+            </p>
+        </div>
+        <div class="mt-10 overflow-hidden">
+            <div data-slider-target="track" class="flex gap-6 cursor-grab touch-pan-y">
+                {% set storyFlags = ['circle-flags:fr', 'circle-flags:us', 'circle-flags:ar', 'circle-flags:se', 'circle-flags:us', 'circle-flags:gb'] %}
+                {% for flag in storyFlags %}
+                    {% set i = loop.index %}
+                    <div
+                        data-controller="video-card"
+                        data-action="pointerdown->video-card#pointerDown click->video-card#toggle"
+                        data-playing="false"
+                        class="group w-[75%] sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] shrink-0 rounded-2xl p-2 border border-neutral-200 cursor-pointer"
+                    >
+                        <div class="relative aspect-[9/16] rounded-xl overflow-hidden bg-gray-900">
+                            <video
+                                data-video-card-target="video"
+                                data-action="ended->video-card#ended"
+                                class="absolute inset-0 h-full w-full object-cover"
+                                playsinline
+                                preload="none"
+                                poster="{{ asset('medias/testimonials/posters/' ~ i ~ '.webp') }}"
+                                aria-label="{{ ('videoStories.' ~ i ~ '.name')|trans }}"
+                            >
+                                <source src="{{ asset('medias/testimonials/webm/' ~ i ~ '.webm') }}" type="video/webm">
+                                <source src="{{ asset('medias/testimonials/mp4/' ~ i ~ '.mp4') }}" type="video/mp4">
+                            </video>
+                            <div class="absolute inset-0 bg-neutral-900/25 transition-opacity duration-300 group-data-[playing=true]:opacity-0 pointer-events-none" aria-hidden="true"></div>
+                            <div class="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-sm py-1 pl-1.5 pr-3 pointer-events-none">
+                                {{ ux_icon(flag, {'class':'size-5 rounded-full'}) }}
+                                <p class="text-gray-900 text-sm font-medium">{{ ('videoStories.' ~ i ~ '.name')|trans|raw }}</p>
+                            </div>
+                            <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-neutral-900/70 to-neutral-900/0 pt-12 pb-3.5 px-4 pointer-events-none">
+                                <p class="text-white/70 text-[11px] font-light uppercase tracking-widest">{{ ('videoStories.' ~ i ~ '.caption')|trans|raw }}</p>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-200 group-data-[playing=true]:opacity-0" aria-hidden="true">
+                                <span class="flex size-13 items-center justify-center rounded-full border border-white/80 bg-white/10 text-white backdrop-blur-sm transition-transform duration-200 group-hover:scale-105">
+                                    {{ ux_icon('material-symbols:play-arrow-rounded', {'class':'size-7'}) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="flex gap-3 mt-5">
+            <button
+                data-slider-target="prev"
+                data-action="click->slider#prev"
+                aria-label="{{ 'videoStories.prev'|trans }}"
+                class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
+            >
+                {{ ux_icon('codicon:arrow-left', {'class':'size-4'}) }}
+            </button>
+            <button
+                data-slider-target="next"
+                data-action="click->slider#next"
+                aria-label="{{ 'videoStories.next'|trans }}"
+                class="size-11 rounded-full border border-gray-300 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
+            >
+                {{ ux_icon('codicon:arrow-right', {'class':'size-4'}) }}
+            </button>
+        </div>
+    </div>
+</section>

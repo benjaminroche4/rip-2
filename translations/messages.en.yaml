@@ -1382,6 +1382,30 @@ reviews:
         from: Google
         date: December 16, 2025
         alt: Nicolas M. review on Google.
+videoStories:
+    title: +900 successful relocations
+    subTitle: They found their apartment. And so much more.
+    text: From the first visit to the key handover, they trusted us with their move. Here is what they say, in their own words.
+    prev: Previous video
+    next: Next video
+    1:
+        name: Sarah
+        caption: Settled in the 11th
+    2:
+        name: David
+        caption: Moved from San Francisco
+    3:
+        name: Emma
+        caption: Moved from Argentina
+    4:
+        name: Ingrid
+        caption: Moved from Stockholm
+    5:
+        name: Michael
+        caption: Moved from Boston
+    6:
+        name: Kate
+        caption: Moved from London
 pricing:
     title: Pricing
     subTitle: Settle in Paris, with complete peace of mind

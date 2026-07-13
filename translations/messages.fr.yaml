@@ -1383,6 +1383,30 @@ reviews:
         from: Google
         date: 16 décembre 2025
         alt: "Photo de Nicolas M., client satisfait de Relocation In Paris"
+videoStories:
+    title: +900 installations réussies
+    subTitle: Ils ont trouvé leur appartement. Et bien plus.
+    text: De la première visite à la remise des clés, ils nous ont confié leur installation. Voici ce qu'ils en disent, avec leurs mots.
+    prev: Vidéo précédente
+    next: Vidéo suivante
+    1:
+        name: Sarah
+        caption: Installée dans le 11e
+    2:
+        name: David
+        caption: Arrivé de San Francisco
+    3:
+        name: Emma
+        caption: Arrivée d'Argentine
+    4:
+        name: Ingrid
+        caption: Arrivée de Stockholm
+    5:
+        name: Michael
+        caption: Arrivé de Boston
+    6:
+        name: Kate
+        caption: Arrivée de Londres
 pricing:
     title: Tarifs
     subTitle: Installez-vous à Paris, en toute sérénité
