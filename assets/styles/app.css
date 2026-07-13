@@ -136,6 +136,53 @@ h1, h2, h3, h4, h5, h6 {
     backface-visibility: hidden;
 }
 
+/* === Shimmer border (pricing popular card) === */
+/* @property lets the conic angle interpolate; without support the ring simply
+   stays static on the base border, no visual breakage. */
+@property --shimmer-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+@keyframes shimmer-border {
+    to {
+        --shimmer-angle: 360deg;
+    }
+}
+.shimmer-border {
+    position: relative;
+}
+.shimmer-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px; /* covers exactly the element's 1px border */
+    border-radius: inherit;
+    padding: 1px;
+    /* pearl-like gradient: two soft light zones opposite each other, rotating
+       slowly over the pink border; start and end colors match so the loop is
+       seamless */
+    background: conic-gradient(
+        from var(--shimmer-angle),
+        #EB9CB0,
+        #FFF6F8 22%,
+        #D77C93 50%,
+        #FFF6F8 72%,
+        #EB9CB0
+    );
+    /* keep only the 1px ring, punch out the center */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: shimmer-border 12s linear infinite;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    .shimmer-border::before {
+        animation: none;
+    }
+}
+
 /* === Blog List Turbo Frame Transition === */
 turbo-frame#blog-list {
     transition: opacity 0.15s ease;
