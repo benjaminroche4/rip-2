@@ -15,9 +15,18 @@
         </div>
         <div class="mt-10 overflow-hidden">
             <div data-slider-target="track" class="flex gap-6 cursor-grab touch-pan-y">
-                {% set storyFlags = ['circle-flags:fr', 'circle-flags:us', 'circle-flags:ar', 'circle-flags:se', 'circle-flags:us', 'circle-flags:gb'] %}
-                {% for flag in storyFlags %}
-                    {% set i = loop.index %}
+                {# Each story keeps its media/translation index; list order = display order #}
+                {% set stories = [
+                    {index: 1, flag: 'circle-flags:fr'},
+                    {index: 2, flag: 'circle-flags:us'},
+                    {index: 6, flag: 'circle-flags:gb'},
+                    {index: 4, flag: 'circle-flags:se'},
+                    {index: 5, flag: 'circle-flags:us'},
+                    {index: 3, flag: 'circle-flags:ar'},
+                ] %}
+                {% for story in stories %}
+                    {% set i = story.index %}
+                    {% set flag = story.flag %}
                     <div
                         data-controller="video-card"
                         data-action="pointerdown->video-card#pointerDown click->video-card#toggle"

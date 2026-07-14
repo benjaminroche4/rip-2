@@ -53,7 +53,7 @@
                             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
                                 <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                             </svg>
-                            <span aria-current="page" class="ml-4 text-sm font-regular text-neutral-400 truncate">
+                            <span aria-current="page" class="ml-4 text-sm font-normal text-neutral-400 truncate">
                                 {{ post.title }}
                             </span>
                         </div>
@@ -116,7 +116,7 @@
                                     </div>
                                     <nav class="space-y-3" data-controller="toc">
                                         {% for block in post.body %}
-                                            {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock'] and block.title %}
+                                            {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock', 'tableBlock'] and block.title ?? false %}
                                                 <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
                                                     {{ block.title }}
                                                 </a>
@@ -165,7 +165,7 @@
                                     {% endif %}
                                     {% for segment in sanity_segments(block.content) %}
                                         {% if segment.type == 'text' %}
-                                            <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
+                                            <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
                                                 {{ segment.html|raw }}
                                             </div>
                                         {% elseif segment.type == 'image' and segment.url %}
@@ -194,7 +194,7 @@
                                     {% endif %}
                                     {% for segment in sanity_segments(block.content) %}
                                         {% if segment.type == 'text' %}
-                                            <div class="text-neutral-700 font-regular leading-7 break-words">
+                                            <div class="text-neutral-600 font-normal leading-7 break-words">
                                                 {{ segment.html|raw }}
                                             </div>
                                         {% elseif segment.type == 'image' and segment.url %}
@@ -248,25 +248,28 @@
                                 {% endif %}
                                 {% for segment in sanity_segments(block.content) %}
                                     {% if segment.type == 'text' %}
-                                        <div class="text-neutral-600 font-regular leading-7 p-6 bg-white rounded-lg break-words">
+                                        <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
                                             {{ segment.html|raw }}
                                         </div>
                                     {% endif %}
                                 {% endfor %}
                             </div>
                         {% elseif block._type == 'ctaBlock' %}
-                            <div class="bg-white bg-linear-to-b from-neutral-100 to-neutral-50/70 rounded-2xl mx-auto p-8 text-center">
-                                <div class="max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
+                            <div class="relative overflow-hidden bg-[linear-gradient(104deg,#FBECF0_0%,#FFF7F9_60%)] rounded-2xl mx-auto p-8 text-center">
+                                <div aria-hidden="true" class="absolute -bottom-1/2 -left-1/4 w-2/3 aspect-square rounded-full bg-[radial-gradient(circle,rgba(244,175,195,0.55)_0%,rgba(244,175,195,0)_65%)] pointer-events-none"></div>
+                                <div aria-hidden="true" class="absolute -top-1/3 -right-1/4 w-2/3 aspect-square rounded-full bg-[radial-gradient(circle,rgba(248,203,216,0.5)_0%,rgba(248,203,216,0)_65%)] pointer-events-none"></div>
+                                <div aria-hidden="true" class="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.9)_1px,transparent_1px)] bg-[size:70px_70px] [mask-image:radial-gradient(ellipse_60%_80%_at_50%_50%,black_30%,transparent_100%)] pointer-events-none"></div>
+                                <div class="relative max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
                                     <div class="flex -space-x-2 mb-6">
-                                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
-                                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
-                                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-neutral-300" />
+                                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                     </div>
                                     {% if block.title %}
-                                        <p class="text-2xl font-semibold text-pretty">{{ block.title }}</p>
+                                        <p class="text-2xl font-semibold text-pretty text-gray-950">{{ block.title }}</p>
                                     {% endif %}
                                     {% if block.description %}
-                                        <p class="text-neutral-700 text-balance">{{ block.description }}</p>
+                                        <p class="text-neutral-600 text-balance">{{ block.description }}</p>
                                     {% endif %}
                                     {% if block.btnText %}
                                         <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
@@ -275,6 +278,57 @@
                                     {% endif %}
                                 </div>
                             </div>
+                        {% elseif block._type == 'tableBlock' %}
+                            {% set tableRows = block.table.rows ?? [] %}
+                            {% if tableRows is not empty %}
+                                {# Absent toggles must be treated as true (Studio defaults) #}
+                                {% set hasHeaderRow = block.firstRowIsHeader ?? true %}
+                                {% set hasHeaderColumn = block.firstColumnIsHeader ?? true %}
+                                <section {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                                    {% if block.title ?? false %}
+                                        <h2 id="{{ block.title|slugify }}-heading" class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
+                                    {% endif %}
+                                    <div
+                                        tabindex="0"
+                                        role="region"
+                                        {% if block.title ?? false %}aria-labelledby="{{ block.title|slugify }}-heading"{% else %}aria-label="{{ 'blog.show.tableRegion'|trans }}"{% endif %}
+                                        class="overflow-x-auto rounded-2xl border border-neutral-200 focus-visible:outline-2 focus-visible:outline-primary"
+                                    >
+                                        <table class="w-full text-left text-sm">
+                                            {% if block.caption ?? false %}
+                                                <caption class="caption-bottom border-t border-neutral-200 px-6 py-3 text-left text-xs text-neutral-500">
+                                                    <span class="flex items-start gap-x-2">
+                                                        {{ ux_icon('lucide:info', {'class': 'size-4 shrink-0'}) }}
+                                                        {{ block.caption }}
+                                                    </span>
+                                                </caption>
+                                            {% endif %}
+                                            {% if hasHeaderRow %}
+                                                <thead>
+                                                    <tr class="bg-neutral-50 divide-x divide-neutral-200 border-b border-neutral-200">
+                                                        {% for cell in tableRows[0].cells %}
+                                                            <th scope="col" class="px-6 py-3 text-xs font-semibold text-neutral-600 whitespace-nowrap">{{ cell }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                            {% endif %}
+                                            <tbody class="divide-y divide-neutral-200">
+                                                {% for row in hasHeaderRow ? tableRows[1:] : tableRows %}
+                                                    <tr class="divide-x divide-neutral-200">
+                                                        {% for cell in row.cells %}
+                                                            {% if hasHeaderColumn and loop.first %}
+                                                                <th scope="row" class="px-6 py-4 bg-neutral-50 font-semibold text-neutral-600 align-top">{{ cell }}</th>
+                                                            {% else %}
+                                                                <td class="px-6 py-4 text-neutral-600 align-top">{{ cell }}</td>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                     {% if post.tags is defined and post.tags is not empty %}

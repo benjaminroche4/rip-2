@@ -247,6 +247,23 @@ final class DashboardController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: [
+            'fr' => '/contacts',
+            'en' => '/contacts',
+        ],
+        name: 'contacts',
+        methods: ['GET'],
+    )]
+    public function contacts(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        return $this->render('admin/contacts/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
     /**
      * Resolves a user by its public ULID. The {slug} segment is purely
      * decorative — if it doesn't match the current display slug (e.g. the

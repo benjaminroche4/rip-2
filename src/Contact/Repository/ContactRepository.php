@@ -2,6 +2,7 @@
 
 namespace App\Contact\Repository;
 
+use App\Contact\Domain\ContactListItem;
 use App\Contact\Entity\Contact;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,6 +15,40 @@ class ContactRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Contact::class);
+    }
+
+    /**
+     * Returns the most recent contact submissions as read models, newest
+     * first. Used by the admin contact list ("load more" pagination: the
+     * component always re-fetches the first N rows).
+     *
+     * @return list<ContactListItem>
+     */
+    public function listFirst(int $limit): array
+    {
+        /** @var list<Contact> $contacts */
+        $contacts = $this->createQueryBuilder('c')
+            ->orderBy('c.createdAt', 'DESC')
+            ->addOrderBy('c.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            static fn (Contact $c): ContactListItem => new ContactListItem(
+                id: (int) $c->getId(),
+                firstName: (string) $c->getFirstName(),
+                lastName: (string) $c->getLastName(),
+                email: (string) $c->getEmail(),
+                phoneNumber: $c->getPhoneNumber(),
+                company: $c->getCompany(),
+                helpType: (string) $c->getHelpType(),
+                message: $c->getMessage(),
+                createdAt: $c->getCreatedAt() ?? new \DateTimeImmutable(),
+                lang: (string) $c->getLang(),
+            ),
+            $contacts,
+        );
     }
 
     /**

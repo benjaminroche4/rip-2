@@ -844,6 +844,7 @@ legal:
             collectedTitle: "Données collectées :"
             collected:
                 - "Formulaire de contact (nom, prénom, e-mail, message)"
+                - "Formulaire d’estimation propriétaire (adresse et caractéristiques du bien, e-mail, téléphone)"
                 - "Formulaire d’inscription à la newsletter"
                 - "Données de navigation (cookies analytiques anonymes)"
             purposeTitle: "Finalités :"
@@ -974,6 +975,7 @@ blog:
         readArticle: Lire l'article
         allArticles: Tous les articles
     show:
+        tableRegion: Tableau de données, défilement horizontal possible
         breadcrumb:
             home: Accueil
             blog: Blog
@@ -1785,10 +1787,18 @@ admin:
     nav:
         dashboard: Tableau de bord
         users: Utilisateurs
+        contacts: Contacts
         payments: Paiements
         tools: Outils
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
+    contacts:
+        title: Demandes de contact
+        subtitle: Les formulaires de contact reçus, du plus récent au plus ancien.
+        empty: Aucune demande de contact pour le moment.
+        button:
+            loadMore: Voir plus
+            loading: Chargement...
     sidebar:
         label: Navigation principale
         section:

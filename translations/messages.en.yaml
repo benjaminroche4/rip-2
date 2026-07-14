@@ -844,6 +844,7 @@ legal:
             collectedTitle: "Data collected:"
             collected:
                 - "Contact form (first name, last name, email address, message)"
+                - "Landlord estimation form (property address and characteristics, email address, phone number)"
                 - "Newsletter subscription form"
                 - "Browsing data (anonymous analytical cookies)"
             purposeTitle: "Purpose:"
@@ -974,6 +975,7 @@ blog:
         readArticle: Read the article
         allArticles: All articles
     show:
+        tableRegion: Data table, scrolls horizontally
         breadcrumb:
             home: Home
             blog: Blog
@@ -1784,10 +1786,18 @@ admin:
     nav:
         dashboard: Dashboard
         users: Users
+        contacts: Contacts
         payments: Payments
         tools: Tools
         logout: Log out
         skipToContent: Skip to main content
+    contacts:
+        title: Contact requests
+        subtitle: Contact form submissions, newest first.
+        empty: No contact requests yet.
+        button:
+            loadMore: Load more
+            loading: Loading...
     sidebar:
         label: Main navigation
         section:

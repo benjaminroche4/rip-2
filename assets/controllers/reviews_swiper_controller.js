@@ -4,8 +4,13 @@ import { Controller } from '@hotwired/stimulus';
 /**
  * Carousel d'avis — infinite loop avec clones
  * La carte active est toujours centrée.
- * Structure : [clone_dernier | real_0 … real_N-1 | clone_premier]
+ * CLONES_PER_SIDE clones de chaque côté : avec 3 cartes visibles centrées,
+ * la carte au bord a besoin d'un voisin, donc 2 clones minimum par côté
+ * pour ne jamais laisser de trou pendant la transition de bouclage.
+ * Structure : [clone_N-2, clone_N-1 | real_0 … real_N-1 | clone_0, clone_1]
  */
+const CLONES_PER_SIDE = 2;
+
 export default class extends Controller {
     static targets = ['track', 'card', 'indicator'];
 
@@ -23,7 +28,8 @@ export default class extends Controller {
         this.cardWidth = 0;
         this.gap = 24;
         this.trackPaddingLeft = 0;
-        this.internalIndex = 1; // 0=clone_last | 1..N=vrais | N+1=clone_first
+        // Positions : [0..CLONES-1]=clones | [CLONES..CLONES+N-1]=vrais | [CLONES+N..]=clones
+        this.internalIndex = CLONES_PER_SIDE;
 
         // Variables pour le drag
         this.touchStartX = 0;
@@ -52,6 +58,8 @@ export default class extends Controller {
 
     disconnect() {
         this.stopAutoplay();
+        clearTimeout(this.resumeTimer);
+        clearTimeout(this.transitionFallbackTimer);
         window.removeEventListener('resize', this.boundHandleResize);
 
         if (this.hasTrackTarget) {
@@ -72,8 +80,8 @@ export default class extends Controller {
     prewarmBoundaries() {
         const track = this.trackTarget;
 
-        // Aller au dernier réel (clone_first devient adjacent et est rasterisé)
-        this.internalIndex = this.totalCards;
+        // Aller au dernier réel (les clones de fin deviennent adjacents et sont rasterisés)
+        this.internalIndex = this.totalCards + CLONES_PER_SIDE - 1;
         track.style.transition = 'none';
         track.style.transform = `translateX(${this.getCurrentOffset()}px)`;
 
@@ -81,29 +89,32 @@ export default class extends Controller {
         void track.offsetHeight;
 
         // Revenir au premier réel — toujours dans le même task, aucun frame peint
-        this.internalIndex = 1;
+        this.internalIndex = CLONES_PER_SIDE;
         track.style.transform = `translateX(${this.getCurrentOffset()}px)`;
     }
 
     /**
-     * Crée 1 clone de chaque côté.
+     * Crée CLONES_PER_SIDE clones de chaque côté.
      * Les images des clones passent en eager pour éviter le flash au premier affichage.
      */
     setupClones() {
-        const lastClone  = this.originalCards[this.totalCards - 1].cloneNode(true);
-        const firstClone = this.originalCards[0].cloneNode(true);
-
-        [lastClone, firstClone].forEach(clone => {
+        const prepareClone = card => {
+            const clone = card.cloneNode(true);
             clone.removeAttribute('data-reviews-swiper-target');
             clone.setAttribute('aria-hidden', 'true');
             clone.querySelectorAll('img').forEach(img => img.removeAttribute('loading'));
-        });
+            return clone;
+        };
 
-        this.trackTarget.prepend(lastClone);
-        this.trackTarget.append(firstClone);
+        // Clones des derniers réels (dans l'ordre) devant, des premiers réels derrière
+        const leadingClones  = this.originalCards.slice(-CLONES_PER_SIDE).map(prepareClone);
+        const trailingClones = this.originalCards.slice(0, CLONES_PER_SIDE).map(prepareClone);
 
-        // allCards = [clone_last, real_0 … real_N-1, clone_first]
-        this.allCards = [lastClone, ...this.originalCards, firstClone];
+        this.trackTarget.prepend(...leadingClones);
+        this.trackTarget.append(...trailingClones);
+
+        // allCards = [clones fin, real_0 … real_N-1, clones début]
+        this.allCards = [...leadingClones, ...this.originalCards, ...trailingClones];
 
         // Promote chaque carte en layer GPU dès le départ → pas de flash au premier affichage
         this.allCards.forEach(card => { card.style.willChange = 'transform, opacity'; });
@@ -168,7 +179,7 @@ export default class extends Controller {
         const deltaX = event.clientX - this.touchStartX;
         const threshold = this.cardWidth * 0.2;
 
-        if (this.autoplayValue) this.stopAutoplay();
+        this.pauseThenResume();
 
         if (deltaX < -threshold)      this.next();
         else if (deltaX > threshold)  this.prev();
@@ -218,7 +229,7 @@ export default class extends Controller {
         const deltaX = event.changedTouches[0].clientX - this.touchStartX;
         const threshold = this.cardWidth * 0.2;
 
-        if (this.autoplayValue) this.stopAutoplay();
+        this.pauseThenResume();
 
         if (deltaX < -threshold)      this.next();
         else if (deltaX > threshold)  this.prev();
@@ -235,7 +246,7 @@ export default class extends Controller {
         else                   this.visibleCards = 3;
 
         this.currentIndexValue = 0;
-        this.internalIndex = 1;
+        this.internalIndex = CLONES_PER_SIDE;
         this.cardWidth = 0;
         this.updateCarousel(false);
     }
@@ -244,6 +255,8 @@ export default class extends Controller {
      * Démarre le défilement automatique
      */
     startAutoplay() {
+        this.stopAutoplay();
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         this.autoplayInterval = setInterval(() => this.next(), this.autoplayDelayValue);
     }
 
@@ -252,6 +265,17 @@ export default class extends Controller {
      */
     stopAutoplay() {
         if (this.autoplayInterval) clearInterval(this.autoplayInterval);
+    }
+
+    /**
+     * Après une interaction manuelle (drag, swipe, indicateur), suspend
+     * l'autoplay quelques secondes puis le laisse reprendre tout seul.
+     */
+    pauseThenResume(delay = 4000) {
+        if (!this.autoplayValue) return;
+        this.stopAutoplay();
+        clearTimeout(this.resumeTimer);
+        this.resumeTimer = setTimeout(() => this.startAutoplay(), delay);
     }
 
     /**
@@ -283,8 +307,9 @@ export default class extends Controller {
         const targetIndex = parseInt(event.currentTarget.dataset.index);
         if (targetIndex >= 0 && targetIndex < this.totalCards) {
             this.currentIndexValue = targetIndex;
-            this.internalIndex = targetIndex + 1;
+            this.internalIndex = targetIndex + CLONES_PER_SIDE;
             this.updateCarousel(true);
+            this.pauseThenResume();
         }
     }
 
@@ -311,10 +336,21 @@ export default class extends Controller {
         if (animate) {
             this.isTransitioning = true;
             this.trackTarget.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            setTimeout(() => {
+
+            // Rebouclage calé sur la vraie fin de transition (le timer seul peut
+            // se désynchroniser si le main thread lag → snap visible)
+            const finish = () => {
+                this.trackTarget.removeEventListener('transitionend', onTransitionEnd);
+                clearTimeout(this.transitionFallbackTimer);
                 this.isTransitioning = false;
                 this.handleLoopBoundary();
-            }, 400);
+            };
+            const onTransitionEnd = event => {
+                if (event.target === this.trackTarget && event.propertyName === 'transform') finish();
+            };
+            this.trackTarget.addEventListener('transitionend', onTransitionEnd);
+            clearTimeout(this.transitionFallbackTimer);
+            this.transitionFallbackTimer = setTimeout(finish, 500);
         } else {
             this.trackTarget.style.transition = 'none';
         }
@@ -327,14 +363,17 @@ export default class extends Controller {
 
     /**
      * Après la transition sur un clone → jump instantané vers la vraie carte (invisible visuellement).
-     * internalIndex 0           → clone_last  → jump vers totalCards (dernier réel)
-     * internalIndex totalCards+1 → clone_first → jump vers 1 (premier réel)
+     * Avant le premier réel  → jump vers le dernier réel
+     * Après le dernier réel  → jump vers le premier réel
      */
     handleLoopBoundary() {
-        if (this.internalIndex === 0) {
-            this.internalIndex = this.totalCards;
-        } else if (this.internalIndex === this.totalCards + 1) {
-            this.internalIndex = 1;
+        const firstReal = CLONES_PER_SIDE;
+        const lastReal = this.totalCards + CLONES_PER_SIDE - 1;
+
+        if (this.internalIndex < firstReal) {
+            this.internalIndex += this.totalCards;
+        } else if (this.internalIndex > lastReal) {
+            this.internalIndex -= this.totalCards;
         } else {
             return;
         }
