@@ -91,8 +91,12 @@ export default class extends Controller {
 
     #positionElements() {
         const triggerRect = this.triggerTarget.getBoundingClientRect();
-        const contentRect = this.contentElement.getBoundingClientRect();
-        const arrowRect = this.arrowElement.getBoundingClientRect();
+        // offsetWidth/offsetHeight: the untransformed layout box. Measuring
+        // with getBoundingClientRect during the opening transition (scale-95)
+        // returns a shrunken box and the tooltip lands off-center.
+        const contentWidth = this.contentElement.offsetWidth;
+        const contentHeight = this.contentElement.offsetHeight;
+        const arrowSize = this.arrowElement.offsetWidth;
 
         let wrapperLeft = 0;
         let wrapperTop = 0;
@@ -101,21 +105,34 @@ export default class extends Controller {
 
         switch (this.side) {
             case 'left':
-                wrapperLeft = triggerRect.left + scrollX - contentRect.width - arrowRect.width / 2 - this.sideOffset;
-                wrapperTop = triggerRect.top + scrollY - contentRect.height / 2 + triggerRect.height / 2;
+                wrapperLeft = triggerRect.left + scrollX - contentWidth - arrowSize / 2 - this.sideOffset;
+                wrapperTop = triggerRect.top + scrollY - contentHeight / 2 + triggerRect.height / 2;
                 break;
             case 'top':
-                wrapperLeft = triggerRect.left + scrollX - contentRect.width / 2 + triggerRect.width / 2;
-                wrapperTop = triggerRect.top + scrollY - contentRect.height - arrowRect.height / 2 - this.sideOffset;
+                wrapperLeft = triggerRect.left + scrollX - contentWidth / 2 + triggerRect.width / 2;
+                wrapperTop = triggerRect.top + scrollY - contentHeight - arrowSize / 2 - this.sideOffset;
                 break;
             case 'right':
-                wrapperLeft = triggerRect.right + scrollX + arrowRect.width / 2 + this.sideOffset;
-                wrapperTop = triggerRect.top + scrollY - contentRect.height / 2 + triggerRect.height / 2;
+                wrapperLeft = triggerRect.right + scrollX + arrowSize / 2 + this.sideOffset;
+                wrapperTop = triggerRect.top + scrollY - contentHeight / 2 + triggerRect.height / 2;
                 break;
             case 'bottom':
-                wrapperLeft = triggerRect.left + scrollX - contentRect.width / 2 + triggerRect.width / 2;
-                wrapperTop = triggerRect.bottom + scrollY + arrowRect.height / 2 + this.sideOffset;
+                wrapperLeft = triggerRect.left + scrollX - contentWidth / 2 + triggerRect.width / 2;
+                wrapperTop = triggerRect.bottom + scrollY + arrowSize / 2 + this.sideOffset;
                 break;
+        }
+
+        // Keep top/bottom tooltips inside the viewport (e.g. a trigger close
+        // to the screen edge) and slide the arrow so it stays pointed at the
+        // trigger even when the body is clamped.
+        if ('top' === this.side || 'bottom' === this.side) {
+            const margin = 8;
+            const minLeft = scrollX + margin;
+            const maxLeft = scrollX + document.documentElement.clientWidth - contentWidth - margin;
+            const clampedLeft = Math.min(Math.max(wrapperLeft, minLeft), Math.min(maxLeft, Infinity));
+            const shift = wrapperLeft - clampedLeft;
+            this.arrowElement.style.marginLeft = shift ? `${shift}px` : '';
+            wrapperLeft = clampedLeft;
         }
 
         this.wrapperElement.style.transform = `translate3d(${wrapperLeft}px, ${wrapperTop}px, 0)`;

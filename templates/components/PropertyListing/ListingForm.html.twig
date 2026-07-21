@@ -1,0 +1,630 @@
+{# @prop form  Symfony form view (PropertyListingType) #}
+{%- props form -%}
+
+{% set inputClass = 'block w-full rounded-lg bg-white px-3 py-2.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 sm:text-sm/6' %}
+{% set numberInputClass = inputClass ~ ' tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none' %}
+{% set chipClass = 'cursor-pointer rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-gray-700 transition duration-100 ease-out active:scale-[.97] hover:border-primary/60 hover:text-primary has-checked:border-primary has-checked:bg-primary/10 has-checked:text-primary has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary' %}
+{% set dividerClass = 'bg-gradient-to-r from-slate-400/5 via-slate-500/20 to-slate-400/5 bg-[length:100%_1px] bg-no-repeat bg-top' %}
+{% set errorClass = 'mt-1.5 text-sm text-red-600' %}
+
+<div id="listing-form">
+    {% set listingSuccess = app.flashes('listingSuccess') %}
+    {% if listingSuccess|length > 0 %}
+        {% set success = listingSuccess|first %}
+        {# Confirmation volontairement simple : le recapitulatif complet part par email #}
+        <div class="rounded-2xl p-2 border border-neutral-200 shadow-lg">
+            <div data-controller="scroll-into-view" class="scroll-mt-6 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 p-6 sm:p-10" role="status" aria-live="polite">
+                <div class="flex flex-col items-center text-center">
+
+                    <div class="p-3 bg-white inline-block rounded-full shadow-sm ring-1 ring-black/5">
+                        {{ ux_icon('mynaui:check-circle-one', {'class': 'size-7 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                    </div>
+
+                    <div class="mt-6 max-w-md space-y-2">
+                        <h2 class="text-2xl font-semibold text-pretty">{{ 'listProperty.form.success.title'|trans|raw }}</h2>
+                        <p class="text-slate-600 font-light text-pretty">{{ 'listProperty.form.success.text'|trans|raw }}</p>
+                    </div>
+
+                    {# Le bien en un coup d'oeil : carte + adresse #}
+                    {% if success.address|default('') != '' %}
+                        <div class="mt-8 w-full max-w-md overflow-hidden rounded-xl border border-neutral-200 bg-white text-left">
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query={{ success.address|url_encode }}{% if success.placeId|default('') %}&query_place_id={{ success.placeId }}{% endif %}"
+                                rel="noopener noreferrer" target="_blank"
+                                class="group block"
+                                aria-label="{{ success.address }}"
+                            >
+                                <img
+                                    src="https://maps.googleapis.com/maps/api/staticmap?center={{ success.address|url_encode }}&zoom=16&size=640x260&scale=2&markers=anchor:bottom%7Cicon:{{ (site_url ~ '/medias/website/map-pin.png')|url_encode }}%7C{{ success.address|url_encode }}&language={{ app.request ? app.request.locale : 'fr' }}&key={{ google_maps_api_key }}"
+                                    alt="{{ success.address }}"
+                                    class="h-36 w-full border-b border-neutral-100 object-cover transition-opacity duration-100 ease-out group-hover:opacity-90 sm:h-40"
+                                    width="640" height="260"
+                                    loading="lazy"
+                                />
+                            </a>
+                            <div class="flex items-center justify-between gap-3 px-4 py-3">
+                                <p class="flex min-w-0 items-center gap-2 text-sm font-medium text-gray-900">
+                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                    <span class="truncate">{{ success.address }}</span>
+                                </p>
+                                {% if success.photosCount|default(0) > 0 %}
+                                    <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-700 tabular-nums">
+                                        {{ ux_icon('lucide:image', {'class': 'size-3.5 text-neutral-400', 'aria-hidden': 'true'}) }}
+                                        {{ 'listProperty.form.success.photosCount'|trans({'%count%': success.photosCount}) }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Le detail complet est dans l'email de confirmation #}
+                    <p class="mt-7 flex items-center justify-center gap-1.5 text-sm font-light text-neutral-500">
+                        {{ ux_icon('lucide:mail-check', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
+                        {{ 'listProperty.form.success.emailRecap'|trans({'%email%': success.email|default('')}) }}
+                    </p>
+
+                    {# Pendant que la confiance est la : vers l'offre de gestion #}
+                    <div class="mt-6 w-full max-w-md">
+                        <twig:Button variant="default" as="a" size="lg" href="{{ path('app_service_landlords') }}" class="w-full">
+                            {{ 'listProperty.form.success.cta'|trans }}
+                        </twig:Button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% else %}
+    {{ form_start(form, {'attr': {
+        'data-turbo': 'false',
+        'novalidate': 'novalidate',
+        'data-controller': 'listing-steps deposit-suggest bedrooms-suggest inline-validation leave-guard upload-progress',
+        'data-action': 'input->listing-steps#update change->listing-steps#onChange focusin->listing-steps#update focusout->listing-steps#update click->listing-steps#onClick submit->listing-steps#onSubmit change->deposit-suggest#suggest change->bedrooms-suggest#suggest input->leave-guard#markDirty change->leave-guard#markDirty submit->leave-guard#submit submit->upload-progress#start',
+        'data-leave-guard-message-value': 'listProperty.form.leaveGuard'|trans,
+        'data-upload-progress-label-value': 'listProperty.form.photos.uploading'|trans,
+        'data-listing-steps-badge-active-class': 'bg-primary text-white ring-4 ring-primary/15 scale-110',
+        'data-listing-steps-badge-done-class': 'bg-primary text-white',
+        'data-listing-steps-badge-idle-class': 'bg-white text-gray-400 ring-1 ring-gray-950/10',
+        'data-listing-steps-muted-class': 'opacity-50',
+        'data-listing-steps-recap-label-value': 'listProperty.form.recap'|trans,
+        'data-listing-steps-recap-done-label-value': 'listProperty.form.recapDone'|trans,
+    }}) }}
+        {% for error in form.vars.errors %}
+            <p class="mb-10 rounded-xl bg-red-50 p-4 text-sm text-red-700" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+        {% endfor %}
+
+        {# Recap sticky sur mobile : le stepper vertical sort vite de l'écran.
+           Purement visuel : les titres de section portent déjà la structure. #}
+        <div class="sticky top-0 z-30 -mx-6 mb-8 border-b border-gray-950/10 bg-white/90 px-6 py-2.5 backdrop-blur lg:hidden" aria-hidden="true">
+            <p class="text-sm font-medium text-gray-900 tabular-nums" data-listing-steps-target="mobileLabel"></p>
+            <div class="mt-2 h-1 overflow-hidden rounded-full bg-gray-950/10">
+                <div class="h-full w-0 rounded-full bg-primary transition-[width] duration-300 ease-out" data-listing-steps-target="mobileFill"></div>
+            </div>
+        </div>
+
+        <div class="relative">
+            <div class="absolute bottom-10 left-[17.5px] top-4 w-px bg-gray-950/10" aria-hidden="true"></div>
+            <div class="absolute left-[17.5px] top-4 w-px bg-primary transition-[height] duration-500 ease-out" style="height: 0" data-listing-steps-target="fill" aria-hidden="true"></div>
+            <div class="space-y-12">
+                {# Section 1 : coordonnées #}
+                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section">
+                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-primary text-white ring-4 ring-primary/15 scale-110" data-listing-steps-target="badge" aria-hidden="true">
+                        <span data-listing-steps-target="badgeNumber">1</span>
+                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                    </span>
+                    <div class="transition-opacity duration-300 ease-out" data-listing-steps-target="content">
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.1.title'|trans }}</h2>
+                    <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.1.text'|trans }}</p>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            {{ form_label(form.fullName, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                            {{ form_widget(form.fullName, {'attr': {'aria-describedby': form.fullName.vars.id ~ '-error-inline', 'class': inputClass, 'placeholder': 'listProperty.form.fullName.placeholder'|trans, 'data-listing-steps-target': 'field', 'data-listing-steps-section': '0' }}) }}
+                            {% for error in form.fullName.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form.fullName.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.fullName.vars.id }}">{{ 'listProperty.form.fullName.notBlank'|trans({}, 'validators') }}</p>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                {{ form_label(form.email, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block mb-2'}}) }}
+                                {{ form_widget(form.email, {'attr': {'aria-describedby': form.email.vars.id ~ '-error-inline', 'class': inputClass, 'placeholder': 'listProperty.form.email.placeholder'|trans, 'data-listing-steps-target': 'field', 'data-listing-steps-section': '0' }}) }}
+                                {% for error in form.email.vars.errors %}
+                                    <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                                {% endfor %}
+                                <p class="hidden {{ errorClass }}" id="{{ form.email.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.email.vars.id }}">{{ 'listProperty.form.email.notBlank'|trans({}, 'validators') }}</p>
+                            </div>
+                            <div data-controller="phone-input" data-phone-input-initial-country-value="{{ (app.request and app.request.locale == 'en') ? 'gb' : 'fr' }}" data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}" class="text-base sm:text-sm/6">
+                                {{ form_label(form.phoneNumber, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-900'}}) }}
+                                <div class="mt-2">
+                                    {{ form_widget(form.phoneNumber, {'attr': {'aria-describedby': form.phoneNumber.vars.id ~ '-error-inline', 
+                                        'class': inputClass,
+                                        'placeholder': ' ',
+                                        'autocomplete': 'tel',
+                                        'data-phone-input-target': 'input',
+                                        'data-listing-steps-target': 'field',
+                                        'data-listing-steps-section': '0'
+                                    }}) }}
+                                    {% for error in form.phoneNumber.vars.errors %}
+                                        <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                                    {% endfor %}
+                                    <p class="hidden {{ errorClass }}" id="{{ form.phoneNumber.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.phoneNumber.vars.id }}">{{ 'listProperty.form.phoneNumber.notBlank'|trans({}, 'validators') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                {# Section 2 : détail du bien #}
+                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section" data-controller="address-map-preview address-area-hint address-confirm house-floor" data-action="places-autocomplete:select->address-map-preview#show places-autocomplete:outside->address-area-hint#show places-autocomplete:select->address-area-hint#hide places-autocomplete:select->address-confirm#set change->house-floor#update" data-address-map-preview-map-id-value="17a6371e43c53ecdecba3794">
+                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                        <span data-listing-steps-target="badgeNumber">2</span>
+                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                    </span>
+                    <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.2.title'|trans }}</h2>
+                    <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.2.text'|trans }}</p>
+                    {{ form_label(form.address, null, {'label_attr': {'class': 'sr-only'}}) }}
+                    <div class="relative mt-4" data-controller="places-autocomplete" data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            {{ ux_icon('lucide:map-pin', {'class':'size-5 text-gray-400'}) }}
+                        </div>
+                        {{ form_widget(form.address, {'attr': {'data-address-confirm-target': 'address', 'aria-describedby': form.address.vars.id ~ '-error-inline', 
+                            'class': inputClass ~ ' pl-10',
+                            'placeholder': 'listProperty.form.address.placeholder'|trans,
+                            'data-listing-steps-target': 'field',
+                            'data-listing-steps-section': '1',
+                            'data-address-map-preview-target': 'input',
+                            'data-action': 'input->places-autocomplete#search keydown->places-autocomplete#navigate input->address-map-preview#onInput input->address-area-hint#hide input->address-confirm#clear',
+                        }}) }}
+                        {# Custom suggestions dropdown (populated by the controller) #}
+                        <ul data-places-autocomplete-target="results" role="listbox"
+                            class="hidden absolute left-0 right-0 top-full mt-2 z-50 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl shadow-gray-500/10 p-1"></ul>
+                    </div>
+                    {% for error in form.address.vars.errors %}
+                        <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                    {% endfor %}
+                    <p class="hidden {{ errorClass }}" id="{{ form.address.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.address.vars.id }}">{{ 'listProperty.form.address.notBlank'|trans({}, 'validators') }}</p>
+                    <p class="mt-1.5 hidden text-sm text-amber-700" aria-live="polite" data-address-area-hint-target="hint">{{ 'listProperty.form.address.outside'|trans }}</p>
+                    {{ form_widget(form.placeId, {'attr': {'data-address-confirm-target': 'input', 'data-listing-steps-target': 'field', 'data-listing-steps-section': '1'}}) }}
+                    <p class="mt-1.5 hidden text-xs text-gray-500" aria-live="polite" data-address-confirm-target="hint">{{ 'listProperty.form.address.pick'|trans }}</p>
+                    {% for error in form.placeId.vars.errors %}
+                        <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                    {% endfor %}
+                    {# Map preview, revealed once an address has been picked #}
+                    <div class="mt-3 hidden overflow-hidden rounded-xl border border-gray-950/10 opacity-0 transition-opacity duration-300 ease-out" data-address-map-preview-target="container">
+                        <div class="h-48 w-full sm:h-56" data-address-map-preview-target="map"></div>
+                    </div>
+
+                    {% for group in ['propertyType', 'propertyStatus'] %}
+                        <div class="mt-5{% if loop.first %} pt-5 {{ dividerClass }}{% endif %}">
+                            <p class="font-semibold text-gray-900 text-sm mb-2" id="{{ form[group].vars.id }}-label">{{ ('listProperty.form.' ~ group ~ '.label')|trans }}</p>
+                            <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="{{ form[group].vars.id }}-label">
+                                {% set chipAttr = {'class': 'sr-only', 'data-listing-steps-target': 'field', 'data-listing-steps-section': '1'} %}
+                                {% if group == 'propertyType' %}{% set chipAttr = chipAttr|merge({'data-bedrooms-suggest-target': 'type', 'data-house-floor-target': 'type'}) %}{% endif %}
+                                {% for child in form[group] %}
+                                    <label class="{{ chipClass }}">
+                                        {{ form_widget(child, {'attr': chipAttr}) }}
+                                        {{ child.vars.label|trans }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% for error in form[group].vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form[group].vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form[group].vars.id }}">{{ ('listProperty.form.' ~ group ~ '.notBlank')|trans({}, 'validators') }}</p>
+                        </div>
+                    {% endfor %}
+
+                    {# Chambres et salles de bains : puces à choix rapide #}
+                    {% for group in ['bedrooms', 'bathrooms'] %}
+                        <div class="mt-5{% if loop.first %} pt-5 {{ dividerClass }}{% endif %}">
+                            <p class="font-semibold text-gray-900 text-sm mb-2" id="{{ form[group].vars.id }}-label">{{ ('listProperty.form.' ~ group ~ '.label')|trans }}</p>
+                            <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="{{ form[group].vars.id }}-label">
+                                {% set chipAttr = {'class': 'sr-only', 'data-listing-steps-target': 'field', 'data-listing-steps-section': '1'} %}
+                                {% if group == 'bedrooms' %}{% set chipAttr = chipAttr|merge({'data-bedrooms-suggest-target': 'bedroom'}) %}{% endif %}
+                                {% for child in form[group] %}
+                                    <label class="min-w-11 text-center tabular-nums {{ chipClass }} px-3.5 py-1.5">
+                                        {{ form_widget(child, {'attr': chipAttr}) }}
+                                        {{ child.vars.label }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% for error in form[group].vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    {# Surface et étage : "Étage 3 sur 6 étages" en un seul contrôle #}
+                    <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <div class="mb-2 flex h-6 items-center justify-between gap-2">
+                                {{ form_label(form.surface, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
+                            </div>
+                            <div class="relative">
+                                {{ form_widget(form.surface, {'attr': {'aria-describedby': form.surface.vars.id ~ '-error-inline', 
+                                    'class': numberInputClass ~ ' pr-10 h-11',
+                                    'data-listing-steps-target': 'field',
+                                    'data-listing-steps-section': '1',
+                                }}) }}
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-400">m²</span>
+                            </div>
+                            {% for error in form.surface.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form.surface.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.surface.vars.id }}">{{ 'listProperty.form.surface.notBlank'|trans({}, 'validators') }}</p>
+                        </div>
+                        <div data-house-floor-target="wrapper">
+                            <div class="mb-2 flex h-6 items-center justify-between gap-2">
+                                {{ form_label(form.floor, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
+                            </div>
+                            <div class="flex h-11 items-center justify-between gap-1.5 rounded-lg border border-gray-300 bg-white px-1.5">
+                                <div class="flex items-center" data-controller="number-stepper" data-number-stepper-min-value="0" data-number-stepper-max-value="20">
+                                    <button type="button" aria-label="{{ 'propertyManagement.form.stepper.decrease'|trans }}" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-100 active:bg-gray-200">
+                                        {{ ux_icon('lucide:minus', {'class':'size-3.5'}) }}
+                                    </button>
+                                    {{ form_widget(form.floor, {'attr': {
+                                        'class': 'w-9 border-0 bg-transparent p-0 text-center text-base font-medium text-gray-900 tabular-nums focus:outline-none focus:ring-0 sm:text-sm/6 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+                                        'data-number-stepper-target': 'input',
+                                        'data-house-floor-target': 'input',
+                                        'data-listing-steps-target': 'field',
+                                        'data-listing-steps-section': '1',
+                                    }}) }}
+                                    <button type="button" aria-label="{{ 'propertyManagement.form.stepper.increase'|trans }}" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-100 active:bg-gray-200">
+                                        {{ ux_icon('lucide:plus', {'class':'size-3.5'}) }}
+                                    </button>
+                                </div>
+                                <span class="shrink-0 text-sm text-gray-400">{{ 'listProperty.form.floor.of'|trans }}</span>
+                                <div class="flex items-center" data-controller="number-stepper" data-number-stepper-min-value="1" data-number-stepper-max-value="20">
+                                    <button type="button" aria-label="{{ 'propertyManagement.form.stepper.decrease'|trans }}" data-action="mousedown->number-stepper#startDecrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startDecrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-100 active:bg-gray-200">
+                                        {{ ux_icon('lucide:minus', {'class':'size-3.5'}) }}
+                                    </button>
+                                    {{ form_widget(form.buildingFloors, {'attr': {
+                                        'class': 'w-9 border-0 bg-transparent p-0 text-center text-base font-medium text-gray-900 tabular-nums focus:outline-none focus:ring-0 sm:text-sm/6 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+                                        'aria-label': 'listProperty.form.buildingFloors.label'|trans,
+                                        'data-number-stepper-target': 'input',
+                                        'data-house-floor-target': 'input',
+                                        'data-listing-steps-target': 'field',
+                                        'data-listing-steps-section': '1',
+                                    }}) }}
+                                    <button type="button" aria-label="{{ 'propertyManagement.form.stepper.increase'|trans }}" data-action="mousedown->number-stepper#startIncrementHold mouseup->number-stepper#stopHold mouseleave->number-stepper#stopHold touchstart->number-stepper#startIncrementHold touchend->number-stepper#stopHold" class="flex size-7 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-100 active:bg-gray-200">
+                                        {{ ux_icon('lucide:plus', {'class':'size-3.5'}) }}
+                                    </button>
+                                </div>
+                                <span class="shrink-0 pr-1 text-sm text-gray-400">{{ 'listProperty.form.floor.floors'|trans }}</span>
+                            </div>
+                            {% for error in form.floor.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            {% for error in form.buildingFloors.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% for group in ['furnishing', 'orientations'] %}
+                        <div class="mt-5{% if loop.first %} pt-5 {{ dividerClass }}{% endif %}">
+                            <p class="font-semibold text-gray-900 text-sm mb-2" id="{{ form[group].vars.id }}-label">{{ ('listProperty.form.' ~ group ~ '.label')|trans }}</p>
+                            <div class="flex flex-wrap gap-2" role="{{ group == 'orientations' ? 'group' : 'radiogroup' }}" aria-labelledby="{{ form[group].vars.id }}-label">
+                                {% set chipAttr = {'class': 'sr-only', 'data-listing-steps-target': 'field', 'data-listing-steps-section': '1'} %}
+                                {% if group == 'furnishing' %}{% set chipAttr = chipAttr|merge({'data-deposit-suggest-target': 'furnishing'}) %}{% endif %}
+                                {% for child in form[group] %}
+                                    <label class="{{ chipClass }}">
+                                        {{ form_widget(child, {'attr': chipAttr}) }}
+                                        {{ child.vars.label|trans }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% for error in form[group].vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            {% if group == 'furnishing' %}
+                                <p class="hidden {{ errorClass }}" id="{{ form[group].vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form[group].vars.id }}">{{ 'listProperty.form.furnishing.notBlank'|trans({}, 'validators') }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+
+                {# Section 3 : conditions de location #}
+                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section" data-controller="lease-financials" data-action="change->lease-financials#update">
+                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                        <span data-listing-steps-target="badgeNumber">3</span>
+                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                    </span>
+                    <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.3.title'|trans }}</h2>
+                    <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.3.text'|trans }}</p>
+
+                    {# Type de bail souhaité (choix multiple) #}
+                    <div class="mt-4">
+                        <p class="font-semibold text-gray-900 text-sm mb-2" id="{{ form.leaseTypes.vars.id }}-label">{{ 'listProperty.form.leaseType.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2" role="group" aria-labelledby="{{ form.leaseTypes.vars.id }}-label">
+                            {% for child in form.leaseTypes %}
+                                <label class="{{ chipClass }}">
+                                    {{ form_widget(child, {'attr': {'class': 'sr-only', 'data-listing-steps-target': 'field', 'data-listing-steps-section': '2', 'data-lease-financials-target': 'lease'}}) }}
+                                    {{ child.vars.label|trans }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.leaseTypes.vars.errors %}
+                            <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Informations financières : le dépôt se pré-remplit (1 mois de loyer en vide, 2 en meublé) #}
+                    <div class="mt-6 grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3 {{ dividerClass }}" data-controller="rent-total" data-action="input->rent-total#update" data-lease-financials-target="financials">
+                        <div>
+                            <div class="mb-2 flex h-6 items-center justify-between gap-2">
+                                {{ form_label(form.rent, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
+                                <twig:Tooltip id="rent-help-tooltip">
+                                    <twig:Tooltip:Trigger>
+                                        <button
+                                            type="button"
+                                            {% for attr, val in tooltip_trigger_attrs|default({}) %}{{ attr }}="{{ val }}" {% endfor %}
+                                            class="inline-flex cursor-pointer rounded-full p-0.5 text-gray-400 transition-colors duration-100 ease-out hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                            aria-label="{{ 'listProperty.form.rent.label'|trans }}"
+                                        >
+                                            {{ ux_icon('uiw:information-o', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        </button>
+                                    </twig:Tooltip:Trigger>
+                                    <twig:Tooltip:Content side="top">
+                                        <p>{{ 'listProperty.form.rent.help'|trans }}</p>
+                                    </twig:Tooltip:Content>
+                                </twig:Tooltip>
+                            </div>
+                            <div class="relative">
+                                {{ form_widget(form.rent, {'attr': {'aria-describedby': form.rent.vars.id ~ '-error-inline', 
+                                    'class': numberInputClass ~ ' pr-8',
+                                    'data-listing-steps-target': 'field',
+                                    'data-listing-steps-section': '2',
+                                    'data-deposit-suggest-target': 'rent',
+                                    'data-rent-total-target': 'rent',
+                                    'data-lease-financials-target': 'input',
+                                    'data-listing-steps-unlocks-next': '',
+                                    'data-action': 'input->deposit-suggest#suggest',
+                                }}) }}
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-400">€</span>
+                            </div>
+                            {% for error in form.rent.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form.rent.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.rent.vars.id }}">{{ 'listProperty.form.rent.notBlank'|trans({}, 'validators') }}</p>
+                        </div>
+                        <div>
+                            <div class="mb-2 flex h-6 items-center justify-between gap-2">
+                                {{ form_label(form.charges, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
+                            </div>
+                            <div class="relative">
+                                {{ form_widget(form.charges, {'attr': {'aria-describedby': form.charges.vars.id ~ '-error-inline', 
+                                    'class': numberInputClass ~ ' pr-8',
+                                    'data-listing-steps-target': 'field',
+                                    'data-listing-steps-section': '2',
+                                    'data-rent-total-target': 'charges',
+                                    'data-lease-financials-target': 'input',
+                                }}) }}
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-400">€</span>
+                            </div>
+                            {% for error in form.charges.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form.charges.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.charges.vars.id }}">{{ 'listProperty.form.charges.notBlank'|trans({}, 'validators') }}</p>
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <div class="mb-2 flex h-6 items-center justify-between gap-2">
+                                {{ form_label(form.deposit, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
+                                <twig:Tooltip id="deposit-help-tooltip">
+                                    <twig:Tooltip:Trigger>
+                                        <button
+                                            type="button"
+                                            {% for attr, val in tooltip_trigger_attrs|default({}) %}{{ attr }}="{{ val }}" {% endfor %}
+                                            class="inline-flex cursor-pointer rounded-full p-0.5 text-gray-400 transition-colors duration-100 ease-out hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                            aria-label="{{ 'listProperty.form.deposit.label'|trans }}"
+                                        >
+                                            {{ ux_icon('uiw:information-o', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        </button>
+                                    </twig:Tooltip:Trigger>
+                                    <twig:Tooltip:Content side="top">
+                                        <p>{{ 'listProperty.form.deposit.help'|trans }}</p>
+                                    </twig:Tooltip:Content>
+                                </twig:Tooltip>
+                            </div>
+                            <div class="relative">
+                                {{ form_widget(form.deposit, {'attr': {'aria-describedby': form.deposit.vars.id ~ '-error-inline',
+                                    'class': numberInputClass ~ ' pr-8',
+                                    'data-listing-steps-target': 'field',
+                                    'data-listing-steps-section': '2',
+                                    'data-deposit-suggest-target': 'deposit',
+                                    'data-lease-financials-target': 'input',
+                                    'data-action': 'input->deposit-suggest#markEdited',
+                                }}) }}
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-400">€</span>
+                            </div>
+                            {% for error in form.deposit.vars.errors %}
+                                <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                            {% endfor %}
+                            <p class="hidden {{ errorClass }}" id="{{ form.deposit.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.deposit.vars.id }}">{{ 'listProperty.form.deposit.notBlank'|trans({}, 'validators') }}</p>
+                        </div>
+                        {# Total charges comprises, calcule en direct (loyer + charges = total) #}
+                        <div class="col-span-full hidden" aria-live="polite" data-rent-total-target="output">
+                            <div class="inline-flex flex-wrap items-center gap-1.5 text-xs">
+                                <span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-full bg-white border border-neutral-200">
+                                    <span class="font-medium tabular-nums text-neutral-900"><span data-rent-total-target="rentOut"></span>€</span>
+                                    <span class="text-neutral-500">{{ 'marketplace.show.charges.rent'|trans }}</span>
+                                </span>
+                                <span class="text-neutral-400">+</span>
+                                <span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-full bg-white border border-neutral-200">
+                                    <span class="font-medium tabular-nums text-neutral-900"><span data-rent-total-target="chargesOut"></span>€</span>
+                                    <span class="text-neutral-500">{{ 'marketplace.show.charges.label'|trans }}</span>
+                                </span>
+                                <span class="text-neutral-400">=</span>
+                                <span class="inline-flex items-baseline gap-1 px-2.5 py-1 rounded-full bg-primary/10">
+                                    <span class="font-semibold tabular-nums text-primary"><span data-rent-total-target="amount"></span>€</span>
+                                    <span class="text-primary/70">/{{ 'marketplace.list.card.price.month'|trans }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Équipements (choix multiple, optionnel) : 10 visibles, le reste derrière "Voir plus" #}
+                    {% set amenityIcons = {
+                        cellar: 'lucide:warehouse',
+                        balcony: 'lucide:building-2',
+                        terrace: 'lucide:fence',
+                        garden: 'lucide:trees',
+                        elevator: 'mdi:elevator',
+                        parking: 'lucide:square-parking',
+                        wifi: 'lucide:wifi',
+                        air_conditioning: 'lucide:air-vent',
+                        tv: 'lucide:tv',
+                        dryer: 'mdi:tumble-dryer',
+                        washing_machine: 'lucide:washing-machine',
+                        dishwasher: 'mdi:dishwasher',
+                        oven: 'mdi:stove',
+                        microwave: 'lucide:microwave',
+                        bathtub: 'lucide:bath',
+                        concierge: 'lucide:concierge-bell',
+                        intercom: 'mdi:doorbell',
+                        natural_light: 'lucide:sun',
+                        double_glazing: 'mdi:window-closed-variant',
+                        wheelchair_access: 'lucide:accessibility',
+                        bike_storage: 'lucide:bike',
+                        workspace: 'lucide:laptop',
+                        gym: 'lucide:dumbbell',
+                        pool: 'lucide:waves',
+                    } %}
+                    <div class="mt-6 pt-6 {{ dividerClass }}" data-controller="reveal checked-count" data-action="change->checked-count#update">
+                        <p class="flex items-center font-semibold text-gray-900 text-sm mb-2" id="{{ form.amenities.vars.id }}-label">
+                            {{ 'listProperty.form.amenities.label'|trans }}
+                            <span class="ml-1.5 hidden size-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white tabular-nums [&:not(.hidden)]:inline-flex" aria-hidden="true" data-checked-count-target="badge"></span>
+                        </p>
+                        <div class="flex flex-wrap gap-2" role="group" aria-labelledby="{{ form.amenities.vars.id }}-label">
+                            {% for child in form.amenities %}
+                                {% if loop.index == 11 %}<div class="hidden" data-reveal-target="extra">{% endif %}
+                                <label class="group inline-flex items-center gap-1.5 {{ chipClass }}">
+                                    {{ form_widget(child, {'attr': {'class': 'sr-only', 'data-checked-count-target': 'box'}}) }}
+                                    {% if amenityIcons[child.vars.value] is defined %}
+                                        {{ ux_icon(amenityIcons[child.vars.value], {'class': 'size-4 shrink-0 text-gray-400 transition-colors duration-100 ease-out group-hover:text-primary/70 group-has-checked:text-primary', 'aria-hidden': 'true'}) }}
+                                    {% endif %}
+                                    {{ child.vars.label|trans }}
+                                </label>
+                                {% if loop.last and loop.index > 10 %}</div>{% endif %}
+                            {% endfor %}
+                        </div>
+                        {% if form.amenities|length > 10 %}
+                            <button type="button" data-reveal-target="button" data-action="reveal#show" class="mt-2 cursor-pointer text-sm font-medium text-primary underline-offset-4 transition-colors duration-100 ease-out hover:text-primary/80 hover:underline">
+                                {{ 'listProperty.form.amenities.showMore'|trans }} (+{{ form.amenities|length - 10 }})
+                            </button>
+                        {% endif %}
+                        {% for error in form.amenities.vars.errors %}
+                            <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+
+                {# Section 4 : photos #}
+                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section">
+                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                        <span data-listing-steps-target="badgeNumber">4</span>
+                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                    </span>
+                    <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.4.title'|trans }}</h2>
+                    <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.4.text'|trans }}</p>
+                    <div class="mt-4" data-controller="file-drop"
+                         data-file-drop-label-value="{{ 'listProperty.form.photos.selected'|trans }}"
+                         data-file-drop-remove-label-value="{{ 'listProperty.form.photos.remove'|trans }}"
+                         data-file-drop-move-left-label-value="{{ 'listProperty.form.photos.moveLeft'|trans }}"
+                         data-file-drop-move-right-label-value="{{ 'listProperty.form.photos.moveRight'|trans }}"
+                         data-file-drop-max-files-value="15"
+                         {# 8M au sens Symfony = 8 000 000 octets (décimal), pas 8 MiB #}
+                         data-file-drop-max-size-value="8000000"
+                         data-file-drop-error-too-large-value="{{ 'listProperty.form.photos.clientTooLarge'|trans }}"
+                         data-file-drop-error-invalid-type-value="{{ 'listProperty.form.photos.clientInvalidType'|trans }}"
+                         data-file-drop-error-too-many-value="{{ 'listProperty.form.photos.clientTooMany'|trans }}"
+                         data-file-drop-optimizing-value="{{ 'listProperty.form.photos.optimizing'|trans }}"
+                         data-file-drop-zone-active-class="border-primary/80 bg-primary/5">
+                        {# La dropzone reste visible en permanence : on peut toujours ajouter des photos #}
+                        <label for="{{ form.photos.vars.id }}" data-file-drop-target="zone" class="relative flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-gray-950/15 bg-gray-50/50 p-6 transition-colors duration-100 ease-out hover:border-primary/50 hover:bg-primary/5 has-[input:focus-visible]:border-primary/80">
+                            <span class="flex size-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-950/5">
+                                {{ ux_icon('lucide:image-plus', {'class':'size-5 text-primary'}) }}
+                            </span>
+                            <span class="text-sm font-medium text-gray-700">{{ 'listProperty.form.photos.hint'|trans }}</span>
+                            <span class="text-xs text-gray-400">{{ 'listProperty.form.photos.help'|trans }}</span>
+                            {{ form_widget(form.photos, {'attr': {
+                                'class': 'absolute inset-0 size-full cursor-pointer opacity-0',
+                                'data-file-drop-target': 'input',
+                                'data-action': 'change->file-drop#update dragenter->file-drop#zoneActive dragleave->file-drop#zoneIdle drop->file-drop#zoneIdle',
+                                'data-listing-steps-target': 'field',
+                                'data-listing-steps-section': '3',
+                                'data-upload-progress-target': 'fileInput',
+                            }}) }}
+                        </label>
+                        {# Compteur et aide au réordonnancement, visibles dès la première photo #}
+                        <div class="mt-3 hidden items-center justify-between gap-3 [&:not(.hidden)]:flex" data-file-drop-target="toolbar">
+                            <span class="text-xs text-gray-400">{{ 'listProperty.form.photos.reorder'|trans }}</span>
+                            <span data-file-drop-target="count" aria-live="polite" class="shrink-0 text-sm font-medium text-primary tabular-nums"></span>
+                        </div>
+                        {# Vignettes hors de la dropzone : cliquer ou glisser une tuile ne rouvre pas le selecteur #}
+                        <div class="mt-2 hidden w-full grid-cols-3 gap-3 sm:grid-cols-4" data-file-drop-target="previews" data-action="dragover->file-drop#dragOverGrid drop->file-drop#dropTile"></div>
+                        <p class="hidden {{ errorClass }}" aria-live="polite" data-file-drop-target="error"></p>
+                        {% for error in form.photos.vars.errors %}
+                            <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {# Note libre (optionnelle) : précisions, contraintes, contexte #}
+                    <div class="mt-6 pt-6 {{ dividerClass }}" data-controller="char-count">
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            {{ form_label(form.note, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block'}}) }}
+                            <twig:Tooltip id="note-help-tooltip">
+                                <twig:Tooltip:Trigger>
+                                    <button
+                                        type="button"
+                                        {% for attr, val in tooltip_trigger_attrs|default({}) %}{{ attr }}="{{ val }}" {% endfor %}
+                                        class="inline-flex cursor-pointer rounded-full p-0.5 text-gray-400 transition-colors duration-100 ease-out hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                        aria-label="{{ 'listProperty.form.note.label'|trans }}"
+                                    >
+                                        {{ ux_icon('uiw:information-o', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    </button>
+                                </twig:Tooltip:Trigger>
+                                <twig:Tooltip:Content side="top">
+                                    <p>{{ 'listProperty.form.note.help'|trans }}</p>
+                                </twig:Tooltip:Content>
+                            </twig:Tooltip>
+                        </div>
+                        {{ form_widget(form.note, {'attr': {
+                            'class': inputClass ~ ' resize-y min-h-24',
+                            'placeholder': 'listProperty.form.note.placeholder'|trans,
+                            'data-char-count-target': 'input',
+                            'data-action': 'input->char-count#update',
+                        }}) }}
+                        <p class="mt-1.5 text-right text-xs text-gray-400 tabular-nums" aria-hidden="true" data-char-count-target="output"></p>
+                        {% for error in form.note.vars.errors %}
+                            <p class="{{ errorClass }}" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                    </div>
+                </div>
+
+                <div class="pl-14 transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="submit">
+                    <p class="mb-3 flex items-center justify-center gap-1.5 text-sm text-gray-500 tabular-nums" aria-live="polite">
+                        {{ ux_icon('lucide:circle-check', {'class': 'size-4 shrink-0 hidden text-green-600', 'data-listing-steps-target': 'recapCheck', 'aria-hidden': 'true'}) }}
+                        <span data-listing-steps-target="recap"></span>
+                    </p>
+                    <twig:Button variant="default" size="lg" class="w-full" data-listing-steps-target="submitButton">
+                        <span class="inline-flex items-center gap-2" data-listing-steps-target="submitLabel">{{ 'listProperty.form.button'|trans|raw }}</span>
+                        <span class="hidden items-center justify-center" data-listing-steps-target="submitSpinner"><twig:Spinner /></span>
+                    </twig:Button>
+                    <p class="mt-3 hidden text-center text-sm font-medium text-primary tabular-nums" aria-live="polite" data-upload-progress-target="status"></p>
+                    <p class="mt-3 flex items-start lg:items-center font-light justify-center gap-x-1.5 text-neutral-500 text-left lg:text-center text-sm">
+                        {{ ux_icon('mingcute:bell-ringing-line', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
+                        {{ 'listProperty.form.subButtonText'|trans|raw }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {{ form_end(form) }}
+    {% endif %}
+</div>

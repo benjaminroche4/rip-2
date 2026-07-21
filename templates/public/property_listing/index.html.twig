@@ -1,0 +1,52 @@
+{% extends 'public/base.html.twig' %}
+
+{% block title %}{{ 'meta.listProperty.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.listProperty.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_list_property') }}{% endblock %}
+
+{% block schema_page %}
+    ,{
+        "@type": "Service",
+        "@id": "{{ site_url }}{{ path('app_list_property') }}/#service",
+        "url": "{{ site_url }}{{ path('app_list_property') }}",
+        "name": "{{ 'meta.listProperty.title'|trans|e('js') }}",
+        "description": "{{ 'meta.listProperty.description'|trans|e('js') }}",
+        "provider": { "@id": "{{ site_url }}/#organization" },
+        "areaServed": {
+            "@type": "City",
+            "name": "Paris"
+        }
+    }
+{% endblock %}
+
+{% block body %}
+    <img src="{{ asset('intl-tel-input/img/flags@2x.webp') }}" alt="" aria-hidden="true" decoding="async" fetchpriority="low" width="1" height="1" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;">
+    <section aria-labelledby="list-property-heading">
+        <div class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+            <div class="max-w-2xl mx-auto flex flex-col justify-center items-center text-center space-y-4">
+                <p class="text-center font-semibold text-primary font-secondary">{{ 'listProperty.hero.eyebrow'|trans|raw }}</p>
+                <h1 id="list-property-heading" class="text-4xl lg:text-5xl/16 font-medium text-balance text-center">{{ 'listProperty.hero.title'|trans|raw }}</h1>
+                <div class="flex flex-wrap justify-center gap-3 pt-2">
+                    <div class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f7f7f7] px-4 py-2">
+                        {{ ux_icon('lucide:clock', {'class':'size-4 text-primary shrink-0'}) }}
+                        <p class="text-sm text-black">{{ 'listProperty.form.trust.1'|trans|raw }}</p>
+                    </div>
+                    <div class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f7f7f7] px-4 py-2">
+                        {{ ux_icon('lucide:lock', {'class':'size-4 text-primary shrink-0'}) }}
+                        <p class="text-sm text-black">{{ 'listProperty.form.trust.2'|trans|raw }}</p>
+                    </div>
+                    <div class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f7f7f7] px-4 py-2">
+                        {{ ux_icon('ph:shield-check', {'class':'size-4 text-primary shrink-0'}) }}
+                        <p class="text-sm text-black">{{ 'listProperty.form.trust.3'|trans|raw }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-24 pb-16 relative z-10">
+        <div class="max-w-2xl mx-auto">
+            <twig:PropertyListing:ListingForm :form="form" />
+        </div>
+    </section>
+{% endblock %}

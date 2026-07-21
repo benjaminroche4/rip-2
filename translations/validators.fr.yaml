@@ -58,6 +58,60 @@ newsletter:
             invalid: "Cette adresse email n'est pas valide."
     email:
         unique: "Cette adresse email est déjà inscrite à la newsletter."
+listProperty:
+    form:
+        fullName:
+            notBlank: "Veuillez renseigner votre nom complet."
+            length: "Le nom ne peut pas dépasser {{ limit }} caractères."
+        email:
+            notBlank: "Veuillez renseigner votre adresse email."
+            invalid: "Cette adresse email n'est pas valide."
+        phoneNumber:
+            notBlank: "Veuillez renseigner votre numéro de téléphone."
+            invalidFormat: "Ce numéro de téléphone n'est pas valide."
+        photos:
+            tooMany: "Vous ne pouvez pas envoyer plus de {{ limit }} photos."
+            mimeTypes: "Formats acceptés : JPG, PNG ou WebP."
+            maxSize: "Chaque photo ne peut pas dépasser 8 Mo."
+        address:
+            notBlank: "Veuillez renseigner l'adresse du bien."
+            length: "L'adresse ne peut pas dépasser {{ limit }} caractères."
+            notSelected: "Veuillez sélectionner l'adresse du bien dans la liste de suggestions."
+        propertyType:
+            notBlank: "Veuillez sélectionner le type de bien."
+        propertyStatus:
+            notBlank: "Veuillez sélectionner le statut du bien."
+        bedrooms:
+            notBlank: "Veuillez indiquer le nombre de chambres."
+        bathrooms:
+            notBlank: "Veuillez indiquer le nombre de salles de bains."
+        surface:
+            notBlank: "Veuillez indiquer la surface du bien."
+            range: "La surface doit être entre {{ min }} et {{ max }} m2."
+        furnishing:
+            notBlank: "Veuillez indiquer si le bien est meublé ou vide."
+        floor:
+            notBlank: "Veuillez indiquer l'étage du bien."
+            range: "L'étage doit être entre {{ min }} et {{ max }}."
+        buildingFloors:
+            notBlank: "Veuillez indiquer le nombre d'étages de l'immeuble."
+            range: "Le nombre d'étages doit être entre {{ min }} et {{ max }}."
+            belowFloor: "Le nombre d'étages de l'immeuble doit être au moins égal à l'étage du bien."
+        orientations:
+            notBlank: "Veuillez sélectionner au moins une orientation."
+        note:
+            length: "La note ne peut pas dépasser {{ limit }} caractères."
+        leaseType:
+            notBlank: "Veuillez sélectionner le type de bail souhaité."
+        rent:
+            notBlank: "Veuillez indiquer le loyer hors charges."
+            range: "Le loyer doit être entre {{ min }} et {{ max }} euros."
+        charges:
+            notBlank: "Veuillez indiquer le montant des charges."
+            range: "Les charges doivent être entre {{ min }} et {{ max }} euros."
+        deposit:
+            notBlank: "Veuillez indiquer le dépôt de garantie."
+            range: "Le dépôt de garantie doit être entre {{ min }} et {{ max }} euros."
 propertyManagement:
     form:
         address:

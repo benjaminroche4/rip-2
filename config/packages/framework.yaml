@@ -35,6 +35,10 @@ framework:
             policy: fixed_window
             limit: 5
             interval: '1 minute'
+        form_listing:
+            policy: fixed_window
+            limit: 5
+            interval: '1 minute'
         # Admin mutations: ROLE_ADMIN is already required, but a per-IP
         # limiter caps damage if an admin session gets hijacked. Keeps
         # filesystem-friendly (cache.app) — no Redis needed.
@@ -84,6 +88,8 @@ when@test:
             form_estimation:
                 limit: 1000
             form_newsletter:
+                limit: 1000
+            form_listing:
                 limit: 1000
             admin_mutation:
                 limit: 1000

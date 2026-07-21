@@ -51,14 +51,14 @@ contact:
                 price: "€1,190"
                 text: Save weeks of searching. You visit, we handle everything else.
             confie:
-                title: Full-service
+                title: Entrusted
                 price: "€2,190"
                 text: We handle everything, from the search to your complete move-in. All you have to do is approve.
         message:
             label: Message
             placeholder: Tell us about your project in a few words...
         accept:
-            label: By checking this box, I agree that my information may be used to be contacted.
+            label: By checking this box, I agree that my information may be used to contact me.
         button: Be contacted quickly
         error:
             tooManyRequests: Too many attempts. Please wait a minute before trying again.
@@ -125,6 +125,7 @@ footer:
         findTenant: Find a tenant
         management: Property management
         ourProperty: Our properties
+        listProperty: List your property
         blog: Blog
         contact: Contact us
         login: Log in
@@ -293,7 +294,7 @@ findAccommodation:
             text: All services and subscriptions activated from day one.
         4:
             title: Turnkey installation
-            text: We handle everything, you simply validate your home.
+            text: We handle everything, you simply approve your home.
         5:
             title: Dedicated advisor
             text: A dedicated advisor by your side, from the first exchange to key handover.
@@ -397,6 +398,9 @@ meta:
     findAccommodation:
         title: Property Search in Paris
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
+    listProperty:
+        title: List Your Property for Rent in Paris
+        description: "Landlords, entrust your Paris apartment to Relocation In Paris: quick and simple submission, expert assessment and secure rental management."
     landlords:
         title: Property Management in Paris
         description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your investment with dedicated expertise."
@@ -532,7 +536,7 @@ home:
             text: 'Read our reviews <a class="underline underline-offset-4 hover:text-primary transition duration-100" href="https://share.google/c8msBrKphxqVY03er" target="_blank" rel="noopener noreferrer nofollow">on Google</a>'
     features:
         title: Paris doesn't happen by chance
-        subTitle: A tough market, A privileged access
+        subTitle: A tough market, privileged access
         1:
             title: No more rejections.
             text: We connect you directly with our exclusive partners, giving you access to off-market properties before anyone else.
@@ -578,7 +582,7 @@ home:
         button: Get your estimate
     blog:
         title: Blog
-        subTitle: Our lastest articles
+        subTitle: Our latest articles
     profile:
         title: Your profile, our solutions
         subTitle: Services designed for every profile
@@ -587,7 +591,7 @@ home:
             text: Comprehensive support to help you settle in Paris smoothly, every step of the way.
         2:
             title: Families
-            text: We find the right neighbourhood, schools, and home to ensure a seamless family relocation.
+            text: We find the right neighborhood, schools, and home to ensure a seamless family relocation.
         3:
             title: Students & young professionals
             text: Reliable guidance to secure suitable housing and begin your Parisian life with confidence.
@@ -677,7 +681,7 @@ register:
         nationality:
             label: Nationality
             placeholder: Select your nationality
-            searchPlaceholder: Search a country
+            searchPlaceholder: Search for a country
             empty: No country found
             required: Nationality is required.
         situation:
@@ -771,7 +775,7 @@ register:
     image:
         alt: Relocation In Paris, relocation agency in Paris
 phoneInput:
-    searchPlaceholder: Search a dial code
+    searchPlaceholder: Search for a dial code
 adminTab:
     logout: Log out
     dashboard: Dashboard
@@ -1100,7 +1104,7 @@ propertyManagement:
             text: Your request has been received. An expert will contact you shortly.
             box:
                 advisor: Your management expert has been assigned
-                altPhoto: Photo of a Relocation in Paris management expert who will contact you back
+                altPhoto: Photo of a Relocation in Paris management expert who will call you back
                 expertJob: Rental management expert
                 callBack:
                     text: "He will contact you within:"
@@ -1156,7 +1160,7 @@ propertyManagement:
     story:
         title: 'Trust & discretion'
         subTitle: Your property, our standards
-        text: "For over ten years, Relocation in Paris has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimising your income and delivering exceptional management, with complete peace of mind."
+        text: "For over ten years, Relocation in Paris has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimizing your income and delivering exceptional management, with complete peace of mind."
         award: 'Best agency<br>in <span class="font-semibold">Paris 2025</span>'
     faq:
         title: FAQ
@@ -1429,7 +1433,7 @@ pricing:
         2:
             eyebrow: Most popular
             title: Entrusted
-            text: We handle everything, from search to full installation. You just have to validate.
+            text: We handle everything, from search to full installation. You just have to approve.
             listing:
                 include: "Everything in <span class='underline underline-offset-4 decoration-dotted decoration-gray-400'>Guided</span>, plus"
                 1: Visits handled by your agent
@@ -1490,7 +1494,7 @@ marketplace:
                 rooms: "%count% rooms"
         search:
             q: Search apartments, areas, features...
-            localisation: Localisation
+            localisation: Location
             propertyType: Property type
             typeCount: "%count% filters"
             moreFilters: More filters
@@ -2103,3 +2107,171 @@ admin:
             profileComplete:
                 yes: Profile complete
                 no: Profile incomplete
+listProperty:
+    hero:
+        eyebrow: Landlords
+        title: List your property for rent
+        text: "Entrust us with your Paris apartment. Enter its address and we take care of the rest: assessment, rental and day-to-day management."
+    section:
+        1:
+            title: Your contact details
+            text: So we can get back to you about your property.
+        2:
+            title: Property details
+            text: Start by entering your property's address.
+        3:
+            title: Rental terms
+            text: Preferred lease, rent and amenities.
+        4:
+            title: Photos and details
+            text: Add a few photos and anything we should know about your property.
+    form:
+        fullName:
+            label: Full name
+            placeholder: Full name
+        email:
+            label: Email
+            placeholder: "Email: john@doe.com"
+        phoneNumber:
+            label: Phone
+        photos:
+            label: Property photos
+            hint: Click or drop your photos here
+            help: JPG, PNG or WebP, 8 MB max per photo
+            selected: "%count%/%max% photos"
+            reorder: Drag photos to reorder them.
+            remove: Remove photo
+            moveLeft: Move photo left
+            moveRight: Move photo right
+            clientTooLarge: "%name% exceeds 8 MB and was skipped."
+            clientInvalidType: "%name% is not an accepted format (JPG, PNG or WebP)."
+            clientTooMany: "Maximum 15 photos, the extra ones were skipped."
+            uploading: "Uploading photos: %percent%"
+            optimizing: "Optimizing photos..."
+        address:
+            label: Property address
+            placeholder: 12 rue de Rivoli, Paris
+            outside: "We could not find this address in Paris. We mainly operate within Paris city limits."
+            pick: "Select an address from the suggestions list."
+        propertyType:
+            label: Property type
+            choice:
+                studio: Studio
+                t1: T1
+                t2: T2
+                t3: T3
+                t4: T4
+                large_apartment: Large apartment
+                duplex: Duplex
+                loft: Loft
+                house: House
+        propertyStatus:
+            label: Property status
+            choice:
+                available: Available
+                rented: Rented
+                under_renovation: Under renovation
+        bedrooms:
+            label: Bedrooms
+        bathrooms:
+            label: Bathrooms
+        surface:
+            label: Surface area
+        furnishing:
+            label: Furnished or unfurnished
+            choice:
+                furnished: Furnished
+                unfurnished: Unfurnished
+        floor:
+            label: Property floor
+            of: of
+            floors: floors
+        buildingFloors:
+            label: Building floors
+        orientations:
+            label: Property orientation
+            choice:
+                north: North
+                south: South
+                east: East
+                west: West
+        amenities:
+            label: Amenities
+            showMore: Show more
+            choice:
+                cellar: Cellar
+                balcony: Balcony
+                terrace: Terrace
+                garden: Garden
+                elevator: Elevator
+                parking: Parking
+                wifi: Wifi
+                air_conditioning: Air conditioning
+                tv: TV
+                dryer: Dryer
+                washing_machine: Washing machine
+                dishwasher: Dishwasher
+                oven: Oven
+                microwave: Microwave
+                bathtub: Bathtub
+                concierge: Concierge
+                intercom: Intercom
+                natural_light: Natural light
+                double_glazing: Double glazing
+                wheelchair_access: Wheelchair access
+                bike_storage: Bike storage
+                workspace: Workspace
+                gym: Gym
+                pool: Swimming pool
+        note:
+            label: Free note (optional)
+            placeholder: "Details about the property, constraints, availability for a visit..."
+            help: Anything that helps us better understand your property.
+        rent:
+            label: Rent excluding charges
+            help: Monthly rent, excluding charges.
+        charges:
+            label: Charges
+        deposit:
+            label: Security deposit
+            help: "Legal maximum: 1 month's rent unfurnished, 2 months furnished."
+        leaseType:
+            label: Preferred lease type
+            choice:
+                alur: Alur law lease
+                civil_code: Civil code lease
+                mobility: Mobility lease
+                airbnb: Airbnb
+                no_idea: Not sure yet
+        button: List my property
+        subButtonText: Our team replies within 24 business hours.
+        success:
+            title: Thank you, your property has been submitted.
+            text: Our team will get back to you within 24 business hours.
+            photosCount: "{0} No photo|{1} 1 photo attached|]1,Inf[ %count% photos attached"
+            emailRecap: "The full summary has been sent to %email%."
+            cta: Discover our rental management
+        error:
+            tooManyRequests: Too many attempts. Please try again in a few moments.
+        leaveGuard: "Your details have not been sent yet. Leave the page?"
+        recap: "%done%/%total% sections completed"
+        recapDone: "All set, you can send it."
+        trust:
+            1: Reply within 24h
+            2: Secure data
+            3: No commitment
+    email:
+        admin:
+            subject: "🏡 Nouveau bien proposé (%details%) | Relocation In Paris"
+        client:
+            subject: "Received! We are reviewing your property, reply within 24h"
+    steps:
+        1:
+            title: Enter the address
+            text: Locate your property in seconds.
+        2:
+            title: Add the details
+            text: Surface area, rooms and availability.
+        3:
+            title: We handle the rest
+            text: Assessment and rental by our experts.

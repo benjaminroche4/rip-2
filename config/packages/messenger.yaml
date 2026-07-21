@@ -29,4 +29,5 @@ framework:
 
             App\Contact\Message\SendContactEmailsMessage: sync
             App\PropertyEstimation\Message\SendEstimationEmailMessage: sync
+            App\PropertyListing\Message\SendListingEmailMessage: sync
             App\Shared\Webhook\NotifyMakeWebhookMessage: sync

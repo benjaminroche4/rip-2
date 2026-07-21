@@ -128,6 +128,7 @@ footer:
         findTenant: Trouver un locataire
         management: Gestion locative
         ourProperty: Nos biens
+        listProperty: Proposer un bien
         blog: Blog
         contact: Contactez-nous
         login: Connexion
@@ -165,7 +166,7 @@ header:
             fr: Français
             en: English
     logo:
-        alt: Logo de Relocation In Pars, Agence de Relocation à Paris.
+        alt: Logo de Relocation In Paris, Agence de Relocation à Paris.
     menu:
         findAccommodation: Recherche de logement
         propertyManagement: Gestion et services
@@ -247,7 +248,7 @@ companies:
                 text:  "Nous assurons un accompagnement complet, recherche de logement, démarches administratives et installation. Chaque mission est personnalisée pour garantir une arrivée fluide et en toute sérénité à Paris pour vos collaborateurs."
             2:
                 title: Comment se déroule la prise en charge d’un collaborateur ?
-                text: "Un conseiller dédié pilote chaque dossier jusqu’à la remise des clés. Le processus débute par l’analyse des besoins, montage du dossier et de la sélection des appartements."
+                text: "Un conseiller dédié pilote chaque dossier jusqu’à la remise des clés. Le processus débute par l’analyse des besoins, le montage du dossier et la sélection des appartements."
             3:
                 title: Travaillez-vous avec des entreprises internationales ?
                 text: Oui. Nous accompagnons des entreprises françaises et internationales, avec une expertise reconnue en mobilité et relocation à Paris.
@@ -400,6 +401,9 @@ meta:
     findAccommodation:
         title: Recherche de Logement à Paris
         description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
+    listProperty:
+        title: Proposer un Bien à la Location à Paris
+        description: "Propriétaires, confiez votre appartement parisien à Relocation In Paris : dépôt simple et rapide, estimation par nos experts et mise en location sécurisée."
     landlords:
         title: Gestion Locative à Paris
         description: "Service de gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Sécurisez et optimisez votre investissement avec une expertise dédiée."
@@ -586,7 +590,7 @@ home:
         title: Votre profil, nos solutions
         subTitle: Des services pensés pour chaque profil
         1:
-            title: Couple et expatriés
+            title: Couples et expatriés
             text: Un accompagnement complet pour vous installer à Paris sereinement, étape après étape.
         2:
             title: Familles
@@ -818,7 +822,7 @@ legal:
                 phone: "<span class='font-semibold'>Téléphone</span> : +33 (0)1 84 80 43 44"
                 email: "<span class='font-semibold'>E-mail</span> : contact@relocation-in-paris.fr"
                 website: "<span class='font-semibold'>Site web</span> : relocation-in-paris.fr"
-            director: "Directeur de la publication : Mr Leroy, en qualité de Responsable de la Publication."
+            director: "Directeur de la publication : M. Leroy, en qualité de Responsable de la Publication."
         2:
             title: 2. Hébergeur du site
             text1: "Le site <i>relocation-in-paris.fr</i> est hébergé par :"
@@ -999,7 +1003,7 @@ faq:
         text: Nous ne prenons pas une mission sans être certains de la réussir. Avec plus de 900 relocations réussies et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
     2:
         title: Sous combien de temps trouvez-vous un logement ?
-        text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce que fait la différence entre chercher seul et chercher avec nous.
+        text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce qui fait la différence entre chercher seul et chercher avec nous.
     3:
         title: Mon profil est atypique, pouvez-vous quand même m'aider ?
         text: C'est exactement pourquoi nous existons. Expatriés sans fiches de paie françaises, freelances, étrangers sans garant... notre réseau de propriétaires partenaires nous fait confiance, et cette confiance fait passer votre dossier.
@@ -1011,7 +1015,7 @@ faq:
         text: Oui, tout à fait. Si votre situation évolue en cours de recherche, vous pouvez basculer de l'offre Accompagné vers l'offre Confié à tout moment. Nous nous adaptons à vous, pas l'inverse.
     6:
         title: Pour qui est fait votre service ?
-        text: "Notre service s'adresse à toute personne qui souhaite s'installer à Paris : expatriés en mission, familles en relocation, cadres, jeunes actifs, étudiants, entrepreneurs tous ceux qui veulent poser leurs valises sans perdre de temps."
+        text: "Notre service s'adresse à toute personne qui souhaite s'installer à Paris : expatriés en mission, familles en relocation, cadres, jeunes actifs, étudiants, entrepreneurs : tous ceux qui veulent poser leurs valises sans perdre de temps."
     7:
         title: Comment se déroule la recherche d'appartement ?
         text: Nous prenons en charge tout ce que vous n'avez pas le temps de gérer, de la sélection des biens jusqu'à la remise des clés, en fonction de vos critères et de votre situation. Chaque accompagnement est unique, pensé sur mesure pour vous.
@@ -1032,7 +1036,7 @@ faq:
         text: Nous intervenons sur l'ensemble des 20 arrondissements de Paris ainsi que dans toute la petite couronne.
     13:
         title: Combien de logements me proposez-vous ?
-        text: "Cela dépend du marché et de votre situation. Nous ne visons pas le volume notre approche est qualitative : chaque bien sélectionné correspond réellement à vos critères."
+        text: "Cela dépend du marché et de votre situation. Nous ne visons pas le volume, notre approche est qualitative : chaque bien sélectionné correspond réellement à vos critères."
     14:
         title: Vous occupez-vous des démarches administratives ?
         text: "Oui. Nous vous accompagnons sur les démarches essentielles à votre installation selon l'offre : ouverture des contrats d'électricité, de gaz, d'internet, mais aussi les démarches liées au visa et à votre situation administrative en France."
@@ -1233,7 +1237,7 @@ newsletter:
         button: S'inscrire
         email:
             label: Votre email
-            placeholder: "Votre address email"
+            placeholder: "Votre adresse email"
         error:
             tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
         success:
@@ -1368,7 +1372,7 @@ reviews:
         date: 3 juillet 2025
         alt: "Photo de Olivia B., cliente satisfaite de Relocation In Paris"
     4:
-        text: Arrivé de La Réunion pour m’installer à Paris, j’appréhendais un peu la recherche de logement à distance. Élodie a été très réactif et à l’écoute de mes critères. Appartement trouvé en 5 jours.
+        text: Arrivé de La Réunion pour m’installer à Paris, j’appréhendais un peu la recherche de logement à distance. Élodie a été très réactive et à l’écoute de mes critères. Appartement trouvé en 5 jours.
         name: Juliette M.
         from: Trustpilot
         date: 17 septembre 2025
@@ -1453,7 +1457,7 @@ pricing:
             text: Nous ne prenons pas une mission sans être certains de la réussir. Avec plus de 900 relocations réussies et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
         2:
             title: Sous combien de temps trouvez-vous un logement ?
-            text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce que fait la différence entre chercher seul et chercher avec nous.
+            text: En moyenne, nos clients signent leur bail en moins de 20 jours. Sur un marché aussi tendu que Paris, c'est ce qui fait la différence entre chercher seul et chercher avec nous.
         3:
             title: Mon profil est atypique, pouvez-vous quand même m'aider ?
             text: C'est exactement pourquoi nous existons. Expatriés sans fiches de paie françaises, freelances, étrangers sans garant... notre réseau de propriétaires partenaires nous fait confiance, et cette confiance fait passer votre dossier.
@@ -2104,3 +2108,171 @@ admin:
             profileComplete:
                 yes: Profil complet
                 no: Profil incomplet
+listProperty:
+    hero:
+        eyebrow: Propriétaires
+        title: Proposez votre bien à la location
+        text: "Confiez-nous votre appartement parisien. Renseignez son adresse, nous nous occupons du reste : estimation, mise en location et gestion au quotidien."
+    section:
+        1:
+            title: Vos coordonnées
+            text: Pour vous recontacter au sujet de votre bien.
+        2:
+            title: Détail du bien
+            text: Commencez par renseigner l'adresse de votre bien.
+        3:
+            title: Conditions de location
+            text: Bail souhaité, loyer et équipements.
+        4:
+            title: Photos et précisions
+            text: Ajoutez quelques photos et tout ce que nous devons savoir sur votre bien.
+    form:
+        fullName:
+            label: Nom complet
+            placeholder: Nom complet
+        email:
+            label: Email
+            placeholder: "Email: john@doe.com"
+        phoneNumber:
+            label: Téléphone
+        photos:
+            label: Photos du bien
+            hint: Cliquez ou déposez vos photos ici
+            help: JPG, PNG ou WebP, 8 Mo max par photo
+            selected: "%count%/%max% photos"
+            reorder: Glissez les photos pour les réordonner.
+            remove: Supprimer la photo
+            moveLeft: Déplacer la photo vers la gauche
+            moveRight: Déplacer la photo vers la droite
+            clientTooLarge: "%name% dépasse 8 Mo et a été ignorée."
+            clientInvalidType: "%name% n'est pas dans un format accepté (JPG, PNG ou WebP)."
+            clientTooMany: "Maximum 15 photos, les photos en trop ont été ignorées."
+            uploading: "Envoi des photos : %percent%"
+            optimizing: "Optimisation des photos..."
+        address:
+            label: Adresse du bien
+            placeholder: 12 rue de Rivoli, Paris
+            outside: "Nous ne trouvons pas cette adresse dans Paris. Nous intervenons principalement à Paris intra-muros."
+            pick: "Sélectionnez une adresse dans la liste de suggestions."
+        propertyType:
+            label: Type de bien
+            choice:
+                studio: Studio
+                t1: T1
+                t2: T2
+                t3: T3
+                t4: T4
+                large_apartment: Grand appartement
+                duplex: Duplex
+                loft: Loft
+                house: Maison
+        propertyStatus:
+            label: Statut du bien
+            choice:
+                available: Disponible
+                rented: Loué
+                under_renovation: En travaux
+        bedrooms:
+            label: Chambres
+        bathrooms:
+            label: Salles de bains
+        surface:
+            label: Surface
+        furnishing:
+            label: Meublé ou vide
+            choice:
+                furnished: Meublé
+                unfurnished: Vide
+        floor:
+            label: Étage du bien
+            of: sur
+            floors: étages
+        buildingFloors:
+            label: Étages de l'immeuble
+        orientations:
+            label: Orientation du logement
+            choice:
+                north: Nord
+                south: Sud
+                east: Est
+                west: Ouest
+        amenities:
+            label: Équipements
+            showMore: Voir plus
+            choice:
+                cellar: Cave
+                balcony: Balcon
+                terrace: Terrasse
+                garden: Jardin
+                elevator: Ascenseur
+                parking: Parking
+                wifi: Wifi
+                air_conditioning: Climatisation
+                tv: TV
+                dryer: Sèche-linge
+                washing_machine: Lave-linge
+                dishwasher: Lave-vaisselle
+                oven: Four
+                microwave: Micro-ondes
+                bathtub: Baignoire
+                concierge: Concierge
+                intercom: Interphone
+                natural_light: Lumière naturelle
+                double_glazing: Double vitrage
+                wheelchair_access: Accès PMR
+                bike_storage: Local vélo
+                workspace: Espace de travail
+                gym: Salle de sport
+                pool: Piscine
+        note:
+            label: Note libre (optionnel)
+            placeholder: "Précisions sur le bien, contraintes, disponibilités pour une visite..."
+            help: Tout ce qui peut nous aider à mieux comprendre votre bien.
+        rent:
+            label: Loyer hors charges
+            help: Loyer mensuel, hors charges.
+        charges:
+            label: Charges
+        deposit:
+            label: Dépôt de garantie
+            help: "Maximum légal : 1 mois de loyer en location vide, 2 mois en meublé."
+        leaseType:
+            label: Type de bail souhaité
+            choice:
+                alur: Loi Alur
+                civil_code: Code civil
+                mobility: Mobilité
+                airbnb: Airbnb
+                no_idea: Aucune idée
+        button: Proposer mon bien
+        subButtonText: Réponse de notre équipe sous 24h ouvrées.
+        success:
+            title: Merci, votre bien a bien été transmis.
+            text: Notre équipe vous recontacte sous 24h ouvrées.
+            photosCount: "{0} Aucune photo|{1} 1 photo jointe|]1,Inf[ %count% photos jointes"
+            emailRecap: "Le récapitulatif complet a été envoyé à %email%."
+            cta: Découvrir notre gestion locative
+        error:
+            tooManyRequests: Trop de tentatives. Merci de réessayer dans quelques instants.
+        leaveGuard: "Vos informations n'ont pas encore été envoyées. Quitter la page ?"
+        recap: "%done%/%total% sections complétées"
+        recapDone: "Tout est prêt, vous pouvez envoyer."
+        trust:
+            1: Réponse sous 24h
+            2: Données sécurisées
+            3: Sans engagement
+    email:
+        admin:
+            subject: "🏡 Nouveau bien proposé (%details%) | Relocation In Paris"
+        client:
+            subject: "Bien reçu ! Nous examinons votre bien, réponse sous 24h"
+    steps:
+        1:
+            title: Renseignez l'adresse
+            text: Localisez votre bien en quelques secondes.
+        2:
+            title: Complétez les détails
+            text: Surface, pièces et disponibilités.
+        3:
+            title: On s'occupe du reste
+            text: Estimation et mise en location par nos experts.

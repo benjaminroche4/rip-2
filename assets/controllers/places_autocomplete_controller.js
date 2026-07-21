@@ -144,6 +144,11 @@ export default class extends Controller {
                 // matching both usages (Paris-scoped) and the 750xx arrondissement logic.
                 const paris = 'OK' === status && predictions ? predictions.filter((p) => this.#isParis(p)) : []
                 this.#suggestions = paris.slice(0, MAX_RESULTS)
+                // Google matched the query but nothing was in Paris: let the page
+                // explain the empty dropdown (e.g. "we operate in Paris only").
+                if ('OK' === status && predictions?.length > 0 && 0 === paris.length) {
+                    this.dispatch('outside', { detail: { query } })
+                }
                 this.#render()
             },
         )
@@ -250,7 +255,7 @@ export default class extends Controller {
                     this.triggerTarget.dispatchEvent(new CustomEvent('places-autocomplete:select'))
                 }
 
-                this.dispatch('select', { detail: { place, arrondissement } })
+                this.dispatch('select', { detail: { place, arrondissement, placeId: prediction.place_id } })
 
                 this.#renewToken() // a selection ends the billing session
                 this.#clear()

@@ -58,6 +58,60 @@ newsletter:
             invalid: "This email address is not valid."
     email:
         unique: "This email address is already subscribed to the newsletter."
+listProperty:
+    form:
+        fullName:
+            notBlank: "Please enter your full name."
+            length: "The name cannot exceed {{ limit }} characters."
+        email:
+            notBlank: "Please enter your email address."
+            invalid: "This email address is not valid."
+        phoneNumber:
+            notBlank: "Please enter your phone number."
+            invalidFormat: "This phone number is not valid."
+        photos:
+            tooMany: "You cannot upload more than {{ limit }} photos."
+            mimeTypes: "Accepted formats: JPG, PNG or WebP."
+            maxSize: "Each photo cannot exceed 8 MB."
+        address:
+            notBlank: "Please enter the property address."
+            length: "The address cannot exceed {{ limit }} characters."
+            notSelected: "Please select the property address from the suggestions list."
+        propertyType:
+            notBlank: "Please select the property type."
+        propertyStatus:
+            notBlank: "Please select the property status."
+        bedrooms:
+            notBlank: "Please specify the number of bedrooms."
+        bathrooms:
+            notBlank: "Please specify the number of bathrooms."
+        surface:
+            notBlank: "Please specify the surface area."
+            range: "The surface area must be between {{ min }} and {{ max }} sqm."
+        furnishing:
+            notBlank: "Please specify whether the property is furnished or unfurnished."
+        floor:
+            notBlank: "Please specify the property floor."
+            range: "The floor must be between {{ min }} and {{ max }}."
+        buildingFloors:
+            notBlank: "Please specify the number of floors in the building."
+            range: "The number of floors must be between {{ min }} and {{ max }}."
+            belowFloor: "The number of building floors must be at least the property floor."
+        note:
+            length: "The note cannot exceed {{ limit }} characters."
+        orientations:
+            notBlank: "Please select at least one orientation."
+        leaseType:
+            notBlank: "Please select the preferred lease type."
+        rent:
+            notBlank: "Please specify the rent excluding charges."
+            range: "The rent must be between {{ min }} and {{ max }} euros."
+        charges:
+            notBlank: "Please specify the amount of charges."
+            range: "The charges must be between {{ min }} and {{ max }} euros."
+        deposit:
+            notBlank: "Please specify the security deposit."
+            range: "The security deposit must be between {{ min }} and {{ max }} euros."
 propertyManagement:
     form:
         address:
