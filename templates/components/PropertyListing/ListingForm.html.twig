@@ -92,27 +92,18 @@
             <p class="mb-10 rounded-xl bg-red-50 p-4 text-sm text-red-700" role="alert" data-listing-steps-target="alert">{{ error.message }}</p>
         {% endfor %}
 
-        {# Recap sticky sur mobile : le stepper vertical sort vite de l'écran.
-           Purement visuel : les titres de section portent déjà la structure. #}
-        <div class="sticky top-0 z-30 -mx-6 mb-8 border-b border-gray-950/10 bg-white/90 px-6 py-2.5 backdrop-blur lg:hidden" aria-hidden="true">
-            <p class="text-sm font-medium text-gray-900 tabular-nums" data-listing-steps-target="mobileLabel"></p>
-            <div class="mt-2 h-1 overflow-hidden rounded-full bg-gray-950/10">
-                <div class="h-full w-0 rounded-full bg-primary transition-[width] duration-300 ease-out" data-listing-steps-target="mobileFill"></div>
-            </div>
-        </div>
-
         <div class="relative">
-            <div class="absolute bottom-10 left-[17.5px] top-4 w-px bg-gray-950/10" aria-hidden="true"></div>
-            <div class="absolute left-[17.5px] top-4 w-px bg-primary transition-[height] duration-500 ease-out" style="height: 0" data-listing-steps-target="fill" aria-hidden="true"></div>
+            <div class="absolute bottom-0 left-[13.5px] top-4 w-px bg-gray-950/10 sm:left-[15.5px]" aria-hidden="true"></div>
+            <div class="absolute left-[13.5px] top-4 w-px bg-primary transition-[height] duration-500 ease-out sm:left-[15.5px]" style="height: 0" data-listing-steps-target="fill" aria-hidden="true"></div>
             <div class="space-y-12">
                 {# Section 1 : coordonnées #}
-                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section">
-                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-primary text-white ring-4 ring-primary/15 scale-110" data-listing-steps-target="badge" aria-hidden="true">
+                <div class="relative pl-10 scroll-mt-6 sm:pl-12" data-listing-steps-target="section">
+                    <span class="absolute left-0 top-0 z-10 flex size-7 items-center justify-center rounded-full text-xs font-medium tabular-nums sm:size-8 sm:text-sm transition-all duration-300 ease-out bg-primary text-white ring-4 ring-primary/15 scale-110" data-listing-steps-target="badge" aria-hidden="true">
                         <span data-listing-steps-target="badgeNumber">1</span>
-                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                        {{ ux_icon('lucide:check', {'class': 'size-3.5 hidden sm:size-4', 'data-listing-steps-target': 'badgeCheck'}) }}
                     </span>
                     <div class="transition-opacity duration-300 ease-out" data-listing-steps-target="content">
-                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.1.title'|trans }}</h2>
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900">{{ 'listProperty.section.1.title'|trans }}</h2>
                     <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.1.text'|trans }}</p>
                     <div class="mt-4 space-y-4">
                         <div>
@@ -155,13 +146,13 @@
                 </div>
 
                 {# Section 2 : détail du bien #}
-                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section" data-controller="address-map-preview address-area-hint address-confirm house-floor" data-action="places-autocomplete:select->address-map-preview#show places-autocomplete:outside->address-area-hint#show places-autocomplete:select->address-area-hint#hide places-autocomplete:select->address-confirm#set change->house-floor#update" data-address-map-preview-map-id-value="17a6371e43c53ecdecba3794">
-                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                <div class="relative pl-10 scroll-mt-6 sm:pl-12" data-listing-steps-target="section" data-controller="address-map-preview address-area-hint address-confirm house-floor" data-action="places-autocomplete:select->address-map-preview#show places-autocomplete:outside->address-area-hint#show places-autocomplete:select->address-area-hint#hide places-autocomplete:select->address-confirm#set change->house-floor#update" data-address-map-preview-map-id-value="17a6371e43c53ecdecba3794">
+                    <span class="absolute left-0 top-0 z-10 flex size-7 items-center justify-center rounded-full text-xs font-medium tabular-nums sm:size-8 sm:text-sm transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
                         <span data-listing-steps-target="badgeNumber">2</span>
-                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                        {{ ux_icon('lucide:check', {'class': 'size-3.5 hidden sm:size-4', 'data-listing-steps-target': 'badgeCheck'}) }}
                     </span>
                     <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
-                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.2.title'|trans }}</h2>
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900">{{ 'listProperty.section.2.title'|trans }}</h2>
                     <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.2.text'|trans }}</p>
                     {{ form_label(form.address, null, {'label_attr': {'class': 'sr-only'}}) }}
                     <div class="relative mt-4" data-controller="places-autocomplete" data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}">
@@ -327,13 +318,13 @@
                 </div>
 
                 {# Section 3 : conditions de location #}
-                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section" data-controller="lease-financials" data-action="change->lease-financials#update">
-                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                <div class="relative pl-10 scroll-mt-6 sm:pl-12" data-listing-steps-target="section" data-controller="lease-financials" data-action="change->lease-financials#update">
+                    <span class="absolute left-0 top-0 z-10 flex size-7 items-center justify-center rounded-full text-xs font-medium tabular-nums sm:size-8 sm:text-sm transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
                         <span data-listing-steps-target="badgeNumber">3</span>
-                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                        {{ ux_icon('lucide:check', {'class': 'size-3.5 hidden sm:size-4', 'data-listing-steps-target': 'badgeCheck'}) }}
                     </span>
                     <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
-                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.3.title'|trans }}</h2>
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900">{{ 'listProperty.section.3.title'|trans }}</h2>
                     <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.3.text'|trans }}</p>
 
                     {# Type de bail souhaité (choix multiple) #}
@@ -353,7 +344,7 @@
                     </div>
 
                     {# Informations financières : le dépôt se pré-remplit (1 mois de loyer en vide, 2 en meublé) #}
-                    <div class="mt-6 grid grid-cols-2 gap-4 pt-6 sm:grid-cols-3 {{ dividerClass }}" data-controller="rent-total" data-action="input->rent-total#update" data-lease-financials-target="financials">
+                    <div class="mt-6 grid grid-cols-1 gap-4 pt-6 sm:grid-cols-3 {{ dividerClass }}" data-controller="rent-total" data-action="input->rent-total#update" data-lease-financials-target="financials">
                         <div>
                             <div class="mb-2 flex h-6 items-center justify-between gap-2">
                                 {{ form_label(form.rent, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
@@ -410,7 +401,7 @@
                             {% endfor %}
                             <p class="hidden {{ errorClass }}" id="{{ form.charges.vars.id }}-error-inline" data-inline-validation-target="error" data-error-for="{{ form.charges.vars.id }}">{{ 'listProperty.form.charges.notBlank'|trans({}, 'validators') }}</p>
                         </div>
-                        <div class="col-span-2 sm:col-span-1">
+                        <div>
                             <div class="mb-2 flex h-6 items-center justify-between gap-2">
                                 {{ form_label(form.deposit, null, {'label_attr': {'class': 'font-semibold text-gray-900 text-sm block whitespace-nowrap'}}) }}
                                 <twig:Tooltip id="deposit-help-tooltip">
@@ -524,13 +515,13 @@
                 </div>
 
                 {# Section 4 : photos #}
-                <div class="relative pl-14 scroll-mt-20" data-listing-steps-target="section">
-                    <span class="absolute left-0 top-0 z-10 flex size-9 items-center justify-center rounded-full text-sm font-medium tabular-nums transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
+                <div class="relative pl-10 scroll-mt-6 sm:pl-12" data-listing-steps-target="section">
+                    <span class="absolute left-0 top-0 z-10 flex size-7 items-center justify-center rounded-full text-xs font-medium tabular-nums sm:size-8 sm:text-sm transition-all duration-300 ease-out bg-white text-gray-400 ring-1 ring-gray-950/10" data-listing-steps-target="badge" aria-hidden="true">
                         <span data-listing-steps-target="badgeNumber">4</span>
-                        {{ ux_icon('lucide:check', {'class': 'size-4 hidden', 'data-listing-steps-target': 'badgeCheck'}) }}
+                        {{ ux_icon('lucide:check', {'class': 'size-3.5 hidden sm:size-4', 'data-listing-steps-target': 'badgeCheck'}) }}
                     </span>
                     <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="content">
-                    <h2 class="text-lg font-semibold font-secondary text-gray-900" data-listing-steps-target="title">{{ 'listProperty.section.4.title'|trans }}</h2>
+                    <h2 class="text-lg font-semibold font-secondary text-gray-900">{{ 'listProperty.section.4.title'|trans }}</h2>
                     <p class="mt-0.5 text-sm text-gray-500">{{ 'listProperty.section.4.text'|trans }}</p>
                     <div class="mt-4" data-controller="file-drop"
                          data-file-drop-label-value="{{ 'listProperty.form.photos.selected'|trans }}"
@@ -608,22 +599,23 @@
                     </div>
                 </div>
 
-                <div class="pl-14 transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="submit">
-                    <p class="mb-3 flex items-center justify-center gap-1.5 text-sm text-gray-500 tabular-nums" aria-live="polite">
-                        {{ ux_icon('lucide:circle-check', {'class': 'size-4 shrink-0 hidden text-green-600', 'data-listing-steps-target': 'recapCheck', 'aria-hidden': 'true'}) }}
-                        <span data-listing-steps-target="recap"></span>
-                    </p>
-                    <twig:Button variant="default" size="lg" class="w-full" data-listing-steps-target="submitButton">
-                        <span class="inline-flex items-center gap-2" data-listing-steps-target="submitLabel">{{ 'listProperty.form.button'|trans|raw }}</span>
-                        <span class="hidden items-center justify-center" data-listing-steps-target="submitSpinner"><twig:Spinner /></span>
-                    </twig:Button>
-                    <p class="mt-3 hidden text-center text-sm font-medium text-primary tabular-nums" aria-live="polite" data-upload-progress-target="status"></p>
-                    <p class="mt-3 flex items-start lg:items-center font-light justify-center gap-x-1.5 text-neutral-500 text-left lg:text-center text-sm">
-                        {{ ux_icon('mingcute:bell-ringing-line', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
-                        {{ 'listProperty.form.subButtonText'|trans|raw }}
-                    </p>
-                </div>
             </div>
+        </div>
+
+        <div class="mt-10 transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="submit">
+            <p class="mb-3 flex items-center justify-center gap-1.5 text-sm text-gray-500 tabular-nums" aria-live="polite">
+                {{ ux_icon('lucide:circle-check', {'class': 'size-4 shrink-0 hidden text-green-600', 'data-listing-steps-target': 'recapCheck', 'aria-hidden': 'true'}) }}
+                <span data-listing-steps-target="recap"></span>
+            </p>
+            <twig:Button variant="default" size="lg" class="w-full" data-listing-steps-target="submitButton">
+                <span class="inline-flex items-center gap-2" data-listing-steps-target="submitLabel">{{ 'listProperty.form.button'|trans|raw }}</span>
+                <span class="hidden items-center justify-center" data-listing-steps-target="submitSpinner"><twig:Spinner /></span>
+            </twig:Button>
+            <p class="mt-3 hidden text-center text-sm font-medium text-primary tabular-nums" aria-live="polite" data-upload-progress-target="status"></p>
+            <p class="mt-3 flex items-start lg:items-center font-light justify-center gap-x-1.5 text-neutral-500 text-left lg:text-center text-sm">
+                {{ ux_icon('mingcute:bell-ringing-line', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
+                {{ 'listProperty.form.subButtonText'|trans|raw }}
+            </p>
         </div>
     {{ form_end(form) }}
     {% endif %}

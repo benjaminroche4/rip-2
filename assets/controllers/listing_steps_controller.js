@@ -5,7 +5,7 @@ export default class extends Controller {
     static targets = [
         'section', 'content', 'badge', 'badgeNumber', 'badgeCheck', 'field', 'fill',
         'submit', 'submitButton', 'submitLabel', 'submitSpinner', 'alert',
-        'title', 'mobileLabel', 'mobileFill', 'recap', 'recapCheck',
+        'recap', 'recapCheck',
     ]
     static classes = ['badgeActive', 'badgeDone', 'badgeIdle', 'muted']
     static values = { recapLabel: String, recapDoneLabel: String }
@@ -105,27 +105,18 @@ export default class extends Controller {
             this.submitTarget.classList.toggle(this.mutedClass, !this.#requiredComplete())
         }
 
-        this.#drawFill(active)
-        this.#drawMobileBar(active)
+        this.#drawFill(active, firstIncomplete === -1)
+        this.#drawRecap()
         // Re-arm auto-advance for sections that dropped back to incomplete.
         this.sectionTargets.forEach((_, index) => {
             if (!this.#isComplete(index)) this.#advancedFrom.delete(index)
         })
     }
 
-    // Compact sticky recap for mobile, where the vertical stepper scrolls out
-    // of view: "2/4 · Conditions de location" plus a completion bar. Also
-    // feeds the recap line above the submit button.
-    #drawMobileBar(active) {
+    // "x/4 sections complétées" line above the submit button.
+    #drawRecap() {
         const total = this.sectionTargets.length
         const done = this.sectionTargets.filter((_, index) => this.#isComplete(index)).length
-        if (this.hasMobileLabelTarget) {
-            const title = this.titleTargets[active]?.textContent.trim() ?? ''
-            this.mobileLabelTarget.textContent = `${active + 1}/${total} · ${title}`
-        }
-        if (this.hasMobileFillTarget) {
-            this.mobileFillTarget.style.width = `${Math.round((done / total) * 100)}%`
-        }
         if (this.hasRecapTarget) {
             const complete = done === total
             this.recapTarget.textContent = complete
@@ -182,14 +173,20 @@ export default class extends Controller {
         return this.sectionTargets.every((_, index) => index === this.sectionTargets.length - 1 || this.#isComplete(index))
     }
 
-    // The vertical track fills down to the active badge.
-    #drawFill(active) {
+    // The vertical track fills down to the active badge; once every section
+    // is complete it runs all the way to the bottom of the track.
+    #drawFill(active, allComplete = false) {
         if (!this.hasFillTarget) return
-        const badge = this.badgeTargets[active]
-        if (!badge) return
-
         const wrapper = this.fillTarget.offsetParent
         if (!wrapper) return
+
+        if (allComplete) {
+            this.fillTarget.style.height = `${wrapper.offsetHeight - this.fillTarget.offsetTop}px`
+            return
+        }
+
+        const badge = this.badgeTargets[active]
+        if (!badge) return
         const height = badge.getBoundingClientRect().top - wrapper.getBoundingClientRect().top - this.fillTarget.offsetTop + 4
 
         this.fillTarget.style.height = `${Math.max(height, 0)}px`
