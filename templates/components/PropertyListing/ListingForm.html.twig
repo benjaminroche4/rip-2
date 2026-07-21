@@ -602,11 +602,14 @@
             </div>
         </div>
 
-        <div class="mt-10 transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="submit">
+        <div class="mt-10">
+            {# Le recap reste pleinement lisible : seul le bouton s'attenue tant
+               que le formulaire est incomplet (contraste AA) #}
             <p class="mb-3 flex items-center justify-center gap-1.5 text-sm text-gray-500 tabular-nums" aria-live="polite">
                 {{ ux_icon('lucide:circle-check', {'class': 'size-4 shrink-0 hidden text-green-600', 'data-listing-steps-target': 'recapCheck', 'aria-hidden': 'true'}) }}
                 <span data-listing-steps-target="recap"></span>
             </p>
+            <div class="transition-opacity duration-300 ease-out opacity-50" data-listing-steps-target="submit">
             <twig:Button variant="default" size="lg" class="w-full" data-listing-steps-target="submitButton">
                 <span class="inline-flex items-center gap-2" data-listing-steps-target="submitLabel">{{ 'listProperty.form.button'|trans|raw }}</span>
                 <span class="hidden items-center justify-center" data-listing-steps-target="submitSpinner"><twig:Spinner /></span>
@@ -616,6 +619,7 @@
                 {{ ux_icon('mingcute:bell-ringing-line', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
                 {{ 'listProperty.form.subButtonText'|trans|raw }}
             </p>
+            </div>
         </div>
     {{ form_end(form) }}
     {% endif %}

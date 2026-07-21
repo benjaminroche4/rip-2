@@ -152,6 +152,7 @@
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
                         <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.management'|trans|raw }}</a>
                         <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findTenant'|trans|raw }}</a>
+                        <a href="{{ path('app_list_property') }}" class="{% if app.request.attributes.get('_route') == 'app_list_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.listProperty'|trans|raw }}</a>
                         <a href="{{ path('app_property') }}" class="{% if app.request.attributes.get('_route') == 'app_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">
                             {{ 'footer.menu.ourProperty'|trans|raw }}
                             {% set propertyCount = available_property_count() %}
@@ -170,7 +171,6 @@
                         <a href="{{ path('app_pricing') }}" class="{% if app.request.attributes.get('_route') == 'app_pricing' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.pricing'|trans|raw }}</a>
                         <a href="{{ path('app_newsletter') }}" class="{% if app.request.attributes.get('_route') == 'app_newsletter' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.newsletter'|trans|raw }}</a>
                         <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
-                        <a href="{{ path('app_list_property') }}" class="{% if app.request.attributes.get('_route') == 'app_list_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.listProperty'|trans|raw }}</a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
