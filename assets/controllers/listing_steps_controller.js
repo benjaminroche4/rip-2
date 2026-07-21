@@ -113,17 +113,20 @@ export default class extends Controller {
         })
     }
 
-    // "x/4 sections complétées" line above the submit button.
+    // "x/3 sections complétées" line above the submit button. Counts only
+    // the REQUIRED sections (the last one, photos/note, is optional): "all
+    // set" must show as soon as the form is actually submittable, photos or
+    // not. The step-4 badge keeps its own photo-based check as a soft nudge.
     #drawRecap() {
-        const total = this.sectionTargets.length
-        const done = this.sectionTargets.filter((_, index) => this.#isComplete(index)).length
-        if (this.hasRecapTarget) {
-            const complete = done === total
-            this.recapTarget.textContent = complete
-                ? this.recapDoneLabelValue
-                : this.recapLabelValue.replace('%done%', String(done)).replace('%total%', String(total))
-            if (this.hasRecapCheckTarget) this.recapCheckTarget.classList.toggle('hidden', !complete)
-        }
+        if (!this.hasRecapTarget) return
+
+        const total = this.sectionTargets.length - 1
+        const done = this.sectionTargets.filter((_, index) => index < total && this.#isComplete(index)).length
+        const complete = done === total
+        this.recapTarget.textContent = complete
+            ? this.recapDoneLabelValue
+            : this.recapLabelValue.replace('%done%', String(done)).replace('%total%', String(total))
+        if (this.hasRecapCheckTarget) this.recapCheckTarget.classList.toggle('hidden', !complete)
     }
 
     // Client gate before the native (non-Turbo) submit: an invalid submission

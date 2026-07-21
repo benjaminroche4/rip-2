@@ -38,6 +38,30 @@ export default class extends Controller {
             },
         });
 
+        // intl-tel-input measures the dial-code box at init to compute the
+        // input's left padding. On a hard load its stylesheet (injected async
+        // by the importmap) can land AFTER that measurement: the padding stays
+        // too small and the digits start under the dial code. Re-selecting the
+        // current country once everything is loaded re-runs the measurement.
+        this.boundPaddingFix = () => {
+            if (!this.iti) return;
+            const container = this.inputTarget.closest('.iti')?.querySelector('.iti__country-container');
+            if (!container) return;
+            const width = container.getBoundingClientRect().width;
+            if (width > 0) this.inputTarget.style.paddingLeft = `${Math.ceil(width) + 6}px`;
+        };
+        if ('complete' === document.readyState) {
+            this.paddingTimer = setTimeout(this.boundPaddingFix, 100);
+        } else {
+            window.addEventListener('load', this.boundPaddingFix, { once: true });
+            // Safety net if load never fires (Turbo visit edge cases).
+            this.paddingTimer = setTimeout(this.boundPaddingFix, 800);
+        }
+        // Dial codes vary in width (+1, +33, +377...): recompute after every
+        // country switch, once the box has been re-rendered.
+        this.boundCountryChange = () => requestAnimationFrame(this.boundPaddingFix);
+        this.inputTarget.addEventListener('countrychange', this.boundCountryChange);
+
         this.form = this.inputTarget.closest('form');
         this.boundSubmit = () => this.syncE164();
         if (this.form) {
@@ -84,6 +108,13 @@ export default class extends Controller {
     }
 
     disconnect() {
+        if (this.boundPaddingFix) {
+            window.removeEventListener('load', this.boundPaddingFix);
+        }
+        if (this.boundCountryChange && this.hasInputTarget) {
+            this.inputTarget.removeEventListener('countrychange', this.boundCountryChange);
+        }
+        clearTimeout(this.paddingTimer);
         if (this.form && this.boundSubmit) {
             this.form.removeEventListener('submit', this.boundSubmit, { capture: true });
         }
