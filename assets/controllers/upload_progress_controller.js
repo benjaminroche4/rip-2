@@ -1,13 +1,16 @@
 /* stimulusFetch: 'lazy' */
 import { Controller } from '@hotwired/stimulus'
+import { renderStreamMessage } from '@hotwired/turbo'
 
 /**
  * Submits the form through XHR when photos are attached so a real upload
  * percentage can be shown: a native POST carrying 10-15 photos on a mobile
- * connection looks frozen behind a spinner. The response (redirected success
- * page or 422 re-render) is parsed and the form container is swapped in
- * place; Stimulus reconnects the controllers on the fresh markup. Without
- * photos the native submit proceeds untouched.
+ * connection looks frozen behind a spinner (Turbo's fetch submission exposes
+ * no upload progress). The server answers with a Turbo Stream (confirmation
+ * or re-rendered form) that replaces the #listing-form region in place;
+ * Stimulus reconnects the controllers on the fresh markup. A full-page HTML
+ * response (redirected fallback) is swapped manually. Without photos the
+ * submit proceeds untouched and Turbo drives it.
  *
  * Must be wired AFTER the other submit handlers on the form: it only engages
  * when none of them prevented the submission.
@@ -30,12 +33,20 @@ export default class extends Controller {
         const xhr = new XMLHttpRequest()
         this.#xhr = xhr
         xhr.open('POST', this.element.action)
+        xhr.setRequestHeader('Accept', 'text/vnd.turbo-stream.html, text/html')
         xhr.upload.addEventListener('progress', (progress) => {
             if (!progress.lengthComputable) return
             const percent = Math.round((progress.loaded / progress.total) * 100)
             this.#status(this.labelValue.replace('%percent%', `${percent} %`))
         })
-        xhr.addEventListener('load', () => this.#swap(xhr.responseText, xhr.responseURL))
+        xhr.addEventListener('load', () => {
+            if ((xhr.getResponseHeader('Content-Type') ?? '').includes('text/vnd.turbo-stream.html')) {
+                this.#xhr = null
+                renderStreamMessage(xhr.responseText)
+                return
+            }
+            this.#swap(xhr.responseText, xhr.responseURL)
+        })
         // Network failure before the server processed anything: retry with a
         // plain native submit so the user is never stuck.
         xhr.addEventListener('error', () => {

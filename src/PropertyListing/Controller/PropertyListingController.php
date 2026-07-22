@@ -15,6 +15,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\Turbo\TurboBundle;
 
 final class PropertyListingController extends AbstractController
 {
@@ -48,9 +49,7 @@ final class PropertyListingController extends AbstractController
         // Honeypot filled: answer exactly like a success so bots cannot tell
         // the trap apart, but store and send nothing.
         if ($form->isSubmitted() && '' !== (string) $form->get('website')->getData()) {
-            $this->addFlash('listingSuccess', $this->successRecap($form->getData(), 0));
-
-            return $this->redirectToRoute('app_list_property', [], Response::HTTP_SEE_OTHER);
+            return $this->success($request, $this->successRecap($form->getData(), 0));
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -58,6 +57,18 @@ final class PropertyListingController extends AbstractController
                 $form->addError(new FormError(
                     $this->translator->trans('listProperty.form.error.tooManyRequests'),
                 ));
+
+                // Turbo submissions get the error as a stream with status 200:
+                // shared o2switch infrastructure intercepts 4xx responses with
+                // its own error page, which would prevent Turbo from rendering
+                // our markup. Stream actions are processed regardless of status.
+                if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+                    $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+                    return $this->render('public/property_listing/form.stream.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
 
                 $response = $this->render('public/property_listing/index.html.twig', ['form' => $form]);
                 $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
@@ -110,16 +121,58 @@ final class PropertyListingController extends AbstractController
                 createdAt: $now,
             ));
 
-            // The submission recap travels in the flash so the confirmation
-            // view can replay it (photo fan + summary card).
-            $this->addFlash('listingSuccess', $this->successRecap($data, \count($photos)));
-
-            return $this->redirectToRoute('app_list_property', [], Response::HTTP_SEE_OTHER);
+            return $this->success($request, $this->successRecap($data, \count($photos)));
         }
 
-        return $this->render('public/property_listing/index.html.twig', [
+        // Invalid Turbo submission: replace the #listing-form region in place
+        // (status 200, see the rate-limit branch for why not 422).
+        if ($form->isSubmitted() && !$form->isValid()
+            && TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+            return $this->render('public/property_listing/form.stream.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
+
+        // Non-Turbo fallback only: the confirmation GET after the PRG redirect
+        // must never be cached, or the shared host's LiteSpeed cache keeps
+        // serving the confirmation on refresh instead of the fresh form.
+        $showsConfirmation = $request->hasPreviousSession()
+            && $request->getSession()->getFlashBag()->has('listingSuccess');
+
+        $response = $this->render('public/property_listing/index.html.twig', [
             'form' => $form,
         ]);
+
+        if ($showsConfirmation) {
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('X-LiteSpeed-Cache-Control', 'no-cache');
+        }
+
+        return $response;
+    }
+
+    /**
+     * Turbo submissions get the confirmation as a stream on the POST response
+     * itself: nothing confirmation-related ever travels on a cacheable GET.
+     * The no-JS fallback keeps the classic flash + redirect (PRG).
+     *
+     * @param array<string, mixed> $recap
+     */
+    private function success(Request $request, array $recap): Response
+    {
+        if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
+            $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+
+            return $this->render('public/property_listing/success.stream.html.twig', [
+                'success' => $recap,
+            ]);
+        }
+
+        $this->addFlash('listingSuccess', $recap);
+
+        return $this->redirectToRoute('app_list_property', [], Response::HTTP_SEE_OTHER);
     }
 
     /**

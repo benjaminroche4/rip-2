@@ -8,74 +8,13 @@
 {% set errorClass = 'mt-1.5 text-sm text-red-600' %}
 
 <div id="listing-form">
+    {# Fallback no-JS : la soumission Turbo recoit la confirmation en stream,
+       la soumission native passe par flash + redirect (PRG) #}
     {% set listingSuccess = app.flashes('listingSuccess') %}
     {% if listingSuccess|length > 0 %}
-        {% set success = listingSuccess|first %}
-        {# Confirmation volontairement simple : le recapitulatif complet part par email #}
-        <div class="rounded-2xl p-2 border border-neutral-200 shadow-lg">
-            <div data-controller="scroll-into-view" class="scroll-mt-6 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0 p-6 sm:p-10" role="status" aria-live="polite">
-                <div class="flex flex-col items-center text-center">
-
-                    <div class="p-3 bg-white inline-block rounded-full shadow-sm ring-1 ring-black/5">
-                        {{ ux_icon('mynaui:check-circle-one', {'class': 'size-7 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
-                    </div>
-
-                    <div class="mt-6 max-w-md space-y-2">
-                        <h2 class="text-2xl font-semibold text-pretty">{{ 'listProperty.form.success.title'|trans|raw }}</h2>
-                        <p class="text-slate-600 font-light text-pretty">{{ 'listProperty.form.success.text'|trans|raw }}</p>
-                    </div>
-
-                    {# Le bien en un coup d'oeil : carte + adresse #}
-                    {% if success.address|default('') != '' %}
-                        <div class="mt-8 w-full max-w-md overflow-hidden rounded-xl border border-neutral-200 bg-white text-left">
-                            <a
-                                href="https://www.google.com/maps/search/?api=1&query={{ success.address|url_encode }}{% if success.placeId|default('') %}&query_place_id={{ success.placeId }}{% endif %}"
-                                rel="noopener noreferrer" target="_blank"
-                                class="group block"
-                                aria-label="{{ success.address }}"
-                            >
-                                <img
-                                    src="https://maps.googleapis.com/maps/api/staticmap?center={{ success.address|url_encode }}&zoom=16&size=640x260&scale=2&markers=anchor:bottom%7Cicon:{{ (site_url ~ '/medias/website/map-pin.png')|url_encode }}%7C{{ success.address|url_encode }}&language={{ app.request ? app.request.locale : 'fr' }}&key={{ google_maps_api_key }}"
-                                    alt="{{ success.address }}"
-                                    class="h-36 w-full border-b border-neutral-100 object-cover transition-opacity duration-100 ease-out group-hover:opacity-90 sm:h-40"
-                                    width="640" height="260"
-                                    loading="lazy"
-                                />
-                            </a>
-                            <div class="flex items-center justify-between gap-3 px-4 py-3">
-                                <p class="flex min-w-0 items-center gap-2 text-sm font-medium text-gray-900">
-                                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                    <span class="truncate">{{ success.address }}</span>
-                                </p>
-                                {% if success.photosCount|default(0) > 0 %}
-                                    <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-700 tabular-nums">
-                                        {{ ux_icon('lucide:image', {'class': 'size-3.5 text-neutral-400', 'aria-hidden': 'true'}) }}
-                                        {{ 'listProperty.form.success.photosCount'|trans({'%count%': success.photosCount}) }}
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {# Le detail complet est dans l'email de confirmation #}
-                    <p class="mt-7 flex items-center justify-center gap-1.5 text-sm font-light text-neutral-500">
-                        {{ ux_icon('lucide:mail-check', {'class': 'size-4 shrink-0 text-neutral-500', 'aria-hidden': 'true'}) }}
-                        {{ 'listProperty.form.success.emailRecap'|trans({'%email%': success.email|default('')}) }}
-                    </p>
-
-                    {# Pendant que la confiance est la : vers l'offre de gestion #}
-                    <div class="mt-6 w-full max-w-md">
-                        <twig:Button variant="default" as="a" size="lg" href="{{ path('app_service_landlords') }}" class="w-full">
-                            {{ 'listProperty.form.success.cta'|trans }}
-                        </twig:Button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+        <twig:PropertyListing:ListingSuccess :success="listingSuccess|first" />
     {% else %}
     {{ form_start(form, {'attr': {
-        'data-turbo': 'false',
         'novalidate': 'novalidate',
         'data-controller': 'listing-steps deposit-suggest bedrooms-suggest inline-validation leave-guard upload-progress',
         'data-action': 'input->listing-steps#update change->listing-steps#onChange focusin->listing-steps#update focusout->listing-steps#update click->listing-steps#onClick submit->listing-steps#onSubmit change->deposit-suggest#suggest change->bedrooms-suggest#suggest input->leave-guard#markDirty change->leave-guard#markDirty submit->leave-guard#submit submit->upload-progress#start',

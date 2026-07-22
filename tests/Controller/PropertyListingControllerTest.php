@@ -349,6 +349,186 @@ final class PropertyListingControllerTest extends WebTestCase
         }
     }
 
+    public function testItReturnsConfirmationAsTurboStreamOnTurboSubmission(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/proposer-un-bien');
+
+        $form = $crawler->filter('form[name="property_listing"]')->form([
+            'property_listing[fullName]' => 'Marie Dupont',
+            'property_listing[email]' => 'marie.dupont@example.com',
+            'property_listing[phoneNumber]' => '+33612345678',
+            'property_listing[propertyType]' => 'studio',
+            'property_listing[propertyStatus]' => 'available',
+            'property_listing[furnishing]' => 'furnished',
+            'property_listing[rent]' => '1500',
+            'property_listing[charges]' => '150',
+            'property_listing[deposit]' => '1500',
+            'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
+            'property_listing[placeId]' => 'ChIJTestRivoli75001',
+        ]);
+        $form['property_listing[orientations]'][1]->tick();
+        $form['property_listing[leaseTypes]'][0]->tick();
+        $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
+
+        // The confirmation travels on the POST response itself: no redirect,
+        // so no confirmation ever lands on a cacheable GET (o2switch's
+        // LiteSpeed cache used to pin it across refreshes).
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'text/vnd.turbo-stream.html; charset=UTF-8');
+
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('<turbo-stream action="replace" target="listing-form">', $content);
+        self::assertStringContainsString('12 rue de Rivoli, 75001 Paris', $content);
+        self::assertStringContainsString('marie.dupont@example.com', $content);
+        self::assertEmailCount(2);
+    }
+
+    public function testItReturnsFormAsTurboStreamOnInvalidTurboSubmission(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/proposer-un-bien');
+
+        // No placeId: the address was typed by hand, the submission is invalid.
+        $form = $crawler->filter('form[name="property_listing"]')->form([
+            'property_listing[fullName]' => 'Marie Dupont',
+            'property_listing[email]' => 'marie.dupont@example.com',
+            'property_listing[phoneNumber]' => '+33612345678',
+            'property_listing[propertyType]' => 'studio',
+            'property_listing[propertyStatus]' => 'available',
+            'property_listing[furnishing]' => 'furnished',
+            'property_listing[rent]' => '1500',
+            'property_listing[charges]' => '150',
+            'property_listing[deposit]' => '1500',
+            'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
+        ]);
+        $form['property_listing[orientations]'][1]->tick();
+        $form['property_listing[leaseTypes]'][0]->tick();
+        $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
+
+        // Status 200 on purpose: o2switch intercepts 4xx with its own error
+        // page, which would prevent Turbo from rendering our error markup.
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'text/vnd.turbo-stream.html; charset=UTF-8');
+
+        $content = (string) $client->getResponse()->getContent();
+        self::assertStringContainsString('<turbo-stream action="replace" target="listing-form">', $content);
+        self::assertStringContainsString('role="alert"', $content);
+        self::assertEmailCount(0);
+    }
+
+    public function testItAnswersTurboHoneypotSubmissionLikeASuccessWithoutSendingAnything(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/proposer-un-bien');
+
+        $form = $crawler->filter('form[name="property_listing"]')->form([
+            'property_listing[fullName]' => 'Marie Dupont',
+            'property_listing[email]' => 'marie.dupont@example.com',
+            'property_listing[phoneNumber]' => '+33612345678',
+            'property_listing[propertyType]' => 'studio',
+            'property_listing[propertyStatus]' => 'available',
+            'property_listing[furnishing]' => 'furnished',
+            'property_listing[rent]' => '1500',
+            'property_listing[charges]' => '150',
+            'property_listing[deposit]' => '1500',
+            'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
+            'property_listing[website]' => 'https://spam.example',
+        ]);
+        $form['property_listing[orientations]'][1]->tick();
+        $form['property_listing[leaseTypes]'][0]->tick();
+        $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
+
+        // The bot sees the exact same stream as a legitimate success, but no
+        // email leaves the application.
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'text/vnd.turbo-stream.html; charset=UTF-8');
+        self::assertStringContainsString(
+            '<turbo-stream action="replace" target="listing-form">',
+            (string) $client->getResponse()->getContent(),
+        );
+        self::assertEmailCount(0);
+    }
+
+    public function testItReturnsRateLimitErrorAsTurboStreamOnTurboSubmission(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+        $crawler = $client->request('GET', '/fr/proposer-un-bien');
+
+        $limiter = static::getContainer()->get('limiter.form_listing')->create('127.0.0.1');
+        $limiter->reset();
+        self::assertTrue($limiter->consume(1000)->isAccepted(), 'The drain itself should be accepted.');
+
+        try {
+            $form = $crawler->filter('form[name="property_listing"]')->form([
+                'property_listing[fullName]' => 'Marie Dupont',
+                'property_listing[email]' => 'marie.dupont@example.com',
+                'property_listing[phoneNumber]' => '+33612345678',
+                'property_listing[propertyType]' => 'studio',
+                'property_listing[propertyStatus]' => 'available',
+                'property_listing[furnishing]' => 'furnished',
+                'property_listing[rent]' => '1500',
+                'property_listing[charges]' => '150',
+                'property_listing[deposit]' => '1500',
+                'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
+                'property_listing[placeId]' => 'ChIJTestRivoli75001',
+            ]);
+            $form['property_listing[orientations]'][1]->tick();
+            $form['property_listing[leaseTypes]'][0]->tick();
+            $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
+
+            // 200 + stream (not 429): o2switch intercepts 4xx responses.
+            self::assertResponseIsSuccessful();
+            self::assertResponseHeaderSame('Content-Type', 'text/vnd.turbo-stream.html; charset=UTF-8');
+
+            $content = (string) $client->getResponse()->getContent();
+            self::assertStringContainsString('<turbo-stream action="replace" target="listing-form">', $content);
+            self::assertStringContainsString('role="alert"', $content);
+            self::assertEmailCount(0);
+        } finally {
+            $limiter->reset();
+        }
+    }
+
+    public function testConfirmationFallbackResponseIsNeverCacheable(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/proposer-un-bien');
+
+        $form = $crawler->filter('form[name="property_listing"]')->form([
+            'property_listing[fullName]' => 'Marie Dupont',
+            'property_listing[email]' => 'marie.dupont@example.com',
+            'property_listing[phoneNumber]' => '+33612345678',
+            'property_listing[propertyType]' => 'studio',
+            'property_listing[propertyStatus]' => 'available',
+            'property_listing[furnishing]' => 'furnished',
+            'property_listing[rent]' => '1500',
+            'property_listing[charges]' => '150',
+            'property_listing[deposit]' => '1500',
+            'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
+            'property_listing[placeId]' => 'ChIJTestRivoli75001',
+        ]);
+        $form['property_listing[orientations]'][1]->tick();
+        $form['property_listing[leaseTypes]'][0]->tick();
+        $client->submit($form);
+
+        self::assertResponseRedirects('/fr/proposer-un-bien', 303);
+        $client->followRedirect();
+
+        // The non-Turbo confirmation GET must opt out of every cache layer,
+        // including the shared host's LiteSpeed cache which ignores plain
+        // `private` and used to pin the confirmation across refreshes.
+        self::assertSelectorExists('#listing-form div[aria-live="polite"]');
+        self::assertResponseHeaderSame('X-LiteSpeed-Cache-Control', 'no-cache');
+        self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
+
+        // A refresh serves the form again, without the cache opt-out.
+        $client->request('GET', '/fr/proposer-un-bien');
+        self::assertSelectorExists('form[name="property_listing"]');
+        self::assertFalse($client->getResponse()->headers->has('X-LiteSpeed-Cache-Control'));
+    }
+
     public function testItStoresUploadedPhotosInASlugNamedFolder(): void
     {
         $client = static::createClient();
