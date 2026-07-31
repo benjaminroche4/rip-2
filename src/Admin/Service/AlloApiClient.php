@@ -108,7 +108,7 @@ final readonly class AlloApiClient
                 return $calls;
             }
 
-            $totalPages = (int) ($payload['data']['metadata']['total_pages'] ?? 0);
+            $totalPages = (int) ($payload['data']['metadata']['pagination']['total_pages'] ?? 0);
             if ($page + 1 >= $totalPages) {
                 return $calls;
             }

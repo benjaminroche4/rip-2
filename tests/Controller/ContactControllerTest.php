@@ -47,6 +47,7 @@ final class ContactControllerTest extends WebTestCase
         $contact = $em->getRepository(Contact::class)->findOneBy(['lastName' => 'Doe']);
         self::assertNotNull($contact);
         self::assertSame('+33612345678', $contact->getPhoneNumber());
+        self::assertSame('accompagne', $contact->getOffer(), 'The chosen package must be persisted.');
     }
 
     public function testItRequiresAnOfferWhenHousingSearchIsSelected(): void

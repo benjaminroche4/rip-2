@@ -1,0 +1,214 @@
+{% extends 'admin/base.html.twig' %}
+
+{% set displayName = contact.fullName ? contact.fullName|title : contact.email %}
+
+{% block title %}{{ displayName }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ displayName }}"
+        breadcrumbLabel="{{ 'admin.contacts.title'|trans }}"
+        breadcrumbUrl="{{ path('admin_contacts', {adminPrefix: adminPrefix}) }}"
+    >
+        <nav class="flex shrink-0 items-center gap-2" aria-label="{{ 'admin.contacts.title'|trans }}">
+            {% if adjacent.newer %}
+                <a
+                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.newer}) }}"
+                    class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                    aria-label="{{ 'admin.contacts.show.prev'|trans }}"
+                    title="{{ 'admin.contacts.show.prev'|trans }}"
+                    data-testid="contact-prev"
+                >
+                    {{ ux_icon('lucide:chevron-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                </a>
+            {% else %}
+                <span class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-300" aria-hidden="true">
+                    {{ ux_icon('lucide:chevron-left', {class: 'size-4'}) }}
+                </span>
+            {% endif %}
+            {% if adjacent.older %}
+                <a
+                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.older}) }}"
+                    class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                    aria-label="{{ 'admin.contacts.show.next'|trans }}"
+                    title="{{ 'admin.contacts.show.next'|trans }}"
+                    data-testid="contact-next"
+                >
+                    {{ ux_icon('lucide:chevron-right', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                </a>
+            {% else %}
+                <span class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-300" aria-hidden="true">
+                    {{ ux_icon('lucide:chevron-right', {class: 'size-4'}) }}
+                </span>
+            {% endif %}
+        </nav>
+    </twig:Admin:PageHeader>
+{% endblock %}
+
+{% block body %}
+    {% set pdfUrl = path('admin_contact_pdf', {adminPrefix: adminPrefix, reference: contact.reference}) %}
+    {% set exportRow %}
+        <div class="flex justify-end">
+            <twig:Button
+                as="a"
+                variant="outline"
+                size="sm"
+                href="{{ pdfUrl }}"
+                class="relative"
+                data-controller="pdf-download"
+                data-pdf-download-url-value="{{ pdfUrl }}"
+                data-action="click->pdf-download#download"
+                data-testid="contact-pdf-export"
+            >
+                <span data-pdf-download-target="label" class="flex items-center gap-2">
+                    {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.contacts.show.exportPdf'|trans }}
+                </span>
+                <span data-pdf-download-target="spinner" class="absolute inset-0 hidden flex items-center justify-center gap-2">
+                    <twig:Spinner />
+                    <span data-pdf-download-target="percent" class="text-xs font-medium tabular-nums">0%</span>
+                </span>
+            </twig:Button>
+        </div>
+    {% endset %}
+    {% set detailCard %}
+        <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+            <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+                <div class="p-3">
+                    <twig:Admin:ContactStatusControl :contactId="contact.id" />
+                </div>
+
+                <div class="grid grid-cols-1 gap-y-4 rounded-t-xl bg-white px-5 py-4 sm:grid-cols-2 sm:gap-x-8">
+                    <div class="min-w-0 space-y-2 text-sm">
+                        <p class="text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</p>
+                        <a href="mailto:{{ contact.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
+                            {{ contact.email }}
+                        </a>
+                    </div>
+                    <div class="min-w-0 space-y-2 text-sm">
+                        <p class="text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</p>
+                        {% if contact.phoneNumber %}
+                            {% set phoneCountry = contact.phoneNumber|phone_country %}
+                            <a href="tel:{{ contact.phoneNumber }}" class="flex min-w-0 items-center gap-2 font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
+                                {% if phoneCountry %}
+                                    {{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                {% endif %}
+                                <span class="truncate">{{ contact.phoneNumber|phone_format }}</span>
+                            </a>
+                        {% else %}
+                            <p class="font-medium text-gray-400">-</p>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0 space-y-2 text-sm">
+                        <p class="text-gray-600">{{ 'admin.contacts.card.field.language'|trans }}</p>
+                        <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                            {{ ux_icon('circle-flags:' ~ contact.lang, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="truncate">{{ ('admin.contacts.card.lang.' ~ contact.lang)|trans }}</span>
+                        </p>
+                    </div>
+                    {% if contact.company %}
+                        <div class="min-w-0 space-y-2 text-sm">
+                            <p class="text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</p>
+                            <p class="truncate font-medium text-gray-900">{{ contact.company }}</p>
+                        </div>
+                    {% endif %}
+                    {% if contact.offer %}
+                        <div class="min-w-0 space-y-2 text-sm">
+                            <p class="text-gray-600">{{ 'admin.contacts.show.field.offer'|trans }}</p>
+                            <p class="truncate font-medium text-gray-900">
+                                {{ ('contact.contactForm.offer.' ~ contact.offer ~ '.title')|trans }}
+                                <span class="text-gray-500">({{ ('contact.contactForm.offer.' ~ contact.offer ~ '.price')|trans }})</span>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
+                    <p class="flex flex-wrap gap-2 text-sm font-medium">
+                        <span class="text-gray-600">{{ 'admin.contacts.card.help'|trans }}</span>
+                        <span class="min-w-0 flex-1 text-gray-900">{{ contact.helpType|trans }}</span>
+                    </p>
+                    {% if contact.message %}
+                        <p class="text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ contact.message }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    {% endset %}
+
+    <div class="space-y-6" data-testid="contact-detail">
+        {{ exportRow }}
+
+        <twig:Admin:ContactTerminalBanner :contactId="contact.id" />
+
+        <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
+            <div class="space-y-6">
+                {{ detailCard }}
+
+                <twig:Admin:ContactProject :contactId="contact.id" />
+                <twig:Admin:LeadQuality :contactId="contact.id" />
+            </div>
+            <div class="space-y-6 max-lg:mt-6 lg:sticky lg:top-6">
+                {# Suivi + fil de notes regroupés dans une seule card. #}
+                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="follow-up-card">
+                    <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+                        <twig:Admin:ContactFollowUp :contactId="contact.id" />
+                        <twig:Admin:ContactNotes :contactId="contact.id" />
+                    </div>
+                </div>
+
+                {% if previousRequests is not empty %}
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="previous-requests">
+                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+                            <div class="p-3">
+                                <h2 class="font-medium text-gray-900">
+                                    {{ 'admin.contacts.previous.title'|trans({'%count%': previousRequests|length}) }}
+                                </h2>
+                            </div>
+                            {% macro previousRow(previous, adminPrefix) %}
+                                <li>
+                                    <a
+                                        href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: previous.reference}) }}"
+                                        class="flex items-center justify-between gap-3 py-3 text-sm transition-colors duration-100 hover:text-primary"
+                                    >
+                                        <span class="flex min-w-0 items-center gap-2">
+                                            <span class="size-1.5 shrink-0 rounded-full {{ previous.status.dotClass }}" aria-hidden="true"></span>
+                                            <span class="truncate font-medium text-gray-900">{{ previous.reference }}</span>
+                                            <span class="truncate text-gray-500">{{ previous.helpType|trans }}</span>
+                                        </span>
+                                        <span class="shrink-0 text-xs text-gray-500 tabular-nums">{{ previous.createdAt|format_date('short') }}</span>
+                                    </a>
+                                </li>
+                            {% endmacro %}
+                            <div class="rounded-xl bg-white px-5 py-2">
+                                <ul class="divide-y divide-gray-950/5" role="list">
+                                    {% for previous in previousRequests|slice(0, 5) %}
+                                        {{ _self.previousRow(previous, adminPrefix) }}
+                                    {% endfor %}
+                                </ul>
+                                {% if previousRequests|length > 5 %}
+                                    <details class="group details-animated flex flex-col border-t border-gray-950/5">
+                                        <summary class="order-last flex cursor-pointer list-none justify-center py-2.5 [&::-webkit-details-marker]:hidden">
+                                            <span class="rounded-full px-3 py-1 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out group-open:hidden hover:bg-neutral-100 hover:text-gray-900">
+                                                {{ 'admin.contacts.previous.showMore'|trans({'%count%': previousRequests|length - 5}) }}
+                                            </span>
+                                            <span class="hidden rounded-full px-3 py-1 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out group-open:inline hover:bg-neutral-100 hover:text-gray-900">
+                                                {{ 'admin.contacts.previous.showLess'|trans }}
+                                            </span>
+                                        </summary>
+                                        <ul class="divide-y divide-gray-950/5 border-b border-gray-950/5" role="list">
+                                            {% for previous in previousRequests|slice(5) %}
+                                                {{ _self.previousRow(previous, adminPrefix) }}
+                                            {% endfor %}
+                                        </ul>
+                                    </details>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

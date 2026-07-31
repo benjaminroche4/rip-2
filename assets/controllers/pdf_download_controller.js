@@ -24,7 +24,11 @@ export default class extends Controller {
         url: String,
         loadingClass: { type: String, default: 'pointer-events-none opacity-60' },
     };
-    static targets = ['label', 'spinner'];
+    static targets = ['label', 'spinner', 'percent'];
+
+    disconnect() {
+        clearInterval(this.progressTimer);
+    }
 
     async download(event) {
         event.preventDefault();
@@ -90,5 +94,38 @@ export default class extends Controller {
         if (this.hasSpinnerTarget) {
             this.spinnerTarget.classList.toggle('hidden', !loading);
         }
+
+        if (loading) {
+            this.startProgress();
+        } else {
+            this.finishProgress();
+        }
+    }
+
+    /**
+     * The server renders the PDF in a single HTTP roundtrip, so no real
+     * progress events exist — we ease a simulated percentage towards 90%
+     * and snap to 100% when the bytes arrive.
+     */
+    startProgress() {
+        if (!this.hasPercentTarget) {
+            return;
+        }
+
+        let progress = 0;
+        this.percentTarget.textContent = '0%';
+        this.progressTimer = setInterval(() => {
+            progress = Math.min(90, progress + Math.max(0.5, (90 - progress) * 0.06));
+            this.percentTarget.textContent = `${Math.round(progress)}%`;
+        }, 150);
+    }
+
+    finishProgress() {
+        if (!this.hasPercentTarget) {
+            return;
+        }
+
+        clearInterval(this.progressTimer);
+        this.percentTarget.textContent = '100%';
     }
 }

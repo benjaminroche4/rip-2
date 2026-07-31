@@ -6,7 +6,7 @@
 
     Spacing / surface conventions mirror DocumentList:
       - section heading: text-base font-semibold + text-sm text-gray-500 sub
-      - container cards: rounded-2xl border border-gray-950/5 bg-white p-2
+      - container cards: rounded-2xl border border-neutral-200 bg-white p-2
       - inner surface: rounded-xl bg-neutral-50/50 p-4..p-5
       - vertical rhythm: space-y-6 between sections, gap-* inside flex/grid
 #}
@@ -23,7 +23,7 @@
                 {{ 'admin.tools.documents.request.person.role.label'|trans }}
                 <span class="text-red-600" aria-hidden="true">*</span>
             </p>
-            <div role="radiogroup" aria-labelledby="{{ personForm.role.vars.id }}-label" class="mt-2 inline-flex rounded-lg border border-gray-950/5 bg-neutral-50/50 p-1">
+            <div role="radiogroup" aria-labelledby="{{ personForm.role.vars.id }}-label" class="mt-2 inline-flex rounded-lg border border-neutral-200 bg-neutral-50/50 p-1">
                 {% for choice in personForm.role.children %}
                     <label for="{{ choice.vars.id }}" class="cursor-pointer rounded-md px-4 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:text-gray-900 has-[input:checked]:bg-white has-[input:checked]:text-primary has-[input:checked]:shadow-sm">
                         <input
@@ -117,7 +117,7 @@
                             <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 {% for docChoice in choices %}
                                     {% set doc = docsById[docChoice.vars.value] ?? null %}
-                                    <label for="{{ docChoice.vars.id }}" class="group flex h-full cursor-pointer items-start gap-3 rounded-lg border border-gray-950/5 bg-white p-3 transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
+                                    <label for="{{ docChoice.vars.id }}" class="group flex h-full cursor-pointer items-start gap-3 rounded-lg border border-neutral-200 bg-white p-3 transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
                                         <span class="group inline-grid size-4 shrink-0 grid-cols-1 self-start pt-0.5">
                                             <input
                                                 type="checkbox"
@@ -217,7 +217,7 @@
             data-controller="person-picker"
             data-person-picker-active-value="{{ activeIndex }}"
         >
-            <aside class="rounded-2xl border border-gray-950/5 bg-white p-2">
+            <aside class="rounded-2xl border border-neutral-200 bg-white p-2">
                 <nav class="flex flex-col gap-1" aria-label="{{ 'admin.tools.documents.request.persons.title'|trans }}">
                     {% for personForm in persons %}
                         {% set fn = personForm.firstName.vars.value %}
@@ -264,7 +264,7 @@
                 </nav>
             </aside>
 
-            <div class="rounded-2xl border border-gray-950/5 bg-white p-5">
+            <div class="rounded-2xl border border-neutral-200 bg-white p-5">
                 {% for personForm in persons %}
                     <div data-person-picker-target="form" {% if not loop.first %}hidden{% endif %} data-testid="document-request-person">
                         <header class="mb-4 flex items-center justify-between gap-3">
@@ -308,7 +308,7 @@
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {% for choice in form.typology.children %}
                 {% set comp = typologyIcons[choice.vars.value] ?? {tenants: 1, guarantors: 0} %}
-                <label for="{{ choice.vars.id }}" class="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border border-gray-950/5 bg-white p-4 text-center transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
+                <label for="{{ choice.vars.id }}" class="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-center transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
                     <input
                         type="radio"
                         id="{{ choice.vars.id }}"
@@ -397,7 +397,7 @@
                 <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.tools.documents.request.language.subtitle'|trans }}</p>
                 <div class="mt-2 flex flex-wrap gap-2">
                     {% for choice in form.language.children %}
-                        <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-950/5 bg-white px-3 py-2 transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
+                        <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 transition-colors has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50/60">
                             <span class="group inline-grid size-4 shrink-0 grid-cols-1">
                                 <input
                                     type="radio"
@@ -473,7 +473,7 @@
         data-unsaved-changes-target="dialog"
         data-action="cancel->unsaved-changes#cancel:prevent"
         data-live-ignore
-        class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-gray-950/5 bg-white p-0 shadow-xl backdrop:bg-gray-950/50"
+        class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-neutral-200 bg-white p-0 shadow-xl backdrop:bg-gray-950/50"
         data-testid="unsaved-changes-dialog"
     >
         <div class="p-6">

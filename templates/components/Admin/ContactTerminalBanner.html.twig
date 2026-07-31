@@ -1,0 +1,53 @@
+<div {{ attributes.defaults({class: 'empty:hidden'}) }}>
+    {%- set contact = this.contact -%}
+    {%- if contact and contact.status.value in ['closed', 'unqualified', 'converted'] -%}
+        {%- set state = contact.status.value -%}
+        {%- set styles = {
+            closed: {
+                banner: 'border-neutral-300 bg-linear-to-r from-neutral-200/80 to-neutral-100/40',
+                icon: 'lucide:archive',
+                iconColor: 'text-gray-600',
+                title: 'text-gray-900',
+                detail: 'text-gray-600',
+            },
+            unqualified: {
+                banner: 'border-amber-200 bg-linear-to-r from-amber-100/90 to-amber-50/40',
+                icon: 'lucide:user-x',
+                iconColor: 'text-amber-600',
+                title: 'text-amber-950',
+                detail: 'text-amber-800/80',
+            },
+            converted: {
+                banner: 'border-green-200 bg-linear-to-r from-green-100/80 to-green-50/30',
+                icon: 'lucide:badge-check',
+                iconColor: 'text-green-600',
+                title: 'text-green-950',
+                detail: 'text-green-800/80',
+            },
+        }[state] -%}
+        <div
+            class="flex items-center gap-4 rounded-2xl border px-5 py-4 shadow-sm {{ styles.banner }}"
+            role="status"
+            data-testid="terminal-banner"
+        >
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm {{ styles.iconColor }}">
+                {{ ux_icon(styles.icon, {class: 'size-5', 'aria-hidden': 'true'}) }}
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold {{ styles.title }}">
+                    {{ ('admin.contacts.show.' ~ state ~ 'Title')|trans }}
+                </p>
+                {%- set detailParts = [] -%}
+                {%- if state == 'unqualified' and contact.closureReason -%}
+                    {%- set detailParts = detailParts|merge([contact.closureReason.labelKey|trans]) -%}
+                {%- endif -%}
+                {%- if contact.statusChangedAt -%}
+                    {%- set detailParts = detailParts|merge(['admin.contacts.show.terminalSince'|trans({'%date%': contact.statusChangedAt|format_date('medium')})]) -%}
+                {%- endif -%}
+                {% if detailParts is not empty %}
+                    <p class="mt-0.5 text-sm {{ styles.detail }}">{{ detailParts|join(' · ') }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {%- endif -%}
+</div>

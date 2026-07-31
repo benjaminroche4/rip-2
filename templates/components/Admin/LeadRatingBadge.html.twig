@@ -1,0 +1,18 @@
+{# Badge compact de note de lead ("4 ★") avec visibilité graduée : plus la
+   note est haute, plus le chip est chaud et contrasté. #}
+{# @prop rating int Note 1-5. #}
+{%- props rating -%}
+{% set ratingChip = {
+    1: {chip: 'border-neutral-200 bg-neutral-50 text-gray-500', star: 'text-gray-300'},
+    2: {chip: 'border-neutral-200 bg-neutral-50 text-gray-500', star: 'text-gray-400'},
+    3: {chip: 'border-neutral-200 bg-neutral-100 text-gray-600', star: 'text-amber-300'},
+    4: {chip: 'border-amber-200 bg-amber-50 text-amber-700', star: 'text-amber-400'},
+    5: {chip: 'border-amber-300 bg-amber-100 text-amber-800', star: 'text-amber-500'},
+}[rating] %}
+<p
+    {{ attributes.defaults({class: 'flex items-center gap-1 rounded-full border py-1 pr-2.5 pl-3 text-sm font-medium tabular-nums ' ~ ratingChip.chip}) }}
+    title="{{ 'admin.contacts.show.field.leadRating'|trans }}"
+>
+    {{ rating }}
+    {{ ux_icon('material-symbols:star-rounded', {class: 'size-5 ' ~ ratingChip.star, 'aria-hidden': 'true'}) }}
+</p>

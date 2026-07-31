@@ -65,11 +65,12 @@ final class ContactController extends AbstractController
             $contact->setLang($request->getLocale());
             $contact->setIp($request->getClientIp());
 
-            $this->entityManager->persist($contact);
-            $this->entityManager->flush();
-
             // Unmapped field: only meaningful for the housing-search help type.
             $offer = \is_string($form->get('offer')->getData()) ? $form->get('offer')->getData() : null;
+            $contact->setOffer($offer);
+
+            $this->entityManager->persist($contact);
+            $this->entityManager->flush();
 
             $this->bus->dispatch(new SendContactEmailsMessage(
                 firstName: $contact->getFirstName(),

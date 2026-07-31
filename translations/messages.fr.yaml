@@ -1,3 +1,9 @@
+date:
+    todayAt: Aujourd'hui à %time%
+    yesterdayAt: Hier à %time%
+    daysAgo: '{1} Il y a 1 jour|]1,Inf] Il y a %count% jours'
+    today: Aujourd'hui
+    inDays: '{1} Dans 1 jour|]1,Inf] Dans %count% jours'
 contact:
     title: Contactez-nous
     subTitle: Parlons de votre installation à Paris
@@ -1798,26 +1804,180 @@ admin:
         skipToContent: Aller au contenu principal
     contacts:
         title: Demandes de contact
-        subtitle: Les formulaires de contact reçus, du plus récent au plus ancien.
         empty: Aucune demande de contact pour le moment.
+        emptyNew: Aucune nouvelle demande à traiter.
+        searchPlaceholder: Rechercher (nom, email, référence)
+        loading: Chargement des demandes
+        show:
+            backToList: Retour aux demandes
+            exportPdf: Exporter en PDF
+            closureLabel: Motif de clôture
+            closurePlaceholder: Choisir un motif
+            closedTitle: Demande fermée
+            unqualifiedTitle: Demande non qualifiée
+            convertedTitle: Demande convertie en client
+            terminalSince: depuis le %date%
+            prev: Demande précédente
+            next: Demande suivante
+            field:
+                company: Société
+                offer: Formule choisie
+                ip: Adresse IP
+                reference: Référence
+                statusChangedAt: Dernier changement de statut
+                firstTreatedAt: Première prise en charge
+                leadRating: Qualité du lead
+                leadNote: Note de qualification
+        followUp:
+            title: Suivi
+            assignee: Suivi par
+            assigneeNone: Personne
+            recallLabel: À recontacter le
+            recallOverdue: Rappel échu
+            recallClear: Effacer
+        closure:
+            budget_unrealistic: Budget irréaliste
+            unreachable: Injoignable
+            profile_mismatch: Profil inadapté à nos services
+            solved_alone: A trouvé seul
+            out_of_area: Hors zone
+            other: Autre
+        nextStep:
+            label: Prochaine étape
+            choice:
+                call: Appeler le prospect
+                video_call: Visio prévue
+                visit: Planifier une visite
+                proposal: Envoyer une proposition
+                awaiting_client: Attente retour client
+                prepare_file: Préparer le dossier
+                other: Autre
+        feed:
+            statusChanged: 'Statut passé à'
+            reasonSet: 'Motif :'
+        project:
+            title: Projet logement
+            subtitle: Rempli à la qualification, pour comparer et filtrer les demandes.
+            budget: Budget mensuel
+            budgetUnit: €/mois
+            areas: Quartiers visés
+            areasPlaceholder: 11e, 18e, 20e...
+            moveIn: Emménagement souhaité
+            propertyType: Type de bien
+            propertyTypePlaceholder: T2 meublé, colocation...
+            stayDuration:
+                label: Durée d'installation
+                choice:
+                    short: Court terme
+                    medium: Moyen terme
+                    long: Long terme
+                hint:
+                    short: 1 à 3 mois
+                    medium: 3 à 12 mois
+                    long: 12 mois et plus
+            budgetTier:
+                low: Budget trop faible
+                good: Bon budget
+                great: Très bon budget
+            removeArea: 'Retirer %area%'
+            unsaved: Le projet logement n'est pas enregistré. Quitter la page quand même ?
+        previous:
+            title: '{1}1 demande précédente|]1,Inf[%count% demandes précédentes'
+            showMore: 'Voir %count% de plus'
+        recallModal:
+            title: Planifier le rappel
+            subtitle: Quand doit-on recontacter ce lead ?
+            skip: Passer
+        qualify:
+            title: Qualifier le lead
+            subtitle: Première prise en charge, renseigne la qualité du lead avant de continuer.
+            done: Terminé
+        leadQuality:
+            internal: Qualification interne, jamais partagée avec le client.
+            ratingLabel: Note
+            channelLabel: Recontacter par
+            channel:
+                phone: Téléphone
+                email: Email
+                sms: SMS
+                whatsapp: WhatsApp
+                other: Autre
+            starLabel: '{1}1 étoile|]1,Inf[%count% étoiles'
+            notePlaceholder: Ajouter une note de qualification (facultatif)
+            unsaved: Ta note de qualification n'est pas enregistrée. Quitter la page quand même ?
+        notes:
+            title: Fil de suivi
+            filter:
+                all: Tout
+                notes: Notes
+                events: Activité
+            showMore: 'Afficher %count% de plus'
+            internal: Notes internes, visibles uniquement par l'équipe.
+            enterHint: Entrée pour envoyer
+            unsaved: Ta note de suivi n'est pas envoyée. Quitter la page quand même ?
+            placeholder: Ajouter une note de suivi...
+            add: Ajouter
+            edit: Modifier
+            delete: Supprimer
+            save: Enregistrer
+            cancel: Annuler
+            empty: Aucune note pour le moment
+            emptyHint: Ajoute la première note pour garder une trace des échanges avec ce contact.
+        filter:
+            all: Tous
         button:
             loadMore: Voir plus
             loading: Chargement...
+        card:
+            status:
+                new: À traiter
+                in_progress: En cours
+                to_recall: À recontacter
+                converted: Convertie
+                unqualified: Non qualifiée
+                closed: Fermée
+            field:
+                email: Email
+                phone: Tél.
+                language: Langue
+            help: 'Demande :'
+            created: Reçue le
+            statusUpdated: Statut mis à jour
+            recallAtText: Le %date% à %time%
+            treatedBy: Traité par
+            updatedBy: Mis à jour par
+            viewMore: Voir plus
+            message:
+                showMore: Voir plus
+            timer:
+                title: 'Objectif : répondre sous 30 minutes'
+                overdue: Délai dépassé
+            lang:
+                fr: Français
+                en: Anglais
     sidebar:
         label: Navigation principale
         section:
-            piloting: Pilotage
+            business: Métier
+            admin: Admin
             data: Données
-            site: Site public
         nav:
             label: Sections de l'administration
             requests: Demandes
             calls: Appels
-            viewSite: Voir le site
+            contactsBadge: '{0}Aucune demande à traiter|{1}1 demande à traiter|]1,Inf[%count% demandes à traiter'
             comingSoon: Bientôt
     dashboard:
         title: Tableau de bord
         subtitle: Voici votre activité du jour.
+        responseTime:
+            title: Prise en charge des demandes
+            subtitle: Premières réponses aux demandes de contact des 30 derniers jours.
+            avg: Temps moyen
+            withinSla: Sous 30 min
+            treated: Demandes traitées
+            minutes: '%minutes% min'
+            hours: '%hours% h %minutes%'
         kpi:
             callsLast7d: Appels reçus
             contactsLast7d: Demandes de contact

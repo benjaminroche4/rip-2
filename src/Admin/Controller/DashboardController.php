@@ -9,9 +9,11 @@ use App\Admin\Repository\AdminUserRepository;
 use App\Admin\Repository\CallRepository;
 use App\Admin\Service\AdminDateFormatter;
 use App\Admin\Service\AdminKpiBuilder;
+use App\Admin\Service\ContactPdfRenderer;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -180,8 +182,25 @@ final class DashboardController extends AbstractController
             ),
         ];
 
+        // First-response SLA stats over the last 30 days. avgLabel is
+        // preformatted here ("12 min" / "1 h 05") so the template stays dumb.
+        $responseStats = $this->contactRepository->responseTimeStats($today->modify('-30 days'));
+        $avgLabel = null;
+        if (null !== $responseStats['avgMinutes']) {
+            $avgMinutes = (int) round($responseStats['avgMinutes']);
+            $avgLabel = $avgMinutes < 60
+                ? $this->translator->trans('admin.dashboard.responseTime.minutes', ['%minutes%' => $avgMinutes])
+                : $this->translator->trans('admin.dashboard.responseTime.hours', [
+                    '%hours%' => intdiv($avgMinutes, 60),
+                    '%minutes%' => str_pad((string) ($avgMinutes % 60), 2, '0', STR_PAD_LEFT),
+                ]);
+        }
+
         return $this->render('admin/dashboard/index.html.twig', [
             'adminPrefix' => $adminPrefix,
+            'responseTimeAvgLabel' => $avgLabel,
+            'responseTimeSlaRate' => null !== $responseStats['withinSlaRate'] ? (int) round($responseStats['withinSlaRate'] * 100) : null,
+            'responseTimeTreatedCount' => $responseStats['treatedCount'],
             'thisYearLeads' => $thisYearLeads,
             'thisYearLabel' => $today->format('Y'),
             'chartLabels' => $chartLabels,
@@ -262,6 +281,56 @@ final class DashboardController extends AbstractController
         return $this->render('admin/contacts/index.html.twig', [
             'adminPrefix' => $adminPrefix,
         ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/contacts/{reference}',
+            'en' => '/contacts/{reference}',
+        ],
+        name: 'contact_show',
+        methods: ['GET'],
+        requirements: ['reference' => 'CT-\d{6}'],
+    )]
+    public function showContact(string $adminPrefix, string $reference): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        $contact = $this->contactRepository->findOneItemByReference($reference)
+            ?? throw $this->createNotFoundException();
+
+        return $this->render('admin/contacts/show.html.twig', [
+            'adminPrefix' => $adminPrefix,
+            'contact' => $contact,
+            'adjacent' => $this->contactRepository->adjacentReferences($contact->id),
+            'previousRequests' => $this->contactRepository->listOtherByEmail($contact->email, $contact->id),
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/contacts/{reference}/pdf',
+            'en' => '/contacts/{reference}/pdf',
+        ],
+        name: 'contact_pdf',
+        methods: ['GET'],
+        requirements: ['reference' => 'CT-\d{6}'],
+    )]
+    public function contactPdf(string $adminPrefix, string $reference, ContactPdfRenderer $renderer): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        $contact = $this->contactRepository->findOneItemByReference($reference)
+            ?? throw $this->createNotFoundException();
+
+        $response = new Response($renderer->render($contact));
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $renderer->filename($contact),
+        ));
+
+        return $response;
     }
 
     /**

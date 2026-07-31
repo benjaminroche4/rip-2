@@ -38,9 +38,9 @@ final class ContactsAccessTest extends WebTestCase
         $em->createQuery('DELETE FROM '.User::class.' u WHERE u.email IN (:emails)')
             ->setParameter('emails', [self::USER_EMAIL, self::ADMIN_EMAIL])
             ->execute();
-        $em->createQuery('DELETE FROM '.Contact::class.' c WHERE c.email = :email')
-            ->setParameter('email', 'contacts-test-lead@example.com')
-            ->execute();
+        // Full purge: the list sorts untreated-oldest first, so a leftover
+        // contact from another test would displace our fixture off card #1.
+        $em->createQuery('DELETE FROM '.Contact::class)->execute();
 
         /** @var UserPasswordHasherInterface $hasher */
         $hasher = $container->get('security.user_password_hasher');
@@ -65,6 +65,7 @@ final class ContactsAccessTest extends WebTestCase
         $admin->setPassword($hasher->hashPassword($admin, self::PASSWORD));
 
         $contact = (new Contact())
+            ->setReference('CT-424242')
             ->setFirstName('Léa')
             ->setLastName('Dupont')
             ->setEmail('contacts-test-lead@example.com')
@@ -135,6 +136,36 @@ final class ContactsAccessTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('aside a[href$="/admin/contacts"]');
+    }
+
+    public function testAdminSeesContactDetailPage(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Léa Dupont');
+        self::assertSelectorExists('[data-testid="contact-detail"]');
+        self::assertSelectorTextContains('[data-testid="contact-detail"]', 'CT-424242');
+        self::assertSelectorTextContains('[data-testid="contact-detail"]', 'Acme Corp');
+    }
+
+    public function testUnknownReferenceReturns404(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-000001');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testCardLinksToDetailPage(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix));
+
+        $link = $crawler->filter('[data-testid="contact-card-details"]')->first();
+        self::assertGreaterThan(0, $link->count());
+        self::assertStringContainsString('/admin/contacts/CT-424242', (string) $link->attr('href'));
     }
 
     private function loginAs(string $email): void

@@ -40,6 +40,19 @@ final class PhoneExtensionTest extends TestCase
         self::assertSame('not-a-phone', $this->extension->format('not-a-phone'));
     }
 
+    public function testItResolvesCountryCodeFromInternationalNumber(): void
+    {
+        self::assertSame('fr', $this->extension->countryCode('+33612345678'));
+        self::assertSame('ch', $this->extension->countryCode('+41791234567'));
+    }
+
+    public function testItReturnsNullCountryForUnparseableOrEmptyNumber(): void
+    {
+        self::assertNull($this->extension->countryCode(null));
+        self::assertNull($this->extension->countryCode(''));
+        self::assertNull($this->extension->countryCode('not-a-phone'));
+    }
+
     public function testItReturnsOriginalValueForUnknownButParseableNumber(): void
     {
         // Parses but is not a valid phone number; the filter must not crash.

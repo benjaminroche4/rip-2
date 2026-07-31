@@ -1,0 +1,285 @@
+{# Bilingual PDF for a contact submission, safe to forward to partners.
+   Rendered through DocRaptor (Chrome headless). Same visual language as
+   pdf/document_request.html.twig: nested gray→white cards, muted #525252
+   labels, centered brand chrome, colored status pill.
+
+   Deliberately excluded (internal only): follow-up notes thread, lead
+   rating/qualification note, IP address. #}
+{% set fr = locale == 'fr' %}
+{% set t = {
+    title: fr ? 'Demande de contact' : 'Contact request',
+    receivedOn: fr ? 'Reçue le' : 'Received on',
+    summary: fr ? 'Coordonnées' : 'Contact details',
+    nameLabel: fr ? 'Nom' : 'Name',
+    emailLabel: 'Email',
+    phoneLabel: fr ? 'Téléphone' : 'Phone',
+    langLabel: fr ? 'Langue' : 'Language',
+    langValue: contact.lang == 'fr' ? (fr ? 'Français' : 'French') : (fr ? 'Anglais' : 'English'),
+    companyLabel: fr ? 'Société' : 'Company',
+    offerLabel: fr ? 'Formule choisie' : 'Chosen package',
+    requestLabel: fr ? 'Demande' : 'Request',
+    projectLabel: fr ? 'Projet logement' : 'Housing project',
+    projectBudget: fr ? 'Budget mensuel' : 'Monthly budget',
+    projectAreas: fr ? 'Quartiers visés' : 'Target areas',
+    projectMoveIn: fr ? 'Emménagement souhaité' : 'Desired move-in',
+    projectType: fr ? 'Type de bien' : 'Property type',
+    projectStay: fr ? "Durée d'installation" : 'Length of stay',
+    messageLabel: fr ? 'Message' : 'Message',
+    referenceLabel: fr ? 'Référence' : 'Reference',
+    followUp: fr ? 'Suivi' : 'Follow-up',
+    handledBy: fr ? 'Prise en charge par' : 'Handled by',
+    firstTreatedAt: fr ? 'Première prise en charge' : 'First handled on',
+    statusChangedAt: fr ? 'Dernier changement de statut' : 'Last status change',
+    status: {
+        new: fr ? 'À traiter' : 'To handle',
+        in_progress: fr ? 'En cours' : 'In progress',
+        to_recall: fr ? 'À recontacter' : 'To call back',
+        converted: fr ? 'Convertie' : 'Converted',
+        unqualified: fr ? 'Non qualifiée' : 'Unqualified',
+        closed: fr ? 'Fermée' : 'Closed',
+    },
+    footerTag: fr ? 'Agence de Relocation pour Particuliers et Professionnels' : 'Relocation Agency for Individuals and Businesses',
+    footerAddress: '155 Rue du Faubourg Saint-Denis, 75010 Paris — France',
+} %}
+{% set statusStyles = {
+    new: 'background-color:#EFF6FF;border-color:#BFDBFE;color:#1d4ed8',
+    in_progress: 'background-color:#FFFBEB;border-color:#FDE68A;color:#b45309',
+    to_recall: 'background-color:#FAF5FF;border-color:#E9D5FF;color:#7e22ce',
+    converted: 'background-color:#EFFDF4;border-color:#BBF7D0;color:#15803d',
+    unqualified: 'background-color:#F7F7F7;border-color:#E5E5E5;color:#525252',
+    closed: 'background-color:#F7F7F7;border-color:#E5E5E5;color:#374151',
+} %}
+<!doctype html>
+<html lang="{{ locale }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ t.title }} — {{ contact.reference }}</title>
+    <style>
+        @page { margin: 18mm 16mm 22mm 16mm; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+            color: #1f2937;
+            font-size: 10.5pt;
+            line-height: 1.55;
+            margin: 0;
+            padding: 0;
+        }
+        a { color: #71172e; }
+        h1, h2, h3 { font-weight: 600; color: #111827; }
+        .muted { color: #525252; }
+        .narrow { max-width: 480pt; margin: 0 auto; }
+
+        .gray-card {
+            background-color: #F7F7F7;
+            border: 1px solid #E5E5E5;
+            border-radius: 12pt;
+            padding: 10pt;
+            margin-bottom: 14pt;
+            page-break-inside: avoid;
+        }
+        .white-inner {
+            background-color: #ffffff;
+            border-radius: 8pt;
+            padding: 14pt 18pt;
+        }
+        .section-label { margin: 0 0 8pt; font-size: 11pt; color: #111827; }
+
+        .field-table { display: table; width: 100%; border-collapse: collapse; }
+        .field-tr { display: table-row; }
+        .field-th {
+            display: table-cell;
+            width: 38%;
+            padding: 4pt 12pt 4pt 0;
+            font-size: 9pt;
+            color: #525252;
+            vertical-align: top;
+        }
+        .field-td {
+            display: table-cell;
+            padding: 4pt 0;
+            font-size: 10pt;
+            font-weight: 600;
+            color: #111827;
+            vertical-align: top;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 2pt 12pt;
+            border-radius: 999pt;
+            font-weight: 600;
+            font-size: 9pt;
+            border: 1px solid;
+        }
+        hr.sep { width: 100%; border: none; border-top: 2px solid #eaeaea; margin: 10pt 0; }
+        .footer-brand { margin: 14pt 0 0; font-size: 9pt; text-align: center; color: #525252; }
+        .footer-address { margin: 4pt 0 0; font-size: 9pt; text-align: center; color: #9ca3af; }
+        .page-footer {
+            position: fixed;
+            bottom: -14mm;
+            left: 0; right: 0;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 7.5pt;
+            line-height: 1.5;
+        }
+        .page-footer .brand { color: #71172e; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="narrow">
+        {# ---- Centered logo (mirrors email header) ---- #}
+        <div style="text-align:center">
+            {% if logoDataUri %}
+                <img src="{{ logoDataUri }}" alt="Relocation in Paris" width="166" height="38" style="display:block;border:none;outline:none;text-decoration:none;height:38px;width:166px;margin:0 auto">
+            {% else %}
+                <span style="font-size:15pt;font-weight:700;color:#71172e;letter-spacing:0.6pt">Relocation in Paris</span>
+            {% endif %}
+        </div>
+
+        <h1 style="font-size:22pt;line-height:1.3;text-align:center;margin:14pt 0 0">{{ t.title }}</h1>
+        <p style="margin:8pt 0 0;font-size:9pt;text-align:center;color:#9ca3af">
+            {{ t.referenceLabel }} {{ contact.reference }} &middot;
+            {{ t.receivedOn }} {{ contact.createdAt|format_datetime(pattern='dd MMMM yyyy, HH:mm', locale=locale) }}
+        </p>
+        <p style="margin:10pt 0 18pt;text-align:center">
+            <span class="status-pill" style="{{ statusStyles[contact.status.value] }}">{{ t.status[contact.status.value] }}</span>
+        </p>
+
+        {# ---- Contact details (gray outer → white inner) ---- #}
+        <div class="gray-card">
+            <p class="section-label"><strong>{{ t.summary }}</strong></p>
+            <div class="white-inner">
+                <div class="field-table">
+                    <div class="field-tr">
+                        <span class="field-th">{{ t.nameLabel }}</span>
+                        <span class="field-td">{{ contact.fullName ? contact.fullName|title : '-' }}</span>
+                    </div>
+                    <div class="field-tr">
+                        <span class="field-th">{{ t.emailLabel }}</span>
+                        <span class="field-td">{{ contact.email }}</span>
+                    </div>
+                    <div class="field-tr">
+                        <span class="field-th">{{ t.phoneLabel }}</span>
+                        <span class="field-td">{{ contact.phoneNumber ? contact.phoneNumber|phone_format : '-' }}</span>
+                    </div>
+                    <div class="field-tr">
+                        <span class="field-th">{{ t.langLabel }}</span>
+                        <span class="field-td">{{ t.langValue }}</span>
+                    </div>
+                    <div class="field-tr">
+                        <span class="field-th">{{ t.companyLabel }}</span>
+                        <span class="field-td">{{ contact.company ?: '-' }}</span>
+                    </div>
+                    {% if offerLabel %}
+                        <div class="field-tr">
+                            <span class="field-th">{{ t.offerLabel }}</span>
+                            <span class="field-td">{{ offerLabel }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# ---- Request + message ---- #}
+        <div class="gray-card">
+            <p class="section-label"><strong>{{ t.requestLabel }}</strong></p>
+            <div class="white-inner">
+                <p style="margin:0;padding:0;font-size:10.5pt"><strong>{{ helpTypeLabel }}</strong></p>
+                {% if contact.message %}
+                    <hr class="sep">
+                    <p class="muted" style="margin:0;padding:0 0 6pt;font-size:9pt">{{ t.messageLabel }} :</p>
+                    <p style="margin:0;padding:2pt 0;font-size:10pt;line-height:1.65;color:#374151;white-space:pre-line">{{ contact.message }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ---- Housing project (only when the admin filled something) ---- #}
+        {% if contact.projectBudget or contact.projectAreas or contact.projectMoveInAt or contact.projectPropertyType or contact.projectStayDuration %}
+            <div class="gray-card">
+                <p class="section-label"><strong>{{ t.projectLabel }}</strong></p>
+                <div class="white-inner">
+                    <div class="field-table">
+                        {% if contact.projectBudget %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.projectBudget }}</span>
+                                <span class="field-td">{{ contact.projectBudget|number_format(0, ',', ' ') }} € / {{ fr ? 'mois' : 'month' }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.projectAreas %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.projectAreas }}</span>
+                                <span class="field-td">{{ contact.projectAreas }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.projectMoveInAt %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.projectMoveIn }}</span>
+                                <span class="field-td">{{ contact.projectMoveInAt|format_date(pattern='dd MMMM yyyy', locale=locale) }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.projectPropertyType %}
+                            {# CSV of enum values translates; legacy free text prints as-is. #}
+                            {% set typeLabels = [] %}
+                            {% for value in contact.projectPropertyType|split(',')|filter(v => v != '') %}
+                                {% set typeKey = 'listProperty.form.propertyType.choice.' ~ value %}
+                                {% set typeLabel = typeKey|trans([], 'messages', locale) %}
+                                {% set typeLabels = typeLabels|merge([typeLabel != typeKey ? typeLabel : value]) %}
+                            {% endfor %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.projectType }}</span>
+                                <span class="field-td">{{ typeLabels|join(', ') }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.projectStayDuration %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.projectStay }}</span>
+                                <span class="field-td">{{ contact.projectStayDuration.labelKey|trans([], 'messages', locale) }} ({{ contact.projectStayDuration.hintKey|trans([], 'messages', locale) }})</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# ---- Follow-up (only once the request was handled) ---- #}
+        {% if contact.statusChangedBy or contact.firstTreatedAt %}
+            <div class="gray-card">
+                <p class="section-label"><strong>{{ t.followUp }}</strong></p>
+                <div class="white-inner">
+                    <div class="field-table">
+                        {% if contact.statusChangedBy %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.handledBy }}</span>
+                                <span class="field-td">{{ contact.statusChangedBy|title }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.firstTreatedAt %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.firstTreatedAt }}</span>
+                                <span class="field-td">{{ contact.firstTreatedAt|format_datetime(pattern='dd MMMM yyyy, HH:mm', locale=locale) }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.statusChangedAt %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.statusChangedAt }}</span>
+                                <span class="field-td">{{ contact.statusChangedAt|format_datetime(pattern='dd MMMM yyyy, HH:mm', locale=locale) }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# ---- Bottom signature, centered like email footer ---- #}
+        <hr class="sep" style="margin-top:20pt">
+        <p class="footer-brand">
+            <strong style="color:#71172e">Relocation in Paris</strong> &middot; {{ t.footerTag }}
+        </p>
+        <p class="footer-address">{{ t.footerAddress }}</p>
+    </div>
+
+    <div class="page-footer">
+        <span class="brand">Relocation in Paris</span> &middot; {{ t.title }} {{ contact.reference }}
+    </div>
+</body>
+</html>

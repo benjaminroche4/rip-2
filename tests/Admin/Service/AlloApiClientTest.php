@@ -174,7 +174,7 @@ final class AlloApiClientTest extends TestCase
             json_encode([
                 'data' => [
                     'results' => $rows,
-                    'metadata' => ['total_pages' => $totalPages, 'current_page' => 0],
+                    'metadata' => ['pagination' => ['total_pages' => $totalPages, 'current_page' => 0]],
                 ],
             ], JSON_THROW_ON_ERROR),
             [

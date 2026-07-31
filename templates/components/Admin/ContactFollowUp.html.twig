@@ -1,0 +1,131 @@
+{% macro assigneeChips(contact, assignees) %}
+    <div class="flex flex-wrap items-center gap-2">
+        {% if contact and contact.assigneeName %}
+            <span class="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pr-1.5 pl-1">
+                <twig:Avatar filename="{{ contact.assigneeAvatar }}" name="{{ contact.assigneeName }}" size="6" />
+                <span class="text-sm font-medium text-gray-900">{{ contact.assigneeName|title }}</span>
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assign"
+                    data-live-id-param="0"
+                    class="flex size-5 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-100 hover:text-gray-900"
+                    aria-label="{{ 'admin.contacts.followUp.assigneeNone'|trans }}"
+                >
+                    {{ ux_icon('lucide:x', {class: 'size-3', 'aria-hidden': 'true'}) }}
+                </button>
+            </span>
+        {% else %}
+            {% for assignee in assignees %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assign"
+                    data-live-id-param="{{ assignee.id }}"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-gray-300 py-1 pr-3 pl-1 text-sm text-gray-500 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
+                >
+                    <twig:Avatar filename="{{ assignee.avatar }}" name="{{ assignee.name }}" size="6" class="opacity-70" />
+                    {{ assignee.name|title }}
+                </button>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro recallField(contact, recallAtValue) %}
+    <div class="flex flex-wrap items-center gap-3">
+        {# Autosave : l'input enregistre dès que la date est complétée. #}
+        <input
+            type="datetime-local"
+            min="{{ 'now'|date('Y-m-d\\TH:i') }}"
+            data-model="norender|recallAt"
+            data-action="change->live#action keydown.enter->live#action:prevent"
+            data-live-action-param="saveRecall"
+            value="{{ recallAtValue }}"
+            aria-label="{{ 'admin.contacts.followUp.recallLabel'|trans }}"
+            class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+            data-testid="recall-input"
+        >
+        {% if contact and contact.recallAt %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="clearRecall"
+                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                data-testid="recall-clear"
+            >
+                {{ 'admin.contacts.followUp.recallClear'|trans }}
+            </button>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro recallLabel(contact) %}
+    <p class="flex items-center gap-2 text-gray-600">
+        {{ 'admin.contacts.followUp.recallLabel'|trans }}
+        {% if contact and contact.recallAt and contact.recallAt < date() %}
+            <span class="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+                {{ ux_icon('lucide:alarm-clock-off', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.contacts.followUp.recallOverdue'|trans }}
+            </span>
+        {% endif %}
+    </p>
+{% endmacro %}
+
+{# Rendu sans chrome propre : le shell de la card "Suivi" vit dans
+   show.html.twig et regroupe ce composant avec le fil de notes. #}
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="contact-follow-up">
+    {% set contact = this.contact %}
+    {% set assignees = this.assignees %}
+    {% set showRecall = contact and contact.status.value == 'to_recall' %}
+            <div class="flex items-center justify-between gap-4 p-3">
+                <h2 class="font-medium text-gray-900">{{ 'admin.contacts.followUp.title'|trans }}</h2>
+                {% if contact %}
+                    <p class="text-xs font-medium text-gray-400 tabular-nums">{{ contact.reference }}</p>
+                {% endif %}
+            </div>
+
+            <div class="rounded-xl bg-white px-5 py-4 text-sm">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+                    {{ _self.assigneeChips(contact, assignees) }}
+                </div>
+                {# Chronologie du lead : reçue → prise en charge → dernier
+                   changement → rappel planifié (ce dernier seulement quand le
+                   statut est "À recontacter"). #}
+                <ol class="relative ml-1.5 space-y-4 border-l border-gray-950/10 pl-5">
+                    <li class="animate-slide-in relative">
+                        <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-gray-300" aria-hidden="true"></span>
+                        <p class="text-gray-600">{{ 'admin.contacts.card.created'|trans }}</p>
+                        <p class="font-medium text-gray-900 tabular-nums">
+                            {{ contact ? contact.createdAt|format_datetime('medium', 'short') : '-' }}
+                            {% if contact and contact.ip %}
+                                <span class="ml-1 font-mono text-[11px] font-normal text-gray-400">({{ contact.ip }})</span>
+                            {% endif %}
+                        </p>
+                    </li>
+                    {% if contact and contact.firstTreatedAt %}
+                        <li class="animate-slide-in relative">
+                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-blue-400" aria-hidden="true"></span>
+                            <p class="text-gray-600">{{ 'admin.contacts.show.field.firstTreatedAt'|trans }}</p>
+                            <p class="font-medium text-gray-900 tabular-nums">{{ contact.firstTreatedAt|format_datetime('medium', 'short') }}</p>
+                        </li>
+                    {% endif %}
+                    {# Redondant tant qu'égal à la première prise en charge. #}
+                    {% if contact and contact.firstTreatedAt and contact.statusChangedAt and contact.statusChangedAt > contact.firstTreatedAt %}
+                        <li class="animate-slide-in relative">
+                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-amber-400" aria-hidden="true"></span>
+                            <p class="text-gray-600">{{ 'admin.contacts.show.field.statusChangedAt'|trans }}</p>
+                            <p class="font-medium text-gray-900 tabular-nums">{{ contact.statusChangedAt|format_datetime('medium', 'short') }}</p>
+                        </li>
+                    {% endif %}
+                    {% if showRecall %}
+                        <li class="animate-slide-in relative">
+                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white {{ contact.recallAt and contact.recallAt < date() ? 'bg-red-400' : 'bg-purple-400' }}" aria-hidden="true"></span>
+                            {{ _self.recallLabel(contact) }}
+                            <div class="mt-1.5">{{ _self.recallField(contact, this.recallAt) }}</div>
+                        </li>
+                    {% endif %}
+                </ol>
+            </div>
+</div>

@@ -1,3 +1,9 @@
+date:
+    todayAt: Today at %time%
+    yesterdayAt: Yesterday at %time%
+    daysAgo: '{1} 1 day ago|]1,Inf] %count% days ago'
+    today: Today
+    inDays: '{1} In 1 day|]1,Inf] In %count% days'
 contact:
     title: Contact us
     subTitle: Let's talk about your move to Paris
@@ -1797,25 +1803,179 @@ admin:
         skipToContent: Skip to main content
     contacts:
         title: Contact requests
-        subtitle: Contact form submissions, newest first.
         empty: No contact requests yet.
+        emptyNew: No new requests to handle.
+        searchPlaceholder: Search (name, email, reference)
+        loading: Loading requests
+        show:
+            backToList: Back to requests
+            exportPdf: Export as PDF
+            closureLabel: Closure reason
+            closurePlaceholder: Pick a reason
+            closedTitle: Request closed
+            unqualifiedTitle: Request unqualified
+            convertedTitle: Request converted to client
+            terminalSince: since %date%
+            prev: Previous request
+            next: Next request
+            field:
+                company: Company
+                offer: Chosen package
+                ip: IP address
+                reference: Reference
+                statusChangedAt: Last status change
+                firstTreatedAt: First handled at
+                leadRating: Lead quality
+                leadNote: Qualification note
+        followUp:
+            title: Follow-up
+            assignee: Followed by
+            assigneeNone: Nobody
+            recallLabel: Recall on
+            recallOverdue: Recall overdue
+            recallClear: Clear
+        closure:
+            budget_unrealistic: Unrealistic budget
+            unreachable: Unreachable
+            profile_mismatch: Profile not a fit for our services
+            solved_alone: Solved on their own
+            out_of_area: Out of area
+            other: Other
+        nextStep:
+            label: Next step
+            choice:
+                call: Call the prospect
+                video_call: Video call planned
+                visit: Schedule a viewing
+                proposal: Send a proposal
+                awaiting_client: Awaiting client reply
+                prepare_file: Prepare the file
+                other: Other
+        feed:
+            statusChanged: 'Status changed to'
+            reasonSet: 'Reason:'
+        project:
+            title: Housing project
+            subtitle: Filled during qualification, to compare and filter requests.
+            budget: Monthly budget
+            budgetUnit: €/month
+            areas: Target areas
+            areasPlaceholder: 11th, 18th, 20th...
+            moveIn: Desired move-in
+            propertyType: Property type
+            budgetTier:
+                low: Budget too low
+                good: Good budget
+                great: Great budget
+            removeArea: 'Remove %area%'
+            stayDuration:
+                label: Intended length of stay
+                choice:
+                    short: Short term
+                    medium: Medium term
+                    long: Long term
+                hint:
+                    short: 1 to 3 months
+                    medium: 3 to 12 months
+                    long: 12 months and more
+            propertyTypePlaceholder: Furnished 1-bedroom, flatshare...
+            unsaved: The housing project is not saved. Leave the page anyway?
+        previous:
+            title: '{1}1 previous request|]1,Inf[%count% previous requests'
+            showMore: 'Show %count% more'
+        recallModal:
+            title: Plan the recall
+            subtitle: When should this lead be called back?
+            skip: Skip
+        qualify:
+            title: Qualify the lead
+            subtitle: First treatment, fill in the lead quality before moving on.
+            done: Done
+        leadQuality:
+            internal: Internal qualification, never shared with the client.
+            ratingLabel: Rating
+            channelLabel: Recontact via
+            channel:
+                phone: Phone
+                email: Email
+                sms: SMS
+                whatsapp: WhatsApp
+                other: Other
+            starLabel: '{1}1 star|]1,Inf[%count% stars'
+            notePlaceholder: Add a qualification note (optional)
+            unsaved: Your qualification note is not saved. Leave the page anyway?
+        notes:
+            title: Follow-up thread
+            filter:
+                all: All
+                notes: Notes
+                events: Activity
+            showMore: 'Show %count% more'
+            internal: Internal notes, only visible to the team.
+            enterHint: Press Enter to send
+            unsaved: Your follow-up note is not sent. Leave the page anyway?
+            placeholder: Add a follow-up note...
+            add: Add
+            edit: Edit
+            delete: Delete
+            save: Save
+            cancel: Cancel
+            empty: No notes yet
+            emptyHint: Add the first note to keep track of your exchanges with this contact.
+        filter:
+            all: All
         button:
             loadMore: Load more
             loading: Loading...
+        card:
+            status:
+                new: To handle
+                in_progress: In progress
+                to_recall: To call back
+                converted: Converted
+                unqualified: Unqualified
+                closed: Closed
+            field:
+                email: Email
+                phone: Tel.
+                language: Language
+            help: 'Help:'
+            created: Created
+            statusUpdated: Status updated
+            recallAtText: On %date% at %time%
+            treatedBy: Handled by
+            updatedBy: Updated by
+            viewMore: View more
+            message:
+                showMore: Show more
+            timer:
+                title: 'Goal: reply within 30 minutes'
+                overdue: Overdue
+            lang:
+                fr: French
+                en: English
     sidebar:
         label: Main navigation
         section:
-            piloting: Piloting
+            business: Business
+            admin: Admin
             data: Data
-            site: Public site
         nav:
             label: Admin sections
             requests: Requests
             calls: Calls
-            viewSite: View site
+            contactsBadge: '{0}No requests to handle|{1}1 request to handle|]1,Inf[%count% requests to handle'
             comingSoon: Soon
     dashboard:
         title: Dashboard
+        responseTime:
+            title: Request handling
+            subtitle: First responses to contact requests over the last 30 days.
+            avg: Average time
+            withinSla: Under 30 min
+            treated: Requests handled
+            minutes: '%minutes% min'
+            hours: '%hours% h %minutes%'
         subtitle: Here's your activity today.
         kpi:
             callsLast7d: Calls received

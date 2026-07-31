@@ -14,7 +14,32 @@ final class PhoneExtension extends AbstractExtension
     {
         return [
             new TwigFilter('phone_format', [$this, 'format']),
+            new TwigFilter('phone_country', [$this, 'countryCode']),
         ];
+    }
+
+    /**
+     * Lowercase ISO 3166-1 alpha-2 region for an international number
+     * ("+33612345678" → "fr"), or null when it can't be determined. Used to
+     * pick a circle-flags icon next to phone numbers.
+     */
+    public function countryCode(?string $phoneNumber): ?string
+    {
+        if (null === $phoneNumber || '' === $phoneNumber) {
+            return null;
+        }
+
+        $util = PhoneNumberUtil::getInstance();
+
+        try {
+            $parsed = $util->parse($phoneNumber, null);
+        } catch (NumberParseException) {
+            return null;
+        }
+
+        $region = $util->getRegionCodeForNumber($parsed);
+
+        return null !== $region ? strtolower($region) : null;
     }
 
     public function format(?string $phoneNumber, string $format = 'international'): string

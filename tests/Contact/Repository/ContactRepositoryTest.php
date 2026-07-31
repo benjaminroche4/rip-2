@@ -2,6 +2,7 @@
 
 namespace App\Tests\Contact\Repository;
 
+use App\Contact\Domain\ContactStatus;
 use App\Contact\Entity\Contact;
 use App\Contact\Repository\ContactRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -143,7 +144,177 @@ final class ContactRepositoryTest extends KernelTestCase
         self::assertSame(1, $byWeekday[7]); // Sunday
     }
 
-    private function persistContact(\DateTimeImmutable $createdAt): void
+    public function testListFirstSearchesNameEmailAndReference(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+        $lea = $this->persistContact($now)->setFirstName('Léa')->setLastName('Dupont')->setReference('CT-111222');
+        $this->persistContact($now->modify('-1 hour'))->setReference('CT-333444');
+        $this->em->flush();
+
+        self::assertCount(1, $this->repository->listFirst(10, null, 'dupont'));
+        self::assertCount(1, $this->repository->listFirst(10, null, 'CT-111'));
+        self::assertSame($lea->getId(), $this->repository->listFirst(10, null, 'léa dupont')[0]->id);
+        self::assertCount(0, $this->repository->listFirst(10, null, 'introuvable'));
+        self::assertSame(1, $this->repository->countFiltered(null, 'dupont'));
+        self::assertSame(2, $this->repository->countFiltered(null, null));
+    }
+
+    public function testAdjacentReferencesFollowTheListOrdering(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+        $oldest = $this->persistContact($now->modify('-2 hours'))->setReference('CT-000003');
+        $middle = $this->persistContact($now->modify('-1 hour'))->setReference('CT-000002');
+        $newest = $this->persistContact($now)->setReference('CT-000001');
+        $this->em->flush();
+
+        $adjacent = $this->repository->adjacentReferences((int) $middle->getId());
+        self::assertSame('CT-000001', $adjacent['newer']);
+        self::assertSame('CT-000003', $adjacent['older']);
+
+        self::assertNull($this->repository->adjacentReferences((int) $newest->getId())['newer']);
+        self::assertNull($this->repository->adjacentReferences((int) $oldest->getId())['older']);
+    }
+
+    public function testStatusAndClosureReasonChangesAreRecordedAsEvents(): void
+    {
+        $contact = $this->persistContact(new \DateTimeImmutable('today 10:00'));
+        $this->em->flush();
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class);
+
+        $this->repository->updateStatus((int) $contact->getId(), ContactStatus::InProgress, 'Julien Moreau', null);
+        $this->repository->saveClosureReason((int) $contact->getId(), \App\Contact\Domain\ClosureReason::Unreachable, 'Julien Moreau', null);
+        // Saving the same reason twice does not duplicate the event.
+        $this->repository->saveClosureReason((int) $contact->getId(), \App\Contact\Domain\ClosureReason::Unreachable, 'Julien Moreau', null);
+
+        $items = $events->listForContact((int) $contact->getId());
+        self::assertCount(2, $items);
+        self::assertSame(\App\Contact\Domain\ClosureReason::Unreachable, $items[0]->closureReason);
+        self::assertNull($items[0]->status);
+        self::assertSame(ContactStatus::InProgress, $items[1]->status);
+        self::assertSame('Julien Moreau', $items[1]->authorName);
+    }
+
+    public function testAdjacentReferencesStayWithinTheSameStatus(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+        $oldConverted = $this->persistContact($now->modify('-3 hours'))->setReference('CT-000004')->setStatus(ContactStatus::Converted);
+        $this->persistContact($now->modify('-2 hours'))->setReference('CT-000003'); // status "new", ignored
+        $current = $this->persistContact($now->modify('-1 hour'))->setReference('CT-000002')->setStatus(ContactStatus::Converted);
+        $this->persistContact($now)->setReference('CT-000001'); // status "new", ignored
+        $this->em->flush();
+
+        $adjacent = $this->repository->adjacentReferences((int) $current->getId());
+        self::assertNull($adjacent['newer'], 'No newer converted request.');
+        self::assertSame('CT-000004', $adjacent['older']);
+
+        self::assertNull($this->repository->adjacentReferences((int) $oldConverted->getId())['older']);
+    }
+
+    public function testListOtherByEmailFindsSiblingsNewestFirst(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+        $first = $this->persistContact($now->modify('-2 days'))->setEmail('same@example.com');
+        $second = $this->persistContact($now->modify('-1 day'))->setEmail('same@example.com');
+        $current = $this->persistContact($now)->setEmail('same@example.com');
+        $this->persistContact($now)->setEmail('other@example.com');
+        $this->em->flush();
+
+        $others = $this->repository->listOtherByEmail('same@example.com', (int) $current->getId());
+
+        self::assertSame([(int) $second->getId(), (int) $first->getId()], array_map(static fn ($i) => $i->id, $others));
+    }
+
+    public function testCountsByStatusFillsEveryCase(): void
+    {
+        $this->persistContact(new \DateTimeImmutable('today 10:00'));
+        $this->persistContact(new \DateTimeImmutable('today 11:00'));
+        $this->em->flush();
+
+        $counts = $this->repository->countsByStatus();
+
+        self::assertSame(2, $counts['new']);
+        self::assertSame(0, $counts['closed']);
+        self::assertCount(6, $counts);
+    }
+
+    public function testListFirstOrdersNewestFirst(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+
+        $oldNew = $this->persistContact($now->modify('-3 hours'));
+        $freshNew = $this->persistContact($now->modify('-10 minutes'));
+        $recentTreated = $this->persistContact($now->modify('-1 hour'))->setStatus(ContactStatus::InProgress);
+        $oldTreated = $this->persistContact($now->modify('-5 hours'))->setStatus(ContactStatus::Closed);
+        $this->em->flush();
+
+        $ids = array_map(static fn ($item) => $item->id, $this->repository->listFirst(10));
+
+        self::assertSame([
+            $freshNew->getId(),
+            $recentTreated->getId(),
+            $oldNew->getId(),
+            $oldTreated->getId(),
+        ], $ids);
+    }
+
+    public function testUpdateStatusSetsFirstTreatedAtOnlyOnce(): void
+    {
+        $contact = $this->persistContact(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+
+        $this->repository->updateStatus((int) $contact->getId(), ContactStatus::InProgress);
+        $firstTreatedAt = $contact->getFirstTreatedAt();
+        self::assertNotNull($firstTreatedAt);
+
+        $this->repository->updateStatus((int) $contact->getId(), ContactStatus::Closed);
+        self::assertSame($firstTreatedAt, $contact->getFirstTreatedAt());
+    }
+
+    public function testUpdateStatusBackToNewDoesNotSetFirstTreatedAt(): void
+    {
+        $contact = $this->persistContact(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+
+        $this->repository->updateStatus((int) $contact->getId(), ContactStatus::New);
+
+        self::assertNull($contact->getFirstTreatedAt());
+    }
+
+    public function testResponseTimeStatsAveragesTreatedSubmissions(): void
+    {
+        $now = new \DateTimeImmutable('now');
+
+        // Treated in 10 min (within SLA) and 50 min (outside SLA).
+        $this->persistContact($now->modify('-2 hours'))
+            ->setStatus(ContactStatus::InProgress)
+            ->setFirstTreatedAt($now->modify('-2 hours')->modify('+10 minutes'));
+        $this->persistContact($now->modify('-3 hours'))
+            ->setStatus(ContactStatus::Closed)
+            ->setFirstTreatedAt($now->modify('-3 hours')->modify('+50 minutes'));
+        // Untreated: excluded from the stats.
+        $this->persistContact($now->modify('-1 hour'));
+        $this->em->flush();
+
+        $stats = $this->repository->responseTimeStats($now->modify('-30 days'));
+
+        self::assertSame(2, $stats['treatedCount']);
+        self::assertEqualsWithDelta(30.0, $stats['avgMinutes'], 0.1);
+        self::assertEqualsWithDelta(0.5, $stats['withinSlaRate'], 0.001);
+    }
+
+    public function testResponseTimeStatsAreNullWhenNothingTreated(): void
+    {
+        $this->persistContact(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+
+        $stats = $this->repository->responseTimeStats(new \DateTimeImmutable('-30 days'));
+
+        self::assertSame(0, $stats['treatedCount']);
+        self::assertNull($stats['avgMinutes']);
+        self::assertNull($stats['withinSlaRate']);
+    }
+
+    private function persistContact(\DateTimeImmutable $createdAt): Contact
     {
         $contact = (new Contact())
             ->setFirstName('Jane')
@@ -157,5 +328,7 @@ final class ContactRepositoryTest extends KernelTestCase
             ->setCreatedAt($createdAt);
 
         $this->em->persist($contact);
+
+        return $contact;
     }
 }

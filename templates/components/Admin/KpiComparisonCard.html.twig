@@ -23,7 +23,7 @@
 {%- set _barLabelWidth = _hasCurrency ? 'w-24' : 'w-10' -%}
 {%- set _formattedValue = _hasCurrency ? kpi.value|number_format(0, ',', ' ') : kpi.value -%}
 {%- set _formattedPrevious = _hasCurrency ? kpi.previous|number_format(0, ',', ' ') : kpi.previous -%}
-<article {{ attributes.defaults({class: 'rounded-2xl border border-gray-950/5 bg-white p-2'}) }}>
+<article {{ attributes.defaults({class: 'rounded-2xl border border-neutral-200 bg-white p-2'}) }}>
     <div class="space-y-6 rounded-xl bg-linear-to-b p-4 {{ _gradient }}">
         <div>
             <h2 class="text-xl font-semibold tracking-tight text-gray-900">{{ kpi.title }}</h2>

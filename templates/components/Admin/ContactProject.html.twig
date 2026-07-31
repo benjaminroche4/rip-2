@@ -1,0 +1,166 @@
+<div
+    {{ attributes.defaults({
+        'data-controller': 'leave-guard',
+        'data-leave-guard-clean-event-value': 'contact-project:saved',
+        'data-leave-guard-message-value': 'admin.contacts.project.unsaved'|trans,
+        'data-action': 'input->leave-guard#markDirty change->leave-guard#markDirty',
+    }) }}
+    data-testid="contact-project"
+>
+    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+        <details open class="group details-animated rounded-2xl bg-neutral-50 p-2">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
+                <div>
+                    <h2 class="font-medium text-gray-900">{{ 'admin.contacts.project.title'|trans }}</h2>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.project.subtitle'|trans }}</p>
+                </div>
+                {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
+            </summary>
+            <div class="mt-1 flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
+                <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                    <div class="min-w-0 space-y-2">
+                        <div class="flex items-baseline justify-between gap-3">
+                            <label for="project-budget-{{ this.contactId }}" class="block text-gray-600">{{ 'admin.contacts.project.budget'|trans }}</label>
+                            {% if this.budget != '' %}
+                                {% set budgetTier = this.budget <= 1000 ? 'low' : (this.budget <= 2500 ? 'good' : 'great') %}
+                                {% set budgetTierClass = {
+                                    low: 'bg-red-50 text-red-600',
+                                    good: 'bg-green-50 text-green-700',
+                                    great: 'bg-green-100 text-green-800',
+                                }[budgetTier] %}
+                                <span class="truncate rounded-full px-2 py-0.5 text-xs font-medium {{ budgetTierClass }}">{{ ('admin.contacts.project.budgetTier.' ~ budgetTier)|trans }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="relative">
+                            <input
+                                id="project-budget-{{ this.contactId }}"
+                                type="number"
+                                min="0"
+                                step="50"
+                                data-model="norender|budget"
+                                data-action="change->live#action keydown.enter->live#action:prevent"
+                                data-live-action-param="save"
+                                value="{{ this.budget }}"
+                                placeholder="2 200"
+                                class="w-full rounded-xl border border-neutral-200 bg-white py-2 pr-14 pl-3.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            >
+                            <span class="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-xs text-gray-400">{{ 'admin.contacts.project.budgetUnit'|trans }}</span>
+                        </div>
+                    </div>
+                    <div class="min-w-0 space-y-2">
+                        <div class="flex items-baseline justify-between gap-3">
+                            <label for="project-movein-{{ this.contactId }}" class="block text-gray-600">{{ 'admin.contacts.project.moveIn'|trans }}</label>
+                            {% if this.moveInAt %}
+                                {% set moveInDiff = date('today').diff(date(this.moveInAt)) %}
+                                {% set moveInUrgent = moveInDiff.invert == 0 and moveInDiff.days < 20 %}
+                                <span class="truncate rounded-full px-2 py-0.5 text-xs font-medium {{ moveInUrgent ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700' }}">{{ date(this.moveInAt)|relative_days }}</span>
+                            {% endif %}
+                        </div>
+                        <input
+                            id="project-movein-{{ this.contactId }}"
+                            type="date"
+                            min="{{ 'now'|date('Y-m-d') }}"
+                            data-model="norender|moveInAt"
+                            data-action="change->live#action keydown.enter->live#action:prevent"
+                            data-live-action-param="save"
+                            value="{{ this.moveInAt }}"
+                            class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                        >
+                    </div>
+                    <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                        {# data-live-ignore : la carte n'est jamais touchée par
+                           les re-rendus live (data-skip-morph la remplacerait,
+                           détruisant l'instance Google Maps → écran blanc). #}
+                        <div data-live-ignore>
+                            {{ ux_map(this.map, {
+                                style: 'height: 260px; width: 100%;',
+                                class: 'overflow-hidden rounded-xl border border-neutral-200',
+                                'data-district-picker-target': 'map',
+                            }) }}
+                        </div>
+                        <input
+                            type="hidden"
+                            data-district-picker-target="input"
+                            data-model="norender|areas"
+                            data-action="change->live#action"
+                            data-live-action-param="save"
+                            value="{{ this.areas }}"
+                        >
+                        {% set areaChips = this.areaChips %}
+                        {% if areaChips is not empty %}
+                            <div class="flex flex-wrap gap-1.5 pt-1" data-testid="area-chips">
+                                {# Le badge entier retire le quartier au clic. #}
+                                {% for chip in areaChips %}
+                                    <button
+                                        type="button"
+                                        data-action="district-picker#remove"
+                                        data-district-picker-code-param="{{ chip.code }}"
+                                        class="animate-slide-in flex cursor-pointer items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors duration-100 ease-out hover:border-primary/60 hover:bg-primary/10"
+                                        aria-label="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                        title="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                        data-testid="area-chip-remove"
+                                    >
+                                        {{ ux_icon('lucide:map-pin', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ chip.label }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% set propertyTypeIcons = {
+                        studio: 'lucide:door-open',
+                        t1: 'lucide:bed-single',
+                        t2: 'lucide:bed-double',
+                        t3: 'lucide:sofa',
+                        t4: 'lucide:building',
+                        large_apartment: 'lucide:building-2',
+                        duplex: 'lucide:layers',
+                        loft: 'lucide:warehouse',
+                        house: 'lucide:home',
+                    } %}
+                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.propertyType'|trans }}</p>
+                        {% set selectedTypes = this.selectedPropertyTypes %}
+                        <div class="flex flex-wrap gap-2">
+                            {% for type in this.propertyTypes %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="togglePropertyType"
+                                    data-live-type-param="{{ type.value }}"
+                                    aria-pressed="{{ type.value in selectedTypes ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ type.value in selectedTypes ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="property-type-chip"
+                                >
+                                    {{ ux_icon(propertyTypeIcons[type.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ ('listProperty.form.propertyType.choice.' ~ type.value)|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% set currentDuration = this.contact ? this.contact.projectStayDuration : null %}
+                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.stayDuration.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for duration in this.stayDurations %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseStayDuration"
+                                    data-live-duration-param="{{ duration.value }}"
+                                    aria-pressed="{{ duration == currentDuration ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-baseline gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ duration == currentDuration ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="stay-duration-chip"
+                                >
+                                    {{ duration.labelKey|trans }}
+                                    <span class="text-xs font-normal {{ duration == currentDuration ? 'text-primary/60' : 'text-gray-400' }}">{{ duration.hintKey|trans }}</span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+    </div>
+</div>

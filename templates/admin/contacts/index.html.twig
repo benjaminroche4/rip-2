@@ -3,14 +3,11 @@
 {% block title %}{{ 'admin.contacts.title'|trans }}{% endblock %}
 
 {% block page_header %}
-    <twig:Admin:PageHeader
-        title="{{ 'admin.contacts.title'|trans }}"
-        subtitle="{{ 'admin.contacts.subtitle'|trans }}"
-    />
+    <twig:Admin:PageHeader title="{{ 'admin.contacts.title'|trans }}" />
 {% endblock %}
 
 {% block body %}
     <div class="space-y-8" data-testid="contacts-page">
-        <twig:Admin:ContactList />
+        <twig:Admin:ContactList :adminPrefix="adminPrefix" />
     </div>
 {% endblock %}

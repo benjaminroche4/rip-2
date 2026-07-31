@@ -1,0 +1,182 @@
+<div
+    {{ attributes.defaults({
+        class: 'contents',
+        'data-controller': 'leave-guard',
+        'data-leave-guard-clean-event-value': 'contact-notes:saved',
+        'data-leave-guard-message-value': 'admin.contacts.notes.unsaved'|trans,
+        'data-action': 'input->leave-guard#markDirty change->leave-guard#markDirty',
+    }) }}
+    data-testid="contact-notes"
+>
+    {# Rendu sans chrome propre : partage la card "Suivi" avec ContactFollowUp
+       (shell dans show.html.twig). #}
+            {% set feedCounts = this.feedCounts %}
+            <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-t border-gray-950/5 p-3">
+                <div>
+                    <h2 class="font-medium text-gray-900">{{ 'admin.contacts.notes.title'|trans }}</h2>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.notes.internal'|trans }}</p>
+                </div>
+                {% if feedCounts.all > 0 %}
+                    <div class="flex items-center gap-1" role="tablist" aria-label="{{ 'admin.contacts.notes.title'|trans }}">
+                        {% for filter in ['all', 'notes', 'events'] %}
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected="{{ this.feedFilter == filter ? 'true' : 'false' }}"
+                                data-action="live#action"
+                                data-live-action-param="filterFeed"
+                                data-live-filter-param="{{ filter }}"
+                                class="cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ this.feedFilter == filter ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
+                                data-testid="feed-filter-{{ filter }}"
+                            >
+                                {{ ('admin.contacts.notes.filter.' ~ filter)|trans }}
+                                <span class="text-gray-400 tabular-nums">{{ feedCounts[filter] }}</span>
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% set noteRows = this.feed %}
+            <div class="flex flex-col gap-3 rounded-t-xl bg-white px-5 py-4 {{ noteRows is empty ? 'rounded-b-xl' }}">
+                <textarea
+                    data-model="norender|newNote"
+                    data-action="keydown.enter->live#action:prevent"
+                    data-live-action-param="add"
+                    rows="3"
+                    placeholder="{{ 'admin.contacts.notes.placeholder'|trans }}"
+                    aria-label="{{ 'admin.contacts.notes.placeholder'|trans }}"
+                    title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                >{{ this.newNote }}</textarea>
+                <div class="flex justify-end">
+                    <twig:Button
+                        size="sm"
+                        data-action="live#action"
+                        data-live-action-param="add"
+                        data-testid="contact-notes-add"
+                    >
+                        {{ 'admin.contacts.notes.add'|trans }}
+                    </twig:Button>
+                </div>
+            </div>
+
+            {% if noteRows is not empty %}
+            <div class="rounded-b-xl bg-white px-5 py-4">
+                    <ul class="divide-y divide-gray-950/5" role="list">
+                        {% for row in noteRows %}
+                            {% if row.event is defined %}
+                            {% set event = row.event %}
+                            <li class="animate-slide-in flex items-center gap-3 py-3 first:pt-0 last:pb-0" data-testid="contact-event">
+                                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-gray-400">
+                                    {{ ux_icon(event.status ? 'lucide:refresh-ccw' : 'lucide:tag', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                </span>
+                                <p class="min-w-0 flex-1 text-sm text-gray-500">
+                                    {% if event.status %}
+                                        {{ 'admin.contacts.feed.statusChanged'|trans }}
+                                        <span class="font-medium {{ event.status.textClass }}">{{ event.status.labelKey|trans }}</span>
+                                    {% else %}
+                                        {{ 'admin.contacts.feed.reasonSet'|trans }}
+                                        <span class="font-medium text-gray-900">{{ event.closureReason.labelKey|trans }}</span>
+                                    {% endif %}
+                                    {% if event.authorName %}
+                                        <span class="text-gray-400">· {{ event.authorName|title }}</span>
+                                    {% endif %}
+                                    <span class="text-xs text-gray-400 tabular-nums" title="{{ event.createdAt|format_datetime('medium', 'short') }}">· {{ event.createdAt|human_date }}</span>
+                                </p>
+                            </li>
+                            {% else %}
+                            {% set note = row.note %}
+                            <li class="animate-slide-in flex gap-3 py-4 first:pt-0 last:pb-0" data-controller="fade-exit" data-testid="contact-note">
+                                <twig:Avatar filename="{{ note.authorAvatar }}" name="{{ note.authorName }}" size="8" />
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                                        <p class="flex items-baseline gap-2 text-sm">
+                                            <span class="font-medium text-gray-900">{{ note.authorName|title }}</span>
+                                            <span class="text-xs text-gray-400 tabular-nums" title="{{ note.createdAt|format_datetime('medium', 'short') }}">{{ note.createdAt|human_date }}</span>
+                                        </p>
+                                        {% if this.editingNoteId != note.id and (row.canEdit or row.canDelete) %}
+                                            <p class="flex items-center gap-1">
+                                                {% if row.canEdit %}
+                                                    <button
+                                                        type="button"
+                                                        data-action="live#action"
+                                                        data-live-action-param="startEdit"
+                                                        data-live-id-param="{{ note.id }}"
+                                                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 hover:bg-neutral-100 hover:text-gray-900"
+                                                        aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
+                                                        title="{{ 'admin.contacts.notes.edit'|trans }}"
+                                                    >
+                                                        {{ ux_icon('lucide:pencil', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                                    </button>
+                                                {% endif %}
+                                                {% if row.canDelete %}
+                                                    <button
+                                                        type="button"
+                                                        data-action="fade-exit#run live#action"
+                                                        data-live-action-param="delete"
+                                                        data-live-id-param="{{ note.id }}"
+                                                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 hover:bg-red-50 hover:text-red-600"
+                                                        aria-label="{{ 'admin.contacts.notes.delete'|trans }}"
+                                                        title="{{ 'admin.contacts.notes.delete'|trans }}"
+                                                        data-testid="contact-note-delete"
+                                                    >
+                                                        {{ ux_icon('lucide:trash-2', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                                    </button>
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if this.editingNoteId == note.id %}
+                                        <div class="mt-2 flex flex-col gap-2">
+                                            <textarea
+                                                data-model="norender|editingText"
+                                                data-action="keydown.enter->live#action:prevent"
+                                                data-live-action-param="saveEdit"
+                                                rows="3"
+                                                title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                            >{{ this.editingText }}</textarea>
+                                            <div class="flex items-center justify-end gap-3">
+                                                <button
+                                                    type="button"
+                                                    data-action="live#action"
+                                                    data-live-action-param="cancelEdit"
+                                                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                                >
+                                                    {{ 'admin.contacts.notes.cancel'|trans }}
+                                                </button>
+                                                <twig:Button
+                                                    size="sm"
+                                                    data-action="live#action"
+                                                    data-live-action-param="saveEdit"
+                                                >
+                                                    {{ 'admin.contacts.notes.save'|trans }}
+                                                </twig:Button>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="mt-1 text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ note.text }}</p>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% if this.hiddenFeedCount > 0 %}
+                        <div class="flex justify-center border-t border-gray-950/5 pt-3">
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="showMoreFeed"
+                                class="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                data-testid="feed-show-more"
+                            >
+                                {{ 'admin.contacts.notes.showMore'|trans({'%count%': this.hiddenFeedCount}) }}
+                            </button>
+                        </div>
+                    {% endif %}
+            </div>
+            {% endif %}
+</div>

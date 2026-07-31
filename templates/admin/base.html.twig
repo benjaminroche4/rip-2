@@ -21,7 +21,7 @@
         </a>
         <div class="isolate flex min-h-dvh">
             <aside class="sticky top-0 flex h-dvh w-64 shrink-0 flex-col border-r border-gray-950/5 bg-white" aria-label="{{ 'admin.sidebar.label'|trans }}">
-                <div class="flex shrink-0 items-center justify-between border-b border-gray-950/5 px-5 py-5">
+                <div class="flex shrink-0 items-center border-b border-gray-950/5 px-5 py-5">
                     <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="Relocation In Paris — Admin">
                         <img
                             src="{{ asset('medias/logos/logo_red.svg') }}"
@@ -31,58 +31,63 @@
                             class="h-7 w-auto"
                         >
                     </a>
-                    <twig:Badge variant="secondary" class="rounded-full">Admin</twig:Badge>
                 </div>
 
                 {% set currentRoute = app.request.attributes.get('_route') %}
                 <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="{{ 'admin.sidebar.nav.label'|trans }}">
-                    <div>
-                        <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                            {{ 'admin.sidebar.section.piloting'|trans }}
-                        </p>
-                        <ul class="space-y-0.5" role="list">
-                            {% for item in [
-                                {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_ADMIN'},
-                                {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
-                                {route: 'admin_contacts', icon: 'lucide:mail', label: 'admin.nav.contacts', role: 'ROLE_ADMIN'},
-                                {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments', role: 'ROLE_ADMIN'},
-                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
-                            ] %}
-                                {% if is_granted(item.role) %}
-                                    {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
-                                    <li>
-                                        <a
-                                            href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
-                                            {% if isActive %}aria-current="page"{% endif %}
-                                            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                        >
-                                            {{ ux_icon(item.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                            {{ item.label|trans }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    {% macro navItems(items, currentRoute, adminPrefix) %}
+                        {% for item in items %}
+                            {% if is_granted(item.role) %}
+                                {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
+                                <li>
+                                    <a
+                                        href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
+                                        {% if isActive %}aria-current="page"{% endif %}
+                                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                    >
+                                        {{ ux_icon(item.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ item.label|trans }}
+                                        {% if item.recentContactsBadge ?? false %}
+                                            <twig:Admin:ContactsNavBadge />
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endmacro %}
+
+                    <ul class="space-y-0.5" role="list">
+                        {{ _self.navItems([
+                            {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_ADMIN'},
+                        ], currentRoute, adminPrefix) }}
+                    </ul>
 
                     <div>
                         <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                            {{ 'admin.sidebar.section.site'|trans }}
+                            {{ 'admin.sidebar.section.business'|trans }}
                         </p>
                         <ul class="space-y-0.5" role="list">
-                            <li>
-                                <a
-                                    href="{{ path('app_home') }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-                                >
-                                    {{ ux_icon('lucide:external-link', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                    {{ 'admin.sidebar.nav.viewSite'|trans }}
-                                </a>
-                            </li>
+                            {{ _self.navItems([
+                                {route: 'admin_contacts', icon: 'lucide:mail', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
+                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
+                            ], currentRoute, adminPrefix) }}
                         </ul>
                     </div>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div>
+                            <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                                {{ 'admin.sidebar.section.admin'|trans }}
+                            </p>
+                            <ul class="space-y-0.5" role="list">
+                                {{ _self.navItems([
+                                    {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments', role: 'ROLE_ADMIN'},
+                                    {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
+                                ], currentRoute, adminPrefix) }}
+                            </ul>
+                        </div>
+                    {% endif %}
+
                 </nav>
 
                 {% set fullName = ((app.user.firstName ?: '') ~ ' ' ~ (app.user.lastName ?: ''))|trim %}
@@ -114,7 +119,9 @@
                 {% block page_header %}{% endblock %}
 
                 <main id="admin-main" class="flex-1 px-8 py-6">
-                    {% block body %}{% endblock %}
+                    <div class="mx-auto w-full max-w-7xl">
+                        {% block body %}{% endblock %}
+                    </div>
                 </main>
             </div>
         </div>

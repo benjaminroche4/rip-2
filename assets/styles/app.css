@@ -310,6 +310,61 @@ turbo-frame#blog-list[busy] {
     display: none !important;
 }
 
+/* === Admin — status change feedback ===
+   Played once when a card/status re-renders right after a change: the card
+   gets a soft brand-colored glow sweep, the status pill settles with a
+   gentle spring, and a transient "updated" chip slides in then fades. */
+@keyframes status-confirm {
+    0% { opacity: 0; transform: translateX(-6px); filter: blur(2px); }
+    12% { opacity: 1; transform: none; filter: blur(0); }
+    82% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translateY(-3px); }
+}
+.animate-status-confirm {
+    /* Starts a beat after the card glow so the sequence reads: "this card
+       changed" → "here is the confirmation". backwards keeps it invisible
+       during the delay. */
+    animation: status-confirm 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards forwards;
+}
+@keyframes card-glow {
+    0% { box-shadow: 0 0 0 0 rgba(113, 23, 46, 0); }
+    22% { box-shadow: 0 0 0 4px rgba(113, 23, 46, 0.10), 0 12px 32px -14px rgba(113, 23, 46, 0.28); }
+    100% { box-shadow: 0 0 0 0 rgba(113, 23, 46, 0); }
+}
+.animate-card-glow {
+    animation: card-glow 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Soft entrance for elements inserted by live re-renders (feed entries,
+   selection chips): morphing only creates the new nodes, so the animation
+   plays once per insertion. */
+@keyframes slide-in-soft {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: none; }
+}
+.animate-slide-in {
+    animation: slide-in-soft 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Collapsible <details> cards (admin): soft height animation on open/close.
+   Uses ::details-content + interpolate-size; browsers without support just
+   toggle instantly. */
+:root {
+    interpolate-size: allow-keywords;
+}
+details.details-animated::details-content {
+    height: 0;
+    overflow: clip;
+    /* overflow must end up "visible" once open, or absolutely-positioned
+       dropdowns inside the card get clipped; allow-discrete flips it
+       mid-transition so the reveal effect is kept. */
+    transition: height 0.25s cubic-bezier(0.22, 1, 0.36, 1), content-visibility 0.25s allow-discrete, overflow 0.25s allow-discrete;
+}
+details.details-animated[open]::details-content {
+    height: auto;
+    overflow: visible;
+}
+
 /* Respect the user's reduced-motion preference: neutralise marquee, ping,
    carousels and hover transitions site-wide. */
 @media (prefers-reduced-motion: reduce) {
