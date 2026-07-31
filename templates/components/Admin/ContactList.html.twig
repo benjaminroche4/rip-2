@@ -164,9 +164,15 @@
             </div>
 
             <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
-                <p class="flex flex-wrap gap-2 text-sm font-medium">
+                <p class="flex flex-wrap items-center gap-2 text-sm font-medium">
                     <span class="text-gray-600">{{ 'admin.contacts.card.help'|trans }}</span>
-                    <span class="min-w-0 flex-1 text-gray-900">{{ contact.helpType|trans }}</span>
+                    <span class="min-w-0 text-gray-900">{{ contact.helpType|trans }}</span>
+                    {% if contact.helpType == constant('App\\Contact\\Form\\ContactType::HOUSING_HELP_TYPE') and contact.offer %}
+                        <span class="rounded-full border border-primary/40 bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary" data-testid="card-offer">
+                            {{ ('contact.contactForm.offer.' ~ contact.offer ~ '.title')|trans }}
+                            <span class="font-normal text-primary/60">({{ ('contact.contactForm.offer.' ~ contact.offer ~ '.price')|trans }})</span>
+                        </span>
+                    {% endif %}
                 </p>
                 {% if contact.message %}
                     <div data-controller="expandable">
@@ -481,7 +487,7 @@
             {# Le spinner reste au centre de la zone VISIBLE même quand la
                liste est très haute : sticky à mi-viewport dans l'overlay. #}
             <div
-                data-loading="delay(150)|show"
+                data-loading="delay(150)|action(filter)|action(changeScope)|action(changeSort)|action(changeStatus)|show"
                 class="absolute inset-0 z-20 rounded-3xl bg-neutral-50/90 backdrop-blur-sm"
                 data-testid="contacts-loading-overlay"
             >

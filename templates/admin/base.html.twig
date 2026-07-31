@@ -7,6 +7,10 @@
 
         {# Admin pages are noindex via X-Robots-Tag (AdminNoIndexListener) — covers HTML and any future JSON/CSV/PDF exports. #}
         <title>{% block title %}Admin{% endblock %}</title>
+        {# Rechargements Turbo en morph : le DOM est raccommodé au lieu d'être
+           remplacé, pas de flash blanc, scroll conservé. #}
+        <meta name="turbo-refresh-method" content="morph">
+        <meta name="turbo-refresh-scroll" content="preserve">
         {% block head %}{% endblock %}
 
         <link rel="icon" type="image/x-icon" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
@@ -105,7 +109,7 @@
                             <p class="truncate text-xs text-gray-500">{{ app.user.email }}</p>
                         </div>
                     </div>
-                    <twig:Button as="a" variant="ghost" size="sm" href="{{ logout_path() }}" class="mt-3 w-full border border-gray-950/10 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-700">
+                    <twig:Button as="a" variant="ghost" size="sm" href="{{ logout_path() }}" data-turbo-prefetch="false" class="mt-3 w-full border border-gray-950/10 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-700">
                         {{ ux_icon('lucide:log-out', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
                         {{ 'admin.nav.logout'|trans }}
                     </twig:Button>
