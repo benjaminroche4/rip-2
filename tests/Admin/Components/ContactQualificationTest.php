@@ -145,6 +145,175 @@ final class ContactQualificationTest extends KernelTestCase
         $component->chooseStayDuration('forever');
     }
 
+    public function testFurnishingAndGuarantorChipsToggleAndPersist(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        $component->chooseFurnishing('furnished');
+        $component->chooseGuarantorType('garantme');
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame(\App\Contact\Domain\Furnishing::Furnished, $reloaded->getProjectFurnishing());
+        self::assertSame(\App\Contact\Domain\GuarantorType::Garantme, $reloaded->getProjectGuarantorType());
+
+        // Clicking the selected chips again clears them.
+        $component->chooseFurnishing('furnished');
+        $component->chooseGuarantorType('garantme');
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getProjectFurnishing());
+        self::assertNull($reloaded->getProjectGuarantorType());
+
+        $this->expectException(BadRequestHttpException::class);
+        $component->chooseGuarantorType('crypto');
+    }
+
+    public function testProjectNoteIsSavedAndSwitchesToReadMode(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        self::assertTrue($component->editingProjectNote, 'Empty note starts in edit mode.');
+
+        $component->projectNote = '  Priorité au calme, télétravail.  ';
+        $component->saveProjectNote();
+
+        $this->em->clear();
+        self::assertSame('Priorité au calme, télétravail.', $this->em->find(Contact::class, $contact->getId())->getProjectNote());
+        self::assertFalse($component->editingProjectNote, 'Saved note switches to read mode.');
+
+        $component->startEditingProjectNote();
+        self::assertTrue($component->editingProjectNote);
+
+        // A fresh mount prefills from storage.
+        $fresh = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        self::assertSame('Priorité au calme, télétravail.', $fresh->projectNote);
+        self::assertFalse($fresh->editingProjectNote);
+    }
+
+    public function testContactDetailsCanBeCorrectedByAdmin(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactDetails', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        self::assertFalse($component->editing);
+
+        $component->startEditing();
+        self::assertTrue($component->editing);
+
+        $component->firstName = '  Marie ';
+        $component->lastName = 'Curie';
+        $component->email = 'marie@example.com';
+        $component->phoneNumber = '+33611223344';
+        $component->company = 'institut curie';
+        $component->chooseOffer('accompagne');
+        $component->chooseLang('en');
+        $component->chooseSource('whatsapp');
+        // Switching away from the housing search drops the package, like on
+        // the public form where the choice only exists for that help type.
+        $component->chooseHelpType('contact.contactForm.helpType.choice.2');
+        $component->saveDetails();
+
+        self::assertFalse($component->editing);
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame('Marie', $reloaded->getFirstName());
+        self::assertSame('Institut curie', $reloaded->getCompany(), 'The company always leads with a capital.');
+        self::assertSame('marie@example.com', $reloaded->getEmail());
+        self::assertSame('contact.contactForm.helpType.choice.2', $reloaded->getHelpType());
+        self::assertNull($reloaded->getOffer(), 'No package outside the housing search.');
+        self::assertSame('en', $reloaded->getLang());
+        self::assertSame(\App\Contact\Domain\ContactSource::Whatsapp, $reloaded->getSource());
+
+        // Back to the housing search: the package can be set again.
+        $component->startEditing();
+        $component->chooseHelpType('contact.contactForm.helpType.choice.1');
+        $component->chooseOffer('accompagne');
+        $component->saveDetails();
+        $this->em->clear();
+        self::assertSame('accompagne', $this->em->find(Contact::class, $contact->getId())->getOffer());
+    }
+
+    public function testInvalidDetailsAreRejectedWithFieldErrors(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactDetails', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->startEditing();
+
+        $component->firstName = '';
+        $component->email = 'not-an-email';
+        $component->saveDetails();
+
+        self::assertTrue($component->editing, 'Errors keep the edit mode open.');
+        self::assertArrayHasKey('firstName', $component->errors);
+        self::assertArrayHasKey('email', $component->errors);
+
+        $this->em->clear();
+        self::assertSame('jane', $this->em->find(Contact::class, $contact->getId())->getFirstName(), 'Nothing was saved.');
+
+        $component->firstName = 'Jane';
+        $component->email = 'jane@example.com';
+        $component->helpType = 'hacked';
+        $this->expectException(BadRequestHttpException::class);
+        $component->saveDetails();
+    }
+
+    public function testFollowUpTimelineRendersTheChronologicalHistory(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactRepository::class);
+        $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::InProgress, 'Julien Moreau', null);
+        $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::Converted, 'Julien Moreau', null);
+
+        $html = (string) $this->renderTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+
+        self::assertSame(2, substr_count($html, 'data-testid="timeline-event"'));
+        self::assertStringContainsString('Statut passé à', $html);
+        self::assertStringContainsString('En cours', $html);
+        self::assertStringContainsString('Convertie', $html);
+        self::assertStringContainsString('Julien Moreau', $html);
+        // Chronological: "En cours" before "Convertie".
+        self::assertLessThan(strpos($html, 'Convertie'), strpos($html, 'En cours'));
+    }
+
+    public function testTimelineCollapsesBeyondFiveEventsAndExpands(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactRepository::class);
+        $cycle = ['in_progress', 'to_recall', 'in_progress', 'converted', 'in_progress', 'closed', 'in_progress'];
+        foreach ($cycle as $status) {
+            $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::from($status), 'Julien Moreau', null);
+        }
+
+        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        self::assertCount(5, $component->getTimelineEvents(), 'Collapsed to the 5 most recent.');
+        self::assertSame(2, $component->getHiddenTimelineCount());
+
+        $component->toggleTimeline();
+        self::assertCount(7, $component->getTimelineEvents());
+        self::assertSame(0, $component->getHiddenTimelineCount());
+
+        $component->toggleTimeline();
+        self::assertCount(5, $component->getTimelineEvents());
+    }
+
     public function testContactCanBeAssignedAndUnassigned(): void
     {
         $contact = $this->persistContact();

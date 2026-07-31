@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Admin\Service;
 
 use App\Contact\Domain\ContactListItem;
+use App\Contact\Domain\ParisDistricts;
 use App\Shared\Pdf\PdfFormat;
 use App\Shared\Pdf\PdfOptions;
 use App\Shared\Pdf\PdfOrientation;
@@ -29,6 +30,7 @@ final readonly class ContactPdfRenderer
         private Environment $twig,
         private TranslatorInterface $translator,
         private PdfRenderer $pdfRenderer,
+        private DistrictMapSvg $districtMap,
         #[Autowire('%kernel.project_dir%')]
         private string $projectDir,
     ) {
@@ -59,7 +61,39 @@ final readonly class ContactPdfRenderer
                 )
                 : null,
             'logoDataUri' => $this->logoDataUri(),
+            'areaLabels' => $this->areaLabels($contact),
+            'areasMapSvg' => $this->areasMapSvg($contact),
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function areaLabels(ContactListItem $contact): array
+    {
+        return array_map(
+            static fn (string $code): string => ParisDistricts::LABELS[$code] ?? $code,
+            $this->areaCodes($contact),
+        );
+    }
+
+    /** Map rendered only when at least one known district is selected. */
+    private function areasMapSvg(ContactListItem $contact): ?string
+    {
+        $known = array_values(array_filter(
+            $this->areaCodes($contact),
+            static fn (string $code): bool => isset(ParisDistricts::LABELS[$code]),
+        ));
+
+        return [] !== $known ? $this->districtMap->render($known) : null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function areaCodes(ContactListItem $contact): array
+    {
+        return array_values(array_filter(array_map(trim(...), explode(',', (string) $contact->projectAreas))));
     }
 
     public function filename(ContactListItem $contact): string

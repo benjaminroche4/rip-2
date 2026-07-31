@@ -190,7 +190,8 @@ final class ContactListTest extends KernelTestCase
 
         $html = (string) $this->renderTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
 
-        self::assertStringContainsString('Aucune nouvelle demande à traiter.', $html);
+        self::assertStringContainsString('Tout est traité', $html);
+        self::assertStringContainsString('Aucune nouvelle demande en attente', $html);
     }
 
     public function testUnknownFilterIsRejected(): void
@@ -288,6 +289,95 @@ final class ContactListTest extends KernelTestCase
     private function adminPrefix(): string
     {
         return (string) self::getContainer()->getParameter('admin_path_prefix');
+    }
+
+    public function testMineScopeShowsOnlyMyAssignedRequests(): void
+    {
+        $this->seedUser('scope-admin@contactlist-test.local', ['ROLE_ADMIN']);
+        $mine = $this->persistContact();
+        $other = $this->persistContact();
+        $this->em->flush();
+        $this->loginAs('scope-admin@contactlist-test.local');
+        $me = $this->em->getRepository(User::class)->findOneBy(['email' => 'scope-admin@contactlist-test.local']);
+        $mine->setAssignedTo($me);
+        $this->em->flush();
+
+        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix(), 'statusFilter' => 'all']);
+        $component->setLiveResponder(new LiveResponder());
+        self::assertCount(2, $component->getItems());
+
+        $component->changeScope('mine');
+        $ids = array_map(static fn ($i) => $i->id, $component->getItems());
+        self::assertSame([(int) $mine->getId()], $ids, 'Only my assigned requests remain.');
+        self::assertSame(1, array_sum($component->getStatusCounts()), 'Rail counts follow the scope.');
+
+        $component->changeScope('all');
+        self::assertCount(2, $component->getItems());
+
+        // Unknown scope is ignored.
+        $component->changeScope('bogus');
+        self::assertSame('all', $component->scope);
+    }
+
+    public function testSortByRecallRatingAndBudget(): void
+    {
+        $now = new \DateTimeImmutable('now');
+        $a = $this->persistContact()->setCreatedAt($now->modify('-3 hours'))
+            ->setRecallAt($now->modify('+3 days'))->setLeadRating(5)->setProjectBudget(1200);
+        $b = $this->persistContact()->setCreatedAt($now->modify('-2 hours'))
+            ->setRecallAt($now->modify('+1 day'))->setLeadRating(2)->setProjectBudget(3000);
+        $noData = $this->persistContact()->setCreatedAt($now->modify('-1 hour'));
+        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@contactlist-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix(), 'statusFilter' => 'all']);
+        $component->setLiveResponder(new LiveResponder());
+
+        $ids = fn () => array_map(static fn ($i) => $i->id, $component->getItems());
+
+        $component->changeSort('recall');
+        self::assertSame([(int) $b->getId(), (int) $a->getId(), (int) $noData->getId()], $ids(), 'Closest recall first, none last.');
+
+        $component->changeSort('rating');
+        self::assertSame([(int) $a->getId(), (int) $b->getId(), (int) $noData->getId()], $ids(), 'Best rating first, unrated last.');
+
+        $component->changeSort('budget');
+        self::assertSame([(int) $b->getId(), (int) $a->getId(), (int) $noData->getId()], $ids(), 'Highest budget first.');
+
+        $component->changeSort('recent');
+        self::assertSame([(int) $noData->getId(), (int) $b->getId(), (int) $a->getId()], $ids());
+
+        // Unknown sort is ignored.
+        $component->changeSort('bogus');
+        self::assertSame('recent', $component->sort);
+    }
+
+    public function testFilterRoundTripAlwaysShowsFreshData(): void
+    {
+        $contact = $this->persistContact();
+        $other = $this->persistContact();
+        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@contactlist-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        // Treat one card from the default "new" filter.
+        $component->changeStatus((int) $contact->getId(), 'in_progress');
+
+        // Switch to "in progress": the treated card must be there.
+        $component->filter('in_progress');
+        self::assertSame([(int) $contact->getId()], array_map(static fn ($i) => $i->id, $component->getItems()));
+
+        // Back to "new": only the untouched one remains.
+        $component->filter('new');
+        self::assertSame([(int) $other->getId()], array_map(static fn ($i) => $i->id, $component->getItems()));
+
+        // And "all" sees both.
+        $component->filter('all');
+        self::assertCount(2, $component->getItems());
     }
 
     private function persistContact(): Contact

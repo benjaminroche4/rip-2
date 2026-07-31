@@ -48,6 +48,13 @@ final class ContactProject
     #[LiveProp(writable: true)]
     public string $propertyType = '';
 
+    /** Free-form project note, same read-mode/pencil flow as LeadQuality. */
+    #[LiveProp(writable: true)]
+    public string $projectNote = '';
+
+    #[LiveProp]
+    public bool $editingProjectNote = false;
+
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
@@ -64,21 +71,34 @@ final class ContactProject
         $this->areas = $contact?->projectAreas ?? '';
         $this->moveInAt = $contact?->projectMoveInAt?->format('Y-m-d') ?? '';
         $this->propertyType = $contact?->projectPropertyType ?? '';
+        $this->projectNote = $contact?->projectNote ?? '';
+        $this->editingProjectNote = '' === $this->projectNote;
+    }
+
+    #[LiveAction]
+    public function saveProjectNote(): void
+    {
+        $this->ensureAdmin();
+
+        $this->repository->saveProjectNote($this->contactId, $this->projectNote);
+        $this->projectNote = trim($this->projectNote);
+        // Back to read mode once something is saved; an emptied note keeps
+        // the textarea open.
+        $this->editingProjectNote = '' === $this->projectNote;
+        $this->dispatchBrowserEvent('contact-project:saved');
+    }
+
+    #[LiveAction]
+    public function startEditingProjectNote(): void
+    {
+        $this->ensureAdmin();
+        $this->editingProjectNote = true;
     }
 
     public function getContact(): ?ContactListItem
     {
         return $this->repository->listByIds([$this->contactId])[0] ?? null;
     }
-
-    /** District codes → chip labels (arrondissements + petite couronne). */
-    private const AREA_LABELS = [
-        '1er' => '1er', '2e' => '2e', '3e' => '3e', '4e' => '4e', '5e' => '5e',
-        '6e' => '6e', '7e' => '7e', '8e' => '8e', '9e' => '9e', '10e' => '10e',
-        '11e' => '11e', '12e' => '12e', '13e' => '13e', '14e' => '14e', '15e' => '15e',
-        '16e' => '16e', '17e' => '17e', '18e' => '18e', '19e' => '19e', '20e' => '20e',
-        '92' => 'Hauts-de-Seine (92)', '93' => 'Seine-Saint-Denis (93)', '94' => 'Val-de-Marne (94)',
-    ];
 
     /** Centered between Paris and the petite couronne. */
     public function getMap(): Map
@@ -103,7 +123,7 @@ final class ContactProject
     public function getAreaChips(): array
     {
         return array_map(
-            static fn (string $code): array => ['code' => $code, 'label' => self::AREA_LABELS[$code] ?? $code],
+            static fn (string $code): array => ['code' => $code, 'label' => \App\Contact\Domain\ParisDistricts::LABELS[$code] ?? $code],
             array_values(array_filter(array_map(trim(...), explode(',', $this->areas)))),
         );
     }
@@ -180,6 +200,54 @@ final class ContactProject
 
         $current = $this->getContact()?->projectStayDuration;
         $this->repository->saveStayDuration($this->contactId, $current === $case ? null : $case);
+    }
+
+    /**
+     * @return list<\App\Contact\Domain\Furnishing>
+     */
+    public function getFurnishings(): array
+    {
+        return \App\Contact\Domain\Furnishing::cases();
+    }
+
+    #[LiveAction]
+    public function chooseFurnishing(#[LiveArg] string $furnishing): void
+    {
+        $this->ensureAdmin();
+
+        if ('' === $furnishing) {
+            return;
+        }
+
+        $case = \App\Contact\Domain\Furnishing::tryFrom($furnishing)
+            ?? throw new BadRequestHttpException(\sprintf('Unknown furnishing "%s".', $furnishing));
+
+        $current = $this->getContact()?->projectFurnishing;
+        $this->repository->saveFurnishing($this->contactId, $current === $case ? null : $case);
+    }
+
+    /**
+     * @return list<\App\Contact\Domain\GuarantorType>
+     */
+    public function getGuarantorTypes(): array
+    {
+        return \App\Contact\Domain\GuarantorType::cases();
+    }
+
+    #[LiveAction]
+    public function chooseGuarantorType(#[LiveArg] string $guarantor): void
+    {
+        $this->ensureAdmin();
+
+        if ('' === $guarantor) {
+            return;
+        }
+
+        $case = \App\Contact\Domain\GuarantorType::tryFrom($guarantor)
+            ?? throw new BadRequestHttpException(\sprintf('Unknown guarantor type "%s".', $guarantor));
+
+        $current = $this->getContact()?->projectGuarantorType;
+        $this->repository->saveGuarantorType($this->contactId, $current === $case ? null : $case);
     }
 
     #[LiveAction]

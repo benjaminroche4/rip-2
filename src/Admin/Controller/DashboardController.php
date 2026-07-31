@@ -278,8 +278,29 @@ final class DashboardController extends AbstractController
     {
         $this->ensureValidPrefix($adminPrefix);
 
+        // Business KPIs over the last 30 days (+ actionable overdue recalls).
+        $now = new \DateTimeImmutable();
+        $since = $now->modify('-30 days');
+        $responseStats = $this->contactRepository->responseTimeStats($since);
+        $avgLabel = null;
+        if (null !== $responseStats['avgMinutes']) {
+            $avgMinutes = (int) round($responseStats['avgMinutes']);
+            $avgLabel = $avgMinutes < 60
+                ? $this->translator->trans('admin.dashboard.responseTime.minutes', ['%minutes%' => $avgMinutes])
+                : $this->translator->trans('admin.dashboard.responseTime.hours', [
+                    '%hours%' => intdiv($avgMinutes, 60),
+                    '%minutes%' => str_pad((string) ($avgMinutes % 60), 2, '0', STR_PAD_LEFT),
+                ]);
+        }
+        $conversionRate = $this->contactRepository->conversionRate($since);
+
         return $this->render('admin/contacts/index.html.twig', [
             'adminPrefix' => $adminPrefix,
+            'kpiNewRequests' => $this->contactRepository->countCreatedSince($since),
+            'kpiAvgResponseLabel' => $avgLabel,
+            'kpiSlaRate' => null !== $responseStats['withinSlaRate'] ? (int) round($responseStats['withinSlaRate'] * 100) : null,
+            'kpiConversionRate' => null !== $conversionRate ? (int) round($conversionRate * 100) : null,
+            'kpiOverdueRecalls' => $this->contactRepository->countOverdueRecalls($now),
         ]);
     }
 
@@ -292,17 +313,24 @@ final class DashboardController extends AbstractController
         methods: ['GET'],
         requirements: ['reference' => 'CT-\d{6}'],
     )]
-    public function showContact(string $adminPrefix, string $reference): Response
+    public function showContact(string $adminPrefix, string $reference, \Symfony\Component\HttpFoundation\Request $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
         $contact = $this->contactRepository->findOneItemByReference($reference)
             ?? throw $this->createNotFoundException();
 
+        // Navigation context carried from the list ("from" filter), so the
+        // arrows keep triaging the category the admin was working in even
+        // after this lead's status changed.
+        $from = $request->query->getString('from');
+        $from = 'all' === $from || null !== \App\Contact\Domain\ContactStatus::tryFrom($from) ? $from : null;
+
         return $this->render('admin/contacts/show.html.twig', [
             'adminPrefix' => $adminPrefix,
             'contact' => $contact,
-            'adjacent' => $this->contactRepository->adjacentReferences($contact->id),
+            'from' => $from,
+            'adjacent' => $this->contactRepository->adjacentReferences($contact->id, $from),
             'previousRequests' => $this->contactRepository->listOtherByEmail($contact->email, $contact->id),
         ]);
     }

@@ -1797,7 +1797,7 @@ admin:
     nav:
         dashboard: Tableau de bord
         users: Utilisateurs
-        contacts: Contacts
+        contacts: Leads
         payments: Paiements
         tools: Outils
         logout: Se déconnecter
@@ -1805,7 +1805,6 @@ admin:
     contacts:
         title: Demandes de contact
         empty: Aucune demande de contact pour le moment.
-        emptyNew: Aucune nouvelle demande à traiter.
         searchPlaceholder: Rechercher (nom, email, référence)
         loading: Chargement des demandes
         show:
@@ -1834,6 +1833,8 @@ admin:
             assigneeNone: Personne
             recallLabel: À recontacter le
             recallOverdue: Rappel échu
+            timelineShowMore: 'Voir les %count% précédents'
+            timelineShowLess: Réduire l'historique
             recallClear: Effacer
         closure:
             budget_unrealistic: Budget irréaliste
@@ -1842,6 +1843,60 @@ admin:
             solved_alone: A trouvé seul
             out_of_area: Hors zone
             other: Autre
+        emptyState:
+            searchTitle: Aucun résultat
+            searchHint: 'Aucune demande ne correspond à « %search% ». Essayez un nom, un email ou une référence.'
+            mineTitle: Aucune demande assignée
+            mineHint: Les demandes qui vous sont assignées via « Suivi par » apparaîtront ici.
+            mineCta: Voir toutes les demandes
+            newTitle: Tout est traité !
+            newHint: Aucune nouvelle demande en attente. Beau travail.
+            defaultTitle: Aucune demande
+        keysHint: '↑↓ naviguer · 1-6 statut · Entrée ouvrir'
+        sort:
+            recent: Plus récentes
+            recall: Rappel le plus proche
+            rating: Meilleure note
+            budget: Budget le plus élevé
+        scope:
+            label: Portée
+            all: Toutes les demandes
+            mine: Mes demandes
+        kpi:
+            newRequests: Nouvelles demandes
+            last30: 30 derniers jours
+            avgResponse: Prise en charge moyenne
+            slaRate: '%rate% % traitées en moins de 30 min'
+            conversion: Taux de conversion
+            conversionHint: Sur les demandes tranchées (30 jours)
+            overdueRecalls: Rappels en retard
+            overdueHint: Rappels planifiés dépassés
+        create:
+            button: Nouvelle demande
+            title: Nouvelle demande de contact
+            subtitle: Saisie manuelle d'une demande reçue par téléphone, email ou WhatsApp.
+            source: Source de la demande
+            submit: Créer la demande
+        contactSource:
+            form: Formulaire du site
+            phone: Téléphone
+            email: Email
+            website: Site web
+            whatsapp: WhatsApp
+        recapEmail:
+            button: Envoyer le récap au client
+            modalTitle: Envoyer le récapitulatif
+            modalSubtitle: 'L''email sera envoyé à <strong>%email%</strong>, dans la langue du client.'
+            paymentToggle: Inclure le lien de paiement
+            paymentHint: 'Formule %offer% (%price%), bouton de paiement sécurisé dans l''email.'
+            paymentUnavailable: 'Lien de paiement indisponible : renseignez d''abord la formule souhaitée dans les informations du contact.'
+            send: Envoyer l'email
+            sent: Récapitulatif envoyé au client
+        edit:
+            title: Modifier les informations
+            required: Ce champ est obligatoire.
+            invalidEmail: Adresse email invalide.
+            noOffer: Aucune formule
         nextStep:
             label: Prochaine étape
             choice:
@@ -1855,6 +1910,9 @@ admin:
         feed:
             statusChanged: 'Statut passé à'
             reasonSet: 'Motif :'
+            recapSent: Récap envoyé au client
+            withPayment: avec lien de paiement
+            withoutPayment: sans lien de paiement
         project:
             title: Projet logement
             subtitle: Rempli à la qualification, pour comparer et filtrer les demandes.
@@ -1865,6 +1923,21 @@ admin:
             moveIn: Emménagement souhaité
             propertyType: Type de bien
             propertyTypePlaceholder: T2 meublé, colocation...
+            note:
+                label: Note sur le projet
+                placeholder: Précisions sur le projet (contraintes, priorités, contexte...)
+                autosaveHint: Enregistrée automatiquement à la sortie du champ.
+            furnishing:
+                label: Meublé ou non meublé
+                choice:
+                    furnished: Meublé
+                    unfurnished: Non meublé
+            guarantor:
+                label: Type de garant
+                choice:
+                    physical: Garant physique
+                    garantme: Garantme
+                    bank: Garantie bancaire
             stayDuration:
                 label: Durée d'installation
                 choice:
@@ -1904,17 +1977,13 @@ admin:
                 other: Autre
             starLabel: '{1}1 étoile|]1,Inf[%count% étoiles'
             notePlaceholder: Ajouter une note de qualification (facultatif)
-            unsaved: Ta note de qualification n'est pas enregistrée. Quitter la page quand même ?
+            unsaved: La note de qualification n'est pas enregistrée. Quitter la page quand même ?
         notes:
             title: Fil de suivi
-            filter:
-                all: Tout
-                notes: Notes
-                events: Activité
             showMore: 'Afficher %count% de plus'
             internal: Notes internes, visibles uniquement par l'équipe.
             enterHint: Entrée pour envoyer
-            unsaved: Ta note de suivi n'est pas envoyée. Quitter la page quand même ?
+            unsaved: La note de suivi n'est pas envoyée. Quitter la page quand même ?
             placeholder: Ajouter une note de suivi...
             add: Ajouter
             edit: Modifier

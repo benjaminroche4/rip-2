@@ -104,21 +104,58 @@
                             {% endif %}
                         </p>
                     </li>
-                    {% if contact and contact.firstTreatedAt %}
-                        <li class="animate-slide-in relative">
-                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-blue-400" aria-hidden="true"></span>
-                            <p class="text-gray-600">{{ 'admin.contacts.show.field.firstTreatedAt'|trans }}</p>
-                            <p class="font-medium text-gray-900 tabular-nums">{{ contact.firstTreatedAt|format_datetime('medium', 'short') }}</p>
+                    {# Chaque action (statut, motif, récap envoyé) devient une
+                       entrée chronologique de la timeline; repliée aux
+                       dernières entrées quand l'historique s'allonge. #}
+                    {% set hiddenTimeline = this.hiddenTimelineCount %}
+                    {% if hiddenTimeline > 0 %}
+                        <li class="relative">
+                            <span class="absolute top-1.5 -left-[26px] size-2.5 rounded-full border-2 border-white bg-neutral-200" aria-hidden="true"></span>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="toggleTimeline"
+                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                data-testid="timeline-show-more"
+                            >
+                                {{ 'admin.contacts.followUp.timelineShowMore'|trans({'%count%': hiddenTimeline}) }}
+                            </button>
+                        </li>
+                    {% elseif this.showAllTimeline %}
+                        <li class="relative">
+                            <span class="absolute top-1.5 -left-[26px] size-2.5 rounded-full border-2 border-white bg-neutral-200" aria-hidden="true"></span>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="toggleTimeline"
+                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                data-testid="timeline-show-less"
+                            >
+                                {{ 'admin.contacts.followUp.timelineShowLess'|trans }}
+                            </button>
                         </li>
                     {% endif %}
-                    {# Redondant tant qu'égal à la première prise en charge. #}
-                    {% if contact and contact.firstTreatedAt and contact.statusChangedAt and contact.statusChangedAt > contact.firstTreatedAt %}
-                        <li class="animate-slide-in relative">
-                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-amber-400" aria-hidden="true"></span>
-                            <p class="text-gray-600">{{ 'admin.contacts.show.field.statusChangedAt'|trans }}</p>
-                            <p class="font-medium text-gray-900 tabular-nums">{{ contact.statusChangedAt|format_datetime('medium', 'short') }}</p>
+                    {% for event in this.timelineEvents %}
+                        <li class="animate-slide-in relative" data-testid="timeline-event">
+                            <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white {{ event.kind is not null ? 'bg-blue-400' : (event.status ? event.status.dotClass : 'bg-amber-400') }}" aria-hidden="true"></span>
+                            <p class="text-gray-600">
+                                {% if event.kind is not null %}
+                                    {{ 'admin.contacts.feed.recapSent'|trans }}
+                                    · <span class="font-medium text-gray-900">{{ (event.kind == 'recap_email_payment' ? 'admin.contacts.feed.withPayment' : 'admin.contacts.feed.withoutPayment')|trans }}</span>
+                                {% elseif event.status %}
+                                    {{ 'admin.contacts.feed.statusChanged'|trans }}
+                                    <span class="font-medium {{ event.status.textClass }}">{{ event.status.labelKey|trans }}</span>
+                                {% else %}
+                                    {{ 'admin.contacts.feed.reasonSet'|trans }}
+                                    <span class="font-medium text-gray-900">{{ event.closureReason.labelKey|trans }}</span>
+                                {% endif %}
+                            </p>
+                            <p class="font-medium text-gray-900 tabular-nums">
+                                {{ event.createdAt|format_datetime('medium', 'short') }}
+                                {%- if event.authorName %} <span class="font-normal text-gray-400">· {{ event.authorName|title }}</span>{% endif %}
+                            </p>
                         </li>
-                    {% endif %}
+                    {% endfor %}
                     {% if showRecall %}
                         <li class="animate-slide-in relative">
                             <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white {{ contact.recallAt and contact.recallAt < date() ? 'bg-red-400' : 'bg-purple-400' }}" aria-hidden="true"></span>

@@ -54,6 +54,13 @@ export default class extends Controller {
         chip.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out'
         chip.style.opacity = '0'
         chip.style.transform = 'scale(0.9)'
+        // The morph can recycle this node for another chip: clear the fade
+        // once the re-render lands, or the recycled chip stays invisible.
+        document.addEventListener('live:render', () => {
+            chip.style.transition = ''
+            chip.style.opacity = ''
+            chip.style.transform = ''
+        }, { once: true, capture: true })
 
         this.#toggle(code)
     }

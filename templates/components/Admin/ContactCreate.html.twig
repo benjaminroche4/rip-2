@@ -1,0 +1,164 @@
+{% macro dropdown(label, actionParam, paramName, options, current, testid) %}
+    {# options: list of {value, label, icon?} maps; current = selected value. #}
+    <div class="min-w-0 space-y-2">
+        <p class="text-gray-600">{{ label }}</p>
+        <details
+            class="relative"
+            data-controller="details-dropdown"
+            data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+        >
+            <summary class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                {% set selected = options|filter(o => o.value == current)|first %}
+                {% if selected and selected.icon is defined %}
+                    {{ ux_icon(selected.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {% endif %}
+                <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ selected ? selected.label : '-' }}</span>
+                {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
+            </summary>
+            <div class="absolute left-0 z-10 mt-2 w-full min-w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                {% for option in options %}
+                    <button
+                        type="button"
+                        data-action="live#action details-dropdown#close"
+                        data-live-action-param="{{ actionParam }}"
+                        data-live-{{ paramName }}-param="{{ option.value }}"
+                        class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ option.value == current ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        {% if testid %}data-testid="{{ testid }}-{{ option.value }}"{% endif %}
+                    >
+                        {% if option.icon is defined %}
+                            {{ ux_icon(option.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {% endif %}
+                        {{ option.label }}
+                    </button>
+                {% endfor %}
+            </div>
+        </details>
+    </div>
+{% endmacro %}
+
+<div {{ attributes.defaults({class: 'shrink-0'}) }} data-testid="contact-create">
+    <twig:Button
+        size="sm"
+        data-action="live#action"
+        data-live-action-param="openModal"
+        data-testid="contact-create-open"
+    >
+        <span class="flex items-center gap-2">
+            {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            {{ 'admin.contacts.create.button'|trans }}
+        </span>
+    </twig:Button>
+
+    {% if this.open %}
+        {% set inputClass = 'w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none' %}
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            data-action="keydown.esc@window->live#action"
+            data-live-action-param="closeModal"
+            data-testid="contact-create-modal"
+        >
+            {# Clic en dehors de la carte = fermeture. #}
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="live#action"
+                data-live-action-param="closeModal"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-neutral-200 bg-white p-8 shadow-xl">
+                <h2 class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.contacts.create.title'|trans }}</h2>
+                <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.contacts.create.subtitle'|trans }}</p>
+
+                <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
+                    <div class="min-w-0 space-y-2">
+                        <label for="create-first" class="block text-gray-600">{{ 'contact.contactForm.firstName.label'|trans }}</label>
+                        <input id="create-first" type="text" data-model="norender|firstName" value="{{ this.firstName }}" class="{{ inputClass }}">
+                        {% if this.errors.firstName is defined %}
+                            <p class="text-xs text-red-600">{{ this.errors.firstName|trans }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0 space-y-2">
+                        <label for="create-last" class="block text-gray-600">{{ 'contact.contactForm.lastName.label'|trans }}</label>
+                        <input id="create-last" type="text" data-model="norender|lastName" value="{{ this.lastName }}" class="{{ inputClass }}">
+                        {% if this.errors.lastName is defined %}
+                            <p class="text-xs text-red-600">{{ this.errors.lastName|trans }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0 space-y-2">
+                        <label for="create-email" class="block text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</label>
+                        <input id="create-email" type="email" data-model="norender|email" value="{{ this.email }}" class="{{ inputClass }}">
+                        {% if this.errors.email is defined %}
+                            <p class="text-xs text-red-600">{{ this.errors.email|trans }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0 space-y-2">
+                        <label for="create-phone" class="block text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</label>
+                        <input id="create-phone" type="tel" data-model="norender|phoneNumber" value="{{ this.phoneNumber }}" placeholder="+33 6 12 34 56 78" class="{{ inputClass }}">
+                    </div>
+                    <div class="min-w-0 space-y-2">
+                        <label for="create-company" class="block text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</label>
+                        <input id="create-company" type="text" data-model="norender|company" value="{{ this.company }}" class="{{ inputClass }}">
+                    </div>
+                    {% set langOptions = [] %}
+                    {% for lang in constant('App\\Admin\\Twig\\Components\\ContactDetails::LANGS') %}
+                        {% set langOptions = langOptions|merge([{value: lang, label: ('admin.contacts.card.lang.' ~ lang)|trans, icon: 'circle-flags:' ~ lang}]) %}
+                    {% endfor %}
+                    {{ _self.dropdown('admin.contacts.card.field.language'|trans, 'chooseLang', 'lang', langOptions, this.lang, 'contact-create-lang') }}
+
+                    {% set helpOptions = [] %}
+                    {% for type in constant('App\\Admin\\Twig\\Components\\ContactDetails::HELP_TYPES') %}
+                        {% set helpOptions = helpOptions|merge([{value: type, label: type|trans}]) %}
+                    {% endfor %}
+                    {{ _self.dropdown('admin.contacts.card.help'|trans, 'chooseHelpType', 'type', helpOptions, this.helpType, 'contact-create-help') }}
+
+                    {% if this.helpType == constant('App\\Contact\\Form\\ContactType::HOUSING_HELP_TYPE') %}
+                        {% set offerOptions = [{value: '', label: 'admin.contacts.edit.noOffer'|trans}] %}
+                        {% for offer in constant('App\\Admin\\Twig\\Components\\ContactDetails::OFFERS') %}
+                            {% set offerOptions = offerOptions|merge([{value: offer, label: ('contact.contactForm.offer.' ~ offer ~ '.title')|trans ~ ' (' ~ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans ~ ')'}]) %}
+                        {% endfor %}
+                        {{ _self.dropdown('admin.contacts.show.field.offer'|trans, 'chooseOffer', 'offer', offerOptions, this.offer, 'contact-create-offer') }}
+                    {% endif %}
+
+                    {% set sourceOptions = [] %}
+                    {% for source in this.manualSources %}
+                        {% set sourceOptions = sourceOptions|merge([{value: source.value, label: source.labelKey|trans, icon: source.icon}]) %}
+                    {% endfor %}
+                    {{ _self.dropdown('admin.contacts.create.source'|trans, 'chooseSource', 'source', sourceOptions, this.source, 'contact-create-source') }}
+
+                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                        <label for="create-message" class="block text-gray-600">{{ 'contact.contactForm.message.label'|trans }}</label>
+                        <textarea
+                            id="create-message"
+                            data-model="norender|message"
+                            rows="3"
+                            class="{{ inputClass }}"
+                        >{{ this.message }}</textarea>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-end gap-4">
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="closeModal"
+                        class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                        data-testid="contact-create-cancel"
+                    >
+                        {{ 'admin.contacts.notes.cancel'|trans }}
+                    </button>
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="create"
+                        class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90"
+                        data-testid="contact-create-submit"
+                    >
+                        {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.create.submit'|trans }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>

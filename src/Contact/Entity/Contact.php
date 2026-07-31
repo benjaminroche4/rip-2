@@ -4,7 +4,10 @@ namespace App\Contact\Entity;
 
 use App\Auth\Entity\User;
 use App\Contact\Domain\ClosureReason;
+use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
+use App\Contact\Domain\Furnishing;
+use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\LeadSource;
 use App\Contact\Domain\NextStep;
 use App\Contact\Domain\RecontactChannel;
@@ -131,6 +134,10 @@ class Contact
     #[ORM\Column(length: 30, nullable: true, enumType: LeadSource::class)]
     private ?LeadSource $leadSource = null;
 
+    /** How the request reached us (form by default, set for manual intakes). */
+    #[ORM\Column(length: 15, enumType: ContactSource::class, options: ['default' => 'form'])]
+    private ContactSource $source = ContactSource::Form;
+
     /** Structured housing project, extracted by the admin while qualifying. */
     #[ORM\Column(nullable: true)]
     private ?int $projectBudget = null;
@@ -147,6 +154,18 @@ class Contact
     /** Intended length of stay (short/medium/long term). */
     #[ORM\Column(length: 10, nullable: true, enumType: StayDuration::class)]
     private ?StayDuration $projectStayDuration = null;
+
+    /** Furnished or unfurnished rental. */
+    #[ORM\Column(length: 15, nullable: true, enumType: Furnishing::class)]
+    private ?Furnishing $projectFurnishing = null;
+
+    /** Kind of guarantor the prospect can provide. */
+    #[ORM\Column(length: 10, nullable: true, enumType: GuarantorType::class)]
+    private ?GuarantorType $projectGuarantorType = null;
+
+    /** Free-form note on the housing project. */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $projectNote = null;
 
     public function __construct()
     {
@@ -382,6 +401,42 @@ class Contact
         return $this;
     }
 
+    public function getProjectFurnishing(): ?Furnishing
+    {
+        return $this->projectFurnishing;
+    }
+
+    public function setProjectFurnishing(?Furnishing $projectFurnishing): static
+    {
+        $this->projectFurnishing = $projectFurnishing;
+
+        return $this;
+    }
+
+    public function getProjectGuarantorType(): ?GuarantorType
+    {
+        return $this->projectGuarantorType;
+    }
+
+    public function setProjectGuarantorType(?GuarantorType $projectGuarantorType): static
+    {
+        $this->projectGuarantorType = $projectGuarantorType;
+
+        return $this;
+    }
+
+    public function getProjectNote(): ?string
+    {
+        return $this->projectNote;
+    }
+
+    public function setProjectNote(?string $projectNote): static
+    {
+        $this->projectNote = $projectNote;
+
+        return $this;
+    }
+
     public function setRecontactChannel(?RecontactChannel $recontactChannel): static
     {
         $this->recontactChannel = $recontactChannel;
@@ -489,7 +544,9 @@ class Contact
 
     public function setCompany(?string $company): static
     {
-        $this->company = $company;
+        // Always leads with a capital, whatever was typed ("acme corp" →
+        // "Acme corp", "SNCF" stays untouched).
+        $this->company = null !== $company && '' !== $company ? mb_ucfirst($company) : $company;
 
         return $this;
     }
@@ -550,6 +607,18 @@ class Contact
     public function setLang(string $lang): static
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getSource(): ContactSource
+    {
+        return $this->source;
+    }
+
+    public function setSource(ContactSource $source): static
+    {
+        $this->source = $source;
 
         return $this;
     }

@@ -99,7 +99,7 @@ final class ContactNotesTest extends KernelTestCase
         self::assertCount(0, $component->getFeed());
     }
 
-    public function testFeedMergesNotesAndStatusEvents(): void
+    public function testFeedKeepsOnlyNotesEventsLiveInTheTimeline(): void
     {
         $contact = $this->persistContact();
         $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
@@ -112,13 +112,11 @@ final class ContactNotesTest extends KernelTestCase
 
         $feed = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()])->getFeed();
 
-        self::assertCount(2, $feed);
-        self::assertArrayHasKey('event', $feed[0], 'The status change is the newest entry.');
-        self::assertSame(\App\Contact\Domain\ContactStatus::InProgress, $feed[0]['event']->status);
-        self::assertArrayHasKey('note', $feed[1]);
+        self::assertCount(1, $feed, 'Status events stay out of the notes thread.');
+        self::assertArrayHasKey('note', $feed[0]);
     }
 
-    public function testFeedFilterAndPagination(): void
+    public function testFeedPagination(): void
     {
         $contact = $this->persistContact();
         $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
@@ -128,32 +126,15 @@ final class ContactNotesTest extends KernelTestCase
         }
         $this->loginAs($admin);
 
-        self::getContainer()->get(\App\Contact\Repository\ContactRepository::class)
-            ->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::InProgress, 'First Last', null);
-
         $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
 
-        // 8 entries total (7 notes + 1 event), capped at 5.
-        self::assertSame(['all' => 8, 'notes' => 7, 'events' => 1], $component->getFeedCounts());
         self::assertCount(5, $component->getFeed());
-        self::assertSame(3, $component->getHiddenFeedCount());
+        self::assertSame(2, $component->getHiddenFeedCount());
 
         $component->showMoreFeed();
-        self::assertCount(8, $component->getFeed());
+        self::assertCount(7, $component->getFeed());
         self::assertSame(0, $component->getHiddenFeedCount());
-
-        $component->filterFeed('events');
-        self::assertCount(1, $component->getFeed());
-        self::assertArrayHasKey('event', $component->getFeed()[0]);
-
-        $component->filterFeed('notes');
-        self::assertCount(5, $component->getFeed(), 'Switching filters resets the cap.');
-        self::assertArrayHasKey('note', $component->getFeed()[0]);
-
-        // Unknown filter is ignored.
-        $component->filterFeed('bogus');
-        self::assertSame('notes', $component->feedFilter);
     }
 
     public function testNonAdminCannotMount(): void

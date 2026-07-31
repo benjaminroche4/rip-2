@@ -47,6 +47,16 @@ final class ContactList
     #[LiveProp(url: true)]
     public string $statusFilter = 'new';
 
+    /** 'all' = every request, 'mine' = only the ones assigned to me. */
+    #[LiveProp(url: true)]
+    public string $scope = 'all';
+
+    /** 'recent' | 'recall' | 'rating' | 'budget'. Mirrored in the URL. */
+    #[LiveProp(url: true)]
+    public string $sort = 'recent';
+
+    public const SORTS = ['recent', 'recall', 'rating', 'budget'];
+
     /** Free-text search over name, email and reference. Debounced client-side. */
     #[LiveProp(writable: true, url: true, onUpdated: 'onSearchUpdated')]
     public string $search = '';
@@ -119,6 +129,12 @@ final class ContactList
         // rather than 500 on an unknown value.
         if ('all' !== $this->statusFilter && null === ContactStatus::tryFrom($this->statusFilter)) {
             $this->statusFilter = 'all';
+        }
+        if (!\in_array($this->scope, ['all', 'mine'], true)) {
+            $this->scope = 'all';
+        }
+        if (!\in_array($this->sort, self::SORTS, true)) {
+            $this->sort = 'recent';
         }
 
         // Pin the order NOW: live props are dehydrated before the template
@@ -196,6 +212,50 @@ final class ContactList
         }
 
         $this->statusFilter = $status;
+        $this->page = 1;
+        $this->pinnedOrder = [];
+        $this->leavingContactId = null;
+        $this->confirmedContactId = null;
+        $this->itemsCache = null;
+        $this->totalCache = null;
+        $this->getItems();
+    }
+
+    #[LiveAction]
+    public function changeScope(#[LiveArg] string $scope): void
+    {
+        $this->ensureAdmin();
+
+        if (!\in_array($scope, ['all', 'mine'], true)) {
+            return;
+        }
+
+        $this->scope = $scope;
+        $this->page = 1;
+        $this->pinnedOrder = [];
+        $this->leavingContactId = null;
+        $this->confirmedContactId = null;
+        $this->itemsCache = null;
+        $this->totalCache = null;
+        $this->getItems();
+    }
+
+    #[LiveAction]
+    public function changeSort(#[LiveArg] string $sort): void
+    {
+        $this->ensureAdmin();
+
+        if (!\in_array($sort, self::SORTS, true)) {
+            return;
+        }
+
+        $this->sort = $sort;
+        // Sorting by recall/rating/budget only makes sense across every
+        // status: widen the rail filter to "all" so the list matches what
+        // the selector shows.
+        if ('recent' !== $sort) {
+            $this->statusFilter = 'all';
+        }
         $this->page = 1;
         $this->pinnedOrder = [];
         $this->leavingContactId = null;
@@ -294,7 +354,7 @@ final class ContactList
      */
     public function getStatusCounts(): array
     {
-        return $this->repository->countsByStatus();
+        return $this->repository->countsByStatus($this->assigneeFilter());
     }
 
     /**
@@ -321,7 +381,7 @@ final class ContactList
             return $this->itemsCache = $items;
         }
 
-        $items = $this->repository->listFirst($this->page * self::PER_PAGE, $this->currentStatus(), $this->searchTerm());
+        $items = $this->repository->listFirst($this->page * self::PER_PAGE, $this->currentStatus(), $this->searchTerm(), $this->assigneeFilter(), $this->sort);
         $this->pinnedOrder = array_map(static fn (ContactListItem $item): int => $item->id, $items);
 
         return $this->itemsCache = $items;
@@ -334,7 +394,29 @@ final class ContactList
 
     public function getTotalCount(): int
     {
-        return $this->totalCache ??= $this->repository->countFiltered($this->currentStatus(), $this->searchTerm());
+        return $this->totalCache ??= $this->repository->countFiltered($this->currentStatus(), $this->searchTerm(), $this->assigneeFilter());
+    }
+
+    /** Badge on the "my requests" tab: my volume within the current filters. */
+    public function getMineCount(): int
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof User) {
+            return 0;
+        }
+
+        return $this->repository->countFiltered($this->currentStatus(), $this->searchTerm(), (int) $user->getId());
+    }
+
+    private function assigneeFilter(): ?int
+    {
+        if ('mine' !== $this->scope) {
+            return null;
+        }
+
+        $user = $this->security->getUser();
+
+        return $user instanceof \App\Auth\Entity\User ? (int) $user->getId() : null;
     }
 
     private function currentStatus(): ?ContactStatus

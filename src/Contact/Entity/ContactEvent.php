@@ -32,6 +32,13 @@ class ContactEvent
     #[ORM\Column(length: 30, nullable: true, enumType: ClosureReason::class)]
     private ?ClosureReason $closureReason = null;
 
+    /**
+     * Discriminator for non status/motif entries ('recap_email',
+     * 'recap_email_payment'); null for the legacy two kinds.
+     */
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $kind = null;
+
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $authorName = null;
 
@@ -83,6 +90,18 @@ class ContactEvent
     public function setClosureReason(?ClosureReason $closureReason): static
     {
         $this->closureReason = $closureReason;
+
+        return $this;
+    }
+
+    public function getKind(): ?string
+    {
+        return $this->kind;
+    }
+
+    public function setKind(?string $kind): static
+    {
+        $this->kind = $kind;
 
         return $this;
     }

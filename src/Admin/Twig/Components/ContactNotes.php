@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Admin\Twig\Components;
 
 use App\Auth\Entity\User;
-use App\Contact\Domain\ContactEventItem;
 use App\Contact\Domain\ContactNoteItem;
-use App\Contact\Repository\ContactEventRepository;
 use App\Contact\Repository\ContactNoteRepository;
 use App\Contact\Repository\ContactRepository;
 use App\Contact\Security\ContactNoteVoter;
@@ -45,10 +43,6 @@ final class ContactNotes
     #[LiveProp(writable: true)]
     public string $editingText = '';
 
-    /** 'all' | 'notes' | 'events' */
-    #[LiveProp]
-    public string $feedFilter = 'all';
-
     /** Visible entries; grows via showMoreFeed(). */
     #[LiveProp]
     public int $feedLimit = self::FEED_PAGE;
@@ -57,7 +51,6 @@ final class ContactNotes
 
     public function __construct(
         private readonly ContactNoteRepository $notes,
-        private readonly ContactEventRepository $events,
         private readonly ContactRepository $contacts,
         private readonly Security $security,
     ) {
@@ -76,41 +69,20 @@ final class ContactNotes
     }
 
     /**
-     * Notes and status/motif events merged into one thread, newest first,
-     * current filter applied, capped at feedLimit entries.
+     * Notes thread, newest first, capped at feedLimit entries. The action
+     * history (status, motifs, recap emails) lives in the follow-up
+     * timeline, not here.
      *
-     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}|array{event: ContactEventItem}>
+     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>
      */
     public function getFeed(): array
     {
         return \array_slice($this->fullFeed(), 0, $this->feedLimit);
     }
 
-    /**
-     * @return array{all: int, notes: int, events: int}
-     */
-    public function getFeedCounts(): array
-    {
-        $notes = \count($this->notes->listForContact($this->contactId));
-        $events = \count($this->events->listForContact($this->contactId));
-
-        return ['all' => $notes + $events, 'notes' => $notes, 'events' => $events];
-    }
-
     public function getHiddenFeedCount(): int
     {
         return max(0, \count($this->fullFeed()) - $this->feedLimit);
-    }
-
-    #[LiveAction]
-    public function filterFeed(#[LiveArg] string $filter): void
-    {
-        $this->ensureAdmin();
-
-        if (\in_array($filter, ['all', 'notes', 'events'], true)) {
-            $this->feedFilter = $filter;
-            $this->feedLimit = self::FEED_PAGE;
-        }
     }
 
     #[LiveAction]
@@ -121,32 +93,18 @@ final class ContactNotes
     }
 
     /**
-     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}|array{event: ContactEventItem}>
+     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>
      */
     private function fullFeed(): array
     {
-        $rows = [];
-
-        if ('events' !== $this->feedFilter) {
-            $rows = array_map(
-                fn (ContactNoteItem $note): array => [
-                    'note' => $note,
-                    'canEdit' => $this->security->isGranted(ContactNoteVoter::EDIT, $note),
-                    'canDelete' => $this->security->isGranted(ContactNoteVoter::DELETE, $note),
-                ],
-                $this->notes->listForContact($this->contactId),
-            );
-        }
-
-        if ('notes' !== $this->feedFilter) {
-            foreach ($this->events->listForContact($this->contactId) as $event) {
-                $rows[] = ['event' => $event];
-            }
-        }
-
-        usort($rows, static fn (array $a, array $b): int => ($b['note'] ?? $b['event'])->createdAt <=> ($a['note'] ?? $a['event'])->createdAt);
-
-        return $rows;
+        return array_map(
+            fn (ContactNoteItem $note): array => [
+                'note' => $note,
+                'canEdit' => $this->security->isGranted(ContactNoteVoter::EDIT, $note),
+                'canDelete' => $this->security->isGranted(ContactNoteVoter::DELETE, $note),
+            ],
+            $this->notes->listForContact($this->contactId),
+        );
     }
 
     #[LiveAction]

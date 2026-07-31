@@ -1796,7 +1796,7 @@ admin:
     nav:
         dashboard: Dashboard
         users: Users
-        contacts: Contacts
+        contacts: Leads
         payments: Payments
         tools: Tools
         logout: Log out
@@ -1804,7 +1804,6 @@ admin:
     contacts:
         title: Contact requests
         empty: No contact requests yet.
-        emptyNew: No new requests to handle.
         searchPlaceholder: Search (name, email, reference)
         loading: Loading requests
         show:
@@ -1833,6 +1832,8 @@ admin:
             assigneeNone: Nobody
             recallLabel: Recall on
             recallOverdue: Recall overdue
+            timelineShowMore: 'Show the %count% previous'
+            timelineShowLess: Collapse the history
             recallClear: Clear
         closure:
             budget_unrealistic: Unrealistic budget
@@ -1841,6 +1842,60 @@ admin:
             solved_alone: Solved on their own
             out_of_area: Out of area
             other: Other
+        emptyState:
+            searchTitle: No results
+            searchHint: 'No request matches "%search%". Try a name, an email or a reference.'
+            mineTitle: No assigned request
+            mineHint: Requests assigned to you via "Followed by" will show up here.
+            mineCta: See all requests
+            newTitle: All caught up!
+            newHint: No new request waiting. Nice work.
+            defaultTitle: No requests
+        keysHint: '↑↓ navigate · 1-6 status · Enter open'
+        sort:
+            recent: Most recent
+            recall: Closest recall
+            rating: Best rating
+            budget: Highest budget
+        scope:
+            label: Scope
+            all: All requests
+            mine: My requests
+        kpi:
+            newRequests: New requests
+            last30: Last 30 days
+            avgResponse: Average first response
+            slaRate: '%rate% % handled within 30 min'
+            conversion: Conversion rate
+            conversionHint: Of decided requests (30 days)
+            overdueRecalls: Overdue recalls
+            overdueHint: Planned recalls past due
+        create:
+            button: New request
+            title: New contact request
+            subtitle: Manual entry for a request received by phone, email or WhatsApp.
+            source: Request source
+            submit: Create the request
+        contactSource:
+            form: Website form
+            phone: Phone
+            email: Email
+            website: Website
+            whatsapp: WhatsApp
+        recapEmail:
+            button: Send the recap to the client
+            modalTitle: Send the recap
+            modalSubtitle: 'The email will be sent to <strong>%email%</strong>, in the client''s language.'
+            paymentToggle: Include the payment link
+            paymentHint: '%offer% package (%price%), secure payment button in the email.'
+            paymentUnavailable: 'Payment link unavailable: set the desired package in the contact details first.'
+            send: Send the email
+            sent: Recap sent to the client
+        edit:
+            title: Edit the details
+            required: This field is required.
+            invalidEmail: Invalid email address.
+            noOffer: No package
         nextStep:
             label: Next step
             choice:
@@ -1854,6 +1909,9 @@ admin:
         feed:
             statusChanged: 'Status changed to'
             reasonSet: 'Reason:'
+            recapSent: Recap sent to the client
+            withPayment: with payment link
+            withoutPayment: without payment link
         project:
             title: Housing project
             subtitle: Filled during qualification, to compare and filter requests.
@@ -1868,6 +1926,21 @@ admin:
                 good: Good budget
                 great: Great budget
             removeArea: 'Remove %area%'
+            note:
+                label: Project note
+                placeholder: Project details (constraints, priorities, context...)
+                autosaveHint: Saved automatically when you leave the field.
+            furnishing:
+                label: Furnished or unfurnished
+                choice:
+                    furnished: Furnished
+                    unfurnished: Unfurnished
+            guarantor:
+                label: Guarantor type
+                choice:
+                    physical: Personal guarantor
+                    garantme: Garantme
+                    bank: Bank guarantee
             stayDuration:
                 label: Intended length of stay
                 choice:
@@ -1906,10 +1979,6 @@ admin:
             unsaved: Your qualification note is not saved. Leave the page anyway?
         notes:
             title: Follow-up thread
-            filter:
-                all: All
-                notes: Notes
-                events: Activity
             showMore: 'Show %count% more'
             internal: Internal notes, only visible to the team.
             enterHint: Press Enter to send

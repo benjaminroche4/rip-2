@@ -10,31 +10,9 @@
 >
     {# Rendu sans chrome propre : partage la card "Suivi" avec ContactFollowUp
        (shell dans show.html.twig). #}
-            {% set feedCounts = this.feedCounts %}
-            <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-t border-gray-950/5 p-3">
-                <div>
-                    <h2 class="font-medium text-gray-900">{{ 'admin.contacts.notes.title'|trans }}</h2>
-                    <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.notes.internal'|trans }}</p>
-                </div>
-                {% if feedCounts.all > 0 %}
-                    <div class="flex items-center gap-1" role="tablist" aria-label="{{ 'admin.contacts.notes.title'|trans }}">
-                        {% for filter in ['all', 'notes', 'events'] %}
-                            <button
-                                type="button"
-                                role="tab"
-                                aria-selected="{{ this.feedFilter == filter ? 'true' : 'false' }}"
-                                data-action="live#action"
-                                data-live-action-param="filterFeed"
-                                data-live-filter-param="{{ filter }}"
-                                class="cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ this.feedFilter == filter ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
-                                data-testid="feed-filter-{{ filter }}"
-                            >
-                                {{ ('admin.contacts.notes.filter.' ~ filter)|trans }}
-                                <span class="text-gray-400 tabular-nums">{{ feedCounts[filter] }}</span>
-                            </button>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+            <div class="border-t border-gray-950/5 p-3">
+                <h2 class="font-medium text-gray-900">{{ 'admin.contacts.notes.title'|trans }}</h2>
+                <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.notes.internal'|trans }}</p>
             </div>
 
             {% set noteRows = this.feed %}
@@ -65,27 +43,6 @@
             <div class="rounded-b-xl bg-white px-5 py-4">
                     <ul class="divide-y divide-gray-950/5" role="list">
                         {% for row in noteRows %}
-                            {% if row.event is defined %}
-                            {% set event = row.event %}
-                            <li class="animate-slide-in flex items-center gap-3 py-3 first:pt-0 last:pb-0" data-testid="contact-event">
-                                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-gray-400">
-                                    {{ ux_icon(event.status ? 'lucide:refresh-ccw' : 'lucide:tag', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
-                                </span>
-                                <p class="min-w-0 flex-1 text-sm text-gray-500">
-                                    {% if event.status %}
-                                        {{ 'admin.contacts.feed.statusChanged'|trans }}
-                                        <span class="font-medium {{ event.status.textClass }}">{{ event.status.labelKey|trans }}</span>
-                                    {% else %}
-                                        {{ 'admin.contacts.feed.reasonSet'|trans }}
-                                        <span class="font-medium text-gray-900">{{ event.closureReason.labelKey|trans }}</span>
-                                    {% endif %}
-                                    {% if event.authorName %}
-                                        <span class="text-gray-400">· {{ event.authorName|title }}</span>
-                                    {% endif %}
-                                    <span class="text-xs text-gray-400 tabular-nums" title="{{ event.createdAt|format_datetime('medium', 'short') }}">· {{ event.createdAt|human_date }}</span>
-                                </p>
-                            </li>
-                            {% else %}
                             {% set note = row.note %}
                             <li class="animate-slide-in flex gap-3 py-4 first:pt-0 last:pb-0" data-controller="fade-exit" data-testid="contact-note">
                                 <twig:Avatar filename="{{ note.authorAvatar }}" name="{{ note.authorName }}" size="8" />
@@ -161,7 +118,6 @@
                                     {% endif %}
                                 </div>
                             </li>
-                            {% endif %}
                         {% endfor %}
                     </ul>
                     {% if this.hiddenFeedCount > 0 %}

@@ -16,7 +16,7 @@
     langLabel: fr ? 'Langue' : 'Language',
     langValue: contact.lang == 'fr' ? (fr ? 'Français' : 'French') : (fr ? 'Anglais' : 'English'),
     companyLabel: fr ? 'Société' : 'Company',
-    offerLabel: fr ? 'Formule choisie' : 'Chosen package',
+    offerLabel: fr ? 'Formule souhaitée' : 'Desired package',
     requestLabel: fr ? 'Demande' : 'Request',
     projectLabel: fr ? 'Projet logement' : 'Housing project',
     projectBudget: fr ? 'Budget mensuel' : 'Monthly budget',
@@ -24,30 +24,18 @@
     projectMoveIn: fr ? 'Emménagement souhaité' : 'Desired move-in',
     projectType: fr ? 'Type de bien' : 'Property type',
     projectStay: fr ? "Durée d'installation" : 'Length of stay',
+    projectFurnishing: fr ? 'Meublé / non meublé' : 'Furnishing',
+    projectGuarantor: fr ? 'Type de garant' : 'Guarantor type',
     messageLabel: fr ? 'Message' : 'Message',
     referenceLabel: fr ? 'Référence' : 'Reference',
     followUp: fr ? 'Suivi' : 'Follow-up',
+    assignee: fr ? 'Suivi par' : 'Followed by',
+    projectAreasMap: fr ? 'Quartiers souhaités (en couleur)' : 'Requested districts (highlighted)',
     handledBy: fr ? 'Prise en charge par' : 'Handled by',
     firstTreatedAt: fr ? 'Première prise en charge' : 'First handled on',
     statusChangedAt: fr ? 'Dernier changement de statut' : 'Last status change',
-    status: {
-        new: fr ? 'À traiter' : 'To handle',
-        in_progress: fr ? 'En cours' : 'In progress',
-        to_recall: fr ? 'À recontacter' : 'To call back',
-        converted: fr ? 'Convertie' : 'Converted',
-        unqualified: fr ? 'Non qualifiée' : 'Unqualified',
-        closed: fr ? 'Fermée' : 'Closed',
-    },
     footerTag: fr ? 'Agence de Relocation pour Particuliers et Professionnels' : 'Relocation Agency for Individuals and Businesses',
     footerAddress: '155 Rue du Faubourg Saint-Denis, 75010 Paris — France',
-} %}
-{% set statusStyles = {
-    new: 'background-color:#EFF6FF;border-color:#BFDBFE;color:#1d4ed8',
-    in_progress: 'background-color:#FFFBEB;border-color:#FDE68A;color:#b45309',
-    to_recall: 'background-color:#FAF5FF;border-color:#E9D5FF;color:#7e22ce',
-    converted: 'background-color:#EFFDF4;border-color:#BBF7D0;color:#15803d',
-    unqualified: 'background-color:#F7F7F7;border-color:#E5E5E5;color:#525252',
-    closed: 'background-color:#F7F7F7;border-color:#E5E5E5;color:#374151',
 } %}
 <!doctype html>
 <html lang="{{ locale }}">
@@ -82,34 +70,49 @@
             border-radius: 8pt;
             padding: 14pt 18pt;
         }
-        .section-label { margin: 0 0 8pt; font-size: 11pt; color: #111827; }
+        .section-label {
+            margin: 2pt 0 8pt 4pt;
+            font-size: 8.5pt;
+            font-weight: 600;
+            color: #71172e;
+            text-transform: uppercase;
+            letter-spacing: 0.8pt;
+        }
 
         .field-table { display: table; width: 100%; border-collapse: collapse; }
         .field-tr { display: table-row; }
         .field-th {
             display: table-cell;
-            width: 38%;
-            padding: 4pt 12pt 4pt 0;
+            width: 36%;
+            padding: 5pt 12pt 5pt 0;
             font-size: 9pt;
             color: #525252;
             vertical-align: top;
+            border-bottom: 1px solid #F5F5F4;
         }
         .field-td {
             display: table-cell;
-            padding: 4pt 0;
+            padding: 5pt 0;
             font-size: 10pt;
             font-weight: 600;
             color: #111827;
             vertical-align: top;
+            border-bottom: 1px solid #F5F5F4;
         }
-        .status-pill {
-            display: inline-block;
-            padding: 2pt 12pt;
-            border-radius: 999pt;
-            font-weight: 600;
-            font-size: 9pt;
-            border: 1px solid;
+        .field-tr:last-child .field-th,
+        .field-tr:last-child .field-td { border-bottom: none; }
+
+        .highlights { display: table; width: 100%; border-collapse: separate; border-spacing: 6pt 0; margin: 0 -6pt 10pt; }
+        .highlight {
+            display: table-cell;
+            width: 33%;
+            background-color: #F7F7F7;
+            border-radius: 8pt;
+            padding: 8pt 10pt;
+            vertical-align: top;
         }
+        .highlight .hl-label { margin: 0; font-size: 7.5pt; color: #525252; text-transform: uppercase; letter-spacing: 0.5pt; }
+        .highlight .hl-value { margin: 2pt 0 0; font-size: 11pt; font-weight: 700; color: #111827; }
         hr.sep { width: 100%; border: none; border-top: 2px solid #eaeaea; margin: 10pt 0; }
         .footer-brand { margin: 14pt 0 0; font-size: 9pt; text-align: center; color: #525252; }
         .footer-address { margin: 4pt 0 0; font-size: 9pt; text-align: center; color: #9ca3af; }
@@ -136,18 +139,18 @@
             {% endif %}
         </div>
 
-        <h1 style="font-size:22pt;line-height:1.3;text-align:center;margin:14pt 0 0">{{ t.title }}</h1>
+        <div style="width:26pt;height:2pt;background-color:#71172e;border-radius:2pt;margin:14pt auto 0"></div>
+        <h1 style="font-size:22pt;line-height:1.3;text-align:center;margin:8pt 0 0">{{ t.title }}</h1>
+        <p style="margin:6pt 0 0;font-size:13pt;font-weight:600;text-align:center;color:#374151">{{ contact.fullName ? contact.fullName|title : contact.email }}</p>
         <p style="margin:8pt 0 0;font-size:9pt;text-align:center;color:#9ca3af">
             {{ t.referenceLabel }} {{ contact.reference }} &middot;
             {{ t.receivedOn }} {{ contact.createdAt|format_datetime(pattern='dd MMMM yyyy, HH:mm', locale=locale) }}
         </p>
-        <p style="margin:10pt 0 18pt;text-align:center">
-            <span class="status-pill" style="{{ statusStyles[contact.status.value] }}">{{ t.status[contact.status.value] }}</span>
-        </p>
+        <div style="margin:0 0 18pt"></div>
 
         {# ---- Contact details (gray outer → white inner) ---- #}
         <div class="gray-card">
-            <p class="section-label"><strong>{{ t.summary }}</strong></p>
+            <p class="section-label">{{ t.summary }}</p>
             <div class="white-inner">
                 <div class="field-table">
                     <div class="field-tr">
@@ -170,19 +173,13 @@
                         <span class="field-th">{{ t.companyLabel }}</span>
                         <span class="field-td">{{ contact.company ?: '-' }}</span>
                     </div>
-                    {% if offerLabel %}
-                        <div class="field-tr">
-                            <span class="field-th">{{ t.offerLabel }}</span>
-                            <span class="field-td">{{ offerLabel }}</span>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
 
         {# ---- Request + message ---- #}
         <div class="gray-card">
-            <p class="section-label"><strong>{{ t.requestLabel }}</strong></p>
+            <p class="section-label">{{ t.requestLabel }}</p>
             <div class="white-inner">
                 <p style="margin:0;padding:0;font-size:10.5pt"><strong>{{ helpTypeLabel }}</strong></p>
                 {% if contact.message %}
@@ -194,27 +191,43 @@
         </div>
 
         {# ---- Housing project (only when the admin filled something) ---- #}
-        {% if contact.projectBudget or contact.projectAreas or contact.projectMoveInAt or contact.projectPropertyType or contact.projectStayDuration %}
+        {% if offerLabel or contact.projectBudget or contact.projectAreas or contact.projectMoveInAt or contact.projectPropertyType or contact.projectStayDuration or contact.projectFurnishing or contact.projectGuarantorType %}
             <div class="gray-card">
-                <p class="section-label"><strong>{{ t.projectLabel }}</strong></p>
+                <p class="section-label">{{ t.projectLabel }}</p>
                 <div class="white-inner">
+                    {% if contact.projectBudget or contact.projectMoveInAt or contact.projectStayDuration %}
+                        <div class="highlights">
+                            {% if contact.projectBudget %}
+                                <div class="highlight">
+                                    <p class="hl-label">{{ t.projectBudget }}</p>
+                                    <p class="hl-value">{{ contact.projectBudget|format_number(locale=locale) }} €<span style="font-size:8pt;font-weight:400;color:#525252"> /{{ fr ? 'mois' : 'mo' }}</span></p>
+                                </div>
+                            {% endif %}
+                            {% if contact.projectMoveInAt %}
+                                <div class="highlight">
+                                    <p class="hl-label">{{ t.projectMoveIn }}</p>
+                                    <p class="hl-value">{{ contact.projectMoveInAt|format_date(pattern='dd MMM yyyy', locale=locale) }}</p>
+                                </div>
+                            {% endif %}
+                            {% if contact.projectStayDuration %}
+                                <div class="highlight">
+                                    <p class="hl-label">{{ t.projectStay }}</p>
+                                    <p class="hl-value">{{ contact.projectStayDuration.labelKey|trans([], 'messages', locale) }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <div class="field-table">
-                        {% if contact.projectBudget %}
+                        {% if offerLabel %}
                             <div class="field-tr">
-                                <span class="field-th">{{ t.projectBudget }}</span>
-                                <span class="field-td">{{ contact.projectBudget|number_format(0, ',', ' ') }} € / {{ fr ? 'mois' : 'month' }}</span>
+                                <span class="field-th">{{ ux_icon('lucide:briefcase', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.offerLabel }}</span>
+                                <span class="field-td">{{ offerLabel }}</span>
                             </div>
                         {% endif %}
-                        {% if contact.projectAreas %}
+                        {% if areaLabels is not empty %}
                             <div class="field-tr">
-                                <span class="field-th">{{ t.projectAreas }}</span>
-                                <span class="field-td">{{ contact.projectAreas }}</span>
-                            </div>
-                        {% endif %}
-                        {% if contact.projectMoveInAt %}
-                            <div class="field-tr">
-                                <span class="field-th">{{ t.projectMoveIn }}</span>
-                                <span class="field-td">{{ contact.projectMoveInAt|format_date(pattern='dd MMMM yyyy', locale=locale) }}</span>
+                                <span class="field-th">{{ ux_icon('lucide:map-pin', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.projectAreas }}</span>
+                                <span class="field-td">{{ areaLabels|join(', ') }}</span>
                             </div>
                         {% endif %}
                         {% if contact.projectPropertyType %}
@@ -226,27 +239,45 @@
                                 {% set typeLabels = typeLabels|merge([typeLabel != typeKey ? typeLabel : value]) %}
                             {% endfor %}
                             <div class="field-tr">
-                                <span class="field-th">{{ t.projectType }}</span>
+                                <span class="field-th">{{ ux_icon('lucide:building-2', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.projectType }}</span>
                                 <span class="field-td">{{ typeLabels|join(', ') }}</span>
                             </div>
                         {% endif %}
-                        {% if contact.projectStayDuration %}
+                        {% if contact.projectFurnishing %}
                             <div class="field-tr">
-                                <span class="field-th">{{ t.projectStay }}</span>
-                                <span class="field-td">{{ contact.projectStayDuration.labelKey|trans([], 'messages', locale) }} ({{ contact.projectStayDuration.hintKey|trans([], 'messages', locale) }})</span>
+                                <span class="field-th">{{ ux_icon('lucide:sofa', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.projectFurnishing }}</span>
+                                <span class="field-td">{{ contact.projectFurnishing.labelKey|trans([], 'messages', locale) }}</span>
+                            </div>
+                        {% endif %}
+                        {% if contact.projectGuarantorType %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ ux_icon('lucide:shield-check', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.projectGuarantor }}</span>
+                                <span class="field-td">{{ contact.projectGuarantorType.labelKey|trans([], 'messages', locale) }}</span>
                             </div>
                         {% endif %}
                     </div>
+                    {% if areasMapSvg %}
+                        <div style="margin-top:10pt;border-top:1px solid #eaeaea;padding-top:10pt;page-break-inside:avoid">
+                            <p style="margin:0 0 6pt;font-size:9pt;color:#525252">{{ t.projectAreasMap }}</p>
+                            <div style="width:100%;border:1px solid #E5E5E5;border-radius:8pt;overflow:hidden;line-height:0">{{ areasMapSvg|raw }}</div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
 
         {# ---- Follow-up (only once the request was handled) ---- #}
-        {% if contact.statusChangedBy or contact.firstTreatedAt %}
+        {% if contact.assigneeName or contact.statusChangedBy or contact.firstTreatedAt %}
             <div class="gray-card">
-                <p class="section-label"><strong>{{ t.followUp }}</strong></p>
+                <p class="section-label">{{ t.followUp }}</p>
                 <div class="white-inner">
                     <div class="field-table">
+                        {% if contact.assigneeName %}
+                            <div class="field-tr">
+                                <span class="field-th">{{ t.assignee }}</span>
+                                <span class="field-td">{{ contact.assigneeName|title }}</span>
+                            </div>
+                        {% endif %}
                         {% if contact.statusChangedBy %}
                             <div class="field-tr">
                                 <span class="field-th">{{ t.handledBy }}</span>

@@ -36,7 +36,7 @@
     </a>
 {% endmacro %}
 
-{% macro contactCard(contact, statuses, leavingContactId, adminPrefix, confirmedContactId = null) %}
+{% macro contactCard(contact, statuses, leavingContactId, adminPrefix, confirmedContactId = null, statusFilter = 'all') %}
     {# data-skip-morph: nos controllers Stimulus (countdown, details-dropdown,
        expandable) mutent le DOM de la carte; idiomorph + le tracker de mutations
        externes peuvent alors réappliquer l'ancien contenu par-dessus le re-rendu.
@@ -195,7 +195,7 @@
                     <twig:Button
                         as="a"
                         size="sm"
-                        href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: contact.reference}) }}"
+                        href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: contact.reference, from: statusFilter}) }}"
                         class="px-10"
                         data-testid="contact-card-details"
                     >
@@ -207,15 +207,54 @@
     </article>
 {% endmacro %}
 
-{% macro cardsBlock(contacts, statuses, leavingContactId, statusFilter, hasMore, adminPrefix, confirmedContactId = null) %}
+{% macro cardsBlock(contacts, statuses, leavingContactId, statusFilter, hasMore, adminPrefix, confirmedContactId = null, scope = 'all', search = '') %}
     {% if contacts is empty %}
+        {# État vide contextuel : recherche sans résultat, vue "mes demandes"
+           vide, inbox zéro sur "à traiter", ou liste vide tout court. #}
+        {% if search|trim != '' %}
+            {% set emptyIcon = 'lucide:search-x' %}
+            {% set emptyTitle = 'admin.contacts.emptyState.searchTitle'|trans %}
+            {% set emptyHint = 'admin.contacts.emptyState.searchHint'|trans({'%search%': search|trim}) %}
+        {% elseif scope == 'mine' %}
+            {% set emptyIcon = 'lucide:user-check' %}
+            {% set emptyTitle = 'admin.contacts.emptyState.mineTitle'|trans %}
+            {% set emptyHint = 'admin.contacts.emptyState.mineHint'|trans %}
+        {% elseif statusFilter == 'new' %}
+            {% set emptyIcon = 'lucide:check-check' %}
+            {% set emptyTitle = 'admin.contacts.emptyState.newTitle'|trans %}
+            {% set emptyHint = 'admin.contacts.emptyState.newHint'|trans %}
+        {% else %}
+            {% set emptyIcon = 'lucide:inbox' %}
+            {% set emptyTitle = 'admin.contacts.emptyState.defaultTitle'|trans %}
+            {% set emptyHint = 'admin.contacts.empty'|trans %}
+        {% endif %}
         <div class="mt-6">
-            <twig:Admin:EmptyCard message="{{ (statusFilter == 'new' ? 'admin.contacts.emptyNew' : 'admin.contacts.empty')|trans }}" />
+            <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="contacts-empty">
+                <div class="flex flex-col items-center rounded-2xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 px-6 py-16 text-center">
+                    <span class="flex size-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-gray-400 shadow-sm">
+                        {{ ux_icon(emptyIcon, {class: 'size-5', 'aria-hidden': 'true'}) }}
+                    </span>
+                    <p class="mt-4 font-medium text-gray-900">{{ emptyTitle }}</p>
+                    <p class="mt-1 max-w-sm text-sm text-pretty text-gray-500">{{ emptyHint }}</p>
+                    {% if scope == 'mine' and search|trim == '' %}
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="changeScope"
+                            data-live-scope-param="all"
+                            class="mt-5 cursor-pointer rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                            data-testid="contacts-empty-see-all"
+                        >
+                            {{ 'admin.contacts.emptyState.mineCta'|trans }}
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     {% else %}
         <div class="mt-6 space-y-4">
             {% for contact in contacts %}
-                {{ _self.contactCard(contact, statuses, leavingContactId, adminPrefix, confirmedContactId) }}
+                {{ _self.contactCard(contact, statuses, leavingContactId, adminPrefix, confirmedContactId, statusFilter) }}
             {% endfor %}
         </div>
 
@@ -310,13 +349,13 @@
             >
                 <button
                     type="button"
-                    class="absolute inset-0 cursor-default bg-gray-950/30"
+                    class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
                     data-action="live#action"
                     data-live-action-param="closeRecall"
                     aria-label="{{ 'admin.contacts.recallModal.skip'|trans }}"
                     tabindex="-1"
                 ></button>
-                <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-6 shadow-xl">
+                <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-8 shadow-xl">
                     <h2 class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.contacts.recallModal.title'|trans }}</h2>
                     <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ 'admin.contacts.recallModal.subtitle'|trans }}</p>
                     <input
@@ -366,7 +405,7 @@
             >
                 <button
                     type="button"
-                    class="absolute inset-0 cursor-default bg-gray-950/30"
+                    class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
                     data-action="live#action"
                     data-live-action-param="closeQualify"
                     aria-label="{{ 'admin.contacts.qualify.done'|trans }}"
@@ -382,20 +421,78 @@
             </div>
         {% endif %}
 
-        <div class="relative max-lg:mt-6 lg:-mt-6">
+        <div
+            class="max-lg:mt-6 lg:-mt-6"
+            data-controller="contacts-keys"
+            data-contacts-keys-focus-class="ring-2 ring-primary/40 ring-offset-2"
+        >
+            {# Portée : toutes les demandes ou seulement les miennes, au-dessus des cards. #}
+            <div class="mb-4 flex items-center justify-end gap-3 pt-6">
+                <p class="mr-auto hidden text-xs text-gray-400 lg:block" aria-hidden="true">{{ 'admin.contacts.keysHint'|trans }}</p>
+                {# Tri de la liste. #}
+                <details
+                    class="relative"
+                    data-controller="details-dropdown"
+                    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    data-testid="contacts-sort"
+                >
+                    <summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                        {{ ux_icon('lucide:arrow-up-down', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                        {{ ('admin.contacts.sort.' ~ this.sort)|trans }}
+                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                    </summary>
+                    <div class="absolute right-0 z-10 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                        {% for sort in constant('App\\Admin\\Twig\\Components\\ContactList::SORTS') %}
+                            <button
+                                type="button"
+                                data-action="live#action details-dropdown#close"
+                                data-live-action-param="changeSort"
+                                data-live-sort-param="{{ sort }}"
+                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.sort == sort ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                data-testid="contacts-sort-{{ sort }}"
+                            >
+                                {{ ('admin.contacts.sort.' ~ sort)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </details>
+                <div class="inline-flex rounded-xl border border-neutral-200 bg-neutral-100 p-1" role="tablist" aria-label="{{ 'admin.contacts.scope.label'|trans }}" data-testid="contacts-scope">
+                    {% for scope in ['all', 'mine'] %}
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected="{{ this.scope == scope ? 'true' : 'false' }}"
+                            data-action="live#action"
+                            data-live-action-param="changeScope"
+                            data-live-scope-param="{{ scope }}"
+                            class="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ this.scope == scope ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
+                            data-testid="contacts-scope-{{ scope }}"
+                        >
+                            {{ ('admin.contacts.scope.' ~ scope)|trans }}
+                            {% if scope == 'mine' %}
+                                <span class="rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums {{ this.scope == 'mine' ? 'bg-primary/10 text-primary' : 'bg-neutral-200 text-gray-500' }}">{{ this.mineCount }}</span>
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="relative">
             {# Overlay visible pendant les requêtes live (filtre, statut, pagination). #}
             {# Le spinner reste au centre de la zone VISIBLE même quand la
                liste est très haute : sticky à mi-viewport dans l'overlay. #}
             <div
                 data-loading="delay(150)|show"
-                class="absolute inset-0 z-20 mt-6 flex items-start justify-center rounded-3xl bg-neutral-50/90 backdrop-blur-sm"
+                class="absolute inset-0 z-20 rounded-3xl bg-neutral-50/90 backdrop-blur-sm"
                 data-testid="contacts-loading-overlay"
             >
-                <span class="sticky top-[45vh]">
+                {# Pleine largeur + flex : le spinner reste centré horizontalement,
+                   et sticky à mi-viewport verticalement même sur liste haute. #}
+                <span class="sticky top-[45vh] flex w-full justify-center">
                     <twig:Spinner class="size-7 text-gray-500" label="{{ 'admin.contacts.loading'|trans }}" />
                 </span>
             </div>
-            {{ _self.cardsBlock(contacts, statuses, this.leavingContactId, this.statusFilter, this.hasMore, this.adminPrefix, this.confirmedContactId) }}
+            {{ _self.cardsBlock(contacts, statuses, this.leavingContactId, this.statusFilter, this.hasMore, this.adminPrefix, this.confirmedContactId, this.scope, this.search) }}
+            </div>
         </div>
     </div>
 </div>

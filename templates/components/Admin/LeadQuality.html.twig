@@ -79,9 +79,10 @@
                 <div class="space-y-2 text-sm">
                     <p class="text-gray-600">{{ 'admin.contacts.show.field.leadNote'|trans }}</p>
                     {% if this.editingNote %}
+                        <div class="space-y-1.5">
                         <textarea
                             data-model="norender|note"
-                            data-action="keydown.enter->live#action:prevent"
+                            data-action="change->live#action keydown.enter->live#action:prevent"
                             data-live-action-param="saveNote"
                             rows="3"
                             placeholder="{{ 'admin.contacts.leadQuality.notePlaceholder'|trans }}"
@@ -89,16 +90,10 @@
                             title="{{ 'admin.contacts.notes.enterHint'|trans }}"
                             class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
                         >{{ this.note }}</textarea>
-                        <div class="flex justify-end">
-                            <twig:Button
-                                size="sm"
-                                variant="outline"
-                                data-action="live#action"
-                                data-live-action-param="saveNote"
-                                data-testid="lead-quality-save"
-                            >
-                                {{ 'admin.contacts.notes.save'|trans }}
-                            </twig:Button>
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.contacts.project.note.autosaveHint'|trans }}
+                        </p>
                         </div>
                     {% else %}
                         <div class="flex items-start justify-between gap-3">

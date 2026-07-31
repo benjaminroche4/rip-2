@@ -43,6 +43,7 @@ class ContactEventRepository extends ServiceEntityRepository
                 id: (int) $event->getId(),
                 status: $event->getStatus(),
                 closureReason: $event->getClosureReason(),
+                kind: $event->getKind(),
                 authorName: $event->getAuthorName(),
                 authorAvatar: $event->getAuthorAvatar(),
                 createdAt: $event->getCreatedAt(),
@@ -62,5 +63,19 @@ class ContactEventRepository extends ServiceEntityRepository
             ->setAuthorAvatar($authorAvatar);
 
         $this->getEntityManager()->persist($event);
+    }
+
+    /** Recap email sent to the client; flushes immediately. */
+    public function recordRecapSent(Contact $contact, bool $withPayment, ?string $authorName, ?string $authorAvatar): void
+    {
+        $event = (new ContactEvent())
+            ->setContact($contact)
+            ->setKind($withPayment ? 'recap_email_payment' : 'recap_email')
+            ->setAuthorName($authorName)
+            ->setAuthorAvatar($authorAvatar);
+
+        $em = $this->getEntityManager();
+        $em->persist($event);
+        $em->flush();
     }
 }

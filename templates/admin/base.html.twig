@@ -7,6 +7,7 @@
 
         {# Admin pages are noindex via X-Robots-Tag (AdminNoIndexListener) — covers HTML and any future JSON/CSV/PDF exports. #}
         <title>{% block title %}Admin{% endblock %}</title>
+        {% block head %}{% endblock %}
 
         <link rel="icon" type="image/x-icon" href="{{ asset('medias/favicon/favicon.ico') }}" sizes="32x32">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('medias/favicon/apple-touch-icon.png') }}">
@@ -68,7 +69,7 @@
                         </p>
                         <ul class="space-y-0.5" role="list">
                             {{ _self.navItems([
-                                {route: 'admin_contacts', icon: 'lucide:mail', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
+                                {route: 'admin_contacts', icon: 'lucide:user-plus', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
                                 {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
                             ], currentRoute, adminPrefix) }}
                         </ul>

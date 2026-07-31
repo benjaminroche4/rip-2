@@ -57,7 +57,8 @@ final class ContactPdfRendererTest extends KernelTestCase
         self::assertNotNull($recorder->lastHtml);
         // Partner-safe follow-up info is included...
         self::assertStringContainsString('Julien Moreau', $recorder->lastHtml);
-        self::assertStringContainsString('À traiter', $recorder->lastHtml);
+        // The internal status never shows on a partner-facing document.
+        self::assertStringNotContainsString('À traiter', $recorder->lastHtml, 'The status must stay internal.');
         // ...but internal-only data never leaves the admin.
         self::assertStringNotContainsString('127.0.0.1', $recorder->lastHtml, 'The IP must stay internal.');
         self::assertStringNotContainsString('Note interne secrète', $recorder->lastHtml, 'The lead note must stay internal.');
@@ -80,6 +81,52 @@ final class ContactPdfRendererTest extends KernelTestCase
         $service = $this->buildService(new RecordingContactPdfRenderer());
 
         self::assertSame('demande-contact-CT-424242.pdf', $service->filename($this->buildContact(lang: 'fr')));
+    }
+
+    public function testRendersAssigneeAreaLabelsAndDistrictMap(): void
+    {
+        $recorder = new RecordingContactPdfRenderer();
+        $service = $this->buildService($recorder);
+
+        $contact = new ContactListItem(
+            id: 2,
+            firstName: 'jane',
+            lastName: 'doe',
+            email: 'jane@example.com',
+            phoneNumber: null,
+            company: null,
+            helpType: 'contact.contactForm.helpType.choice.1',
+            message: null,
+            createdAt: new \DateTimeImmutable('2026-03-18 14:00'),
+            lang: 'fr',
+            reference: 'CT-424243',
+            status: ContactStatus::InProgress,
+            statusChangedBy: null,
+            statusChangedByAvatar: null,
+            projectAreas: '11e,92',
+            assigneeId: 7,
+            assigneeName: 'julien moreau',
+        );
+        $service->render($contact);
+        $html = (string) $recorder->lastHtml;
+
+        self::assertStringContainsString('Suivi par', $html);
+        self::assertStringContainsString('Julien Moreau', $html);
+        self::assertStringContainsString('11e, Hauts-de-Seine (92)', $html, 'Area codes render as labels.');
+        self::assertStringContainsString('<svg', $html, 'The district map is embedded.');
+        self::assertStringContainsString('fill="#71172e"', $html, 'Selected districts are highlighted.');
+    }
+
+    public function testNoDistrictMapWithoutKnownAreas(): void
+    {
+        $recorder = new RecordingContactPdfRenderer();
+        $service = $this->buildService($recorder);
+
+        $service->render($this->buildContact('fr'));
+
+        // Row icons are inline SVGs too: assert on the map section itself.
+        self::assertStringNotContainsString('Quartiers souhaités', (string) $recorder->lastHtml);
+        self::assertStringNotContainsString('viewBox="0 0 720', (string) $recorder->lastHtml);
     }
 
     private function buildService(PdfRenderer $pdfRenderer): ContactPdfRenderer

@@ -6,6 +6,8 @@ namespace App\Admin\Twig\Components;
 
 use App\Auth\Repository\UserRepository;
 use App\Contact\Domain\ContactListItem;
+use App\Contact\Domain\ContactEventItem;
+use App\Contact\Repository\ContactEventRepository;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -36,8 +38,15 @@ final class ContactFollowUp
     #[LiveProp(writable: true)]
     public string $recallAt = '';
 
+    /** Timeline collapsed to the most recent entries by default. */
+    #[LiveProp]
+    public bool $showAllTimeline = false;
+
+    private const TIMELINE_RECENT = 5;
+
     public function __construct(
         private readonly ContactRepository $repository,
+        private readonly ContactEventRepository $events,
         private readonly UserRepository $users,
         private readonly Security $security,
     ) {
@@ -60,6 +69,34 @@ final class ContactFollowUp
     public function getContact(): ?ContactListItem
     {
         return $this->repository->listByIds([$this->contactId])[0] ?? null;
+    }
+
+    /**
+     * History in chronological order (status changes, motifs, recap
+     * emails), rendered as the timeline after the "received" entry.
+     * Collapsed to the last entries unless expanded.
+     *
+     * @return list<ContactEventItem>
+     */
+    public function getTimelineEvents(): array
+    {
+        $events = array_reverse($this->events->listForContact($this->contactId));
+
+        return $this->showAllTimeline ? $events : \array_slice($events, -self::TIMELINE_RECENT);
+    }
+
+    public function getHiddenTimelineCount(): int
+    {
+        return $this->showAllTimeline
+            ? 0
+            : max(0, \count($this->events->listForContact($this->contactId)) - self::TIMELINE_RECENT);
+    }
+
+    #[LiveAction]
+    public function toggleTimeline(): void
+    {
+        $this->ensureAdmin();
+        $this->showAllTimeline = !$this->showAllTimeline;
     }
 
     #[LiveAction]

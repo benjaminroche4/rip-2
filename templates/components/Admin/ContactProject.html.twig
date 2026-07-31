@@ -139,8 +139,12 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% set currentDuration = this.contact ? this.contact.projectStayDuration : null %}
-                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                    {% set projectContact = this.contact %}
+                    {% set currentDuration = projectContact ? projectContact.projectStayDuration : null %}
+                    {% set currentGuarantor = projectContact ? projectContact.projectGuarantorType : null %}
+                    {# Durée + garant : toujours côte à côte, quelle que soit la largeur. #}
+                    <div class="flex gap-6 sm:col-span-2">
+                    <div class="min-w-0 flex-1 space-y-2">
                         <p class="text-gray-600">{{ 'admin.contacts.project.stayDuration.label'|trans }}</p>
                         <div class="flex flex-wrap gap-2">
                             {% for duration in this.stayDurations %}
@@ -158,6 +162,82 @@
                                 </button>
                             {% endfor %}
                         </div>
+                    </div>
+                            <div class="min-w-0 flex-1 space-y-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.guarantor.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for guarantor in this.guarantorTypes %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseGuarantorType"
+                                    data-live-guarantor-param="{{ guarantor.value }}"
+                                    aria-pressed="{{ guarantor == currentGuarantor ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor == currentGuarantor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="guarantor-chip"
+                                >
+                                    {{ ux_icon({'physical': 'lucide:user-check', 'garantme': 'lucide:shield-check', 'bank': 'lucide:landmark'}[guarantor.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ guarantor.labelKey|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    </div>
+                    {% set currentFurnishing = projectContact ? projectContact.projectFurnishing : null %}
+                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.furnishing.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for furnishing in this.furnishings %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseFurnishing"
+                                    data-live-furnishing-param="{{ furnishing.value }}"
+                                    aria-pressed="{{ furnishing == currentFurnishing ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ furnishing == currentFurnishing ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="furnishing-chip"
+                                >
+                                    {{ ux_icon(furnishing.value == 'furnished' ? 'lucide:sofa' : 'lucide:package-open', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ furnishing.labelKey|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="min-w-0 space-y-2 sm:col-span-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.note.label'|trans }}</p>
+                        {% if this.editingProjectNote %}
+                            <div class="space-y-1.5">
+                            <textarea
+                                data-model="norender|projectNote"
+                                data-action="change->live#action keydown.enter->live#action:prevent"
+                                data-live-action-param="saveProjectNote"
+                                rows="3"
+                                placeholder="{{ 'admin.contacts.project.note.placeholder'|trans }}"
+                                aria-label="{{ 'admin.contacts.project.note.label'|trans }}"
+                                title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            >{{ this.projectNote }}</textarea>
+                            <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                {{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.contacts.project.note.autosaveHint'|trans }}
+                            </p>
+                            </div>
+                        {% else %}
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="min-w-0 flex-1 font-medium text-pretty whitespace-pre-line text-gray-900">{{ this.projectNote }}</p>
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="startEditingProjectNote"
+                                    class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                    aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
+                                    title="{{ 'admin.contacts.notes.edit'|trans }}"
+                                    data-testid="contact-project-note-edit"
+                                >
+                                    {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

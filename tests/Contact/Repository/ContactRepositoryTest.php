@@ -175,6 +175,33 @@ final class ContactRepositoryTest extends KernelTestCase
         self::assertNull($this->repository->adjacentReferences((int) $oldest->getId())['older']);
     }
 
+    public function testAdjacentReferencesFollowTheFromContextAfterATreatment(): void
+    {
+        $now = new \DateTimeImmutable('today 12:00');
+        $older = $this->persistContact($now->modify('-2 hours'))->setReference('CT-000103');
+        $middle = $this->persistContact($now->modify('-1 hour'))->setReference('CT-000102');
+        $newer = $this->persistContact($now)->setReference('CT-000101');
+        $this->em->flush();
+
+        // The middle lead just got treated: it left "new"...
+        $this->repository->updateStatus((int) $middle->getId(), ContactStatus::Converted, null, null);
+
+        // ...but with the "new" context the arrows keep triaging that inbox.
+        $adjacent = $this->repository->adjacentReferences((int) $middle->getId(), 'new');
+        self::assertSame('CT-000101', $adjacent['newer']);
+        self::assertSame('CT-000103', $adjacent['older']);
+
+        // "all" spans every status.
+        $adjacent = $this->repository->adjacentReferences((int) $middle->getId(), 'all');
+        self::assertSame('CT-000101', $adjacent['newer']);
+        self::assertSame('CT-000103', $adjacent['older']);
+
+        // No context: falls back to the contact's own (new) status.
+        $adjacent = $this->repository->adjacentReferences((int) $middle->getId());
+        self::assertNull($adjacent['newer']);
+        self::assertNull($adjacent['older']);
+    }
+
     public function testStatusAndClosureReasonChangesAreRecordedAsEvents(): void
     {
         $contact = $this->persistContact(new \DateTimeImmutable('today 10:00'));

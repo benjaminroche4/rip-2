@@ -115,6 +115,10 @@ final class ContactsAccessTest extends WebTestCase
         $cards = $crawler->filter('[data-testid="contact-card"]');
         self::assertGreaterThanOrEqual(1, $cards->count());
 
+        // The KPI band renders above the list.
+        self::assertSelectorExists('[data-testid="contacts-kpis"]');
+        self::assertStringContainsString('Nouvelles demandes', $crawler->filter('[data-testid="contacts-kpis"]')->text());
+
         $cardText = $cards->first()->text();
         self::assertStringContainsString('Léa Dupont', $cardText);
         self::assertStringContainsString('contacts-test-lead@example.com', $cardText);

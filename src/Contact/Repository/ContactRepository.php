@@ -5,7 +5,10 @@ namespace App\Contact\Repository;
 use App\Contact\Domain\ClosureReason;
 use App\Auth\Entity\User;
 use App\Contact\Domain\ContactListItem;
+use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
+use App\Contact\Domain\Furnishing;
+use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\NextStep;
 use App\Contact\Domain\RecontactChannel;
 use App\Contact\Domain\StayDuration;
@@ -32,15 +35,33 @@ class ContactRepository extends ServiceEntityRepository
      *
      * @return list<ContactListItem>
      */
-    public function listFirst(int $limit, ?ContactStatus $status = null, ?string $search = null): array
+    public function listFirst(int $limit, ?ContactStatus $status = null, ?string $search = null, ?int $assignedToId = null, string $sort = 'recent'): array
     {
-        // Newest first, whatever the filter.
-        $qb = $this->createQueryBuilder('c')
-            ->orderBy('c.createdAt', 'DESC')
-            ->addOrderBy('c.id', 'DESC')
-            ->setMaxResults($limit);
+        $qb = $this->createQueryBuilder('c')->setMaxResults($limit);
 
-        $this->applyFilters($qb, $status, $search);
+        // Nullable sort keys go last (CASE flag), newest first as tiebreak.
+        switch ($sort) {
+            case 'recall':
+                $qb->addSelect('CASE WHEN c.recallAt IS NULL THEN 1 ELSE 0 END AS HIDDEN nullsLast')
+                    ->orderBy('nullsLast', 'ASC')
+                    ->addOrderBy('c.recallAt', 'ASC');
+                break;
+            case 'rating':
+                $qb->addSelect('CASE WHEN c.leadRating IS NULL THEN 1 ELSE 0 END AS HIDDEN nullsLast')
+                    ->orderBy('nullsLast', 'ASC')
+                    ->addOrderBy('c.leadRating', 'DESC');
+                break;
+            case 'budget':
+                $qb->addSelect('CASE WHEN c.projectBudget IS NULL THEN 1 ELSE 0 END AS HIDDEN nullsLast')
+                    ->orderBy('nullsLast', 'ASC')
+                    ->addOrderBy('c.projectBudget', 'DESC');
+                break;
+            default:
+                $qb->orderBy('c.createdAt', 'DESC');
+        }
+        $qb->addOrderBy('c.createdAt', 'DESC')->addOrderBy('c.id', 'DESC');
+
+        $this->applyFilters($qb, $status, $search, $assignedToId);
 
         /** @var list<Contact> $contacts */
         $contacts = $qb->getQuery()->getResult();
@@ -51,18 +72,22 @@ class ContactRepository extends ServiceEntityRepository
     /**
      * Count matching the same filters as listFirst() — powers "load more".
      */
-    public function countFiltered(?ContactStatus $status = null, ?string $search = null): int
+    public function countFiltered(?ContactStatus $status = null, ?string $search = null, ?int $assignedToId = null): int
     {
         $qb = $this->createQueryBuilder('c')->select('COUNT(c.id)');
-        $this->applyFilters($qb, $status, $search);
+        $this->applyFilters($qb, $status, $search, $assignedToId);
 
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    private function applyFilters(\Doctrine\ORM\QueryBuilder $qb, ?ContactStatus $status, ?string $search): void
+    private function applyFilters(\Doctrine\ORM\QueryBuilder $qb, ?ContactStatus $status, ?string $search, ?int $assignedToId = null): void
     {
         if (null !== $status) {
             $qb->andWhere('c.status = :status')->setParameter('status', $status);
+        }
+
+        if (null !== $assignedToId) {
+            $qb->andWhere('c.assignedTo = :assignee')->setParameter('assignee', $assignedToId);
         }
 
         if (null !== $search && '' !== trim($search)) {
@@ -115,38 +140,44 @@ class ContactRepository extends ServiceEntityRepository
      *
      * @return array{newer: ?string, older: ?string}
      */
-    public function adjacentReferences(int $id): array
+    public function adjacentReferences(int $id, ?string $from = null): array
     {
         $current = $this->find($id);
         if (null === $current) {
             return ['newer' => null, 'older' => null];
         }
 
-        // Navigation stays within the same status: an admin working through
-        // "À traiter" jumps to the next untreated request, not to any contact.
-        $newer = $this->createQueryBuilder('c')
-            ->andWhere('c.status = :status')
+        // Navigation follows the category the admin is triaging ("from" the
+        // list filter), NOT the contact's own status: treating a lead must
+        // not silently switch the arrows to its new category. 'all' spans
+        // everything; no context falls back to the contact's status.
+        $navStatus = match (true) {
+            'all' === $from => null,
+            null !== $from && null !== ContactStatus::tryFrom($from) => ContactStatus::from($from),
+            default => $current->getStatus(),
+        };
+
+        $newerQb = $this->createQueryBuilder('c')
             ->andWhere('c.createdAt > :date OR (c.createdAt = :date AND c.id > :id)')
-            ->setParameter('status', $current->getStatus())
             ->setParameter('date', $current->getCreatedAt())
             ->setParameter('id', $id)
             ->orderBy('c.createdAt', 'ASC')
             ->addOrderBy('c.id', 'ASC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
-
-        $older = $this->createQueryBuilder('c')
-            ->andWhere('c.status = :status')
+            ->setMaxResults(1);
+        $olderQb = $this->createQueryBuilder('c')
             ->andWhere('c.createdAt < :date OR (c.createdAt = :date AND c.id < :id)')
-            ->setParameter('status', $current->getStatus())
             ->setParameter('date', $current->getCreatedAt())
             ->setParameter('id', $id)
             ->orderBy('c.createdAt', 'DESC')
             ->addOrderBy('c.id', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+        if (null !== $navStatus) {
+            $newerQb->andWhere('c.status = :status')->setParameter('status', $navStatus);
+            $olderQb->andWhere('c.status = :status')->setParameter('status', $navStatus);
+        }
+
+        $newer = $newerQb->getQuery()->getOneOrNullResult();
+        $older = $olderQb->getQuery()->getOneOrNullResult();
 
         return [
             'newer' => $newer?->getReference(),
@@ -209,11 +240,15 @@ class ContactRepository extends ServiceEntityRepository
             closureReason: $c->getClosureReason(),
             nextStep: $c->getNextStep(),
             leadSource: $c->getLeadSource(),
+            source: $c->getSource(),
             projectBudget: $c->getProjectBudget(),
             projectAreas: $c->getProjectAreas(),
             projectMoveInAt: $c->getProjectMoveInAt(),
             projectPropertyType: $c->getProjectPropertyType(),
             projectStayDuration: $c->getProjectStayDuration(),
+            projectFurnishing: $c->getProjectFurnishing(),
+            projectGuarantorType: $c->getProjectGuarantorType(),
+            projectNote: $c->getProjectNote(),
             assigneeId: null !== $assignee ? (int) $assignee->getId() : null,
             assigneeName: $assigneeName,
             assigneeAvatar: $assignee?->getAvatarFilename(),
@@ -231,16 +266,20 @@ class ContactRepository extends ServiceEntityRepository
      *
      * @return array<string, int>
      */
-    public function countsByStatus(): array
+    public function countsByStatus(?int $assignedToId = null): array
     {
         $counts = [];
         foreach (ContactStatus::cases() as $case) {
             $counts[$case->value] = 0;
         }
 
-        $rows = $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->select('c.status AS status, COUNT(c.id) AS total')
-            ->groupBy('c.status')
+            ->groupBy('c.status');
+        if (null !== $assignedToId) {
+            $qb->andWhere('c.assignedTo = :assignee')->setParameter('assignee', $assignedToId);
+        }
+        $rows = $qb
             ->getQuery()
             ->getArrayResult();
 
@@ -393,6 +432,85 @@ class ContactRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
+    public function saveFurnishing(int $id, ?Furnishing $furnishing): void
+    {
+        $contact = $this->find($id);
+        if (null === $contact) {
+            return;
+        }
+
+        $contact->setProjectFurnishing($furnishing);
+        $this->getEntityManager()->flush();
+    }
+
+    public function saveGuarantorType(int $id, ?GuarantorType $guarantorType): void
+    {
+        $contact = $this->find($id);
+        if (null === $contact) {
+            return;
+        }
+
+        $contact->setProjectGuarantorType($guarantorType);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Manual submission created by the admin (phone intake). Returns the
+     * generated reference; retries on the unlikely random-reference clash.
+     */
+    public function createManual(string $firstName, string $lastName, string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ?string $message, ContactSource $source): string
+    {
+        $contact = (new Contact())
+            ->setFirstName($firstName)
+            ->setLastName($lastName)
+            ->setEmail($email)
+            ->setPhoneNumber($phoneNumber)
+            ->setCompany($company)
+            ->setHelpType($helpType)
+            ->setOffer($offer)
+            ->setLang($lang)
+            ->setMessage($message)
+            ->setSource($source)
+            ->setCreatedAt(new \DateTimeImmutable());
+
+        $em = $this->getEntityManager();
+        $em->persist($contact);
+        $em->flush();
+
+        return $contact->getReference();
+    }
+
+    /** Admin correction of what the prospect submitted (typos, wrong type). */
+    public function updateDetails(int $id, string $firstName, string $lastName, string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ContactSource $source): void
+    {
+        $contact = $this->find($id);
+        if (null === $contact) {
+            return;
+        }
+
+        $contact->setFirstName($firstName)
+            ->setLastName($lastName)
+            ->setEmail($email)
+            ->setPhoneNumber($phoneNumber)
+            ->setCompany($company)
+            ->setHelpType($helpType)
+            ->setOffer($offer)
+            ->setLang($lang)
+            ->setSource($source);
+        $this->getEntityManager()->flush();
+    }
+
+    public function saveProjectNote(int $id, ?string $note): void
+    {
+        $contact = $this->find($id);
+        if (null === $contact) {
+            return;
+        }
+
+        $contact->setProjectNote(null !== $note && '' !== trim($note) ? trim($note) : null);
+        $this->getEntityManager()->flush();
+    }
+
     /**
      * Other submissions sharing the same email, newest first — surfaces
      * returning leads on the detail page.
@@ -445,6 +563,57 @@ class ContactRepository extends ServiceEntityRepository
      *
      * @return array{avgMinutes: ?float, withinSlaRate: ?float, treatedCount: int}
      */
+    public function countCreatedSince(\DateTimeImmutable $since): int
+    {
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.createdAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Share of decided requests (converted/unqualified/closed) that ended
+     * converted, over the period. Null when nothing was decided yet.
+     */
+    public function conversionRate(\DateTimeImmutable $since): ?float
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.status AS status, COUNT(c.id) AS n')
+            ->andWhere('c.createdAt >= :since')
+            ->andWhere('c.status IN (:decided)')
+            ->setParameter('since', $since)
+            ->setParameter('decided', [ContactStatus::Converted, ContactStatus::Unqualified, ContactStatus::Closed])
+            ->groupBy('c.status')
+            ->getQuery()
+            ->getArrayResult();
+
+        $decided = 0;
+        $converted = 0;
+        foreach ($rows as $row) {
+            $decided += (int) $row['n'];
+            if (ContactStatus::Converted === $row['status']) {
+                $converted = (int) $row['n'];
+            }
+        }
+
+        return $decided > 0 ? $converted / $decided : null;
+    }
+
+    public function countOverdueRecalls(\DateTimeImmutable $now): int
+    {
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->andWhere('c.status = :status')
+            ->andWhere('c.recallAt IS NOT NULL')
+            ->andWhere('c.recallAt < :now')
+            ->setParameter('status', ContactStatus::ToRecall)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function responseTimeStats(\DateTimeImmutable $since): array
     {
         $row = $this->getEntityManager()->getConnection()

@@ -4,6 +4,10 @@
 
 {% block title %}{{ displayName }}{% endblock %}
 
+{% block head %}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ displayName }}"
@@ -13,7 +17,7 @@
         <nav class="flex shrink-0 items-center gap-2" aria-label="{{ 'admin.contacts.title'|trans }}">
             {% if adjacent.newer %}
                 <a
-                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.newer}) }}"
+                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.newer} + (from ? {from: from} : {})) }}"
                     class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
                     aria-label="{{ 'admin.contacts.show.prev'|trans }}"
                     title="{{ 'admin.contacts.show.prev'|trans }}"
@@ -28,7 +32,7 @@
             {% endif %}
             {% if adjacent.older %}
                 <a
-                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.older}) }}"
+                    href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: adjacent.older} + (from ? {from: from} : {})) }}"
                     class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
                     aria-label="{{ 'admin.contacts.show.next'|trans }}"
                     title="{{ 'admin.contacts.show.next'|trans }}"
@@ -48,7 +52,8 @@
 {% block body %}
     {% set pdfUrl = path('admin_contact_pdf', {adminPrefix: adminPrefix, reference: contact.reference}) %}
     {% set exportRow %}
-        <div class="flex justify-end">
+        <div class="flex items-center justify-end gap-3">
+            <twig:Admin:ContactRecapEmail :contactId="contact.id" />
             <twig:Button
                 as="a"
                 variant="outline"
@@ -78,60 +83,7 @@
                     <twig:Admin:ContactStatusControl :contactId="contact.id" />
                 </div>
 
-                <div class="grid grid-cols-1 gap-y-4 rounded-t-xl bg-white px-5 py-4 sm:grid-cols-2 sm:gap-x-8">
-                    <div class="min-w-0 space-y-2 text-sm">
-                        <p class="text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</p>
-                        <a href="mailto:{{ contact.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
-                            {{ contact.email }}
-                        </a>
-                    </div>
-                    <div class="min-w-0 space-y-2 text-sm">
-                        <p class="text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</p>
-                        {% if contact.phoneNumber %}
-                            {% set phoneCountry = contact.phoneNumber|phone_country %}
-                            <a href="tel:{{ contact.phoneNumber }}" class="flex min-w-0 items-center gap-2 font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
-                                {% if phoneCountry %}
-                                    {{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
-                                {% endif %}
-                                <span class="truncate">{{ contact.phoneNumber|phone_format }}</span>
-                            </a>
-                        {% else %}
-                            <p class="font-medium text-gray-400">-</p>
-                        {% endif %}
-                    </div>
-                    <div class="min-w-0 space-y-2 text-sm">
-                        <p class="text-gray-600">{{ 'admin.contacts.card.field.language'|trans }}</p>
-                        <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
-                            {{ ux_icon('circle-flags:' ~ contact.lang, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
-                            <span class="truncate">{{ ('admin.contacts.card.lang.' ~ contact.lang)|trans }}</span>
-                        </p>
-                    </div>
-                    {% if contact.company %}
-                        <div class="min-w-0 space-y-2 text-sm">
-                            <p class="text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</p>
-                            <p class="truncate font-medium text-gray-900">{{ contact.company }}</p>
-                        </div>
-                    {% endif %}
-                    {% if contact.offer %}
-                        <div class="min-w-0 space-y-2 text-sm">
-                            <p class="text-gray-600">{{ 'admin.contacts.show.field.offer'|trans }}</p>
-                            <p class="truncate font-medium text-gray-900">
-                                {{ ('contact.contactForm.offer.' ~ contact.offer ~ '.title')|trans }}
-                                <span class="text-gray-500">({{ ('contact.contactForm.offer.' ~ contact.offer ~ '.price')|trans }})</span>
-                            </p>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
-                    <p class="flex flex-wrap gap-2 text-sm font-medium">
-                        <span class="text-gray-600">{{ 'admin.contacts.card.help'|trans }}</span>
-                        <span class="min-w-0 flex-1 text-gray-900">{{ contact.helpType|trans }}</span>
-                    </p>
-                    {% if contact.message %}
-                        <p class="text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ contact.message }}</p>
-                    {% endif %}
-                </div>
+                <twig:Admin:ContactDetails :contactId="contact.id" />
 
             </div>
         </div>

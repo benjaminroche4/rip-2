@@ -1,0 +1,262 @@
+{# Rendu sans chrome propre : partage la card détail avec ContactStatusControl
+   (shell dans show.html.twig). #}
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="contact-details">
+    {% set contact = this.contact %}
+    {% if this.editing %}
+        <div class="flex flex-col gap-4 rounded-t-xl bg-white px-5 py-4">
+            {% set inputClass = 'w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none' %}
+            <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-first-{{ this.contactId }}" class="block text-gray-600">{{ 'contact.contactForm.firstName.label'|trans }}</label>
+                    <input id="edit-first-{{ this.contactId }}" type="text" data-model="norender|firstName" value="{{ this.firstName }}" class="{{ inputClass }}">
+                    {% if this.errors.firstName is defined %}
+                        <p class="text-xs text-red-600">{{ this.errors.firstName|trans }}</p>
+                    {% endif %}
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-last-{{ this.contactId }}" class="block text-gray-600">{{ 'contact.contactForm.lastName.label'|trans }}</label>
+                    <input id="edit-last-{{ this.contactId }}" type="text" data-model="norender|lastName" value="{{ this.lastName }}" class="{{ inputClass }}">
+                    {% if this.errors.lastName is defined %}
+                        <p class="text-xs text-red-600">{{ this.errors.lastName|trans }}</p>
+                    {% endif %}
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-email-{{ this.contactId }}" class="block text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</label>
+                    <input id="edit-email-{{ this.contactId }}" type="email" data-model="norender|email" value="{{ this.email }}" class="{{ inputClass }}">
+                    {% if this.errors.email is defined %}
+                        <p class="text-xs text-red-600">{{ this.errors.email|trans }}</p>
+                    {% endif %}
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-phone-{{ this.contactId }}" class="block text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</label>
+                    <input id="edit-phone-{{ this.contactId }}" type="tel" data-model="norender|phoneNumber" value="{{ this.phoneNumber }}" placeholder="+33 6 12 34 56 78" class="{{ inputClass }}">
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.card.field.language'|trans }}</p>
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    >
+                        <summary class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                            {{ ux_icon('circle-flags:' ~ this.lang, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ ('admin.contacts.card.lang.' ~ this.lang)|trans }}</span>
+                            {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        <div class="absolute left-0 z-10 mt-2 w-full min-w-40 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                            {% for lang in constant('App\\Admin\\Twig\\Components\\ContactDetails::LANGS') %}
+                                <button
+                                    type="button"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="chooseLang"
+                                    data-live-lang-param="{{ lang }}"
+                                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.lang == lang ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                >
+                                    {{ ux_icon('circle-flags:' ~ lang, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                    {{ ('admin.contacts.card.lang.' ~ lang)|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.create.source'|trans }}</p>
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    >
+                        <summary class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                            {{ ux_icon(this.sourceCase.icon, {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ ('admin.contacts.contactSource.' ~ this.source)|trans }}</span>
+                            {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        <div class="absolute left-0 z-10 mt-2 w-full min-w-48 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                            {% for source in this.sources %}
+                                <button
+                                    type="button"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="chooseSource"
+                                    data-live-source-param="{{ source.value }}"
+                                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.source == source.value ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                >
+                                    {{ ux_icon(source.icon, {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ source.labelKey|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-company-{{ this.contactId }}" class="block text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</label>
+                    <input id="edit-company-{{ this.contactId }}" type="text" data-model="norender|company" value="{{ this.company }}" class="{{ inputClass }}">
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.card.help'|trans }}</p>
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    >
+                        <summary class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ this.helpType|trans }}</span>
+                            {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        <div class="absolute left-0 z-10 mt-2 w-full min-w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                            {% for type in constant('App\\Admin\\Twig\\Components\\ContactDetails::HELP_TYPES') %}
+                                <button
+                                    type="button"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="chooseHelpType"
+                                    data-live-type-param="{{ type }}"
+                                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.helpType == type ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                >
+                                    {{ type|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+                {# La formule n'existe que pour la recherche de logement,
+                   comme sur le formulaire public. #}
+                {% if this.helpType == constant('App\\Contact\\Form\\ContactType::HOUSING_HELP_TYPE') %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.show.field.offer'|trans }}</p>
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    >
+                        <summary class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                            <span class="min-w-0 flex-1 truncate text-sm font-medium {{ this.offer == '' ? 'text-gray-500' : 'text-gray-900' }}">
+                                {{ this.offer == '' ? 'admin.contacts.edit.noOffer'|trans : ('contact.contactForm.offer.' ~ this.offer ~ '.title')|trans }}
+                                {% if this.offer != '' %}
+                                    <span class="font-normal text-gray-400">({{ ('contact.contactForm.offer.' ~ this.offer ~ '.price')|trans }})</span>
+                                {% endif %}
+                            </span>
+                            {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        <div class="absolute left-0 z-10 mt-2 w-full min-w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                            <button
+                                type="button"
+                                data-action="live#action details-dropdown#close"
+                                data-live-action-param="chooseOffer"
+                                data-live-offer-param=""
+                                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.offer == '' ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            >
+                                {{ 'admin.contacts.edit.noOffer'|trans }}
+                            </button>
+                            {% for offer in constant('App\\Admin\\Twig\\Components\\ContactDetails::OFFERS') %}
+                                <button
+                                    type="button"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="chooseOffer"
+                                    data-live-offer-param="{{ offer }}"
+                                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.offer == offer ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                >
+                                    {{ ('contact.contactForm.offer.' ~ offer ~ '.title')|trans }}
+                                    <span class="ml-auto text-xs text-gray-400">{{ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans }}</span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+                {% endif %}
+            </div>
+            <div class="flex items-center justify-end gap-3">
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="cancelEditing"
+                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                    data-testid="contact-details-cancel"
+                >
+                    {{ 'admin.contacts.notes.cancel'|trans }}
+                </button>
+                <twig:Button
+                    size="sm"
+                    data-action="live#action"
+                    data-live-action-param="saveDetails"
+                    data-testid="contact-details-save"
+                >
+                    {{ 'admin.contacts.notes.save'|trans }}
+                </twig:Button>
+            </div>
+        </div>
+    {% elseif contact %}
+        <div class="relative grid grid-cols-1 gap-y-4 rounded-t-xl bg-white px-5 py-4 sm:grid-cols-2 sm:gap-x-8">
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="startEditing"
+                class="absolute top-3 right-3 flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                aria-label="{{ 'admin.contacts.edit.title'|trans }}"
+                title="{{ 'admin.contacts.edit.title'|trans }}"
+                data-testid="contact-details-edit"
+            >
+                {{ ux_icon('lucide:pencil', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+            </button>
+            <div class="min-w-0 space-y-2 text-sm">
+                <p class="text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</p>
+                <a href="mailto:{{ contact.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
+                    {{ contact.email }}
+                </a>
+            </div>
+            <div class="min-w-0 space-y-2 text-sm">
+                <p class="text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</p>
+                {% if contact.phoneNumber %}
+                    {% set phoneCountry = contact.phoneNumber|phone_country %}
+                    <a href="tel:{{ contact.phoneNumber }}" class="flex min-w-0 items-center gap-2 font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
+                        {% if phoneCountry %}
+                            {{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                        {% endif %}
+                        <span class="truncate">{{ contact.phoneNumber|phone_format }}</span>
+                    </a>
+                {% else %}
+                    <p class="font-medium text-gray-400">-</p>
+                {% endif %}
+            </div>
+            <div class="min-w-0 space-y-2 text-sm">
+                <p class="text-gray-600">{{ 'admin.contacts.card.field.language'|trans }}</p>
+                <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                    {{ ux_icon('circle-flags:' ~ contact.lang, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                    <span class="truncate">{{ ('admin.contacts.card.lang.' ~ contact.lang)|trans }}</span>
+                </p>
+            </div>
+            <div class="min-w-0 space-y-2 text-sm">
+                <p class="text-gray-600">{{ 'admin.contacts.create.source'|trans }}</p>
+                <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                    {{ ux_icon(contact.source.icon, {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                    <span class="truncate">{{ contact.source.labelKey|trans }}</span>
+                </p>
+            </div>
+            {% if contact.company %}
+                <div class="min-w-0 space-y-2 text-sm">
+                    <p class="text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</p>
+                    <p class="truncate font-medium text-gray-900">{{ contact.company }}</p>
+                </div>
+            {% endif %}
+            {% if contact.offer %}
+                <div class="min-w-0 space-y-2 text-sm">
+                    <p class="text-gray-600">{{ 'admin.contacts.show.field.offer'|trans }}</p>
+                    <p class="truncate font-medium text-gray-900">
+                        {{ ('contact.contactForm.offer.' ~ contact.offer ~ '.title')|trans }}
+                        <span class="text-gray-500">({{ ('contact.contactForm.offer.' ~ contact.offer ~ '.price')|trans }})</span>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if contact %}
+        <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
+            <p class="flex flex-wrap gap-2 text-sm font-medium">
+                <span class="text-gray-600">{{ 'admin.contacts.card.help'|trans }}</span>
+                <span class="min-w-0 flex-1 text-gray-900">{{ contact.helpType|trans }}</span>
+            </p>
+            {% if contact.message %}
+                <p class="text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ contact.message }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
