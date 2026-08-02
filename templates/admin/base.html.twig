@@ -20,7 +20,7 @@
             {{ importmap('app') }}
         {% endblock %}
     </head>
-    <body class="min-h-dvh bg-neutral-50 text-gray-900 antialiased">
+    <body class="min-h-dvh bg-neutral-50 text-gray-900 antialiased" data-controller="bfcache-refresh">
         <a href="#admin-main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-gray-900 focus:shadow-md focus:outline-2 focus:outline-primary">
             {{ 'admin.nav.skipToContent'|trans }}
         </a>
