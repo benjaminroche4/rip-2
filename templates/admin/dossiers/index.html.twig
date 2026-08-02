@@ -1,0 +1,65 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.dossiers.title'|trans }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ 'admin.dossiers.title'|trans }}"
+        subtitle="{{ 'admin.dossiers.subtitle'|trans }}"
+    >
+        <twig:Dossier:DossierCreate adminPrefix="{{ adminPrefix }}" />
+    </twig:Admin:PageHeader>
+{% endblock %}
+
+{% block body %}
+    <div class="space-y-8" data-testid="dossiers-page">
+        {% if dossiers is empty %}
+            <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="dossiers-empty">
+                <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
+                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                        {{ ux_icon('lucide:folder-open', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                    </div>
+                    <div class="space-y-1">
+                        <h2 class="text-sm font-medium text-gray-700">
+                            {{ 'admin.dossiers.empty.title'|trans }}
+                        </h2>
+                        <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
+                            {{ 'admin.dossiers.empty.description'|trans }}
+                        </p>
+                    </div>
+                </div>
+            </section>
+        {% else %}
+            <section class="rounded-2xl border border-neutral-200 bg-white p-2" data-testid="dossiers-list">
+                <ul class="divide-y divide-gray-950/5" role="list">
+                    {% for dossier in dossiers %}
+                        <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-xl px-4 py-3.5 transition-colors duration-100 ease-out hover:bg-neutral-50/60" data-testid="dossier-row">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    {{ ux_icon('lucide:folder-open', {class: 'size-4.5', 'aria-hidden': 'true'}) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ dossier.name }}</p>
+                                    {% if dossier.primaryTenantName %}
+                                        <p class="truncate text-xs text-gray-500">
+                                            {{ 'admin.dossiers.list.primaryTenant'|trans({'%name%': dossier.primaryTenantName}) }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-4 text-xs text-gray-500">
+                                <span class="inline-flex items-center gap-1">
+                                    {{ ux_icon('lucide:users', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.list.personCount'|trans({'%count%': dossier.personCount}) }}
+                                </span>
+                                <span title="{{ dossier.createdAt|format_datetime('medium', 'short') }}">
+                                    {{ dossier.createdAt|format_datetime(pattern='dd.MM.yyyy') }}
+                                </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

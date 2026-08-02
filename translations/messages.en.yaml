@@ -1797,10 +1797,72 @@ admin:
         dashboard: Dashboard
         users: Users
         contacts: Leads
+        dossiers: Files
         payments: Payments
         tools: Tools
         logout: Log out
         skipToContent: Skip to main content
+    dossiers:
+        title: Files
+        subtitle: Client files tracking
+        empty:
+            title: No files yet
+            description: Create your first file with the button above.
+        list:
+            primaryTenant: 'Primary tenant: %name%'
+            personCount: '{1}1 person|]1,Inf[%count% people'
+        create:
+            button: New file
+            title: Create a file
+            subtitle: 'Up to 2 tenants and 2 follow-up requests. The file name is generated from the tenants.'
+            cancel: Cancel
+            submit: Create the file
+            submitting: Creating
+            name:
+                label: File name
+                notBlank: The file name is required.
+                length: The name must be between 2 and 100 characters.
+            persons:
+                title: People
+                count: '%count% / %max% people'
+                add: Add a person
+                min: The file must contain at least one person.
+                max: The file cannot contain more than 4 people.
+                tenantRequired: The file must contain at least one tenant.
+                maxTenants: The file cannot contain more than 2 tenants.
+                maxFollowUps: The file cannot contain more than 2 follow-up requests.
+            person:
+                heading: Person %number%
+                remove: Remove
+                primaryTag: Primary tenant
+                makePrimary: Set as primary
+                role:
+                    label: Role
+                    notNull: Pick a role for this person.
+                    tenant: Tenant
+                    follow_up: Follow-up request
+                firstName:
+                    label: First name
+                    notBlank: The first name is required.
+                    length: The first name must be between 2 and 50 characters.
+                lastName:
+                    label: Last name
+                    notBlank: The last name is required.
+                    length: The last name must be between 2 and 50 characters.
+                email:
+                    label: Email
+                    notBlank: The email is required.
+                    invalid: This email is not valid.
+                    length: The email cannot exceed 180 characters.
+                phone:
+                    label: Phone
+                    invalid: This number is not valid (digits, spaces, dots and dashes only).
+                    length: The phone number cannot exceed 30 characters.
+                language:
+                    label: Contact language
+                    notNull: Pick a contact language.
+                    fr: French
+                    en: English
     contacts:
         title: Contact requests
         empty: No contact requests yet.

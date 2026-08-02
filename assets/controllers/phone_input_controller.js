@@ -104,6 +104,10 @@ export default class extends Controller {
 
         if (digits) {
             this.inputTarget.value = `+${data.dialCode}${digits}`;
+            // Inside a LiveComponent form the model syncs on `change`: without
+            // this dispatch the server would keep the raw national digits.
+            // No-op for classic Turbo form posts (value is read from the DOM).
+            this.inputTarget.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
 

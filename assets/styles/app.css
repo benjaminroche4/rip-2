@@ -346,6 +346,20 @@ turbo-frame#blog-list[busy] {
     animation: slide-in-soft 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
+/* Cards added inside live modals (dossier persons): a touch more presence
+   than slide-in-soft — slight lift + scale. Plays once per insertion, the
+   exit is handled by the card-exit Stimulus controller. */
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+.animate-card-in {
+    animation: card-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+    .animate-card-in { animation: none; }
+}
+
 /* Collapsible <details> cards (admin): soft height animation on open/close.
    Uses ::details-content + interpolate-size; browsers without support just
    toggle instantly. */

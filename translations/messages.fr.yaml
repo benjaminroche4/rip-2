@@ -1798,10 +1798,72 @@ admin:
         dashboard: Tableau de bord
         users: Utilisateurs
         contacts: Leads
+        dossiers: Dossiers
         payments: Paiements
         tools: Outils
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
+    dossiers:
+        title: Dossiers
+        subtitle: Suivi des dossiers clients
+        empty:
+            title: Aucun dossier pour le moment
+            description: Créez votre premier dossier avec le bouton ci-dessus.
+        list:
+            primaryTenant: 'Locataire principal : %name%'
+            personCount: '{1}1 personne|]1,Inf[%count% personnes'
+        create:
+            button: Nouveau dossier
+            title: Créer un dossier
+            subtitle: 'Jusqu''à 2 locataires et 2 demandes de suivi. Le nom du dossier est généré depuis les locataires.'
+            cancel: Annuler
+            submit: Créer le dossier
+            submitting: Création en cours
+            name:
+                label: Nom du dossier
+                notBlank: Le nom du dossier est obligatoire.
+                length: Le nom doit faire entre 2 et 100 caractères.
+            persons:
+                title: Personnes
+                count: '%count% / %max% personnes'
+                add: Ajouter une personne
+                min: Le dossier doit contenir au moins une personne.
+                max: Le dossier ne peut pas contenir plus de 4 personnes.
+                tenantRequired: Le dossier doit contenir au moins un locataire.
+                maxTenants: Le dossier ne peut pas contenir plus de 2 locataires.
+                maxFollowUps: Le dossier ne peut pas contenir plus de 2 demandes de suivi.
+            person:
+                heading: Personne %number%
+                remove: Retirer
+                primaryTag: Locataire principal
+                makePrimary: Définir comme principal
+                role:
+                    label: Rôle
+                    notNull: Choisissez un rôle pour cette personne.
+                    tenant: Locataire
+                    follow_up: Demande de suivi
+                firstName:
+                    label: Prénom
+                    notBlank: Le prénom est obligatoire.
+                    length: Le prénom doit faire entre 2 et 50 caractères.
+                lastName:
+                    label: Nom
+                    notBlank: Le nom est obligatoire.
+                    length: Le nom doit faire entre 2 et 50 caractères.
+                email:
+                    label: Email
+                    notBlank: L'email est obligatoire.
+                    invalid: Cet email n'est pas valide.
+                    length: L'email ne peut pas dépasser 180 caractères.
+                phone:
+                    label: Téléphone
+                    invalid: Ce numéro n'est pas valide (chiffres, espaces, points et tirets uniquement).
+                    length: Le téléphone ne peut pas dépasser 30 caractères.
+                language:
+                    label: Langue de contact
+                    notNull: Choisissez une langue de contact.
+                    fr: Français
+                    en: Anglais
     contacts:
         title: Demandes de contact
         empty: Aucune demande de contact pour le moment.
