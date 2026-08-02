@@ -230,15 +230,15 @@ final class ContactDetails
     private function prefill(): void
     {
         $contact = $this->getContact();
-        $this->firstName = $contact?->firstName ?? '';
-        $this->lastName = $contact?->lastName ?? '';
-        $this->email = $contact?->email ?? '';
-        $this->phoneNumber = $contact?->phoneNumber ?? '';
-        $this->company = $contact?->company ?? '';
-        $this->helpType = $contact?->helpType ?? self::HELP_TYPES[0];
-        $this->offer = $contact?->offer ?? '';
-        $this->lang = $contact?->lang ?? 'fr';
-        $this->source = ($contact?->source ?? ContactSource::Form)->value;
+        $this->firstName = $contact->firstName ?? '';
+        $this->lastName = $contact->lastName ?? '';
+        $this->email = $contact->email ?? '';
+        $this->phoneNumber = $contact->phoneNumber ?? '';
+        $this->company = $contact->company ?? '';
+        $this->helpType = $contact->helpType ?? self::HELP_TYPES[0];
+        $this->offer = $contact->offer ?? '';
+        $this->lang = $contact->lang ?? 'fr';
+        $this->source = ($contact->source ?? ContactSource::Form)->value;
     }
 
     private function ensureAdmin(): void

@@ -17,7 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  *  - valid submit → persists phone + nationality + flips isProfileComplete
  *  - invalid submit → 422, no DB change
  *  - listener: incomplete user hitting any other route is force-redirected here
- *  - listener: incomplete user can still reach logout (no soft-lock)
+ *  - listener: incomplete user can still reach logout (no soft-lock).
  */
 final class CompleteProfileControllerTest extends WebTestCase
 {

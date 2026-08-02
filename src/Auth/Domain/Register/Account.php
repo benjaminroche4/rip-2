@@ -22,11 +22,9 @@ final class Account
         #[Assert\NotBlank(message: 'register.phoneNumber.notBlank', groups: ['account'])]
         #[Assert\Length(max: 25, maxMessage: 'register.phoneNumber.maxLength', groups: ['account'])]
         public ?string $phoneNumber = null,
-
         #[Assert\NotBlank(message: 'register.nationality.notBlank', groups: ['account'])]
         #[Assert\Country(message: 'register.nationality.invalid', groups: ['account'])]
         public ?string $nationality = null,
-
         #[Assert\NotNull(message: 'register.situation.required', groups: ['account'])]
         public ?Situation $situation = null,
     ) {

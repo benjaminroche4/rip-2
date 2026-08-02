@@ -7,12 +7,8 @@ namespace App\Admin\Twig\Components;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Repository\ContactRepository;
 use App\PropertyListing\Domain\PropertyType;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\UX\Map\Bridge\Google\GoogleOptions;
-use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
-use Symfony\UX\Map\Map;
-use Symfony\UX\Map\Point;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -20,6 +16,10 @@ use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\UX\Map\Bridge\Google\GoogleOptions;
+use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
+use Symfony\UX\Map\Map;
+use Symfony\UX\Map\Point;
 
 /**
  * Structured housing project on the contact detail page (budget, target
@@ -68,10 +68,10 @@ final class ContactProject
 
         $contact = $this->getContact();
         $this->budget = null !== $contact?->projectBudget ? (string) $contact->projectBudget : '';
-        $this->areas = $contact?->projectAreas ?? '';
-        $this->moveInAt = $contact?->projectMoveInAt?->format('Y-m-d') ?? '';
-        $this->propertyType = $contact?->projectPropertyType ?? '';
-        $this->projectNote = $contact?->projectNote ?? '';
+        $this->areas = $contact->projectAreas ?? '';
+        $this->moveInAt = $contact->projectMoveInAt?->format('Y-m-d') ?? '';
+        $this->propertyType = $contact->projectPropertyType ?? '';
+        $this->projectNote = $contact->projectNote ?? '';
         $this->editingProjectNote = '' === $this->projectNote;
     }
 
@@ -215,7 +215,7 @@ final class ContactProject
      */
     public function getSelectedFurnishings(): array
     {
-        return array_values(array_filter(explode(',', (string) ($this->getContact()?->projectFurnishing))));
+        return array_values(array_filter(explode(',', (string) $this->getContact()?->projectFurnishing)));
     }
 
     /** Multi-select: a prospect can be open to both. */

@@ -152,6 +152,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $component->send();
 
         $email = $this->mailer->lastMessage;
+        self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         $html = (string) $email->getHtmlBody();
         // English prospect + deposit → the English deposit link.
@@ -163,6 +164,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $component->toggleDeposit();
         $component->send();
         $email = $this->mailer->lastMessage;
+        self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/4gM5kDgSv4ZTeeL3cv6kg00', (string) $email->getHtmlBody());
 
@@ -174,6 +176,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $component->toggleDeposit();
         $component->send();
         $email = $this->mailer->lastMessage;
+        self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         $html = (string) $email->getHtmlBody();
         self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/eVq4gz9q3akd8Ur4gz6kg01', $html);
@@ -184,6 +187,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $component->togglePayment();
         $component->send();
         $email = $this->mailer->lastMessage;
+        self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04', (string) $email->getHtmlBody());
     }

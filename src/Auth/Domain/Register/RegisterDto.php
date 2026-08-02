@@ -16,10 +16,8 @@ final class RegisterDto
     public function __construct(
         #[Assert\Valid(groups: ['personal'])]
         public Personal $personal = new Personal(),
-
         #[Assert\Valid(groups: ['account'])]
         public Account $account = new Account(),
-
         public string $currentStep = 'personal',
     ) {
     }

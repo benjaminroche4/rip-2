@@ -51,7 +51,19 @@ final class DashboardController extends AbstractController
     }
 
     #[Route('', name: 'dashboard', methods: ['GET'])]
-    public function index(string $adminPrefix, Request $request): Response
+    public function index(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        // Instant shell: the heavy content (Allo API calls history) loads
+        // lazily in a Turbo Frame rendered by dashboardContent().
+        return $this->render('admin/dashboard/index.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route('/tableau', name: 'dashboard_content', methods: ['GET'])]
+    public function dashboardContent(string $adminPrefix, Request $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -196,7 +208,7 @@ final class DashboardController extends AbstractController
                 ]);
         }
 
-        return $this->render('admin/dashboard/index.html.twig', [
+        return $this->render('admin/dashboard/_content.html.twig', [
             'adminPrefix' => $adminPrefix,
             'responseTimeAvgLabel' => $avgLabel,
             'responseTimeSlaRate' => null !== $responseStats['withinSlaRate'] ? (int) round($responseStats['withinSlaRate'] * 100) : null,
@@ -313,7 +325,7 @@ final class DashboardController extends AbstractController
         methods: ['GET'],
         requirements: ['reference' => 'CT-\d{6}'],
     )]
-    public function showContact(string $adminPrefix, string $reference, \Symfony\Component\HttpFoundation\Request $request): Response
+    public function showContact(string $adminPrefix, string $reference, Request $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 

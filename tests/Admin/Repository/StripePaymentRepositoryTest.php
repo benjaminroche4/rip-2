@@ -215,7 +215,8 @@ final class StripePaymentRepositoryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @param  list<object>  $intents
+     * @param list<object> $intents
+     *
      * @return iterable<object>
      */
     private static function filterByWindow(array $intents, \DateTimeImmutable $from, \DateTimeImmutable $to): iterable

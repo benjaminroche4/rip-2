@@ -14,7 +14,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
-use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -372,7 +371,7 @@ final class ContactList
 
         $user = $this->security->getUser();
 
-        return $user instanceof \App\Auth\Entity\User ? (int) $user->getId() : null;
+        return $user instanceof User ? (int) $user->getId() : null;
     }
 
     private function currentStatus(): ?ContactStatus

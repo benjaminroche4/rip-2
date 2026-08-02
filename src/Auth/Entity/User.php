@@ -359,5 +359,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
 
         return $this;
     }
-
 }

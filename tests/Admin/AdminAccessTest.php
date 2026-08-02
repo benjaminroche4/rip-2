@@ -98,6 +98,11 @@ final class AdminAccessTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tableau de bord');
+        // The shell ships a lazy frame pointing at the heavy content.
+        self::assertSelectorExists('turbo-frame[data-testid="dashboard-frame"][loading="lazy"]');
+
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/tableau');
+        self::assertResponseIsSuccessful();
 
         // Activity chart canvas mounted with 2 series (contacts + calls), 12 buckets each.
         $canvas = $crawler->filter('canvas[data-testid="activity-chart"]');
@@ -168,7 +173,7 @@ final class AdminAccessTest extends WebTestCase
         $em->flush();
 
         $this->loginAs(self::ADMIN_EMAIL);
-        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix));
+        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/tableau');
 
         self::assertResponseIsSuccessful();
 

@@ -51,7 +51,7 @@ final class ListingPhotoStorage
 
     /**
      * "12 Rue de Rivoli, 75001 Paris" + "Marie Dupont" + 2026-07-20
-     * => "12ruederivoli75001parismariedupont-20260720"
+     * => "12ruederivoli75001parismariedupont-20260720".
      *
      * The date suffix keeps submissions sent on different days apart even
      * when the same owner re-submits the same address.

@@ -2,8 +2,8 @@
 
 namespace App\Contact\Repository;
 
-use App\Contact\Domain\ClosureReason;
 use App\Auth\Entity\User;
+use App\Contact\Domain\ClosureReason;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
@@ -558,14 +558,6 @@ class ContactRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    /**
-     * First-response stats over submissions received since $since:
-     * average minutes between creation and first treatment, share treated
-     * within the 30-minute SLA, and how many treated submissions the stats
-     * are based on. Null metrics when nothing was treated in the window.
-     *
-     * @return array{avgMinutes: ?float, withinSlaRate: ?float, treatedCount: int}
-     */
     public function countCreatedSince(\DateTimeImmutable $since): int
     {
         return (int) $this->createQueryBuilder('c')
@@ -617,6 +609,14 @@ class ContactRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * First-response stats over submissions received since $since:
+     * average minutes between creation and first treatment, share treated
+     * within the 30-minute SLA, and how many treated submissions the stats
+     * are based on. Null metrics when nothing was treated in the window.
+     *
+     * @return array{avgMinutes: ?float, withinSlaRate: ?float, treatedCount: int}
+     */
     public function responseTimeStats(\DateTimeImmutable $since): array
     {
         $row = $this->getEntityManager()->getConnection()

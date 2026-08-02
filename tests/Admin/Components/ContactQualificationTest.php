@@ -325,6 +325,7 @@ final class ContactQualificationTest extends KernelTestCase
         $contact = $this->persistContact();
         $this->loginAsAdmin();
         $admin = self::getContainer()->get('security.token_storage')->getToken()->getUser();
+        self::assertInstanceOf(User::class, $admin);
 
         $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());

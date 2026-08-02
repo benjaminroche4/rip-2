@@ -51,7 +51,7 @@ class PropertyBadgeExtension extends AbstractExtension
 
     private function isNew(Property $property): bool
     {
-        return $property->createdAt !== null
+        return null !== $property->createdAt
             && $property->createdAt > new \DateTimeImmutable(self::NEW_WINDOW);
     }
 }

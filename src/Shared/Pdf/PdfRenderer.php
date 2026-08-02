@@ -20,7 +20,7 @@ interface PdfRenderer
     /**
      * @throws PdfRenderException when the backend rejects the HTML, the
      *                            network call fails, or the provider
-     *                            returns a non-2xx response.
+     *                            returns a non-2xx response
      */
     public function render(string $html, ?PdfOptions $options = null): string;
 }

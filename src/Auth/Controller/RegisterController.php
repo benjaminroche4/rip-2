@@ -88,7 +88,7 @@ final class RegisterController extends AbstractController
         // that's what advances the cursor and persists the new step in the session.
         // Without it, the redirect would re-render the previous step.
         if ($flow->isSubmitted() && $flow->isValid() && !$flow->isFinished()) {
-            /** @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
+            /* @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
             $flow->getStepForm();
 
             return $this->redirectToRoute('app_register', [], Response::HTTP_SEE_OTHER);
@@ -150,7 +150,7 @@ final class RegisterController extends AbstractController
                 $this->entityManager->remove($user);
                 $this->entityManager->flush();
 
-                /** @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
+                /* @var \Symfony\Component\Form\Flow\FormFlowInterface $flow */
                 $flow->reset();
                 $this->addFlash('register_error', 'register.email.sendFailed');
 

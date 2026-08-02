@@ -82,7 +82,7 @@ final class PropertyFilter
     }
 
     /**
-     * @param array<int, Property> $properties
+     * @param array<int, Property>     $properties
      * @param callable(Property): bool $predicate
      *
      * @return array<int, Property>

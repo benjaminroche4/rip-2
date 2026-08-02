@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Admin\Service;
 
 use App\Admin\Domain\Call;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -32,12 +31,13 @@ final readonly class AlloApiClient
     private const PAGE_SIZE = 100;
     private const MAX_PAGES = 50;             // hard cap = 5000 calls / fetch (failsafe)
     private const TIMEOUT_SECONDS = 5;
-    private const CACHE_TTL = 900;            // 15 min — admins refreshing fast still hit cache
+    private const CACHE_TTL = 900;            // 15 min — current month only
+    private const HISTORY_CACHE_TTL = 2_592_000; // 30 jours — les mois passés sont immuables
     private const CACHE_KEY_PREFIX = 'allo.calls.window.';
 
     public function __construct(
         private HttpClientInterface $httpClient,
-        private CacheInterface $cache,
+        private CacheItemPoolInterface $cache,
         private LoggerInterface $logger,
         #[Autowire('%allo_api_key%')]
         private string $apiKey,
@@ -47,8 +47,11 @@ final readonly class AlloApiClient
     }
 
     /**
-     * Fetches every call in [$start, $end). Cached for 15 min keyed by the
-     * window so two close-by requests share a single API roundtrip.
+     * Fetches every call in [$start, $end), cached PER MONTH: past months
+     * never change (30-day TTL), only the current month is refreshed every
+     * 15 min. The Allo API has no date filter, so a cold history costs one
+     * deep pagination — once — then steady-state only walks the current
+     * month's pages.
      *
      * @return list<Call>
      */
@@ -60,13 +63,71 @@ final readonly class AlloApiClient
             return [];
         }
 
-        $key = self::CACHE_KEY_PREFIX.$start->format('Y-m').'.'.$end->format('Y-m');
+        $currentMonth = (new \DateTimeImmutable('first day of this month'))->setTime(0, 0);
 
-        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end): array {
-            $item->expiresAfter(self::CACHE_TTL);
+        // Month buckets covering the window.
+        $months = [];
+        $cursor = $start->modify('first day of this month')->setTime(0, 0);
+        while ($cursor < $end) {
+            $months[] = $cursor;
+            $cursor = $cursor->modify('+1 month');
+        }
 
-            return $this->paginate($start, $end);
-        });
+        $keys = array_map(static fn (\DateTimeImmutable $m): string => self::CACHE_KEY_PREFIX.'month.'.$m->format('Y-m'), $months);
+        $items = $this->itemsByKey($keys);
+
+        $missingFrom = null;
+        foreach ($months as $i => $month) {
+            if (!$items[$keys[$i]]->isHit()) {
+                $missingFrom ??= $month;
+            }
+        }
+
+        if (null !== $missingFrom) {
+            // One pagination covers every missing month up to now, bucketed
+            // then stored with the right TTL each.
+            $fetched = $this->paginate($missingFrom, $end);
+            $buckets = [];
+            foreach ($fetched as $call) {
+                $buckets[$call->startedAt->format('Y-m')][] = $call;
+            }
+            foreach ($months as $i => $month) {
+                $item = $items[$keys[$i]];
+                if ($item->isHit() && $month < $missingFrom) {
+                    continue;
+                }
+                $item->set($buckets[$month->format('Y-m')] ?? []);
+                $item->expiresAfter($month >= $currentMonth ? self::CACHE_TTL : self::HISTORY_CACHE_TTL);
+                $this->cache->save($item);
+            }
+            $items = $this->itemsByKey($keys);
+        }
+
+        $calls = [];
+        foreach ($keys as $key) {
+            foreach ($items[$key]->get() ?? [] as $call) {
+                if ($call->startedAt >= $start && $call->startedAt < $end) {
+                    $calls[] = $call;
+                }
+            }
+        }
+
+        return $calls;
+    }
+
+    /**
+     * @param list<string> $keys
+     *
+     * @return array<string, \Psr\Cache\CacheItemInterface>
+     */
+    private function itemsByKey(array $keys): array
+    {
+        $items = [];
+        foreach ($this->cache->getItems($keys) as $key => $item) {
+            $items[$key] = $item;
+        }
+
+        return $items;
     }
 
     /**

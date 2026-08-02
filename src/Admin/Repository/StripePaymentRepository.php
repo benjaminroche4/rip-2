@@ -391,7 +391,8 @@ class StripePaymentRepository
      * raw array otherwise. Lets callers downgrade an outage to an empty
      * projection without confusing it with a legitimate "no payments yet".
      *
-     * @param  array<string, array{amount: int, count: int, currency: string}>|array{__failed__: true} $payload
+     * @param array<string, array{amount: int, count: int, currency: string}>|array{__failed__: true} $payload
+     *
      * @return array<string, array{amount: int, count: int, currency: string}>|null
      */
     private function unwrapSentinel(array $payload): ?array
@@ -400,7 +401,7 @@ class StripePaymentRepository
             return null;
         }
 
-        /** @var array<string, array{amount: int, count: int, currency: string}> $payload */
+        /* @var array<string, array{amount: int, count: int, currency: string}> $payload */
         return $payload;
     }
 }

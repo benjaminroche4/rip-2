@@ -90,7 +90,7 @@ final class DistrictMapSvg
     }
 
     /**
-     * @param array<string, list<array{0: float, 1: float}>> $paths
+     * @param array<int|string, list<array<int, float>>> $paths PHP casts the numeric district keys ('92') to int
      *
      * @return array{0: float, 1: float, 2: float, 3: float}
      */

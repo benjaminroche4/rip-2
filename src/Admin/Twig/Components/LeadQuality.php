@@ -48,7 +48,7 @@ final class LeadQuality
     {
         $this->ensureAdmin();
         $this->contactId = $contactId;
-        $this->note = $this->getContact()?->leadNote ?? '';
+        $this->note = $this->getContact()->leadNote ?? '';
         $this->editingNote = '' === $this->note;
     }
 

@@ -1,10 +1,106 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Property App\\Admin\\Entity\\Document\:\:\$category type mapping mismatch\: property can contain App\\Admin\\Domain\\DocumentCategory\|null but database expects App\\Admin\\Domain\\DocumentCategory\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/Document.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\Document\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/Document.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\Document\:\:\$nameEn type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/Document.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\Document\:\:\$nameFr type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/Document.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\Document\:\:\$slug type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/Document.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\DocumentRequest\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/DocumentRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\DocumentRequest\:\:\$driveLink type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/DocumentRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\DocumentRequest\:\:\$typology type mapping mismatch\: property can contain App\\Admin\\Domain\\HouseholdTypology\|null but database expects App\\Admin\\Domain\\HouseholdTypology\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/DocumentRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\PersonRequest\:\:\$documentRequest type mapping mismatch\: property can contain App\\Admin\\Entity\\DocumentRequest\|null but database expects App\\Admin\\Entity\\DocumentRequest\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Admin/Entity/PersonRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\PersonRequest\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/PersonRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\PersonRequest\:\:\$lastName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/PersonRequest.php
+
+		-
+			message: '#^Property App\\Admin\\Entity\\PersonRequest\:\:\$role type mapping mismatch\: property can contain App\\Admin\\Domain\\PersonRole\|null but database expects App\\Admin\\Domain\\PersonRole\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Admin/Entity/PersonRequest.php
+
+		-
+			message: '#^Access to an undefined property Stripe\\StripeObject\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Admin/Repository/StripePaymentRepository.php
+
+		-
+			message: '#^Attribute class Symfony\\Bridge\\Monolog\\Attribute\\WithMonologChannel does not exist\.$#'
+			identifier: attribute.notFound
+			count: 1
+			path: src/Admin/Repository/StripePaymentRepository.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Admin/Repository/StripePaymentRepository.php
+
+		-
 			message: '#^Method KnpU\\OAuth2ClientBundle\\Client\\OAuth2ClientInterface\:\:redirect\(\) invoked with 1 parameter, 2 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: src/Auth/Controller/GoogleAuthController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Form\\FormInterface\<mixed\>\:\:isFinished\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Auth/Controller/RegisterController.php
 
 		-
 			message: '#^Property App\\Auth\\Entity\\ResetPasswordRequest\:\:\$user type mapping mismatch\: property can contain App\\Auth\\Entity\\User\|null but database expects App\\Auth\\Entity\\User\.$#'
@@ -109,6 +205,24 @@ parameters:
 			path: src/Contact/Entity/Contact.php
 
 		-
+			message: '#^Property App\\Contact\\Entity\\ContactEvent\:\:\$contact type mapping mismatch\: property can contain App\\Contact\\Entity\\Contact\|null but database expects App\\Contact\\Entity\\Contact\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Contact/Entity/ContactEvent.php
+
+		-
+			message: '#^Property App\\Contact\\Entity\\ContactNote\:\:\$contact type mapping mismatch\: property can contain App\\Contact\\Entity\\Contact\|null but database expects App\\Contact\\Entity\\Contact\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Contact/Entity/ContactNote.php
+
+		-
+			message: '#^Parameter \$arrondissements of class App\\Marketplace\\Filter\\PropertySearchCriteria constructor expects array\<int, int\>, array\<int, string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Marketplace/Twig/Components/MarketplaceSearch.php
+
+		-
 			message: '#^Property App\\Newsletter\\Controller\\NewsletterController\:\:\$logger is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -185,6 +299,48 @@ parameters:
 			identifier: doctrine.columnType
 			count: 1
 			path: src/PropertyEstimation/Entity/PropertyEstimation.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/PropertyListing/Controller/PropertyListingController.php
+
+		-
+			message: '#^Attribute class Symfony\\Bridge\\Monolog\\Attribute\\WithMonologChannel does not exist\.$#'
+			identifier: attribute.notFound
+			count: 1
+			path: src/Shared/Pdf/DocRaptorPdfRenderer.php
+
+		-
+			message: '#^PHPDoc tag @var with type Symfony\\Contracts\\Cache\\CacheInterface is not subtype of native type Symfony\\Component\\Cache\\Adapter\\ArrayAdapter\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: tests/Admin/Repository/StripePaymentRepositoryTest.php
+
+		-
+			message: '#^Method App\\Tests\\Auth\\RegisterControllerTest\:\:registerOneUser\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: tests/Auth/RegisterControllerTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Mime\\RawMessage\:\:getHtmlBody\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Auth/Service/EmailVerificationCodeServiceTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Mime\\RawMessage\:\:getAttachments\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/Controller/PropertyListingControllerTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Mime\\RawMessage\:\:getTo\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/Controller/PropertyListingControllerTest.php
 
 		-
 			message: '#^Cannot call method tick\(\) on array\<array\<Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\.$#'

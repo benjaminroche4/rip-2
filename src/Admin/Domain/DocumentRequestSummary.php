@@ -12,8 +12,8 @@ namespace App\Admin\Domain;
 final readonly class DocumentRequestSummary
 {
     /**
-     * @param list<string> $personNames Full names ("Firstname Lastname") in
-     *                                   display (position) order.
+     * @param list<string> $personNames full names ("Firstname Lastname") in
+     *                                  display (position) order
      */
     public function __construct(
         public int $id,

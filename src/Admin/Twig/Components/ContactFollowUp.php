@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Admin\Twig\Components;
 
 use App\Auth\Repository\UserRepository;
-use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ContactEventItem;
+use App\Contact\Domain\ContactListItem;
 use App\Contact\Repository\ContactEventRepository;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\SecurityBundle\Security;

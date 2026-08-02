@@ -143,10 +143,10 @@ final class PropertyFilterTest extends TestCase
     }
 
     /**
-     * @param array<int, string>      $tags
-     * @param array<string, bool>     $equipment
-     * @param array<int, string>      $metro
-     * @param array<int, string>      $rer
+     * @param array<int, string>  $tags
+     * @param array<string, bool> $equipment
+     * @param array<int, string>  $metro
+     * @param array<int, string>  $rer
      */
     private function property(
         string $id,

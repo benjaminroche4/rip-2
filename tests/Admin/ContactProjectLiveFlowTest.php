@@ -90,6 +90,7 @@ final class ContactProjectLiveFlowTest extends WebTestCase
 
         $crawler = new \Symfony\Component\DomCrawler\Crawler((string) $response->getContent());
         $root = $crawler->filter('[data-testid="contact-project"]')->first();
+
         return json_decode($root->attr('data-live-props-value'), true);
     }
 }

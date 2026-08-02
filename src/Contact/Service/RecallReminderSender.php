@@ -49,7 +49,7 @@ final readonly class RecallReminderSender
      */
     public function send(?\DateTimeImmutable $now = null): int
     {
-        $now = $now ?? new \DateTimeImmutable();
+        $now ??= new \DateTimeImmutable();
         $sent = 0;
 
         foreach ($this->contacts->findWithUpcomingRecall($now) as $contact) {
