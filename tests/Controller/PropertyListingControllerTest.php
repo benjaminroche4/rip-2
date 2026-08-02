@@ -523,10 +523,11 @@ final class PropertyListingControllerTest extends WebTestCase
         self::assertResponseHeaderSame('X-LiteSpeed-Cache-Control', 'no-cache');
         self::assertStringContainsString('no-store', (string) $client->getResponse()->headers->get('Cache-Control'));
 
-        // A refresh serves the form again, without the cache opt-out.
+        // A refresh serves the form again; the global LiteSpeed listener
+        // still marks it no-cache (form pages never enter the page cache).
         $client->request('GET', '/fr/proposer-un-bien');
         self::assertSelectorExists('form[name="property_listing"]');
-        self::assertFalse($client->getResponse()->headers->has('X-LiteSpeed-Cache-Control'));
+        self::assertResponseHeaderSame('X-LiteSpeed-Cache-Control', 'no-cache');
     }
 
     public function testItStoresUploadedPhotosInASlugNamedFolder(): void

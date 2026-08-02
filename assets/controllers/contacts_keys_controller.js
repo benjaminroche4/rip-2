@@ -3,7 +3,7 @@ import { Controller } from '@hotwired/stimulus'
 
 // Keyboard-driven triage on the leads list: ArrowUp/ArrowDown move the
 // focus ring between cards, Enter opens the focused card's detail page,
-// and 1-6 apply the matching status (the keys mirror the dropdown order)
+// and 1-7 apply the matching status (the keys mirror the dropdown order)
 // by clicking the card's own dropdown option, so the whole live flow
 // (modals, animations, badges) stays identical to a mouse click.
 export default class extends Controller {
@@ -35,7 +35,7 @@ export default class extends Controller {
             return
         }
         // Never fight a modal or an open dropdown.
-        if (document.querySelector('[data-testid="contact-create-modal"], [data-testid="qualify-modal"], [data-testid="recall-modal"], details[open] > div')) {
+        if (document.querySelector('[data-testid="contact-create-modal"], [data-testid="recall-modal"], details[open] > div')) {
             return
         }
 
@@ -70,7 +70,7 @@ export default class extends Controller {
             return
         }
 
-        if (/^[1-6]$/.test(event.key)) {
+        if (/^[1-7]$/.test(event.key)) {
             const options = focused.querySelectorAll('[data-live-action-param="changeStatus"]')
             const option = options[Number(event.key) - 1]
             if (option) {

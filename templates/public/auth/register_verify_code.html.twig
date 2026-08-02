@@ -29,7 +29,7 @@
                    while still authenticated), so they can re-register or come
                    back later with a fresh login. The EmailVerificationListener
                    would otherwise loop them straight back here. #}
-                <a href="{{ logout_path() }}">
+                <a href="{{ logout_path() }}" data-turbo-prefetch="false">
                     <img
                         src="{{ asset('medias/logos/logo_red.svg') }}"
                         width="141"

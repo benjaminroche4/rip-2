@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Admin\Components;
 
 use App\Auth\Entity\User;
-use App\Contact\Domain\Furnishing;
 use App\Contact\Domain\StayDuration;
 use App\Contact\Entity\Contact;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,7 +56,7 @@ final class ContactRecapEmailTest extends KernelTestCase
             ->setProjectBudget(1800)
             ->setProjectAreas('11e,92')
             ->setProjectStayDuration(StayDuration::Medium)
-            ->setProjectFurnishing(Furnishing::Furnished)
+            ->setProjectFurnishing('furnished,unfurnished')
             ->setProjectPropertyType('t2,loft')
             ->setAssignedTo($admin);
         $this->em->persist($contact);
@@ -118,6 +117,75 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertCount(1, $events);
         self::assertSame('recap_email_payment', $events[0]->kind);
         self::assertSame('Julien Moreau', $events[0]->authorName);
+    }
+
+    public function testDepositLinkForConfieAndEnglishLinksFollowTheLanguage(): void
+    {
+        $admin = (new User())
+            ->setEmail('dep@recap-test.local')
+            ->setFirstName('Julien')->setLastName('Moreau')
+            ->setRoles(['ROLE_ADMIN'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($admin);
+
+        $contact = (new Contact())
+            ->setFirstName('john')->setLastName('smith')
+            ->setEmail('john@example.com')
+            ->setHelpType('contact.contactForm.helpType.choice.1')
+            ->setOffer('confie')
+            ->setMessage('Hello')->setLang('en')->setIp('127.0.0.1')
+            ->setCreatedAt(new \DateTimeImmutable('now'));
+        $this->em->persist($contact);
+        $this->em->flush();
+
+        self::getContainer()->get('security.token_storage')
+            ->setToken(new UsernamePasswordToken($admin, 'main', $admin->getRoles()));
+
+        $component = $this->mountTwigComponent('Admin:ContactRecapEmail', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->openModal();
+        self::assertTrue($component->getDepositAvailable(), 'Confié offers the 50% deposit.');
+
+        $component->togglePayment();
+        $component->toggleDeposit();
+        $component->send();
+
+        $email = $this->mailer->lastMessage;
+        self::getContainer()->get('twig.mime_body_renderer')->render($email);
+        $html = (string) $email->getHtmlBody();
+        // English prospect + deposit → the English deposit link.
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/aFa00j0Tx781b2z3cv6kg03', $html);
+        self::assertStringContainsString('50% deposit on', $html);
+        self::assertStringContainsString('Your housing project', (string) $email->getSubject());
+
+        // Same prospect, full amount → the English full link.
+        $component->toggleDeposit();
+        $component->send();
+        $email = $this->mailer->lastMessage;
+        self::getContainer()->get('twig.mime_body_renderer')->render($email);
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/4gM5kDgSv4ZTeeL3cv6kg00', (string) $email->getHtmlBody());
+
+        // French prospect, Confié + deposit → the French deposit link.
+        $contact->setLang('fr');
+        $this->em->flush();
+        $component->openModal();
+        $component->togglePayment();
+        $component->toggleDeposit();
+        $component->send();
+        $email = $this->mailer->lastMessage;
+        self::getContainer()->get('twig.mime_body_renderer')->render($email);
+        $html = (string) $email->getHtmlBody();
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/eVq4gz9q3akd8Ur4gz6kg01', $html);
+        self::assertStringContainsString('Acompte de 50 % sur', $html);
+
+        // French prospect, Confié full amount → the French full link.
+        $component->openModal();
+        $component->togglePayment();
+        $component->send();
+        $email = $this->mailer->lastMessage;
+        self::getContainer()->get('twig.mime_body_renderer')->render($email);
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04', (string) $email->getHtmlBody());
     }
 
     public function testCloseModalSendsNothingAndPaymentNeedsAPackage(): void

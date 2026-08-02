@@ -1814,6 +1814,7 @@ admin:
             closurePlaceholder: Choisir un motif
             closedTitle: Demande fermée
             unqualifiedTitle: Demande non qualifiée
+            not_convertedTitle: Demande non convertie
             convertedTitle: Demande convertie en client
             terminalSince: depuis le %date%
             prev: Demande précédente
@@ -1852,7 +1853,26 @@ admin:
             newTitle: Tout est traité !
             newHint: Aucune nouvelle demande en attente. Beau travail.
             defaultTitle: Aucune demande
-        keysHint: '↑↓ naviguer · 1-6 statut · Entrée ouvrir'
+            byStatus:
+                in_progress:
+                    title: Aucune demande en cours
+                    hint: Les demandes prises en charge par l'équipe apparaîtront ici.
+                to_recall:
+                    title: Aucun rappel planifié
+                    hint: Les demandes à recontacter, avec leur date de rappel, apparaîtront ici.
+                converted:
+                    title: Aucune conversion pour le moment
+                    hint: Les demandes transformées en clients apparaîtront ici.
+                not_converted:
+                    title: Aucune demande non convertie
+                    hint: Les demandes qui n'ont pas abouti apparaîtront ici.
+                unqualified:
+                    title: Aucune demande non qualifiée
+                    hint: Les demandes hors cible, avec leur motif, apparaîtront ici.
+                closed:
+                    title: Aucune demande fermée
+                    hint: Les demandes clôturées apparaîtront ici.
+        keysHint: '↑↓ naviguer · 1-7 statut · Entrée ouvrir'
         sort:
             recent: Plus récentes
             recall: Rappel le plus proche
@@ -1889,6 +1909,8 @@ admin:
             modalSubtitle: 'L''email sera envoyé à <strong>%email%</strong>, dans la langue du client.'
             paymentToggle: Inclure le lien de paiement
             paymentHint: 'Formule %offer% (%price%), bouton de paiement sécurisé dans l''email.'
+            depositToggle: Acompte de 50 %
+            depositHint: 'Le lien demandera 50 % de la formule Confié (1 095 €), le solde sera réglé plus tard.'
             paymentUnavailable: 'Lien de paiement indisponible : renseignez d''abord la formule souhaitée dans les informations du contact.'
             send: Envoyer l'email
             sent: Récapitulatif envoyé au client
@@ -1961,10 +1983,6 @@ admin:
             title: Planifier le rappel
             subtitle: Quand doit-on recontacter ce lead ?
             skip: Passer
-        qualify:
-            title: Qualifier le lead
-            subtitle: Première prise en charge, renseigne la qualité du lead avant de continuer.
-            done: Terminé
         leadQuality:
             internal: Qualification interne, jamais partagée avec le client.
             ratingLabel: Note
@@ -2003,6 +2021,7 @@ admin:
                 in_progress: En cours
                 to_recall: À recontacter
                 converted: Convertie
+                not_converted: Non convertie
                 unqualified: Non qualifiée
                 closed: Fermée
             field:

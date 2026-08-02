@@ -77,13 +77,6 @@ final class ContactList
     public ?int $confirmedContactId = null;
 
     /**
-     * Contact being qualified in the modal, opened on the FIRST treatment
-     * of a submission (first status change out of "new").
-     */
-    #[LiveProp]
-    public ?int $qualifyContactId = null;
-
-    /**
      * Contact whose recall date is being planned, opened when the status
      * is set to "to recall". Takes precedence over the qualify modal.
      */
@@ -93,13 +86,6 @@ final class ContactList
     /** Recall being planned, "Y-m-dTH:i" (datetime-local format). */
     #[LiveProp(writable: true)]
     public string $recallAt = '';
-
-    /**
-     * First treatment done straight to "to recall": the qualification
-     * modal chains right after the recall one closes.
-     */
-    #[LiveProp]
-    public ?int $qualifyAfterRecall = null;
 
     /**
      * Ids in their on-screen order, captured when the list is (re)built.
@@ -163,22 +149,17 @@ final class ContactList
 
         $user = $this->security->getUser();
         $avatar = $user instanceof User ? $user->getAvatarFilename() : null;
-        $firstTreatment = $this->repository->updateStatus($id, $newStatus, $this->currentUserName(), $avatar);
+        $this->repository->updateStatus($id, $newStatus, $this->currentUserName(), $avatar);
         $this->itemsCache = null;
         $this->totalCache = null;
 
-        // "To recall" → plan the recall date first; a first treatment then
-        // chains into the lead qualification once the recall modal closes.
+        // "To recall" → plan the recall date right away.
         if (ContactStatus::ToRecall === $newStatus) {
             $this->recallContactId = $id;
             $this->recallAt = $this->repository->listByIds([$id])[0]?->recallAt?->format('Y-m-d\TH:i') ?? '';
-            $this->qualifyContactId = null;
-            $this->qualifyAfterRecall = $firstTreatment ? $id : null;
         } else {
             $this->recallContactId = null;
             $this->recallAt = '';
-            $this->qualifyAfterRecall = null;
-            $this->qualifyContactId = $firstTreatment ? $id : null;
         }
 
         $filterStatus = $this->currentStatus();
@@ -266,21 +247,6 @@ final class ContactList
     }
 
     #[LiveAction]
-    public function closeQualify(): void
-    {
-        $this->ensureAdmin();
-        $this->qualifyContactId = null;
-    }
-
-    #[LiveListener('lead-quality:saved')]
-    public function onLeadQualitySaved(): void
-    {
-        // Saving the qualification note closes the modal in one click.
-        $this->ensureAdmin();
-        $this->qualifyContactId = null;
-    }
-
-    #[LiveAction]
     public function saveRecall(): void
     {
         $this->ensureAdmin();
@@ -301,7 +267,6 @@ final class ContactList
         $this->recallContactId = null;
         $this->recallAt = '';
         $this->itemsCache = null;
-        $this->chainQualifyModal();
     }
 
     #[LiveAction]
@@ -310,15 +275,6 @@ final class ContactList
         $this->ensureAdmin();
         $this->recallContactId = null;
         $this->recallAt = '';
-        $this->chainQualifyModal();
-    }
-
-    private function chainQualifyModal(): void
-    {
-        if (null !== $this->qualifyAfterRecall) {
-            $this->qualifyContactId = $this->qualifyAfterRecall;
-            $this->qualifyAfterRecall = null;
-        }
     }
 
     /**

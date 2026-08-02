@@ -1813,6 +1813,7 @@ admin:
             closurePlaceholder: Pick a reason
             closedTitle: Request closed
             unqualifiedTitle: Request unqualified
+            not_convertedTitle: Request not converted
             convertedTitle: Request converted to client
             terminalSince: since %date%
             prev: Previous request
@@ -1851,7 +1852,26 @@ admin:
             newTitle: All caught up!
             newHint: No new request waiting. Nice work.
             defaultTitle: No requests
-        keysHint: '↑↓ navigate · 1-6 status · Enter open'
+            byStatus:
+                in_progress:
+                    title: No request in progress
+                    hint: Requests being handled by the team will show up here.
+                to_recall:
+                    title: No recall planned
+                    hint: Requests to call back, with their recall date, will show up here.
+                converted:
+                    title: No conversion yet
+                    hint: Requests turned into clients will show up here.
+                not_converted:
+                    title: No unconverted request
+                    hint: Requests that did not go through will show up here.
+                unqualified:
+                    title: No unqualified request
+                    hint: Out-of-scope requests, with their reason, will show up here.
+                closed:
+                    title: No closed request
+                    hint: Closed requests will show up here.
+        keysHint: '↑↓ navigate · 1-7 status · Enter open'
         sort:
             recent: Most recent
             recall: Closest recall
@@ -1888,6 +1908,8 @@ admin:
             modalSubtitle: 'The email will be sent to <strong>%email%</strong>, in the client''s language.'
             paymentToggle: Include the payment link
             paymentHint: '%offer% package (%price%), secure payment button in the email.'
+            depositToggle: 50% deposit
+            depositHint: 'The link will charge 50% of the Confié package (€1,095), the balance is settled later.'
             paymentUnavailable: 'Payment link unavailable: set the desired package in the contact details first.'
             send: Send the email
             sent: Recap sent to the client
@@ -1960,10 +1982,6 @@ admin:
             title: Plan the recall
             subtitle: When should this lead be called back?
             skip: Skip
-        qualify:
-            title: Qualify the lead
-            subtitle: First treatment, fill in the lead quality before moving on.
-            done: Done
         leadQuality:
             internal: Internal qualification, never shared with the client.
             ratingLabel: Rating
@@ -2002,6 +2020,7 @@ admin:
                 in_progress: In progress
                 to_recall: To call back
                 converted: Converted
+                not_converted: Not converted
                 unqualified: Unqualified
                 closed: Closed
             field:

@@ -183,7 +183,7 @@
                         </div>
                     </div>
                     </div>
-                    {% set currentFurnishing = projectContact ? projectContact.projectFurnishing : null %}
+                    {% set selectedFurnishings = this.selectedFurnishings %}
                     <div class="min-w-0 space-y-2 sm:col-span-2">
                         <p class="text-gray-600">{{ 'admin.contacts.project.furnishing.label'|trans }}</p>
                         <div class="flex flex-wrap gap-2">
@@ -193,8 +193,8 @@
                                     data-action="live#action"
                                     data-live-action-param="chooseFurnishing"
                                     data-live-furnishing-param="{{ furnishing.value }}"
-                                    aria-pressed="{{ furnishing == currentFurnishing ? 'true' : 'false' }}"
-                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ furnishing == currentFurnishing ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    aria-pressed="{{ furnishing.value in selectedFurnishings ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ furnishing.value in selectedFurnishings ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
                                     data-testid="furnishing-chip"
                                 >
                                     {{ ux_icon(furnishing.value == 'furnished' ? 'lucide:sofa' : 'lucide:package-open', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}

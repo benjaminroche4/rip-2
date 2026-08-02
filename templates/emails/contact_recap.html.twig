@@ -88,7 +88,8 @@
                                                                                         {{ _self.row(fr ? 'Durée d\'installation' : 'Length of stay', contact.projectStayDuration.labelKey|trans([], 'messages', locale) ~ ' (' ~ contact.projectStayDuration.hintKey|trans([], 'messages', locale) ~ ')') }}
                                                                                     {% endif %}
                                                                                     {% if contact.projectFurnishing %}
-                                                                                        {{ _self.row(fr ? 'Meublé / non meublé' : 'Furnishing', contact.projectFurnishing.labelKey|trans([], 'messages', locale)) }}
+                                                                                        {% set furnishingLabels = contact.projectFurnishing|split(',')|filter(v => v != '')|map(v => ('admin.contacts.project.furnishing.choice.' ~ v)|trans([], 'messages', locale)) %}
+                                                                                        {{ _self.row(fr ? 'Meublé / non meublé' : 'Furnishing', furnishingLabels|join(', ')) }}
                                                                                     {% endif %}
                                                                                     {% if contact.projectGuarantorType %}
                                                                                         {{ _self.row(fr ? 'Type de garant' : 'Guarantor', contact.projectGuarantorType.labelKey|trans([], 'messages', locale)) }}
@@ -236,8 +237,8 @@
                                                                     <td align="center" style="padding:8px 0 28px;border-top:1px solid #efefef">
                                                                         <p style="margin:0 auto;padding:24px 0 18px;font-size:1em;color:#525252;max-width:400px;text-align:center;text-wrap:balance">
                                                                             {{ fr
-                                                                                ? 'Il ne vous reste qu\'à confirmer votre formule pour lancer les recherches.'
-                                                                                : 'All that remains is to confirm your package to start the search.' }}
+                                                                                ? 'Il ne vous reste plus qu\'à confirmer votre recherche pour démarrer la sélection.'
+                                                                                : 'All that remains is to confirm your search to start the selection.' }}
                                                                         </p>
                                                                         <a href="{{ paymentUrl }}"
                                                                             style="display:inline-block;background-color:#71172e;color:#ffffff;text-decoration:none;font-weight:600;font-size:1em;padding:13px 28px;border-radius:8px">
@@ -247,7 +248,7 @@
                                                                         </a>
                                                                         <p style="margin:0;padding:12px 0 0;font-size:0.85em;color:#9ca3af">
                                                                             <img src="{{ site_url }}/medias/website/email-icons/lock.png" alt="" width="12" height="12" style="display:inline-block;vertical-align:-1px;margin-right:4px;border:none;outline:none" />
-                                                                            {{ fr ? 'Paiement sécurisé via Stripe' : 'Secure payment via Stripe' }} · {{ paymentOfferPrice }}
+                                                                            {{ fr ? 'Paiement sécurisé via Stripe' : 'Secure payment via Stripe' }} · {{ paymentDeposit ? (fr ? 'Acompte de 50 % sur ' : '50% deposit on ') }}{{ paymentOfferPrice }}
                                                                         </p>
                                                                         <p style="margin:0;padding:26px 0 0;font-size:0.8em;color:#9ca3af;letter-spacing:0.01em">
                                                                             {{ fr ? '+900 installations réussies · Biens off-market ·' : '+900 successful relocations · Off-market listings ·' }}

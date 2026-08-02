@@ -210,6 +210,15 @@ final class ContactProject
         return \App\Contact\Domain\Furnishing::cases();
     }
 
+    /**
+     * @return list<string>
+     */
+    public function getSelectedFurnishings(): array
+    {
+        return array_values(array_filter(explode(',', (string) ($this->getContact()?->projectFurnishing))));
+    }
+
+    /** Multi-select: a prospect can be open to both. */
     #[LiveAction]
     public function chooseFurnishing(#[LiveArg] string $furnishing): void
     {
@@ -219,11 +228,16 @@ final class ContactProject
             return;
         }
 
-        $case = \App\Contact\Domain\Furnishing::tryFrom($furnishing)
-            ?? throw new BadRequestHttpException(\sprintf('Unknown furnishing "%s".', $furnishing));
+        if (null === \App\Contact\Domain\Furnishing::tryFrom($furnishing)) {
+            throw new BadRequestHttpException(\sprintf('Unknown furnishing "%s".', $furnishing));
+        }
 
-        $current = $this->getContact()?->projectFurnishing;
-        $this->repository->saveFurnishing($this->contactId, $current === $case ? null : $case);
+        $selected = $this->getSelectedFurnishings();
+        $selected = \in_array($furnishing, $selected, true)
+            ? array_values(array_diff($selected, [$furnishing]))
+            : [...$selected, $furnishing];
+
+        $this->repository->saveFurnishing($this->contactId, implode(',', $selected));
     }
 
     /**

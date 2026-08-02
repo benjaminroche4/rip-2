@@ -66,6 +66,25 @@
                                 </span>
                             </span>
                         </button>
+                        {% if this.includePayment and this.depositAvailable %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="toggleDeposit"
+                                role="switch"
+                                aria-checked="{{ this.includeDeposit ? 'true' : 'false' }}"
+                                class="mt-3 ml-8 flex w-full cursor-pointer items-start gap-3 text-left"
+                                data-testid="contact-recap-deposit-toggle"
+                            >
+                                <span class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors duration-100 ease-out {{ this.includeDeposit ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-transparent' }}">
+                                    {{ ux_icon('lucide:check', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                </span>
+                                <span class="min-w-0">
+                                    <span class="block text-sm font-medium text-gray-900">{{ 'admin.contacts.recapEmail.depositToggle'|trans }}</span>
+                                    <span class="mt-0.5 block text-xs text-gray-500">{{ 'admin.contacts.recapEmail.depositHint'|trans }}</span>
+                                </span>
+                            </button>
+                        {% endif %}
                     {% else %}
                         <p class="flex items-start gap-2 text-xs text-gray-500">
                             {{ ux_icon('lucide:info', {class: 'mt-0.5 size-3.5 shrink-0', 'aria-hidden': 'true'}) }}

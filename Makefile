@@ -17,6 +17,7 @@ deploy:
 	echo "→ Compile AssetMapper" && php bin/console asset-map:compile --env=prod
 	echo "→ Clear cache (prod)" && php bin/console cache:clear --env=prod
 	echo "✓ Cache warmup (prod, compiles all Twig templates ahead of first request)" && php bin/console cache:warmup --env=prod
+	$(MAKE) purge-cache
 	echo "✓ Déploiement terminé"
 
 version:
@@ -76,3 +77,10 @@ tailwind:
 	php bin/console cache:clear
 	php bin/console cache:warmup --env=prod
 	echo "→ Tailwind CSS build complete. Do not forget : chmod 711 . (Source)"
+
+purge-cache:
+	@if [ -n "$$CACHE_PURGE_TOKEN" ]; then \
+		echo "→ Purge LiteSpeed cache" && curl -fso /dev/null "https://relocation-in-paris.fr/_cache/purge?token=$$CACHE_PURGE_TOKEN" && echo "✓ Cache purgé"; \
+	else \
+		echo "→ CACHE_PURGE_TOKEN non défini, purge LiteSpeed ignorée"; \
+	fi

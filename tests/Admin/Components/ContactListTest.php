@@ -90,24 +90,6 @@ final class ContactListTest extends KernelTestCase
         self::assertSame(1, $component->getTotalCount());
     }
 
-    public function testFirstTreatmentOpensTheQualifyModal(): void
-    {
-        $contact = $this->persistContact();
-        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
-        $this->em->flush();
-        $this->loginAs('admin@contactlist-test.local');
-
-        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
-        $component->setLiveResponder(new LiveResponder());
-
-        $component->changeStatus((int) $contact->getId(), 'in_progress');
-        self::assertSame((int) $contact->getId(), $component->qualifyContactId, 'First treatment opens the qualification modal.');
-
-        $component->closeQualify();
-        $component->changeStatus((int) $contact->getId(), 'closed');
-        self::assertNull($component->qualifyContactId, 'Later changes do not reopen it.');
-    }
-
     public function testToRecallOpensTheRecallModalAndSavesTheDate(): void
     {
         $contact = $this->persistContact();
@@ -120,7 +102,6 @@ final class ContactListTest extends KernelTestCase
 
         $component->changeStatus((int) $contact->getId(), 'to_recall');
         self::assertSame((int) $contact->getId(), $component->recallContactId, 'To-recall opens the recall modal.');
-        self::assertNull($component->qualifyContactId, 'The recall modal shows first.');
 
         $futureRecall = new \DateTimeImmutable('+2 days 14:30');
         $component->recallAt = $futureRecall->format('Y-m-d\TH:i');
@@ -129,14 +110,11 @@ final class ContactListTest extends KernelTestCase
         $this->em->clear();
         self::assertSame($futureRecall->format('Y-m-d H:i'), $this->em->find(Contact::class, $contact->getId())->getRecallAt()?->format('Y-m-d H:i'));
         self::assertNull($component->recallContactId);
-        // First treatment done via "to recall": the qualification modal chains.
-        self::assertSame((int) $contact->getId(), $component->qualifyContactId);
 
-        // A later switch back to "to recall" only shows the recall modal.
-        $component->closeQualify();
+        // A later switch back to "to recall" reopens only the recall modal.
         $component->changeStatus((int) $contact->getId(), 'to_recall');
         $component->closeRecall();
-        self::assertNull($component->qualifyContactId, 'No qualification chaining after the first treatment.');
+        self::assertNull($component->recallContactId);
     }
 
     public function testSearchFiltersTheListAndResetsPaging(): void

@@ -17,10 +17,26 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final readonly class ContactRecapMailer
 {
-    /** Stripe payment links per package (accompagne 1 190 €, confie 2 190 €). */
+    /**
+     * Stripe payment links per locale and package (accompagne 1 190 €,
+     * confie 2 190 €). The "confie" package can be paid with a 50% deposit;
+     * "accompagne" has no deposit option.
+     */
     public const PAYMENT_LINKS = [
-        'accompagne' => 'https://payment.relocation-in-paris.fr/b/00wfZh7hV2RLeeL6oH6kg05',
-        'confie' => 'https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04',
+        'fr' => [
+            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/00wfZh7hV2RLeeL6oH6kg05'],
+            'confie' => [
+                'full' => 'https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04',
+                'deposit' => 'https://payment.relocation-in-paris.fr/b/eVq4gz9q3akd8Ur4gz6kg01',
+            ],
+        ],
+        'en' => [
+            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/4gMbJ10Tx63X2w314n6kg02'],
+            'confie' => [
+                'full' => 'https://payment.relocation-in-paris.fr/b/4gM5kDgSv4ZTeeL3cv6kg00',
+                'deposit' => 'https://payment.relocation-in-paris.fr/b/aFa00j0Tx781b2z3cv6kg03',
+            ],
+        ],
     ];
 
     public function __construct(
@@ -30,7 +46,7 @@ final readonly class ContactRecapMailer
     ) {
     }
 
-    public function send(ContactListItem $contact, bool $withPaymentLink = false): void
+    public function send(ContactListItem $contact, bool $withPaymentLink = false, bool $withDeposit = false): void
     {
         $locale = \in_array($contact->lang, ['fr', 'en'], true) ? $contact->lang : 'fr';
         $fr = 'fr' === $locale;
@@ -47,7 +63,8 @@ final readonly class ContactRecapMailer
                 'contact' => $contact,
                 'areaLabels' => $this->areaLabels($contact),
                 'areasMapUrl' => $this->staticMap->build($this->areaCodes($contact), $locale),
-                'paymentUrl' => $withPaymentLink && null !== $contact->offer ? (self::PAYMENT_LINKS[$contact->offer] ?? null) : null,
+                'paymentUrl' => $this->paymentUrl($contact, $locale, $withPaymentLink, $withDeposit),
+                'paymentDeposit' => $withDeposit && 'confie' === $contact->offer,
                 'paymentOfferTitle' => null !== $contact->offer ? $this->translator->trans('contact.contactForm.offer.'.$contact->offer.'.title', locale: $locale) : null,
                 'paymentOfferPrice' => null !== $contact->offer ? $this->translator->trans('contact.contactForm.offer.'.$contact->offer.'.price', locale: $locale) : null,
                 'propertyTypeLabels' => $this->propertyTypeLabels($contact, $locale),
@@ -61,6 +78,21 @@ final readonly class ContactRecapMailer
             ]);
 
         $this->mailer->send($email);
+    }
+
+    private function paymentUrl(ContactListItem $contact, string $locale, bool $withPaymentLink, bool $withDeposit): ?string
+    {
+        if (!$withPaymentLink || null === $contact->offer) {
+            return null;
+        }
+
+        $links = self::PAYMENT_LINKS[$locale][$contact->offer] ?? null;
+        if (null === $links) {
+            return null;
+        }
+
+        // The deposit only exists for the "confie" package.
+        return $withDeposit && isset($links['deposit']) ? $links['deposit'] : $links['full'];
     }
 
     /**

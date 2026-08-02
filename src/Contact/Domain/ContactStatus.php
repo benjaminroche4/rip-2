@@ -14,6 +14,7 @@ enum ContactStatus: string
     case InProgress = 'in_progress';
     case ToRecall = 'to_recall';
     case Converted = 'converted';
+    case NotConverted = 'not_converted';
     case Unqualified = 'unqualified';
     case Closed = 'closed';
 
@@ -33,6 +34,7 @@ enum ContactStatus: string
             self::InProgress => 'bg-amber-500',
             self::ToRecall => 'bg-purple-500',
             self::Converted => 'bg-green-600',
+            self::NotConverted => 'bg-orange-500',
             self::Unqualified => 'bg-gray-400',
             self::Closed => 'bg-gray-500',
         };
@@ -45,6 +47,7 @@ enum ContactStatus: string
             self::InProgress => 'text-amber-600',
             self::ToRecall => 'text-purple-600',
             self::Converted => 'text-green-600',
+            self::NotConverted => 'text-orange-600',
             self::Unqualified => 'text-gray-500',
             self::Closed => 'text-gray-600',
         };

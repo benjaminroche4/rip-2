@@ -261,7 +261,7 @@ final class ContactRepositoryTest extends KernelTestCase
 
         self::assertSame(2, $counts['new']);
         self::assertSame(0, $counts['closed']);
-        self::assertCount(6, $counts);
+        self::assertCount(7, $counts);
     }
 
     public function testListFirstOrdersNewestFirst(): void

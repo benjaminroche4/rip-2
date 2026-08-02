@@ -157,11 +157,17 @@ final class ContactQualificationTest extends KernelTestCase
         $component->chooseGuarantorType('garantme');
         $this->em->clear();
         $reloaded = $this->em->find(Contact::class, $contact->getId());
-        self::assertSame(\App\Contact\Domain\Furnishing::Furnished, $reloaded->getProjectFurnishing());
+        self::assertSame('furnished', $reloaded->getProjectFurnishing());
         self::assertSame(\App\Contact\Domain\GuarantorType::Garantme, $reloaded->getProjectGuarantorType());
+
+        // Multi-select: open to both.
+        $component->chooseFurnishing('unfurnished');
+        $this->em->clear();
+        self::assertSame('furnished,unfurnished', $this->em->find(Contact::class, $contact->getId())->getProjectFurnishing());
 
         // Clicking the selected chips again clears them.
         $component->chooseFurnishing('furnished');
+        $component->chooseFurnishing('unfurnished');
         $component->chooseGuarantorType('garantme');
         $this->em->clear();
         $reloaded = $this->em->find(Contact::class, $contact->getId());

@@ -39,6 +39,10 @@ final class ContactRecapEmail
     #[LiveProp(writable: true)]
     public bool $includePayment = false;
 
+    /** 50% deposit link instead of the full amount ("confie" only). */
+    #[LiveProp(writable: true)]
+    public bool $includeDeposit = false;
+
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly ContactEventRepository $events,
@@ -61,7 +65,12 @@ final class ContactRecapEmail
     {
         $offer = $this->getContact()?->offer;
 
-        return null !== $offer && isset(ContactRecapMailer::PAYMENT_LINKS[$offer]);
+        return null !== $offer && isset(ContactRecapMailer::PAYMENT_LINKS['fr'][$offer]);
+    }
+
+    public function getDepositAvailable(): bool
+    {
+        return 'confie' === $this->getContact()?->offer;
     }
 
     #[LiveAction]
@@ -70,6 +79,7 @@ final class ContactRecapEmail
         $this->ensureAdmin();
         $this->state = 'modal';
         $this->includePayment = false;
+        $this->includeDeposit = false;
     }
 
     #[LiveAction]
@@ -78,6 +88,7 @@ final class ContactRecapEmail
         $this->ensureAdmin();
         $this->state = 'idle';
         $this->includePayment = false;
+        $this->includeDeposit = false;
     }
 
     #[LiveAction]
@@ -85,6 +96,16 @@ final class ContactRecapEmail
     {
         $this->ensureAdmin();
         $this->includePayment = $this->getPaymentAvailable() && !$this->includePayment;
+        if (!$this->includePayment) {
+            $this->includeDeposit = false;
+        }
+    }
+
+    #[LiveAction]
+    public function toggleDeposit(): void
+    {
+        $this->ensureAdmin();
+        $this->includeDeposit = $this->includePayment && $this->getDepositAvailable() && !$this->includeDeposit;
     }
 
     #[LiveAction]
@@ -100,7 +121,8 @@ final class ContactRecapEmail
         }
 
         $withPayment = $this->includePayment && $this->getPaymentAvailable();
-        $this->recapMailer->send($contact, $withPayment);
+        $withDeposit = $withPayment && $this->includeDeposit && $this->getDepositAvailable();
+        $this->recapMailer->send($contact, $withPayment, $withDeposit);
 
         // Trace who sent what in the follow-up thread.
         $entity = $this->repository->find($this->contactId);

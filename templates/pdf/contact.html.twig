@@ -244,9 +244,10 @@
                             </div>
                         {% endif %}
                         {% if contact.projectFurnishing %}
+                            {% set furnishingLabels = contact.projectFurnishing|split(',')|filter(v => v != '')|map(v => ('admin.contacts.project.furnishing.choice.' ~ v)|trans([], 'messages', locale)) %}
                             <div class="field-tr">
                                 <span class="field-th">{{ ux_icon('lucide:sofa', {style: 'width:9pt;height:9pt;vertical-align:-1.5pt;margin-right:4pt;color:#525252', 'aria-hidden': 'true'}) }}{{ t.projectFurnishing }}</span>
-                                <span class="field-td">{{ contact.projectFurnishing.labelKey|trans([], 'messages', locale) }}</span>
+                                <span class="field-td">{{ furnishingLabels|join(', ') }}</span>
                             </div>
                         {% endif %}
                         {% if contact.projectGuarantorType %}

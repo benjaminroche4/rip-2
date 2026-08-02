@@ -7,7 +7,6 @@ use App\Auth\Entity\User;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
-use App\Contact\Domain\Furnishing;
 use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\NextStep;
 use App\Contact\Domain\RecontactChannel;
@@ -432,14 +431,14 @@ class ContactRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function saveFurnishing(int $id, ?Furnishing $furnishing): void
+    public function saveFurnishing(int $id, ?string $furnishing): void
     {
         $contact = $this->find($id);
         if (null === $contact) {
             return;
         }
 
-        $contact->setProjectFurnishing($furnishing);
+        $contact->setProjectFurnishing(null !== $furnishing && '' !== $furnishing ? $furnishing : null);
         $this->getEntityManager()->flush();
     }
 
@@ -584,7 +583,7 @@ class ContactRepository extends ServiceEntityRepository
             ->andWhere('c.createdAt >= :since')
             ->andWhere('c.status IN (:decided)')
             ->setParameter('since', $since)
-            ->setParameter('decided', [ContactStatus::Converted, ContactStatus::Unqualified, ContactStatus::Closed])
+            ->setParameter('decided', [ContactStatus::Converted, ContactStatus::NotConverted, ContactStatus::Unqualified, ContactStatus::Closed])
             ->groupBy('c.status')
             ->getQuery()
             ->getArrayResult();

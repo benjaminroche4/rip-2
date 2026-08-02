@@ -6,7 +6,6 @@ use App\Auth\Entity\User;
 use App\Contact\Domain\ClosureReason;
 use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
-use App\Contact\Domain\Furnishing;
 use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\LeadSource;
 use App\Contact\Domain\NextStep;
@@ -155,9 +154,9 @@ class Contact
     #[ORM\Column(length: 10, nullable: true, enumType: StayDuration::class)]
     private ?StayDuration $projectStayDuration = null;
 
-    /** Furnished or unfurnished rental. */
-    #[ORM\Column(length: 15, nullable: true, enumType: Furnishing::class)]
-    private ?Furnishing $projectFurnishing = null;
+    /** Furnished / unfurnished, CSV of Furnishing values (both possible). */
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $projectFurnishing = null;
 
     /** Kind of guarantor the prospect can provide. */
     #[ORM\Column(length: 10, nullable: true, enumType: GuarantorType::class)]
@@ -401,12 +400,12 @@ class Contact
         return $this;
     }
 
-    public function getProjectFurnishing(): ?Furnishing
+    public function getProjectFurnishing(): ?string
     {
         return $this->projectFurnishing;
     }
 
-    public function setProjectFurnishing(?Furnishing $projectFurnishing): static
+    public function setProjectFurnishing(?string $projectFurnishing): static
     {
         $this->projectFurnishing = $projectFurnishing;
 

@@ -1,6 +1,6 @@
 <div {{ attributes.defaults({class: 'empty:hidden'}) }}>
     {%- set contact = this.contact -%}
-    {%- if contact and contact.status.value in ['closed', 'unqualified', 'converted'] -%}
+    {%- if contact and contact.status.value in ['closed', 'unqualified', 'converted', 'not_converted'] -%}
         {%- set state = contact.status.value -%}
         {%- set styles = {
             closed: {
@@ -16,6 +16,13 @@
                 iconColor: 'text-amber-600',
                 title: 'text-amber-950',
                 detail: 'text-amber-800/80',
+            },
+            not_converted: {
+                banner: 'border-orange-200 bg-linear-to-r from-orange-100/80 to-orange-50/30',
+                icon: 'lucide:circle-slash',
+                iconColor: 'text-orange-600',
+                title: 'text-orange-950',
+                detail: 'text-orange-800/80',
             },
             converted: {
                 banner: 'border-green-200 bg-linear-to-r from-green-100/80 to-green-50/30',

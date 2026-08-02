@@ -42,7 +42,7 @@ final readonly class ContactListItem
         public ?\DateTimeImmutable $projectMoveInAt = null,
         public ?string $projectPropertyType = null,
         public ?StayDuration $projectStayDuration = null,
-        public ?Furnishing $projectFurnishing = null,
+        public ?string $projectFurnishing = null,
         public ?GuarantorType $projectGuarantorType = null,
         public ?string $projectNote = null,
         public ?int $assigneeId = null,
