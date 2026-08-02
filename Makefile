@@ -79,8 +79,10 @@ tailwind:
 	echo "→ Tailwind CSS build complete. Do not forget : chmod 711 . (Source)"
 
 purge-cache:
-	@if [ -n "$$CACHE_PURGE_TOKEN" ]; then \
-		echo "→ Purge LiteSpeed cache" && curl -fso /dev/null "https://relocation-in-paris.fr/_cache/purge?token=$$CACHE_PURGE_TOKEN" && echo "✓ Cache purgé"; \
+	@TOKEN="$$CACHE_PURGE_TOKEN"; \
+	if [ -z "$$TOKEN" ] && [ -f .env.local ]; then TOKEN=$$(grep -E '^CACHE_PURGE_TOKEN=' .env.local | cut -d= -f2); fi; \
+	if [ -n "$$TOKEN" ]; then \
+		echo "→ Purge LiteSpeed cache" && curl -fso /dev/null "https://relocation-in-paris.fr/_cache/purge?token=$$TOKEN" && echo "✓ Cache purgé"; \
 	else \
 		echo "→ CACHE_PURGE_TOKEN non défini, purge LiteSpeed ignorée"; \
 	fi
