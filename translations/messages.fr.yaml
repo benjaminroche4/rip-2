@@ -47,7 +47,7 @@ contact:
             choice:
                 1: Recherche de logement
                 2: Solutions pour entreprises
-                3: Gestion locative et service de location
+                3: Gestion locative
                 4: Autre demande ou information
         offer:
             label: Quelle formule vous intéresse ?

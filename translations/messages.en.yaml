@@ -47,7 +47,7 @@ contact:
             choice:
                 1: Housing Search
                 2: Solutions for Businesses
-                3: Property Management and Rental Services
+                3: Property Management
                 4: Other Requests or Information
         offer:
             label: Which package are you interested in?
