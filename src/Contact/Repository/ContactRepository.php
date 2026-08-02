@@ -36,7 +36,11 @@ class ContactRepository extends ServiceEntityRepository
      */
     public function listFirst(int $limit, ?ContactStatus $status = null, ?string $search = null, ?int $assignedToId = null, string $sort = 'recent'): array
     {
-        $qb = $this->createQueryBuilder('c')->setMaxResults($limit);
+        // Assignee joined upfront: one query for the whole page instead of
+        // one lazy load per card.
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.assignedTo', 'assignee')->addSelect('assignee')
+            ->setMaxResults($limit);
 
         // Nullable sort keys go last (CASE flag), newest first as tiebreak.
         switch ($sort) {
@@ -113,6 +117,7 @@ class ContactRepository extends ServiceEntityRepository
 
         /** @var list<Contact> $contacts */
         $contacts = $this->createQueryBuilder('c')
+            ->leftJoin('c.assignedTo', 'assignee')->addSelect('assignee')
             ->andWhere('c.id IN (:ids)')
             ->setParameter('ids', $ids)
             ->getQuery()
@@ -472,9 +477,8 @@ class ContactRepository extends ServiceEntityRepository
             ->setSource($source)
             ->setCreatedAt(new \DateTimeImmutable());
 
-        $em = $this->getEntityManager();
-        $em->persist($contact);
-        $em->flush();
+        $this->getEntityManager()->persist($contact);
+        $this->getEntityManager()->flush();
 
         return $contact->getReference();
     }
