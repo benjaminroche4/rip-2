@@ -187,7 +187,8 @@ final class ContactDetails
         if ('' === trim($this->lastName)) {
             $this->errors['lastName'] = 'admin.contacts.edit.required';
         }
-        if (false === filter_var(trim($this->email), \FILTER_VALIDATE_EMAIL)) {
+        // Optional (manual intakes may have no email); format-checked when present.
+        if ('' !== trim($this->email) && false === filter_var(trim($this->email), \FILTER_VALIDATE_EMAIL)) {
             $this->errors['email'] = 'admin.contacts.edit.invalidEmail';
         }
         if ([] !== $this->errors) {
@@ -212,7 +213,7 @@ final class ContactDetails
             $this->contactId,
             trim($this->firstName),
             trim($this->lastName),
-            trim($this->email),
+            '' !== trim($this->email) ? trim($this->email) : null,
             '' !== trim($this->phoneNumber) ? trim($this->phoneNumber) : null,
             '' !== trim($this->company) ? trim($this->company) : null,
             $this->helpType,

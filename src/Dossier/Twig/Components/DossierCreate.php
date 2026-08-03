@@ -189,8 +189,9 @@ final class DossierCreate extends AbstractController
         $em->persist($draft);
         $em->flush();
 
-        return $this->redirectToRoute('admin_dossiers', [
+        return $this->redirectToRoute('admin_dossier_show', [
             'adminPrefix' => $this->adminPrefix,
+            'reference' => $draft->getReference(),
         ]);
     }
 

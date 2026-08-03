@@ -57,6 +57,23 @@ final class ContactCreateTest extends KernelTestCase
         self::assertStringContainsString('test_admin_prefix_1234567890abcdef', (string) $response->getTargetUrl());
     }
 
+    public function testCreatesAContactWithoutEmail(): void
+    {
+        $component = $this->mountTwigComponent('Admin:ContactCreate', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+        $component->firstName = 'paul';
+        $component->lastName = 'martin';
+        $component->email = '';
+        $component->phoneNumber = '+33622334455';
+        $component->chooseSource('phone');
+
+        $response = $component->create();
+        self::assertInstanceOf(RedirectResponse::class, $response);
+
+        $contact = $this->em->getRepository(Contact::class)->findOneBy(['lastName' => 'martin']);
+        self::assertNotNull($contact);
+        self::assertNull($contact->getEmail());
+    }
+
     public function testInvalidFieldsBlockCreation(): void
     {
         $component = $this->mountTwigComponent('Admin:ContactCreate', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);

@@ -1,23 +1,26 @@
-<div {{ attributes.defaults({class: 'flex items-center gap-2'}) }} data-testid="contact-recap-email">
+{# Rendered as a row of the contact "Actions" dropdown menu — the trigger and
+   the sent chip use the menu-row vocabulary; the confirmation modal itself is
+   fixed-positioned so it overlays the page from anywhere. #}
+<div {{ attributes }} data-testid="contact-recap-email">
     {% set contact = this.contact %}
     {% if this.state == 'sent' %}
-        <span class="animate-slide-in flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700" role="status">
-            {{ ux_icon('lucide:mail-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+        <span class="animate-slide-in flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-green-700" role="status">
+            {{ ux_icon('lucide:mail-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
             {{ 'admin.contacts.recapEmail.sent'|trans }}
         </span>
+    {% elseif contact and not contact.email %}
+        {# No email on this contact (manual intake) — nothing to send to. #}
     {% else %}
-        <twig:Button
-            variant="outline"
-            size="sm"
+        <button
+            type="button"
             data-action="live#action"
             data-live-action-param="openModal"
+            class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
             data-testid="contact-recap-send"
         >
-            <span class="flex items-center gap-2">
-                {{ ux_icon('lucide:mail', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                {{ 'admin.contacts.recapEmail.button'|trans }}
-            </span>
-        </twig:Button>
+            {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+            {{ 'admin.contacts.recapEmail.button'|trans }}
+        </button>
     {% endif %}
 
     {% if this.state == 'modal' and contact %}

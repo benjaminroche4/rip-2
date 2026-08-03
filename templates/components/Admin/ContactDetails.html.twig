@@ -198,9 +198,13 @@
             </button>
             <div class="min-w-0 space-y-2 text-sm">
                 <p class="text-gray-600">{{ 'admin.contacts.card.field.email'|trans }}</p>
-                <a href="mailto:{{ contact.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
-                    {{ contact.email }}
-                </a>
+                {% if contact.email %}
+                    <a href="mailto:{{ contact.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary">
+                        {{ contact.email }}
+                    </a>
+                {% else %}
+                    <p class="font-medium text-gray-400">-</p>
+                {% endif %}
             </div>
             <div class="min-w-0 space-y-2 text-sm">
                 <p class="text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</p>

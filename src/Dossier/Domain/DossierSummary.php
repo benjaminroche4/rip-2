@@ -13,6 +13,7 @@ final readonly class DossierSummary
     public function __construct(
         public int $id,
         public string $name,
+        public string $reference,
         public ?string $primaryTenantName,
         public int $personCount,
         public \DateTimeImmutable $createdAt,

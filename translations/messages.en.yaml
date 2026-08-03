@@ -1811,6 +1811,39 @@ admin:
         list:
             primaryTenant: 'Primary tenant: %name%'
             personCount: '{1}1 person|]1,Inf[%count% people'
+            viewMore: View the file
+        show:
+            noPhone: No phone
+            persons:
+                edit: Edit
+                save: Save
+                newTitle: New person
+            facts:
+                reference: File number
+                pairingCode: Pairing code
+                createdAt: Created on
+            manager:
+                label: File manager
+                assign: Assign a manager
+                remove: Unassign the manager
+            search:
+                title: Search
+                empty: No criteria yet.
+            followUp:
+                empty: No notes yet.
+                origin: File created from a contact request
+            modules:
+                title: Modules
+                comingSoon: Coming soon
+                file:
+                    title: File
+                    description: Tenants' documents and paperwork.
+                visit:
+                    title: Visit
+                    description: Visit scheduling and reports.
+                payment:
+                    title: Payment
+                    description: Fees and payment tracking.
         create:
             button: New file
             title: Create a file
@@ -1866,11 +1899,18 @@ admin:
     contacts:
         title: Contact requests
         empty: No contact requests yet.
-        searchPlaceholder: Search (name, email, reference)
+        searchPlaceholder: Search (name, email, phone, reference)
         loading: Loading requests
         show:
             backToList: Back to requests
+            actions: Actions
             exportPdf: Export as PDF
+            toDossier: Convert to file
+            toDossierModal:
+                title: Convert to file
+                description: 'The file centralises %name%''s relocation: household members, property search, visits and payments. The contact becomes the file''s primary tenant. If a file already exists with this email, you will be redirected to it.'
+                cancel: Cancel
+                confirm: Create the file
             closureLabel: Closure reason
             closurePlaceholder: Pick a reason
             closedTitle: Request closed

@@ -30,7 +30,9 @@ class Contact
     #[ORM\Column(length: 100)]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 254)]
+    // Nullable: manual intakes (phone…) may come without an email; the
+    // public form keeps its own NotBlank constraint.
+    #[ORM\Column(length: 254, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
 
@@ -517,7 +519,7 @@ class Contact
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(?string $email): static
     {
         $this->email = $email;
 

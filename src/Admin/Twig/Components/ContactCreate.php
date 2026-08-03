@@ -164,7 +164,9 @@ final class ContactCreate
         if ('' === trim($this->lastName)) {
             $this->errors['lastName'] = 'admin.contacts.edit.required';
         }
-        if (false === filter_var(trim($this->email), \FILTER_VALIDATE_EMAIL)) {
+        // Optional on manual intakes (phone…): only the format is checked
+        // when something was typed.
+        if ('' !== trim($this->email) && false === filter_var(trim($this->email), \FILTER_VALIDATE_EMAIL)) {
             $this->errors['email'] = 'admin.contacts.edit.invalidEmail';
         }
         if ([] !== $this->errors) {
@@ -189,7 +191,7 @@ final class ContactCreate
         $reference = $this->repository->createManual(
             trim($this->firstName),
             trim($this->lastName),
-            trim($this->email),
+            '' !== trim($this->email) ? trim($this->email) : null,
             '' !== trim($this->phoneNumber) ? trim($this->phoneNumber) : null,
             '' !== trim($this->company) ? trim($this->company) : null,
             $this->helpType,

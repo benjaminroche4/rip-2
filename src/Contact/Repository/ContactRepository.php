@@ -95,8 +95,20 @@ class ContactRepository extends ServiceEntityRepository
 
         if (null !== $search && '' !== trim($search)) {
             $like = '%'.addcslashes(trim($search), '%_').'%';
-            $qb->andWhere("c.firstName LIKE :search OR c.lastName LIKE :search OR c.email LIKE :search OR c.reference LIKE :search OR CONCAT(c.firstName, ' ', c.lastName) LIKE :search")
-                ->setParameter('search', $like);
+            $conditions = "c.firstName LIKE :search OR c.lastName LIKE :search OR c.email LIKE :search OR c.reference LIKE :search OR CONCAT(c.firstName, ' ', c.lastName) LIKE :search";
+            $qb->setParameter('search', $like);
+
+            // Phone search: numbers are stored in E.164 ("+33612345678") but
+            // admins type them freely ("06 12 34 56 78") — compare on the
+            // digits with national zeros stripped. 3+ digits required so a
+            // lone digit doesn't match every contact.
+            $digits = ltrim(preg_replace('/\D+/', '', $search), '0');
+            if (\strlen($digits) >= 3) {
+                $conditions .= ' OR c.phoneNumber LIKE :phoneSearch';
+                $qb->setParameter('phoneSearch', '%'.$digits.'%');
+            }
+
+            $qb->andWhere($conditions);
         }
     }
 
@@ -462,7 +474,7 @@ class ContactRepository extends ServiceEntityRepository
      * Manual submission created by the admin (phone intake). Returns the
      * generated reference; retries on the unlikely random-reference clash.
      */
-    public function createManual(string $firstName, string $lastName, string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ?string $message, ContactSource $source): string
+    public function createManual(string $firstName, string $lastName, ?string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ?string $message, ContactSource $source): string
     {
         $contact = (new Contact())
             ->setFirstName($firstName)
@@ -484,7 +496,7 @@ class ContactRepository extends ServiceEntityRepository
     }
 
     /** Admin correction of what the prospect submitted (typos, wrong type). */
-    public function updateDetails(int $id, string $firstName, string $lastName, string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ContactSource $source): void
+    public function updateDetails(int $id, string $firstName, string $lastName, ?string $email, ?string $phoneNumber, ?string $company, string $helpType, ?string $offer, string $lang, ContactSource $source): void
     {
         $contact = $this->find($id);
         if (null === $contact) {

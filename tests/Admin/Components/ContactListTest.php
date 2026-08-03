@@ -136,6 +136,24 @@ final class ContactListTest extends KernelTestCase
         self::assertSame(1, $component->getTotalCount());
     }
 
+    public function testSearchMatchesPhoneNumbersHoweverTheyAreTyped(): void
+    {
+        $match = $this->persistContact()->setPhoneNumber('+33612345678');
+        $this->persistContact()->setPhoneNumber('+33799887766');
+        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@contactlist-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
+
+        // National format with spaces still finds the E.164-stored number.
+        $component->search = '06 12 34 56 78';
+        $component->onSearchUpdated('');
+
+        self::assertCount(1, $component->getItems());
+        self::assertSame((int) $match->getId(), $component->getItems()[0]->id);
+    }
+
     public function testTreatedCardStaysOnePassAsLeavingThenDisappears(): void
     {
         $contact = $this->persistContact();

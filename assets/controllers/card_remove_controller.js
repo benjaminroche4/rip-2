@@ -10,7 +10,11 @@ import { getComponent } from '@symfony/ux-live-component';
  * card-exit, which self-removes a stale card on connect.)
  */
 export default class extends Controller {
-    static values = { key: Number };
+    static values = {
+        key: Number,
+        // Live action fired once the collapse is done.
+        action: { type: String, default: 'removePerson' },
+    };
 
     async remove() {
         if (this.removing) {
@@ -25,7 +29,7 @@ export default class extends Controller {
         const host = this.element.closest('[data-controller~="live"]');
         if (host) {
             const component = await getComponent(host);
-            component.action('removePerson', { key: this.keyValue });
+            component.action(this.actionValue, { key: this.keyValue });
         }
     }
 

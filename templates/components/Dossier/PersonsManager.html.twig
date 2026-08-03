@@ -1,0 +1,300 @@
+{#
+    Dossier:PersonsManager — persons section of the dossier detail page.
+    Read cards mirror the creation modal's "header band" style; clicking
+    "Modifier" (or the add button) swaps in an inline edit form bound to the
+    component's writable props. Same chips / phone widget vocabulary as
+    Dossier:DossierCreate.
+#}
+
+{% macro chipRadios(model, options, current, prefix) %}
+    <div role="radiogroup" class="mt-2 flex flex-wrap gap-2">
+        {% for option in options %}
+            <label for="{{ prefix }}-{{ option.value }}" class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                <input
+                    type="radio"
+                    id="{{ prefix }}-{{ option.value }}"
+                    name="{{ prefix }}"
+                    value="{{ option.value }}"
+                    data-model="norender|{{ model }}"
+                    {% if option.value == current %}checked{% endif %}
+                    class="sr-only"
+                />
+                {% if option.icon is defined %}
+                    {{ ux_icon(option.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {% endif %}
+                {{ option.label|trans }}
+            </label>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro fieldError(errors, key) %}
+    {% if errors[key] is defined %}
+        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ errors[key]|trans }}</p>
+    {% endif %}
+{% endmacro %}
+
+{# ── Shared building blocks for the person-card variants ─────────────── #}
+
+{% macro pStar(person, idle = 'text-gray-300') %}
+    {% if person.primaryContact %}
+        <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" title="{{ 'admin.dossiers.create.person.primaryTag'|trans }}" role="img" aria-label="{{ 'admin.dossiers.create.person.primaryTag'|trans }}" data-testid="dossier-show-primary-tag">
+            {{ ux_icon('lucide:star', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+        </span>
+    {% elseif person.role.value == 'tenant' %}
+        <button type="button" class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full {{ idle }} transition-colors duration-100 ease-out hover:bg-primary/5 hover:text-primary" data-action="live#action" data-live-action-param="makePrimary" data-live-key-param="{{ person.id }}" title="{{ 'admin.dossiers.create.person.makePrimary'|trans }}" aria-label="{{ 'admin.dossiers.create.person.makePrimary'|trans }}" data-testid="person-make-primary">
+            {{ ux_icon('lucide:star', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+        </button>
+    {% endif %}
+{% endmacro %}
+
+{% macro pRows(person, gap = 'gap-2', icon = 'size-3.5') %}
+    <div class="flex min-w-0 items-center {{ gap }}">
+        {{ ux_icon('lucide:mail', {class: icon ~ ' shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+        <a href="mailto:{{ person.email }}" class="min-w-0 flex-1 truncate text-gray-900 transition-colors duration-100 hover:text-primary">{{ person.email }}</a>
+    </div>
+    <div class="flex min-w-0 items-center {{ gap }}">
+        {{ ux_icon('lucide:phone', {class: icon ~ ' shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+        {% if person.phone %}
+            <a href="tel:{{ person.phone }}" class="min-w-0 flex-1 truncate text-gray-900 transition-colors duration-100 hover:text-primary">{{ person.phone }}</a>
+        {% else %}
+            <span class="text-gray-400">{{ 'admin.dossiers.show.noPhone'|trans }}</span>
+        {% endif %}
+    </div>
+    <div class="flex min-w-0 items-center {{ gap }}">
+        {{ ux_icon('circle-flags:' ~ person.language.value, {class: icon ~ ' shrink-0', 'aria-hidden': 'true'}) }}
+        <span class="text-gray-900">{{ person.language.labelKey|trans }}</span>
+    </div>
+{% endmacro %}
+
+{% macro pRoleChip(person, colored = false) %}
+    {% set tenant = person.role.value == 'tenant' %}
+    <span class="inline-flex items-center gap-1 rounded-full py-0.5 pr-2 pl-1.5 text-[11px] font-medium {{ colored ? (tenant ? 'bg-primary/5 text-primary' : 'bg-amber-50 text-amber-700') : 'border border-neutral-200 bg-white text-gray-600' }}">
+        {{ ux_icon(tenant ? 'lucide:key-round' : 'lucide:bell', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+        {{ person.role.labelKey|trans }}
+    </span>
+{% endmacro %}
+
+{% import _self as ui %}
+
+{% set roleOptions = [
+    {value: 'tenant', label: 'admin.dossiers.create.person.role.tenant', icon: 'lucide:key-round'},
+    {value: 'follow_up', label: 'admin.dossiers.create.person.role.follow_up', icon: 'lucide:bell'},
+] %}
+{% set languageOptions = [
+    {value: 'fr', label: 'admin.dossiers.create.person.language.fr', icon: 'circle-flags:fr'},
+    {value: 'en', label: 'admin.dossiers.create.person.language.en', icon: 'circle-flags:en'},
+] %}
+{% set maxPersons = constant('App\\Dossier\\Entity\\Dossier::MAX_PERSONS') %}
+{% set persons = this.persons %}
+
+{# Standalone compact cards — no big shell around the section, each person
+   card is its own bordered white card on the page background. #}
+<section {{ attributes }} data-testid="dossier-show-persons">
+    <div class="mb-3 flex items-baseline justify-between gap-4">
+        <h2 class="text-base font-semibold tracking-tight text-gray-900">
+            {{ 'admin.dossiers.create.persons.title'|trans }}
+        </h2>
+        <p class="text-xs text-gray-500">
+            {{ 'admin.dossiers.create.persons.count'|trans({'%count%': persons|length, '%max%': maxPersons}) }}
+        </p>
+    </div>
+
+    {# Native inputs: data-model with a modifier can't ride through the
+       <twig:Input> component (the live preprocessor tries to read the
+       property "norender|x"), same trade-off as Admin:ContactCreate. #}
+    {% set inputClass = 'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-base text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 sm:text-sm/6' %}
+    {% set editForm %}
+        <div class="flex flex-col gap-4 p-5">
+            <div>
+                <p class="text-sm font-semibold text-gray-900">
+                    {{ 'admin.dossiers.create.person.role.label'|trans }}
+                    <span class="text-red-600" aria-hidden="true">*</span>
+                </p>
+                {{ ui.chipRadios('role', roleOptions, this.role, 'pm-role') }}
+                {{ ui.fieldError(this.errors, 'role') }}
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="min-w-0">
+                    <twig:Label for="pm-first" class="text-sm font-semibold text-gray-900">
+                        {{ 'admin.dossiers.create.person.firstName.label'|trans }}
+                        <span class="text-red-600" aria-hidden="true">*</span>
+                    </twig:Label>
+                    <div class="mt-2">
+                        <input type="text" id="pm-first" name="pm-first" maxlength="50" data-model="norender|firstName" value="{{ this.firstName }}" class="{{ inputClass }}">
+                        {{ ui.fieldError(this.errors, 'firstName') }}
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <twig:Label for="pm-last" class="text-sm font-semibold text-gray-900">
+                        {{ 'admin.dossiers.create.person.lastName.label'|trans }}
+                        <span class="text-red-600" aria-hidden="true">*</span>
+                    </twig:Label>
+                    <div class="mt-2">
+                        <input type="text" id="pm-last" name="pm-last" maxlength="50" data-model="norender|lastName" value="{{ this.lastName }}" class="{{ inputClass }}">
+                        {{ ui.fieldError(this.errors, 'lastName') }}
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <twig:Label for="pm-email" class="text-sm font-semibold text-gray-900">
+                        {{ 'admin.dossiers.create.person.email.label'|trans }}
+                        <span class="text-red-600" aria-hidden="true">*</span>
+                    </twig:Label>
+                    <div class="mt-2">
+                        <input type="email" id="pm-email" name="pm-email" maxlength="180" data-model="norender|email" value="{{ this.email }}" class="{{ inputClass }}">
+                        {{ ui.fieldError(this.errors, 'email') }}
+                    </div>
+                </div>
+                <div class="min-w-0">
+                    <twig:Label for="pm-phone" class="text-sm font-semibold text-gray-900">
+                        {{ 'admin.dossiers.create.person.phone.label'|trans }}
+                    </twig:Label>
+                    <div
+                        class="mt-2 text-base sm:text-sm/6"
+                        data-live-ignore
+                        data-controller="phone-input"
+                        data-phone-input-initial-country-value="fr"
+                        data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
+                    >
+                        <input type="tel" id="pm-phone" name="pm-phone" maxlength="30" placeholder="6 12 34 56 78" data-model="norender|phone" value="{{ this.phone }}" data-phone-input-target="input" class="{{ inputClass }}">
+                    </div>
+                    {{ ui.fieldError(this.errors, 'phone') }}
+                </div>
+            </div>
+
+            <div>
+                <p class="text-sm font-semibold text-gray-900">
+                    {{ 'admin.dossiers.create.person.language.label'|trans }}
+                    <span class="text-red-600" aria-hidden="true">*</span>
+                </p>
+                {{ ui.chipRadios('language', languageOptions, this.language, 'pm-language') }}
+                {{ ui.fieldError(this.errors, 'language') }}
+            </div>
+
+            <div class="flex items-center justify-end gap-4">
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="cancelEdit"
+                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                    data-testid="person-edit-cancel"
+                >
+                    {{ 'admin.dossiers.create.cancel'|trans }}
+                </button>
+                <button
+                    type="submit"
+                    data-loading="action(savePerson)|addAttribute(disabled)"
+                    class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                    data-testid="person-edit-save"
+                >
+                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.dossiers.show.persons.save'|trans }}
+                </button>
+            </div>
+        </div>
+    {% endset %}
+
+    {# Compact person cards in a horizontal scroll row; the edit / add form
+       opens full-width below the row. #}
+    <div class="flex snap-x gap-2 overflow-x-auto pb-1">
+        {% for person in persons %}
+            <article
+                class="relative flex w-64 shrink-0 snap-start flex-col rounded-2xl border border-neutral-200 bg-white {{ this.editId == person.id ? 'ring-1 ring-primary/40' }}"
+                data-controller="card-remove"
+                data-card-remove-key-value="{{ person.id }}"
+                data-testid="dossier-show-person"
+            >
+                <header class="flex items-center justify-between gap-2 border-b border-gray-950/5 px-4 py-2.5">
+                    <div class="flex min-w-0 items-center gap-1.5">
+                        {{ ui.pStar(person) }}
+                        <p class="truncate text-sm font-semibold tracking-tight text-gray-900">{{ person.fullName }}</p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        <details
+                            class="relative"
+                            data-controller="details-dropdown"
+                            data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                        >
+                            <summary
+                                class="flex size-6 cursor-pointer list-none items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
+                                aria-label="{{ 'admin.contacts.show.actions'|trans }}"
+                                data-testid="person-actions"
+                            >
+                                {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            </summary>
+                            {# Opens over the card body so the horizontal scroll
+                               container never clips it. #}
+                            <div class="absolute right-0 z-10 mt-1 w-36 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                <button
+                                    type="button"
+                                    class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="startEdit"
+                                    data-live-key-param="{{ person.id }}"
+                                    data-testid="person-edit"
+                                >
+                                    {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.show.persons.edit'|trans }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                    data-action="card-remove#remove details-dropdown#close"
+                                    data-testid="person-remove"
+                                >
+                                    {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.create.person.remove'|trans }}
+                                </button>
+                            </div>
+                        </details>
+                    </div>
+                </header>
+                <dl class="flex flex-1 flex-col gap-2 px-4 py-3 text-xs">{{ ui.pRows(person) }}</dl>
+                {# Footer band (style « Rôle en pied ») carrying the colored role chip. #}
+                <footer class="flex items-center rounded-b-2xl bg-neutral-50/60 px-3 py-1.5">
+                    {{ ui.pRoleChip(person, true) }}
+                </footer>
+            </article>
+        {% endfor %}
+
+        {% if this.canAdd and this.editId is null and not this.adding %}
+            <button
+                type="button"
+                class="flex w-40 shrink-0 snap-start cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-3 py-4 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                data-action="live#action"
+                data-live-action-param="startAdd"
+                data-testid="person-add"
+            >
+                {{ ux_icon('lucide:user-plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.dossiers.create.persons.add'|trans }}
+            </button>
+        {% endif %}
+    </div>
+
+    {% if this.editId is not null or this.adding %}
+        <form
+            class="animate-card-in mt-3 overflow-hidden rounded-2xl border border-primary/30 bg-white"
+            data-action="live#action:prevent"
+            data-live-action-param="savePerson"
+            novalidate
+            autocomplete="off"
+            data-testid="{{ this.adding ? 'person-add-form' : 'person-edit-form' }}"
+        >
+            <header class="flex items-center justify-between gap-3 border-b border-gray-950/5 bg-neutral-50/60 px-5 py-3">
+                <p class="text-sm font-semibold tracking-tight text-gray-900">
+                    {% if this.adding %}
+                        {{ 'admin.dossiers.show.persons.newTitle'|trans }}
+                    {% else %}
+                        {{ ((this.firstName ~ ' ' ~ this.lastName)|trim) ?: 'admin.dossiers.show.persons.edit'|trans }}
+                    {% endif %}
+                </p>
+            </header>
+            {{ editForm }}
+        </form>
+    {% endif %}
+
+    {% if this.errors.global is defined %}
+        <p class="mt-3 text-sm text-red-600" role="alert" data-testid="persons-global-error">{{ this.errors.global|trans }}</p>
+    {% endif %}
+</section>

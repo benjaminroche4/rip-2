@@ -49,7 +49,8 @@ final class DossierCreateTest extends KernelTestCase
 
         $response = $this->createAction($component);
         self::assertInstanceOf(RedirectResponse::class, $response);
-        self::assertStringContainsString('/'.self::PREFIX.'/admin/', (string) $response->getTargetUrl());
+        // Redirects straight to the new dossier's detail page.
+        self::assertMatchesRegularExpression('~/'.self::PREFIX.'/admin/dossiers/DS-\d{6}$~', (string) $response->getTargetUrl());
 
         /** @var Dossier|null $dossier */
         $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);

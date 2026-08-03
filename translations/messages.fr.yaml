@@ -1812,6 +1812,39 @@ admin:
         list:
             primaryTenant: 'Locataire principal : %name%'
             personCount: '{1}1 personne|]1,Inf[%count% personnes'
+            viewMore: Voir le dossier
+        show:
+            noPhone: Pas de téléphone
+            persons:
+                edit: Modifier
+                save: Enregistrer
+                newTitle: Nouvelle personne
+            facts:
+                reference: Numéro de dossier
+                pairingCode: Code d'appairage
+                createdAt: Créé le
+            manager:
+                label: Responsable de dossier
+                assign: Assigner un responsable
+                remove: Retirer le responsable
+            search:
+                title: Recherche
+                empty: Aucun critère renseigné pour le moment.
+            followUp:
+                empty: Aucune note pour le moment.
+                origin: Dossier créé à partir d'une demande de contact
+            modules:
+                title: Modules
+                comingSoon: Bientôt disponible
+                file:
+                    title: Dossier
+                    description: Pièces et documents des locataires.
+                visit:
+                    title: Visite
+                    description: Planification et comptes-rendus de visites.
+                payment:
+                    title: Paiement
+                    description: Honoraires et suivi des paiements.
         create:
             button: Nouveau dossier
             title: Créer un dossier
@@ -1867,11 +1900,18 @@ admin:
     contacts:
         title: Demandes de contact
         empty: Aucune demande de contact pour le moment.
-        searchPlaceholder: Rechercher (nom, email, référence)
+        searchPlaceholder: Rechercher (nom, email, téléphone, référence)
         loading: Chargement des demandes
         show:
             backToList: Retour aux demandes
+            actions: Actions
             exportPdf: Exporter en PDF
+            toDossier: Transformer en dossier
+            toDossierModal:
+                title: Transformer en dossier
+                description: 'Le dossier centralise le suivi de la relocation de %name% : personnes du foyer, recherche de biens, visites et paiements. Le contact devient le locataire principal du dossier. Si un dossier existe déjà avec cet email, vous y serez redirigé.'
+                cancel: Annuler
+                confirm: Créer le dossier
             closureLabel: Motif de clôture
             closurePlaceholder: Choisir un motif
             closedTitle: Demande fermée

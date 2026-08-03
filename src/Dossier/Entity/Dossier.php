@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dossier\Entity;
 
+use App\Auth\Entity\User;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Repository\DossierRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -49,6 +50,22 @@ class Dossier
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
+     * Reference of the contact request this dossier was converted from, or
+     * null for dossiers created from scratch. Displayed as the origin entry
+     * of the follow-up thread, linking back to the contact page.
+     */
+    #[ORM\Column(length: 32, nullable: true)]
+    private ?string $sourceContactReference = null;
+
+    /**
+     * Staff member in charge of the dossier ("responsable de dossier").
+     * Optional; survives the user's deletion as an unassigned dossier.
+     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $manager = null;
+
+    /**
      * Ordered list of persons attached to the dossier. Bound to the
      * LiveCollectionType in DossierType, hence allow_add/remove via the
      * LiveCollectionTrait.
@@ -71,9 +88,26 @@ class Dossier
     #[Assert\Valid]
     private Collection $persons;
 
+    /**
+     * Search criteria ("Recherche" module), seeded from the contact at
+     * conversion time. Nullable: dossiers created from scratch start empty.
+     */
+    #[ORM\OneToOne(targetEntity: DossierSearch::class, mappedBy: 'dossier', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private ?DossierSearch $search = null;
+
+    /**
+     * Follow-up thread ("fil de suivi"), oldest first.
+     *
+     * @var Collection<int, DossierNote>
+     */
+    #[ORM\OneToMany(targetEntity: DossierNote::class, mappedBy: 'dossier', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    private Collection $notes;
+
     public function __construct()
     {
         $this->persons = new ArrayCollection();
+        $this->notes = new ArrayCollection();
     }
 
     /**
@@ -149,6 +183,61 @@ class Dossier
     public function setPairingCode(?string $pairingCode): static
     {
         $this->pairingCode = $pairingCode;
+
+        return $this;
+    }
+
+    public function getSearch(): ?DossierSearch
+    {
+        return $this->search;
+    }
+
+    public function setSearch(?DossierSearch $search): static
+    {
+        $search?->setDossier($this);
+        $this->search = $search;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DossierNote>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(DossierNote $note): static
+    {
+        if (!$this->notes->contains($note)) {
+            $note->setDossier($this);
+            $this->notes->add($note);
+        }
+
+        return $this;
+    }
+
+    public function getSourceContactReference(): ?string
+    {
+        return $this->sourceContactReference;
+    }
+
+    public function setSourceContactReference(?string $sourceContactReference): static
+    {
+        $this->sourceContactReference = $sourceContactReference;
+
+        return $this;
+    }
+
+    public function getManager(): ?User
+    {
+        return $this->manager;
+    }
+
+    public function setManager(?User $manager): static
+    {
+        $this->manager = $manager;
 
         return $this;
     }
