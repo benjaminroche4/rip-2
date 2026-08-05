@@ -4,6 +4,12 @@ framework:
         paths:
             - assets/
         missing_import_mode: strict
+        # Cloudflare Rocket Loader rewrites <script type> with a per-response
+        # hash; Turbo then sees its data-turbo-track="reload" tags change on
+        # every navigation and forces a full page reload. data-cfasync="false"
+        # tells Rocket Loader to leave these scripts untouched.
+        importmap_script_attributes:
+            data-cfasync: 'false'
 
 when@prod:
     framework:
