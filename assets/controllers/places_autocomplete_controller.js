@@ -34,6 +34,13 @@ export default class extends Controller {
         // Optional: when the page has no Google Maps script yet (e.g. the estimation page),
         // the controller injects this URL on first focus instead of loading Maps eagerly.
         scriptUrl: { type: String, default: '' },
+        // Prediction types ('geocode' for addresses, '(cities)' for city pickers).
+        types: { type: String, default: 'geocode' },
+        // Comma-separated ISO country restriction; empty = worldwide.
+        countries: { type: String, default: 'fr' },
+        // Bias + filter the results to Paris (the historic behaviour of the
+        // address fields); disable for worldwide pickers like the current city.
+        parisOnly: { type: Boolean, default: true },
     }
 
     #suggestions = []
@@ -134,29 +141,29 @@ export default class extends Controller {
 
     #fetch(query) {
         this.#latestQuery = query
-        this.#autocompleteService.getPlacePredictions(
-            {
-                input: query,
-                sessionToken: this.#token,
-                bounds: this.#bounds, // biases results towards Paris
-                componentRestrictions: { country: 'fr' },
-                types: ['geocode'], // addresses and areas only (no businesses/POIs)
-            },
-            (predictions, status) => {
-                // Drop stale responses (user kept typing).
-                if (this.#latestQuery !== query) return
-                // The service only biases (not restricts); keep Paris results only,
-                // matching both usages (Paris-scoped) and the 750xx arrondissement logic.
-                const paris = 'OK' === status && predictions ? predictions.filter((p) => this.#isParis(p)) : []
-                this.#suggestions = paris.slice(0, MAX_RESULTS)
-                // Google matched the query but nothing was in Paris: let the page
-                // explain the empty dropdown (e.g. "we operate in Paris only").
-                if ('OK' === status && predictions?.length > 0 && 0 === paris.length) {
-                    this.dispatch('outside', { detail: { query } })
-                }
-                this.#render()
-            },
-        )
+        const request = {
+            input: query,
+            sessionToken: this.#token,
+            types: [this.typesValue],
+        }
+        if (this.parisOnlyValue) request.bounds = this.#bounds // biases results towards Paris
+        if (this.countriesValue) request.componentRestrictions = { country: this.countriesValue.split(',') }
+        this.#autocompleteService.getPlacePredictions(request, (predictions, status) => {
+            // Drop stale responses (user kept typing).
+            if (this.#latestQuery !== query) return
+            // The service only biases (not restricts); the historic address
+            // fields keep Paris results only (750xx arrondissement logic),
+            // worldwide pickers keep everything.
+            const all = 'OK' === status && predictions ? predictions : []
+            const kept = this.parisOnlyValue ? all.filter((p) => this.#isParis(p)) : all
+            this.#suggestions = kept.slice(0, MAX_RESULTS)
+            // Google matched the query but nothing survived the Paris filter:
+            // let the page explain the empty dropdown.
+            if ('OK' === status && all.length > 0 && 0 === kept.length) {
+                this.dispatch('outside', { detail: { query } })
+            }
+            this.#render()
+        })
     }
 
     #render() {

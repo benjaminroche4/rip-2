@@ -126,9 +126,10 @@
                                 type="button"
                                 data-action="live#action"
                                 data-live-action-param="showMoreFeed"
-                                class="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
                                 data-testid="feed-show-more"
                             >
+                                {{ ux_icon('lucide:plus', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                                 {{ 'admin.contacts.notes.showMore'|trans({'%count%': this.hiddenFeedCount}) }}
                             </button>
                         </div>

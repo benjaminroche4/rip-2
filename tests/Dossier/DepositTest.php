@@ -54,7 +54,8 @@ final class DepositTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('#deposit-pairing');
         self::assertSelectorExists('form[name="deposit_pairing"]');
-        self::assertSelectorExists('meta[name="robots"][content="noindex, nofollow"]');
+        // Référencée volontairement (footer + sitemap en priorité basse).
+        self::assertSelectorExists('meta[name="robots"][content="index, follow"]');
         $response = $this->client->getResponse();
         self::assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         self::assertSame('no-cache', $response->headers->get('X-LiteSpeed-Cache-Control'));
@@ -159,6 +160,12 @@ final class DepositTest extends WebTestCase
         self::assertSame(DossierDocumentStatus::Received, $document->getStatus());
         self::assertNotNull($document->getReceivedAt());
         self::assertCount(1, $document->getFiles());
+
+        // The deposit lands in the follow-up thread, authored by the tenant.
+        $events = static::getContainer()->get(\App\Dossier\Repository\DossierEventRepository::class)
+            ->listForDossier((int) $dossier->getId());
+        self::assertSame('document_deposited', $events[0]->getKind());
+        self::assertSame('Jean Dupont', $events[0]->getAuthorName());
 
         /** @var DossierDocumentFile $file */
         $file = $document->getFiles()->first();
@@ -402,6 +409,27 @@ final class DepositTest extends WebTestCase
         $fresh = $dossier->getPersons()->first()->getDocuments()->first();
         self::assertCount(1, $fresh->getFiles());
         self::assertSame(DossierDocumentStatus::Validated, $fresh->getStatus());
+    }
+
+    public function testClosedDossierIsRefusedLikeAnUnknownCode(): void
+    {
+        $this->persistDossier();
+
+        // Pair first, then the dossier closes: the session grant dies too.
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $this->client->followRedirect();
+        /** @var Dossier $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $dossier->setClosedAt(new \DateTimeImmutable());
+        $this->em->flush();
+
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorExists('#deposit-pairing');
+
+        // Re-pairing with the still-valid code fails with the generic error.
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+        self::assertStringContainsString('ne correspondent à aucun dossier', (string) $this->client->getResponse()->getContent());
     }
 
     public function testLocaleSwitchKeepsThePrefilledCode(): void

@@ -3,42 +3,14 @@
 {% block title %}{{ 'admin.dashboard.title'|trans }}{% endblock %}
 
 {% block page_header %}
-    <twig:Admin:PageHeader
-        title="{{ 'admin.dashboard.title'|trans }}"
-        subtitle="{{ 'admin.dashboard.subtitle'|trans }}"
-    />
+    <twig:Admin:PageHeader title="{{ 'admin.dashboard.title'|trans }}" />
 {% endblock %}
 
 {% block body %}
-    {# La page s'affiche instantanément; le contenu (API Allo comprise)
-       arrive dans la frame, squelettes en attendant. #}
-    <turbo-frame
-        id="dashboard-content"
-        src="{{ path('admin_dashboard_content', {adminPrefix: adminPrefix}) }}"
-        loading="lazy"
-        data-testid="dashboard-frame"
-    >
-        <div class="space-y-8" aria-hidden="true">
-            <section class="grid animate-pulse grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {% for i in 1..4 %}
-                    <div class="rounded-2xl border border-neutral-200 bg-white p-2">
-                        <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
-                            <div class="h-4 w-32 rounded-full bg-neutral-200"></div>
-                            <div class="mt-2 h-3 w-20 rounded-full bg-neutral-200/60"></div>
-                            <div class="mt-6 h-8 w-24 rounded-full bg-neutral-200/80"></div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </section>
-            {% for i in 1..2 %}
-                <section class="animate-pulse rounded-2xl border border-neutral-200 bg-white p-2">
-                    <div class="rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
-                        <div class="h-5 w-48 rounded-full bg-neutral-200"></div>
-                        <div class="mt-2 h-3 w-64 rounded-full bg-neutral-200/60"></div>
-                        <div class="mt-6 h-64 rounded-xl bg-neutral-100"></div>
-                    </div>
-                </section>
-            {% endfor %}
+    <div class="flex min-h-[50vh] items-center justify-center" data-testid="dashboard-page">
+        <div class="flex flex-col items-center gap-3 text-center">
+            {{ ux_icon('lucide:construction', {class: 'size-14 text-gray-300', 'aria-hidden': 'true'}) }}
+            <p class="text-base font-medium text-gray-500">{{ 'admin.dashboard.underConstruction'|trans }}</p>
         </div>
-    </turbo-frame>
+    </div>
 {% endblock %}

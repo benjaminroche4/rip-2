@@ -76,17 +76,6 @@ final class ContactList
     public ?int $confirmedContactId = null;
 
     /**
-     * Contact whose recall date is being planned, opened when the status
-     * is set to "to recall". Takes precedence over the qualify modal.
-     */
-    #[LiveProp]
-    public ?int $recallContactId = null;
-
-    /** Recall being planned, "Y-m-dTH:i" (datetime-local format). */
-    #[LiveProp(writable: true)]
-    public string $recallAt = '';
-
-    /**
      * Ids in their on-screen order, captured when the list is (re)built.
      * Later live re-renders reuse it so cards don't jump around while the
      * admin is interacting; a page reload, filter or "load more" re-sorts.
@@ -151,15 +140,6 @@ final class ContactList
         $this->repository->updateStatus($id, $newStatus, $this->currentUserName(), $avatar);
         $this->itemsCache = null;
         $this->totalCache = null;
-
-        // "To recall" → plan the recall date right away.
-        if (ContactStatus::ToRecall === $newStatus) {
-            $this->recallContactId = $id;
-            $this->recallAt = $this->repository->listByIds([$id])[0]?->recallAt?->format('Y-m-d\TH:i') ?? '';
-        } else {
-            $this->recallContactId = null;
-            $this->recallAt = '';
-        }
 
         $filterStatus = $this->currentStatus();
         $this->leavingContactId = null !== $filterStatus && $newStatus !== $filterStatus ? $id : null;
@@ -243,37 +223,6 @@ final class ContactList
         $this->itemsCache = null;
         $this->totalCache = null;
         $this->getItems();
-    }
-
-    #[LiveAction]
-    public function saveRecall(): void
-    {
-        $this->ensureAdmin();
-
-        if (null === $this->recallContactId) {
-            return;
-        }
-
-        $recallAt = '' !== trim($this->recallAt)
-            ? (\DateTimeImmutable::createFromFormat('Y-m-d\TH:i', trim($this->recallAt)) ?: null)
-            : null;
-        if (null !== $recallAt && $recallAt < new \DateTimeImmutable()) {
-            // A recall can only be planned in the future.
-            $recallAt = null;
-        }
-        $this->repository->saveRecallAt($this->recallContactId, $recallAt);
-
-        $this->recallContactId = null;
-        $this->recallAt = '';
-        $this->itemsCache = null;
-    }
-
-    #[LiveAction]
-    public function closeRecall(): void
-    {
-        $this->ensureAdmin();
-        $this->recallContactId = null;
-        $this->recallAt = '';
     }
 
     /**

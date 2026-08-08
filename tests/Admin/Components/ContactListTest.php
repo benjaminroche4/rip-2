@@ -90,33 +90,6 @@ final class ContactListTest extends KernelTestCase
         self::assertSame(1, $component->getTotalCount());
     }
 
-    public function testToRecallOpensTheRecallModalAndSavesTheDate(): void
-    {
-        $contact = $this->persistContact();
-        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
-        $this->em->flush();
-        $this->loginAs('admin@contactlist-test.local');
-
-        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
-        $component->setLiveResponder(new LiveResponder());
-
-        $component->changeStatus((int) $contact->getId(), 'to_recall');
-        self::assertSame((int) $contact->getId(), $component->recallContactId, 'To-recall opens the recall modal.');
-
-        $futureRecall = new \DateTimeImmutable('+2 days 14:30');
-        $component->recallAt = $futureRecall->format('Y-m-d\TH:i');
-        $component->saveRecall();
-
-        $this->em->clear();
-        self::assertSame($futureRecall->format('Y-m-d H:i'), $this->em->find(Contact::class, $contact->getId())->getRecallAt()?->format('Y-m-d H:i'));
-        self::assertNull($component->recallContactId);
-
-        // A later switch back to "to recall" reopens only the recall modal.
-        $component->changeStatus((int) $contact->getId(), 'to_recall');
-        $component->closeRecall();
-        self::assertNull($component->recallContactId);
-    }
-
     public function testSearchFiltersTheListAndResetsPaging(): void
     {
         $match = $this->persistContact()->setFirstName('Léa')->setLastName('Dupont');

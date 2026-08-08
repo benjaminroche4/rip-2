@@ -418,3 +418,17 @@ details.details-animated[open]::details-content {
         scroll-behavior: auto !important;
     }
 }
+
+/* Icônes de la sidebar admin : petit effet ressort au survol de l'item
+   (une oscillation puis retour au repos), à la Linear/Arc. Déclenché via
+   motion-safe:group-hover/item:animate-sidebar-wiggle. */
+@keyframes sidebar-wiggle {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    55% { transform: rotate(5deg); }
+    80% { transform: rotate(-2deg); }
+    100% { transform: rotate(0deg); }
+}
+@utility animate-sidebar-wiggle {
+    animation: sidebar-wiggle 350ms ease-in-out;
+}

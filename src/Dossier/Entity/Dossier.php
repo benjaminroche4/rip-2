@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Dossier\Entity;
 
 use App\Auth\Entity\User;
+use App\Dossier\Domain\DossierDocumentStatus;
 use App\Dossier\Domain\DossierPersonRole;
+use App\Dossier\Domain\DossierStatus;
 use App\Dossier\Repository\DossierRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -48,6 +50,21 @@ class Dossier
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    /**
+     * Manual part of the semi-automatic lifecycle: the operator only picks
+     * between new / searching / property_found. The two derived statuses
+     * (awaiting documents, closed) are computed by getEffectiveStatus().
+     */
+    #[ORM\Column(length: 20, enumType: DossierStatus::class, options: ['default' => DossierStatus::New])]
+    private DossierStatus $status = DossierStatus::New;
+
+    /**
+     * Closure timestamp: a closed dossier has its deposited files purged,
+     * its pairing code rotated and the public deposit page refuses it.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $closedAt = null;
 
     /**
      * Reference of the contact request this dossier was converted from, or
@@ -240,6 +257,54 @@ class Dossier
         $this->manager = $manager;
 
         return $this;
+    }
+
+    public function getClosedAt(): ?\DateTimeImmutable
+    {
+        return $this->closedAt;
+    }
+
+    public function setClosedAt(?\DateTimeImmutable $closedAt): static
+    {
+        $this->closedAt = $closedAt;
+
+        return $this;
+    }
+
+    public function isClosed(): bool
+    {
+        return null !== $this->closedAt;
+    }
+
+    public function getStatus(): DossierStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(DossierStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /** A requested piece not validated yet keeps the dossier incomplete. */
+    public function hasPendingDocuments(): bool
+    {
+        foreach ($this->persons as $person) {
+            foreach ($person->getDocuments() as $document) {
+                if (DossierDocumentStatus::Validated !== $document->getStatus()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function getEffectiveStatus(): DossierStatus
+    {
+        return DossierStatus::effective($this->status, $this->isClosed(), $this->hasPendingDocuments());
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

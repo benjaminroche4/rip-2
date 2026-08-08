@@ -47,6 +47,18 @@ class DossierSearch
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $guarantorType = null;
 
+    /** Progress of the guarantee: not_started, in_progress, obtained, refused. */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $guarantorStatus = null;
+
+    /** Number of occupants of the future home. */
+    #[ORM\Column(nullable: true)]
+    private ?int $occupants = null;
+
+    /** Required amenities, CSV of PropertyListing Amenity values. */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $equipment = null;
+
     /** "yes" / "no", optional (rare but real cases). */
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $pets = null;
@@ -88,10 +100,6 @@ class DossierSearch
     /** "yes" (accepted) / "no" (excluded), optional: top floor. */
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $topFloor = null;
-
-    /** "included" (CC) / "excluded" (HC), optional: what the budget covers. */
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $budgetCharges = null;
 
     /** "yes" / "no", optional: parking or box required. */
     #[ORM\Column(length: 10, nullable: true)]
@@ -225,6 +233,42 @@ class DossierSearch
         return $this;
     }
 
+    public function getGuarantorStatus(): ?string
+    {
+        return $this->guarantorStatus;
+    }
+
+    public function setGuarantorStatus(?string $guarantorStatus): static
+    {
+        $this->guarantorStatus = $guarantorStatus;
+
+        return $this;
+    }
+
+    public function getOccupants(): ?int
+    {
+        return $this->occupants;
+    }
+
+    public function setOccupants(?int $occupants): static
+    {
+        $this->occupants = $occupants;
+
+        return $this;
+    }
+
+    public function getEquipment(): ?string
+    {
+        return $this->equipment;
+    }
+
+    public function setEquipment(?string $equipment): static
+    {
+        $this->equipment = $equipment;
+
+        return $this;
+    }
+
     public function getPets(): ?string
     {
         return $this->pets;
@@ -298,18 +342,6 @@ class DossierSearch
     public function setGroundFloor(?string $groundFloor): static
     {
         $this->groundFloor = $groundFloor;
-
-        return $this;
-    }
-
-    public function getBudgetCharges(): ?string
-    {
-        return $this->budgetCharges;
-    }
-
-    public function setBudgetCharges(?string $budgetCharges): static
-    {
-        $this->budgetCharges = $budgetCharges;
 
         return $this;
     }

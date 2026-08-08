@@ -183,7 +183,6 @@ final class SearchEditorTest extends KernelTestCase
         $component->chooseParking('no');
         $component->chooseGroundFloor('no');
         $component->chooseTopFloor('yes');
-        $component->chooseBudgetCharges('included');
         $this->em->clear();
         $search = $this->em->find(Dossier::class, $dossier->getId())->getSearch();
         self::assertSame(2, $search->getMinBedrooms());
@@ -191,19 +190,16 @@ final class SearchEditorTest extends KernelTestCase
         self::assertSame('no', $search->getParking());
         self::assertSame('no', $search->getGroundFloor());
         self::assertSame('yes', $search->getTopFloor());
-        self::assertSame('included', $search->getBudgetCharges());
 
         // Toggle-off on the active values.
         $component->chooseMinBedrooms(2);
         $component->chooseGroundFloor('no');
         $component->chooseTopFloor('yes');
-        $component->chooseBudgetCharges('included');
         $this->em->clear();
         $search = $this->em->find(Dossier::class, $dossier->getId())->getSearch();
         self::assertNull($search->getMinBedrooms());
         self::assertNull($search->getGroundFloor());
         self::assertNull($search->getTopFloor());
-        self::assertNull($search->getBudgetCharges());
 
         // Optional: completeness never depends on them.
         $component->chooseStayDuration('long');
@@ -369,6 +365,83 @@ final class SearchEditorTest extends KernelTestCase
 
         $this->expectException(AccessDeniedException::class);
         $this->mountTwigComponent('Dossier:Search', ['dossierId' => 1]);
+    }
+
+    public function testGuarantorStatusTogglesAndClears(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $component = $this->mountEditor($dossier);
+
+        $component->chooseGuarantorStatus('in_progress');
+        $this->em->clear();
+        self::assertSame('in_progress', $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getGuarantorStatus());
+
+        // Same chip again = cleared; unknown value rejected.
+        $component->chooseGuarantorStatus('in_progress');
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getSearch()->getGuarantorStatus());
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+        $component->chooseGuarantorStatus('maybe');
+    }
+
+    public function testOccupantsChipTogglesTheCount(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $component = $this->mountEditor($dossier);
+
+        $component->chooseOccupants(3);
+        $this->em->clear();
+        self::assertSame(3, $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getOccupants());
+
+        $component->chooseOccupants(3);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getSearch()->getOccupants());
+    }
+
+    public function testEquipmentMultiSelectUsesTheAmenityReferential(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $component = $this->mountEditor($dossier);
+
+        $component->chooseEquipment('elevator');
+        $component->chooseEquipment('washing_machine');
+        $this->em->clear();
+        self::assertSame('elevator,washing_machine', $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getEquipment());
+
+        // Unselecting one keeps the other.
+        $component->chooseEquipment('elevator');
+        $this->em->clear();
+        self::assertSame('washing_machine', $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getEquipment());
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+        $component->chooseEquipment('jacuzzi');
+    }
+
+    public function testEverySearchChangeLandsInTheFollowUpThread(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $component = $this->mountEditor($dossier);
+
+        // Move-in date via the main autosave, a chip via its action: both
+        // must produce a field-level audit event (Doctrine flush listener).
+        $component->moveInAt = '2026-11-15';
+        $component->save();
+        $component->chooseStayDuration('long');
+
+        $events = self::getContainer()->get(\App\Dossier\Repository\DossierEventRepository::class)
+            ->listForDossier((int) $dossier->getId());
+        // Newest first: the fixture insertion also logs its initial values
+        // now, keep only the most recent entry per field.
+        $fields = [];
+        foreach ($events as $event) {
+            self::assertSame('search_updated', $event->getKind());
+            $fields[$event->getPayload()['field']] ??= $event->getPayload()['value'];
+        }
+        self::assertArrayHasKey('admin.dossiers.show.events.searchField.moveInAt', $fields);
+        self::assertSame('15.11.2026', $fields['admin.dossiers.show.events.searchField.moveInAt']);
+        self::assertArrayHasKey('admin.dossiers.show.events.searchField.stayDuration', $fields);
+        self::assertSame('long', $fields['admin.dossiers.show.events.searchField.stayDuration']);
     }
 
     private function persistDossier(bool $withSearch): Dossier

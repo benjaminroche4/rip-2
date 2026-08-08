@@ -98,96 +98,18 @@ final class AdminAccessTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tableau de bord');
-        // The shell ships a lazy frame pointing at the heavy content.
-        self::assertSelectorExists('turbo-frame[data-testid="dashboard-frame"][loading="lazy"]');
 
-        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/tableau');
-        self::assertResponseIsSuccessful();
-
-        // Activity chart canvas mounted with 2 series (contacts + calls), 12 buckets each.
-        $canvas = $crawler->filter('canvas[data-testid="activity-chart"]');
-        self::assertCount(1, $canvas);
-        self::assertSame('chart', $canvas->attr('data-controller'));
-        $labels = json_decode((string) $canvas->attr('data-chart-labels-value'), true);
-        $series = json_decode((string) $canvas->attr('data-chart-series-value'), true);
-        self::assertCount(12, $labels);
-        self::assertCount(2, $series);
-        foreach ($series as $serie) {
-            self::assertCount(12, $serie['data']);
-            self::assertNotEmpty($serie['label']);
-            self::assertNotEmpty($serie['color']);
-            self::assertNotEmpty($serie['fillColor']);
-        }
-
-        // Week-over-week bar chart: 7 day labels, 2 series of 7 points (current vs previous week).
-        $weekCanvas = $crawler->filter('canvas[data-testid="week-vs-week-chart"]');
-        self::assertCount(1, $weekCanvas);
-        self::assertSame('chart-bars', $weekCanvas->attr('data-controller'));
-        $weekLabels = json_decode((string) $weekCanvas->attr('data-chart-bars-labels-value'), true);
-        $weekSeries = json_decode((string) $weekCanvas->attr('data-chart-bars-series-value'), true);
-        self::assertCount(7, $weekLabels);
-        self::assertCount(2, $weekSeries);
-        foreach ($weekSeries as $serie) {
-            self::assertCount(7, $serie['data']);
-            self::assertNotEmpty($serie['label']);
-            self::assertNotEmpty($serie['color']);
-            self::assertNotEmpty($serie['fillColor']);
-        }
-
-        // KPI grid: 4 cards (calls 7d, contacts 7d, leads month, leads 12m).
-        self::assertCount(4, $crawler->filter('[data-testid="kpi-grid"] > article'));
-
-        // No contacts in DB (cleared in setUp) → all-time + weekday chart sections are hidden.
-        self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-all-time-chart"]'));
-        self::assertCount(0, $crawler->filter('canvas[data-testid="contacts-weekday-chart"]'));
-
-        // No STRIPE_SECRET_KEY in .env.test → repo returns []  →  payments
-        // chart section is hidden. Confirms the graceful-degradation path.
-        self::assertCount(0, $crawler->filter('canvas[data-testid="payments-chart"]'));
+        // The analytics content (KPI tiles, charts, lazy frame) was removed
+        // on purpose: the dashboard is a placeholder until rebuilt.
+        self::assertSelectorExists('[data-testid="dashboard-page"]');
+        self::assertSelectorTextContains('[data-testid="dashboard-page"]', 'En cours de construction');
+        self::assertCount(0, $crawler->filter('turbo-frame[data-testid="dashboard-frame"]'));
+        self::assertCount(0, $crawler->filter('[data-testid="kpi-grid"]'));
+        self::assertCount(0, $crawler->filter('canvas'));
 
         $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
         self::assertStringContainsString('noindex', $robots);
         self::assertStringContainsString('nofollow', $robots);
-    }
-
-    public function testAdminSeesContactsAllTimeChartWhenContactsExist(): void
-    {
-        /** @var EntityManagerInterface $em */
-        $em = static::getContainer()->get('doctrine.orm.entity_manager');
-
-        $today = new \DateTimeImmutable('today 12:00:00');
-        $threeDaysAgo = $today->modify('-3 days');
-
-        foreach ([$threeDaysAgo, $threeDaysAgo, $today] as $i => $createdAt) {
-            $em->persist((new Contact())
-                ->setFirstName('Jane')
-                ->setLastName('Doe')
-                ->setEmail('jane'.$i.'@example.com')
-                ->setPhoneNumber('+33600000000')
-                ->setHelpType('contact.contactForm.helpType.choice.1')
-                ->setMessage('Hello')
-                ->setLang('fr')
-                ->setIp('127.0.0.1')
-                ->setCreatedAt($createdAt));
-        }
-        $em->flush();
-
-        $this->loginAs(self::ADMIN_EMAIL);
-        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/tableau');
-
-        self::assertResponseIsSuccessful();
-
-        $canvas = $crawler->filter('canvas[data-testid="contacts-all-time-chart"]');
-        self::assertCount(1, $canvas);
-        self::assertSame('chart', $canvas->attr('data-controller'));
-
-        $labels = json_decode((string) $canvas->attr('data-chart-labels-value'), true);
-        $series = json_decode((string) $canvas->attr('data-chart-series-value'), true);
-
-        // 4 contiguous days from first contact (today-3) to today, inclusive.
-        self::assertCount(4, $labels);
-        self::assertCount(1, $series);
-        self::assertSame([2, 0, 0, 1], $series[0]['data']);
     }
 
     public function testAdminSeesUsersPage(): void

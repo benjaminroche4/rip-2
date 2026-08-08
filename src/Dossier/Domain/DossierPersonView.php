@@ -28,6 +28,8 @@ final readonly class DossierPersonView
         public ?\DateTimeImmutable $contractStartDate = null,
         public ?\DateTimeImmutable $contractEndDate = null,
         public bool $trialPeriodOver = false,
+        public ?string $currentCity = null,
+        public ?string $visaStatus = null,
     ) {
     }
 

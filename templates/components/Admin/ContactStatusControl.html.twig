@@ -99,7 +99,7 @@
 
         {# Motif de clôture : demandé uniquement quand le lead est non
            qualifié, rendu sous l'en-tête (w-full → passe à la ligne). #}
-        {% if contact.status.value == 'unqualified' %}
+        {% if contact.status.value == 'closed' %}
             {% set reasons = this.closureReasons %}
             <div class="w-full space-y-2 border-t border-gray-950/5 pt-3 text-sm">
                 <p class="text-gray-600">{{ 'admin.contacts.show.closureLabel'|trans }}</p>

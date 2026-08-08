@@ -72,6 +72,14 @@ class DossierPerson
     #[ORM\Column(length: 2, nullable: true)]
     private ?string $nationality = null;
 
+    /** City where the person currently lives, free text. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $currentCity = null;
+
+    /** Visa need for the relocation: yes, no, obtained. */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $visaStatus = null;
+
     /**
      * "No professional activity" flag (the spouse works, stay-at-home
      * parent, …): the whole pro pane is hidden and cleared.
@@ -248,6 +256,30 @@ class DossierPerson
     public function setNationality(?string $nationality): static
     {
         $this->nationality = $nationality;
+
+        return $this;
+    }
+
+    public function getCurrentCity(): ?string
+    {
+        return $this->currentCity;
+    }
+
+    public function setCurrentCity(?string $currentCity): static
+    {
+        $this->currentCity = $currentCity;
+
+        return $this;
+    }
+
+    public function getVisaStatus(): ?string
+    {
+        return $this->visaStatus;
+    }
+
+    public function setVisaStatus(?string $visaStatus): static
+    {
+        $this->visaStatus = $visaStatus;
 
         return $this;
     }

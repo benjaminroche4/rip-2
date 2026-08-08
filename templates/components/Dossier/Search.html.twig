@@ -102,23 +102,6 @@
                             {{ 'admin.dossiers.show.search.budgetTooHigh'|trans({'%max%': maxAffordableBudget|format_number}) }}
                         </p>
                     {% endif %}
-                    {# CC ou HC : le même montant change de sens à 200 € près. #}
-                    {% set currentBudgetCharges = this.currentBudgetCharges %}
-                    <div class="flex flex-wrap gap-2">
-                        {% for value in ['included', 'excluded'] %}
-                            <button
-                                type="button"
-                                data-action="live#action"
-                                data-live-action-param="chooseBudgetCharges"
-                                data-live-value-param="{{ value }}"
-                                aria-pressed="{{ value == currentBudgetCharges ? 'true' : 'false' }}"
-                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ value == currentBudgetCharges ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
-                                data-testid="budget-charges-chip"
-                            >
-                                {{ ('admin.dossiers.show.search.budgetCharges.choice.' ~ value)|trans }}
-                            </button>
-                        {% endfor %}
-                    </div>
                 </div>
                 <div class="min-w-0 space-y-2">
                     <div class="flex items-baseline justify-between gap-3">
@@ -498,6 +481,85 @@
                         {% endfor %}
                     </div>
                 </div>
+                {# Nombre d'occupants du futur logement. #}
+                {% set currentOccupants = this.currentOccupants %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.occupants.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for count in [1, 2, 3, 4, 5, 6] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseOccupants"
+                                data-live-count-param="{{ count }}"
+                                aria-pressed="{{ count == currentOccupants ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums transition-colors duration-100 ease-out {{ count == currentOccupants ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="occupants-chip"
+                            >
+                                {{ ux_icon('lucide:users', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ count == 6 ? 'admin.dossiers.show.search.occupants.sixPlus'|trans : count }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {# Équipements indispensables : même référentiel que "Déposer
+                   mon bien" (enum Amenity). Les 10 premiers (plus tout ce qui
+                   est sélectionné) sont visibles, le reste derrière "+N". #}
+                {% set selectedEquipment = this.selectedEquipment %}
+                {% set visibleAmenities = [] %}
+                {% set extraAmenities = [] %}
+                {% for amenity in this.equipmentOptions %}
+                    {% if loop.index <= 10 or amenity.value in selectedEquipment %}
+                        {% set visibleAmenities = visibleAmenities|merge([amenity]) %}
+                    {% else %}
+                        {% set extraAmenities = extraAmenities|merge([amenity]) %}
+                    {% endif %}
+                {% endfor %}
+                <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="reveal">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.equipment.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for amenity in visibleAmenities %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseEquipment"
+                                data-live-equipment-param="{{ amenity.value }}"
+                                aria-pressed="{{ amenity.value in selectedEquipment ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ amenity.value in selectedEquipment ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="equipment-chip"
+                            >
+                                {{ ('listProperty.form.amenities.choice.' ~ amenity.value)|trans }}
+                            </button>
+                        {% endfor %}
+                        {% if extraAmenities is not empty %}
+                            <div class="hidden" data-reveal-target="extra">
+                                {% for amenity in extraAmenities %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="chooseEquipment"
+                                        data-live-equipment-param="{{ amenity.value }}"
+                                        aria-pressed="false"
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
+                                        data-testid="equipment-chip"
+                                    >
+                                        {{ ('listProperty.form.amenities.choice.' ~ amenity.value)|trans }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                            <button
+                                type="button"
+                                data-reveal-target="button"
+                                data-action="reveal#show"
+                                class="flex cursor-pointer items-center gap-1 rounded-full border border-dashed border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
+                                data-testid="equipment-show-more"
+                            >
+                                {{ ux_icon('lucide:plus', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ extraAmenities|length }}
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
                 {% set currentElevator = this.currentElevator %}
                 <div class="min-w-0 space-y-2">
                     <p class="text-gray-600">{{ 'admin.dossiers.show.search.elevator.label'|trans }}</p>
@@ -687,6 +749,30 @@
                         {% endfor %}
                     </div>
                 </div>
+                {# Avancement de l'obtention de la garantie : ne concerne
+                   que Garantme. #}
+                {% set currentGuarantorStatus = this.currentGuarantorStatus %}
+                {% if currentGuarantor == 'garantme' %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.guarantorStatus.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for status in this.guarantorStatuses %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseGuarantorStatus"
+                                data-live-status-param="{{ status }}"
+                                aria-pressed="{{ status == currentGuarantorStatus ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ status == currentGuarantorStatus ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="guarantor-status-chip"
+                            >
+                                {{ ux_icon({'not_started': 'lucide:circle-dashed', 'in_progress': 'lucide:loader', 'obtained': 'lucide:check', 'refused': 'lucide:x'}[status], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.dossiers.show.search.guarantorStatus.choice.' ~ status)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
                 </div>
             </div>
             <div class="rounded-b-xl bg-white px-5 py-4">

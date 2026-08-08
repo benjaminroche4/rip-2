@@ -270,9 +270,7 @@
         {% elseif statusFilter != 'all' %}
             {% set emptyIcon = {
                 in_progress: 'lucide:circle-dashed',
-                to_recall: 'lucide:calendar-clock',
                 converted: 'lucide:badge-check',
-                unqualified: 'lucide:user-x',
                 closed: 'lucide:archive',
             }[statusFilter]|default('lucide:inbox') %}
             {% set emptyTitle = ('admin.contacts.emptyState.byStatus.' ~ statusFilter ~ '.title')|trans %}
@@ -320,7 +318,10 @@
                     data-live-action-param="more"
                     data-testid="contacts-load-more"
                 >
-                    <span data-loading="action(more)|hide">{{ 'admin.contacts.button.loadMore'|trans }}</span>
+                    <span data-loading="action(more)|hide" class="flex items-center gap-x-2">
+                        {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.button.loadMore'|trans }}
+                    </span>
                     <span data-loading="action(more)|show" class="hidden items-center gap-x-2">
                         <twig:Spinner class="inline" />
                         {{ 'admin.contacts.button.loading'|trans }}
@@ -335,24 +336,10 @@
     {% set contacts = this.items %}
     {% set statuses = this.statuses %}
     {% set counts = this.statusCounts %}
-    {% set statCards = statuses|filter(s => s.value in ['new', 'in_progress', 'to_recall']) %}
 
     <div class="lg:grid lg:grid-cols-[15rem_1fr] lg:items-start lg:gap-6">
         <aside class="lg:sticky lg:top-6">
-            <div class="rounded-2xl border border-neutral-200 bg-white p-2">
-                <div class="divide-y divide-gray-950/5 rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 px-4">
-                    {% for status in statCards %}
-                        <div class="flex items-center justify-between py-3">
-                            <p class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                <span class="size-1.5 shrink-0 rounded-full {{ status.dotClass }}" aria-hidden="true"></span>
-                                {{ status.labelKey|trans }}
-                            </p>
-                            <p class="text-lg font-medium text-gray-900 tabular-nums">{{ counts[status.value] }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="relative mt-4">
+            <div class="relative">
                 {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400', 'aria-hidden': 'true'}) }}
                 <input
                     type="search"
@@ -391,61 +378,6 @@
                 </button>
             </div>
         </aside>
-        {% if this.recallContactId %}
-            <div
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
-                role="dialog"
-                aria-modal="true"
-                aria-label="{{ 'admin.contacts.recallModal.title'|trans }}"
-                data-action="keydown.esc@window->live#action"
-                data-live-action-param="closeRecall"
-                data-testid="recall-modal"
-            >
-                <button
-                    type="button"
-                    class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                    data-action="live#action"
-                    data-live-action-param="closeRecall"
-                    aria-label="{{ 'admin.contacts.recallModal.skip'|trans }}"
-                    tabindex="-1"
-                ></button>
-                <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-8 shadow-xl">
-                    <h2 class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.contacts.recallModal.title'|trans }}</h2>
-                    <p class="mt-0.5 text-sm text-pretty text-gray-500">{{ 'admin.contacts.recallModal.subtitle'|trans }}</p>
-                    <input
-                        type="datetime-local"
-                        min="{{ 'now'|date('Y-m-d\\TH:i') }}"
-                        data-model="norender|recallAt"
-                        data-action="keydown.enter->live#action:prevent"
-                        data-live-action-param="saveRecall"
-                        value="{{ this.recallAt }}"
-                        aria-label="{{ 'admin.contacts.followUp.recallLabel'|trans }}"
-                        title="{{ 'admin.contacts.notes.enterHint'|trans }}"
-                        class="mt-4 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                        data-testid="recall-modal-input"
-                        autofocus
-                    >
-                    <div class="mt-5 flex items-center justify-end gap-3">
-                        <button
-                            type="button"
-                            data-action="live#action"
-                            data-live-action-param="closeRecall"
-                            class="cursor-pointer text-sm text-gray-500 transition-colors duration-100 hover:text-gray-900"
-                        >
-                            {{ 'admin.contacts.recallModal.skip'|trans }}
-                        </button>
-                        <twig:Button
-                            size="sm"
-                            data-action="live#action"
-                            data-live-action-param="saveRecall"
-                            data-testid="recall-modal-save"
-                        >
-                            {{ 'admin.contacts.notes.save'|trans }}
-                        </twig:Button>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
 
 
         <div
@@ -455,7 +387,6 @@
         >
             {# Portée : toutes les demandes ou seulement les miennes, au-dessus des cards. #}
             <div class="mb-4 flex items-center justify-end gap-3 pt-6">
-                <p class="mr-auto hidden text-xs text-gray-400 lg:block" aria-hidden="true">{{ 'admin.contacts.keysHint'|trans }}</p>
                 {# Tri de la liste. #}
                 <details
                     class="relative"

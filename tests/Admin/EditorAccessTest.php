@@ -13,7 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 /**
  * Locks down the ROLE_EDITOR contract: an editor may access ONLY the Outils
  * section of the back-office, and is denied everywhere else (dashboard, users,
- * payments). ROLE_ADMIN still reaches Outils via the role hierarchy — covered
+ * ROLE_ADMIN still reaches Outils via the role hierarchy — covered
  * by AdminAccessTest.
  */
 final class EditorAccessTest extends WebTestCase
@@ -100,13 +100,6 @@ final class EditorAccessTest extends WebTestCase
     public function testEditorIsDeniedOnUsers(): void
     {
         $this->client->request('GET', $this->adminUrl().'/utilisateurs');
-
-        self::assertResponseStatusCodeSame(403);
-    }
-
-    public function testEditorIsDeniedOnPayments(): void
-    {
-        $this->client->request('GET', $this->adminUrl().'/paiements');
 
         self::assertResponseStatusCodeSame(403);
     }

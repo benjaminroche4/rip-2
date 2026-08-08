@@ -53,6 +53,11 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertSame([], $component->errors);
         self::assertFalse($component->adding);
 
+        // The addition lands in the follow-up thread.
+        $events = self::getContainer()->get(\App\Dossier\Repository\DossierEventRepository::class)
+            ->listForDossier((int) $dossier->getId());
+        self::assertSame('person_added', $events[0]->getKind());
+
         $this->em->clear();
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
         self::assertCount(2, $fresh->getPersons());
@@ -406,6 +411,133 @@ final class PersonsManagerTest extends KernelTestCase
         $this->em->flush();
 
         return $dossier;
+    }
+
+    public function testCurrentCityVisaAndNewProfessionsPersist(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        $component->startAdd();
+        $component->role = DossierPersonRole::TENANT->value;
+        $component->firstName = 'Paul';
+        $component->lastName = 'Martin';
+        $component->email = 'paul@example.com';
+        $component->currentCity = '  Londres ';
+        $component->visaStatus = 'obtained';
+        $component->profession = 'business_owner';
+        $component->jobTitle = 'CEO';
+        $component->employer = 'ACME';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $added = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->last();
+        self::assertSame('Londres', $added->getCurrentCity());
+        self::assertSame('obtained', $added->getVisaStatus());
+        self::assertSame('business_owner', $added->getProfession());
+        // jobTitle exists for a business owner, employer does not.
+        self::assertSame('CEO', $added->getJobTitle());
+        self::assertNull($added->getEmployer());
+    }
+
+    public function testFollowUpKeepsOnlyIdentityAndContactDetails(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        // A stale DOM could post tenant-only fields for a follow-up: the
+        // server drops them, mirroring the reduced form.
+        $component->startAdd();
+        $component->role = DossierPersonRole::FOLLOW_UP->value;
+        $component->firstName = 'Marie';
+        $component->lastName = 'Durand';
+        $component->email = 'marie@example.com';
+        $component->phone = '+33611223344';
+        $component->birthDate = '1990-01-01';
+        $component->nationality = 'FR';
+        $component->currentCity = 'Londres';
+        $component->visaStatus = 'yes';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $added = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->last();
+        self::assertSame('marie@example.com', $added->getEmail());
+        self::assertSame('+33611223344', $added->getPhone());
+        self::assertNull($added->getBirthDate());
+        self::assertNull($added->getNationality());
+        self::assertNull($added->getCurrentCity());
+        self::assertNull($added->getVisaStatus());
+    }
+
+    public function testEditingAFollowUpKeepsItsStoredTenantFields(): void
+    {
+        $dossier = $this->persistDossier();
+        $legacy = (new DossierPerson())
+            ->setRole(DossierPersonRole::FOLLOW_UP)
+            ->setFirstName('Marie')->setLastName('Durand')
+            ->setEmail('marie@example.com')
+            ->setBirthDate(new \DateTimeImmutable('1990-01-01'))
+            ->setNationality('FR')
+            ->setCurrentCity('Londres')
+            ->setVisaStatus('obtained');
+        $dossier->addPerson($legacy);
+        $this->em->flush();
+
+        // A plain email fix on an already-non-tenant person must not wipe
+        // the tenant-specific fields stored before the reduced form.
+        $component = $this->mountManager($dossier);
+        $component->startEdit((int) $legacy->getId());
+        $component->email = 'marie.durand@example.com';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $fresh = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->last();
+        self::assertSame('marie.durand@example.com', $fresh->getEmail());
+        self::assertSame('1990-01-01', $fresh->getBirthDate()?->format('Y-m-d'));
+        self::assertSame('FR', $fresh->getNationality());
+        self::assertSame('Londres', $fresh->getCurrentCity());
+        self::assertSame('obtained', $fresh->getVisaStatus());
+    }
+
+    public function testLegacyProfessionStaysEditable(): void
+    {
+        $dossier = $this->persistDossier();
+        /** @var DossierPerson $tenant */
+        $tenant = $dossier->getPersons()->first();
+        $tenant->setProfession('expat');
+        $this->em->flush();
+
+        $component = $this->mountManager($dossier);
+        $component->startEdit((int) $tenant->getId());
+        $component->phone = '+33611223344';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $fresh = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertSame('expat', $fresh->getProfession());
+        self::assertSame('+33611223344', $fresh->getPhone());
+    }
+
+    public function testUnknownVisaValueIsDropped(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        $component->startAdd();
+        $component->role = DossierPersonRole::TENANT->value;
+        $component->firstName = 'Paul';
+        $component->lastName = 'Martin';
+        $component->email = 'paul@example.com';
+        $component->visaStatus = 'maybe';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getPersons()->last()->getVisaStatus());
     }
 
     public function testRemovalGoesThroughTheConfirmationModal(): void

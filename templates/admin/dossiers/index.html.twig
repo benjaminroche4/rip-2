@@ -2,6 +2,12 @@
 
 {% block title %}{{ 'admin.dossiers.title'|trans }}{% endblock %}
 
+{% block head %}
+    {# Les filtres vivent dans un LiveComponent : un snapshot Turbo restauré
+       montrerait un état périmé de la liste au retour. #}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
 {% block page_header %}
     <twig:Admin:PageHeader title="{{ 'admin.dossiers.title'|trans }}">
         <twig:Dossier:DossierCreate adminPrefix="{{ adminPrefix }}" />
@@ -9,142 +15,7 @@
 {% endblock %}
 
 {% block body %}
-    <div class="space-y-8" data-testid="dossiers-page">
-        {% if dossiers is empty %}
-            <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="dossiers-empty">
-                <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
-                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                        {{ ux_icon('lucide:folder-open', {class: 'size-6', 'aria-hidden': 'true'}) }}
-                    </div>
-                    <div class="space-y-1">
-                        <h2 class="text-sm font-medium text-gray-700">
-                            {{ 'admin.dossiers.empty.title'|trans }}
-                        </h2>
-                        <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
-                            {{ 'admin.dossiers.empty.description'|trans }}
-                        </p>
-                    </div>
-                </div>
-            </section>
-        {% else %}
-            {# Carte Figma "dossier" : coque grise arrondie, deux bandes
-               blanches (infos clés / progression). Statut, formule, avancement
-               et compteurs de visites sont des mocks en attendant les modules
-               correspondants (visites, paiements, pièces). #}
-            {# max-w-4xl centré temporaire, en attendant la vraie grille de la page. #}
-            <div class="mx-auto max-w-4xl space-y-4" data-testid="dossiers-list">
-                {% for dossier in dossiers %}
-                    <article class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-row">
-                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                            <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-3">
-                                <div class="flex min-w-0 items-center gap-3">
-                                    <p class="truncate font-medium text-gray-900">{{ dossier.name }}</p>
-                                    <span class="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-gray-900">
-                                        <span class="size-1.5 shrink-0 rounded-full bg-emerald-600" aria-hidden="true"></span>
-                                        {{ (dossier.personCount > 1 ? 'admin.dossiers.card.type.family' : 'admin.dossiers.card.type.individual')|trans }}
-                                    </span>
-                                </div>
-                                {# Mock : le statut du dossier n'existe pas encore en base. #}
-                                <div class="flex w-44 shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5">
-                                    <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ 'admin.dossiers.card.status.inProgress'|trans }}</span>
-                                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-y-4 rounded-t-xl bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
-                                <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                                    <p class="text-gray-600">{{ 'admin.dossiers.create.person.primaryTag'|trans }}</p>
-                                    <p class="truncate font-medium text-gray-900">{{ dossier.primaryTenantName ?: '-' }}</p>
-                                </div>
-                                <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
-                                <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                                    <p class="text-gray-600">{{ 'admin.dossiers.card.filesStatus.label'|trans }}</p>
-                                    <p class="flex items-center gap-1.5 font-medium text-emerald-600">
-                                        {{ ux_icon('lucide:check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ 'admin.dossiers.card.filesStatus.completed'|trans }}
-                                    </p>
-                                </div>
-                                <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
-                                <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                                    <p class="text-gray-600">{{ 'admin.dossiers.card.package.label'|trans }}</p>
-                                    {% if dossier.offer %}
-                                        <p class="truncate font-medium text-gray-900">
-                                            {{ ('contact.contactForm.offer.' ~ dossier.offer ~ '.title')|trans }}
-                                            <span class="font-normal text-gray-500">({{ ('contact.contactForm.offer.' ~ dossier.offer ~ '.price')|trans }})</span>
-                                        </p>
-                                    {% else %}
-                                        <p class="font-medium text-gray-400">-</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
-                                <p class="text-sm font-medium text-gray-900">{{ 'admin.dossiers.card.progress.title'|trans }}</p>
-
-                                <div class="space-y-2">
-                                    {# Mock : avancement fixe en attendant le module visites. #}
-                                    <div class="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-                                        <div class="progress-bar-fill h-full w-[58%] rounded-full bg-linear-to-r from-[#8ebf7d] to-[#279d2f]"></div>
-                                    </div>
-                                    <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-xs">
-                                        <p class="text-gray-600">
-                                            {{ 'admin.dossiers.card.progress.started'|trans }}
-                                            <span class="font-medium text-gray-900 tabular-nums">{{ dossier.createdAt|format_datetime(pattern='dd MMM yyyy') }}</span>
-                                        </p>
-                                        <p class="text-gray-600">
-                                            {{ 'admin.dossiers.card.progress.estimatedFinish'|trans }}
-                                            <span class="font-medium text-gray-900 tabular-nums">{{ dossier.createdAt|date_modify('+21 days')|format_datetime(pattern='dd MMM yyyy') }}</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {# Mock : compteurs fixes en attendant le module visites. #}
-                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                                    <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                        <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">1</p>
-                                        <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.upcomingVisits'|trans }}</p>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                        <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">9</p>
-                                        <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.totalVisits'|trans }}</p>
-                                    </div>
-                                    <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                        <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">0</p>
-                                        <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.rejections'|trans }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-2 mb-1 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-1">
-                                <div class="flex items-center gap-2 pl-1">
-                                    <p class="text-xs text-gray-900 opacity-50">{{ 'admin.dossiers.card.managedBy'|trans }}</p>
-                                    {% if dossier.managerName %}
-                                        <div class="flex items-center gap-1.5">
-                                            <twig:Avatar
-                                                filename="{{ dossier.managerAvatarFilename }}"
-                                                name="{{ dossier.managerName }}"
-                                                :size="5"
-                                            />
-                                            <p class="truncate text-xs font-medium text-gray-900">{{ dossier.managerName }}</p>
-                                        </div>
-                                    {% else %}
-                                        <p class="text-xs font-medium text-gray-400">{{ 'admin.dossiers.card.noManager'|trans }}</p>
-                                    {% endif %}
-                                </div>
-                                <twig:Button
-                                    as="a"
-                                    size="sm"
-                                    href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: dossier.reference}) }}"
-                                    class="px-10"
-                                    data-testid="dossier-card-details"
-                                >
-                                    {{ 'admin.dossiers.list.viewMore'|trans }}
-                                </twig:Button>
-                            </div>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-        {% endif %}
+    <div data-testid="dossiers-page">
+        <twig:Dossier:DossierList :adminPrefix="adminPrefix" />
     </div>
 {% endblock %}

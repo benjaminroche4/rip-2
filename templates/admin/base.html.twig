@@ -6,7 +6,35 @@
         <meta name="theme-color" content="#FFFFFF">
 
         {# Admin pages are noindex via X-Robots-Tag (AdminNoIndexListener) — covers HTML and any future JSON/CSV/PDF exports. #}
-        <title>{% block title %}Admin{% endblock %}</title>
+        {# Titre uniforme : "Admin - <Page>" ("Admin" seul quand une page
+           n'a pas de titre propre). La capture est déjà échappée par
+           Twig : |raw évite le double échappement ("&amp;" visible dans
+           l'onglet) sans rien désécuriser. #}
+        {% set pageTitle %}{% block title %}{% endblock %}{% endset %}
+        {% set fullTitle %}Admin{% if pageTitle|trim %} - {{ pageTitle|trim|raw }}{% endif %}{% endset %}
+        <title>{{ fullTitle|raw }}</title>
+
+        {# Description + OG/Twitter : jamais indexé (X-Robots-Tag + meta),
+           mais un lien admin collé dans Slack/iMessage garde un aperçu
+           propre. Les bots de partage ne passent pas le firewall : ils ne
+           voient que la redirection de connexion, rien ne fuit. #}
+        {% set pageDescription %}{% block description %}{{ 'admin.meta.description'|trans }}{% endblock %}{% endset %}
+        <meta name="description" content="{{ pageDescription|trim|raw }}">
+        <meta name="robots" content="noindex, nofollow">
+
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Relocation In Paris">
+        <meta property="og:locale" content="{{ app.request.locale == 'fr' ? 'fr_FR' : 'en_GB' }}">
+        <meta property="og:title" content="{{ fullTitle|raw }}">
+        <meta property="og:description" content="{{ pageDescription|trim|raw }}">
+        <meta property="og:image" content="{{ absolute_url(asset('medias/banner/relocation-in-paris-banner.webp')) }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ fullTitle|raw }}">
+        <meta name="twitter:description" content="{{ pageDescription|trim|raw }}">
+        <meta name="twitter:image" content="{{ absolute_url(asset('medias/banner/relocation-in-paris-banner.webp')) }}">
+
         {# Rechargements Turbo en morph : le DOM est raccommodé au lieu d'être
            remplacé, pas de flash blanc, scroll conservé. #}
         <meta name="turbo-refresh-method" content="morph">
@@ -25,17 +53,42 @@
             {{ 'admin.nav.skipToContent'|trans }}
         </a>
         <div class="isolate flex min-h-dvh">
-            <aside class="sticky top-0 flex h-dvh w-64 shrink-0 flex-col border-r border-gray-950/5 bg-white" aria-label="{{ 'admin.sidebar.label'|trans }}">
-                <div class="flex shrink-0 items-center border-b border-gray-950/5 px-5 py-5">
-                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="Relocation In Paris — Admin">
+            <aside
+                class="group/sidebar sticky top-0 flex h-dvh w-64 shrink-0 flex-col border-r border-gray-950/5 bg-white transition-[width] duration-120 ease-out data-collapsed:w-16"
+                data-controller="sidebar-collapse"
+                aria-label="{{ 'admin.sidebar.label'|trans }}"
+            >
+                <div class="flex shrink-0 items-center justify-between gap-2 px-5 py-5 group-data-collapsed/sidebar:flex-col group-data-collapsed/sidebar:gap-3 group-data-collapsed/sidebar:px-3">
+                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="Relocation In Paris — Admin" class="rounded-lg focus-visible:outline-2 focus-visible:outline-primary">
                         <img
                             src="{{ asset('medias/logos/logo_red.svg') }}"
                             alt="Relocation In Paris"
                             width="140"
                             height="28"
-                            class="h-7 w-auto"
+                            class="h-7 w-auto group-data-collapsed/sidebar:hidden"
+                        >
+                        <img
+                            src="{{ asset('medias/logos/logo_short_red.svg') }}"
+                            alt="Relocation In Paris"
+                            width="28"
+                            height="28"
+                            class="hidden h-7 w-auto group-data-collapsed/sidebar:block"
                         >
                     </a>
+                    {# Repli en rail d'icônes, mémorisé (localStorage). #}
+                    <button
+                        type="button"
+                        data-action="sidebar-collapse#toggle"
+                        data-sidebar-collapse-target="toggle"
+                        aria-expanded="true"
+                        aria-label="{{ 'admin.sidebar.toggle'|trans }}"
+                        title="{{ 'admin.sidebar.toggle'|trans }}"
+                        class="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-primary"
+                        data-testid="sidebar-collapse-toggle"
+                    >
+                        {{ ux_icon('lucide:panel-left-close', {class: 'size-4 shrink-0 group-data-collapsed/sidebar:hidden', 'aria-hidden': 'true'}) }}
+                        {{ ux_icon('lucide:panel-left-open', {class: 'hidden size-4 shrink-0 group-data-collapsed/sidebar:block', 'aria-hidden': 'true'}) }}
+                    </button>
                 </div>
 
                 {% set currentRoute = app.request.attributes.get('_route') %}
@@ -48,12 +101,14 @@
                                     <a
                                         href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
                                         {% if isActive %}aria-current="page"{% endif %}
-                                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-sidebar-tooltip="{{ item.label|trans }}"
+                                        data-action="mouseenter->sidebar-collapse#showTip mouseleave->sidebar-collapse#hideTip focus->sidebar-collapse#showTip blur->sidebar-collapse#hideTip"
+                                        class="group/item flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-primary group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:px-2 {{ isActive ? 'bg-neutral-100 font-medium text-primary' : 'font-normal text-gray-800 hover:bg-gray-50 hover:text-gray-900' }}"
                                     >
-                                        {{ ux_icon(item.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ item.label|trans }}
+                                        {{ ux_icon(item.icon, {class: 'size-4 shrink-0 motion-safe:group-hover/item:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate group-data-collapsed/sidebar:hidden">{{ item.label|trans }}</span>
                                         {% if item.recentContactsBadge ?? false %}
-                                            <twig:Admin:ContactsNavBadge />
+                                            <span class="ml-auto group-data-collapsed/sidebar:hidden"><twig:Admin:ContactsNavBadge /></span>
                                         {% endif %}
                                     </a>
                                 </li>
@@ -68,12 +123,12 @@
                     </ul>
 
                     <div>
-                        <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                        <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase group-data-collapsed/sidebar:hidden">
                             {{ 'admin.sidebar.section.business'|trans }}
                         </p>
                         <ul class="space-y-0.5" role="list">
                             {{ _self.navItems([
-                                {route: 'admin_contacts', icon: 'lucide:user-plus', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
+                                {route: 'admin_contacts', icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
                                 {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_ADMIN'},
                             ], currentRoute, adminPrefix) }}
                             {# Entrée "Visites" sans page pour l'instant (module à venir). #}
@@ -81,11 +136,13 @@
                                 <li>
                                     <a
                                         href="#"
-                                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                                        data-sidebar-tooltip="{{ 'admin.nav.visits'|trans }}"
+                                        data-action="mouseenter->sidebar-collapse#showTip mouseleave->sidebar-collapse#hideTip focus->sidebar-collapse#showTip blur->sidebar-collapse#hideTip"
+                                        class="group/item flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal text-gray-800 transition-colors hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-primary group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:px-2"
                                         data-testid="nav-visits"
                                     >
-                                        {{ ux_icon('lucide:calendar-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ 'admin.nav.visits'|trans }}
+                                        {{ ux_icon('lucide:calendar-check', {class: 'size-4 shrink-0 motion-safe:group-hover/item:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate group-data-collapsed/sidebar:hidden">{{ 'admin.nav.visits'|trans }}</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -97,12 +154,11 @@
 
                     {% if is_granted('ROLE_ADMIN') %}
                         <div>
-                            <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                            <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase group-data-collapsed/sidebar:hidden">
                                 {{ 'admin.sidebar.section.admin'|trans }}
                             </p>
                             <ul class="space-y-0.5" role="list">
                                 {{ _self.navItems([
-                                    {route: 'admin_payments', icon: 'lucide:credit-card', label: 'admin.nav.payments', role: 'ROLE_ADMIN'},
                                     {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
                                 ], currentRoute, adminPrefix) }}
                             </ul>
@@ -112,23 +168,48 @@
                 </nav>
 
                 {% set fullName = ((app.user.firstName ?: '') ~ ' ' ~ (app.user.lastName ?: ''))|trim %}
-                <div class="shrink-0 border-t border-gray-950/5 p-4">
-                    <div class="flex items-center gap-3">
-                        <twig:Avatar
-                            filename="{{ app.user.avatarFilename }}"
-                            name="{{ fullName }}"
-                            email="{{ app.user.email }}"
-                            size="9"
-                        />
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-gray-900">{{ fullName ?: app.user.email }}</p>
-                            <p class="truncate text-xs text-gray-500">{{ app.user.email }}</p>
+                <div class="shrink-0 p-3 group-data-collapsed/sidebar:p-2">
+                    {# Box utilisateur : photo + identité, le menu (déconnexion)
+                       s'ouvre vers le haut. #}
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                        data-testid="sidebar-user-menu"
+                    >
+                        <summary
+                            class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-2.5 py-2 transition-colors duration-100 ease-out select-none hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:border-transparent group-data-collapsed/sidebar:bg-transparent group-data-collapsed/sidebar:px-1"
+                            data-sidebar-tooltip="{{ fullName ?: app.user.email }}"
+                            data-action="mouseenter->sidebar-collapse#showTip mouseleave->sidebar-collapse#hideTip focus->sidebar-collapse#showTip blur->sidebar-collapse#hideTip"
+                            data-testid="sidebar-user-trigger"
+                        >
+                            <twig:Avatar
+                                filename="{{ app.user.avatarFilename }}"
+                                name="{{ fullName }}"
+                                email="{{ app.user.email }}"
+                                size="8"
+                            />
+                            <span class="min-w-0 flex-1 group-data-collapsed/sidebar:hidden">
+                                <span class="block truncate text-sm font-medium text-gray-900">{{ fullName ?: app.user.email }}</span>
+                                <span class="block truncate text-xs text-gray-500">{{ app.user.email }}</span>
+                            </span>
+                            {{ ux_icon('lucide:chevrons-up-down', {class: 'size-3.5 shrink-0 text-gray-400 group-data-collapsed/sidebar:hidden', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        {# Déplié : pleine largeur de la box, vers le haut.
+                           Replié : la box fait 64px, le menu s'ancre à
+                           droite de l'avatar avec une largeur fixe. #}
+                        <div class="absolute inset-x-0 bottom-full z-20 mb-2 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg group-data-collapsed/sidebar:right-auto group-data-collapsed/sidebar:bottom-0 group-data-collapsed/sidebar:left-full group-data-collapsed/sidebar:mb-0 group-data-collapsed/sidebar:ml-2 group-data-collapsed/sidebar:w-52">
+                            <a
+                                href="{{ logout_path() }}"
+                                data-turbo-prefetch="false"
+                                class="group/item flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-primary"
+                                data-testid="sidebar-logout"
+                            >
+                                {{ ux_icon('lucide:log-out', {class: 'size-4 shrink-0 text-red-500 motion-safe:group-hover/item:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.nav.logout'|trans }}
+                            </a>
                         </div>
-                    </div>
-                    <twig:Button as="a" variant="ghost" size="sm" href="{{ logout_path() }}" data-turbo-prefetch="false" class="mt-3 w-full border border-gray-950/10 text-xs text-gray-700 hover:bg-gray-50 hover:text-gray-700">
-                        {{ ux_icon('lucide:log-out', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.nav.logout'|trans }}
-                    </twig:Button>
+                    </details>
                 </div>
             </aside>
 

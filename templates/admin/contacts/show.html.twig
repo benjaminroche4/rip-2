@@ -2,7 +2,7 @@
 
 {% set displayName = contact.fullName ? contact.fullName|title : contact.email %}
 
-{% block title %}{{ displayName }}{% endblock %}
+{% block title %}{{ displayName }} ({{ contact.reference }}){% endblock %}
 
 {% block head %}
     <meta name="turbo-cache-control" content="no-cache">

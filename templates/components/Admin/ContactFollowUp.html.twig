@@ -77,7 +77,7 @@
 <div {{ attributes.defaults({class: 'contents'}) }} data-testid="contact-follow-up">
     {% set contact = this.contact %}
     {% set assignees = this.assignees %}
-    {% set showRecall = contact and contact.status.value == 'to_recall' %}
+    {% set showRecall = contact and contact.status.value == 'in_progress' %}
             <div class="flex items-center justify-between gap-4 p-3">
                 <h2 class="font-medium text-gray-900">{{ 'admin.contacts.followUp.title'|trans }}</h2>
                 {% if contact %}

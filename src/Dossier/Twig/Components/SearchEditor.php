@@ -12,6 +12,7 @@ use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierSearch;
 use App\Dossier\Repository\DossierRepository;
+use App\PropertyListing\Domain\Amenity;
 use App\PropertyListing\Domain\PropertyType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -309,6 +310,114 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setGuarantorType($search->getGuarantorType() === $case->value ? null : $case->value);
+        $this->em->flush();
+
+        $this->emit('dossier-search:changed');
+    }
+
+    /** Progress of the guarantee, clear labels in translations. */
+    public const GUARANTOR_STATUSES = ['not_started', 'in_progress', 'obtained', 'refused'];
+
+    /**
+     * @return list<string>
+     */
+    public function getGuarantorStatuses(): array
+    {
+        return self::GUARANTOR_STATUSES;
+    }
+
+    public function getCurrentGuarantorStatus(): ?string
+    {
+        return $this->dossier()->getSearch()?->getGuarantorStatus();
+    }
+
+    #[LiveAction]
+    public function chooseGuarantorStatus(#[LiveArg] string $status): void
+    {
+        $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
+
+        if ('' === $status) {
+            return;
+        }
+
+        if (!\in_array($status, self::GUARANTOR_STATUSES, true)) {
+            throw new BadRequestHttpException(\sprintf('Unknown guarantor status "%s".', $status));
+        }
+
+        $search = $this->search();
+        $search->setGuarantorStatus($search->getGuarantorStatus() === $status ? null : $status);
+        $this->em->flush();
+
+        $this->emit('dossier-search:changed');
+    }
+
+    public function getCurrentOccupants(): ?int
+    {
+        return $this->dossier()->getSearch()?->getOccupants();
+    }
+
+    #[LiveAction]
+    public function chooseOccupants(#[LiveArg] int $count): void
+    {
+        $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
+
+        if ($count < 1 || $count > 6) {
+            throw new BadRequestHttpException(\sprintf('Invalid occupants count "%d".', $count));
+        }
+
+        $search = $this->search();
+        $search->setOccupants($search->getOccupants() === $count ? null : $count);
+        $this->em->flush();
+
+        $this->emit('dossier-search:changed');
+    }
+
+    /**
+     * Required amenities: same referential as the "list my property" form.
+     *
+     * @return list<Amenity>
+     */
+    public function getEquipmentOptions(): array
+    {
+        return Amenity::cases();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getSelectedEquipment(): array
+    {
+        return array_values(array_filter(explode(',', (string) $this->dossier()->getSearch()?->getEquipment())));
+    }
+
+    #[LiveAction]
+    public function chooseEquipment(#[LiveArg] string $equipment): void
+    {
+        $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
+
+        if ('' === $equipment) {
+            return;
+        }
+
+        if (null === Amenity::tryFrom($equipment)) {
+            throw new BadRequestHttpException(\sprintf('Unknown equipment "%s".', $equipment));
+        }
+
+        $selected = $this->getSelectedEquipment();
+        $selected = \in_array($equipment, $selected, true)
+            ? array_values(array_diff($selected, [$equipment]))
+            : [...$selected, $equipment];
+
+        $this->search()->setEquipment(implode(',', $selected) ?: null);
         $this->em->flush();
 
         $this->emit('dossier-search:changed');
@@ -714,38 +823,6 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setTopFloor($search->getTopFloor() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
-    }
-
-    /** What the monthly budget covers. */
-    public const BUDGET_CHARGES = ['included', 'excluded'];
-
-    public function getCurrentBudgetCharges(): ?string
-    {
-        return $this->dossier()->getSearch()?->getBudgetCharges();
-    }
-
-    /** CC / HC beside the budget input, single-select with toggle-off. */
-    #[LiveAction]
-    public function chooseBudgetCharges(#[LiveArg] string $value): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::BUDGET_CHARGES, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown budget charges value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setBudgetCharges($search->getBudgetCharges() === $value ? null : $value);
         $this->em->flush();
 
         $this->emit('dossier-search:changed');

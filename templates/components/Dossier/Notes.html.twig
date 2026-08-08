@@ -53,6 +53,46 @@
     </div>
 
     <div class="rounded-xl bg-white px-5 py-4 text-sm">
+        {# Statut semi-automatique : chips manuelles, cadenas quand l'état
+           est déduit (pièces en attente ou dossier clôturé). #}
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-gray-600">{{ 'admin.dossiers.status.label'|trans }}</p>
+            {% set effectiveStatus = this.effectiveStatus %}
+            {% if not effectiveStatus.isManual %}
+                <span
+                    class="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-sm font-medium text-gray-900"
+                    title="{{ 'admin.dossiers.status.autoHint'|trans }}"
+                    data-testid="dossier-status-auto"
+                >
+                    {{ ux_icon('lucide:lock', {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    <span class="size-1.5 shrink-0 rounded-full {{ effectiveStatus.dotClass }}" aria-hidden="true"></span>
+                    {{ effectiveStatus.labelKey|trans }}
+                </span>
+            {% else %}
+                <div class="flex flex-wrap items-center gap-2">
+                    {% for choice in this.statusChoices %}
+                        {% if choice == effectiveStatus %}
+                            <span class="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-sm font-medium text-gray-900" data-testid="dossier-status-current">
+                                <span class="size-1.5 shrink-0 rounded-full {{ choice.dotClass }}" aria-hidden="true"></span>
+                                {{ choice.labelKey|trans }}
+                            </span>
+                        {% else %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="changeStatus"
+                                data-live-value-param="{{ choice.value }}"
+                                class="flex cursor-pointer items-center gap-2 rounded-full border border-dashed border-gray-300 px-3 py-1 text-sm text-gray-500 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
+                                data-testid="dossier-status-choice"
+                            >
+                                <span class="size-1.5 shrink-0 rounded-full {{ choice.dotClass }} opacity-50" aria-hidden="true"></span>
+                                {{ choice.labelKey|trans }}
+                            </button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
             <p class="text-gray-600">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
             {{ _self.managerChips(this.manager, this.managerChoices) }}
@@ -78,8 +118,147 @@
                 <p class="text-gray-600">{{ 'admin.dossiers.show.facts.createdAt'|trans }}</p>
                 <p class="font-medium text-gray-900 tabular-nums">{{ this.createdAt|format_datetime('medium', 'short') }}</p>
             </li>
+            {% if this.closedAt %}
+                <li class="relative" data-testid="dossier-closed-entry">
+                    <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-gray-500" aria-hidden="true"></span>
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.closure.closedAt'|trans }}</p>
+                    <p class="font-medium text-gray-900 tabular-nums">{{ this.closedAt|format_datetime('medium', 'short') }}</p>
+                </li>
+            {% endif %}
         </ol>
+
+        {# Clôture : purge des pièces + rotation du lien de dépôt. #}
+        <div class="mt-4 border-t border-gray-950/5 pt-4">
+            {% if this.closedAt %}
+                <div class="flex items-center justify-between gap-3">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600" data-testid="dossier-closed-badge">
+                        {{ ux_icon('lucide:archive', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.closure.badge'|trans }}
+                    </span>
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="reopen"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                        data-testid="dossier-reopen"
+                    >
+                        {{ ux_icon('lucide:archive-restore', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.closure.reopen'|trans }}
+                    </button>
+                </div>
+            {% else %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="askClose"
+                    class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                    data-testid="dossier-close"
+                >
+                    {{ ux_icon('lucide:archive', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.dossiers.show.closure.close'|trans }}
+                </button>
+            {% endif %}
+        </div>
+
+        {% if this.confirmingClosure %}
+            <div
+                class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="dossier-close-title"
+                data-controller="modal-focus modal-anim"
+                data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+                data-live-action-param="cancelClose"
+                data-testid="dossier-close-modal"
+            >
+                <button
+                    type="button"
+                    class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                    data-action="modal-anim#out live#action"
+                    data-live-action-param="cancelClose"
+                    aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                    tabindex="-1"
+                ></button>
+                <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                    <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
+                        <div>
+                            <h2 id="dossier-close-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                                {{ 'admin.dossiers.show.closure.modal.title'|trans }}
+                            </h2>
+                            <p class="mt-1 text-sm text-pretty text-gray-500">
+                                {{ 'admin.dossiers.show.closure.modal.text'|trans }}
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-end gap-4">
+                            <button
+                                type="button"
+                                data-action="modal-anim#out live#action"
+                                data-live-action-param="cancelClose"
+                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                data-testid="dossier-close-cancel"
+                            >
+                                {{ 'admin.contacts.notes.cancel'|trans }}
+                            </button>
+                            <button
+                                type="button"
+                                data-action="modal-anim#out live#action"
+                                data-live-action-param="confirmClose"
+                                data-loading="action(confirmClose)|addAttribute(disabled)"
+                                class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                                data-testid="dossier-close-confirm"
+                            >
+                                {{ ux_icon('lucide:archive', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.closure.modal.confirm'|trans }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
+
+    {# Fil de suivi : la piste d'audit (recherche, pièces, personnes...),
+       séparée des commentaires manuels. Rafraîchie en live via le listener
+       dossier-search:changed. #}
+    {% set eventRows = this.events %}
+    {% if eventRows is not empty %}
+        <div class="border-t border-gray-950/5 p-3">
+            <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.show.feed.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.feed.subtitle'|trans }}</p>
+        </div>
+        <div class="rounded-xl bg-white px-5 py-4" data-testid="dossier-feed">
+            <ul class="divide-y divide-gray-950/5" role="list">
+                {% for event in eventRows %}
+                    <li class="flex gap-3 py-4 first:pt-0 last:pb-0" data-testid="dossier-event">
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-gray-400" aria-hidden="true">
+                            {{ ux_icon(event.icon, {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="flex items-baseline gap-2 text-sm">
+                                <span class="font-medium text-gray-900">{{ event.authorName ?: 'admin.dossiers.show.events.system'|trans }}</span>
+                                <span class="text-xs text-gray-400 tabular-nums" title="{{ event.createdAt|format_datetime('medium', 'short') }}">{{ event.createdAt|human_date }}</span>
+                            </p>
+                            <p class="mt-1 text-sm leading-relaxed text-pretty text-gray-600">{{ event.text }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if this.hiddenEventsCount > 0 %}
+                <div class="flex justify-center border-t border-gray-950/5 pt-3">
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="showMoreEvents"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        data-testid="dossier-feed-show-more"
+                    >
+                        {{ ux_icon('lucide:plus', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.notes.showMore'|trans({'%count%': this.hiddenEventsCount}) }}
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <div class="border-t border-gray-950/5 p-3">
         <h2 class="font-medium text-gray-900">{{ 'admin.contacts.notes.title'|trans }}</h2>
@@ -141,8 +320,8 @@
                                         {% if row.canDelete %}
                                             <button
                                                 type="button"
-                                                data-action="fade-exit#run live#action"
-                                                data-live-action-param="delete"
+                                                data-action="live#action"
+                                                data-live-action-param="askDelete"
                                                 data-live-id-param="{{ note.id }}"
                                                 class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 hover:bg-red-50 hover:text-red-600"
                                                 aria-label="{{ 'admin.contacts.notes.delete'|trans }}"
@@ -191,15 +370,74 @@
                     </li>
                 {% endfor %}
             </ul>
+            {# Suppression d'une note : toujours confirmée par modal. #}
+            {% if this.confirmDeleteNoteId is not null %}
+                <div
+                    class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="dossier-note-delete-title"
+                    data-controller="modal-focus modal-anim"
+                    data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+                    data-live-action-param="cancelDelete"
+                    data-testid="dossier-note-delete-modal"
+                >
+                    <button
+                        type="button"
+                        class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                        data-action="modal-anim#out live#action"
+                        data-live-action-param="cancelDelete"
+                        aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                        tabindex="-1"
+                    ></button>
+                    <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                        <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
+                            <div>
+                                <h2 id="dossier-note-delete-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                                    {{ 'admin.dossiers.show.notes.deleteConfirm.title'|trans }}
+                                </h2>
+                                <p class="mt-1 text-sm text-pretty text-gray-500">
+                                    {{ 'admin.dossiers.show.notes.deleteConfirm.text'|trans }}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-end gap-4">
+                                <button
+                                    type="button"
+                                    data-action="modal-anim#out live#action"
+                                    data-live-action-param="cancelDelete"
+                                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                    data-testid="dossier-note-delete-cancel"
+                                >
+                                    {{ 'admin.contacts.notes.cancel'|trans }}
+                                </button>
+                                <button
+                                    type="button"
+                                    data-action="modal-anim#out live#action"
+                                    data-live-action-param="delete"
+                                    data-live-id-param="{{ this.confirmDeleteNoteId }}"
+                                    data-loading="action(delete)|addAttribute(disabled)"
+                                    class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                                    data-testid="dossier-note-delete-confirm"
+                                >
+                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.show.notes.deleteConfirm.confirm'|trans }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             {% if this.hiddenFeedCount > 0 %}
                 <div class="flex justify-center border-t border-gray-950/5 pt-3">
                     <button
                         type="button"
                         data-action="live#action"
                         data-live-action-param="showMoreFeed"
-                        class="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
                         data-testid="dossier-notes-show-more"
                     >
+                        {{ ux_icon('lucide:plus', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                         {{ 'admin.contacts.notes.showMore'|trans({'%count%': this.hiddenFeedCount}) }}
                     </button>
                 </div>

@@ -10,6 +10,7 @@ use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Repository\DossierRepository;
+use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Intl\Countries;
@@ -110,26 +111,47 @@ final class PersonsManager
     #[LiveProp(writable: true)]
     public string $nationality = '';
 
-    /** Allowed professional situations, clear labels in translations. */
-    public const PROFESSIONS = ['cdi', 'cdd', 'freelance', 'expat', 'student', 'retired', 'other'];
+    /** City where the person currently lives, '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $currentCity = '';
+
+    /** Visa need (yes, no, obtained), '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $visaStatus = '';
+
+    /** Professional situations offered as chips, clear labels in translations. */
+    public const PROFESSIONS = ['cdi', 'cdd', 'student', 'business_owner', 'freelance', 'liberal', 'company', 'retired'];
+
+    /**
+     * Situations no longer offered but still stored on older persons: they
+     * stay valid on save (and their chip shows) so those cards remain
+     * editable without silently rewriting history.
+     */
+    public const LEGACY_PROFESSIONS = ['expat', 'other'];
 
     /**
      * Which pro fields exist for which situation (shared with the template
      * and the pro-fields Stimulus controller): anything not listed for the
-     * saved situation is cleared, never silently kept.
+     * saved situation is cleared, never silently kept. Self-employed
+     * situations reuse contractStart as the activity start date; legacy
+     * situations keep their historic field set.
      */
     public const PRO_FIELD_PROFESSIONS = [
         'employer' => ['cdi', 'cdd', 'expat'],
-        'jobTitle' => ['cdi', 'cdd', 'expat', 'freelance', 'other'],
-        'contractStart' => ['cdi', 'cdd', 'expat', 'freelance'],
+        'jobTitle' => ['cdi', 'cdd', 'business_owner', 'freelance', 'liberal', 'company', 'expat', 'other'],
+        'contractStart' => ['cdi', 'cdd', 'business_owner', 'freelance', 'liberal', 'company', 'expat'],
         'contractEnd' => ['cdd'],
         'trialOver' => ['cdi'],
     ];
+
+    /** Visa need options ('' = unspecified). */
+    public const VISA_STATUSES = ['yes', 'no', 'obtained'];
 
     public function __construct(
         private readonly DossierRepository $repository,
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
+        private readonly DossierEventLogger $events,
     ) {
     }
 
@@ -164,6 +186,8 @@ final class PersonsManager
                 contractStartDate: $person->getContractStartDate(),
                 contractEndDate: $person->getContractEndDate(),
                 trialPeriodOver: $person->isTrialPeriodOver(),
+                currentCity: $person->getCurrentCity(),
+                visaStatus: $person->getVisaStatus(),
             );
         }
 
@@ -212,6 +236,8 @@ final class PersonsManager
         $this->monthlyIncome = null !== $person->getMonthlyIncome() ? (string) $person->getMonthlyIncome() : '';
         $this->birthDate = $person->getBirthDate()?->format('Y-m-d') ?? '';
         $this->nationality = $person->getNationality() ?? '';
+        $this->currentCity = $person->getCurrentCity() ?? '';
+        $this->visaStatus = $person->getVisaStatus() ?? '';
     }
 
     #[LiveAction]
@@ -254,16 +280,28 @@ final class PersonsManager
             $this->errors['language'] = 'admin.dossiers.create.person.language.label';
         }
         $profession = trim($this->profession);
-        if ('' !== $profession && !\in_array($profession, self::PROFESSIONS, true)) {
+        if ('' !== $profession && !\in_array($profession, [...self::PROFESSIONS, ...self::LEGACY_PROFESSIONS], true)) {
             $this->errors['profession'] = 'admin.dossiers.create.person.profession.invalid';
         }
-        // The pro pane only exists for tenants (mirrors the client-side
-        // visibility): any other role saves with an empty pane.
-        if (DossierPersonRole::TENANT !== $role) {
+        // A follow-up contact is identity + contact details only (mirrors
+        // the client-side visibility). The tenant-specific fields are
+        // cleared for new persons and on a real tenant → follow-up
+        // downgrade, never on a plain edit of an already-non-tenant person:
+        // legacy cards may hold a birth date or nationality that a simple
+        // email fix must not wipe.
+        $previousRole = !$this->adding && null !== $this->editId
+            ? $this->person((int) $this->editId)->getRole()
+            : null;
+        if (DossierPersonRole::TENANT !== $role
+            && ($this->adding || DossierPersonRole::TENANT === $previousRole)) {
             $this->noProfession = false;
             $this->profession = '';
             $this->monthlyIncome = '';
             $profession = '';
+            $this->birthDate = '';
+            $this->nationality = '';
+            $this->currentCity = '';
+            $this->visaStatus = '';
         }
         // "No professional activity" empties the whole pane; otherwise a
         // field only survives if it exists for the saved situation.
@@ -305,6 +343,9 @@ final class PersonsManager
         if ('' !== $nationality && !Countries::exists($nationality)) {
             $this->errors['nationality'] = 'admin.dossiers.create.person.nationality.invalid';
         }
+        $currentCity = mb_substr(trim($this->currentCity), 0, 100);
+        // Stale DOM can post anything: an unknown visa value is dropped.
+        $visaStatus = \in_array($this->visaStatus, self::VISA_STATUSES, true) ? $this->visaStatus : '';
 
         // Household composition once this save lands.
         if (null !== $role) {
@@ -357,8 +398,23 @@ final class PersonsManager
         $person->setMonthlyIncome('' !== $monthlyIncome ? max(0, (int) $monthlyIncome) : null);
         $person->setBirthDate($birthDate);
         $person->setNationality('' !== $nationality ? $nationality : null);
+        $person->setCurrentCity('' !== $currentCity ? $currentCity : null);
+        $person->setVisaStatus('' !== $visaStatus ? $visaStatus : null);
 
         $this->normalize($dossier);
+        // Every field autosaves through savePerson: only log when something
+        // actually changed, or the thread drowns in identical entries.
+        $changed = $this->adding;
+        if (!$changed) {
+            $this->em->getUnitOfWork()->computeChangeSets();
+            $changed = [] !== $this->em->getUnitOfWork()->getEntityChangeSet($person);
+        }
+        if ($changed) {
+            $this->events->log($dossier, $this->adding ? 'person_added' : 'person_updated', [
+                'name' => trim($firstName.' '.$lastName),
+                'role' => 'admin.dossiers.create.person.role.'.$role->value,
+            ]);
+        }
         $this->em->flush();
         // The search card recomputes its budget warning from the incomes.
         $this->emit('dossier-persons:changed');
@@ -417,8 +473,10 @@ final class PersonsManager
             return;
         }
 
+        $removedName = trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName()));
         $dossier->removePerson($person);
         $this->normalize($dossier);
+        $this->events->log($dossier, 'person_removed', ['name' => $removedName]);
         $this->em->flush();
         $this->emit('dossier-persons:changed');
         $this->resetDraft();
@@ -439,6 +497,9 @@ final class PersonsManager
             $other->setPrimaryContact($other === $person);
         }
         $this->normalize($dossier);
+        $this->events->log($dossier, 'primary_changed', [
+            'name' => trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName())),
+        ]);
         $this->em->flush();
     }
 
@@ -522,6 +583,8 @@ final class PersonsManager
         $this->monthlyIncome = '';
         $this->birthDate = '';
         $this->nationality = '';
+        $this->currentCity = '';
+        $this->visaStatus = '';
     }
 
     private function ensureAdmin(): void

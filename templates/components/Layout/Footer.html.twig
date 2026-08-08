@@ -179,6 +179,7 @@
                         <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
                         {{ render_esi(path('fragment_footer_user_chip', {currentRoute: app.request.attributes.get('_route')})) }}
                         <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
+                        <a href="{{ path('app_dossier_deposit') }}" class="{% if app.request.attributes.get('_route') == 'app_dossier_deposit' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.deposit'|trans|raw }}</a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">

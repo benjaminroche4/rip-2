@@ -97,6 +97,155 @@ final class DossierNotesTest extends KernelTestCase
         self::assertCount(0, $component->getFeed());
     }
 
+    public function testAuditEventsAppearInTheActivityFeedNotTheComments(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->assignManager((int) $admin->getId());
+
+        // Events live in the fil de suivi, never in the comments thread.
+        $events = $component->getEvents();
+        self::assertStringContainsString('assigné', $events[0]['text']);
+        self::assertNotNull($events[0]['authorName']);
+        self::assertCount(0, $component->getFeed());
+    }
+
+    public function testOperatorChangesTheManualStatusAndTheFeedRecordsIt(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        self::assertSame(\App\Dossier\Domain\DossierStatus::New, $component->getEffectiveStatus());
+
+        $component->changeStatus('searching');
+
+        $this->em->clear();
+        $fresh = $this->em->find(Dossier::class, $dossier->getId());
+        self::assertSame(\App\Dossier\Domain\DossierStatus::Searching, $fresh->getStatus());
+        self::assertStringContainsString('Recherche en cours', $component->getEvents()[0]['text']);
+    }
+
+    public function testDerivedStatusesOverrideTheManualPick(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->changeStatus('property_found');
+
+        // A requested piece flips the dossier to "awaiting documents".
+        $tenant = $dossier->getPersons()->first();
+        $tenant->addDocument((new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Requested)
+            ->setRequestedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+        self::assertSame(\App\Dossier\Domain\DossierStatus::AwaitingDocuments, $component->getEffectiveStatus());
+
+        // Closure wins over everything.
+        $dossier->setClosedAt(new \DateTimeImmutable());
+        $this->em->flush();
+        self::assertSame(\App\Dossier\Domain\DossierStatus::Closed, $component->getEffectiveStatus());
+    }
+
+    public function testUnknownOrDerivedStatusValuesAreRejected(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $component->changeStatus('awaiting_documents');
+    }
+
+    public function testNoteDeletionGoesThroughTheConfirmationModal(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $note = $this->persistNote($dossier, (int) $admin->getId(), 'À supprimer');
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+
+        // Asking opens the modal, nothing is deleted yet.
+        $component->askDelete((int) $note->getId());
+        self::assertSame((int) $note->getId(), $component->confirmDeleteNoteId);
+        self::assertCount(1, $component->getFeed());
+
+        // Cancelling closes it without deleting.
+        $component->cancelDelete();
+        self::assertNull($component->confirmDeleteNoteId);
+        self::assertCount(1, $component->getFeed());
+
+        // Confirming deletes and closes the modal.
+        $component->askDelete((int) $note->getId());
+        $component->delete((int) $note->getId());
+        self::assertNull($component->confirmDeleteNoteId);
+        self::assertCount(0, $component->getFeed());
+    }
+
+    public function testClosurePurgesFilesRotatesTheCodeAndReopens(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        // One deposited file on disk + database.
+        $tenant = $dossier->getPersons()->first();
+        $document = (new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable())
+            ->setReceivedAt(new \DateTimeImmutable());
+        $tenant->addDocument($document);
+        $document->addFile((new \App\Dossier\Entity\DossierDocumentFile())
+            ->setStoredName('closure-test.pdf')
+            ->setOriginalName('piece.pdf')
+            ->setMimeType('application/pdf')
+            ->setSize(8)
+            ->setUploadedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+        $storageDir = (string) self::getContainer()->getParameter('dossier_storage_dir');
+        $path = $storageDir.'/'.$dossier->getReference().'/closure-test.pdf';
+        (new \Symfony\Component\Filesystem\Filesystem())->mkdir(\dirname($path));
+        file_put_contents($path, '%PDF-1.4');
+        $oldCode = $dossier->getPairingCode();
+
+        $component = $this->mountNotes($dossier);
+
+        // The modal must be confirmed; cancelling changes nothing.
+        $component->askClose();
+        self::assertTrue($component->confirmingClosure);
+        $component->cancelClose();
+        self::assertFalse($component->confirmingClosure);
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getClosedAt());
+
+        $component->askClose();
+        $component->confirmClose();
+
+        $this->em->clear();
+        $fresh = $this->em->find(Dossier::class, $dossier->getId());
+        self::assertNotNull($fresh->getClosedAt());
+        self::assertNotSame($oldCode, $fresh->getPairingCode(), 'The emailed deposit links must die.');
+        self::assertFileDoesNotExist($path);
+        self::assertCount(0, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+
+        // Reopening lifts the closure but never restores the files.
+        $component->reopen();
+        $this->em->clear();
+        $fresh = $this->em->find(Dossier::class, $dossier->getId());
+        self::assertNull($fresh->getClosedAt());
+        self::assertCount(0, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+    }
+
     public function testFeedPagination(): void
     {
         $dossier = $this->persistDossier();

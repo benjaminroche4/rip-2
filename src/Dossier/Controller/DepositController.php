@@ -11,9 +11,13 @@ use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Form\DepositPairingType;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\DocumentStorage;
+use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
+use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -44,6 +48,9 @@ final class DepositController extends AbstractController
         private readonly ClockInterface $clock,
         private readonly TranslatorInterface $translator,
         private readonly RateLimiterFactoryInterface $formDepositLimiter,
+        private readonly DossierEventLogger $events,
+        #[Autowire(service: 'monolog.logger.security')]
+        private readonly LoggerInterface $securityLogger,
     ) {
     }
 
@@ -54,6 +61,14 @@ final class DepositController extends AbstractController
         ],
         name: 'app_dossier_deposit',
         methods: ['GET', 'POST'],
+        options: [
+            // Référencée volontairement très bas : page utilitaire, pas
+            // une page d'acquisition.
+            'sitemap' => [
+                'priority' => 0.1,
+                'changefreq' => UrlConcrete::CHANGEFREQ_YEARLY,
+            ],
+        ],
     )]
     public function index(Request $request): Response
     {
@@ -83,15 +98,25 @@ final class DepositController extends AbstractController
             if (null === $match) {
                 // Generic message on purpose: never reveal whether the code
                 // exists or whether the email belongs to the dossier.
+                $this->securityLogger->warning('Deposit pairing failed', [
+                    'ip' => $request->getClientIp(),
+                ]);
                 $form->addError(new FormError($this->translator->trans('deposit.pairing.error.noMatch')));
 
                 return $this->pairingErrorResponse($request, $form);
             }
 
             [$dossier, $person] = $match;
+            // New privilege level: rotate the session id (fixation guard).
+            $request->getSession()->migrate();
             $request->getSession()->set(self::SESSION_KEY, [
                 'dossier' => (int) $dossier->getId(),
                 'person' => (int) $person->getId(),
+            ]);
+            $this->securityLogger->info('Deposit pairing succeeded', [
+                'dossier' => (string) $dossier->getReference(),
+                'person' => (int) $person->getId(),
+                'ip' => $request->getClientIp(),
             ]);
 
             return $this->redirectToRoute('app_dossier_deposit', status: Response::HTTP_SEE_OTHER);
@@ -175,6 +200,12 @@ final class DepositController extends AbstractController
             ->setUploadedBy($person));
         $document->setStatus(DossierDocumentStatus::Received);
         $document->setReceivedAt($this->clock->now());
+        $depositor = trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName()));
+        $this->events->log($dossier, 'document_deposited', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => trim(trim((string) $document->getPerson()?->getFirstName()).' '.trim((string) $document->getPerson()?->getLastName())),
+            'file' => $originalName,
+        ], authorName: $depositor);
         $this->em->flush();
 
         return $this->documentsResponse($request, $dossier, $person, null, null);
@@ -250,11 +281,16 @@ final class DepositController extends AbstractController
         }
 
         $storage->delete($dossier, $file);
+        $fileName = (string) $file->getOriginalName();
         $document?->removeFile($file);
         if (null !== $document && $document->getFiles()->isEmpty()) {
             $document->setStatus(DossierDocumentStatus::Requested);
             $document->setReceivedAt(null);
         }
+        $this->events->log($dossier, 'document_file_removed', [
+            'piece' => $document?->getType()?->labelKey() ?? '',
+            'file' => $fileName,
+        ], authorName: trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName())));
         $this->em->flush();
 
         return $this->documentsResponse($request, $dossier, $person, null, null);
@@ -307,7 +343,7 @@ final class DepositController extends AbstractController
         }
 
         $dossier = $this->dossiers->find((int) $grant['dossier']);
-        if (!$dossier instanceof Dossier) {
+        if (!$dossier instanceof Dossier || $dossier->isClosed()) {
             return [null, null];
         }
 
@@ -332,7 +368,8 @@ final class DepositController extends AbstractController
         }
 
         $dossier = $this->dossiers->findOneBy(['pairingCode' => $code]);
-        if (!$dossier instanceof Dossier) {
+        if (!$dossier instanceof Dossier || $dossier->isClosed()) {
+            // A closed dossier behaves exactly like an unknown code.
             return null;
         }
 

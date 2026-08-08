@@ -50,13 +50,13 @@ final class DossierController extends AbstractController
         name: 'dossiers',
         methods: ['GET'],
     )]
-    public function index(string $adminPrefix, DossierRepository $repository): Response
+    public function index(string $adminPrefix): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
+        // The list itself lives in the Dossier:DossierList live component.
         return $this->render('admin/dossiers/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'dossiers' => $repository->findSummaries(),
         ]);
     }
 

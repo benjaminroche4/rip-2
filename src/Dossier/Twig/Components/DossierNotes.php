@@ -8,10 +8,18 @@ use App\Auth\Entity\User;
 use App\Auth\Repository\UserRepository;
 use App\Dossier\Domain\DossierManagerView;
 use App\Dossier\Domain\DossierNoteView;
+use App\Dossier\Domain\DossierStatus;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierEvent;
+use App\Dossier\Repository\DossierEventRepository;
 use App\Dossier\Repository\DossierNoteRepository;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Security\DossierNoteVoter;
+use App\Dossier\Service\DocumentStorage;
+use App\Dossier\Service\DossierEventLogger;
+use App\Dossier\Service\DossierNumberGenerator;
+use Symfony\Component\Clock\ClockInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -49,9 +57,21 @@ final class DossierNotes
     #[LiveProp(writable: true)]
     public string $editingText = '';
 
-    /** Visible entries; grows via showMoreFeed(). */
+    /** Visible notes; grows via showMoreFeed(). */
     #[LiveProp]
     public int $feedLimit = self::FEED_PAGE;
+
+    /** Visible audit events; grows via showMoreEvents(). */
+    #[LiveProp]
+    public int $eventsLimit = self::FEED_PAGE;
+
+    /** Note id awaiting deletion confirmation in the modal, or null. */
+    #[LiveProp]
+    public ?int $confirmDeleteNoteId = null;
+
+    /** True while the closure confirmation modal is open. */
+    #[LiveProp]
+    public bool $confirmingClosure = false;
 
     private const FEED_PAGE = 5;
 
@@ -61,6 +81,12 @@ final class DossierNotes
         private readonly UserRepository $users,
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
+        private readonly DossierEventRepository $eventRepository,
+        private readonly DossierEventLogger $events,
+        private readonly TranslatorInterface $translator,
+        private readonly DocumentStorage $storage,
+        private readonly DossierNumberGenerator $numbers,
+        private readonly ClockInterface $clock,
     ) {
     }
 
@@ -112,23 +138,27 @@ final class DossierNotes
             }
         }
 
-        $this->dossier()->setManager($user);
+        $dossier = $this->dossier();
+        $dossier->setManager($user);
+        $this->events->log($dossier, null !== $user ? 'manager_assigned' : 'manager_unassigned', [
+            'name' => null !== $user ? $this->displayName($user) : '',
+        ]);
         $this->em->flush();
     }
 
     /**
-     * Notes thread, newest first, capped at feedLimit entries.
+     * Manual notes thread (comments), newest first, capped at feedLimit.
      *
      * @return list<array{note: DossierNoteView, canEdit: bool, canDelete: bool}>
      */
     public function getFeed(): array
     {
-        return \array_slice($this->fullFeed(), 0, $this->feedLimit);
+        return \array_slice($this->noteRows(), 0, $this->feedLimit);
     }
 
     public function getHiddenFeedCount(): int
     {
-        return max(0, \count($this->fullFeed()) - $this->feedLimit);
+        return max(0, \count($this->noteRows()) - $this->feedLimit);
     }
 
     #[LiveAction]
@@ -136,6 +166,82 @@ final class DossierNotes
     {
         $this->ensureAdmin();
         $this->feedLimit += 10;
+    }
+
+    /**
+     * Audit trail (fil de suivi), newest first, capped at eventsLimit.
+     *
+     * @return list<array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
+     */
+    public function getEvents(): array
+    {
+        return \array_slice($this->eventViews(), 0, $this->eventsLimit);
+    }
+
+    public function getHiddenEventsCount(): int
+    {
+        return max(0, \count($this->eventViews()) - $this->eventsLimit);
+    }
+
+    #[LiveAction]
+    public function showMoreEvents(): void
+    {
+        $this->ensureAdmin();
+        $this->eventsLimit += 10;
+    }
+
+    /**
+     * The sibling live components (search editor, persons, modules) log
+     * audit events and change the derived status: re-render so the fil de
+     * suivi and the status chips pick them up live.
+     */
+    #[LiveListener('dossier-search:changed')]
+    #[LiveListener('dossier-persons:changed')]
+    #[LiveListener('dossier-documents:changed')]
+    public function refresh(): void
+    {
+        $this->ensureAdmin();
+    }
+
+    /**
+     * Manual statuses the operator can pick from.
+     *
+     * @return list<DossierStatus>
+     */
+    public function getStatusChoices(): array
+    {
+        return DossierStatus::manualCases();
+    }
+
+    public function getManualStatus(): DossierStatus
+    {
+        return $this->dossier()->getStatus();
+    }
+
+    /** Closure and pending pieces folded in; drives the auto badge. */
+    public function getEffectiveStatus(): DossierStatus
+    {
+        return $this->dossier()->getEffectiveStatus();
+    }
+
+    #[LiveAction]
+    public function changeStatus(#[LiveArg] string $value): void
+    {
+        $this->ensureAdmin();
+
+        $status = DossierStatus::tryFrom($value);
+        if (null === $status || !$status->isManual()) {
+            throw new NotFoundHttpException('Unknown manual dossier status.');
+        }
+
+        $dossier = $this->dossier();
+        if ($dossier->getStatus() === $status) {
+            return;
+        }
+
+        $dossier->setStatus($status);
+        $this->events->log($dossier, 'status_changed', ['status' => $status->labelKey()]);
+        $this->em->flush();
     }
 
     #[LiveAction]
@@ -208,10 +314,96 @@ final class DossierNotes
         $this->dispatchBrowserEvent('dossier-notes:saved');
     }
 
+    public function getClosedAt(): ?\DateTimeImmutable
+    {
+        return $this->dossier()->getClosedAt();
+    }
+
+    /** Opens the closure confirmation modal. */
+    #[LiveAction]
+    public function askClose(): void
+    {
+        $this->ensureAdmin();
+        if (!$this->dossier()->isClosed()) {
+            $this->confirmingClosure = true;
+        }
+    }
+
+    #[LiveAction]
+    public function cancelClose(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmingClosure = false;
+    }
+
+    /**
+     * Closes the dossier: every deposited file is purged from disk and
+     * database (the deposit page's retention promise), the pairing code is
+     * rotated so every emailed link dies, and the public deposit page
+     * refuses the dossier from now on.
+     */
+    #[LiveAction]
+    public function confirmClose(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmingClosure = false;
+        $dossier = $this->dossier();
+        if ($dossier->isClosed()) {
+            return;
+        }
+
+        $purged = 0;
+        foreach ($dossier->getPersons() as $person) {
+            foreach ($person->getDocuments() as $document) {
+                foreach ($document->getFiles()->toArray() as $file) {
+                    $this->storage->delete($dossier, $file);
+                    $document->removeFile($file);
+                    ++$purged;
+                }
+            }
+        }
+
+        $dossier->setClosedAt($this->clock->now());
+        $dossier->setPairingCode($this->numbers->pairingCode());
+        $this->events->log($dossier, 'dossier_closed', ['count' => $purged]);
+        $this->em->flush();
+    }
+
+    /** Reopens the dossier (the rotated pairing code stays the new one). */
+    #[LiveAction]
+    public function reopen(): void
+    {
+        $this->ensureAdmin();
+        $dossier = $this->dossier();
+        if (!$dossier->isClosed()) {
+            return;
+        }
+
+        $dossier->setClosedAt(null);
+        $this->events->log($dossier, 'dossier_reopened');
+        $this->em->flush();
+    }
+
+    /** Opens the deletion confirmation modal for a note. */
+    #[LiveAction]
+    public function askDelete(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteNoteId = $id;
+    }
+
+    #[LiveAction]
+    public function cancelDelete(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteNoteId = null;
+    }
+
     #[LiveAction]
     public function delete(#[LiveArg] int $id): void
     {
         $this->ensureAdmin();
+        $this->confirmDeleteNoteId = null;
 
         $note = $this->notes->find($id);
         if (null === $note || (int) $note->getDossier()?->getId() !== $this->dossierId) {
@@ -229,18 +421,154 @@ final class DossierNotes
     }
 
     /**
-     * @return list<array{note: DossierNoteView, canEdit: bool, canDelete: bool}>
+     * Manual notes only, newest first.
+     *
+     * @return list<array<string, mixed>>
      */
-    private function fullFeed(): array
+    private function noteRows(): array
     {
-        return array_map(
+        $rows = array_map(
             fn (DossierNoteView $note): array => [
                 'note' => $note,
                 'canEdit' => $this->security->isGranted(DossierNoteVoter::EDIT, $note),
                 'canDelete' => $this->security->isGranted(DossierNoteVoter::DELETE, $note),
+                'createdAt' => $note->createdAt,
             ],
             $this->notes->listForDossier($this->dossierId),
         );
+        usort($rows, static fn (array $a, array $b): int => $b['createdAt'] <=> $a['createdAt']);
+
+        return $rows;
+    }
+
+    /**
+     * Audit events only, newest first.
+     *
+     * @return list<array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
+     */
+    private function eventViews(): array
+    {
+        $rows = array_map(
+            $this->eventView(...),
+            $this->eventRepository->listForDossier($this->dossierId),
+        );
+        usort($rows, static fn (array $a, array $b): int => $b['createdAt'] <=> $a['createdAt']);
+
+        return $rows;
+    }
+
+    /**
+     * @return array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}
+     */
+    private function eventView(DossierEvent $event): array
+    {
+        $payload = $event->getPayload();
+        $piece = isset($payload['piece']) ? $this->translator->trans((string) $payload['piece']) : '';
+        $params = [
+            '%piece%' => $piece,
+            '%field%' => isset($payload['field']) ? $this->translator->trans((string) $payload['field']) : '',
+            '%value%' => $this->searchValueLabel((string) ($payload['field'] ?? ''), (string) ($payload['value'] ?? '')),
+            '%old%' => (string) ($payload['old'] ?? ''),
+            '%count%' => (string) ($payload['count'] ?? ''),
+            '%tenant%' => (string) ($payload['tenant'] ?? ''),
+            '%name%' => (string) ($payload['name'] ?? ''),
+            '%recipient%' => (string) ($payload['recipient'] ?? ''),
+            '%file%' => (string) ($payload['file'] ?? ''),
+            '%reason%' => (string) ($payload['reason'] ?? ''),
+            '%description%' => (string) ($payload['description'] ?? ''),
+            '%role%' => isset($payload['role']) ? $this->translator->trans((string) $payload['role']) : '',
+            '%status%' => isset($payload['status']) ? $this->translator->trans((string) $payload['status']) : '',
+            '%pieces%' => implode(', ', array_map(
+                fn (string $key): string => $this->translator->trans($key),
+                (array) ($payload['pieces'] ?? []),
+            )),
+        ];
+
+        $kind = $event->getKind();
+        // A refusal without reason and a cleared description read differently.
+        $key = match (true) {
+            'document_refused' === $kind && '' === $params['%reason%'] => 'documentRefusedNoReason',
+            'description_updated' === $kind && '' === $params['%description%'] => 'descriptionCleared',
+            'search_updated' === $kind && '' === $params['%value%'] => 'searchCleared',
+            default => lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $kind)))),
+        };
+
+        $icons = [
+            'documents_requested' => 'lucide:list-checks',
+            'documents_resent' => 'lucide:bell-ring',
+            'document_deposited' => 'lucide:upload',
+            'document_validated' => 'lucide:check',
+            'document_refused' => 'lucide:x',
+            'document_status' => 'lucide:refresh-cw',
+            'document_file_deleted' => 'lucide:trash-2',
+            'document_file_removed' => 'lucide:trash-2',
+            'description_updated' => 'lucide:pencil',
+            'person_added' => 'lucide:user-plus',
+            'person_updated' => 'lucide:user-pen',
+            'person_removed' => 'lucide:user-minus',
+            'primary_changed' => 'lucide:star',
+            'manager_assigned' => 'lucide:user-check',
+            'manager_unassigned' => 'lucide:user-x',
+            'search_updated' => 'lucide:sliders-horizontal',
+            'status_changed' => 'lucide:flag',
+            'dossier_closed' => 'lucide:archive',
+            'dossier_reopened' => 'lucide:archive-restore',
+        ];
+
+        return [
+            'text' => $this->translator->trans('admin.dossiers.show.events.'.$key, $params),
+            'icon' => $icons[$kind] ?? 'lucide:activity',
+            'authorName' => $event->getAuthorName(),
+            'authorAvatar' => $event->getAuthorAvatar(),
+            'createdAt' => $event->getCreatedAt(),
+        ];
+    }
+
+    /**
+     * Label prefixes of the search fields whose stored values are internal
+     * codes: the audit entry shows the same translated labels as the chips.
+     */
+    private const SEARCH_VALUE_LABELS = [
+        'stayDuration' => 'admin.contacts.project.stayDuration.choice.',
+        'furnishing' => 'admin.contacts.project.furnishing.choice.',
+        'guarantorType' => 'admin.contacts.project.guarantor.choice.',
+        'guarantorStatus' => 'admin.dossiers.show.search.guarantorStatus.choice.',
+        'propertyType' => 'listProperty.form.propertyType.choice.',
+        'equipment' => 'listProperty.form.amenities.choice.',
+        'pets' => 'admin.dossiers.show.search.pets.choice.',
+        'earlyMoveIn' => 'admin.dossiers.show.search.earlyMoveIn.choice.',
+        'householdType' => 'admin.dossiers.show.search.householdType.choice.',
+        'leaseTypes' => 'admin.dossiers.show.search.leaseType.choice.',
+        'elevator' => 'admin.dossiers.show.search.elevator.choice.',
+        'groundFloor' => 'admin.dossiers.show.search.groundFloor.choice.',
+        'topFloor' => 'admin.dossiers.show.search.topFloor.choice.',
+        'parking' => 'admin.dossiers.show.search.parking.choice.',
+    ];
+
+    /**
+     * Translates a search_updated value: each CSV part goes through the
+     * field's chip catalogue; free values (dates, amounts, areas) and
+     * unknown codes pass through untouched.
+     */
+    private function searchValueLabel(string $fieldKey, string $value): string
+    {
+        if ('' === $value) {
+            return '';
+        }
+        $field = str_contains($fieldKey, '.') ? substr($fieldKey, (int) strrpos($fieldKey, '.') + 1) : $fieldKey;
+        $prefix = self::SEARCH_VALUE_LABELS[$field] ?? null;
+        if (null === $prefix) {
+            return $value;
+        }
+
+        $parts = array_map(trim(...), explode(',', $value));
+        $labels = array_map(function (string $part) use ($prefix): string {
+            $label = $this->translator->trans($prefix.$part);
+
+            return $label !== $prefix.$part ? $label : $part;
+        }, $parts);
+
+        return implode(', ', $labels);
     }
 
     private function managerView(User $user): DossierManagerView

@@ -6,8 +6,6 @@
 parameters:
     site_url: 'https://relocation-in-paris.fr'
     admin_path_prefix: '%env(string:ADMIN_PATH_PREFIX)%'
-    allo_api_key: '%env(string:ALLO_API_KEY)%'
-    allo_phone_number: '%env(string:ALLO_PHONE_NUMBER)%'
     # Deposited dossier documents live outside public/ and outside var/
     # (cache:clear / deploy safe). Served via authenticated controllers only.
     dossier_storage_dir: '%kernel.project_dir%/storage/dossiers'

@@ -296,6 +296,112 @@ final class ModulesTest extends KernelTestCase
         self::assertNull($this->em->find(DossierDocument::class, $documentId)->getDescription());
     }
 
+    public function testResendRequestEmailsOnlyThePiecesStillAwaited(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $tenant->addDocument((new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Requested)
+            ->setRequestedAt(new \DateTimeImmutable()));
+        $tenant->addDocument((new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Payslips)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable())
+            ->setReceivedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+        $component = $this->mountModules($dossier);
+
+        // The modal opens with the tenant preselected as recipient.
+        $component->askResend($tenant->getId());
+        self::assertSame($tenant->getId(), $component->resendingId);
+        self::assertSame([(string) $tenant->getId()], $component->resendRecipientIds);
+        self::assertEmailCount(0);
+
+        $component->confirmResend();
+
+        self::assertNull($component->resendingId);
+        self::assertEmailCount(1);
+        $email = $this->getMailerMessages()[0];
+        self::assertSame('jean@modules-test.example', $email->getTo()[0]->getAddress());
+        $html = (string) $email->getHtmlBody();
+        // Only the piece still awaited, not the already deposited one.
+        self::assertStringContainsString('identité', $html);
+        self::assertStringNotContainsString('fiches de paie', $html);
+        self::assertSame('jean@modules-test.example', $component->lastSentTo);
+
+        // Batched double-click: the second call is a silent no-op, never a
+        // 404 on person(0).
+        $component->confirmResend();
+        self::assertEmailCount(1);
+    }
+
+    public function testResendDoesNothingWhenEveryPieceIsDeposited(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $tenant->addDocument((new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Validated)
+            ->setRequestedAt(new \DateTimeImmutable())
+            ->setReceivedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+        $component = $this->mountModules($dossier);
+
+        // Everything deposited: the modal never opens, nothing is sent.
+        $component->askResend($tenant->getId());
+
+        self::assertNull($component->resendingId);
+        self::assertEmailCount(0);
+    }
+
+    public function testSummaryShowsTheDepositedCounter(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $tenant->addDocument((new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable())
+            ->setReceivedAt(new \DateTimeImmutable()));
+        $tenant->addDocument((new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Payslips)
+            ->setStatus(DossierDocumentStatus::Requested)
+            ->setRequestedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        self::assertStringContainsString('module-file-counter', $rendered);
+        self::assertStringContainsString('1/2', $rendered);
+        // The resend button shows since one piece is still awaited.
+        self::assertStringContainsString('module-file-resend', $rendered);
+    }
+
+    public function testFileModuleActionsAreLoggedInTheFollowUpThread(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountModules($dossier);
+
+        // Request → event with the piece list and the recipient.
+        $component->openPicker($tenant->getId());
+        $component->selectedTypes = ['identity'];
+        $component->pickerNext();
+        $component->sendRequest();
+
+        $documentId = $tenant->getDocuments()->first()->getId();
+        $component->setStatus($documentId, 'received');
+        $component->setStatus($documentId, 'validated');
+
+        $kinds = array_map(
+            static fn (\App\Dossier\Entity\DossierEvent $event): string => $event->getKind(),
+            self::getContainer()->get(\App\Dossier\Repository\DossierEventRepository::class)->listForDossier((int) $dossier->getId()),
+        );
+        self::assertContains('documents_requested', $kinds);
+        self::assertContains('document_status', $kinds);
+        self::assertContains('document_validated', $kinds);
+    }
+
     public function testDepositLinkShowsUpOnceARequestExists(): void
     {
         $dossier = $this->persistDossier();

@@ -1,0 +1,53 @@
+{# Modale de confirmation partagée pour les soumissions destructives,
+   pilotée par le controller confirm-dialog. À placer dans le scope d'un
+   élément portant data-controller="confirm-dialog"; les formulaires
+   déclencheurs utilisent data-action="submit->confirm-dialog#intercept"
+   + data-confirm-message. #}
+<div
+    data-confirm-dialog-target="overlay"
+    hidden
+    class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-dialog-title"
+    data-action="keydown.esc@window->confirm-dialog#cancel"
+    data-testid="confirm-dialog"
+>
+    {# Clic en dehors de la carte = annulation. #}
+    <button
+        type="button"
+        class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+        data-action="confirm-dialog#cancel"
+        aria-label="{{ 'confirmDialog.cancel'|trans }}"
+        tabindex="-1"
+    ></button>
+    <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+        <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
+            <div>
+                <h2 id="confirm-dialog-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                    {{ 'confirmDialog.title'|trans }}
+                </h2>
+                <p class="mt-1 text-sm text-pretty text-gray-500" data-confirm-dialog-target="message"></p>
+            </div>
+            <div class="flex items-center justify-end gap-4">
+                <button
+                    type="button"
+                    data-action="confirm-dialog#cancel"
+                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                    data-testid="confirm-dialog-cancel"
+                >
+                    {{ 'confirmDialog.cancel'|trans }}
+                </button>
+                <button
+                    type="button"
+                    data-action="confirm-dialog#confirm"
+                    class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700"
+                    data-testid="confirm-dialog-confirm"
+                >
+                    {{ ux_icon('lucide:trash-2', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'confirmDialog.confirm'|trans }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

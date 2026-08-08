@@ -22,7 +22,6 @@
         "resend/resend-php": "^1.4",
         "sanity/sanity-php": "^1.5.2",
         "sensiolabs/minify-bundle": "^1.2",
-        "stripe/stripe-php": "^20.3",
         "symfony/asset": "8.0.*",
         "symfony/asset-mapper": "8.0.*",
         "symfony/console": "8.0.*",

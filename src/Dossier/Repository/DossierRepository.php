@@ -35,6 +35,8 @@ class DossierRepository extends ServiceEntityRepository
         $dossiers = $this->createQueryBuilder('d')
             ->leftJoin('d.persons', 'p')
             ->addSelect('p')
+            ->leftJoin('p.documents', 'doc')
+            ->addSelect('doc')
             ->leftJoin('d.manager', 'm')
             ->addSelect('m')
             ->orderBy('d.createdAt', 'DESC')
@@ -67,6 +69,7 @@ class DossierRepository extends ServiceEntityRepository
                 primaryTenantName: $primaryName,
                 personCount: $dossier->getPersons()->count(),
                 createdAt: $dossier->getCreatedAt() ?? new \DateTimeImmutable(),
+                status: $dossier->getEffectiveStatus(),
                 managerName: $managerName,
                 managerAvatarFilename: $manager?->getAvatarFilename(),
                 offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,

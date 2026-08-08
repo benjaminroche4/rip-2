@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace App\Contact\Domain;
 
 /**
- * Lifecycle of a contact request in the admin. "New" is the default on
- * submission; the rest is set manually from the dashboard.
+ * Lifecycle of a contact request in the admin, kept deliberately short:
+ * new → in progress → converted or closed. A planned recall lives in the
+ * dedicated recallAt field (not a status), and the way a lead was closed
+ * lives in ClosureReason.
  */
 enum ContactStatus: string
 {
     case New = 'new';
     case InProgress = 'in_progress';
-    case ToRecall = 'to_recall';
     case Converted = 'converted';
-    case NotConverted = 'not_converted';
-    case Unqualified = 'unqualified';
     case Closed = 'closed';
 
     public function labelKey(): string
@@ -32,10 +31,7 @@ enum ContactStatus: string
         return match ($this) {
             self::New => 'bg-blue-500',
             self::InProgress => 'bg-amber-500',
-            self::ToRecall => 'bg-purple-500',
             self::Converted => 'bg-green-600',
-            self::NotConverted => 'bg-orange-500',
-            self::Unqualified => 'bg-gray-400',
             self::Closed => 'bg-gray-500',
         };
     }
@@ -45,10 +41,7 @@ enum ContactStatus: string
         return match ($this) {
             self::New => 'text-blue-600',
             self::InProgress => 'text-amber-600',
-            self::ToRecall => 'text-purple-600',
             self::Converted => 'text-green-600',
-            self::NotConverted => 'text-orange-600',
-            self::Unqualified => 'text-gray-500',
             self::Closed => 'text-gray-600',
         };
     }

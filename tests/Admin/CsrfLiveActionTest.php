@@ -75,16 +75,6 @@ final class CsrfLiveActionTest extends WebTestCase
         self::assertLessThan(500, $this->client->getResponse()->getStatusCode());
     }
 
-    public function testPaymentListMoreActionRejectsRequestWithoutCsrfToken(): void
-    {
-        $this->postLiveAction('Admin:PaymentList', 'more', [
-            'props' => ['page' => 1, 'currencySymbol' => '€'],
-        ]);
-
-        self::assertGreaterThanOrEqual(400, $this->client->getResponse()->getStatusCode());
-        self::assertLessThan(500, $this->client->getResponse()->getStatusCode());
-    }
-
     public function testDocumentListDeleteActionRejectsRequestWithoutCsrfToken(): void
     {
         // Seed a doc so the action would have something to delete if it ran.

@@ -47,7 +47,7 @@ final class DocumentsToolsAccessTest extends WebTestCase
         /** @var EntityManagerInterface $em */
         $em = $container->get('doctrine.orm.entity_manager');
 
-        // Same isolation strategy as PaymentsAccessTest: scope the cleanup
+        // Scope the cleanup
         // to our test users + every Document/DocumentRequest, so the suite
         // doesn't depend on full DB resets between runs. PersonRequest rows
         // are cleaned up by the cascade on DocumentRequest::$persons.

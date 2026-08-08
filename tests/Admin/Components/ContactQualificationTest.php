@@ -306,7 +306,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $repo = self::getContainer()->get(\App\Contact\Repository\ContactRepository::class);
-        $cycle = ['in_progress', 'to_recall', 'in_progress', 'converted', 'in_progress', 'closed', 'in_progress'];
+        $cycle = ['in_progress', 'converted', 'in_progress', 'closed', 'in_progress', 'converted', 'in_progress'];
         foreach ($cycle as $status) {
             $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::from($status), 'Julien Moreau', null);
         }
@@ -409,7 +409,7 @@ final class ContactQualificationTest extends KernelTestCase
         $component->setClosureReason('nope');
     }
 
-    public function testTerminalBannerShowsOnlyForClosedOrUnqualified(): void
+    public function testTerminalBannerShowsOnlyForClosedOrConverted(): void
     {
         $contact = $this->persistContact();
         $this->loginAsAdmin();
@@ -417,14 +417,14 @@ final class ContactQualificationTest extends KernelTestCase
         $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
         self::assertStringNotContainsString('data-testid="terminal-banner"', $html, 'No banner while untreated.');
 
-        $contact->setStatus(\App\Contact\Domain\ContactStatus::Unqualified)
+        $contact->setStatus(\App\Contact\Domain\ContactStatus::Closed)
             ->setClosureReason(ClosureReason::ProfileMismatch)
             ->setStatusChangedAt(new \DateTimeImmutable('2026-07-31 10:00'));
         $this->em->flush();
 
         $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
         self::assertStringContainsString('data-testid="terminal-banner"', $html);
-        self::assertStringContainsString('Demande non qualifiée', $html);
+        self::assertStringContainsString('Demande fermée', $html);
         self::assertStringContainsString('Profil inadapté à nos services', $html);
 
         $contact->setStatus(\App\Contact\Domain\ContactStatus::Converted);
@@ -433,7 +433,7 @@ final class ContactQualificationTest extends KernelTestCase
         $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
         self::assertStringContainsString('data-testid="terminal-banner"', $html);
         self::assertStringContainsString('Demande convertie en client', $html);
-        self::assertStringNotContainsString('Profil inadapté', $html, 'Closure reason is unqualified-only.');
+        self::assertStringNotContainsString('Profil inadapté', $html, 'Closure reason is closed-only.');
     }
 
     public function testProjectFieldsAreSavedAndPrefilled(): void

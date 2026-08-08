@@ -121,6 +121,7 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Conditions générales de vente
+        deposit: Déposer mon dossier
     blogMenu:
         blog: Blog
     propertyMenu:
@@ -149,6 +150,7 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: CGV
+        deposit: Déposer mon dossier
     menuTitle:
         1: Nos services
         2: À propos
@@ -1794,13 +1796,14 @@ a11y:
     previous: Précédent
     next: Suivant
 admin:
+    meta:
+        description: Espace d'administration Relocation in Paris. Accès réservé à l'équipe.
     nav:
         dashboard: Tableau de bord
         users: Utilisateurs
         contacts: Leads
         dossiers: Dossiers
         visits: Visites
-        payments: Paiements
         tools: Outils
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
@@ -1809,6 +1812,21 @@ admin:
         empty:
             title: Aucun dossier pour le moment
             description: Créez votre premier dossier avec le bouton ci-dessus.
+        searchPlaceholder: Rechercher un dossier...
+        filter:
+            all: Tous les dossiers
+        emptyFiltered:
+            title: Aucun dossier ne correspond
+            description: Modifiez la recherche ou le filtre de statut pour retrouver vos dossiers.
+        status:
+            label: Statut
+            autoHint: Statut automatique, déduit de la clôture et des pièces en attente
+            choice:
+                new: Nouveau
+                awaiting_documents: En attente de documents
+                searching: Recherche en cours
+                property_found: Bien trouvé
+                closed: Clôturé
         list:
             primaryTenant: 'Locataire principal : %name%'
             personCount: '{1}1 personne|]1,Inf[%count% personnes'
@@ -1817,11 +1835,10 @@ admin:
             type:
                 individual: Individuel
                 family: Famille
-            status:
-                inProgress: En cours
             filesStatus:
                 label: Statut des pièces
                 completed: Complet
+                pending: En attente
             package:
                 label: Formule
             progress:
@@ -1877,6 +1894,18 @@ admin:
                 daysLeft: 'J-%count%'
                 daysLate: 'J+%count%'
             search:
+                guarantorStatus:
+                    label: Garantie
+                    choice:
+                        not_started: Pas commencée
+                        in_progress: En cours
+                        obtained: Obtenue
+                        refused: Refusée
+                occupants:
+                    label: Nombre d'occupants
+                    sixPlus: 6+
+                equipment:
+                    label: Équipements indispensables
                 title: Recherche
                 subtitle: Critères de recherche du locataire
                 toComplete: À compléter
@@ -1936,10 +1965,6 @@ admin:
                 leaseMismatch:
                     mobilityLong: Bail mobilité limité à 10 mois, incohérent avec un séjour long terme
                     alurShort: Bail loi ALUR (1 an minimum) incohérent avec un séjour court terme
-                budgetCharges:
-                    choice:
-                        included: Charges comprises
-                        excluded: Hors charges
                 parking:
                     label: Parking / box nécessaire
                     choice:
@@ -1963,6 +1988,70 @@ admin:
                         other: Autre
             followUp:
                 origin: Créé depuis la demande
+            closure:
+                badge: Dossier clos
+                closedAt: Clôturé le
+                close: Clôturer le dossier
+                reopen: Rouvrir
+                modal:
+                    title: Clôturer ce dossier ?
+                    text: Les fichiers déposés seront définitivement supprimés, le lien de dépôt sera désactivé et la page de dépôt refusera ce dossier. Vous pourrez rouvrir le dossier, mais les fichiers ne seront pas restaurés.
+                    confirm: Clôturer
+            notes:
+                deleteConfirm:
+                    title: Supprimer cette note ?
+                    text: La note sera supprimée définitivement du fil de suivi.
+                    confirm: Supprimer
+            feed:
+                title: Fil de suivi
+                subtitle: Historique des actions sur le dossier
+            events:
+                statusChanged: 'Statut du dossier : %status%'
+                system: Système
+                documentsRequested: 'Pièces demandées pour %tenant% (envoyé à %recipient%) : %pieces%'
+                documentsResent: 'Relance envoyée à %recipient% pour les pièces de %tenant% : %pieces%'
+                documentDeposited: 'Pièce déposée : %piece% (%tenant%), fichier %file%'
+                documentValidated: 'Pièce validée : %piece% (%tenant%)'
+                documentRefused: 'Pièce refusée : %piece% (%tenant%). Motif : %reason%'
+                documentRefusedNoReason: 'Pièce refusée : %piece% (%tenant%)'
+                documentStatus: 'Statut de la pièce %piece% (%tenant%) passé à "%status%"'
+                documentFileDeleted: 'Fichier supprimé sur la pièce %piece% (%tenant%) : %file%'
+                documentFileRemoved: 'Fichier retiré par le déposant sur la pièce %piece% : %file%'
+                descriptionUpdated: 'Précision ajoutée sur la pièce %piece% (%tenant%) : %description%'
+                descriptionCleared: Précision retirée sur la pièce %piece% (%tenant%)
+                personAdded: '%name% ajouté au dossier (%role%)'
+                personUpdated: 'Fiche de %name% mise à jour (%role%)'
+                personRemoved: '%name% retiré du dossier'
+                primaryChanged: '%name% devient le locataire principal'
+                managerAssigned: Dossier assigné à %name%
+                managerUnassigned: Dossier désassigné
+                dossierClosed: 'Dossier clôturé : %count% fichier(s) supprimé(s), lien de dépôt désactivé'
+                dossierReopened: Dossier rouvert
+                searchUpdated: 'Recherche mise à jour, %field% : %value%'
+                searchCleared: Recherche mise à jour, %field% effacé
+                searchField:
+                    budget: Budget
+                    areas: Quartiers
+                    moveInAt: Date d'emménagement
+                    propertyType: Type de bien
+                    stayDuration: Durée de séjour
+                    furnishing: Meublé
+                    guarantorType: Garant
+                    guarantorStatus: Garantie
+                    pets: Animaux
+                    householdType: Typologie de foyer
+                    earlyMoveIn: Emménagement anticipé
+                    leaseTypes: Types de bail
+                    minSurface: Surface minimale
+                    minBedrooms: Chambres minimum
+                    elevator: Ascenseur
+                    groundFloor: Rez-de-chaussée
+                    topFloor: Dernier étage
+                    parking: Parking
+                    importantAddresses: Adresses importantes
+                    note: Note du projet
+                    occupants: Nombre d'occupants
+                    equipment: Équipements
             modules:
                 comingSoon: Bientôt disponible
                 locked: Se déverrouille quand la recherche est complète
@@ -1980,6 +2069,18 @@ admin:
                     sendTo: 'Envoyer la demande à :'
                     sent: Email de demande envoyé à %email%
                     deleteFile: Supprimer ce fichier (la pièce repasse en demandée s'il n'en reste aucun)
+                    deleteFileConfirm:
+                        title: Supprimer ce fichier ?
+                        text: Le fichier sera supprimé définitivement. Si c'était le dernier de la pièce, elle repasse en demandée.
+                        confirm: Supprimer
+                    counter: '%deposited%/%total% déposées'
+                    resend: Relancer
+                    resendTitle: Renvoyer l'email de demande pour les pièces encore attendues
+                    resendModal:
+                        title: Relancer pour les pièces attendues
+                        text: Choisissez qui reçoit l'email de rappel avec le lien de dépôt.
+                        confirm: Envoyer la relance
+                        sendFailed: Certains envois ont échoué. Les envois réussis sont tracés dans le suivi; réessayez pour les autres.
                     downloadZip: Tout télécharger (.zip)
                     refuse:
                         title: Refuser cette pièce ?
@@ -2081,11 +2182,23 @@ admin:
                     choice:
                         cdi: CDI
                         cdd: CDD
-                        freelance: Indépendant
-                        expat: Salarié étranger
                         student: Étudiant
+                        business_owner: Chef d'entreprise
+                        freelance: Freelance
+                        liberal: Profession libérale
+                        company: Société
                         retired: Retraité
+                        expat: Salarié étranger
                         other: Autre
+                currentCity:
+                    label: Ville actuelle
+                    placeholder: 'Ex : Londres, New York...'
+                visa:
+                    label: Besoin d'un visa
+                    choice:
+                        'yes': Oui
+                        'no': Non
+                        obtained: Déjà obtenu
                 income:
                     label: Revenus mensuels nets
                     unit: € / mois
@@ -2116,8 +2229,6 @@ admin:
             closureLabel: Motif de clôture
             closurePlaceholder: Choisir un motif
             closedTitle: Demande fermée
-            unqualifiedTitle: Demande non qualifiée
-            not_convertedTitle: Demande non convertie
             convertedTitle: Demande convertie en client
             terminalSince: depuis le %date%
             prev: Demande précédente
@@ -2160,22 +2271,12 @@ admin:
                 in_progress:
                     title: Aucune demande en cours
                     hint: Les demandes prises en charge par l'équipe apparaîtront ici.
-                to_recall:
-                    title: Aucun rappel planifié
-                    hint: Les demandes à recontacter, avec leur date de rappel, apparaîtront ici.
                 converted:
                     title: Aucune conversion pour le moment
                     hint: Les demandes transformées en clients apparaîtront ici.
-                not_converted:
-                    title: Aucune demande non convertie
-                    hint: Les demandes qui n'ont pas abouti apparaîtront ici.
-                unqualified:
-                    title: Aucune demande non qualifiée
-                    hint: Les demandes hors cible, avec leur motif, apparaîtront ici.
                 closed:
                     title: Aucune demande fermée
                     hint: Les demandes clôturées apparaîtront ici.
-        keysHint: '↑↓ naviguer · 1-7 statut · Entrée ouvrir'
         sort:
             recent: Plus récentes
             recall: Rappel le plus proche
@@ -2185,15 +2286,6 @@ admin:
             label: Portée
             all: Toutes les demandes
             mine: Mes demandes
-        kpi:
-            newRequests: Nouvelles demandes
-            last30: 30 derniers jours
-            avgResponse: Prise en charge moyenne
-            slaRate: '%rate% % traitées en moins de 30 min'
-            conversion: Taux de conversion
-            conversionHint: Sur les demandes tranchées (30 jours)
-            overdueRecalls: Rappels en retard
-            overdueHint: Rappels planifiés dépassés
         create:
             button: Nouvelle demande
             title: Nouvelle demande de contact
@@ -2284,10 +2376,6 @@ admin:
         previous:
             title: '{1}1 demande précédente|]1,Inf[%count% demandes précédentes'
             showMore: 'Voir %count% de plus'
-        recallModal:
-            title: Planifier le rappel
-            subtitle: Quand doit-on recontacter ce lead ?
-            skip: Passer
         leadQuality:
             internal: Qualification interne, jamais partagée avec le client.
             ratingLabel: Note
@@ -2324,10 +2412,7 @@ admin:
             status:
                 new: À traiter
                 in_progress: En cours
-                to_recall: À recontacter
                 converted: Convertie
-                not_converted: Non convertie
-                unqualified: Non qualifiée
                 closed: Fermée
             field:
                 email: Email
@@ -2350,6 +2435,7 @@ admin:
                 en: Anglais
     sidebar:
         label: Navigation principale
+        toggle: Réduire ou étendre la navigation
         section:
             business: Métier
             admin: Admin
@@ -2362,104 +2448,7 @@ admin:
             comingSoon: Bientôt
     dashboard:
         title: Tableau de bord
-        subtitle: Voici votre activité du jour.
-        responseTime:
-            title: Prise en charge des demandes
-            subtitle: Premières réponses aux demandes de contact des 30 derniers jours.
-            avg: Temps moyen
-            withinSla: Sous 30 min
-            treated: Demandes traitées
-            minutes: '%minutes% min'
-            hours: '%hours% h %minutes%'
-        kpi:
-            callsLast7d: Appels reçus
-            contactsLast7d: Demandes de contact
-            leadsThisMonth: Mois en cours
-            leadsLast12Months: Total leads
-            thisYear: 'Année %year%'
-            period:
-                last7d: 7 derniers jours
-                last12m: 12 derniers mois
-                summary: Bilan
-                thisMonthLeads: '%month%, total leads'
-            previousLabel: Précédent
-            currentLabel: Actuel
-        activity:
-            title: Activité commerciale
-            subtitle: Demandes formulaire et appels sur les 12 derniers mois
-            contactsLabel: Demandes formulaire
-            callsLabel: Appels
-        weekVsWeek:
-            title: Semaine en cours vs précédente
-            subtitle: Demandes via le formulaire de contact par jour, comparaison hebdomadaire
-            currentWeekLabel: Semaine en cours
-            previousWeekLabel: Semaine précédente
-        contactsAllTime:
-            title: Demandes de contact depuis le début
-            subtitle: Toutes les demandes du formulaire de contact, par jour
-            seriesLabel: Demandes
-        contactsWeekdays:
-            title: Meilleurs jours de la semaine
-            subtitle: Demandes du formulaire de contact, depuis le début
-            seriesLabel: Demandes cumulées
-    payments:
-        title: Paiements
-        subtitle: 'Chiffre d''affaires, transactions et tendances mensuelles.'
-        loading: Récupération des paiements Stripe...
-        kpi:
-            totalAllTime: CA total encaissé
-            thisMonth: CA du mois
-            thisWeek: CA de la semaine
-            thisYear: 'Année %year%'
-            period:
-                allTime: Depuis le début
-                thisWeek: 'Semaine %number%'
-                summary: Bilan
-        charts:
-            monthly:
-                title: Activité mensuelle
-                subtitle: Montant total des paiements par mois sur les 12 derniers mois
-                seriesLabel: Montant
-            monthlyDaily:
-                title: Activité du mois
-                subtitle: Paiements journaliers, ce mois vs mois précédent
-            weekly:
-                title: 4 dernières semaines vs 4 semaines précédentes
-                subtitle: 'Chiffre d''affaires hebdomadaire, comparaison sur 4 semaines'
-            allTime:
-                title: Paiements depuis le début
-                subtitle: Tous les paiements encaissés, par jour
-                seriesLabel: Montant
-            weekdays:
-                title: Meilleurs jours de la semaine
-                subtitle: Chiffre d'affaires cumulé par jour de la semaine, depuis le début
-                seriesLabel: Montant cumulé
-        weekly:
-            weekLabel: 'Semaine %number%'
-            currentLabel: 4 dernières semaines
-            previousLabel: 4 semaines précédentes
-        table:
-            title: Derniers paiements
-            subtitle: '{0}Aucun paiement|{1}Le dernier paiement enregistré|]1,Inf[Les %count% derniers paiements enregistrés'
-            viewAll: Voir tout sur Stripe
-            loadMore: Voir plus
-            cappedHint: 'Limite de 100 paiements affichée.'
-            empty: Aucun paiement à afficher pour le moment.
-            unknownClient: Client inconnu
-            column:
-                date: Date
-                client: Client
-                email: Email
-                amount: Montant
-                status: Statut
-        status:
-            succeeded: Réussi
-            processing: En cours
-            requires_action: Action requise
-            requires_payment_method: Moyen requis
-            requires_confirmation: À confirmer
-            requires_capture: À capturer
-            canceled: Annulé
+        underConstruction: En cours de construction...
     tools:
         title: Outils
         subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
@@ -2830,6 +2819,11 @@ listProperty:
             title: On s'occupe du reste
             text: Estimation et mise en location par nos experts.
 
+confirmDialog:
+    title: Confirmer la suppression ?
+    cancel: Annuler
+    confirm: Supprimer
+
 filePreview:
     title: Aperçu du fichier
     close: Fermer l'aperçu
@@ -2863,6 +2857,8 @@ deposit:
         empty: Aucune pièce n'est attendue pour le moment.
         upload: Déposer
         uploadMore: Ajouter
+        uploading: Envoi... %percent%
+        uploadFailed: Échec de l'envoi, réessayez
         leave: Se déconnecter
         sizeMb: '%size% Mo'
         sizeKb: '%size% Ko'

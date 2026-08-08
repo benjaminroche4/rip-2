@@ -120,6 +120,7 @@ sitemap:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
+        deposit: Upload my file
     blogMenu:
         blog: Blog
 footer:
@@ -146,6 +147,7 @@ footer:
         faq: FAQ
         newsletter: Newsletter
         termsConditions: Terms and Conditions
+        deposit: Upload my file
     menuTitle:
         1: Our Services
         2: About Us
@@ -1793,13 +1795,14 @@ a11y:
     previous: Previous
     next: Next
 admin:
+    meta:
+        description: Relocation in Paris admin area. Team access only.
     nav:
         dashboard: Dashboard
         users: Users
         contacts: Leads
         dossiers: Files
         visits: Visits
-        payments: Payments
         tools: Tools
         logout: Log out
         skipToContent: Skip to main content
@@ -1808,6 +1811,21 @@ admin:
         empty:
             title: No files yet
             description: Create your first file with the button above.
+        searchPlaceholder: Search a file...
+        filter:
+            all: All files
+        emptyFiltered:
+            title: No file matches
+            description: Adjust the search or the status filter to find your files.
+        status:
+            label: Status
+            autoHint: Automatic status, derived from closure and pending documents
+            choice:
+                new: New
+                awaiting_documents: Awaiting documents
+                searching: Search in progress
+                property_found: Property found
+                closed: Closed
         list:
             primaryTenant: 'Primary tenant: %name%'
             personCount: '{1}1 person|]1,Inf[%count% people'
@@ -1816,11 +1834,10 @@ admin:
             type:
                 individual: Individual
                 family: Family
-            status:
-                inProgress: In progress
             filesStatus:
                 label: Files status
                 completed: Completed
+                pending: Pending
             package:
                 label: Package
             progress:
@@ -1876,6 +1893,18 @@ admin:
                 daysLeft: 'D-%count%'
                 daysLate: 'D+%count%'
             search:
+                guarantorStatus:
+                    label: Guarantee
+                    choice:
+                        not_started: Not started
+                        in_progress: In progress
+                        obtained: Obtained
+                        refused: Refused
+                occupants:
+                    label: Number of occupants
+                    sixPlus: 6+
+                equipment:
+                    label: Must-have amenities
                 title: Search
                 subtitle: Tenant search criteria
                 toComplete: To complete
@@ -1935,10 +1964,6 @@ admin:
                 leaseMismatch:
                     mobilityLong: Mobility lease capped at 10 months, inconsistent with a long-term stay
                     alurShort: ALUR lease (1 year minimum) inconsistent with a short-term stay
-                budgetCharges:
-                    choice:
-                        included: Charges included
-                        excluded: Charges excluded
                 parking:
                     label: Parking / box required
                     choice:
@@ -1962,6 +1987,70 @@ admin:
                         other: Other
             followUp:
                 origin: Created from the request
+            closure:
+                badge: File closed
+                closedAt: Closed on
+                close: Close the file
+                reopen: Reopen
+                modal:
+                    title: Close this file?
+                    text: The deposited files will be permanently deleted, the deposit link will be disabled and the deposit page will refuse this file. You can reopen the file later, but the files will not be restored.
+                    confirm: Close
+            notes:
+                deleteConfirm:
+                    title: Delete this note?
+                    text: The note will be permanently removed from the follow-up thread.
+                    confirm: Delete
+            feed:
+                title: Activity feed
+                subtitle: History of actions on the file
+            events:
+                statusChanged: 'File status: %status%'
+                system: System
+                documentsRequested: 'Documents requested for %tenant% (sent to %recipient%): %pieces%'
+                documentsResent: 'Reminder sent to %recipient% for the documents of %tenant%: %pieces%'
+                documentDeposited: 'Document deposited: %piece% (%tenant%), file %file%'
+                documentValidated: 'Document validated: %piece% (%tenant%)'
+                documentRefused: 'Document refused: %piece% (%tenant%). Reason: %reason%'
+                documentRefusedNoReason: 'Document refused: %piece% (%tenant%)'
+                documentStatus: 'Status of %piece% (%tenant%) set to "%status%"'
+                documentFileDeleted: 'File deleted on %piece% (%tenant%): %file%'
+                documentFileRemoved: 'File removed by the depositor on %piece%: %file%'
+                descriptionUpdated: 'Precision added on %piece% (%tenant%): %description%'
+                descriptionCleared: Precision removed on %piece% (%tenant%)
+                personAdded: '%name% added to the file (%role%)'
+                personUpdated: '%name% updated (%role%)'
+                personRemoved: '%name% removed from the file'
+                primaryChanged: '%name% becomes the primary tenant'
+                managerAssigned: File assigned to %name%
+                managerUnassigned: File unassigned
+                dossierClosed: 'File closed: %count% file(s) deleted, deposit link disabled'
+                dossierReopened: File reopened
+                searchUpdated: 'Search updated, %field%: %value%'
+                searchCleared: Search updated, %field% cleared
+                searchField:
+                    budget: Budget
+                    areas: Areas
+                    moveInAt: Move-in date
+                    propertyType: Property type
+                    stayDuration: Stay duration
+                    furnishing: Furnishing
+                    guarantorType: Guarantor
+                    guarantorStatus: Guarantee
+                    pets: Pets
+                    householdType: Household type
+                    earlyMoveIn: Early move-in
+                    leaseTypes: Lease types
+                    minSurface: Minimum surface
+                    minBedrooms: Minimum bedrooms
+                    elevator: Elevator
+                    groundFloor: Ground floor
+                    topFloor: Top floor
+                    parking: Parking
+                    importantAddresses: Important addresses
+                    note: Project note
+                    occupants: Number of occupants
+                    equipment: Amenities
             modules:
                 comingSoon: Coming soon
                 locked: Unlocks once the search is complete
@@ -1979,6 +2068,18 @@ admin:
                     sendTo: 'Send the request to:'
                     sent: Request email sent to %email%
                     deleteFile: Delete this file (the piece goes back to requested if none is left)
+                    deleteFileConfirm:
+                        title: Delete this file?
+                        text: The file will be permanently deleted. If it was the piece's last one, it goes back to requested.
+                        confirm: Delete
+                    counter: '%deposited%/%total% deposited'
+                    resend: Remind
+                    resendTitle: Re-send the request email for the pieces still awaited
+                    resendModal:
+                        title: Remind about the awaited documents
+                        text: Choose who receives the reminder email with the deposit link.
+                        confirm: Send the reminder
+                        sendFailed: Some emails failed to send. Successful ones are logged in the thread; retry for the others.
                     downloadZip: Download all (.zip)
                     refuse:
                         title: Refuse this piece?
@@ -2080,11 +2181,23 @@ admin:
                     choice:
                         cdi: Permanent contract
                         cdd: Fixed-term contract
-                        freelance: Self-employed
-                        expat: Foreign employee
                         student: Student
+                        business_owner: Business owner
+                        freelance: Freelance
+                        liberal: Liberal profession
+                        company: Company
                         retired: Retired
+                        expat: Foreign employee
                         other: Other
+                currentCity:
+                    label: Current city
+                    placeholder: 'E.g. London, New York...'
+                visa:
+                    label: Visa needed
+                    choice:
+                        'yes': 'Yes'
+                        'no': 'No'
+                        obtained: Already obtained
                 income:
                     label: Net monthly income
                     unit: € / month
@@ -2115,8 +2228,6 @@ admin:
             closureLabel: Closure reason
             closurePlaceholder: Pick a reason
             closedTitle: Request closed
-            unqualifiedTitle: Request unqualified
-            not_convertedTitle: Request not converted
             convertedTitle: Request converted to client
             terminalSince: since %date%
             prev: Previous request
@@ -2159,22 +2270,12 @@ admin:
                 in_progress:
                     title: No request in progress
                     hint: Requests being handled by the team will show up here.
-                to_recall:
-                    title: No recall planned
-                    hint: Requests to call back, with their recall date, will show up here.
                 converted:
                     title: No conversion yet
                     hint: Requests turned into clients will show up here.
-                not_converted:
-                    title: No unconverted request
-                    hint: Requests that did not go through will show up here.
-                unqualified:
-                    title: No unqualified request
-                    hint: Out-of-scope requests, with their reason, will show up here.
                 closed:
                     title: No closed request
                     hint: Closed requests will show up here.
-        keysHint: '↑↓ navigate · 1-7 status · Enter open'
         sort:
             recent: Most recent
             recall: Closest recall
@@ -2184,15 +2285,6 @@ admin:
             label: Scope
             all: All requests
             mine: My requests
-        kpi:
-            newRequests: New requests
-            last30: Last 30 days
-            avgResponse: Average first response
-            slaRate: '%rate% % handled within 30 min'
-            conversion: Conversion rate
-            conversionHint: Of decided requests (30 days)
-            overdueRecalls: Overdue recalls
-            overdueHint: Planned recalls past due
         create:
             button: New request
             title: New contact request
@@ -2283,10 +2375,6 @@ admin:
         previous:
             title: '{1}1 previous request|]1,Inf[%count% previous requests'
             showMore: 'Show %count% more'
-        recallModal:
-            title: Plan the recall
-            subtitle: When should this lead be called back?
-            skip: Skip
         leadQuality:
             internal: Internal qualification, never shared with the client.
             ratingLabel: Rating
@@ -2323,10 +2411,7 @@ admin:
             status:
                 new: To handle
                 in_progress: In progress
-                to_recall: To call back
                 converted: Converted
-                not_converted: Not converted
-                unqualified: Unqualified
                 closed: Closed
             field:
                 email: Email
@@ -2349,6 +2434,7 @@ admin:
                 en: English
     sidebar:
         label: Main navigation
+        toggle: Collapse or expand the navigation
         section:
             business: Business
             admin: Admin
@@ -2361,104 +2447,7 @@ admin:
             comingSoon: Soon
     dashboard:
         title: Dashboard
-        responseTime:
-            title: Request handling
-            subtitle: First responses to contact requests over the last 30 days.
-            avg: Average time
-            withinSla: Under 30 min
-            treated: Requests handled
-            minutes: '%minutes% min'
-            hours: '%hours% h %minutes%'
-        subtitle: Here's your activity today.
-        kpi:
-            callsLast7d: Calls received
-            contactsLast7d: Contact requests
-            leadsThisMonth: Current month
-            leadsLast12Months: Total leads
-            thisYear: 'Year %year%'
-            period:
-                last7d: Last 7 days
-                last12m: Last 12 months
-                summary: Summary
-                thisMonthLeads: '%month%, total leads'
-            previousLabel: Previous
-            currentLabel: Current
-        activity:
-            title: Commercial activity
-            subtitle: Form requests and calls over the last 12 months
-            contactsLabel: Form requests
-            callsLabel: Calls
-        weekVsWeek:
-            title: This week vs last week
-            subtitle: Contact form requests per day, weekly comparison
-            currentWeekLabel: This week
-            previousWeekLabel: Previous week
-        contactsAllTime:
-            title: Contact requests since launch
-            subtitle: All contact form requests, by day
-            seriesLabel: Requests
-        contactsWeekdays:
-            title: Best days of the week
-            subtitle: Contact form requests, since launch
-            seriesLabel: Total requests
-    payments:
-        title: Payments
-        subtitle: 'Revenue, transactions, and monthly trends.'
-        loading: Fetching Stripe payments...
-        kpi:
-            totalAllTime: Total revenue
-            thisMonth: This month
-            thisWeek: This week
-            thisYear: 'Year %year%'
-            period:
-                allTime: Since launch
-                thisWeek: 'Week %number%'
-                summary: Summary
-        charts:
-            monthly:
-                title: Monthly activity
-                subtitle: Total payment amount per month over the last 12 months
-                seriesLabel: Amount
-            monthlyDaily:
-                title: This month's activity
-                subtitle: Daily payments, this month vs prior month
-            weekly:
-                title: Last 4 weeks vs prior 4 weeks
-                subtitle: 'Weekly revenue, 4-week rolling comparison'
-            allTime:
-                title: Payments since launch
-                subtitle: All collected payments, by day
-                seriesLabel: Amount
-            weekdays:
-                title: Best days of the week
-                subtitle: Total revenue per weekday across all history
-                seriesLabel: Total amount
-        weekly:
-            weekLabel: 'Week %number%'
-            currentLabel: Last 4 weeks
-            previousLabel: Prior 4 weeks
-        table:
-            title: Recent payments
-            subtitle: '{0}No payments|{1}The last recorded payment|]1,Inf[The last %count% recorded payments'
-            viewAll: View all in Stripe
-            loadMore: Load more
-            cappedHint: 'Showing the most recent 100 payments.'
-            empty: No payments to show yet.
-            unknownClient: Unknown client
-            column:
-                date: Date
-                client: Client
-                email: Email
-                amount: Amount
-                status: Status
-        status:
-            succeeded: Succeeded
-            processing: Processing
-            requires_action: Action required
-            requires_payment_method: Payment method required
-            requires_confirmation: To confirm
-            requires_capture: To capture
-            canceled: Canceled
+        underConstruction: Under construction...
     tools:
         title: Tools
         subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
@@ -2829,6 +2818,11 @@ listProperty:
             title: We handle the rest
             text: Assessment and rental by our experts.
 
+confirmDialog:
+    title: Confirm the deletion?
+    cancel: Cancel
+    confirm: Delete
+
 filePreview:
     title: File preview
     close: Close the preview
@@ -2862,6 +2856,8 @@ deposit:
         empty: No document is expected at the moment.
         upload: Upload
         uploadMore: Add
+        uploading: Uploading... %percent%
+        uploadFailed: Upload failed, please retry
         leave: Sign out
         sizeMb: '%size% MB'
         sizeKb: '%size% KB'

@@ -1,6 +1,6 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}{{ dossier.name }}{% endblock %}
+{% block title %}{{ dossier.name }} ({{ dossier.reference }}){% endblock %}
 
 {% block page_header %}
     <twig:Admin:PageHeader

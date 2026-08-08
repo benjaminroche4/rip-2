@@ -38,11 +38,11 @@ final class ContactStatusControlTest extends KernelTestCase
 
         $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
-        $component->change('to_recall');
+        $component->change('converted');
 
         $this->em->clear();
         $reloaded = $this->em->find(Contact::class, $contact->getId());
-        self::assertSame(ContactStatus::ToRecall, $reloaded->getStatus());
+        self::assertSame(ContactStatus::Converted, $reloaded->getStatus());
         self::assertSame('First Last', $reloaded->getStatusChangedBy());
     }
 

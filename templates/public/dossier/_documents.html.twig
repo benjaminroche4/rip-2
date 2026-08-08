@@ -2,7 +2,7 @@
    POST's Turbo Stream. Every paired person sees the whole dossier: a couple
    or a guarantor can deposit for the others. Same card language as the
    backoffice: rounded-3xl bordered shell, neutral-50 inner, white rows. #}
-<div id="deposit-documents" data-turbo="true" data-controller="file-preview" data-action="keydown.esc@window->file-preview#close">
+<div id="deposit-documents" data-turbo="true" data-controller="file-preview confirm-dialog" data-action="keydown.esc@window->file-preview#close">
     {% set progressPct = deposit.progress.total > 0 ? (100 * deposit.progress.validated / deposit.progress.total)|round : 0 %}
     {% set contactIconClass = 'flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900' %}
     {# En-tête : accueil + référence et formats en chips, anneau de
@@ -97,23 +97,31 @@
                                         </div>
                                     </div>
                                     {% if document.canUpload %}
+                                        {# Upload en XHR dès la sélection : vraie progression
+                                           d'envoi, la réponse stream remplace la région. #}
                                         <form action="{{ path('app_dossier_deposit_upload', {id: document.id}) }}"
                                               method="post"
                                               enctype="multipart/form-data"
-                                              data-controller="auto-submit"
+                                              data-controller="deposit-upload"
+                                              data-deposit-upload-uploading-label-value="{{ 'deposit.documents.uploading'|trans }}"
+                                              data-deposit-upload-error-label-value="{{ 'deposit.documents.uploadFailed'|trans }}"
                                               data-turbo="true"
                                               class="shrink-0">
                                             <input type="hidden" name="_token" value="{{ csrf_token('deposit_upload') }}">
-                                            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out focus-within:outline focus-within:outline-2 focus-within:outline-primary {{ document.status == 'refused' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-primary/40 hover:bg-primary/5 hover:text-primary' }}">
+                                            <label data-deposit-upload-target="label" class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out focus-within:outline focus-within:outline-2 focus-within:outline-primary {{ document.status == 'refused' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-primary/40 hover:bg-primary/5 hover:text-primary' }}">
                                                 {{ ux_icon('lucide:upload', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                {{ (document.files is empty or document.status == 'refused' ? 'deposit.documents.upload' : 'deposit.documents.uploadMore')|trans }}
+                                                <span data-deposit-upload-target="status">{{ (document.files is empty or document.status == 'refused' ? 'deposit.documents.upload' : 'deposit.documents.uploadMore')|trans }}</span>
                                                 <input type="file"
                                                        name="file"
                                                        accept="application/pdf"
                                                        class="sr-only"
-                                                       data-action="change->auto-submit#submit"
+                                                       data-deposit-upload-target="input"
+                                                       data-action="change->deposit-upload#start"
                                                        data-testid="deposit-file-input">
                                             </label>
+                                            <div data-deposit-upload-target="bar" hidden class="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">
+                                                <div data-deposit-upload-target="fill" class="h-full w-(--progress) rounded-full bg-primary transition-[width] duration-150 ease-out" style="--progress: 0%"></div>
+                                            </div>
                                         </form>
                                     {% endif %}
                                 </div>
@@ -160,10 +168,14 @@
                                                     {{ 'deposit.documents.fileReceived'|trans }}
                                                 </span>
                                                 {% if document.canDeleteFiles %}
-                                                    <form action="{{ path('app_dossier_deposit_file_delete', {id: file.id}) }}" method="post" data-turbo="true" class="shrink-0">
+                                                    <form action="{{ path('app_dossier_deposit_file_delete', {id: file.id}) }}"
+                                                          method="post"
+                                                          data-turbo="true"
+                                                          data-action="submit->confirm-dialog#intercept"
+                                                          data-confirm-message="{{ 'deposit.documents.deleteConfirm'|trans }}"
+                                                          class="shrink-0">
                                                         <input type="hidden" name="_token" value="{{ csrf_token('deposit_delete') }}">
                                                         <button type="submit"
-                                                                data-turbo-confirm="{{ 'deposit.documents.deleteConfirm'|trans }}"
                                                                 class="flex size-6 cursor-pointer items-center justify-center rounded-md text-gray-300 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
                                                                 aria-label="{{ 'deposit.documents.deleteFile'|trans }}"
                                                                 title="{{ 'deposit.documents.deleteFile'|trans }}"
@@ -185,4 +197,5 @@
     </div>
 
     <twig:FilePreview />
+    <twig:ConfirmDialog />
 </div>

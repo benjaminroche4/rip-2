@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
-use App\Admin\Domain\ChartPalette;
 use App\Admin\Repository\AdminUserRepository;
-use App\Admin\Repository\CallRepository;
-use App\Admin\Service\AdminDateFormatter;
-use App\Admin\Service\AdminKpiBuilder;
 use App\Admin\Service\ContactPdfRenderer;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +13,6 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 // NOTE: pas de #[IsGranted('ROLE_ADMIN')] ici. La sécurité passe par
 // access_control dans security.yaml, ancré sur la vraie valeur de
@@ -42,11 +37,7 @@ final class DashboardController extends AbstractController
         #[Autowire('%admin_path_prefix%')]
         private readonly string $adminPathPrefix,
         private readonly ContactRepository $contactRepository,
-        private readonly CallRepository $callRepository,
         private readonly AdminUserRepository $adminUserRepository,
-        private readonly AdminKpiBuilder $kpiBuilder,
-        private readonly AdminDateFormatter $dateFormatter,
-        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -55,209 +46,8 @@ final class DashboardController extends AbstractController
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        // Instant shell: the heavy content (Allo API calls history) loads
-        // lazily in a Turbo Frame rendered by dashboardContent().
         return $this->render('admin/dashboard/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-        ]);
-    }
-
-    #[Route('/tableau', name: 'dashboard_content', methods: ['GET'])]
-    public function dashboardContent(string $adminPrefix, Request $request): Response
-    {
-        $this->ensureValidPrefix($adminPrefix);
-
-        $locale = $request->getLocale();
-        $today = new \DateTimeImmutable('today');
-
-        $contactsByMonth = $this->contactRepository->countByMonth(12);
-        $callsByMonth = $this->callRepository->countByMonth(12);
-
-        $contactsCounts = array_map(static fn (array $row): int => $row['count'], $contactsByMonth);
-        $callsCounts = array_map(static fn (array $row): int => $row['count'], $callsByMonth);
-
-        $chartLabels = array_map(
-            fn (array $row): string => $this->dateFormatter->ymLabel($row['ym'], $locale),
-            $contactsByMonth,
-        );
-
-        // Rolling 7d vs the prior 7d. Calls API is capped at 12 months,
-        // so a 14-day window is always inside the cached fetch.
-        $windowStart = $today->modify('-13 days');
-        $last7Start = $today->modify('-6 days');
-        $next = $today->modify('+1 day');
-
-        $contactsByDay = $this->contactRepository->countByDay($windowStart, $next);
-        $callsByDay = $this->callRepository->countByDay($windowStart, $next);
-
-        $contactsLast7 = $this->sumDays($contactsByDay, $last7Start, $next);
-        $contactsPrev7 = $this->sumDays($contactsByDay, $windowStart, $last7Start);
-        $callsLast7 = $this->sumDays($callsByDay, $last7Start, $next);
-        $callsPrev7 = $this->sumDays($callsByDay, $windowStart, $last7Start);
-
-        // Week-over-week contact requests (Mon→Sun, ISO week). Future days
-        // inside the current week stay at 0 so the bars collapse to nothing.
-        $currentWeekStart = $today->modify('monday this week');
-        $previousWeekStart = $currentWeekStart->modify('-7 days');
-        $nextWeekStart = $currentWeekStart->modify('+7 days');
-
-        $contactsByDayWeeks = $this->contactRepository->countByDay($previousWeekStart, $nextWeekStart);
-
-        $weekDayLabels = [];
-        $currentWeekData = [];
-        $previousWeekData = [];
-        for ($i = 0; $i < 7; ++$i) {
-            $currentDay = $currentWeekStart->modify('+'.$i.' days');
-            $previousDay = $previousWeekStart->modify('+'.$i.' days');
-
-            $weekDayLabels[] = $this->dateFormatter->weekdayLabel($currentDay, $locale);
-            $currentWeekData[] = $contactsByDayWeeks[$currentDay->format('Y-m-d')] ?? 0;
-            $previousWeekData[] = $contactsByDayWeeks[$previousDay->format('Y-m-d')] ?? 0;
-        }
-
-        // All-time daily series for the contact form (no calls). Returns []
-        // if no contact has ever been recorded — the template skips the
-        // section in that case so we don't render an empty chart.
-        $contactsAllTime = $this->contactRepository->countByDayAllTime();
-        $allTimeChartLabels = array_map(
-            fn (array $row): string => $this->dateFormatter->dayLabel(new \DateTimeImmutable($row['date']), $locale),
-            $contactsAllTime,
-        );
-        $allTimeChartData = array_map(static fn (array $row): int => $row['count'], $contactsAllTime);
-
-        // Weekday distribution (Monday → Sunday across all history) for
-        // the contact form. Reuses the daily series cached by the repo.
-        $contactsByWeekday = $this->contactRepository->countByWeekdayAllTime();
-        $weekdayLabels = $this->dateFormatter->weekdayNames($locale);
-        $weekdayContactsData = [];
-        $weekdayContactsHasData = false;
-        for ($i = 1; $i <= 7; ++$i) {
-            $count = $contactsByWeekday[$i] ?? 0;
-            $weekdayContactsData[] = $count;
-            if ($count > 0) {
-                $weekdayContactsHasData = true;
-            }
-        }
-
-        $contactsThisMonth = end($contactsCounts) ?: 0;
-        $contactsLastMonth = $contactsCounts[\count($contactsCounts) - 2] ?? 0;
-        $callsThisMonth = end($callsCounts) ?: 0;
-        $callsLastMonth = $callsCounts[\count($callsCounts) - 2] ?? 0;
-
-        // Year-to-date leads (contacts + calls) by summing buckets that
-        // fall in the current civil year. Reuses the 12-month series so
-        // no extra repository call.
-        $currentYearPrefix = $today->format('Y').'-';
-        $thisYearLeads = 0;
-        foreach ($contactsByMonth as $bucket) {
-            if (str_starts_with($bucket['ym'], $currentYearPrefix)) {
-                $thisYearLeads += (int) $bucket['count'];
-            }
-        }
-        foreach ($callsByMonth as $bucket) {
-            if (str_starts_with($bucket['ym'], $currentYearPrefix)) {
-                $thisYearLeads += (int) $bucket['count'];
-            }
-        }
-
-        $kpis = [
-            $this->kpiBuilder->build(
-                title: $this->translator->trans('admin.dashboard.kpi.callsLast7d'),
-                period: $this->translator->trans('admin.dashboard.kpi.period.last7d'),
-                current: $callsLast7,
-                previous: $callsPrev7,
-            ),
-            $this->kpiBuilder->build(
-                title: $this->translator->trans('admin.dashboard.kpi.contactsLast7d'),
-                period: $this->translator->trans('admin.dashboard.kpi.period.last7d'),
-                current: $contactsLast7,
-                previous: $contactsPrev7,
-            ),
-            $this->kpiBuilder->build(
-                title: $this->translator->trans('admin.dashboard.kpi.leadsThisMonth'),
-                period: $this->translator->trans('admin.dashboard.kpi.period.thisMonthLeads', [
-                    '%month%' => $this->dateFormatter->monthLabel($today, $locale),
-                ]),
-                current: $contactsThisMonth + $callsThisMonth,
-                previous: $contactsLastMonth + $callsLastMonth,
-                currentLabel: $this->dateFormatter->monthName($today, $locale),
-                previousLabel: $this->dateFormatter->monthName($today->modify('first day of this month')->modify('-1 month'), $locale),
-            ),
-            // Calls API caps at 12 months → no 24-month comparison possible,
-            // so this card stays neutral. Renders as a "two stats with
-            // divider" (12-month total + year-to-date) in the template.
-            $this->kpiBuilder->build(
-                title: $this->translator->trans('admin.dashboard.kpi.period.summary'),
-                period: $this->translator->trans('admin.dashboard.kpi.leadsLast12Months'),
-                current: array_sum($contactsCounts) + array_sum($callsCounts),
-                previous: null,
-            ),
-        ];
-
-        // First-response SLA stats over the last 30 days. avgLabel is
-        // preformatted here ("12 min" / "1 h 05") so the template stays dumb.
-        $responseStats = $this->contactRepository->responseTimeStats($today->modify('-30 days'));
-        $avgLabel = null;
-        if (null !== $responseStats['avgMinutes']) {
-            $avgMinutes = (int) round($responseStats['avgMinutes']);
-            $avgLabel = $avgMinutes < 60
-                ? $this->translator->trans('admin.dashboard.responseTime.minutes', ['%minutes%' => $avgMinutes])
-                : $this->translator->trans('admin.dashboard.responseTime.hours', [
-                    '%hours%' => intdiv($avgMinutes, 60),
-                    '%minutes%' => str_pad((string) ($avgMinutes % 60), 2, '0', STR_PAD_LEFT),
-                ]);
-        }
-
-        return $this->render('admin/dashboard/_content.html.twig', [
-            'adminPrefix' => $adminPrefix,
-            'responseTimeAvgLabel' => $avgLabel,
-            'responseTimeSlaRate' => null !== $responseStats['withinSlaRate'] ? (int) round($responseStats['withinSlaRate'] * 100) : null,
-            'responseTimeTreatedCount' => $responseStats['treatedCount'],
-            'thisYearLeads' => $thisYearLeads,
-            'thisYearLabel' => $today->format('Y'),
-            'chartLabels' => $chartLabels,
-            'chartSeries' => [
-                [
-                    'label' => $this->translator->trans('admin.dashboard.activity.contactsLabel'),
-                    'data' => $contactsCounts,
-                    ...ChartPalette::PRIMARY,
-                ],
-                [
-                    'label' => $this->translator->trans('admin.dashboard.activity.callsLabel'),
-                    'data' => $callsCounts,
-                    ...ChartPalette::BLUE,
-                ],
-            ],
-            'weekChartLabels' => $weekDayLabels,
-            'weekChartSeries' => [
-                [
-                    'label' => $this->translator->trans('admin.dashboard.weekVsWeek.previousWeekLabel'),
-                    'data' => $previousWeekData,
-                    ...ChartPalette::PURPLE,
-                ],
-                [
-                    'label' => $this->translator->trans('admin.dashboard.weekVsWeek.currentWeekLabel'),
-                    'data' => $currentWeekData,
-                    ...ChartPalette::GREEN,
-                ],
-            ],
-            'allTimeChartLabels' => $allTimeChartLabels,
-            'allTimeChartSeries' => [] === $allTimeChartData ? [] : [
-                [
-                    'label' => $this->translator->trans('admin.dashboard.contactsAllTime.seriesLabel'),
-                    'data' => $allTimeChartData,
-                    ...ChartPalette::PRIMARY,
-                ],
-            ],
-            'weekdayChartLabels' => $weekdayLabels,
-            'weekdayChartSeries' => $weekdayContactsHasData ? [
-                [
-                    'label' => $this->translator->trans('admin.dashboard.contactsWeekdays.seriesLabel'),
-                    'data' => $weekdayContactsData,
-                    ...ChartPalette::TEAL,
-                ],
-            ] : [],
-            'kpis' => $kpis,
         ]);
     }
 
@@ -290,29 +80,8 @@ final class DashboardController extends AbstractController
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        // Business KPIs over the last 30 days (+ actionable overdue recalls).
-        $now = new \DateTimeImmutable();
-        $since = $now->modify('-30 days');
-        $responseStats = $this->contactRepository->responseTimeStats($since);
-        $avgLabel = null;
-        if (null !== $responseStats['avgMinutes']) {
-            $avgMinutes = (int) round($responseStats['avgMinutes']);
-            $avgLabel = $avgMinutes < 60
-                ? $this->translator->trans('admin.dashboard.responseTime.minutes', ['%minutes%' => $avgMinutes])
-                : $this->translator->trans('admin.dashboard.responseTime.hours', [
-                    '%hours%' => intdiv($avgMinutes, 60),
-                    '%minutes%' => str_pad((string) ($avgMinutes % 60), 2, '0', STR_PAD_LEFT),
-                ]);
-        }
-        $conversionRate = $this->contactRepository->conversionRate($since);
-
         return $this->render('admin/contacts/index.html.twig', [
             'adminPrefix' => $adminPrefix,
-            'kpiNewRequests' => $this->contactRepository->countCreatedSince($since),
-            'kpiAvgResponseLabel' => $avgLabel,
-            'kpiSlaRate' => null !== $responseStats['withinSlaRate'] ? (int) round($responseStats['withinSlaRate'] * 100) : null,
-            'kpiConversionRate' => null !== $conversionRate ? (int) round($conversionRate * 100) : null,
-            'kpiOverdueRecalls' => $this->contactRepository->countOverdueRecalls($now),
         ]);
     }
 
@@ -410,21 +179,6 @@ final class DashboardController extends AbstractController
             'adminPrefix' => $adminPrefix,
             'profile' => $profile,
         ]);
-    }
-
-    /**
-     * @param array<string, int> $byDay
-     */
-    private function sumDays(array $byDay, \DateTimeImmutable $startInclusive, \DateTimeImmutable $endExclusive): int
-    {
-        $sum = 0;
-        $cursor = $startInclusive;
-        while ($cursor < $endExclusive) {
-            $sum += $byDay[$cursor->format('Y-m-d')] ?? 0;
-            $cursor = $cursor->modify('+1 day');
-        }
-
-        return $sum;
     }
 
     /**

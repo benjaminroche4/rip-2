@@ -312,6 +312,9 @@ final class DossiersAccessTest extends WebTestCase
                 ->setGuarantorType('physical'))
             ->addNote((new DossierNote())
                 ->setText('Premier appel, très motivée.')
+                // Plus récente que les events d'audit générés par la fixture
+                // (la première page du fil n'affiche que 5 entrées).
+                ->setCreatedAt(new \DateTimeImmutable('+1 minute'))
                 ->setAuthorId(1)
                 ->setAuthorName('Alice Staff'))
             ->setSourceContactReference('CT-000123')

@@ -14,6 +14,7 @@ use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierDocumentRefusalMailer;
 use App\Dossier\Service\DossierDocumentRequestMailer;
+use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Clock\ClockInterface;
@@ -25,6 +26,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -37,6 +39,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:Modules', template: 'components/Dossier/Modules.html.twig')]
 final class Modules
 {
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -78,6 +81,22 @@ final class Modules
     #[LiveProp(writable: true)]
     public string $refusalReason = '';
 
+    /** File id awaiting deletion confirmation in the modal, or null. */
+    #[LiveProp]
+    public ?int $confirmDeleteFileId = null;
+
+    /** Tenant id whose resend modal is open, or null. */
+    #[LiveProp]
+    public ?int $resendingId = null;
+
+    /** @var list<string> Person ids receiving the reminder email (checkboxes). */
+    #[LiveProp(writable: true)]
+    public array $resendRecipientIds = [];
+
+    /** Translation key of the current resend error, '' when none. */
+    #[LiveProp]
+    public string $resendError = '';
+
     /** Document id whose description is being edited inline, or null. */
     #[LiveProp]
     public ?int $editingDescriptionId = null;
@@ -95,6 +114,7 @@ final class Modules
         private readonly DossierDocumentRefusalMailer $refusalMailer,
         private readonly DocumentStorage $storage,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly DossierEventLogger $events,
     ) {
     }
 
@@ -114,6 +134,28 @@ final class Modules
     public function getReference(): string
     {
         return (string) $this->dossier()->getReference();
+    }
+
+    /**
+     * "x/y déposées" on the module card summary: pieces holding a deposit
+     * (received or validated) over the pieces requested.
+     *
+     * @return array{deposited: int, total: int}
+     */
+    public function getPieceCounts(): array
+    {
+        $deposited = 0;
+        $total = 0;
+        foreach ($this->dossier()->getPersons() as $person) {
+            foreach ($person->getDocuments() as $document) {
+                ++$total;
+                if (\in_array($document->getStatus(), [DossierDocumentStatus::Received, DossierDocumentStatus::Validated], true)) {
+                    ++$deposited;
+                }
+            }
+        }
+
+        return ['deposited' => $deposited, 'total' => $total];
     }
 
     /** True as soon as one file has been deposited on the dossier. */
@@ -343,7 +385,13 @@ final class Modules
                 ->setStatus(DossierDocumentStatus::Requested)
                 ->setRequestedAt($now));
         }
+        $this->events->log($dossier, 'documents_requested', [
+            'tenant' => $this->personName($tenant),
+            'recipient' => (string) $recipient->getEmail(),
+            'pieces' => array_map(static fn (DossierDocumentType $type): string => $type->labelKey(), $types),
+        ]);
         $this->em->flush();
+        $this->emit('dossier-documents:changed');
 
         $this->mailer->send($dossier, $tenant, $recipient, $types);
 
@@ -385,7 +433,13 @@ final class Modules
         } elseif (null === $document->getReceivedAt()) {
             $document->setReceivedAt($this->clock->now());
         }
+        $this->events->log($this->dossier(), DossierDocumentStatus::Validated === $target ? 'document_validated' : 'document_status', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => $this->personName($document->getPerson()),
+            'status' => $target->labelKey(),
+        ]);
         $this->em->flush();
+        $this->emit('dossier-documents:changed');
     }
 
     /**
@@ -404,7 +458,13 @@ final class Modules
         if (null === $document->getReceivedAt()) {
             $document->setReceivedAt($this->clock->now());
         }
+        $this->events->log($this->dossier(), 'document_refused', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => $this->personName($document->getPerson()),
+            'reason' => $reason,
+        ]);
         $this->em->flush();
+        $this->emit('dossier-documents:changed');
 
         $this->refusalMailer->send($this->dossier(), $document);
 
@@ -438,7 +498,13 @@ final class Modules
 
         $description = mb_substr(trim($this->descriptionDraft), 0, 500);
         $document->setDescription('' !== $description ? $description : null);
+        $this->events->log($this->dossier(), 'description_updated', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => $this->personName($document->getPerson()),
+            'description' => $description,
+        ]);
         $this->em->flush();
+        $this->emit('dossier-documents:changed');
 
         $this->editingDescriptionId = null;
         $this->descriptionDraft = '';
@@ -453,14 +519,149 @@ final class Modules
     }
 
     /**
+     * Opens the reminder modal for a tenant's pieces still awaiting a
+     * deposit (requested or refused): the admin picks which email of the
+     * dossier receives the reminder.
+     */
+    #[LiveAction]
+    public function askResend(#[LiveArg] int $key): void
+    {
+        $this->ensureAdmin();
+        $tenant = $this->person($key);
+        if ([] === $this->pendingTypes($tenant)) {
+            return;
+        }
+
+        $this->resendingId = (int) $tenant->getId();
+        // Default recipient: the tenant if reachable, else the first one.
+        $recipients = $this->getRecipients();
+        $ids = array_column($recipients, 'id');
+        if (\in_array((int) $tenant->getId(), $ids, true)) {
+            $this->resendRecipientIds = [(string) $tenant->getId()];
+        } elseif ([] !== $recipients) {
+            $this->resendRecipientIds = [(string) $recipients[0]['id']];
+        }
+    }
+
+    #[LiveAction]
+    public function cancelResend(): void
+    {
+        $this->ensureAdmin();
+        $this->resendingId = null;
+        $this->resendRecipientIds = [];
+        $this->resendError = '';
+    }
+
+    /** Sends the reminder to every recipient checked in the modal. */
+    #[LiveAction]
+    public function confirmResend(): void
+    {
+        $this->ensureAdmin();
+        // Batched double-click: the first call already sent and closed.
+        if (null === $this->resendingId) {
+            return;
+        }
+        $dossier = $this->dossier();
+        $tenant = $this->person($this->resendingId);
+
+        $types = $this->pendingTypes($tenant);
+        if ([] === $types) {
+            $this->resendingId = null;
+
+            return;
+        }
+
+        $checked = array_map(intval(...), $this->resendRecipientIds);
+        $recipients = [];
+        foreach ($dossier->getPersons() as $person) {
+            if (\in_array((int) $person->getId(), $checked, true) && '' !== trim((string) $person->getEmail())) {
+                $recipients[] = $person;
+            }
+        }
+        if ([] === $recipients) {
+            return;
+        }
+
+        // Every email that actually left must land in the audit trail, even
+        // when a later recipient fails: send per recipient, log what went
+        // out, then surface the failure without closing the modal.
+        $sent = [];
+        $failed = false;
+        foreach ($recipients as $recipient) {
+            try {
+                $this->mailer->send($dossier, $tenant, $recipient, $types);
+                $sent[] = (string) $recipient->getEmail();
+            } catch (\Throwable) {
+                $failed = true;
+            }
+        }
+        if ([] !== $sent) {
+            $this->events->log($dossier, 'documents_resent', [
+                'tenant' => $this->personName($tenant),
+                'recipient' => implode(', ', $sent),
+                'pieces' => array_map(static fn (DossierDocumentType $type): string => $type->labelKey(), $types),
+            ]);
+            $this->em->flush();
+        $this->emit('dossier-documents:changed');
+            $this->lastSentTo = implode(', ', $sent);
+        }
+        if ($failed) {
+            $this->resendError = 'admin.dossiers.show.modules.file.resendModal.sendFailed';
+
+            return;
+        }
+
+        $this->resendingId = null;
+        $this->resendRecipientIds = [];
+        $this->resendError = '';
+    }
+
+    /**
+     * Pieces of the tenant still awaiting a deposit.
+     *
+     * @return list<DossierDocumentType>
+     */
+    private function pendingTypes(DossierPerson $tenant): array
+    {
+        $types = [];
+        foreach ($tenant->getDocuments() as $document) {
+            if (\in_array($document->getStatus(), [DossierDocumentStatus::Requested, DossierDocumentStatus::Refused], true)) {
+                $type = $document->getType();
+                if (null !== $type) {
+                    $types[] = $type;
+                }
+            }
+        }
+
+        return $types;
+    }
+
+    /** Opens the deletion confirmation modal for a deposited file. */
+    #[LiveAction]
+    public function askDeleteFile(#[LiveArg] int $key): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteFileId = $key;
+    }
+
+    #[LiveAction]
+    public function cancelDeleteFile(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteFileId = null;
+    }
+
+    /**
      * Deletes a deposited file (unreadable, wrong piece...) from disk and
-     * database. When it was the document's last file the piece goes back to
-     * "requested" so the tenant sees it must be deposited again.
+     * database, after the confirmation modal. When it was the document's
+     * last file the piece goes back to "requested" so the tenant sees it
+     * must be deposited again.
      */
     #[LiveAction]
     public function deleteFile(#[LiveArg] int $key): void
     {
         $this->ensureAdmin();
+        $this->confirmDeleteFileId = null;
         $dossier = $this->dossier();
         foreach ($dossier->getPersons() as $person) {
             foreach ($person->getDocuments() as $document) {
@@ -469,12 +670,19 @@ final class Modules
                         continue;
                     }
                     $this->storage->delete($dossier, $file);
+                    $fileName = (string) $file->getOriginalName();
                     $document->removeFile($file);
                     if ($document->getFiles()->isEmpty()) {
                         $document->setStatus(DossierDocumentStatus::Requested);
                         $document->setReceivedAt(null);
                     }
+                    $this->events->log($dossier, 'document_file_deleted', [
+                        'piece' => $document->getType()?->labelKey() ?? '',
+                        'tenant' => $this->personName($document->getPerson()),
+                        'file' => $fileName,
+                    ]);
                     $this->em->flush();
+        $this->emit('dossier-documents:changed');
 
                     return;
                 }
@@ -525,6 +733,11 @@ final class Modules
     {
         return $this->dossiers->find($this->dossierId)
             ?? throw new NotFoundHttpException('Dossier not found.');
+    }
+
+    private function personName(?DossierPerson $person): string
+    {
+        return trim(trim((string) $person?->getFirstName()).' '.trim((string) $person?->getLastName()));
     }
 
     private function document(int $id): DossierDocument

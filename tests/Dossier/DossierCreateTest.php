@@ -101,7 +101,7 @@ final class DossierCreateTest extends KernelTestCase
         self::assertStringContainsString('role="dialog"', $rendered);
         self::assertStringContainsString('aria-modal="true"', $rendered);
         self::assertStringContainsString('aria-labelledby="dossier-create-title"', $rendered);
-        self::assertStringContainsString('data-controller="modal-focus"', $rendered);
+        self::assertStringContainsString('data-controller="modal-focus modal-anim"', $rendered);
         // Anti double-submit guard on the create action.
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
     }

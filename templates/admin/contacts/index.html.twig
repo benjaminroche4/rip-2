@@ -16,46 +16,6 @@
 
 {% block body %}
     <div class="space-y-8" data-testid="contacts-page">
-        {% macro kpiCard(title, value, subtitle, tone, href = null) %}
-            {% set inner %}
-                <div class="h-full rounded-xl bg-linear-to-b from-neutral-100/50 to-neutral-100/0 p-4">
-                    <p class="text-sm text-gray-500">{{ title }}</p>
-                    <p class="mt-2 text-2xl font-medium tabular-nums {{ tone|default('text-gray-900') }}">{{ value }}</p>
-                    {% if subtitle %}
-                        <p class="mt-1 text-xs text-gray-500">{{ subtitle }}</p>
-                    {% endif %}
-                </div>
-            {% endset %}
-            {% if href %}
-                <a href="{{ href }}" class="block rounded-2xl border border-neutral-200 bg-white p-2 transition-colors duration-100 ease-out hover:border-gray-300">{{ inner }}</a>
-            {% else %}
-                <article class="rounded-2xl border border-neutral-200 bg-white p-2">{{ inner }}</article>
-            {% endif %}
-        {% endmacro %}
-        <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="contacts-kpis">
-            {{ _self.kpiCard(
-                'admin.contacts.kpi.newRequests'|trans,
-                kpiNewRequests|number_format(0, ',', ' '),
-                'admin.contacts.kpi.last30'|trans,
-            ) }}
-            {{ _self.kpiCard(
-                'admin.contacts.kpi.avgResponse'|trans,
-                kpiAvgResponseLabel ?? '-',
-                kpiSlaRate is not null ? 'admin.contacts.kpi.slaRate'|trans({'%rate%': kpiSlaRate}) : 'admin.contacts.kpi.last30'|trans,
-            ) }}
-            {{ _self.kpiCard(
-                'admin.contacts.kpi.conversion'|trans,
-                kpiConversionRate is not null ? kpiConversionRate ~ ' %' : '-',
-                'admin.contacts.kpi.conversionHint'|trans,
-            ) }}
-            {{ _self.kpiCard(
-                'admin.contacts.kpi.overdueRecalls'|trans,
-                kpiOverdueRecalls|number_format(0, ',', ' '),
-                'admin.contacts.kpi.overdueHint'|trans,
-                kpiOverdueRecalls > 0 ? 'text-red-600' : 'text-gray-900',
-                kpiOverdueRecalls > 0 ? path('admin_contacts', {adminPrefix: adminPrefix}) ~ '?statusFilter=to_recall&sort=recall' : null,
-            ) }}
-        </section>
         <twig:Admin:ContactList :adminPrefix="adminPrefix" />
     </div>
 {% endblock %}
