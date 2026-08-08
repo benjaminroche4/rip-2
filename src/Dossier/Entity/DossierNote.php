@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dossier\Entity;
 
+use App\Dossier\Repository\DossierNoteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * (id, name, avatar) exactly like ContactNote so entries survive staff
  * account changes.
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: DossierNoteRepository::class)]
 #[ORM\Table(name: 'dossier_note')]
 class DossierNote
 {

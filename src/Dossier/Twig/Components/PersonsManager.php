@@ -12,12 +12,14 @@ use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Repository\DossierRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -30,6 +32,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:PersonsManager', template: 'components/Dossier/PersonsManager.html.twig')]
 final class PersonsManager
 {
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -42,6 +45,10 @@ final class PersonsManager
     /** True while the "new person" card is open. */
     #[LiveProp]
     public bool $adding = false;
+
+    /** Person id awaiting removal confirmation in the modal, or null. */
+    #[LiveProp]
+    public ?int $confirmRemoveId = null;
 
     /** Validation errors keyed by field ('global' for card-level rules). */
     #[LiveProp]
@@ -64,6 +71,60 @@ final class PersonsManager
 
     #[LiveProp(writable: true)]
     public string $language = ContactLanguage::FR->value;
+
+    /** Professional situation ('' = unspecified), see PROFESSIONS. */
+    #[LiveProp(writable: true)]
+    public string $profession = '';
+
+    /** "No professional activity": hides and clears the whole pro pane. */
+    #[LiveProp(writable: true)]
+    public bool $noProfession = false;
+
+    #[LiveProp(writable: true)]
+    public string $employer = '';
+
+    #[LiveProp(writable: true)]
+    public string $jobTitle = '';
+
+    /** Contract start date, "Y-m-d", '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $contractStart = '';
+
+    /** Contract end date (CDD only), "Y-m-d", '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $contractEnd = '';
+
+    /** CDI only: trial period over ("essai validé"). */
+    #[LiveProp(writable: true)]
+    public bool $trialOver = false;
+
+    /** Net monthly income in €, '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $monthlyIncome = '';
+
+    /** Birth date, "Y-m-d" (date input format), '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $birthDate = '';
+
+    /** ISO 3166-1 alpha-2 nationality, '' = unspecified. */
+    #[LiveProp(writable: true)]
+    public string $nationality = '';
+
+    /** Allowed professional situations, clear labels in translations. */
+    public const PROFESSIONS = ['cdi', 'cdd', 'freelance', 'expat', 'student', 'retired', 'other'];
+
+    /**
+     * Which pro fields exist for which situation (shared with the template
+     * and the pro-fields Stimulus controller): anything not listed for the
+     * saved situation is cleared, never silently kept.
+     */
+    public const PRO_FIELD_PROFESSIONS = [
+        'employer' => ['cdi', 'cdd', 'expat'],
+        'jobTitle' => ['cdi', 'cdd', 'expat', 'freelance', 'other'],
+        'contractStart' => ['cdi', 'cdd', 'expat', 'freelance'],
+        'contractEnd' => ['cdd'],
+        'trialOver' => ['cdi'],
+    ];
 
     public function __construct(
         private readonly DossierRepository $repository,
@@ -93,6 +154,16 @@ final class PersonsManager
                 phone: $person->getPhone(),
                 language: $person->getLanguage() ?? ContactLanguage::FR,
                 primaryContact: $person->isPrimaryContact(),
+                profession: $person->getProfession(),
+                monthlyIncome: $person->getMonthlyIncome(),
+                birthDate: $person->getBirthDate(),
+                nationality: $person->getNationality(),
+                noProfession: $person->isNoProfession(),
+                employer: $person->getEmployer(),
+                jobTitle: $person->getJobTitle(),
+                contractStartDate: $person->getContractStartDate(),
+                contractEndDate: $person->getContractEndDate(),
+                trialPeriodOver: $person->isTrialPeriodOver(),
             );
         }
 
@@ -131,6 +202,16 @@ final class PersonsManager
         $this->email = (string) $person->getEmail();
         $this->phone = (string) $person->getPhone();
         $this->language = $person->getLanguage()?->value ?? ContactLanguage::FR->value;
+        $this->profession = $person->getProfession() ?? '';
+        $this->noProfession = $person->isNoProfession();
+        $this->employer = (string) $person->getEmployer();
+        $this->jobTitle = (string) $person->getJobTitle();
+        $this->contractStart = $person->getContractStartDate()?->format('Y-m-d') ?? '';
+        $this->contractEnd = $person->getContractEndDate()?->format('Y-m-d') ?? '';
+        $this->trialOver = $person->isTrialPeriodOver();
+        $this->monthlyIncome = null !== $person->getMonthlyIncome() ? (string) $person->getMonthlyIncome() : '';
+        $this->birthDate = $person->getBirthDate()?->format('Y-m-d') ?? '';
+        $this->nationality = $person->getNationality() ?? '';
     }
 
     #[LiveAction]
@@ -171,6 +252,58 @@ final class PersonsManager
         }
         if (null === $language) {
             $this->errors['language'] = 'admin.dossiers.create.person.language.label';
+        }
+        $profession = trim($this->profession);
+        if ('' !== $profession && !\in_array($profession, self::PROFESSIONS, true)) {
+            $this->errors['profession'] = 'admin.dossiers.create.person.profession.invalid';
+        }
+        // The pro pane only exists for tenants (mirrors the client-side
+        // visibility): any other role saves with an empty pane.
+        if (DossierPersonRole::TENANT !== $role) {
+            $this->noProfession = false;
+            $this->profession = '';
+            $this->monthlyIncome = '';
+            $profession = '';
+        }
+        // "No professional activity" empties the whole pane; otherwise a
+        // field only survives if it exists for the saved situation.
+        if ($this->noProfession) {
+            $profession = '';
+        }
+        $keeps = static fn (string $field): bool => \in_array($profession, self::PRO_FIELD_PROFESSIONS[$field], true);
+        $employer = $keeps('employer') ? mb_substr(trim($this->employer), 0, 100) : '';
+        $jobTitle = $keeps('jobTitle') ? mb_substr(trim($this->jobTitle), 0, 100) : '';
+        $trialOver = $keeps('trialOver') && $this->trialOver;
+        $contractStart = null;
+        if ($keeps('contractStart') && '' !== trim($this->contractStart)) {
+            $contractStart = \DateTimeImmutable::createFromFormat('!Y-m-d', trim($this->contractStart)) ?: null;
+            if (null === $contractStart || $contractStart < new \DateTimeImmutable('1950-01-01')) {
+                $this->errors['contractStart'] = 'admin.dossiers.show.persons.pro.contractStart.invalid';
+            }
+        }
+        $contractEnd = null;
+        if ($keeps('contractEnd') && '' !== trim($this->contractEnd)) {
+            $contractEnd = \DateTimeImmutable::createFromFormat('!Y-m-d', trim($this->contractEnd)) ?: null;
+            if (null === $contractEnd || (null !== $contractStart && $contractEnd < $contractStart)) {
+                $this->errors['contractEnd'] = 'admin.dossiers.show.persons.pro.contractEnd.invalid';
+            }
+        }
+        $monthlyIncome = $this->noProfession ? '' : trim($this->monthlyIncome);
+        if ('' !== $monthlyIncome && (!is_numeric($monthlyIncome) || (int) $monthlyIncome < 0)) {
+            $this->errors['monthlyIncome'] = 'admin.dossiers.create.person.income.invalid';
+        }
+        $birthDate = null;
+        if ('' !== trim($this->birthDate)) {
+            $birthDate = \DateTimeImmutable::createFromFormat('!Y-m-d', trim($this->birthDate)) ?: null;
+            if (null === $birthDate
+                || $birthDate > new \DateTimeImmutable('today')
+                || $birthDate < new \DateTimeImmutable('1900-01-01')) {
+                $this->errors['birthDate'] = 'admin.dossiers.create.person.birthDate.invalid';
+            }
+        }
+        $nationality = strtoupper(trim($this->nationality));
+        if ('' !== $nationality && !Countries::exists($nationality)) {
+            $this->errors['nationality'] = 'admin.dossiers.create.person.nationality.invalid';
         }
 
         // Household composition once this save lands.
@@ -214,10 +347,40 @@ final class PersonsManager
         $person->setEmail($email);
         $person->setPhone('' !== $phone ? $phone : null);
         $person->setLanguage($language);
+        $person->setProfession('' !== $profession ? $profession : null);
+        $person->setNoProfession($this->noProfession);
+        $person->setEmployer('' !== $employer ? $employer : null);
+        $person->setJobTitle('' !== $jobTitle ? $jobTitle : null);
+        $person->setContractStartDate($contractStart);
+        $person->setContractEndDate($contractEnd);
+        $person->setTrialPeriodOver($trialOver);
+        $person->setMonthlyIncome('' !== $monthlyIncome ? max(0, (int) $monthlyIncome) : null);
+        $person->setBirthDate($birthDate);
+        $person->setNationality('' !== $nationality ? $nationality : null);
 
         $this->normalize($dossier);
         $this->em->flush();
+        // The search card recomputes its budget warning from the incomes.
+        $this->emit('dossier-persons:changed');
+
+        // Explicit validate button (same flow as the lead identity card):
+        // a successful save closes the inline form, add and edit alike.
         $this->resetDraft();
+    }
+
+    /** Opens the removal confirmation modal for a person. */
+    #[LiveAction]
+    public function askRemove(#[LiveArg] int $key): void
+    {
+        $this->ensureAdmin();
+        $this->confirmRemoveId = $this->person($key)->getId();
+    }
+
+    #[LiveAction]
+    public function cancelRemove(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmRemoveId = null;
     }
 
     #[LiveAction]
@@ -227,9 +390,18 @@ final class PersonsManager
         $dossier = $this->dossier();
         $person = $this->person($key);
 
+        $this->confirmRemoveId = null;
         $this->errors = [];
         if ($dossier->getPersons()->count() <= Dossier::MIN_PERSONS) {
             $this->errors['global'] = 'admin.dossiers.create.persons.min';
+
+            return;
+        }
+        if ($person->isPrimaryContact()) {
+            // The primary tenant can only leave after the star moved to
+            // another tenant; the template hides the button, this guards
+            // hand-crafted requests.
+            $this->errors['global'] = 'admin.dossiers.show.persons.primaryLocked';
 
             return;
         }
@@ -248,6 +420,7 @@ final class PersonsManager
         $dossier->removePerson($person);
         $this->normalize($dossier);
         $this->em->flush();
+        $this->emit('dossier-persons:changed');
         $this->resetDraft();
     }
 
@@ -339,6 +512,16 @@ final class PersonsManager
         $this->email = '';
         $this->phone = '';
         $this->language = ContactLanguage::FR->value;
+        $this->profession = '';
+        $this->noProfession = false;
+        $this->employer = '';
+        $this->jobTitle = '';
+        $this->contractStart = '';
+        $this->contractEnd = '';
+        $this->trialOver = false;
+        $this->monthlyIncome = '';
+        $this->birthDate = '';
+        $this->nationality = '';
     }
 
     private function ensureAdmin(): void

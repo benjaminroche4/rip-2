@@ -1,0 +1,209 @@
+{% macro managerChips(manager, choices) %}
+    <div class="flex flex-wrap items-center gap-2">
+        {% if manager %}
+            <span class="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pr-1.5 pl-1">
+                <twig:Avatar filename="{{ manager.avatarFilename }}" name="{{ manager.fullName }}" email="{{ manager.email }}" size="6" />
+                <span class="text-sm font-medium text-gray-900">{{ manager.fullName }}</span>
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assignManager"
+                    data-live-id-param="0"
+                    class="flex size-5 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-100 hover:text-gray-900"
+                    aria-label="{{ 'admin.dossiers.show.manager.remove'|trans }}"
+                    data-testid="dossier-notes-unassign"
+                >
+                    {{ ux_icon('lucide:x', {class: 'size-3', 'aria-hidden': 'true'}) }}
+                </button>
+            </span>
+        {% else %}
+            {% for choice in choices %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assignManager"
+                    data-live-id-param="{{ choice.id }}"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-gray-300 py-1 pr-3 pl-1 text-sm text-gray-500 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
+                    data-testid="dossier-notes-assign"
+                >
+                    <twig:Avatar filename="{{ choice.avatarFilename }}" name="{{ choice.fullName }}" email="{{ choice.email }}" size="6" class="opacity-70" />
+                    {{ choice.fullName }}
+                </button>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{# Rendu sans chrome propre : le shell de la card "Suivi" vit dans
+   show.html.twig, comme ContactFollowUp / ContactNotes sur la fiche contact. #}
+<div
+    {{ attributes.defaults({
+        class: 'contents',
+        'data-controller': 'leave-guard',
+        'data-leave-guard-clean-event-value': 'dossier-notes:saved',
+        'data-leave-guard-message-value': 'admin.contacts.notes.unsaved'|trans,
+        'data-action': 'input->leave-guard#markDirty change->leave-guard#markDirty',
+    }) }}
+    data-testid="dossier-notes"
+>
+    {% set sourceContactReference = this.sourceContactReference %}
+    <div class="flex items-center justify-between gap-4 p-3">
+        <h2 class="font-medium text-gray-900">{{ 'admin.contacts.followUp.title'|trans }}</h2>
+        <p class="text-xs font-medium text-gray-400 tabular-nums">{{ this.reference }}</p>
+    </div>
+
+    <div class="rounded-xl bg-white px-5 py-4 text-sm">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-gray-600">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+            {{ _self.managerChips(this.manager, this.managerChoices) }}
+        </div>
+        {# Chronologie du dossier : création, précédée de la demande de
+           contact d'origine quand le dossier en est issu. #}
+        <ol class="relative ml-1.5 space-y-4 border-l border-gray-950/10 pl-5">
+            {% if sourceContactReference %}
+                <li class="relative" data-testid="dossier-origin">
+                    <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-blue-400" aria-hidden="true"></span>
+                    <p class="text-gray-600">
+                        {{ 'admin.dossiers.show.followUp.origin'|trans }}
+                        <a
+                            href="{{ path('admin_contact_show', {adminPrefix: this.adminPrefix, reference: sourceContactReference}) }}"
+                            class="text-xs font-medium text-primary transition-colors duration-100 hover:text-primary/80 tabular-nums"
+                            data-testid="dossier-origin-link"
+                        >({{ sourceContactReference }})</a>
+                    </p>
+                </li>
+            {% endif %}
+            <li class="relative">
+                <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-gray-300" aria-hidden="true"></span>
+                <p class="text-gray-600">{{ 'admin.dossiers.show.facts.createdAt'|trans }}</p>
+                <p class="font-medium text-gray-900 tabular-nums">{{ this.createdAt|format_datetime('medium', 'short') }}</p>
+            </li>
+        </ol>
+    </div>
+
+    <div class="border-t border-gray-950/5 p-3">
+        <h2 class="font-medium text-gray-900">{{ 'admin.contacts.notes.title'|trans }}</h2>
+        <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.notes.internal'|trans }}</p>
+    </div>
+
+    {% set noteRows = this.feed %}
+    <div class="flex flex-col gap-3 rounded-t-xl bg-white px-5 py-4 {{ noteRows is empty ? 'rounded-b-xl' }}">
+        <textarea
+            data-model="norender|newNote"
+            data-action="keydown.enter->live#action:prevent"
+            data-live-action-param="add"
+            rows="3"
+            placeholder="{{ 'admin.contacts.notes.placeholder'|trans }}"
+            aria-label="{{ 'admin.contacts.notes.placeholder'|trans }}"
+            title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+            class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+        >{{ this.newNote }}</textarea>
+        <div class="flex justify-end">
+            <twig:Button
+                size="sm"
+                data-action="live#action"
+                data-live-action-param="add"
+                data-testid="dossier-notes-add"
+            >
+                {{ 'admin.contacts.notes.add'|trans }}
+            </twig:Button>
+        </div>
+    </div>
+
+    {% if noteRows is not empty %}
+        <div class="rounded-b-xl bg-white px-5 py-4">
+            <ul class="divide-y divide-gray-950/5" role="list">
+                {% for row in noteRows %}
+                    {% set note = row.note %}
+                    <li class="animate-slide-in flex gap-3 py-4 first:pt-0 last:pb-0" data-controller="fade-exit" data-testid="dossier-note">
+                        <twig:Avatar filename="{{ note.authorAvatar }}" name="{{ note.authorName }}" size="8" />
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                                <p class="flex items-baseline gap-2 text-sm">
+                                    <span class="font-medium text-gray-900">{{ note.authorName }}</span>
+                                    <span class="text-xs text-gray-400 tabular-nums" title="{{ note.createdAt|format_datetime('medium', 'short') }}">{{ note.createdAt|human_date }}</span>
+                                </p>
+                                {% if this.editingNoteId != note.id and (row.canEdit or row.canDelete) %}
+                                    <p class="flex items-center gap-1">
+                                        {% if row.canEdit %}
+                                            <button
+                                                type="button"
+                                                data-action="live#action"
+                                                data-live-action-param="startEdit"
+                                                data-live-id-param="{{ note.id }}"
+                                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 hover:bg-neutral-100 hover:text-gray-900"
+                                                aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
+                                                title="{{ 'admin.contacts.notes.edit'|trans }}"
+                                            >
+                                                {{ ux_icon('lucide:pencil', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                            </button>
+                                        {% endif %}
+                                        {% if row.canDelete %}
+                                            <button
+                                                type="button"
+                                                data-action="fade-exit#run live#action"
+                                                data-live-action-param="delete"
+                                                data-live-id-param="{{ note.id }}"
+                                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 hover:bg-red-50 hover:text-red-600"
+                                                aria-label="{{ 'admin.contacts.notes.delete'|trans }}"
+                                                title="{{ 'admin.contacts.notes.delete'|trans }}"
+                                                data-testid="dossier-note-delete"
+                                            >
+                                                {{ ux_icon('lucide:trash-2', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+                                            </button>
+                                        {% endif %}
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            {% if this.editingNoteId == note.id %}
+                                <div class="mt-2 flex flex-col gap-2">
+                                    <textarea
+                                        data-model="norender|editingText"
+                                        data-action="keydown.enter->live#action:prevent"
+                                        data-live-action-param="saveEdit"
+                                        rows="3"
+                                        title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                    >{{ this.editingText }}</textarea>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button
+                                            type="button"
+                                            data-action="live#action"
+                                            data-live-action-param="cancelEdit"
+                                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                        >
+                                            {{ 'admin.contacts.notes.cancel'|trans }}
+                                        </button>
+                                        <twig:Button
+                                            size="sm"
+                                            data-action="live#action"
+                                            data-live-action-param="saveEdit"
+                                        >
+                                            {{ 'admin.contacts.notes.save'|trans }}
+                                        </twig:Button>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="mt-1 text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ note.text }}</p>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if this.hiddenFeedCount > 0 %}
+                <div class="flex justify-center border-t border-gray-950/5 pt-3">
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="showMoreFeed"
+                        class="cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        data-testid="dossier-notes-show-more"
+                    >
+                        {{ 'admin.contacts.notes.showMore'|trans({'%count%': this.hiddenFeedCount}) }}
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

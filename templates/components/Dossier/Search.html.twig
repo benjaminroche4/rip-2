@@ -1,0 +1,735 @@
+{# Carte "Recherche" éditable du détail dossier : mêmes champs et autosave
+   que Admin:ContactProject, persistés sur DossierSearch (snapshot séparé de
+   la demande de contact). Coque repliable identique à la card Projet. #}
+<section
+    {{ attributes.defaults({
+        class: 'rounded-3xl border border-neutral-200 bg-white p-2',
+        'data-controller': 'leave-guard',
+        'data-leave-guard-clean-event-value': 'dossier-search:saved',
+        'data-leave-guard-message-value': 'admin.contacts.project.unsaved'|trans,
+        'data-action': 'input->leave-guard#markDirty change->leave-guard#markDirty',
+    }) }}
+    data-testid="dossier-show-search"
+>
+    <details open class="group details-animated rounded-2xl bg-neutral-50 p-2">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.show.search.title'|trans }}</h2>
+                    {% if this.complete %}
+                        <span
+                            class="flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
+                            title="{{ 'admin.dossiers.show.search.complete'|trans }}"
+                            aria-label="{{ 'admin.dossiers.show.search.complete'|trans }}"
+                            data-testid="dossier-search-complete"
+                        >
+                            {{ ux_icon('lucide:check', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                        </span>
+                    {% else %}
+                        <span
+                            class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700"
+                            data-testid="dossier-search-incomplete"
+                        >
+                            {{ 'admin.dossiers.show.search.toComplete'|trans }}
+                        </span>
+                    {% endif %}
+                </div>
+                <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.search.subtitle'|trans }}</p>
+            </div>
+            <div class="flex shrink-0 items-center gap-1.5">
+                {# Cadenas anti-missclick : verrouillé par défaut à chaque
+                   chargement, les champs ne réagissent qu'une fois déverrouillés. #}
+                <button
+                    type="button"
+                    data-action="live#action:prevent:stop"
+                    data-live-action-param="toggleLock"
+                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg transition-colors duration-100 ease-out {{ this.locked ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-900' : 'bg-primary/10 text-primary hover:bg-primary/15' }}"
+                    aria-pressed="{{ this.locked ? 'false' : 'true' }}"
+                    aria-label="{{ (this.locked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
+                    title="{{ (this.locked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
+                    data-testid="dossier-search-lock"
+                >
+                    {{ ux_icon(this.locked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </button>
+                {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
+            </div>
+        </summary>
+        {# Verrouillé : seuls les contrôles sont désactivés (fieldset), le
+           contenu reste lisible, sans voile. #}
+        {% set currentDuration = this.currentStayDuration %}
+        {% set currentGuarantor = this.currentGuarantorType %}
+        {% set currentEarlyMoveIn = this.currentEarlyMoveIn %}
+        <div class="mt-1 flex flex-col gap-1">
+            <fieldset {% if this.locked %}disabled{% endif %} class="contents">
+            <div class="bg-white px-5 py-4 rounded-t-xl">
+                <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.search.section.essentials'|trans }}</h3>
+                <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+
+                <div class="min-w-0 space-y-2">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <label for="search-budget-{{ this.dossierId }}" class="block text-gray-600">{{ 'admin.contacts.project.budget'|trans }}</label>
+                        {% if this.budget != '' %}
+                            {% set budgetTier = this.budget <= 1000 ? 'low' : (this.budget <= 2500 ? 'good' : 'great') %}
+                            {% set budgetTierClass = {
+                                low: 'bg-red-50 text-red-600',
+                                good: 'bg-green-50 text-green-700',
+                                great: 'bg-green-100 text-green-800',
+                            }[budgetTier] %}
+                            <span class="truncate rounded-full px-2 py-0.5 text-xs font-medium {{ budgetTierClass }}">{{ ('admin.contacts.project.budgetTier.' ~ budgetTier)|trans }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="relative">
+                        <input
+                            id="search-budget-{{ this.dossierId }}"
+                            type="number"
+                            min="0"
+                            step="50"
+                            data-model="norender|budget"
+                            data-action="change->live#action keydown.enter->live#action:prevent"
+                            data-live-action-param="save"
+                            value="{{ this.budget }}"
+                            placeholder="2 200"
+                            class="w-full rounded-xl border border-neutral-200 bg-white py-2 pr-14 pl-3.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                        >
+                        <span class="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-xs text-gray-400">{{ 'admin.contacts.project.budgetUnit'|trans }}</span>
+                    </div>
+                    {# Règle des 3x : budget plafonné par les revenus des
+                       locataires (section Personnes), alerte sinon. #}
+                    {% set maxAffordableBudget = this.maxAffordableBudget %}
+                    {% if this.budget != '' and maxAffordableBudget is not null and this.budget > maxAffordableBudget %}
+                        <p class="flex items-center gap-1.5 text-xs text-red-600" role="alert" data-testid="budget-too-high">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.search.budgetTooHigh'|trans({'%max%': maxAffordableBudget|format_number}) }}
+                        </p>
+                    {% endif %}
+                    {# CC ou HC : le même montant change de sens à 200 € près. #}
+                    {% set currentBudgetCharges = this.currentBudgetCharges %}
+                    <div class="flex flex-wrap gap-2">
+                        {% for value in ['included', 'excluded'] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseBudgetCharges"
+                                data-live-value-param="{{ value }}"
+                                aria-pressed="{{ value == currentBudgetCharges ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ value == currentBudgetCharges ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="budget-charges-chip"
+                            >
+                                {{ ('admin.dossiers.show.search.budgetCharges.choice.' ~ value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <label for="search-movein-{{ this.dossierId }}" class="block text-gray-600">{{ 'admin.contacts.project.moveIn'|trans }}</label>
+                        {% if this.moveInAt %}
+                            {% set moveInDiff = date('today').diff(date(this.moveInAt)) %}
+                            {% set moveInUrgent = moveInDiff.invert == 0 and moveInDiff.days < 20 %}
+                            <span class="truncate rounded-full px-2 py-0.5 text-xs font-medium {{ moveInUrgent ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700' }}">{{ date(this.moveInAt)|relative_days }}</span>
+                        {% endif %}
+                    </div>
+                    <input
+                        id="search-movein-{{ this.dossierId }}"
+                        type="date"
+                        min="{{ 'now'|date('Y-m-d') }}"
+                        data-model="norender|moveInAt"
+                        data-action="change->live#action keydown.enter->live#action:prevent"
+                        data-live-action-param="save"
+                        value="{{ this.moveInAt }}"
+                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                    >
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.stayDuration.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for duration in this.stayDurations %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseStayDuration"
+                                data-live-duration-param="{{ duration.value }}"
+                                aria-pressed="{{ duration.value == currentDuration ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-baseline gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ duration.value == currentDuration ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="stay-duration-chip"
+                            >
+                                {{ duration.labelKey|trans }}
+                                <span class="text-xs font-normal {{ duration.value == currentDuration ? 'text-primary/60' : 'text-gray-400' }}">{{ duration.hintKey|trans }}</span>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.earlyMoveIn.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for value in ['yes', 'no'] %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseEarlyMoveIn"
+                                    data-live-value-param="{{ value }}"
+                                    aria-pressed="{{ value == currentEarlyMoveIn ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentEarlyMoveIn ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="early-move-in-chip"
+                                >
+                                    {{ ux_icon(value == 'yes' ? 'lucide:calendar-check' : 'lucide:calendar-x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ ('admin.dossiers.show.search.earlyMoveIn.choice.' ~ value)|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white px-5 py-4">
+                <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.search.section.location'|trans }}</h3>
+                <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                {% set importantAddresses = this.importantAddresses %}
+                {# Chaque adresse importante devient un pin badgé sur la map
+                   des quartiers (icône = type de lieu). #}
+                {% set addressPins = [] %}
+                {% for row in importantAddresses %}
+                    {% set addressPins = addressPins|merge([{
+                        lat: row.lat ?? null,
+                        lng: row.lng ?? null,
+                        address: row.address,
+                        type: row.type,
+                        label: ('admin.dossiers.show.search.importantAddresses.type.' ~ row.type)|trans ~ ' · ' ~ row.address,
+                    }]) %}
+                {% endfor %}
+                {# La carte n'est pas un contrôle de formulaire : on coupe ses
+                   clics quand le cadenas est fermé (le fieldset ne suffit pas). #}
+                <div class="min-w-0 space-y-2 sm:col-span-2 {{ this.locked ? 'pointer-events-none' }}" data-controller="district-picker" data-district-picker-pins-value="{{ addressPins|json_encode }}">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                    {# data-live-ignore : la carte n'est jamais touchée par les
+                       re-rendus live (data-skip-morph la remplacerait,
+                       détruisant l'instance Google Maps → écran blanc). #}
+                    <div data-live-ignore>
+                        {{ ux_map(this.map, {
+                            style: 'height: 260px; width: 100%;',
+                            class: 'overflow-hidden rounded-xl border border-neutral-200',
+                            'data-district-picker-target': 'map',
+                        }) }}
+                    </div>
+                    <input
+                        type="hidden"
+                        data-district-picker-target="input"
+                        data-model="norender|areas"
+                        data-action="change->live#action"
+                        data-live-action-param="save"
+                        value="{{ this.areas }}"
+                    >
+                    {% set areaChips = this.areaChips %}
+                    {% if areaChips is not empty %}
+                        <div class="flex flex-wrap gap-1.5 pt-1" data-testid="area-chips">
+                            {# Le badge entier retire le quartier au clic. #}
+                            {% for chip in areaChips %}
+                                <button
+                                    type="button"
+                                    data-action="district-picker#remove"
+                                    data-district-picker-code-param="{{ chip.code }}"
+                                    class="animate-slide-in flex cursor-pointer items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors duration-100 ease-out hover:border-primary/60 hover:bg-primary/10"
+                                    aria-label="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                    title="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                    data-testid="area-chip-remove"
+                                >
+                                    {{ ux_icon('lucide:map-pin', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ chip.label }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {# Adresses importantes (max 3, optionnel) : lieu qui compte
+                   pour le locataire, relié à Google (autocomplétion + lien
+                   vers Maps). #}
+                {% set addressTypeIcons = {
+                    work: 'lucide:briefcase',
+                    school: 'lucide:graduation-cap',
+                    daycare: 'lucide:baby',
+                    family: 'lucide:heart',
+                    gym: 'lucide:dumbbell',
+                    other: 'lucide:map-pin',
+                } %}
+                {% set canAddImportantAddress = importantAddresses|length < constant('App\\Dossier\\Twig\\Components\\SearchEditor::MAX_IMPORTANT_ADDRESSES') %}
+                <div class="min-w-0 space-y-2 sm:col-span-2">
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-gray-600">{{ 'admin.dossiers.show.search.importantAddresses.label'|trans }}</p>
+                        {% if canAddImportantAddress %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="addImportantAddress"
+                                class="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                                aria-label="{{ 'admin.dossiers.show.search.importantAddresses.add'|trans }}"
+                                title="{{ 'admin.dossiers.show.search.importantAddresses.add'|trans }}"
+                                data-testid="important-address-add"
+                            >
+                                {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            </button>
+                        {% endif %}
+                    </div>
+                    {% if importantAddresses is not empty %}
+                        <ul class="space-y-1.5" role="list">
+                            {% for row in importantAddresses %}
+                                <li class="animate-slide-in flex items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3 py-2" data-testid="important-address-row">
+                                    <span class="flex shrink-0 items-center gap-1.5 rounded-full bg-primary/5 py-0.5 pr-2.5 pl-1.5 text-xs font-medium text-primary">
+                                        {{ ux_icon(addressTypeIcons[row.type] ?? 'lucide:map-pin', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ ('admin.dossiers.show.search.importantAddresses.type.' ~ row.type)|trans }}
+                                    </span>
+                                    <a
+                                        href="https://www.google.com/maps/search/?api=1&query={{ row.address|url_encode }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="min-w-0 flex-1 truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary"
+                                        title="{{ 'admin.dossiers.show.search.importantAddresses.openInMaps'|trans }}"
+                                    >{{ row.address }}</a>
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="removeImportantAddress"
+                                        data-live-index-param="{{ loop.index0 }}"
+                                        class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                        aria-label="{{ 'admin.dossiers.show.search.importantAddresses.remove'|trans }}"
+                                        title="{{ 'admin.dossiers.show.search.importantAddresses.remove'|trans }}"
+                                        data-testid="important-address-remove"
+                                    >
+                                        {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if canAddImportantAddress %}
+                        <div class="flex gap-2" data-controller="places-autocomplete">
+                            {# Dropdown custom (même mécanique <details> que les
+                               statuts) pour le type de lieu du brouillon. #}
+                            {# Un <summary> n'est pas un contrôle de formulaire :
+                               le fieldset ne le désactive pas, on coupe donc
+                               ses clics quand le cadenas est fermé. #}
+                            <details
+                                class="relative shrink-0 {{ this.locked ? 'pointer-events-none' }}"
+                                data-controller="details-dropdown"
+                                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                            >
+                                <summary
+                                    class="flex w-32 cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
+                                    aria-label="{{ 'admin.dossiers.show.search.importantAddresses.typeLabel'|trans }}"
+                                    data-testid="important-address-type"
+                                >
+                                    {{ ux_icon(addressTypeIcons[this.addressTypeDraft] ?? 'lucide:map-pin', {class: 'size-3.5 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                                    <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ ('admin.dossiers.show.search.importantAddresses.type.' ~ this.addressTypeDraft)|trans }}</span>
+                                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                </summary>
+                                <div class="absolute left-0 z-10 mt-2 w-44 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                    {% for type in this.importantAddressTypes %}
+                                        <button
+                                            type="button"
+                                            data-action="live#action details-dropdown#close"
+                                            data-live-action-param="chooseAddressType"
+                                            data-live-type-param="{{ type }}"
+                                            class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ type == this.addressTypeDraft ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                            data-testid="important-address-type-choice"
+                                        >
+                                            {{ ux_icon(addressTypeIcons[type] ?? 'lucide:map-pin', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                            <span class="min-w-0 flex-1 truncate">{{ ('admin.dossiers.show.search.importantAddresses.type.' ~ type)|trans }}</span>
+                                            {% if type == this.addressTypeDraft %}
+                                                {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                            {% endif %}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </details>
+                            <div class="relative min-w-0 flex-1">
+                                {# Coordonnées de la sélection Places : elles
+                                   suivent le brouillon et permettent le pin
+                                   sans géocodage supplémentaire. #}
+                                <input type="hidden" data-places-autocomplete-target="lat" data-model="norender|addressLatDraft" value="{{ this.addressLatDraft }}">
+                                <input type="hidden" data-places-autocomplete-target="lng" data-model="norender|addressLngDraft" value="{{ this.addressLngDraft }}">
+                                <input
+                                    type="text"
+                                    data-places-autocomplete-target="input"
+                                    data-model="norender|addressDraft"
+                                    data-action="input->places-autocomplete#search keydown->places-autocomplete#navigate keydown.enter->live#action:prevent"
+                                    data-live-action-param="addImportantAddress"
+                                    value="{{ this.addressDraft }}"
+                                    role="combobox"
+                                    aria-expanded="false"
+                                    aria-autocomplete="list"
+                                    placeholder="{{ 'admin.dossiers.show.search.importantAddresses.placeholder'|trans }}"
+                                    aria-label="{{ 'admin.dossiers.show.search.importantAddresses.label'|trans }}"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="important-address-input"
+                                >
+                                <ul
+                                    data-places-autocomplete-target="results"
+                                    role="listbox"
+                                    class="absolute inset-x-0 top-full z-10 mt-1 hidden rounded-xl border border-neutral-200 bg-white p-1 shadow-lg"
+                                ></ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                </div>
+            </div>
+            <div class="bg-white px-5 py-4">
+                <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.search.section.property'|trans }}</h3>
+                <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                {% set propertyTypeIcons = {
+                    studio: 'lucide:door-open',
+                    t1: 'lucide:bed-single',
+                    t2: 'lucide:bed-double',
+                    t3: 'lucide:sofa',
+                    t4: 'lucide:building',
+                    large_apartment: 'lucide:building-2',
+                    duplex: 'lucide:layers',
+                    loft: 'lucide:warehouse',
+                    house: 'lucide:home',
+                } %}
+                <div class="min-w-0 space-y-2 sm:col-span-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.propertyType'|trans }}</p>
+                    {% set selectedTypes = this.selectedPropertyTypes %}
+                    <div class="flex flex-wrap gap-2">
+                        {% for type in this.propertyTypes %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="togglePropertyType"
+                                data-live-type-param="{{ type.value }}"
+                                aria-pressed="{{ type.value in selectedTypes ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ type.value in selectedTypes ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="property-type-chip"
+                            >
+                                {{ ux_icon(propertyTypeIcons[type.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('listProperty.form.propertyType.choice.' ~ type.value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% set selectedFurnishings = this.selectedFurnishings %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.furnishing.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for furnishing in this.furnishings %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseFurnishing"
+                                data-live-furnishing-param="{{ furnishing.value }}"
+                                aria-pressed="{{ furnishing.value in selectedFurnishings ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ furnishing.value in selectedFurnishings ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="furnishing-chip"
+                            >
+                                {{ ux_icon(furnishing.value == 'furnished' ? 'lucide:sofa' : 'lucide:package-open', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ furnishing.labelKey|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {# Type de bail souhaité : multi-sélection, chips avec durée
+                   indicative. #}
+                {% set selectedLeaseTypes = this.selectedLeaseTypes %}
+                {% set leaseTypeIcons = {
+                    civil_code: 'lucide:landmark',
+                    alur: 'lucide:scale',
+                    mobility: 'lucide:briefcase',
+                } %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.leaseType.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for lease in this.leaseTypes %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseLeaseType"
+                                data-live-lease-param="{{ lease }}"
+                                aria-pressed="{{ lease in selectedLeaseTypes ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-baseline gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ lease in selectedLeaseTypes ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="lease-type-chip"
+                            >
+                                {{ ('admin.dossiers.show.search.leaseType.choice.' ~ lease)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                    {# Garde-fou : bail incompatible avec la durée de séjour. #}
+                    {% set leaseMismatch = this.leaseMismatch %}
+                    {% if leaseMismatch %}
+                        <p class="flex items-center gap-1.5 text-xs text-red-600" role="alert" data-testid="lease-mismatch">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ leaseMismatch|trans }}
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="search-surface-{{ this.dossierId }}" class="block text-gray-600">{{ 'admin.dossiers.show.search.minSurface.label'|trans }}</label>
+                    <div class="relative">
+                        <input
+                            id="search-surface-{{ this.dossierId }}"
+                            type="number"
+                            min="0"
+                            step="5"
+                            data-model="norender|minSurface"
+                            data-action="change->live#action keydown.enter->live#action:prevent"
+                            data-live-action-param="save"
+                            value="{{ this.minSurface }}"
+                            placeholder="35"
+                            class="w-full rounded-xl border border-neutral-200 bg-white py-2 pr-14 pl-3.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            data-testid="min-surface-input"
+                        >
+                        <span class="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-xs text-gray-400">{{ 'admin.dossiers.show.search.minSurface.unit'|trans }}</span>
+                    </div>
+                </div>
+                {% set currentMinBedrooms = this.currentMinBedrooms %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.minBedrooms.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for count in [1, 2, 3, 4] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseMinBedrooms"
+                                data-live-count-param="{{ count }}"
+                                aria-pressed="{{ count == currentMinBedrooms ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums transition-colors duration-100 ease-out {{ count == currentMinBedrooms ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="min-bedrooms-chip"
+                            >
+                                {{ ux_icon('lucide:bed-double', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ count == 4 ? 'admin.dossiers.show.search.minBedrooms.fourPlus'|trans : count }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% set currentElevator = this.currentElevator %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.elevator.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for value in ['yes', 'no'] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseElevator"
+                                data-live-value-param="{{ value }}"
+                                aria-pressed="{{ value == currentElevator ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentElevator ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="elevator-chip"
+                            >
+                                {{ ux_icon(value == 'yes' ? 'lucide:check' : 'lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.dossiers.show.search.elevator.choice.' ~ value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% set currentParking = this.currentParking %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.parking.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for value in ['yes', 'no'] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseParking"
+                                data-live-value-param="{{ value }}"
+                                aria-pressed="{{ value == currentParking ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentParking ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="parking-chip"
+                            >
+                                {{ ux_icon(value == 'yes' ? 'lucide:check' : 'lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.dossiers.show.search.parking.choice.' ~ value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% set currentGroundFloor = this.currentGroundFloor %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.groundFloor.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for value in ['yes', 'no'] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseGroundFloor"
+                                data-live-value-param="{{ value }}"
+                                aria-pressed="{{ value == currentGroundFloor ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentGroundFloor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="ground-floor-chip"
+                            >
+                                {{ ux_icon(value == 'yes' ? 'lucide:check' : 'lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.dossiers.show.search.groundFloor.choice.' ~ value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% set currentTopFloor = this.currentTopFloor %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.topFloor.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for value in ['yes', 'no'] %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseTopFloor"
+                                data-live-value-param="{{ value }}"
+                                aria-pressed="{{ value == currentTopFloor ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentTopFloor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="top-floor-chip"
+                            >
+                                {{ ux_icon(value == 'yes' ? 'lucide:check' : 'lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.dossiers.show.search.topFloor.choice.' ~ value)|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="bg-white px-5 py-4">
+                <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.search.section.profile'|trans }}</h3>
+                <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.householdType.label'|trans }}</p>
+                        {# Dropdown custom (même mécanique <details> que les
+                           statuts); '' = non renseignée. #}
+                        {% set householdTypeIcons = {
+                            alone: 'lucide:user',
+                            couple: 'lucide:heart',
+                            family: 'lucide:users',
+                            flatshare: 'lucide:home',
+                            other: 'lucide:ellipsis',
+                        } %}
+                        {# Même verrou que l'autre dropdown : un <summary>
+                           échappe au fieldset disabled. #}
+                        <details
+                            class="relative {{ this.locked ? 'pointer-events-none' }}"
+                            data-controller="details-dropdown"
+                            data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                        >
+                            <summary
+                                class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
+                                aria-label="{{ 'admin.dossiers.show.search.householdType.label'|trans }}"
+                                data-testid="household-type-toggle"
+                            >
+                                {% if this.householdType %}
+                                    {{ ux_icon(householdTypeIcons[this.householdType] ?? 'lucide:ellipsis', {class: 'size-3.5 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                                    <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ ('admin.dossiers.show.search.householdType.choice.' ~ this.householdType)|trans }}</span>
+                                {% else %}
+                                    <span class="min-w-0 flex-1 truncate text-sm text-gray-400">{{ 'admin.dossiers.show.search.householdType.none'|trans }}</span>
+                                {% endif %}
+                                {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            </summary>
+                            <div class="absolute left-0 z-10 mt-2 w-52 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                <button
+                                    type="button"
+                                    data-action="live#action details-dropdown#close"
+                                    data-live-action-param="chooseHouseholdType"
+                                    data-live-value-param=""
+                                    class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.householdType == '' ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}"
+                                    data-testid="household-type-choice"
+                                >
+                                    <span class="min-w-0 flex-1 truncate">{{ 'admin.dossiers.show.search.householdType.none'|trans }}</span>
+                                </button>
+                                {% for type in this.householdTypes %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action details-dropdown#close"
+                                        data-live-action-param="chooseHouseholdType"
+                                        data-live-value-param="{{ type }}"
+                                        class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ type == this.householdType ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-testid="household-type-choice"
+                                    >
+                                        {{ ux_icon(householdTypeIcons[type] ?? 'lucide:ellipsis', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                        <span class="min-w-0 flex-1 truncate">{{ ('admin.dossiers.show.search.householdType.choice.' ~ type)|trans }}</span>
+                                        {% if type == this.householdType %}
+                                            {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                        {% endif %}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </div>
+
+                {# Critères optionnels : animaux, typologie du projet,
+                   emménagement anticipé. #}
+                {% set currentPets = this.currentPets %}
+                {% set currentEarlyMoveIn = this.currentEarlyMoveIn %}
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.pets.label'|trans }}</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% for value in ['yes', 'no'] %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="choosePets"
+                                    data-live-value-param="{{ value }}"
+                                    aria-pressed="{{ value == currentPets ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ value == currentPets ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    data-testid="pets-chip"
+                                >
+                                    {{ ux_icon(value == 'yes' ? 'lucide:paw-print' : 'lucide:ban', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ ('admin.dossiers.show.search.pets.choice.' ~ value)|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.guarantor.label'|trans }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        {% for guarantor in this.guarantorTypes %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="chooseGuarantorType"
+                                data-live-guarantor-param="{{ guarantor.value }}"
+                                aria-pressed="{{ guarantor.value == currentGuarantor ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor.value == currentGuarantor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="guarantor-chip"
+                            >
+                                {{ ux_icon({'physical': 'lucide:user-check', 'garantme': 'lucide:shield-check', 'bank': 'lucide:landmark'}[guarantor.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ guarantor.labelKey|trans }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="rounded-b-xl bg-white px-5 py-4">
+                <div class="text-sm">
+                <div class="min-w-0 space-y-2">
+                    <p class="text-gray-600">{{ 'admin.contacts.project.note.label'|trans }}</p>
+                    {% if this.editingNote %}
+                        <div class="space-y-1.5">
+                            <textarea
+                                data-model="norender|note"
+                                data-action="change->live#action keydown.enter->live#action:prevent"
+                                data-live-action-param="saveNote"
+                                rows="3"
+                                placeholder="{{ 'admin.contacts.project.note.placeholder'|trans }}"
+                                aria-label="{{ 'admin.contacts.project.note.label'|trans }}"
+                                title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            >{{ this.note }}</textarea>
+                            <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                {{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.contacts.project.note.autosaveHint'|trans }}
+                            </p>
+                        </div>
+                    {% else %}
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="min-w-0 flex-1 font-medium text-pretty whitespace-pre-line text-gray-900">{{ this.note }}</p>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="startEditingNote"
+                                class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
+                                title="{{ 'admin.contacts.notes.edit'|trans }}"
+                                data-testid="dossier-search-note-edit"
+                            >
+                                {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+                </div>
+            </div>
+            </fieldset>
+        </div>
+    </details>
+</section>

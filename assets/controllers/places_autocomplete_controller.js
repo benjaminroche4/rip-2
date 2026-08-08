@@ -16,6 +16,8 @@ import { Controller } from '@hotwired/stimulus'
  *  - results  (required) an empty <ul> (hidden) that receives the options
  *  - trigger  (optional) an element wired to a LiveAction; on select it receives
  *             data-live-lat/lng/arrondissement params and a `places-autocomplete:select` event.
+ *  - lat/lng  (optional) hidden inputs receiving the selected place coordinates;
+ *             cleared whenever the user edits the text again (stale coordinates).
  *
  * Values:
  *  - setInput (Boolean, default true) write the chosen address back into the input.
@@ -26,7 +28,7 @@ const DEBOUNCE_MS = 280
 const MAX_RESULTS = 5
 
 export default class extends Controller {
-    static targets = ['input', 'results', 'trigger']
+    static targets = ['input', 'results', 'trigger', 'lat', 'lng']
     static values = {
         setInput: { type: Boolean, default: true },
         // Optional: when the page has no Google Maps script yet (e.g. the estimation page),
@@ -81,6 +83,9 @@ export default class extends Controller {
 
     search() {
         clearTimeout(this.#timer)
+        // Any edit invalidates a previously selected place's coordinates.
+        // (#select re-fills them right after its own synthetic input event.)
+        this.#setCoords('', '')
         const query = this.inputTarget.value.trim()
         if (query.length < MIN_LENGTH || !this.#autocompleteService) {
             this.#clear()
@@ -248,6 +253,10 @@ export default class extends Controller {
                 const location = place.geometry?.location
                 const arrondissement = this.#arrondissementFrom(place.address_components)
 
+                if (location) {
+                    this.#setCoords(String(location.lat()), String(location.lng()))
+                }
+
                 if (this.hasTriggerTarget && location) {
                     this.triggerTarget.dataset.liveLatParam = String(location.lat())
                     this.triggerTarget.dataset.liveLngParam = String(location.lng())
@@ -261,6 +270,18 @@ export default class extends Controller {
                 this.#clear()
             },
         )
+    }
+
+    /** Sync the optional coordinate inputs (and their live model bindings). */
+    #setCoords(lat, lng) {
+        for (const [target, value] of [['lat', lat], ['lng', lng]]) {
+            const has = 'lat' === target ? this.hasLatTarget : this.hasLngTarget
+            if (!has) continue
+            const input = 'lat' === target ? this.latTarget : this.lngTarget
+            if (input.value === value) continue
+            input.value = value
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+        }
     }
 
     /** Keep only Paris predictions (the service biases but cannot strictly restrict). */

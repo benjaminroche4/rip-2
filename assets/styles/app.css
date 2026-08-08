@@ -360,6 +360,35 @@ turbo-frame#blog-list[busy] {
     .animate-card-in { animation: none; }
 }
 
+/* Progress bars (dossier timeline, list cards): the fill grows from zero on
+   load, animates smoothly on live width changes, and carries a soft moving
+   sheen. */
+@keyframes progress-grow {
+    from { width: 0; }
+}
+@keyframes progress-sheen {
+    from { transform: translateX(-150%); }
+    to { transform: translateX(350%); }
+}
+.progress-bar-fill {
+    position: relative;
+    overflow: hidden;
+    animation: progress-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: progress-sheen 2.6s ease-in-out 1.2s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    .progress-bar-fill { animation: none; transition: none; }
+    .progress-bar-fill::after { animation: none; opacity: 0; }
+}
+
 /* Collapsible <details> cards (admin): soft height animation on open/close.
    Uses ::details-content + interpolate-size; browsers without support just
    toggle instantly. */

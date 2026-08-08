@@ -6,10 +6,10 @@ namespace App\Dossier\Repository;
 
 use App\Dossier\Domain\ContactLanguage;
 use App\Dossier\Domain\DossierDetails;
-use App\Dossier\Domain\DossierNoteView;
 use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Domain\DossierSearchView;
 use App\Dossier\Domain\DossierSummary;
+use App\Contact\Entity\Contact;
 use App\Dossier\Entity\Dossier;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -35,9 +35,13 @@ class DossierRepository extends ServiceEntityRepository
         $dossiers = $this->createQueryBuilder('d')
             ->leftJoin('d.persons', 'p')
             ->addSelect('p')
+            ->leftJoin('d.manager', 'm')
+            ->addSelect('m')
             ->orderBy('d.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
+
+        $offersByContactReference = $this->findOffersByContactReference($dossiers);
 
         $summaries = [];
         foreach ($dossiers as $dossier) {
@@ -49,6 +53,13 @@ class DossierRepository extends ServiceEntityRepository
                 }
             }
 
+            $manager = $dossier->getManager();
+            $managerName = null;
+            if (null !== $manager) {
+                $managerName = trim(($manager->getFirstName() ?? '').' '.($manager->getLastName() ?? ''));
+                $managerName = '' !== $managerName ? $managerName : (string) $manager->getEmail();
+            }
+
             $summaries[] = new DossierSummary(
                 id: (int) $dossier->getId(),
                 name: (string) $dossier->getName(),
@@ -56,10 +67,80 @@ class DossierRepository extends ServiceEntityRepository
                 primaryTenantName: $primaryName,
                 personCount: $dossier->getPersons()->count(),
                 createdAt: $dossier->getCreatedAt() ?? new \DateTimeImmutable(),
+                managerName: $managerName,
+                managerAvatarFilename: $manager?->getAvatarFilename(),
+                offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
             );
         }
 
         return $summaries;
+    }
+
+    /**
+     * Package chosen on the source contacts, keyed by contact reference. One
+     * query for the whole list; dossiers created from scratch have no source
+     * contact and simply miss from the map.
+     *
+     * @param list<Dossier> $dossiers
+     *
+     * @return array<string, string>
+     */
+    private function findOffersByContactReference(array $dossiers): array
+    {
+        $references = [];
+        foreach ($dossiers as $dossier) {
+            if (null !== $dossier->getSourceContactReference()) {
+                $references[] = $dossier->getSourceContactReference();
+            }
+        }
+
+        if ([] === $references) {
+            return [];
+        }
+
+        /** @var list<array{reference: string, offer: string|null}> $rows */
+        $rows = $this->getEntityManager()->createQuery(
+            'SELECT c.reference, c.offer FROM '.Contact::class.' c WHERE c.reference IN (:references)'
+        )
+            ->setParameter('references', $references)
+            ->getArrayResult();
+
+        $offers = [];
+        foreach ($rows as $row) {
+            if (null !== $row['offer']) {
+                $offers[$row['reference']] = $row['offer'];
+            }
+        }
+
+        return $offers;
+    }
+
+    /**
+     * References of the previous / next dossier in list order (newest
+     * first), driving the detail-page navigation arrows.
+     *
+     * @return array{previous: ?string, next: ?string}
+     */
+    public function findAdjacentReferences(string $reference): array
+    {
+        /** @var list<array{reference: string}> $rows */
+        $rows = $this->createQueryBuilder('d')
+            ->select('d.reference')
+            ->orderBy('d.createdAt', 'DESC')
+            ->addOrderBy('d.id', 'DESC')
+            ->getQuery()
+            ->getScalarResult();
+
+        $references = array_column($rows, 'reference');
+        $index = array_search($reference, $references, true);
+        if (false === $index) {
+            return ['previous' => null, 'next' => null];
+        }
+
+        return [
+            'previous' => $references[$index - 1] ?? null,
+            'next' => $references[$index + 1] ?? null,
+        ];
     }
 
     /**
@@ -108,6 +189,10 @@ class DossierRepository extends ServiceEntityRepository
                 phone: $person->getPhone(),
                 language: $person->getLanguage() ?? ContactLanguage::FR,
                 primaryContact: $person->isPrimaryContact(),
+                profession: $person->getProfession(),
+                monthlyIncome: $person->getMonthlyIncome(),
+                birthDate: $person->getBirthDate(),
+                nationality: $person->getNationality(),
             );
         }
 
@@ -125,12 +210,7 @@ class DossierRepository extends ServiceEntityRepository
 
         $notes = [];
         foreach ($dossier->getNotes() as $note) {
-            $notes[] = new DossierNoteView(
-                text: $note->getText(),
-                createdAt: $note->getCreatedAt(),
-                authorName: $note->getAuthorName(),
-                authorAvatar: $note->getAuthorAvatar(),
-            );
+            $notes[] = DossierNoteRepository::toView($note);
         }
 
         return new DossierDetails(

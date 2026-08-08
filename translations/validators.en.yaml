@@ -151,3 +151,11 @@ resetPassword:
     empty: "Please enter a password."
     minLength: "Your password should be at least {{ limit }} characters."
     notMatch: "The password fields must match."
+deposit:
+    pairing:
+        email:
+            required: Please enter your email address.
+            invalid: This email address is not valid.
+        code:
+            required: Please enter the file code.
+            invalid: The code is 6 characters long.

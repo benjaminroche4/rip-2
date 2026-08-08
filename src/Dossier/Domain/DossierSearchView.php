@@ -23,15 +23,4 @@ final readonly class DossierSearchView
     ) {
     }
 
-    public function isEmpty(): bool
-    {
-        return null === $this->budget
-            && null === $this->areas
-            && null === $this->moveInAt
-            && null === $this->propertyType
-            && null === $this->stayDuration
-            && null === $this->furnishing
-            && null === $this->guarantorType
-            && null === $this->note;
-    }
 }

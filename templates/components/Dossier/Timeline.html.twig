@@ -1,0 +1,60 @@
+{# Card "Avancement" : barre début → installation souhaitée + badge de
+   statut. Composant live : se recalcule dès que l'éditeur de recherche émet
+   "dossier-search:changed" (ex. changement de la date d'installation). #}
+{% set timeline = this.timeline %}
+<div {{ attributes.defaults({class: 'contents'}) }}>
+    {% if timeline %}
+        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-facts">
+            <div class="rounded-2xl bg-neutral-50 p-2">
+                {# La barre se réchauffe (vert → ambre → rouge) à l'approche
+                   de l'échéance. #}
+                <div class="rounded-xl bg-white px-5 pt-4 pb-5" data-testid="dossier-show-timeline">
+                    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.show.timeline.title'|trans }}</h2>
+                        {# Statut lisible d'un coup d'œil : en retard ou non. #}
+                        {% if timeline.overdue %}
+                            <span class="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600 tabular-nums" data-testid="dossier-timeline-status-late">
+                                {{ ux_icon('lucide:alarm-clock-off', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.timeline.late'|trans }}
+                                ({{ 'admin.dossiers.show.timeline.daysLate'|trans({'%count%': timeline.days}) }})
+                            </span>
+                        {% elseif timeline.tone.value == 'green' %}
+                            <span class="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 tabular-nums" data-testid="dossier-timeline-status-ontrack">
+                                {{ ux_icon('lucide:circle-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.timeline.onTrack'|trans }}
+                                ({{ 'admin.dossiers.show.timeline.daysLeft'|trans({'%count%': timeline.days}) }})
+                            </span>
+                        {% else %}
+                            <span class="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 tabular-nums" data-testid="dossier-timeline-status-duesoon">
+                                {{ ux_icon('lucide:calendar-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.timeline.dueSoon'|trans }}
+                                ({{ 'admin.dossiers.show.timeline.daysLeft'|trans({'%count%': timeline.days}) }})
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                        <div
+                            class="progress-bar-fill h-full rounded-full bg-linear-to-r {{ {
+                                'green': 'from-[#8ebf7d] to-[#279d2f]',
+                                'amber': 'from-amber-300 to-amber-500',
+                                'red': 'from-red-400 to-red-600',
+                            }[timeline.tone.value] }}"
+                            style="width: {{ max(2, timeline.percent) }}%"
+                            data-testid="dossier-timeline-bar-{{ timeline.tone.value }}"
+                        ></div>
+                    </div>
+                    <div class="mt-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 text-xs">
+                        <p class="text-gray-600">
+                            {{ 'admin.dossiers.show.timeline.start'|trans }}
+                            <span class="font-medium text-gray-900 tabular-nums">{{ this.createdAt|format_datetime(pattern='dd MMM yyyy') }}</span>
+                        </p>
+                        <p class="text-gray-600">
+                            {{ 'admin.dossiers.show.timeline.moveIn'|trans }}
+                            <span class="font-medium text-gray-900 tabular-nums">{{ this.moveInAt|format_datetime(pattern='dd MMM yyyy') }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>

@@ -55,6 +55,13 @@ final class ContactProject
     #[LiveProp]
     public bool $editingProjectNote = false;
 
+    /**
+     * Anti-missclick shield: fields start locked on every page load and
+     * only mutate once explicitly unlocked via the padlock.
+     */
+    #[LiveProp]
+    public bool $locked = true;
+
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
@@ -76,9 +83,19 @@ final class ContactProject
     }
 
     #[LiveAction]
+    public function toggleLock(): void
+    {
+        $this->ensureAdmin();
+        $this->locked = !$this->locked;
+    }
+
+    #[LiveAction]
     public function saveProjectNote(): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         $this->repository->saveProjectNote($this->contactId, $this->projectNote);
         $this->projectNote = trim($this->projectNote);
@@ -158,6 +175,9 @@ final class ContactProject
     public function togglePropertyType(#[LiveArg] string $type): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         // A stale DOM mid-morph can fire with an empty arg: ignore, never 500.
         if ('' === $type) {
@@ -190,6 +210,9 @@ final class ContactProject
     public function chooseStayDuration(#[LiveArg] string $duration): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         if ('' === $duration) {
             return;
@@ -223,6 +246,9 @@ final class ContactProject
     public function chooseFurnishing(#[LiveArg] string $furnishing): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         if ('' === $furnishing) {
             return;
@@ -252,6 +278,9 @@ final class ContactProject
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         if ('' === $guarantor) {
             return;
@@ -268,6 +297,9 @@ final class ContactProject
     public function save(): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
 
         $budget = '' !== trim($this->budget) && is_numeric(trim($this->budget))
             ? max(0, (int) trim($this->budget))

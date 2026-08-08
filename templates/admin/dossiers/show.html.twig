@@ -8,13 +8,39 @@
         breadcrumbLabel="{{ 'admin.dossiers.title'|trans }}"
         breadcrumbUrl="{{ path('admin_dossiers', {adminPrefix: adminPrefix}) }}"
     >
-        <div class="flex shrink-0 flex-wrap items-center gap-3">
-            <twig:Dossier:ManagerPicker :dossierId="dossier.id" />
-            <span class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1 font-mono text-sm text-gray-700" data-testid="dossier-show-reference">
-                {{ ux_icon('lucide:hash', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                {{ dossier.reference }}
-            </span>
-        </div>
+        {# Prev/next arrows to move through the dossiers in list order. #}
+        <nav class="flex shrink-0 items-center gap-2" aria-label="{{ 'admin.dossiers.show.nav.label'|trans }}" data-testid="dossier-show-nav">
+            {% if adjacent.previous %}
+                <a
+                    href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: adjacent.previous}) }}"
+                    class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                    aria-label="{{ 'admin.dossiers.show.nav.previous'|trans }}"
+                    title="{{ 'admin.dossiers.show.nav.previous'|trans }}"
+                    data-testid="dossier-nav-previous"
+                >
+                    {{ ux_icon('lucide:chevron-left', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </a>
+            {% else %}
+                <span class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-300" aria-hidden="true">
+                    {{ ux_icon('lucide:chevron-left', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </span>
+            {% endif %}
+            {% if adjacent.next %}
+                <a
+                    href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: adjacent.next}) }}"
+                    class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                    aria-label="{{ 'admin.dossiers.show.nav.next'|trans }}"
+                    title="{{ 'admin.dossiers.show.nav.next'|trans }}"
+                    data-testid="dossier-nav-next"
+                >
+                    {{ ux_icon('lucide:chevron-right', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </a>
+            {% else %}
+                <span class="flex size-9 items-center justify-center rounded-xl border border-neutral-200 bg-white text-gray-300" aria-hidden="true">
+                    {{ ux_icon('lucide:chevron-right', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </span>
+            {% endif %}
+        </nav>
     </twig:Admin:PageHeader>
 {% endblock %}
 
@@ -23,203 +49,33 @@
        sticky (fil de suivi) en 1fr / 26rem, modules en pleine largeur. #}
     <div class="space-y-6" data-testid="dossier-show-page">
         <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
-        <div class="space-y-6">
-        {# ── Key facts ────────────────────────────────────────────────── #}
-        {# Same card vocabulary as the leads (ContactList / contact detail):
-           white shell, gray inner, white zones split by gradient dividers. #}
-        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-facts">
-            <div class="rounded-2xl bg-neutral-50 p-2">
-                <dl class="flex flex-col gap-y-4 rounded-xl bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
-                    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                        <dt class="text-gray-600">{{ 'admin.dossiers.show.facts.reference'|trans }}</dt>
-                        <dd class="font-mono font-medium text-gray-900">{{ dossier.reference }}</dd>
-                    </div>
-                    <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
-                    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                        <dt class="text-gray-600">{{ 'admin.dossiers.show.facts.pairingCode'|trans }}</dt>
-                        <dd class="font-mono font-medium tracking-widest text-gray-900" data-testid="dossier-show-pairing-code">{{ dossier.pairingCode }}</dd>
-                    </div>
-                    <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
-                    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-                        <dt class="text-gray-600">{{ 'admin.dossiers.show.facts.createdAt'|trans }}</dt>
-                        <dd class="font-medium text-gray-900">{{ dossier.createdAt|format_datetime('medium', 'short') }}</dd>
-                    </div>
-                </dl>
-            </div>
-        </section>
+        {# flex + gap plutôt que space-y : la racine `contents` du composant
+           Timeline ne porte pas de marge, et un dossier sans timeline ne doit
+           pas laisser d'écart fantôme avant le premier bloc. #}
+        <div class="flex flex-col gap-6">
+        {# ── Timeline (début → installation souhaitée), live ──────────── #}
+        <twig:Dossier:Timeline :dossierId="dossier.id" />
 
         {# ── Persons (inline add / edit / remove) ─────────────────────── #}
         <twig:Dossier:PersonsManager :dossierId="dossier.id" />
 
-        {# ── Search criteria ──────────────────────────────────────────── #}
-            <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-search">
-                <div class="flex h-full flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                <header class="flex items-center gap-2.5 p-3">
-                    {{ ux_icon('lucide:search', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                    <h2 class="text-sm font-semibold tracking-tight text-gray-900">
-                        {{ 'admin.dossiers.show.search.title'|trans }}
-                    </h2>
-                </header>
-                {% set search = dossier.search %}
-                {% if search is null or search.isEmpty %}
-                    <p class="flex-1 rounded-xl bg-white px-5 py-6 text-sm text-gray-400">{{ 'admin.dossiers.show.search.empty'|trans }}</p>
-                {% else %}
-                    <dl class="grid flex-1 grid-cols-1 gap-x-6 gap-y-4 rounded-xl bg-white p-5 text-sm sm:grid-cols-2">
-                        {% if search.budget %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.budget'|trans }}</dt>
-                                <dd class="mt-0.5 font-medium text-gray-900 tabular-nums">{{ search.budget }} {{ 'admin.contacts.project.budgetUnit'|trans }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.moveInAt %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.moveIn'|trans }}</dt>
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ search.moveInAt|format_datetime(pattern='dd.MM.yyyy') }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.areas %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.areas'|trans }}</dt>
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ search.areas }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.propertyType %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.propertyType'|trans }}</dt>
-                                {# CSV of listProperty type values ("t2,t3"); each part is
-                                   translated, unknown parts fall back to the raw text. #}
-                                {% set typeLabels = [] %}
-                                {% for part in search.propertyType|split(',')|map(p => p|trim)|filter(p => p != '') %}
-                                    {% set key = 'listProperty.form.propertyType.choice.' ~ part %}
-                                    {% set typeLabels = typeLabels|merge([key|trans != key ? key|trans : part]) %}
-                                {% endfor %}
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ typeLabels|join(', ') }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.stayDuration %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.stayDuration.label'|trans }}</dt>
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ ('admin.contacts.project.stayDuration.choice.' ~ search.stayDuration)|trans }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.furnishing %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.furnishing.label'|trans }}</dt>
-                                {# Multi-choice CSV ("furnished,unfurnished") — translate each part. #}
-                                {% set furnishingLabels = [] %}
-                                {% for part in search.furnishing|split(',')|map(p => p|trim)|filter(p => p != '') %}
-                                    {% set key = 'admin.contacts.project.furnishing.choice.' ~ part %}
-                                    {% set furnishingLabels = furnishingLabels|merge([key|trans != key ? key|trans : part]) %}
-                                {% endfor %}
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ furnishingLabels|join(', ') }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.guarantorType %}
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.guarantor.label'|trans }}</dt>
-                                <dd class="mt-0.5 font-medium text-gray-900">{{ ('admin.contacts.project.guarantor.choice.' ~ search.guarantorType)|trans }}</dd>
-                            </div>
-                        {% endif %}
-                        {% if search.note %}
-                            <div class="sm:col-span-2">
-                                <dt class="text-xs font-medium text-gray-500">{{ 'admin.contacts.project.note.label'|trans }}</dt>
-                                <dd class="mt-0.5 text-pretty text-gray-900">{{ search.note|nl2br }}</dd>
-                            </div>
-                        {% endif %}
-                    </dl>
-                {% endif %}
-                </div>
-            </section>
+        {# ── Search criteria (editable, mirrors the contact "Projet" card) ─ #}
+        <twig:Dossier:Search :dossierId="dossier.id" />
+
+        {# ── Modules: live, unlock as soon as the search becomes complete. ── #}
+        <twig:Dossier:Modules :dossierId="dossier.id" adminPrefix="{{ adminPrefix }}" />
         </div>
 
-        {# ── Follow-up thread (sticky sidebar, like the contact page) ─── #}
+        {# ── Follow-up card (sticky sidebar, like the contact page):
+              manager assignment chips + interactive notes thread. #}
         <div class="space-y-6 max-lg:mt-6 lg:sticky lg:top-6">
             <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-followup">
                 <div class="flex h-full flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                <header class="flex items-center gap-2.5 p-3">
-                    {{ ux_icon('lucide:messages-square', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                    <h2 class="text-sm font-semibold tracking-tight text-gray-900">
-                        {{ 'admin.contacts.notes.title'|trans }}
-                    </h2>
-                </header>
-                {% if dossier.notes is empty and dossier.sourceContactReference is null %}
-                    <p class="flex-1 rounded-xl bg-white px-5 py-6 text-sm text-gray-400">{{ 'admin.dossiers.show.followUp.empty'|trans }}</p>
-                {% else %}
-                    <ol class="flex-1 divide-y divide-gray-950/5 overflow-hidden rounded-xl bg-white" role="list">
-                        {% for note in dossier.notes|reverse %}
-                            <li class="flex items-start gap-3 px-5 py-4" data-testid="dossier-note">
-                                <twig:Avatar
-                                    filename="{{ note.authorAvatar }}"
-                                    name="{{ note.authorName }}"
-                                    size="8"
-                                />
-                                <div class="min-w-0 flex-1">
-                                    <p class="flex flex-wrap items-baseline gap-x-2 text-sm">
-                                        <span class="font-medium text-gray-900">{{ note.authorName }}</span>
-                                        <time datetime="{{ note.createdAt|date('c') }}" class="text-xs text-gray-400">
-                                            {{ note.createdAt|format_datetime('medium', 'short') }}
-                                        </time>
-                                    </p>
-                                    <p class="mt-1 text-sm text-pretty text-gray-700">{{ note.text|nl2br }}</p>
-                                </div>
-                            </li>
-                        {% endfor %}
-                        {% if dossier.sourceContactReference %}
-                            {# Origin event — always the oldest entry of the thread. #}
-                            <li class="flex items-center gap-3 bg-neutral-50/50 px-5 py-3.5" data-testid="dossier-origin">
-                                <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                                    {{ ux_icon('lucide:git-branch', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                </span>
-                                <p class="min-w-0 text-sm text-gray-600">
-                                    {{ 'admin.dossiers.show.followUp.origin'|trans }}
-                                    <a
-                                        href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: dossier.sourceContactReference}) }}"
-                                        class="font-medium text-primary transition-colors duration-100 hover:text-primary/80"
-                                        data-testid="dossier-origin-link"
-                                    >({{ dossier.sourceContactReference }})</a>
-                                </p>
-                            </li>
-                        {% endif %}
-                    </ol>
-                {% endif %}
+                    <twig:Dossier:Notes :dossierId="dossier.id" adminPrefix="{{ adminPrefix }}" />
                 </div>
             </section>
         </div>
         </div>
 
-        {# ── Modules (placeholders — no logic yet) ────────────────────── #}
-        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-modules">
-            <div class="rounded-2xl bg-neutral-50 p-2">
-            <h2 class="p-3 text-sm font-semibold tracking-tight text-gray-900">
-                {{ 'admin.dossiers.show.modules.title'|trans }}
-            </h2>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {% for module in [
-                    {key: 'file', icon: 'lucide:folder-open'},
-                    {key: 'visit', icon: 'lucide:calendar-check'},
-                    {key: 'payment', icon: 'lucide:credit-card'},
-                ] %}
-                    <article class="rounded-xl bg-white" data-testid="dossier-module-card">
-                        <div class="flex h-full flex-col items-center gap-3 rounded-xl p-5 text-center">
-                            <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                {{ ux_icon(module.icon, {class: 'size-5', 'aria-hidden': 'true'}) }}
-                            </div>
-                            <div class="space-y-1">
-                                <h3 class="text-sm font-semibold tracking-tight text-gray-900">
-                                    {{ ('admin.dossiers.show.modules.' ~ module.key ~ '.title')|trans }}
-                                </h3>
-                                <p class="text-xs text-pretty text-gray-500">
-                                    {{ ('admin.dossiers.show.modules.' ~ module.key ~ '.description')|trans }}
-                                </p>
-                            </div>
-                            <span class="mt-auto inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-500">
-                                {{ 'admin.dossiers.show.modules.comingSoon'|trans }}
-                            </span>
-                        </div>
-                    </article>
-                {% endfor %}
-            </div>
-            </div>
-        </section>
     </div>
 {% endblock %}

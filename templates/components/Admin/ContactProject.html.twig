@@ -14,9 +14,26 @@
                     <h2 class="font-medium text-gray-900">{{ 'admin.contacts.project.title'|trans }}</h2>
                     <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.project.subtitle'|trans }}</p>
                 </div>
-                {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
+                <div class="flex shrink-0 items-center gap-1.5">
+                    {# Cadenas anti-missclick : verrouillé par défaut à chaque
+                       chargement, les champs restent lisibles. #}
+                    <button
+                        type="button"
+                        data-action="live#action:prevent:stop"
+                        data-live-action-param="toggleLock"
+                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg transition-colors duration-100 ease-out {{ this.locked ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-900' : 'bg-primary/10 text-primary hover:bg-primary/15' }}"
+                        aria-pressed="{{ this.locked ? 'false' : 'true' }}"
+                        aria-label="{{ (this.locked ? 'admin.contacts.project.unlock' : 'admin.contacts.project.lock')|trans }}"
+                        title="{{ (this.locked ? 'admin.contacts.project.unlock' : 'admin.contacts.project.lock')|trans }}"
+                        data-testid="contact-project-lock"
+                    >
+                        {{ ux_icon(this.locked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    </button>
+                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
+                </div>
             </summary>
             <div class="mt-1 flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
+                <fieldset {% if this.locked %}disabled{% endif %} class="contents">
                 <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                     <div class="min-w-0 space-y-2">
                         <div class="flex items-baseline justify-between gap-3">
@@ -67,7 +84,9 @@
                             class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
                         >
                     </div>
-                    <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker">
+                    {# La carte n'est pas un contrôle de formulaire : clics
+                       coupés quand le cadenas est fermé. #}
+                    <div class="min-w-0 space-y-2 sm:col-span-2 {{ this.locked ? 'pointer-events-none' }}" data-controller="district-picker">
                         <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
                         {# data-live-ignore : la carte n'est jamais touchée par
                            les re-rendus live (data-skip-morph la remplacerait,
@@ -240,6 +259,7 @@
                         {% endif %}
                     </div>
                 </div>
+                </fieldset>
             </div>
         </details>
     </div>

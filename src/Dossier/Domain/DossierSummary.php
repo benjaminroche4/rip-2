@@ -17,6 +17,10 @@ final readonly class DossierSummary
         public ?string $primaryTenantName,
         public int $personCount,
         public \DateTimeImmutable $createdAt,
+        public ?string $managerName = null,
+        public ?string $managerAvatarFilename = null,
+        /** Package chosen on the source contact ("accompagne" or "confie"). */
+        public ?string $offer = null,
     ) {
     }
 }

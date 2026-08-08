@@ -151,3 +151,11 @@ resetPassword:
     empty: "Veuillez entrer un mot de passe."
     minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."
     notMatch: "Les mots de passe ne correspondent pas."
+deposit:
+    pairing:
+        email:
+            required: Veuillez renseigner votre adresse email.
+            invalid: Cette adresse email n'est pas valide.
+        code:
+            required: Veuillez renseigner le code du dossier.
+            invalid: Le code fait 6 caractères.

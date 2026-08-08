@@ -89,6 +89,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
         $component->moveInAt = (new \DateTimeImmutable('-1 day'))->format('Y-m-d');
         $component->save();
@@ -103,6 +104,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
 
         $component->togglePropertyType('t3');
@@ -130,6 +132,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
 
         $component->chooseStayDuration('medium');
@@ -151,6 +154,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
 
         $component->chooseFurnishing('furnished');
@@ -184,6 +188,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
         self::assertTrue($component->editingProjectNote, 'Empty note starts in edit mode.');
 
@@ -437,6 +442,7 @@ final class ContactQualificationTest extends KernelTestCase
         $this->loginAsAdmin();
 
         $component = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        $component->toggleLock(); // fields start locked (anti-missclick)
         $component->setLiveResponder(new LiveResponder());
         $component->budget = ' 2200 ';
         $component->areas = '  11e, 18e  ';

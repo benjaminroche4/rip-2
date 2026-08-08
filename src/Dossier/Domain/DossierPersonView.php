@@ -18,6 +18,16 @@ final readonly class DossierPersonView
         public ?string $phone,
         public ContactLanguage $language,
         public bool $primaryContact,
+        public ?string $profession = null,
+        public ?int $monthlyIncome = null,
+        public ?\DateTimeImmutable $birthDate = null,
+        public ?string $nationality = null,
+        public bool $noProfession = false,
+        public ?string $employer = null,
+        public ?string $jobTitle = null,
+        public ?\DateTimeImmutable $contractStartDate = null,
+        public ?\DateTimeImmutable $contractEndDate = null,
+        public bool $trialPeriodOver = false,
     ) {
     }
 

@@ -8,6 +8,9 @@ parameters:
     admin_path_prefix: '%env(string:ADMIN_PATH_PREFIX)%'
     allo_api_key: '%env(string:ALLO_API_KEY)%'
     allo_phone_number: '%env(string:ALLO_PHONE_NUMBER)%'
+    # Deposited dossier documents live outside public/ and outside var/
+    # (cache:clear / deploy safe). Served via authenticated controllers only.
+    dossier_storage_dir: '%kernel.project_dir%/storage/dossiers'
 
 services:
     # default configuration for services in *this* file
@@ -36,3 +39,9 @@ services:
             $sanityApiVersion: '%env(SANITY_API_VERSION)%'
             $sanityToken: '%env(SANITY_TOKEN)%'
             $sanityUseCdn: '%env(bool:SANITY_USE_CDN)%'
+
+when@test:
+    parameters:
+        # Keep test uploads under var/ so the suite never writes into the
+        # real storage/ directory and leftovers vanish with cache:clear.
+        dossier_storage_dir: '%kernel.project_dir%/var/test-storage/dossiers'

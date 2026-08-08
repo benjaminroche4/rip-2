@@ -41,6 +41,26 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $users;
     }
 
+    /**
+     * Admin-space staff (admins and editors), assignable on dossiers.
+     *
+     * @return list<User>
+     */
+    public function findStaff(): array
+    {
+        /** @var list<User> $users */
+        $users = $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :admin OR u.roles LIKE :editor')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('editor', '%ROLE_EDITOR%')
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $users;
+    }
+
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {

@@ -96,6 +96,8 @@ final class PersonsManagerTest extends KernelTestCase
         $component->savePerson();
 
         self::assertSame([], $component->errors);
+        // The explicit validate button closes the inline form on success.
+        self::assertNull($component->editId);
         $this->em->clear();
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
         $person = $fresh->getPersons()->first();
@@ -105,12 +107,180 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertSame('Lefebvre', $fresh->getName());
     }
 
-    public function testRemovingThePrimaryTenantReassignsTheTag(): void
+    public function testProfessionAndIncomePersistOnSave(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->profession = 'cdi';
+        $component->monthlyIncome = ' 3200 ';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertSame('cdi', $person->getProfession());
+        self::assertSame(3200, $person->getMonthlyIncome());
+
+        // Both optional: clearing them empties the columns.
+        $component->startEdit($tenant->getId());
+        self::assertSame('cdi', $component->profession);
+        $component->profession = '';
+        $component->monthlyIncome = '';
+        $component->savePerson();
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertNull($person->getProfession());
+        self::assertNull($person->getMonthlyIncome());
+    }
+
+    public function testProFieldsPersistAndFollowTheSituation(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        // CDI: employer, job title, start date and trial flag all exist.
+        $component->startEdit($tenant->getId());
+        $component->profession = 'cdi';
+        $component->employer = '  Acme Corp  ';
+        $component->jobTitle = 'Product Designer';
+        $component->contractStart = '2024-02-01';
+        $component->contractEnd = '2026-12-31';
+        $component->trialOver = true;
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertSame('Acme Corp', $person->getEmployer());
+        self::assertSame('Product Designer', $person->getJobTitle());
+        self::assertSame('2024-02-01', $person->getContractStartDate()?->format('Y-m-d'));
+        self::assertTrue($person->isTrialPeriodOver());
+        // The end date does not exist for a CDI: never silently kept.
+        self::assertNull($person->getContractEndDate());
+
+        // Switching to student clears the fields that no longer exist.
+        $component->startEdit($tenant->getId());
+        $component->profession = 'student';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertNull($person->getEmployer());
+        self::assertNull($person->getJobTitle());
+        self::assertNull($person->getContractStartDate());
+        self::assertFalse($person->isTrialPeriodOver());
+    }
+
+    public function testContractEndBeforeStartIsRejected(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->profession = 'cdd';
+        $component->contractStart = '2026-06-01';
+        $component->contractEnd = '2026-01-01';
+        $component->savePerson();
+
+        self::assertSame('admin.dossiers.show.persons.pro.contractEnd.invalid', $component->errors['contractEnd'] ?? null);
+    }
+
+    public function testNoProfessionClearsTheWholeProPane(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->profession = 'cdi';
+        $component->employer = 'Acme Corp';
+        $component->monthlyIncome = '3200';
+        $component->savePerson();
+        self::assertSame([], $component->errors);
+
+        // "No professional activity" (the spouse works): everything empties.
+        $component->startEdit($tenant->getId());
+        $component->noProfession = true;
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertTrue($person->isNoProfession());
+        self::assertNull($person->getProfession());
+        self::assertNull($person->getEmployer());
+        self::assertNull($person->getMonthlyIncome());
+    }
+
+    public function testBirthDateAndNationalityPersistOnSave(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->birthDate = '1998-05-12';
+        $component->nationality = 'fr';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $person = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first();
+        self::assertSame('1998-05-12', $person->getBirthDate()?->format('Y-m-d'));
+        self::assertSame('FR', $person->getNationality());
+
+        // Future date and unknown country are rejected.
+        $component->startEdit($tenant->getId());
+        $component->birthDate = (new \DateTimeImmutable('+1 day'))->format('Y-m-d');
+        $component->nationality = 'ZZ';
+        $component->savePerson();
+        self::assertSame('admin.dossiers.create.person.birthDate.invalid', $component->errors['birthDate'] ?? null);
+        self::assertSame('admin.dossiers.create.person.nationality.invalid', $component->errors['nationality'] ?? null);
+    }
+
+    public function testInvalidProfessionOrIncomeBlocksSave(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->profession = 'astronaut';
+        $component->monthlyIncome = 'beaucoup';
+        $component->savePerson();
+
+        self::assertSame('admin.dossiers.create.person.profession.invalid', $component->errors['profession'] ?? null);
+        self::assertSame('admin.dossiers.create.person.income.invalid', $component->errors['monthlyIncome'] ?? null);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getPersons()->first()->getProfession());
+    }
+
+    public function testCannotRemoveThePrimaryTenant(): void
+    {
+        $dossier = $this->persistDossier(withSecondTenant: true);
+        [$primary] = $dossier->getPersons()->toArray();
+        $component = $this->mountManager($dossier);
+
+        $component->removePerson($primary->getId());
+
+        self::assertSame('admin.dossiers.show.persons.primaryLocked', $component->errors['global'] ?? null);
+        $this->em->clear();
+        self::assertCount(2, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+    }
+
+    public function testFormerPrimaryCanLeaveOnceTheTagMoved(): void
     {
         $dossier = $this->persistDossier(withSecondTenant: true);
         [$primary, $second] = $dossier->getPersons()->toArray();
         $component = $this->mountManager($dossier);
 
+        $component->makePrimary($second->getId());
         $component->removePerson($primary->getId());
 
         self::assertSame([], $component->errors);
@@ -144,7 +314,9 @@ final class PersonsManagerTest extends KernelTestCase
 
         $component->removePerson($tenant->getId());
 
-        self::assertSame('admin.dossiers.create.persons.tenantRequired', $component->errors['global'] ?? null);
+        // The only tenant carries the primary tag, so the primary guard
+        // fires first.
+        self::assertSame('admin.dossiers.show.persons.primaryLocked', $component->errors['global'] ?? null);
         $this->em->clear();
         self::assertCount(2, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
     }
@@ -234,6 +406,69 @@ final class PersonsManagerTest extends KernelTestCase
         $this->em->flush();
 
         return $dossier;
+    }
+
+    public function testRemovalGoesThroughTheConfirmationModal(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        $component->startAdd();
+        $component->role = DossierPersonRole::FOLLOW_UP->value;
+        $component->firstName = 'Marie';
+        $component->lastName = 'Durand';
+        $component->email = 'marie@example.com';
+        $component->savePerson();
+        $this->em->clear();
+        $followUpId = (int) $this->em->find(Dossier::class, $dossier->getId())->getPersons()->last()->getId();
+
+        // Asking opens the modal, nothing is removed yet.
+        $component->askRemove($followUpId);
+        self::assertSame($followUpId, $component->confirmRemoveId);
+        $this->em->clear();
+        self::assertCount(2, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+
+        // Cancelling closes it without removing.
+        $component->cancelRemove();
+        self::assertNull($component->confirmRemoveId);
+        $this->em->clear();
+        self::assertCount(2, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+
+        // Confirming removes the person and closes the modal.
+        $component->askRemove($followUpId);
+        $component->removePerson($followUpId);
+        self::assertNull($component->confirmRemoveId);
+        $this->em->clear();
+        self::assertCount(1, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+    }
+
+    public function testNonTenantRolesSaveWithAnEmptyProfessionalPane(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        // The pane is hidden client-side for non-tenants; a stale DOM could
+        // still post values, the server mirrors the rule and drops them.
+        $component->startAdd();
+        $component->role = DossierPersonRole::FOLLOW_UP->value;
+        $component->firstName = 'Marie';
+        $component->lastName = 'Durand';
+        $component->email = 'marie@example.com';
+        $component->profession = 'cdi';
+        $component->employer = 'ACME';
+        $component->jobTitle = 'Dev';
+        $component->monthlyIncome = '3000';
+        $component->savePerson();
+
+        self::assertSame([], $component->errors);
+        $this->em->clear();
+        $added = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->last();
+        self::assertSame(DossierPersonRole::FOLLOW_UP, $added->getRole());
+        self::assertNull($added->getProfession());
+        self::assertNull($added->getEmployer());
+        self::assertNull($added->getJobTitle());
+        self::assertNull($added->getMonthlyIncome());
+        self::assertFalse($added->isNoProfession());
     }
 
     private function mountManager(Dossier $dossier): object

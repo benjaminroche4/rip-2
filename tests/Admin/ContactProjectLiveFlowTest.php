@@ -58,6 +58,8 @@ final class ContactProjectLiveFlowTest extends WebTestCase
         $csrf = $node->attr('data-live-csrf-value');
         $url = $node->attr('data-live-url-value');
 
+        // Unlock the fields first (anti-missclick padlock, locked by default).
+        $props = $this->action($client, $url, $csrf, $props, 'toggleLock', []);
         // First click: t2
         $props = $this->click($client, $url, $csrf, $props, 't2');
         // Second click: t3
@@ -70,13 +72,19 @@ final class ContactProjectLiveFlowTest extends WebTestCase
     /** @return array live props after re-render */
     private function click(KernelBrowser $client, string $url, ?string $csrf, array $props, string $type): array
     {
+        return $this->action($client, $url, $csrf, $props, 'togglePropertyType', ['type' => $type]);
+    }
+
+    /** @return array live props after re-render */
+    private function action(KernelBrowser $client, string $url, ?string $csrf, array $props, string $action, array $args): array
+    {
         $client->request(
             'POST',
-            $url.'/togglePropertyType',
+            $url.'/'.$action,
             [
                 'data' => json_encode([
                     'props' => $props,
-                    'args' => ['type' => $type],
+                    'args' => $args,
                 ]),
             ],
             [],

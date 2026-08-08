@@ -1,0 +1,250 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Dossier;
+
+use App\Auth\Entity\User;
+use App\Dossier\Domain\DossierPersonRole;
+use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierNote;
+use App\Dossier\Entity\DossierPerson;
+use App\Dossier\Security\DossierNoteVoter;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\UX\LiveComponent\LiveResponder;
+use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
+
+/**
+ * Dossier:Notes behaviour: interactive follow-up thread (add / edit / delete
+ * with the voter, pagination) plus the manager assignment chips, mirroring
+ * the contact detail page.
+ */
+final class DossierNotesTest extends KernelTestCase
+{
+    use InteractsWithTwigComponents;
+
+    private EntityManagerInterface $em;
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+        $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
+        $this->em->createQuery('DELETE FROM '.Dossier::class)->execute();
+        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@dossier-notes-test.local')->execute();
+    }
+
+    public function testAdminCanAddANote(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->newNote = '  Premier point avec la famille.  ';
+        $component->add();
+
+        $feed = $component->getFeed();
+        self::assertCount(1, $feed);
+        self::assertSame('Premier point avec la famille.', $feed[0]['note']->text);
+        self::assertSame('Admin Staff', $feed[0]['note']->authorName);
+        self::assertSame('', $component->newNote);
+    }
+
+    public function testEmptyNoteIsIgnored(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->newNote = '   ';
+        $component->add();
+
+        self::assertCount(0, $component->getFeed());
+    }
+
+    public function testAuthorCanEditTheirNote(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $note = $this->persistNote($dossier, (int) $admin->getId(), 'Premier jet');
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->startEdit((int) $note->getId());
+        self::assertSame('Premier jet', $component->editingText);
+
+        $component->editingText = 'Version corrigée';
+        $component->saveEdit();
+
+        self::assertNull($component->editingNoteId);
+        self::assertSame('Version corrigée', $component->getFeed()[0]['note']->text);
+    }
+
+    public function testDeleteRemovesTheNote(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $note = $this->persistNote($dossier, (int) $admin->getId(), 'À supprimer');
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->delete((int) $note->getId());
+
+        self::assertCount(0, $component->getFeed());
+    }
+
+    public function testFeedPagination(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        for ($i = 1; $i <= 7; ++$i) {
+            $this->persistNote($dossier, (int) $admin->getId(), 'Note '.$i);
+        }
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+
+        self::assertCount(5, $component->getFeed());
+        self::assertSame(2, $component->getHiddenFeedCount());
+
+        $component->showMoreFeed();
+        self::assertCount(7, $component->getFeed());
+        self::assertSame(0, $component->getHiddenFeedCount());
+    }
+
+    public function testAssignsAndUnassignsTheManager(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $editor = $this->persistUser('editor', ['ROLE_EDITOR']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        self::assertNull($component->getManager());
+
+        $component->assignManager((int) $editor->getId());
+        self::assertSame($editor->getId(), $component->getManager()?->id);
+        $this->em->clear();
+        self::assertSame($editor->getId(), $this->em->find(Dossier::class, $dossier->getId())->getManager()?->getId());
+
+        $component->assignManager(0);
+        self::assertNull($component->getManager());
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getManager());
+    }
+
+    public function testCannotAssignARegularUser(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $plain = $this->persistUser('plain', []);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $component->assignManager((int) $plain->getId());
+    }
+
+    public function testNonAdminCannotMount(): void
+    {
+        $user = $this->persistUser('plain', []);
+        $this->loginAs($user);
+
+        $this->expectException(AccessDeniedException::class);
+        $this->mountTwigComponent('Dossier:Notes', ['dossierId' => 1, 'adminPrefix' => 'x']);
+    }
+
+    public function testVoterAllowsAuthorAndAdminOnly(): void
+    {
+        $dossier = $this->persistDossier();
+        $author = $this->persistUser('author', []);
+        $other = $this->persistUser('other', []);
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $note = $this->persistNote($dossier, (int) $author->getId(), 'Ma note');
+
+        $checker = self::getContainer()->get('security.authorization_checker');
+
+        $this->loginAs($author);
+        self::assertTrue($checker->isGranted(DossierNoteVoter::EDIT, $note), 'Author can edit their note.');
+
+        $this->loginAs($other);
+        self::assertFalse($checker->isGranted(DossierNoteVoter::EDIT, $note), 'Another non-admin user cannot.');
+        self::assertFalse($checker->isGranted(DossierNoteVoter::DELETE, $note));
+
+        $this->loginAs($admin);
+        self::assertTrue($checker->isGranted(DossierNoteVoter::DELETE, $note), 'Admin can always.');
+    }
+
+    private function persistDossier(): Dossier
+    {
+        $tenant = (new DossierPerson())
+            ->setRole(DossierPersonRole::TENANT)
+            ->setFirstName('Jean')
+            ->setLastName('Dupont')
+            ->setEmail('jean@example.com')
+            ->setPrimaryContact(true);
+        $dossier = (new Dossier())
+            ->setName('Dupont')
+            ->setReference('DS-000042')
+            ->setPairingCode('ABE78L')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->addPerson($tenant);
+        $this->em->persist($dossier);
+        $this->em->flush();
+
+        return $dossier;
+    }
+
+    private function persistNote(Dossier $dossier, int $authorId, string $text): DossierNote
+    {
+        $note = (new DossierNote())
+            ->setDossier($dossier)
+            ->setText($text)
+            ->setAuthorId($authorId)
+            ->setAuthorName('Admin Staff');
+
+        $this->em->persist($note);
+        $this->em->flush();
+
+        return $note;
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    private function persistUser(string $slug, array $roles): User
+    {
+        $user = (new User())
+            ->setEmail($slug.'-'.bin2hex(random_bytes(3)).'@dossier-notes-test.local')
+            ->setFirstName(ucfirst($slug))->setLastName('Staff')
+            ->setRoles($roles)->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return $user;
+    }
+
+    private function mountNotes(Dossier $dossier): object
+    {
+        $component = $this->mountTwigComponent('Dossier:Notes', [
+            'dossierId' => (int) $dossier->getId(),
+            'adminPrefix' => 'test-prefix',
+        ]);
+        $component->setLiveResponder(new LiveResponder());
+
+        return $component;
+    }
+
+    private function loginAs(User $user): void
+    {
+        $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+        self::getContainer()->get('security.token_storage')->setToken($token);
+    }
+}

@@ -49,3 +49,7 @@
 
 /public/.htaccess
 .htaccess
+
+###> dossier document storage ###
+/storage/
+###< dossier document storage ###

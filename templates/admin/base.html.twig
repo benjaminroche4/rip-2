@@ -75,6 +75,21 @@
                             {{ _self.navItems([
                                 {route: 'admin_contacts', icon: 'lucide:user-plus', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
                                 {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_ADMIN'},
+                            ], currentRoute, adminPrefix) }}
+                            {# Entrée "Visites" sans page pour l'instant (module à venir). #}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <li>
+                                    <a
+                                        href="#"
+                                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                                        data-testid="nav-visits"
+                                    >
+                                        {{ ux_icon('lucide:calendar-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ 'admin.nav.visits'|trans }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {{ _self.navItems([
                                 {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
                             ], currentRoute, adminPrefix) }}
                         </ul>

@@ -1799,13 +1799,13 @@ admin:
         users: Utilisateurs
         contacts: Leads
         dossiers: Dossiers
+        visits: Visites
         payments: Paiements
         tools: Outils
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
     dossiers:
         title: Dossiers
-        subtitle: Suivi des dossiers clients
         empty:
             title: Aucun dossier pour le moment
             description: Créez votre premier dossier avec le bouton ci-dessus.
@@ -1813,32 +1813,210 @@ admin:
             primaryTenant: 'Locataire principal : %name%'
             personCount: '{1}1 personne|]1,Inf[%count% personnes'
             viewMore: Voir le dossier
+        card:
+            type:
+                individual: Individuel
+                family: Famille
+            status:
+                inProgress: En cours
+            filesStatus:
+                label: Statut des pièces
+                completed: Complet
+            package:
+                label: Formule
+            progress:
+                title: Avancement de la relocation
+                started: 'Début :'
+                estimatedFinish: 'Fin estimée :'
+            stats:
+                upcomingVisits: Visites à venir
+                totalVisits: Visites au total
+                rejections: Refus
+            managedBy: 'Géré par :'
+            noManager: Non assigné
         show:
-            noPhone: Pas de téléphone
             persons:
                 edit: Modifier
                 save: Enregistrer
                 newTitle: Nouvelle personne
+                primaryLocked: Le locataire principal ne peut pas être retiré. Transférez d'abord le rôle à un autre locataire.
+                removeConfirm:
+                    title: Supprimer cette personne ?
+                    text: '%name% sera retiré du dossier, avec ses informations et ses pièces demandées. Cette action est définitive.'
+                    confirm: Supprimer
+                pro:
+                    none: Sans activité professionnelle
+                    employer: Employeur
+                    jobTitle: Intitulé de poste
+                    contractStart:
+                        label: Début de contrat
+                        invalid: Date de début invalide.
+                    contractEnd:
+                        label: Fin de contrat
+                        invalid: La fin de contrat doit être après le début.
+                    trialOver: Période d'essai validée
+                    trialBadge: Essai validé
+                    seniorityYears: depuis %count% an|depuis %count% ans
+                    seniorityMonths: depuis %count% mois
             facts:
-                reference: Numéro de dossier
-                pairingCode: Code d'appairage
                 createdAt: Créé le
             manager:
                 label: Responsable de dossier
-                assign: Assigner un responsable
                 remove: Retirer le responsable
+            nav:
+                label: Navigation entre dossiers
+                previous: Dossier précédent
+                next: Dossier suivant
+            timeline:
+                title: Avancement
+                start: 'Début du dossier :'
+                moveIn: 'Installation souhaitée :'
+                onTrack: Dans les temps
+                dueSoon: Échéance proche
+                late: En retard
+                daysLeft: 'J-%count%'
+                daysLate: 'J+%count%'
             search:
                 title: Recherche
-                empty: Aucun critère renseigné pour le moment.
+                subtitle: Critères de recherche du locataire
+                toComplete: À compléter
+                complete: Recherche complète
+                section:
+                    essentials: Budget & échéance
+                    location: Localisation
+                    property: Le logement
+                    profile: Profil du locataire
+                pets:
+                    label: Animaux de compagnie
+                    choice:
+                        'yes': Oui
+                        'no': Non
+                householdType:
+                    label: Typologie du projet
+                    none: Non renseignée
+                    choice:
+                        alone: Personne seule
+                        couple: Couple
+                        family: Famille
+                        flatshare: Colocation
+                        other: Autre
+                earlyMoveIn:
+                    label: Emménagement anticipé possible
+                    choice:
+                        'yes': Oui
+                        'no': Non
+                leaseType:
+                    label: Type de bail souhaité
+                    choice:
+                        civil_code: Code civil
+                        alur: Loi ALUR
+                        mobility: Bail mobilité
+                minSurface:
+                    label: Surface minimale
+                    unit: m²
+                minBedrooms:
+                    label: Chambres minimum
+                    fourPlus: 4+
+                elevator:
+                    label: Ascenseur obligatoire
+                    choice:
+                        'yes': Oui
+                        'no': Non
+                groundFloor:
+                    label: Rez-de-chaussée
+                    choice:
+                        'yes': Accepté
+                        'no': Exclu
+                topFloor:
+                    label: Dernier étage
+                    choice:
+                        'yes': Accepté
+                        'no': Exclu
+                budgetTooHigh: Budget au-dessus des revenus du foyer (max conseillé %max% €, règle des 3x)
+                leaseMismatch:
+                    mobilityLong: Bail mobilité limité à 10 mois, incohérent avec un séjour long terme
+                    alurShort: Bail loi ALUR (1 an minimum) incohérent avec un séjour court terme
+                budgetCharges:
+                    choice:
+                        included: Charges comprises
+                        excluded: Hors charges
+                parking:
+                    label: Parking / box nécessaire
+                    choice:
+                        'yes': Oui
+                        'no': Non
+                lock: Verrouiller les champs
+                unlock: Déverrouiller les champs
+                importantAddresses:
+                    label: Adresses importantes
+                    typeLabel: Type de lieu
+                    placeholder: Tapez l'adresse à ajouter…
+                    add: Ajouter cette adresse
+                    remove: Retirer cette adresse
+                    openInMaps: Ouvrir dans Google Maps
+                    type:
+                        work: Travail
+                        school: École
+                        daycare: Crèche
+                        family: Famille
+                        gym: Sport
+                        other: Autre
             followUp:
-                empty: Aucune note pour le moment.
-                origin: Dossier créé à partir d'une demande de contact
+                origin: Créé depuis la demande
             modules:
-                title: Modules
                 comingSoon: Bientôt disponible
+                locked: Se déverrouille quand la recherche est complète
+                lockedShort: Verrouillé
                 file:
                     title: Dossier
                     description: Pièces et documents des locataires.
+                    select: Sélectionner les pièces
+                    requestTitle: Demande de pièces
+                    requestSubtitle: Cochez les pièces à demander pour %name%.
+                    recipientSubtitle: Choisissez qui reçoit l'email de demande pour %name%.
+                    next: Continuer
+                    back: Retour
+                    send: Envoyer l'email
+                    sendTo: 'Envoyer la demande à :'
+                    sent: Email de demande envoyé à %email%
+                    deleteFile: Supprimer ce fichier (la pièce repasse en demandée s'il n'en reste aucun)
+                    downloadZip: Tout télécharger (.zip)
+                    refuse:
+                        title: Refuser cette pièce ?
+                        text: Le locataire sera prévenu par email et invité à redéposer une nouvelle version.
+                        reasonLabel: Motif (optionnel, visible par le locataire)
+                        reasonPlaceholder: 'Ex : document illisible, il manque une page...'
+                        confirm: Refuser et prévenir
+                    pieceDescription:
+                        edit: Ajouter une précision visible par le locataire
+                        placeholder: 'Ex : les 3 derniers mois, recto-verso...'
+                    depositLink:
+                        label: Lien de dépôt à partager
+                        copy: Copier
+                        copied: Copié !
+                    error:
+                        none: Sélectionnez au moins une pièce.
+                        allRequested: Toutes ces pièces ont déjà été demandées.
+                        noRecipient: Choisissez un destinataire.
+                    table:
+                        piece: Pièce
+                        requestedAt: Demandée le
+                        status: Statut
+                    status:
+                        requested: Demandée
+                        received: Déposée
+                        validated: Validée
+                        refused: Refusée
+                    type:
+                        identity: Pièce d'identité
+                        employment_contract: Contrat de travail
+                        payslips: 3 dernières fiches de paie
+                        tax_notice: Dernier avis d'imposition
+                        rent_receipts: 3 dernières quittances de loyer
+                        proof_of_address: Justificatif de domicile
+                        employer_letter: Attestation employeur
+                        rib: RIB
+                        student_proof: Certificat de scolarité
                 visit:
                     title: Visite
                     description: Planification et comptes-rendus de visites.
@@ -1897,6 +2075,29 @@ admin:
                     notNull: Choisissez une langue de contact.
                     fr: Français
                     en: Anglais
+                profession:
+                    label: Situation professionnelle
+                    invalid: Choisissez une situation dans la liste.
+                    choice:
+                        cdi: CDI
+                        cdd: CDD
+                        freelance: Indépendant
+                        expat: Salarié étranger
+                        student: Étudiant
+                        retired: Retraité
+                        other: Autre
+                income:
+                    label: Revenus mensuels nets
+                    unit: € / mois
+                    invalid: Saisissez un montant valide.
+                birthDate:
+                    label: Date de naissance
+                    age: '%age% ans'
+                    invalid: Saisissez une date de naissance valide.
+                nationality:
+                    label: Nationalité
+                    placeholder: Choisir un pays
+                    invalid: Choisissez un pays dans la liste.
     contacts:
         title: Demandes de contact
         empty: Aucune demande de contact pour le moment.
@@ -2040,6 +2241,8 @@ admin:
         project:
             title: Projet logement
             subtitle: Rempli à la qualification, pour comparer et filtrer les demandes.
+            lock: Verrouiller les champs
+            unlock: Déverrouiller les champs
             budget: Budget mensuel
             budgetUnit: €/mois
             areas: Quartiers visés
@@ -2626,3 +2829,76 @@ listProperty:
         3:
             title: On s'occupe du reste
             text: Estimation et mise en location par nos experts.
+
+filePreview:
+    title: Aperçu du fichier
+    close: Fermer l'aperçu
+    openNewTab: Ouvrir dans un nouvel onglet
+
+deposit:
+    meta:
+        title: Dépôt de pièces
+        description: Déposez en ligne les pièces de votre dossier locatif, en toute sécurité.
+    pairing:
+        title: Dépôt de pièces
+        text: Identifiez-vous pour accéder au dépôt sécurisé de votre dossier locatif.
+        email:
+            label: Adresse email
+            placeholder: vous@exemple.fr
+        code:
+            label: Code du dossier
+            placeholder: 'Code à 6 caractères'
+            hint: Le code figure dans l'email que vous avez reçu.
+        submit: Accéder à mon dossier
+        error:
+            noMatch: Ces informations ne correspondent à aucun dossier. Vérifiez l'email et le code reçus.
+            tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
+    documents:
+        title: Bonjour %firstName%
+        text: Déposez les pièces demandées ci-dessous, votre conseiller les vérifie au fur et à mesure.
+        formats:
+            label: 'Format accepté :'
+            maxSize: 10 Mo max par fichier
+        reference: Dossier %reference%
+        empty: Aucune pièce n'est attendue pour le moment.
+        upload: Déposer
+        uploadMore: Ajouter
+        leave: Se déconnecter
+        sizeMb: '%size% Mo'
+        sizeKb: '%size% Ko'
+        depositedOn: Déposée le %date%
+        fileReceived: Reçu
+        refusedReason: 'Motif : %reason%'
+        viewFile: Ouvrir le fichier
+        deleteFile: Retirer ce fichier
+        deleteConfirm: Retirer ce fichier ? Vous pourrez en déposer un nouveau.
+        refusedHint: Cette pièce n'a pas pu être acceptée. Merci d'en déposer une nouvelle version.
+        status:
+            requested: À déposer
+            received: En cours de vérification
+            validated: Validée
+            refused: Refusée
+        error:
+            noFile: Aucun fichier reçu. Merci de réessayer.
+            mimeType: 'Format non accepté. Seul le PDF est autorisé.'
+            maxSize: Le fichier dépasse 10 Mo. Merci d'envoyer une version plus légère.
+            locked: Cette pièce a été validée, son fichier ne peut plus être retiré.
+    manager:
+        title: Votre interlocuteur dédié
+        call: Appeler
+        write: Écrire
+    progress:
+        label: Avancement de votre dossier
+    trust:
+        encrypted:
+            title: Connexion chiffrée
+            text: Vos documents transitent en HTTPS et sont stockés hors de tout accès public.
+        private:
+            title: Accès restreint
+            text: Seule l'équipe en charge de votre dossier peut consulter vos pièces.
+        retention:
+            title: Conservation limitée
+            text: Vos documents sont supprimés à la clôture de votre dossier.
+        hosting:
+            title: Hébergé en France
+            text: Vos données restent sur des serveurs situés en France.

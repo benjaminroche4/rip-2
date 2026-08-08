@@ -1798,13 +1798,13 @@ admin:
         users: Users
         contacts: Leads
         dossiers: Files
+        visits: Visits
         payments: Payments
         tools: Tools
         logout: Log out
         skipToContent: Skip to main content
     dossiers:
         title: Files
-        subtitle: Client files tracking
         empty:
             title: No files yet
             description: Create your first file with the button above.
@@ -1812,32 +1812,210 @@ admin:
             primaryTenant: 'Primary tenant: %name%'
             personCount: '{1}1 person|]1,Inf[%count% people'
             viewMore: View the file
+        card:
+            type:
+                individual: Individual
+                family: Family
+            status:
+                inProgress: In progress
+            filesStatus:
+                label: Files status
+                completed: Completed
+            package:
+                label: Package
+            progress:
+                title: Relocation progress
+                started: 'Started:'
+                estimatedFinish: 'Estimated finish:'
+            stats:
+                upcomingVisits: Upcoming visits
+                totalVisits: Total visits
+                rejections: Rejections
+            managedBy: 'Managed by:'
+            noManager: Unassigned
         show:
-            noPhone: No phone
             persons:
                 edit: Edit
                 save: Save
                 newTitle: New person
+                primaryLocked: The primary tenant cannot be removed. Transfer the role to another tenant first.
+                removeConfirm:
+                    title: Remove this person?
+                    text: '%name% will be removed from the file, along with their details and requested documents. This action is permanent.'
+                    confirm: Remove
+                pro:
+                    none: No professional activity
+                    employer: Employer
+                    jobTitle: Job title
+                    contractStart:
+                        label: Contract start
+                        invalid: Invalid start date.
+                    contractEnd:
+                        label: Contract end
+                        invalid: The contract end must come after its start.
+                    trialOver: Trial period completed
+                    trialBadge: Trial completed
+                    seniorityYears: for %count% year|for %count% years
+                    seniorityMonths: for %count% month|for %count% months
             facts:
-                reference: File number
-                pairingCode: Pairing code
                 createdAt: Created on
             manager:
                 label: File manager
-                assign: Assign a manager
                 remove: Unassign the manager
+            nav:
+                label: File navigation
+                previous: Previous file
+                next: Next file
+            timeline:
+                title: Progress
+                start: 'File started:'
+                moveIn: 'Desired move-in:'
+                onTrack: On track
+                dueSoon: Due soon
+                late: Late
+                daysLeft: 'D-%count%'
+                daysLate: 'D+%count%'
             search:
                 title: Search
-                empty: No criteria yet.
+                subtitle: Tenant search criteria
+                toComplete: To complete
+                complete: Search complete
+                section:
+                    essentials: Budget & timing
+                    property: The property
+                    location: Location
+                    profile: Tenant profile
+                pets:
+                    label: Pets
+                    choice:
+                        'yes': 'Yes'
+                        'no': 'No'
+                householdType:
+                    label: Project typology
+                    none: Not specified
+                    choice:
+                        alone: Single person
+                        couple: Couple
+                        family: Family
+                        flatshare: Flatshare
+                        other: Other
+                earlyMoveIn:
+                    label: Earlier move-in possible
+                    choice:
+                        'yes': 'Yes'
+                        'no': 'No'
+                leaseType:
+                    label: Desired lease type
+                    choice:
+                        civil_code: Civil code
+                        alur: ALUR law
+                        mobility: Mobility lease
+                minSurface:
+                    label: Minimum surface
+                    unit: m²
+                minBedrooms:
+                    label: Minimum bedrooms
+                    fourPlus: 4+
+                elevator:
+                    label: Elevator required
+                    choice:
+                        'yes': 'Yes'
+                        'no': 'No'
+                groundFloor:
+                    label: Ground floor
+                    choice:
+                        'yes': Accepted
+                        'no': Excluded
+                topFloor:
+                    label: Top floor
+                    choice:
+                        'yes': Accepted
+                        'no': Excluded
+                budgetTooHigh: Budget above the household income (advised max %max% €, the 3x rule)
+                leaseMismatch:
+                    mobilityLong: Mobility lease capped at 10 months, inconsistent with a long-term stay
+                    alurShort: ALUR lease (1 year minimum) inconsistent with a short-term stay
+                budgetCharges:
+                    choice:
+                        included: Charges included
+                        excluded: Charges excluded
+                parking:
+                    label: Parking / box required
+                    choice:
+                        'yes': 'Yes'
+                        'no': 'No'
+                lock: Lock the fields
+                unlock: Unlock the fields
+                importantAddresses:
+                    label: Important addresses
+                    typeLabel: Place type
+                    placeholder: Type the address to add…
+                    add: Add this address
+                    remove: Remove this address
+                    openInMaps: Open in Google Maps
+                    type:
+                        work: Work
+                        school: School
+                        daycare: Daycare
+                        family: Family
+                        gym: Gym
+                        other: Other
             followUp:
-                empty: No notes yet.
-                origin: File created from a contact request
+                origin: Created from the request
             modules:
-                title: Modules
                 comingSoon: Coming soon
+                locked: Unlocks once the search is complete
+                lockedShort: Locked
                 file:
                     title: File
                     description: Tenants' documents and paperwork.
+                    select: Select the documents
+                    requestTitle: Document request
+                    requestSubtitle: Tick the documents to request for %name%.
+                    recipientSubtitle: Choose who receives the request email for %name%.
+                    next: Continue
+                    back: Back
+                    send: Send the email
+                    sendTo: 'Send the request to:'
+                    sent: Request email sent to %email%
+                    deleteFile: Delete this file (the piece goes back to requested if none is left)
+                    downloadZip: Download all (.zip)
+                    refuse:
+                        title: Refuse this piece?
+                        text: The tenant will be notified by email and asked to upload a new version.
+                        reasonLabel: Reason (optional, visible to the tenant)
+                        reasonPlaceholder: 'E.g. unreadable document, a page is missing...'
+                        confirm: Refuse and notify
+                    pieceDescription:
+                        edit: Add a precision visible to the tenant
+                        placeholder: 'E.g. last 3 months, both sides...'
+                    depositLink:
+                        label: Deposit link to share
+                        copy: Copy
+                        copied: Copied!
+                    error:
+                        none: Select at least one document.
+                        allRequested: All these documents have already been requested.
+                        noRecipient: Choose a recipient.
+                    table:
+                        piece: Document
+                        requestedAt: Requested on
+                        status: Status
+                    status:
+                        requested: Requested
+                        received: Deposited
+                        validated: Validated
+                        refused: Refused
+                    type:
+                        identity: ID document
+                        employment_contract: Employment contract
+                        payslips: Last 3 payslips
+                        tax_notice: Latest tax notice
+                        rent_receipts: Last 3 rent receipts
+                        proof_of_address: Proof of address
+                        employer_letter: Employer letter
+                        rib: Bank details (RIB)
+                        student_proof: Proof of enrolment
                 visit:
                     title: Visit
                     description: Visit scheduling and reports.
@@ -1896,6 +2074,29 @@ admin:
                     notNull: Pick a contact language.
                     fr: French
                     en: English
+                profession:
+                    label: Professional situation
+                    invalid: Pick a situation from the list.
+                    choice:
+                        cdi: Permanent contract
+                        cdd: Fixed-term contract
+                        freelance: Self-employed
+                        expat: Foreign employee
+                        student: Student
+                        retired: Retired
+                        other: Other
+                income:
+                    label: Net monthly income
+                    unit: € / month
+                    invalid: Enter a valid amount.
+                birthDate:
+                    label: Birth date
+                    age: '%age% years old'
+                    invalid: Enter a valid birth date.
+                nationality:
+                    label: Nationality
+                    placeholder: Pick a country
+                    invalid: Pick a country from the list.
     contacts:
         title: Contact requests
         empty: No contact requests yet.
@@ -2039,6 +2240,8 @@ admin:
         project:
             title: Housing project
             subtitle: Filled during qualification, to compare and filter requests.
+            lock: Lock the fields
+            unlock: Unlock the fields
             budget: Monthly budget
             budgetUnit: €/month
             areas: Target areas
@@ -2625,3 +2828,76 @@ listProperty:
         3:
             title: We handle the rest
             text: Assessment and rental by our experts.
+
+filePreview:
+    title: File preview
+    close: Close the preview
+    openNewTab: Open in a new tab
+
+deposit:
+    meta:
+        title: Document upload
+        description: Securely upload the documents of your rental application file online.
+    pairing:
+        title: Document upload
+        text: Identify yourself to access the secure upload area of your rental file.
+        email:
+            label: Email address
+            placeholder: you@example.com
+        code:
+            label: File code
+            placeholder: 6-character code
+            hint: The code is in the email you received.
+        submit: Access my file
+        error:
+            noMatch: These details do not match any file. Please check the email and code you received.
+            tooManyRequests: Too many attempts. Please wait a minute before trying again.
+    documents:
+        title: Hello %firstName%
+        text: Upload the requested documents below, your advisor reviews them as they arrive.
+        formats:
+            label: 'Accepted format:'
+            maxSize: 10 MB max per file
+        reference: File %reference%
+        empty: No document is expected at the moment.
+        upload: Upload
+        uploadMore: Add
+        leave: Sign out
+        sizeMb: '%size% MB'
+        sizeKb: '%size% KB'
+        depositedOn: Deposited on %date%
+        fileReceived: Received
+        refusedReason: 'Reason: %reason%'
+        viewFile: Open the file
+        deleteFile: Remove this file
+        deleteConfirm: Remove this file? You will be able to upload a new one.
+        refusedHint: This document could not be accepted. Please upload a new version.
+        status:
+            requested: To upload
+            received: Under review
+            validated: Validated
+            refused: Refused
+        error:
+            noFile: No file received. Please try again.
+            mimeType: 'Format not accepted. Only PDF is allowed.'
+            maxSize: The file exceeds 10 MB. Please send a lighter version.
+            locked: This piece has been validated, its file can no longer be removed.
+    manager:
+        title: Your dedicated advisor
+        call: Call
+        write: Write
+    progress:
+        label: Your file progress
+    trust:
+        encrypted:
+            title: Encrypted connection
+            text: Your documents travel over HTTPS and are stored away from any public access.
+        private:
+            title: Restricted access
+            text: Only the team handling your file can view your documents.
+        retention:
+            title: Limited retention
+            text: Your documents are deleted when your file is closed.
+        hosting:
+            title: Hosted in France
+            text: Your data stays on servers located in France.
