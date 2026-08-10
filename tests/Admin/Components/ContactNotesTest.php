@@ -150,8 +150,11 @@ final class ContactNotesTest extends KernelTestCase
     public function testVoterAllowsAuthorAndAdminOnly(): void
     {
         $contact = $this->persistContact();
-        $author = $this->seedUser('author@notes-test.local', []);
-        $other = $this->seedUser('other@notes-test.local', []);
+        // Being the author is no longer enough: the contacts section is a
+        // prerequisite (a demoted member loses edit rights on old notes).
+        $author = $this->seedUser('author@notes-test.local', ['ROLE_SECTION_CONTACTS']);
+        $demotedAuthor = $this->seedUser('demoted@notes-test.local', []);
+        $other = $this->seedUser('other@notes-test.local', ['ROLE_SECTION_CONTACTS']);
         $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
         $this->em->flush();
         $note = $this->persistNote($contact, (int) $author->getId(), 'Ma note');
@@ -165,8 +168,36 @@ final class ContactNotesTest extends KernelTestCase
         self::assertFalse($checker->isGranted(ContactNoteVoter::EDIT, $note), 'Another non-admin user cannot.');
         self::assertFalse($checker->isGranted(ContactNoteVoter::DELETE, $note));
 
+        // Author of the note, but out of the contacts section: refused.
+        $demotedNote = $this->persistNote($contact, (int) $demotedAuthor->getId(), 'Ancienne note');
+        $this->loginAs($demotedAuthor);
+        self::assertFalse($checker->isGranted(ContactNoteVoter::EDIT, $demotedNote), 'A demoted author loses edit rights.');
+
         $this->loginAs($admin);
         self::assertTrue($checker->isGranted(ContactNoteVoter::DELETE, $note), 'Admin can always.');
+    }
+
+    public function testHistoryRendersStatusChangesAndRecapEvents(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('history-admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        /** @var \App\Contact\Repository\ContactEventRepository $events */
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class);
+        $events->record($contact, \App\Contact\Domain\ContactStatus::InProgress, null, 'Julien Moreau', null);
+        $events->recordRecapSent($contact, false, 'Julien Moreau', null);
+
+        /** @var \App\Admin\Twig\Components\ContactNotes $component */
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+
+        $history = $component->getHistory();
+        // "Reçue le" ouvre la chronologie, puis les événements en ordre.
+        self::assertCount(3, $history);
+        self::assertStringContainsString('Reçue le', $history[0]['text']);
+        self::assertStringContainsString('En cours', $history[1]['text']);
+        self::assertSame('Julien Moreau', $history[1]['authorName']);
+        self::assertStringContainsString('Récapitulatif', $history[2]['text']);
     }
 
     private function persistContact(): Contact
@@ -180,7 +211,9 @@ final class ContactNotesTest extends KernelTestCase
             ->setMessage('Hello')
             ->setLang('fr')
             ->setIp('127.0.0.1')
-            ->setCreatedAt(new \DateTimeImmutable('today 10:00'));
+            // Always in the past, whatever the time of day the suite runs:
+            // the reception entry must sort before status events.
+            ->setCreatedAt(new \DateTimeImmutable('-1 day 10:00'));
 
         $this->em->persist($contact);
 

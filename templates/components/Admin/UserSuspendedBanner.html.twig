@@ -1,0 +1,11 @@
+<div {{ attributes.defaults({class: ''}) }} data-testid="user-suspended-banner">
+    {% if this.isSuspended %}
+        <div class="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4" role="alert">
+            {{ ux_icon('lucide:user-lock', {class: 'mt-0.5 size-5 shrink-0 text-red-600', 'aria-hidden': 'true'}) }}
+            <div>
+                <p class="text-sm font-medium text-red-700">{{ 'admin.users.suspendedBanner.title'|trans }}</p>
+                <p class="mt-0.5 text-sm text-red-700/80">{{ 'admin.users.suspendedBanner.text'|trans }}</p>
+            </div>
+        </div>
+    {% endif %}
+</div>

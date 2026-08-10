@@ -9,6 +9,7 @@
        Dialog block, `this` resolves to the (anonymous) Dialog component,
        not the parent DocumentList. #}
     {% set docs = this.documents %}
+    {% set usageCounts = this.usageCounts %}
     {% set totalCount = this.totalCount %}
 
     <twig:Dialog id="document-form">
@@ -54,10 +55,11 @@
         </div>
     {% else %}
         <div class="rounded-2xl border border-neutral-200 bg-white p-2">
-            <div class="overflow-hidden rounded-xl">
+            <div class="rounded-xl bg-neutral-50 p-2">
+                <div class="overflow-hidden rounded-lg bg-white">
                 <table class="w-full text-left text-sm" data-testid="document-table" aria-label="{{ 'admin.tools.documents.list.title'|trans }}">
-                    <thead class="border-b border-gray-950/5 bg-neutral-50/50">
-                        <tr class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    <thead>
+                        <tr class="border-b border-gray-950/5 text-xs font-medium text-gray-400">
                             <th scope="col" class="w-10 px-2 py-3">
                                 <span class="sr-only">{{ 'admin.tools.documents.list.column.expand'|trans }}</span>
                             </th>
@@ -80,7 +82,7 @@
                             data-testid="document-row-group"
                             class="border-b border-gray-950/5 last:border-b-0"
                         >
-                            <tr class="group transition-colors hover:bg-neutral-50/60" data-testid="document-row">
+                            <tr class="group cursor-pointer transition-colors hover:bg-neutral-100/80" data-testid="document-row">
                                 <td class="px-2 py-3 align-middle">
                                     <button
                                         type="button"
@@ -98,20 +100,20 @@
                                         />
                                     </button>
                                 </td>
-                                <td class="px-4 py-3 align-middle">
+                                <td class="px-4 py-3 align-middle" data-action="click->collapsible#toggle">
                                     <p class="font-medium text-gray-900" data-testid="document-name-fr">{{ doc.nameFr }}</p>
                                     {% if doc.nameEn and doc.nameEn != doc.nameFr %}
                                         <p class="text-xs text-gray-500" data-testid="document-name-en">{{ doc.nameEn }}</p>
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3 align-middle">
+                                <td class="px-4 py-3 align-middle" data-action="click->collapsible#toggle">
                                     {% if doc.category %}
                                         <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700" data-testid="document-category-badge">
                                             {{ doc.category.labelKey|trans }}
                                         </span>
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3 align-middle">
+                                <td class="px-4 py-3 align-middle" data-action="click->collapsible#toggle">
                                     {% if doc.pinned %}
                                         <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1 pr-2 pl-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-600" data-testid="document-pinned-badge">
                                             <twig:ux:icon name="lucide:pin" class="size-3 shrink-0 text-gray-500" aria-hidden="true" />
@@ -119,39 +121,54 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                <td class="px-4 py-3 align-middle">
+                                <td class="px-4 py-3 align-middle" data-action="click->collapsible#toggle">
                                     <span class="block max-w-[14ch] truncate font-mono text-xs text-gray-500" title="{{ doc.slug }}">{{ doc.slug }}</span>
                                 </td>
-                                <td class="px-4 py-3 align-middle text-right tabular-nums text-gray-500">
+                                <td class="px-4 py-3 align-middle text-right tabular-nums text-gray-500" data-action="click->collapsible#toggle">
                                     {{ doc.createdAt|format_datetime(pattern='dd MMM yyyy', locale=app.locale) }}
                                 </td>
-                                <td class="px-2 py-3 align-middle">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <twig:Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            data-action="live#action"
-                                            data-live-action-param="edit"
-                                            data-live-id-param="{{ doc.id }}"
-                                            aria-label="{{ 'admin.tools.documents.actions.edit'|trans }} — {{ doc.nameFr }}"
-                                            class="text-gray-400 hover:bg-neutral-100 hover:text-primary"
-                                            data-testid="document-edit-trigger-{{ doc.id }}"
-                                        >
-                                            <twig:ux:icon name="lucide:pencil" class="size-4 shrink-0" aria-hidden="true" />
-                                        </twig:Button>
+                                <td class="px-2 py-3 align-middle text-right">
+                                    {# Menu d'actions façon shadcn : Modifier, puis
+                                       Supprimer isolé derrière un séparateur. #}
                                     <twig:AlertDialog id="delete-{{ doc.id }}">
-                                        <twig:Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            data-action="click->alert-dialog#open"
-                                            data-alert-dialog-target="trigger"
-                                            aria-haspopup="dialog"
-                                            aria-label="{{ 'admin.tools.documents.actions.delete'|trans }} — {{ doc.nameFr }}"
-                                            class="text-gray-400 hover:bg-red-50 hover:text-red-600"
-                                            data-testid="document-delete-trigger-{{ doc.id }}"
+                                        <details
+                                            class="relative inline-block text-left"
+                                            data-controller="details-dropdown"
+                                            data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                                            data-testid="document-actions-{{ doc.id }}"
                                         >
-                                            <twig:ux:icon name="lucide:trash-2" class="size-4 shrink-0" aria-hidden="true" />
-                                        </twig:Button>
+                                            <summary
+                                                class="inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
+                                                aria-label="{{ 'admin.tools.documents.recent.column.actions'|trans }} — {{ doc.nameFr }}"
+                                            >
+                                                {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            </summary>
+                                            <div class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-neutral-200 bg-white p-1 text-left shadow-md">
+                                                <button
+                                                    type="button"
+                                                    data-action="live#action details-dropdown#close"
+                                                    data-live-action-param="edit"
+                                                    data-live-id-param="{{ doc.id }}"
+                                                    class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                                    data-testid="document-edit-trigger-{{ doc.id }}"
+                                                >
+                                                    {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                    {{ 'admin.tools.documents.actions.edit'|trans }}
+                                                </button>
+                                                <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                                                <button
+                                                    type="button"
+                                                    data-action="click->alert-dialog#open details-dropdown#close"
+                                                    data-alert-dialog-target="trigger"
+                                                    aria-haspopup="dialog"
+                                                    class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                                                    data-testid="document-delete-trigger-{{ doc.id }}"
+                                                >
+                                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                    {{ 'admin.tools.documents.actions.delete'|trans }}
+                                                </button>
+                                            </div>
+                                        </details>
                                         <twig:AlertDialog:Content class="sm:max-w-md">
                                             <twig:AlertDialog:Header>
                                                 <twig:AlertDialog:Title>
@@ -159,6 +176,14 @@
                                                 </twig:AlertDialog:Title>
                                                 <twig:AlertDialog:Description>
                                                     {{ 'admin.tools.documents.delete.description'|trans({'%name%': doc.nameFr}) }}
+                                                    {% set usage = usageCounts[doc.id]|default(0) %}
+                                                    {% if usage > 0 %}
+                                                        {# Garde-fou : le document apparaît dans des demandes déjà envoyées. #}
+                                                        <span class="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700" data-testid="document-delete-usage">
+                                                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                            {{ 'admin.tools.documents.delete.usage'|trans({'%count%': usage}) }}
+                                                        </span>
+                                                    {% endif %}
                                                 </twig:AlertDialog:Description>
                                             </twig:AlertDialog:Header>
                                             <twig:AlertDialog:Footer class="mt-4">
@@ -176,7 +201,6 @@
                                             </twig:AlertDialog:Footer>
                                         </twig:AlertDialog:Content>
                                     </twig:AlertDialog>
-                                    </div>
                                 </td>
                             </tr>
                             {# Disclosure row — collapsible#toggle animates the
@@ -219,6 +243,7 @@
                         </tbody>
                     {% endfor %}
                 </table>
+                </div>
             </div>
         </div>
     {% endif %}

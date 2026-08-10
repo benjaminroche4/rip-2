@@ -360,6 +360,43 @@ turbo-frame#blog-list[busy] {
     .animate-card-in { animation: none; }
 }
 
+/* Server-driven drawer (dossier notes): entrance replays each time the
+   `hidden` attribute drops (display:none → visible restarts CSS animations),
+   and live morphs while open never re-trigger it. Mirrors the client-side
+   drawer of the contact page (backdrop fade + panel slide from the right). */
+@keyframes drawer-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-drawer-backdrop {
+    animation: drawer-backdrop-in 0.2s ease-out backwards;
+}
+@keyframes drawer-panel-in {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+}
+.animate-drawer-panel {
+    animation: drawer-panel-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+    .animate-drawer-backdrop,
+    .animate-drawer-panel { animation: none; }
+}
+
+/* Onglets du détail dossier (tabs_controller) : la visibilité des panneaux
+   dérive de l'attribut data-active-tab porté par le wrapper statique de la
+   page. Les panneaux vivent dans des LiveComponents ; en ne faisant que
+   MASQUER les inactifs (jamais forcer un display sur l'actif), les morphs
+   live ne peuvent ni casser la mise en page ni réafficher un panneau. */
+[data-tabs]:not([data-active-tab="recap"]) [data-tab-panel="recap"],
+[data-tabs]:not([data-active-tab="persons"]) [data-tab-panel="persons"],
+[data-tabs]:not([data-active-tab="search"]) [data-tab-panel="search"],
+[data-tabs]:not([data-active-tab="file"]) [data-tab-panel="file"],
+[data-tabs]:not([data-active-tab="visit"]) [data-tab-panel="visit"],
+[data-tabs]:not([data-active-tab="payment"]) [data-tab-panel="payment"] {
+    display: none;
+}
+
 /* Progress bars (dossier timeline, list cards): the fill grows from zero on
    load, animates smoothly on live width changes, and carries a soft moving
    sheen. */

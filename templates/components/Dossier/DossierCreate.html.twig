@@ -33,23 +33,25 @@
 {% endmacro %}
 
 {% macro input(field, label, type, required = true) %}
+    {# Mêmes champs que la card personnes de la page détail (PersonsManager). #}
     {% set hasErrors = field.vars.errors|length > 0 %}
     <div class="min-w-0">
-        <twig:Label for="{{ field.vars.id }}" class="text-sm font-semibold text-gray-900">
+        <twig:Label for="{{ field.vars.id }}" class="text-gray-600">
             {{ label|trans }}
             {% if required %}<span class="text-red-600" aria-hidden="true">*</span>{% endif %}
         </twig:Label>
-        <div class="mt-2">
-            <twig:Input
+        <div class="mt-1.5">
+            <input
                 type="{{ type }}"
                 id="{{ field.vars.id }}"
                 name="{{ field.vars.full_name }}"
                 value="{{ field.vars.value }}"
-                :maxlength="field.vars.attr.maxlength|default(false)"
-                :placeholder="field.vars.attr.placeholder|default(false)"
-                :required="required"
+                {% if field.vars.attr.maxlength is defined %}maxlength="{{ field.vars.attr.maxlength }}"{% endif %}
+                {% if field.vars.attr.placeholder is defined %}placeholder="{{ field.vars.attr.placeholder }}"{% endif %}
+                {% if required %}required{% endif %}
                 aria-invalid="{{ hasErrors ? 'true' : 'false' }}"
-            />
+                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+            >
             {% for error in field.vars.errors %}
                 <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
             {% endfor %}
@@ -127,15 +129,15 @@
                 autocomplete="off"
                 data-testid="dossier-create-form"
             >
-                <div class="space-y-6 rounded-2xl bg-neutral-50 p-6">
-                    <div>
+                <div class="space-y-3 rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3 pb-0">
                         <h2 id="dossier-create-title" class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.dossiers.create.title'|trans }}</h2>
                         <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.dossiers.create.subtitle'|trans }}</p>
                     </div>
 
                     <section data-testid="dossier-create-persons">
-                        <div class="mb-3 flex items-baseline justify-between gap-4">
-                            <h3 class="text-base font-semibold tracking-tight text-gray-900">
+                        <div class="mb-3 flex items-baseline justify-between gap-4 px-3">
+                            <h3 class="font-medium text-gray-900">
                                 {{ 'admin.dossiers.create.persons.title'|trans }}
                             </h3>
                             <p class="text-xs text-gray-500">
@@ -143,7 +145,7 @@
                             </p>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="flex flex-col gap-1">
                             {% for personForm in persons %}
                                 {% set key = personForm.vars.name %}
                                 {% set isTenant = personForm.role.vars.value == tenantValue %}
@@ -151,19 +153,19 @@
                                    exit animations stay attached to the right person). #}
                                 <article
                                     id="dossier-person-{{ key }}"
-                                    class="animate-card-in overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+                                    class="animate-card-in overflow-hidden rounded-xl bg-white"
                                     data-controller="card-remove"
                                     data-card-remove-key-value="{{ key }}"
                                     data-testid="dossier-create-person"
                                 >
-                                    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-neutral-50/80 px-5 py-3">
+                                    <header class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                                         {# Live heading: shows the person's name as soon as it is
                                            typed (the component re-renders on change), falls back
                                            to "Personne N" while empty. #}
                                         {% set fullName = ((personForm.firstName.vars.value ?: '') ~ ' ' ~ (personForm.lastName.vars.value ?: ''))|trim %}
                                         <div class="flex min-w-0 items-center gap-2">
-                                            <p class="truncate text-sm font-semibold tracking-tight text-gray-900" data-testid="dossier-person-heading">
-                                                {{ fullName ?: 'admin.dossiers.create.person.heading'|trans({'%number%': loop.index}) }}
+                                            <p class="truncate text-sm font-medium text-gray-900" data-testid="dossier-person-heading">
+                                                {{ fullName ? fullName|title : 'admin.dossiers.create.person.heading'|trans({'%number%': loop.index}) }}
                                             </p>
                                             {{ ui.primaryControls(key, isTenant, isTenant and key == primaryKey) }}
                                         </div>
@@ -180,9 +182,9 @@
                                         {% endif %}
                                     </header>
 
-                                    <div class="flex flex-col gap-4 p-5">
+                                    <div class="flex flex-col gap-4 border-t border-gray-950/5 px-4 py-4">
                                         <div>
-                                            <p id="{{ personForm.role.vars.id }}-label" class="text-sm font-semibold text-gray-900">
+                                            <p id="{{ personForm.role.vars.id }}-label" class="text-sm text-gray-600">
                                                 {{ 'admin.dossiers.create.person.role.label'|trans }}
                                                 <span class="text-red-600" aria-hidden="true">*</span>
                                             </p>
@@ -194,7 +196,7 @@
                                             {{ ui.input(personForm.lastName, 'admin.dossiers.create.person.lastName.label', 'text') }}
                                             {{ ui.input(personForm.email, 'admin.dossiers.create.person.email.label', 'email') }}
                                             <div class="min-w-0">
-                                                <twig:Label for="{{ personForm.phone.vars.id }}" class="text-sm font-semibold text-gray-900">
+                                                <twig:Label for="{{ personForm.phone.vars.id }}" class="text-gray-600">
                                                     {{ 'admin.dossiers.create.person.phone.label'|trans }}
                                                 </twig:Label>
                                                 {# Same intl-tel-input widget as the public contact form.
@@ -202,13 +204,13 @@
                                                    the input — morphing must leave the zone alone (the
                                                    value still syncs to the model via the change event). #}
                                                 <div
-                                                    class="mt-2 text-base sm:text-sm/6"
+                                                    class="mt-1.5"
                                                     data-live-ignore
                                                     data-controller="phone-input"
                                                     data-phone-input-initial-country-value="fr"
                                                     data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
                                                 >
-                                                    <twig:Input
+                                                    <input
                                                         type="tel"
                                                         id="{{ personForm.phone.vars.id }}"
                                                         name="{{ personForm.phone.vars.full_name }}"
@@ -216,7 +218,8 @@
                                                         maxlength="30"
                                                         placeholder="6 12 34 56 78"
                                                         data-phone-input-target="input"
-                                                    />
+                                                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                                    >
                                                 </div>
                                                 {% for error in personForm.phone.vars.errors %}
                                                     <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
@@ -225,7 +228,7 @@
                                         </div>
 
                                         <div>
-                                            <p id="{{ personForm.language.vars.id }}-label" class="text-sm font-semibold text-gray-900">
+                                            <p id="{{ personForm.language.vars.id }}-label" class="text-sm text-gray-600">
                                                 {{ 'admin.dossiers.create.person.language.label'|trans }}
                                                 <span class="text-red-600" aria-hidden="true">*</span>
                                             </p>
@@ -239,7 +242,7 @@
                         {% if personCount < maxPersons %}
                             <button
                                 type="button"
-                                class="mt-4 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-950/10 px-2 py-2.5 text-xs font-medium whitespace-nowrap text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                                class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-950/10 px-2 py-2.5 text-xs font-medium whitespace-nowrap text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                                 data-action="live#action"
                                 data-live-action-param="addPerson"
                                 data-testid="dossier-create-add-person"
@@ -254,7 +257,7 @@
                         {% endfor %}
                     </section>
 
-                    <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center justify-end gap-4 p-3 pt-0">
                         <button
                             type="button"
                             data-action="live#action"

@@ -13,8 +13,8 @@ use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Intl\Countries;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -418,6 +418,11 @@ final class PersonsManager
         $this->em->flush();
         // The search card recomputes its budget warning from the incomes.
         $this->emit('dossier-persons:changed');
+        // A new person changes the count badge of the Personnes tab, which
+        // lives in the page chrome: a Turbo morph refresh picks it up.
+        if ($this->adding) {
+            $this->dispatchBrowserEvent('dossier-persons:changed');
+        }
 
         // Explicit validate button (same flow as the lead identity card):
         // a successful save closes the inline form, add and edit alike.
@@ -479,6 +484,8 @@ final class PersonsManager
         $this->events->log($dossier, 'person_removed', ['name' => $removedName]);
         $this->em->flush();
         $this->emit('dossier-persons:changed');
+        // Keep the Personnes tab count badge in sync (page-chrome morph).
+        $this->dispatchBrowserEvent('dossier-persons:changed');
         $this->resetDraft();
     }
 
@@ -589,7 +596,7 @@ final class PersonsManager
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_DOSSIERS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

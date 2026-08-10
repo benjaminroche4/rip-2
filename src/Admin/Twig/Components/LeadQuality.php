@@ -25,6 +25,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:LeadQuality', template: 'components/Admin/LeadQuality.html.twig')]
 final class LeadQuality
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -38,10 +39,40 @@ final class LeadQuality
     #[LiveProp]
     public bool $editingNote = false;
 
+    /**
+     * First treatment just happened (status left "new" for the first
+     * time): nudge the admin to rate the lead while the call is fresh.
+     */
+    #[LiveProp]
+    public bool $promptRating = false;
+
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
     ) {
+    }
+
+    #[\Symfony\UX\LiveComponent\Attribute\LiveListener('lead:first-treated')]
+    public function onFirstTreatment(): void
+    {
+        $this->ensureAdmin();
+        // Only nudge while there is no rating yet.
+        $this->promptRating = null === $this->getContact()?->leadRating;
+    }
+
+    #[LiveAction]
+    public function dismissRatingPrompt(): void
+    {
+        $this->ensureAdmin();
+        $this->promptRating = false;
+    }
+
+    #[\Symfony\UX\LiveComponent\Attribute\LiveListener('contacts:changed')]
+    public function refresh(): void
+    {
+        // Re-render only: the recontact channel can change from the
+        // status card (recontact step) and must show here too.
+        $this->ensureAdmin();
     }
 
     public function mount(int $contactId): void
@@ -67,9 +98,12 @@ final class LeadQuality
         }
 
         $this->repository->saveLeadRating($this->contactId, $rating);
+        $this->promptRating = false;
 
-        // The detail header (status control) shows the rating badge live.
         $this->emit('contacts:changed');
+        // The rating badge in the identity card header lives outside the
+        // live components: morph-refresh the page chrome.
+        $this->dispatchBrowserEvent('contact-identity:changed');
     }
 
     #[LiveAction]
@@ -106,6 +140,8 @@ final class LeadQuality
             ?? throw new BadRequestHttpException(\sprintf('Unknown recontact channel "%s".', $channel));
 
         $this->repository->saveRecontactChannel($this->contactId, $case);
+        // The recap card on the status control shows the same field.
+        $this->emit('contacts:changed');
     }
 
     #[LiveAction]
@@ -117,7 +153,7 @@ final class LeadQuality
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

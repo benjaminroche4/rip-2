@@ -21,6 +21,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactTerminalBanner', template: 'components/Admin/ContactTerminalBanner.html.twig')]
 final class ContactTerminalBanner
 {
+    use ContactsSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -51,7 +52,7 @@ final class ContactTerminalBanner
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

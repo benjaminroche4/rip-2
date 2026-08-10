@@ -11,12 +11,11 @@ export default class extends Controller {
     static targets = ['first', 'last', 'output'];
 
     refresh() {
-        if (!this.hasOutputTarget) {
-            return;
-        }
         const first = this.hasFirstTarget ? this.firstTarget.value.trim() : '';
         const last = this.hasLastTarget ? this.lastTarget.value.trim() : '';
         const name = `${first} ${last}`.trim();
-        this.outputTarget.textContent = name || (this.outputTarget.dataset.default ?? '');
+        for (const output of this.outputTargets) {
+            output.textContent = name || (output.dataset.default ?? '');
+        }
     }
 }

@@ -5,13 +5,20 @@ declare(strict_types=1);
 namespace App\Admin\Controller;
 
 use App\Admin\Repository\AdminUserRepository;
+use App\Admin\Repository\UserActivityRepository;
 use App\Admin\Service\ContactPdfRenderer;
+use App\Auth\Entity\User;
+use App\Auth\Service\AvatarDownloader;
 use App\Contact\Repository\ContactRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 // NOTE: pas de #[IsGranted('ROLE_ADMIN')] ici. La sécurité passe par
@@ -38,6 +45,8 @@ final class DashboardController extends AbstractController
         private readonly string $adminPathPrefix,
         private readonly ContactRepository $contactRepository,
         private readonly AdminUserRepository $adminUserRepository,
+        private readonly \App\Contact\Service\VisioInvitationMailer $visioMailer,
+        private readonly \App\Contact\Repository\ContactEventRepository $contactEvents,
     ) {
     }
 
@@ -94,7 +103,7 @@ final class DashboardController extends AbstractController
         methods: ['GET'],
         requirements: ['reference' => 'CT-\d{6}'],
     )]
-    public function showContact(string $adminPrefix, string $reference, Request $request): Response
+    public function showContact(string $adminPrefix, string $reference, Request $request, \App\Contact\Repository\ContactNoteRepository $noteRepository, \App\Dossier\Repository\DossierRepository $dossierRepository): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -113,7 +122,43 @@ final class DashboardController extends AbstractController
             'from' => $from,
             'adjacent' => $this->contactRepository->adjacentReferences($contact->id, $from),
             'previousRequests' => $this->contactRepository->listOtherByEmail($contact->email, $contact->id),
+            'notesCount' => \count($noteRepository->listForContact($contact->id)),
+            'convertedDossierRef' => $dossierRepository->findOneBy(['sourceContactReference' => $contact->reference])?->getReference(),
         ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/contacts/{reference}/supprimer',
+            'en' => '/contacts/{reference}/delete',
+        ],
+        name: 'contact_delete',
+        methods: ['POST'],
+        requirements: ['reference' => 'CT-\\d{6}'],
+    )]
+    public function deleteContact(string $adminPrefix, string $reference, Request $request): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+        // La suppression définitive d'un lead est réservée aux admins.
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if (!$this->isCsrfTokenValid('delete_contact', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $contact = $this->contactRepository->findOneBy(['reference' => $reference])
+            ?? throw $this->createNotFoundException();
+
+        // Une visio planifiée sort des agendas, sans email : la suppression
+        // d'un lead peut être un effacement RGPD, on ne le recontacte pas.
+        $this->visioMailer->cancel($contact, notify: false);
+
+        // Notes et événements suivent via le ON DELETE CASCADE en base.
+        $em = $this->contactRepository->createQueryBuilder('c')->getEntityManager();
+        $em->remove($contact);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_contacts', ['adminPrefix' => $adminPrefix], 303);
     }
 
     #[Route(
@@ -131,6 +176,21 @@ final class DashboardController extends AbstractController
 
         $contact = $this->contactRepository->findOneItemByReference($reference)
             ?? throw $this->createNotFoundException();
+
+        // A full-PII export leaves a trace in the follow-up thread.
+        $entity = $this->contactRepository->findOneBy(['reference' => $reference]);
+        $user = $this->getUser();
+        if (null !== $entity) {
+            $this->contactEvents->recordKind(
+                $entity,
+                'pdf_export',
+                null,
+                $user instanceof \App\Auth\Entity\User
+                    ? (trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail())
+                    : null,
+                $user instanceof \App\Auth\Entity\User ? $user->getAvatarFilename() : null,
+            );
+        }
 
         $response = new Response($renderer->render($contact));
         $response->headers->set('Content-Type', 'application/pdf');
@@ -160,7 +220,7 @@ final class DashboardController extends AbstractController
             'slug' => '[a-z0-9-]+',
         ],
     )]
-    public function showUser(string $adminPrefix, string $uniqueId, string $slug): Response
+    public function showUser(string $adminPrefix, string $uniqueId, string $slug, UserActivityRepository $activityRepository): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -178,7 +238,85 @@ final class DashboardController extends AbstractController
         return $this->render('admin/users/show.html.twig', [
             'adminPrefix' => $adminPrefix,
             'profile' => $profile,
+            'assignedLeads' => $activityRepository->assignedLeads($profile->id),
+            'managedDossiers' => $activityRepository->managedDossiers($profile->id),
         ]);
+    }
+
+    /**
+     * Replaces a user's avatar from an admin upload. Plain multipart POST
+     * (LiveComponents don't carry files): validate, normalize to WebP via
+     * AvatarDownloader, swap the stored file, redirect back to the profile.
+     */
+    #[Route(
+        path: [
+            'fr' => '/utilisateurs/{uniqueId}/avatar',
+            'en' => '/users/{uniqueId}/avatar',
+        ],
+        name: 'user_avatar',
+        methods: ['POST'],
+        requirements: ['uniqueId' => '[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}'],
+    )]
+    public function uploadUserAvatar(
+        string $adminPrefix,
+        string $uniqueId,
+        Request $request,
+        EntityManagerInterface $em,
+        AvatarDownloader $avatarDownloader,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
+    ): Response {
+        $this->ensureValidPrefix($adminPrefix);
+
+        if (!$this->isCsrfTokenValid('user-avatar', (string) $request->request->get('_csrf_token'))) {
+            throw new BadRequestHttpException('Invalid CSRF token.');
+        }
+
+        $profile = $this->adminUserRepository->findByUniqueId($uniqueId)
+            ?? throw $this->createNotFoundException();
+        $user = $em->find(User::class, $profile->id)
+            ?? throw $this->createNotFoundException();
+
+        $redirect = $this->redirectToRoute('admin_user_show', [
+            'adminPrefix' => $adminPrefix,
+            'uniqueId' => $uniqueId,
+            'slug' => $profile->slug,
+        ]);
+
+        $file = $request->files->get('avatar');
+        if (!$file instanceof UploadedFile || !$file->isValid()) {
+            return $redirect;
+        }
+
+        // Mime sniffed from the content, never trusted from the client.
+        if (!\in_array((string) $file->getMimeType(), ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], true)) {
+            return $redirect;
+        }
+
+        $bytes = @file_get_contents($file->getPathname());
+        if (false === $bytes) {
+            return $redirect;
+        }
+
+        // storeFromBytes re-encodes to WebP 256×256 and enforces the size cap.
+        $filename = $avatarDownloader->storeFromBytes($bytes);
+        if (null === $filename) {
+            return $redirect;
+        }
+
+        if (null !== $user->getAvatarFilename()) {
+            $avatarDownloader->delete($user->getAvatarFilename());
+        }
+        $user->setAvatarFilename($filename);
+        $em->flush();
+
+        // Audit trail: replacing a profile picture is identity-sensitive.
+        $securityLogger->notice('User administration: avatar replaced', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'target' => (string) $user->getEmail(),
+        ]);
+
+        return $redirect;
     }
 
     /**

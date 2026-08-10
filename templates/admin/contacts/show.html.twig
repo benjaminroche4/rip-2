@@ -11,8 +11,7 @@
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ displayName }}"
-        breadcrumbLabel="{{ 'admin.contacts.title'|trans }}"
-        breadcrumbUrl="{{ path('admin_contacts', {adminPrefix: adminPrefix}) }}"
+        :crumbs="[{label: 'admin.contacts.title'|trans, url: path('admin_contacts', {adminPrefix: adminPrefix})}]"
     >
         <nav class="flex shrink-0 items-center gap-2" aria-label="{{ 'admin.contacts.title'|trans }}">
             {% if adjacent.newer %}
@@ -50,10 +49,26 @@
 {% endblock %}
 
 {% block body %}
+    {# Le chrome de page (titre, header, badge de note) vit hors des
+       composants live : un morph Turbo le rafraîchit quand l'identité
+       ou la note changent. #}
+    <div
+        class="contents"
+        data-controller="page-refresh"
+        data-action="contact-identity:changed@window->page-refresh#refresh"
+    ></div>
     {% set pdfUrl = path('admin_contact_pdf', {adminPrefix: adminPrefix, reference: contact.reference}) %}
     {% set menuRowClass = 'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900' %}
     {% set exportRow %}
-        <div class="flex items-center justify-end gap-3">
+        {# Nom du lead en tête de page (live : suit l'édition de la fiche
+           sans rechargement), menu Actions en vis-à-vis. #}
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-2.5">
+                <twig:Admin:ContactHeading :contactId="contact.id" />
+                {% if contact.leadRating %}
+                    <twig:Admin:LeadRatingBadge :rating="contact.leadRating" data-testid="lead-rating-title-badge" />
+                {% endif %}
+            </div>
             <details
                 class="relative"
                 data-controller="details-dropdown"
@@ -66,6 +81,17 @@
                     {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
                 </summary>
                 <div class="absolute right-0 z-10 mt-2 w-60 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                    {% if convertedDossierRef %}
+                        {# Déjà converti : lien direct vers le dossier. #}
+                        <a
+                            href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: convertedDossierRef}) }}"
+                            class="{{ menuRowClass }}"
+                            data-testid="contact-view-dossier"
+                        >
+                            {{ ux_icon('lucide:folder-open', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.contacts.show.viewDossier'|trans({'%reference%': convertedDossierRef}) }}
+                        </a>
+                    {% else %}
                     <twig:AlertDialog id="to-dossier-{{ contact.id }}">
                         <button
                             type="button"
@@ -108,6 +134,7 @@
                             </twig:AlertDialog:Footer>
                         </twig:AlertDialog:Content>
                     </twig:AlertDialog>
+                    {% endif %}
 
                     {# The component renders a matching menu row; its confirmation
                        modal is fixed-positioned so it overlays fine from here. #}
@@ -130,20 +157,67 @@
                             <span data-pdf-download-target="percent" class="text-xs font-medium tabular-nums">0%</span>
                         </span>
                     </a>
+
+                    {# Suppression définitive : admins uniquement, isolée
+                       derrière un séparateur, toujours confirmée. #}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                        <twig:AlertDialog id="delete-contact-{{ contact.id }}">
+                            <button
+                                type="button"
+                                class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                                data-action="click->alert-dialog#open"
+                                data-alert-dialog-target="trigger"
+                                aria-haspopup="dialog"
+                                data-testid="contact-delete-trigger"
+                            >
+                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.contacts.show.delete.action'|trans }}
+                            </button>
+                            <twig:AlertDialog:Content class="sm:max-w-md">
+                                <twig:AlertDialog:Header>
+                                    <twig:AlertDialog:Title>
+                                        {{ 'admin.contacts.show.delete.title'|trans }}
+                                    </twig:AlertDialog:Title>
+                                    <twig:AlertDialog:Description>
+                                        {{ 'admin.contacts.show.delete.description'|trans({'%name%': displayName, '%reference%': contact.reference}) }}
+                                    </twig:AlertDialog:Description>
+                                </twig:AlertDialog:Header>
+                                <twig:AlertDialog:Footer class="mt-4">
+                                    <twig:AlertDialog:Cancel>
+                                        {{ 'admin.contacts.show.delete.cancel'|trans }}
+                                    </twig:AlertDialog:Cancel>
+                                    <form
+                                        method="post"
+                                        action="{{ path('admin_contact_delete', {adminPrefix: adminPrefix, reference: contact.reference}) }}"
+                                        class="contents"
+                                    >
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_contact') }}">
+                                        <twig:AlertDialog:Action type="submit" class="bg-red-600 hover:bg-red-700" data-testid="contact-delete-confirm">
+                                            <span class="flex items-center gap-2">
+                                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                {{ 'admin.contacts.show.delete.confirm'|trans }}
+                                            </span>
+                                        </twig:AlertDialog:Action>
+                                    </form>
+                                </twig:AlertDialog:Footer>
+                            </twig:AlertDialog:Content>
+                        </twig:AlertDialog>
+                    {% endif %}
                 </div>
             </details>
         </div>
     {% endset %}
     {% set detailCard %}
         <div class="rounded-3xl border border-neutral-200 bg-white p-2">
-            <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                <div class="p-3">
-                    <twig:Admin:ContactStatusControl :contactId="contact.id" />
-                </div>
-
+            {# Repliable, comme les cards de la fiche dossier. #}
+            <details open class="group details-animated rounded-2xl bg-neutral-50 p-2">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
+                    <h2 class="font-medium text-gray-900">{{ 'admin.contacts.show.identityTitle'|trans }}</h2>
+                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
+                </summary>
                 <twig:Admin:ContactDetails :contactId="contact.id" />
-
-            </div>
+            </details>
         </div>
     {% endset %}
 
@@ -159,65 +233,153 @@
                 <twig:Admin:ContactProject :contactId="contact.id" />
                 <twig:Admin:LeadQuality :contactId="contact.id" />
             </div>
-            <div class="space-y-6 max-lg:mt-6 lg:sticky lg:top-6">
-                {# Suivi + fil de notes regroupés dans une seule card. #}
-                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="follow-up-card">
+            <div class="space-y-4 max-lg:mt-6 lg:sticky lg:top-6">
+                {# Card statut : état, suivi par, sélecteur, puis les accès
+                   au drawer Suivi et notes et à l'historique des demandes,
+                   la référence en pied de card. #}
+                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="status-card">
                     <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                        <twig:Admin:ContactFollowUp :contactId="contact.id" />
-                        <twig:Admin:ContactNotes :contactId="contact.id" />
-                    </div>
-                </div>
+                        <twig:Admin:ContactStatusControl :contactId="contact.id" />
 
-                {% if previousRequests is not empty %}
-                    <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="previous-requests">
-                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-                            <div class="p-3">
-                                <h2 class="font-medium text-gray-900">
-                                    {{ 'admin.contacts.previous.title'|trans({'%count%': previousRequests|length}) }}
-                                </h2>
-                            </div>
-                            {% macro previousRow(previous, adminPrefix) %}
-                                <li>
-                                    <a
-                                        href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: previous.reference}) }}"
-                                        class="flex items-center justify-between gap-3 py-3 text-sm transition-colors duration-100 hover:text-primary"
+                        <div class="flex flex-col overflow-hidden rounded-xl bg-white">
+                            {# ── Drawer : fil de suivi. ─────────────────── #}
+                            <div
+                                class="contents"
+                                data-controller="drawer"
+                                data-action="keydown.esc@window->drawer#close"
+                                data-testid="notes-drawer"
+                            >
+                                <button
+                                    type="button"
+                                    data-controller="notes-count"
+                                    data-action="drawer#open contact-notes:count@window->notes-count#update"
+                                    class="flex w-full cursor-pointer items-center gap-2 border-b border-gray-950/5 px-4 py-3 text-left text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-primary"
+                                    data-testid="notes-drawer-open"
+                                >
+                                    {{ ux_icon('lucide:message-square-text', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.contacts.drawer.notes'|trans }}
+                                    <span
+                                        class="inline-flex min-w-5 items-center justify-center rounded-full bg-neutral-100 px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums {{ notesCount == 0 ? 'hidden' }}"
+                                        data-notes-count-target="badge"
+                                        data-testid="notes-count-badge"
+                                    >{{ notesCount }}</span>
+                                    {{ ux_icon('lucide:chevron-right', {class: 'ml-auto size-4 shrink-0 text-gray-300', 'aria-hidden': 'true'}) }}
+                                </button>
+                                <div data-drawer-target="root" hidden class="fixed inset-0 z-50">
+                                    <button
+                                        type="button"
+                                        data-drawer-target="backdrop"
+                                        data-action="drawer#close"
+                                        class="absolute inset-0 cursor-default bg-gray-950/40 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 ease-out motion-reduce:transition-none"
+                                        aria-label="{{ 'admin.contacts.drawer.close'|trans }}"
+                                        tabindex="-1"
+                                    ></button>
+                                    <aside
+                                        data-drawer-target="panel"
+                                        class="absolute inset-y-0 right-0 flex w-full max-w-md translate-x-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none"
+                                        role="dialog"
+                                        aria-modal="true"
+                                        aria-label="{{ 'admin.contacts.drawer.notes'|trans }}"
                                     >
-                                        <span class="flex min-w-0 items-center gap-2">
-                                            <span class="size-1.5 shrink-0 rounded-full {{ previous.status.dotClass }}" aria-hidden="true"></span>
-                                            <span class="truncate font-medium text-gray-900">{{ previous.reference }}</span>
-                                            <span class="truncate text-gray-500">{{ previous.helpType|trans }}</span>
-                                        </span>
-                                        <span class="shrink-0 text-xs text-gray-500 tabular-nums">{{ previous.createdAt|format_date('short') }}</span>
-                                    </a>
-                                </li>
-                            {% endmacro %}
-                            <div class="rounded-xl bg-white px-5 py-2">
-                                <ul class="divide-y divide-gray-950/5" role="list">
-                                    {% for previous in previousRequests|slice(0, 5) %}
-                                        {{ _self.previousRow(previous, adminPrefix) }}
-                                    {% endfor %}
-                                </ul>
-                                {% if previousRequests|length > 5 %}
-                                    <details class="group details-animated flex flex-col border-t border-gray-950/5">
-                                        <summary class="order-last flex cursor-pointer list-none justify-center py-2.5 [&::-webkit-details-marker]:hidden">
-                                            <span class="rounded-full px-3 py-1 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out group-open:hidden hover:bg-neutral-100 hover:text-gray-900">
-                                                {{ 'admin.contacts.previous.showMore'|trans({'%count%': previousRequests|length - 5}) }}
-                                            </span>
-                                            <span class="hidden rounded-full px-3 py-1 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out group-open:inline hover:bg-neutral-100 hover:text-gray-900">
-                                                {{ 'admin.contacts.previous.showLess'|trans }}
-                                            </span>
-                                        </summary>
-                                        <ul class="divide-y divide-gray-950/5 border-b border-gray-950/5" role="list">
-                                            {% for previous in previousRequests|slice(5) %}
-                                                {{ _self.previousRow(previous, adminPrefix) }}
-                                            {% endfor %}
-                                        </ul>
-                                    </details>
-                                {% endif %}
+                                        <div class="flex items-center justify-between gap-4 border-b border-gray-950/5 px-5 py-4">
+                                            <h2 class="font-medium text-gray-900">{{ 'admin.contacts.drawer.notes'|trans }}</h2>
+                                            <button
+                                                type="button"
+                                                data-action="drawer#close"
+                                                class="flex size-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                                aria-label="{{ 'admin.contacts.drawer.close'|trans }}"
+                                                data-testid="notes-drawer-close"
+                                            >
+                                                {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            </button>
+                                        </div>
+                                        {# min-h-0 : le composant (display:contents) fournit la zone
+                                           scrollable et le composer épinglé en pied de panel. #}
+                                        <div class="flex min-h-0 flex-1 flex-col bg-neutral-50">
+                                            <twig:Admin:ContactNotes :contactId="contact.id" />
+                                        </div>
+                                    </aside>
+                                </div>
                             </div>
+
+                            {# ── Drawer : demandes précédentes. ─────────── #}
+                            {% if previousRequests is not empty %}
+                                <div
+                                    class="contents"
+                                    data-controller="drawer"
+                                    data-action="keydown.esc@window->drawer#close"
+                                    data-testid="previous-requests"
+                                >
+                                    <button
+                                        type="button"
+                                        data-action="drawer#open"
+                                        class="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-left text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-primary"
+                                        data-testid="previous-drawer-open"
+                                    >
+                                        {{ ux_icon('lucide:history', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                        {{ 'admin.contacts.previous.title'|trans({'%count%': previousRequests|length}) }}
+                                        {{ ux_icon('lucide:chevron-right', {class: 'ml-auto size-4 shrink-0 text-gray-300', 'aria-hidden': 'true'}) }}
+                                    </button>
+                                    <div data-drawer-target="root" hidden class="fixed inset-0 z-50">
+                                        <button
+                                            type="button"
+                                            data-drawer-target="backdrop"
+                                            data-action="drawer#close"
+                                            class="absolute inset-0 cursor-default bg-gray-950/40 opacity-0 backdrop-blur-[1px] transition-opacity duration-200 ease-out motion-reduce:transition-none"
+                                            aria-label="{{ 'admin.contacts.drawer.close'|trans }}"
+                                            tabindex="-1"
+                                        ></button>
+                                        <aside
+                                            data-drawer-target="panel"
+                                            class="absolute inset-y-0 right-0 flex w-full max-w-md translate-x-full flex-col bg-white shadow-2xl transition-transform duration-200 ease-out motion-reduce:transition-none"
+                                            role="dialog"
+                                            aria-modal="true"
+                                            aria-label="{{ 'admin.contacts.previous.title'|trans({'%count%': previousRequests|length}) }}"
+                                        >
+                                            <div class="flex items-center justify-between gap-4 border-b border-gray-950/5 px-5 py-4">
+                                                <h2 class="font-medium text-gray-900">
+                                                    {{ 'admin.contacts.previous.title'|trans({'%count%': previousRequests|length}) }}
+                                                </h2>
+                                                <button
+                                                    type="button"
+                                                    data-action="drawer#close"
+                                                    class="flex size-8 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                                    aria-label="{{ 'admin.contacts.drawer.close'|trans }}"
+                                                    data-testid="previous-drawer-close"
+                                                >
+                                                    {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                </button>
+                                            </div>
+                                            <div class="flex-1 overflow-y-auto px-5 py-2">
+                                                <ul class="divide-y divide-gray-950/5" role="list">
+                                                    {% for previous in previousRequests %}
+                                                        <li>
+                                                            <a
+                                                                href="{{ path('admin_contact_show', {adminPrefix: adminPrefix, reference: previous.reference}) }}"
+                                                                class="flex items-center justify-between gap-3 py-3 text-sm transition-colors duration-100 hover:text-primary"
+                                                            >
+                                                                <span class="flex min-w-0 items-center gap-2">
+                                                                    <span class="size-1.5 shrink-0 rounded-full {{ previous.status.dotClass }}" aria-hidden="true"></span>
+                                                                    <span class="truncate font-medium text-gray-900">{{ previous.reference }}</span>
+                                                                    <span class="truncate text-gray-500">{{ previous.helpType|trans }}</span>
+                                                                </span>
+                                                                <span class="shrink-0 text-xs text-gray-500 tabular-nums">{{ previous.createdAt|format_date('short') }}</span>
+                                                            </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </aside>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex justify-end px-3 pt-1 pb-1">
+                            <p class="text-xs font-medium text-gray-400 tabular-nums" data-testid="status-card-reference">{{ contact.reference }}</p>
                         </div>
                     </div>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>

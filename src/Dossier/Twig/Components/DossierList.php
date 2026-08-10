@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dossier\Twig\Components;
 
+use App\Auth\Entity\User;
 use App\Dossier\Domain\DossierStatus;
 use App\Dossier\Domain\DossierSummary;
 use App\Dossier\Repository\DossierRepository;
@@ -34,6 +35,10 @@ final class DossierList
     #[LiveProp(url: true)]
     public string $statusFilter = 'all';
 
+    /** 'all' = every dossier, 'mine' = only the ones I manage. */
+    #[LiveProp(url: true)]
+    public string $scope = 'all';
+
     /** Free-text search over name, tenant and reference. Debounced client-side. */
     #[LiveProp(writable: true, url: true)]
     public string $search = '';
@@ -56,6 +61,24 @@ final class DossierList
         if ('all' !== $this->statusFilter && null === DossierStatus::tryFrom($this->statusFilter)) {
             $this->statusFilter = 'all';
         }
+        if (!\in_array($this->scope, ['all', 'mine'], true)) {
+            $this->scope = 'all';
+        }
+    }
+
+    #[LiveAction]
+    public function changeScope(#[LiveArg] string $scope): void
+    {
+        $this->ensureAdmin();
+        if (!\in_array($scope, ['all', 'mine'], true)) {
+            throw new AccessDeniedException('Unknown dossier scope.');
+        }
+        $this->scope = $scope;
+    }
+
+    public function getMineCount(): int
+    {
+        return \count($this->scoped('mine'));
     }
 
     #[LiveAction]
@@ -77,12 +100,15 @@ final class DossierList
     }
 
     /**
+     * Counts follow the active scope so the sidebar chips always describe
+     * the list actually shown.
+     *
      * @return array<string, int>
      */
     public function getStatusCounts(): array
     {
         $counts = array_fill_keys(array_column(DossierStatus::cases(), 'value'), 0);
-        foreach ($this->summaries() as $summary) {
+        foreach ($this->scoped($this->scope) as $summary) {
             ++$counts[$summary->status->value];
         }
 
@@ -91,7 +117,7 @@ final class DossierList
 
     public function getTotalCount(): int
     {
-        return \count($this->summaries());
+        return \count($this->scoped($this->scope));
     }
 
     /**
@@ -99,7 +125,7 @@ final class DossierList
      */
     public function getDossiers(): array
     {
-        $rows = $this->summaries();
+        $rows = $this->scoped($this->scope);
 
         if ('all' !== $this->statusFilter) {
             $rows = array_values(array_filter(
@@ -129,9 +155,27 @@ final class DossierList
         return $this->summariesCache ??= $this->repository->findSummaries();
     }
 
+    /**
+     * @return list<DossierSummary>
+     */
+    private function scoped(string $scope): array
+    {
+        if ('mine' !== $scope) {
+            return $this->summaries();
+        }
+
+        $user = $this->security->getUser();
+        $userId = $user instanceof User ? (int) $user->getId() : 0;
+
+        return array_values(array_filter(
+            $this->summaries(),
+            static fn (DossierSummary $summary): bool => $summary->managerId === $userId,
+        ));
+    }
+
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_DOSSIERS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

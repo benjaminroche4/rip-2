@@ -40,8 +40,22 @@ final readonly class UserProfile
         return trim($this->firstName.' '.$this->lastName);
     }
 
+    /**
+     * Highest role for display (admin > staff > user), mirroring
+     * UserListItem::primaryRole() so the profile badge matches the list.
+     */
     public function primaryRole(): string
     {
-        return \in_array('ROLE_ADMIN', $this->roles, true) ? 'admin' : 'user';
+        if (\in_array('ROLE_ADMIN', $this->roles, true)) {
+            return 'admin';
+        }
+
+        foreach ($this->roles as $role) {
+            if ('ROLE_STAFF' === $role || str_starts_with($role, 'ROLE_SECTION_')) {
+                return 'staff';
+            }
+        }
+
+        return 'user';
     }
 }

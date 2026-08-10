@@ -1,7 +1,10 @@
-{% macro dropdown(label, actionParam, paramName, options, current, testid) %}
+{% macro dropdown(label, actionParam, paramName, options, current, testid, required = false, error = null) %}
     {# options: list of {value, label, icon?} maps; current = selected value. #}
     <div class="min-w-0 space-y-2">
-        <p class="text-gray-600">{{ label }}</p>
+        <p class="text-gray-600">
+            {{ label }}
+            {% if required %}<span class="text-red-600" aria-hidden="true">*</span>{% endif %}
+        </p>
         <details
             class="relative"
             data-controller="details-dropdown"
@@ -33,6 +36,9 @@
                 {% endfor %}
             </div>
         </details>
+        {% if error %}
+            <p class="text-xs text-red-600">{{ error|trans }}</p>
+        {% endif %}
     </div>
 {% endmacro %}
 
@@ -68,13 +74,17 @@
                 tabindex="-1"
             ></button>
             <div class="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-                <div class="rounded-2xl bg-neutral-50 p-6">
-                    <h2 class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.contacts.create.title'|trans }}</h2>
-                    <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.contacts.create.subtitle'|trans }}</p>
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.contacts.create.title'|trans }}</h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.contacts.create.subtitle'|trans }}</p>
+                    </div>
 
-                    <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
+                    {# Bloc blanc : mêmes rangées que les cards détail. #}
+                    <div class="rounded-xl bg-white px-5 py-4">
+                    <div class="grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
                         <div class="min-w-0 space-y-2">
-                            <label for="create-first" class="block text-gray-600">{{ 'contact.contactForm.firstName.label'|trans }}</label>
+                            <label for="create-first" class="block text-gray-600">{{ 'contact.contactForm.firstName.label'|trans }} <span class="text-red-600" aria-hidden="true">*</span></label>
                             <input id="create-first" type="text" data-model="norender|firstName" value="{{ this.firstName }}" class="{{ inputClass }}">
                             {% if this.errors.firstName is defined %}
                                 <p class="text-xs text-red-600">{{ this.errors.firstName|trans }}</p>
@@ -96,7 +106,17 @@
                         </div>
                         <div class="min-w-0 space-y-2">
                             <label for="create-phone" class="block text-gray-600">{{ 'admin.contacts.card.field.phone'|trans }}</label>
-                            <input id="create-phone" type="tel" data-model="norender|phoneNumber" value="{{ this.phoneNumber }}" placeholder="+33 6 12 34 56 78" class="{{ inputClass }}">
+                            {# Même sélecteur d'indicatif que le formulaire de contact public.
+                               data-live-ignore : le widget construit son propre DOM autour de
+                               l'input, le morphing doit laisser la zone tranquille. #}
+                            <div
+                                data-live-ignore
+                                data-controller="phone-input"
+                                data-phone-input-initial-country-value="{{ app.request and app.request.locale == 'en' ? 'gb' : 'fr' }}"
+                                data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
+                            >
+                                <input id="create-phone" type="tel" data-model="norender|phoneNumber" value="{{ this.phoneNumber }}" placeholder="6 12 34 56 78" data-phone-input-target="input" class="{{ inputClass }}">
+                            </div>
                         </div>
                         <div class="min-w-0 space-y-2">
                             <label for="create-company" class="block text-gray-600">{{ 'admin.contacts.show.field.company'|trans }}</label>
@@ -106,20 +126,20 @@
                         {% for lang in constant('App\\Admin\\Twig\\Components\\ContactDetails::LANGS') %}
                             {% set langOptions = langOptions|merge([{value: lang, label: ('admin.contacts.card.lang.' ~ lang)|trans, icon: 'circle-flags:' ~ lang}]) %}
                         {% endfor %}
-                        {{ _self.dropdown('admin.contacts.card.field.language'|trans, 'chooseLang', 'lang', langOptions, this.lang, 'contact-create-lang') }}
+                        {{ _self.dropdown('admin.contacts.card.field.language'|trans, 'chooseLang', 'lang', langOptions, this.lang, 'contact-create-lang', required = true) }}
 
                         {% set helpOptions = [] %}
                         {% for type in constant('App\\Admin\\Twig\\Components\\ContactDetails::HELP_TYPES') %}
                             {% set helpOptions = helpOptions|merge([{value: type, label: type|trans}]) %}
                         {% endfor %}
-                        {{ _self.dropdown('admin.contacts.card.help'|trans, 'chooseHelpType', 'type', helpOptions, this.helpType, 'contact-create-help') }}
+                        {{ _self.dropdown('admin.contacts.card.help'|trans, 'chooseHelpType', 'type', helpOptions, this.helpType, 'contact-create-help', required = true) }}
 
                         {% if this.helpType == constant('App\\Contact\\Form\\ContactType::HOUSING_HELP_TYPE') %}
-                            {% set offerOptions = [{value: '', label: 'admin.contacts.edit.noOffer'|trans}] %}
+                            {% set offerOptions = [] %}
                             {% for offer in constant('App\\Admin\\Twig\\Components\\ContactDetails::OFFERS') %}
                                 {% set offerOptions = offerOptions|merge([{value: offer, label: ('contact.contactForm.offer.' ~ offer ~ '.title')|trans ~ ' (' ~ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans ~ ')'}]) %}
                             {% endfor %}
-                            {{ _self.dropdown('admin.contacts.show.field.offer'|trans, 'chooseOffer', 'offer', offerOptions, this.offer, 'contact-create-offer') }}
+                            {{ _self.dropdown('admin.contacts.show.field.offer'|trans, 'chooseOffer', 'offer', offerOptions, this.offer, 'contact-create-offer', required = true, error = this.errors.offer is defined ? this.errors.offer : null) }}
                         {% endif %}
 
                         {% set sourceOptions = [] %}
@@ -138,8 +158,9 @@
                             >{{ this.message }}</textarea>
                         </div>
                     </div>
+                    </div>
 
-                    <div class="mt-8 flex items-center justify-end gap-4">
+                    <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
                             data-action="live#action"
@@ -156,7 +177,6 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90"
                             data-testid="contact-create-submit"
                         >
-                            {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ 'admin.contacts.create.submit'|trans }}
                         </button>
                     </div>

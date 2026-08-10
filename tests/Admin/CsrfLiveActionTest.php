@@ -65,10 +65,11 @@ final class CsrfLiveActionTest extends WebTestCase
         $this->client->loginUser($admin);
     }
 
-    public function testUserListMoreActionRejectsRequestWithoutCsrfToken(): void
+    public function testUserAccessToggleActionRejectsRequestWithoutCsrfToken(): void
     {
-        $this->postLiveAction('Admin:UserList', 'more', [
-            'props' => ['page' => 1, 'adminPrefix' => $this->adminPrefix],
+        $this->postLiveAction('Admin:UserAccess', 'toggleSection', [
+            'props' => ['userId' => 1],
+            'args' => ['section' => 'tools'],
         ]);
 
         self::assertGreaterThanOrEqual(400, $this->client->getResponse()->getStatusCode());

@@ -125,12 +125,13 @@ final class AdminAccessTest extends WebTestCase
         self::assertSelectorExists('aside a[href$="/admin"]');
         self::assertSelectorExists('aside a[href$="/admin/utilisateurs"]');
 
-        // Two users seeded in setUp() → table rendered with 2 rows, both emails visible.
-        $rows = $crawler->filter('[data-testid="users-table"] tbody tr');
-        self::assertCount(2, $rows);
+        // Two users seeded in setUp() → two data rows, one per grade group
+        // (admin / user), each group with its own header row.
+        self::assertCount(2, $crawler->filter('[data-testid="users-table"] [data-testid="user-row-link"]'));
+        self::assertCount(1, $crawler->filter('[data-testid="users-group-admin"]'));
+        self::assertCount(1, $crawler->filter('[data-testid="users-group-user"]'));
         $body = $crawler->filter('[data-testid="users-table"]')->html();
-        self::assertStringContainsString(self::USER_EMAIL, $body);
-        self::assertStringContainsString(self::ADMIN_EMAIL, $body);
+        self::assertStringContainsString('Site web', $body);
 
         // Admin row carries the admin role badge, the regular user the user one.
         self::assertStringContainsString('Admin', $body);
@@ -221,7 +222,20 @@ final class AdminAccessTest extends WebTestCase
         self::assertCount(1, $crawler->filter('[data-testid="user-profile"]'));
         self::assertStringContainsString(self::USER_EMAIL, $crawler->filter('[data-testid="user-profile"]')->html());
 
+        // A plain client has no BO access: the staff-only cards (functions,
+        // assigned leads/dossiers) stay hidden on their profile.
+        self::assertSelectorNotExists('[data-testid="user-functions"]');
+        self::assertSelectorNotExists('[data-testid="user-activity"]');
+
+        // On a staff profile (the admin's own), those cards show up.
+        $admin = $this->findUser(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/utilisateurs/'.$admin->getUniqueId().'/test-admin');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-testid="user-functions"]');
+        self::assertSelectorExists('[data-testid="user-activity"]');
+
         // Back link in the page header points at the list.
+        $crawler = $this->client->request('GET', $url);
         self::assertSelectorExists('a[href$="/admin/utilisateurs"]');
     }
 

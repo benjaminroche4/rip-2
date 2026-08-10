@@ -1,143 +1,423 @@
-<div {{ attributes.defaults({class: 'flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-3'}) }} data-testid="contact-status-control">
-    {% set contact = this.contact %}
-    {% if contact %}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <p class="flex items-center gap-1.5 text-sm {{ contact.status.textClass }}">
-                <span class="size-1.5 shrink-0 rounded-full {{ contact.status.dotClass }}" aria-hidden="true"></span>
-                {{ contact.status.labelKey|trans }}
-            </p>
-            {% if contact.status.value == 'new' %}
-                {% set deadline = contact.createdAt|date_modify('+30 minutes') %}
-                {% set alreadyOverdue = date() > deadline %}
-                <div
-                    data-controller="countdown"
-                    data-countdown-deadline-value="{{ deadline|date('c') }}"
-                    title="{{ 'admin.contacts.card.timer.title'|trans }}"
+{% macro statusChips(contact) %}
+    {# Chips contextuelles : délai de prise en charge, note, rappel. #}
+    {% if contact.status.value == 'new' %}
+        {% set deadline = contact.createdAt|date_modify('+30 minutes') %}
+        {% set alreadyOverdue = date() > deadline %}
+        <div
+            data-controller="countdown"
+            data-countdown-deadline-value="{{ deadline|date('c') }}"
+            title="{{ 'admin.contacts.card.timer.title'|trans }}"
+        >
+            <span
+                data-countdown-target="running"
+                class="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 tabular-nums"
+                {% if alreadyOverdue %}hidden{% endif %}
+            >
+                {{ ux_icon('lucide:timer', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                <span data-countdown-target="remaining">--:--</span>
+            </span>
+            <span
+                data-countdown-target="overdue"
+                class="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600"
+                {% if not alreadyOverdue %}hidden{% endif %}
+            >
+                {{ ux_icon('lucide:alarm-clock-off', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.contacts.card.timer.overdue'|trans }}
+            </span>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro calloutText(contact, planned) %}
+    {#- Libellé partagé de la card récap : date planifiée ou nom de l'étape. -#}
+    {%- if planned -%}
+        {{ ('admin.contacts.card.' ~ {visio: 'visioAtText', quote_sent: 'quoteSentAtText'}[contact.nextStep.value]|default('recallAtText'))|trans({
+            '%date%': contact.recallAt|format_datetime(pattern='dd.MM'),
+            '%time%': contact.recallAt|format_datetime(pattern="HH'h'mm"),
+        }) }}
+    {%- else -%}
+        {{ contact.nextStep.labelKey|trans }}
+    {%- endif -%}
+{% endmacro %}
+
+{% macro assignee(contact, assignees) %}
+    {# Mêmes chips que la card Suivi : la personne en place se retire d'un X,
+       sinon un chip par membre assignable. #}
+    <div class="flex flex-wrap items-center gap-2 {{ contact and contact.assigneeName ? 'justify-end' }}">
+        {% if contact and contact.assigneeName %}
+            <span class="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pr-1.5 pl-1">
+                <twig:Avatar filename="{{ contact.assigneeAvatar }}" name="{{ contact.assigneeName }}" size="6" />
+                <span class="text-sm font-medium text-gray-900">{{ contact.assigneeName|title }}</span>
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assign"
+                    data-live-id-param="0"
+                    class="flex size-5 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-100 hover:text-gray-900"
+                    aria-label="{{ 'admin.contacts.followUp.assigneeNone'|trans }}"
+                    data-testid="status-card-unassign"
                 >
-                    <span
-                        data-countdown-target="running"
-                        class="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 tabular-nums"
-                        {% if alreadyOverdue %}hidden{% endif %}
-                    >
-                        {{ ux_icon('lucide:timer', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                        <span data-countdown-target="remaining">--:--</span>
-                    </span>
-                    <span
-                        data-countdown-target="overdue"
-                        class="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600"
-                        {% if not alreadyOverdue %}hidden{% endif %}
-                    >
-                        {{ ux_icon('lucide:alarm-clock-off', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.contacts.card.timer.overdue'|trans }}
-                    </span>
-                </div>
-            {% endif %}
-            {% if contact.leadRating %}
-                <twig:Admin:LeadRatingBadge :rating="contact.leadRating" />
-            {% endif %}
-            {% if contact.recallAt %}
-                {% set recallOverdue = contact.recallAt < date() %}
-                <span
-                    class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium tabular-nums {{ recallOverdue ? 'bg-red-50 text-red-600' : 'bg-purple-50 text-purple-700' }}"
-                    title="{{ 'admin.contacts.followUp.recallLabel'|trans }}"
-                    data-testid="recall-chip"
+                    {{ ux_icon('lucide:x', {class: 'size-3', 'aria-hidden': 'true'}) }}
+                </button>
+            </span>
+        {% else %}
+            {% for assignee in assignees %}
+                {# "Moi" en tête : s'attribuer le lead est le geste le plus courant. #}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="assign"
+                    data-live-id-param="{{ assignee.id }}"
+                    {% if assignee.me %}title="{{ assignee.name|title }}"{% endif %}
+                    class="flex cursor-pointer items-center gap-1.5 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors duration-100 ease-out {{ assignee.me ? 'border-gray-300 bg-white font-medium text-gray-900 hover:border-gray-400 hover:bg-gray-50' : 'border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900' }}"
+                    data-testid="status-card-assign"
                 >
-                    {{ ux_icon('lucide:calendar-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                    {{ 'admin.contacts.card.recallAtText'|trans({
-                        '%date%': contact.recallAt|format_datetime(pattern='dd.MM'),
-                        '%time%': contact.recallAt|format_datetime(pattern="HH'h'mm"),
-                    }) }}
+                    <twig:Avatar filename="{{ assignee.avatar }}" name="{{ assignee.name }}" size="6" class="{{ assignee.me ? '' : 'opacity-70' }}" />
+                    {{ assignee.me ? 'admin.contacts.followUp.assignMe'|trans : assignee.name|title }}
+                </button>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro statusDropdown(contact, statuses, width = 'w-44') %}
+    <details
+        class="relative {{ width == 'w-full' ? 'w-full' : 'shrink-0' }}"
+        data-controller="details-dropdown"
+        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+        data-testid="contact-status-dropdown"
+    >
+        <summary class="flex {{ width }} cursor-pointer list-none items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-colors duration-100 ease-out hover:border-gray-300 hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+            <span class="size-2 shrink-0 rounded-full {{ contact.status.dotClass }}" aria-hidden="true"></span>
+            <span class="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">{{ contact.status.labelKey|trans }}</span>
+            {{ ux_icon('lucide:chevrons-up-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+        </summary>
+        <div class="absolute right-0 z-10 mt-2 {{ width == 'w-full' ? 'w-full' : 'w-44' }} rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+            {% for status in statuses %}
+                <button
+                    type="button"
+                    data-action="live#action details-dropdown#close"
+                    data-live-action-param="change"
+                    data-live-status-param="{{ status.value }}"
+                    class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ status == contact.status ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                >
+                    <span class="size-1.5 shrink-0 rounded-full {{ status.dotClass }}" aria-hidden="true"></span>
+                    {{ status.labelKey|trans }}
+                </button>
+            {% endfor %}
+        </div>
+    </details>
+{% endmacro %}
+
+{% macro closureBlock(contact, reasons) %}
+    {# Motif de clôture : demandé uniquement quand le lead est fermé. #}
+    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.show.closureLabel'|trans }}</p>
+    <div class="mt-2 flex flex-wrap gap-1.5">
+        {% for reason in reasons %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="setClosureReason"
+                data-live-reason-param="{{ reason.value }}"
+                aria-pressed="{{ reason == contact.closureReason ? 'true' : 'false' }}"
+                class="cursor-pointer rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ reason == contact.closureReason ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+            >
+                {{ reason.labelKey|trans }}
+            </button>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro stepChips(pendingValue, steps) %}
+    {# Chips de sélection en brouillon (re-clic = désélection) : rien ne
+       part au serveur avant Valider. #}
+    <div class="flex flex-wrap gap-1.5">
+        {% for step in steps %}
+            {% set picked = step.value == pendingValue %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="pickStep"
+                data-live-step-param="{{ step.value }}"
+                aria-pressed="{{ picked ? 'true' : 'false' }}"
+                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                data-testid="next-step-chip"
+            >
+                {{ ux_icon(step.icon, {class: 'size-4 shrink-0 ' ~ (picked ? 'text-primary/70' : 'text-gray-400'), 'aria-hidden': 'true'}) }}
+                {{ step.labelKey|trans }}
+            </button>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro planner(contact, recallAt, stepCase, channels = [], pendingChannel = '') %}
+    {# Selon l'étape choisie : planifier le rappel ou la visio (brouillon). #}
+    <div class="space-y-1.5" data-testid="status-card-recall">
+        <p class="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-400 uppercase">
+            {{ ('admin.contacts.nextStep.planner.' ~ stepCase.value)|trans }}
+            {% if contact.recallAt and contact.recallAt < date() %}
+                <span class="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium tracking-normal normal-case text-red-600">
+                    {{ ux_icon('lucide:alarm-clock-off', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.contacts.followUp.recallOverdue'|trans }}
                 </span>
             {% endif %}
-        </div>
-
-        <div class="flex shrink-0 items-center gap-3">
-            {# La personne de suivi assignée prime sur le dernier intervenant. #}
-            {% if contact.assigneeName %}
-                <div class="flex items-center gap-2">
-                    <div class="min-w-0 text-right">
-                        <p class="text-xs text-gray-500">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
-                        <p class="truncate text-xs font-medium text-gray-900">{{ contact.assigneeName|title }}</p>
-                    </div>
-                    <twig:Avatar filename="{{ contact.assigneeAvatar }}" name="{{ contact.assigneeName }}" size="7" />
-                </div>
-            {% elseif contact.statusChangedBy %}
-                {% set isUpdate = contact.firstTreatedAt and contact.statusChangedAt and contact.statusChangedAt > contact.firstTreatedAt %}
-                <div class="flex items-center gap-2">
-                    <div class="min-w-0 text-right">
-                        <p class="text-xs text-gray-500">{{ (isUpdate ? 'admin.contacts.card.updatedBy' : 'admin.contacts.card.treatedBy')|trans }}</p>
-                        <p class="truncate text-xs font-medium text-gray-900">{{ contact.statusChangedBy|title }}</p>
-                    </div>
-                    <twig:Avatar filename="{{ contact.statusChangedByAvatar }}" name="{{ contact.statusChangedBy }}" size="7" />
-                </div>
-            {% endif %}
-            <details
-                class="relative shrink-0"
-                data-controller="details-dropdown"
-                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+            <input
+                type="datetime-local"
+                min="{{ 'now'|date('Y-m-d\\TH:i') }}"
+                data-model="norender|recallAt"
+                data-action="keydown.enter->live#action:prevent"
+                data-live-action-param="confirmStep"
+                value="{{ recallAt }}"
+                aria-label="{{ ('admin.contacts.nextStep.planner.' ~ stepCase.value)|trans }}"
+                class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                data-testid="recall-input"
             >
-                <summary class="flex w-44 cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
-                    <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ contact.status.labelKey|trans }}</span>
-                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
-                </summary>
-                <div class="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
-                    {% for status in this.statuses %}
-                        <button
-                            type="button"
-                            data-action="live#action details-dropdown#close"
-                            data-live-action-param="change"
-                            data-live-status-param="{{ status.value }}"
-                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ status == contact.status ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                        >
-                            <span class="size-1.5 shrink-0 rounded-full {{ status.dotClass }}" aria-hidden="true"></span>
-                            {{ status.labelKey|trans }}
-                        </button>
-                    {% endfor %}
-                </div>
-            </details>
+            {% if recallAt %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="clearPendingRecall"
+                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                    data-testid="recall-clear"
+                >
+                    {{ 'admin.contacts.followUp.recallClear'|trans }}
+                </button>
+            {% endif %}
         </div>
 
-        {# Motif de clôture : demandé uniquement quand le lead est non
-           qualifié, rendu sous l'en-tête (w-full → passe à la ligne). #}
-        {% if contact.status.value == 'closed' %}
-            {% set reasons = this.closureReasons %}
-            <div class="w-full space-y-2 border-t border-gray-950/5 pt-3 text-sm">
-                <p class="text-gray-600">{{ 'admin.contacts.show.closureLabel'|trans }}</p>
-                <div class="flex flex-wrap gap-2">
-                    {% for reason in reasons %}
+        {% if stepCase.value == 'visio' %}
+            <p class="flex items-start gap-1.5 pt-1 text-xs text-gray-500" data-testid="visio-invite-notice">
+                {{ ux_icon('lucide:info', {class: 'mt-0.5 size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                {{ 'admin.contacts.nextStep.visioNotice'|trans }}
+            </p>
+        {% endif %}
+
+        {# Recontact : par quel canal (même liste que Qualité du lead). #}
+        {% if stepCase.value == 'recontact' and channels is not empty %}
+            <p class="pt-1.5 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.channelLabel'|trans }}</p>
+            <div class="flex flex-wrap gap-1.5">
+                {% for channel in channels %}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="pickChannel"
+                        data-live-channel-param="{{ channel.value }}"
+                        aria-pressed="{{ channel.value == pendingChannel ? 'true' : 'false' }}"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ channel.value == pendingChannel ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        data-testid="recontact-channel-chip"
+                    >
+                        {{ ux_icon(channel.icon, {class: 'size-3.5 shrink-0 ' ~ (channel.value == pendingChannel ? 'text-primary/70' : 'text-gray-400'), 'aria-hidden': 'true'}) }}
+                        {{ channel.labelKey|trans }}
+                    </button>
+                {% endfor %}
+            </div>
+
+            {# Prévenir le prospect par email du créneau planifié. #}
+            <label class="flex cursor-pointer items-start gap-2 pt-2 text-xs text-gray-600">
+                <input
+                    type="checkbox"
+                    data-model="notifyClient"
+                    class="mt-0.5 size-3.5 shrink-0 cursor-pointer rounded border-neutral-300 text-primary accent-[#71172e] focus:ring-primary/30"
+                    data-testid="notify-client-checkbox"
+                >
+                {{ 'admin.contacts.nextStep.notifyClient'|trans }}
+            </label>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% import _self as ui %}
+
+<div {{ attributes.defaults({class: 'flex w-full flex-col gap-1'}) }} data-testid="contact-status-control">
+    {% set contact = this.contact %}
+    {% if contact %}
+        {% set statuses = this.statuses %}
+        {% set inProgress = contact.status.value == 'in_progress' %}
+        {% set closed = contact.status.value == 'closed' %}
+        {% set editingStep = inProgress and (not contact.nextStep or this.editingStep) %}
+
+        {# ── État = action : chips contextuelles (délai) à gauche, sélecteur
+              de statut à droite. Une fois la prochaine étape remplie, la
+              card récap s'affiche dessous avec un "Modifier" discret. ──── #}
+        <div class="rounded-xl bg-white px-4 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                {% set chips %}{{ ui.statusChips(contact) }}{% endset %}
+                {% if chips|trim %}
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        {{ chips }}
+                    </div>
+                {% endif %}
+                <div class="ml-auto">
+                    {{ ui.statusDropdown(contact, statuses) }}
+                </div>
+            </div>
+
+            {% if inProgress and contact.nextStep and not editingStep %}
+                {% set planned = contact.recallAt and contact.nextStep.needsDate %}
+                {% set overdue = planned and contact.recallAt < date() %}
+                {# Card récap deux niveaux : pastille icône ambre, micro-label,
+                   valeur. Rouge quand l'échéance planifiée est dépassée. #}
+                <div id="next-step-callout" class="mt-2.5 flex items-center gap-3 rounded-xl border px-3 py-2 {{ overdue ? 'border-red-200 bg-red-50/40' : 'border-amber-200 bg-amber-50/40' }}" data-testid="next-step-callout">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-full {{ overdue ? 'bg-red-100' : 'bg-amber-100' }}">
+                        {{ ux_icon(contact.nextStep.icon, {class: 'size-4 shrink-0 ' ~ (overdue ? 'text-red-600' : 'text-amber-600'), 'aria-hidden': 'true'}) }}
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</span>
+                        <span class="block text-sm font-medium text-gray-900 tabular-nums">{{ ui.calloutText(contact, planned) }}</span>
+                    </span>
+                    {% if contact.nextStep.value == 'recontact' and contact.recontactChannel %}
+                        <span class="flex shrink-0 items-center gap-1.5 text-xs font-medium text-gray-500" data-testid="recontact-channel-badge">
+                            {{ ux_icon(contact.recontactChannel.icon, {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            {{ contact.recontactChannel.labelKey|trans }}
+                        </span>
+                    {% endif %}
+                    {% if contact.nextStep.value == 'visio' and contact.visioMeetLink %}
+                        <a
+                            href="{{ contact.visioMeetLink }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 transition-colors duration-100 ease-out hover:bg-amber-50"
+                            data-testid="visio-meet-link"
+                        >
+                            {{ ux_icon('lucide:video', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.contacts.nextStep.joinVisio'|trans }}
+                        </a>
+                    {% endif %}
+                </div>
+                {% if contact.nextStep.value == 'visio' and overdue %}
+                    {# Visio échue : on pousse à conclure au lieu de laisser
+                       le pipeline s'endormir sur une card rouge. #}
+                    <div class="mt-1.5 flex items-center justify-between gap-3" data-testid="visio-overdue-actions">
+                        <p class="text-xs text-gray-500">{{ 'admin.contacts.nextStep.visioOverdue.question'|trans }}</p>
+                        <div class="flex shrink-0 items-center gap-1.5">
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="visioDone"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                data-testid="visio-done"
+                            >
+                                {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.contacts.nextStep.visioOverdue.done'|trans }}
+                            </button>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="visioNoShow"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                data-testid="visio-noshow"
+                            >
+                                {{ ux_icon('lucide:user-x', {class: 'size-3.5 shrink-0 text-red-500', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.contacts.nextStep.visioOverdue.noShow'|trans }}
+                            </button>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mt-1.5 flex justify-end">
                         <button
                             type="button"
                             data-action="live#action"
-                            data-live-action-param="setClosureReason"
-                            data-live-reason-param="{{ reason.value }}"
-                            aria-pressed="{{ reason == contact.closureReason ? 'true' : 'false' }}"
-                            class="cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ reason == contact.closureReason ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                            data-live-action-param="editStep"
+                            class="cursor-pointer text-xs text-gray-500 underline underline-offset-2 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="next-step-edit"
                         >
-                            {{ reason.labelKey|trans }}
+                            {{ 'admin.contacts.nextStep.edit'|trans }}
                         </button>
-                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {% if inProgress %}
+                {# Pendant la confirmation (création de l'événement Meet côté
+                   Google), squelette de la future card récap. Sur l'étape
+                   stockée nulle (première planification), l'éditeur est
+                   masqué : le squelette est le seul retour visuel. #}
+                <div
+                    id="next-step-skeleton"
+                    data-loading="action(confirmStep)|show"
+                    class="mt-2.5 flex animate-pulse items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2"
+                    data-testid="next-step-skeleton"
+                >
+                    <span class="size-8 shrink-0 rounded-full bg-neutral-200" aria-hidden="true"></span>
+                    <span class="min-w-0 flex-1 space-y-2 py-1">
+                        <span class="block h-2.5 w-24 rounded bg-neutral-200" aria-hidden="true"></span>
+                        <span class="block h-3 w-40 rounded bg-neutral-200" aria-hidden="true"></span>
+                    </span>
+                </div>
+            {% endif %}
+
+            {% if closed %}
+                <div class="mt-3 border-t border-gray-950/5 pt-3 text-sm">
+                    {{ ui.closureBlock(contact, this.closureReasons) }}
+                </div>
+            {% endif %}
+        </div>
+
+        {# ── Éditeur de prochaine étape : s'ouvre quand le lead passe en
+              cours (ou via Modifier), border primary pour ressortir. ────── #}
+        {% if editingStep %}
+            {% set pendingCase = this.pendingCase %}
+            {% set needsPlanner = pendingCase and pendingCase.needsDate %}
+            <div id="next-step-editor" class="rounded-xl border-2 border-dashed border-primary/40 bg-white px-4 py-3 text-sm" data-loading="action(confirmStep)|hide" data-testid="next-step">
+                <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</p>
+                <div class="mt-2">
+                    {{ ui.stepChips(this.pendingStep, this.nextSteps) }}
+                </div>
+                {% if needsPlanner %}
+                    <div class="mt-3 border-t border-gray-950/5 pt-3">
+                        {{ ui.planner(contact, this.recallAt, pendingCase, this.recontactChannels, this.pendingChannel) }}
+                    </div>
+                {% endif %}
+                {% if this.dateMissing %}
+                    <p class="mt-2 flex items-center gap-1.5 text-xs text-red-600" data-testid="next-step-date-missing">
+                        {{ ux_icon('lucide:alarm-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.nextStep.dateRequired'|trans }}
+                    </p>
+                {% endif %}
+                {% if this.channelMissing %}
+                    <p class="mt-2 flex items-center gap-1.5 text-xs text-red-600" data-testid="next-step-channel-missing">
+                        {{ ux_icon('lucide:message-circle-warning', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.nextStep.channelRequired'|trans }}
+                    </p>
+                {% endif %}
+                {# Rien ne part avant Valider : le choix reste un brouillon. #}
+                <div class="mt-3 flex items-center justify-end gap-4 border-t border-gray-950/5 pt-3">
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="cancelStep"
+                        class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                        data-testid="next-step-cancel"
+                    >
+                        {{ 'admin.contacts.notes.cancel'|trans }}
+                    </button>
+                    <twig:Button
+                        size="sm"
+                        data-action="live#action"
+                        data-live-action-param="confirmStep"
+                        data-loading="action(confirmStep)|addAttribute(disabled)"
+                        data-testid="next-step-confirm"
+                    >
+                        {{ 'admin.contacts.nextStep.confirm'|trans }}
+                    </twig:Button>
                 </div>
             </div>
         {% endif %}
 
-        {# Prochaine étape : pilotée seulement quand la demande est en cours. #}
-        {% if contact.status.value == 'in_progress' %}
-            <div class="w-full space-y-2 border-t border-gray-950/5 pt-3 text-sm" data-testid="next-step">
-                <p class="text-gray-600">{{ 'admin.contacts.nextStep.label'|trans }}</p>
-                <div class="flex flex-wrap gap-2">
-                    {% for step in this.nextSteps %}
-                        <button
-                            type="button"
-                            data-action="live#action"
-                            data-live-action-param="setNextStep"
-                            data-live-step-param="{{ step.value }}"
-                            aria-pressed="{{ step == contact.nextStep ? 'true' : 'false' }}"
-                            class="cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ step == contact.nextStep ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                            data-testid="next-step-chip"
-                        >
-                            {{ step.labelKey|trans }}
-                        </button>
-                    {% endfor %}
+        {# ── Suivi par : à côté du label quand assigné, en dessous (chips
+              en ligne) quand il faut choisir. ──────────────────────────── #}
+        {% if contact.assigneeName %}
+            <div class="flex items-start justify-between gap-4 rounded-xl bg-white px-4 py-3 text-sm">
+                <p class="shrink-0 pt-1 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+                {{ ui.assignee(contact, this.assignees) }}
+            </div>
+        {% else %}
+            <div class="rounded-xl bg-white px-4 py-3 text-sm">
+                <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+                <div class="mt-2">
+                    {{ ui.assignee(contact, this.assignees) }}
                 </div>
             </div>
         {% endif %}

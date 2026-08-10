@@ -110,6 +110,9 @@
                                         {% if item.recentContactsBadge ?? false %}
                                             <span class="ml-auto group-data-collapsed/sidebar:hidden"><twig:Admin:ContactsNavBadge /></span>
                                         {% endif %}
+                                        {% if item.openDossiersBadge ?? false %}
+                                            <span class="ml-auto group-data-collapsed/sidebar:hidden"><twig:Dossier:DossiersNavBadge /></span>
+                                        {% endif %}
                                     </a>
                                 </li>
                             {% endif %}
@@ -118,39 +121,26 @@
 
                     <ul class="space-y-0.5" role="list">
                         {{ _self.navItems([
-                            {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_ADMIN'},
+                            {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_STAFF'},
                         ], currentRoute, adminPrefix) }}
                     </ul>
 
+                    {% if is_granted('ROLE_SECTION_CONTACTS') or is_granted('ROLE_SECTION_DOSSIERS') or is_granted('ROLE_SECTION_VISITS') or is_granted('ROLE_SECTION_AGENTS') or is_granted('ROLE_SECTION_TOOLS') %}
                     <div>
                         <p class="mb-1.5 px-3 text-xs font-semibold tracking-wide text-gray-400 uppercase group-data-collapsed/sidebar:hidden">
                             {{ 'admin.sidebar.section.business'|trans }}
                         </p>
                         <ul class="space-y-0.5" role="list">
                             {{ _self.navItems([
-                                {route: 'admin_contacts', icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_ADMIN', recentContactsBadge: true},
-                                {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_ADMIN'},
-                            ], currentRoute, adminPrefix) }}
-                            {# Entrée "Visites" sans page pour l'instant (module à venir). #}
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <li>
-                                    <a
-                                        href="#"
-                                        data-sidebar-tooltip="{{ 'admin.nav.visits'|trans }}"
-                                        data-action="mouseenter->sidebar-collapse#showTip mouseleave->sidebar-collapse#hideTip focus->sidebar-collapse#showTip blur->sidebar-collapse#hideTip"
-                                        class="group/item flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-normal text-gray-800 transition-colors hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-primary group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:px-2"
-                                        data-testid="nav-visits"
-                                    >
-                                        {{ ux_icon('lucide:calendar-check', {class: 'size-4 shrink-0 motion-safe:group-hover/item:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
-                                        <span class="truncate group-data-collapsed/sidebar:hidden">{{ 'admin.nav.visits'|trans }}</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                            {{ _self.navItems([
-                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_EDITOR'},
+                                {route: 'admin_contacts', icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_SECTION_CONTACTS', recentContactsBadge: true},
+                                {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_SECTION_DOSSIERS', openDossiersBadge: true},
+                                {route: 'admin_visits', icon: 'lucide:calendar-check', label: 'admin.nav.visits', role: 'ROLE_SECTION_VISITS'},
+                                {route: 'admin_agents', icon: 'lucide:briefcase', label: 'admin.nav.agents', role: 'ROLE_SECTION_AGENTS'},
+                                {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_SECTION_TOOLS'},
                             ], currentRoute, adminPrefix) }}
                         </ul>
                     </div>
+                    {% endif %}
 
                     {% if is_granted('ROLE_ADMIN') %}
                         <div>
@@ -179,7 +169,7 @@
                     >
                         <summary
                             class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-2.5 py-2 transition-colors duration-100 ease-out select-none hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:border-transparent group-data-collapsed/sidebar:bg-transparent group-data-collapsed/sidebar:px-1"
-                            data-sidebar-tooltip="{{ fullName ?: app.user.email }}"
+                            data-sidebar-tooltip="{{ fullName ? fullName|title : app.user.email }}"
                             data-action="mouseenter->sidebar-collapse#showTip mouseleave->sidebar-collapse#hideTip focus->sidebar-collapse#showTip blur->sidebar-collapse#hideTip"
                             data-testid="sidebar-user-trigger"
                         >
@@ -190,7 +180,7 @@
                                 size="8"
                             />
                             <span class="min-w-0 flex-1 group-data-collapsed/sidebar:hidden">
-                                <span class="block truncate text-sm font-medium text-gray-900">{{ fullName ?: app.user.email }}</span>
+                                <span class="block truncate text-sm font-medium text-gray-900">{{ fullName ? fullName|title : app.user.email }}</span>
                                 <span class="block truncate text-xs text-gray-500">{{ app.user.email }}</span>
                             </span>
                             {{ ux_icon('lucide:chevrons-up-down', {class: 'size-3.5 shrink-0 text-gray-400 group-data-collapsed/sidebar:hidden', 'aria-hidden': 'true'}) }}

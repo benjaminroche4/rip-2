@@ -23,7 +23,7 @@ final class LoginRedirectTest extends WebTestCase
     private const SUBMIT_BUTTON = 'Se connecter';
     private const PASSWORD = 'password';
     private const ADMIN_EMAIL = 'login-redirect-admin@example.com';
-    private const EDITOR_EMAIL = 'login-redirect-editor@example.com';
+    private const STAFF_EMAIL = 'login-redirect-staff@example.com';
     private const USER_EMAIL = 'login-redirect-user@example.com';
 
     private KernelBrowser $client;
@@ -64,19 +64,19 @@ final class LoginRedirectTest extends WebTestCase
             ->setVerified(true);
         $admin->setPassword($hasher->hashPassword($admin, self::PASSWORD));
 
-        $editor = (new User())
-            ->setEmail(self::EDITOR_EMAIL)
-            ->setFirstName('Ed')
-            ->setLastName('Itor')
-            ->setRoles(['ROLE_EDITOR'])
+        $staff = (new User())
+            ->setEmail(self::STAFF_EMAIL)
+            ->setFirstName('Sta')
+            ->setLastName('Ff')
+            ->setRoles(['ROLE_SECTION_TOOLS'])
             ->setCreatedAt(new \DateTimeImmutable())
             ->setProfileComplete(true)
             ->setVerified(true);
-        $editor->setPassword($hasher->hashPassword($editor, self::PASSWORD));
+        $staff->setPassword($hasher->hashPassword($staff, self::PASSWORD));
 
         $em->persist($user);
         $em->persist($admin);
-        $em->persist($editor);
+        $em->persist($staff);
         $em->flush();
     }
 
@@ -120,17 +120,18 @@ final class LoginRedirectTest extends WebTestCase
         self::assertStringContainsString('/'.$this->adminPrefix.'/admin', $location);
     }
 
-    public function testEditorLoginRedirectsToTools(): void
+    public function testSectionStaffLoginRedirectsToDashboard(): void
     {
         $this->client->request('GET', self::LOGIN_PATH);
         $this->client->submitForm(self::SUBMIT_BUTTON, [
-            '_username' => self::EDITOR_EMAIL,
+            '_username' => self::STAFF_EMAIL,
             '_password' => self::PASSWORD,
         ]);
 
         self::assertResponseStatusCodeSame(302);
         $location = (string) $this->client->getResponse()->headers->get('Location');
-        self::assertStringContainsString('/'.$this->adminPrefix.'/admin/outils', $location);
+        self::assertStringContainsString('/'.$this->adminPrefix.'/admin', $location);
+        self::assertStringNotContainsString('/admin/outils', $location);
     }
 
     public function testRegularUserLoginRedirectsToHomeNotAdmin(): void

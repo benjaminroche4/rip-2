@@ -48,18 +48,20 @@ final class ContactController extends AbstractController
         $form = $this->createForm(ContactType::class, $contact);
         $form->handleRequest($request);
 
+        // The limiter counts every submission, valid or not: honeypot hits
+        // and invalid spam must burn tokens too, not only clean requests.
+        if ($form->isSubmitted() && !$this->formContactLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+            $form->get('email')->addError(new \Symfony\Component\Form\FormError(
+                $this->translator->trans('contact.contactForm.error.tooManyRequests'),
+            ));
+
+            $response = $this->render('public/contact/index.html.twig', ['contactForm' => $form->createView()]);
+            $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
+
+            return $response;
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$this->formContactLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
-                $form->get('email')->addError(new \Symfony\Component\Form\FormError(
-                    $this->translator->trans('contact.contactForm.error.tooManyRequests'),
-                ));
-
-                $response = $this->render('public/contact/index.html.twig', ['contactForm' => $form->createView()]);
-                $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
-
-                return $response;
-            }
-
             $now = new \DateTimeImmutable();
             $contact->setCreatedAt($now);
             $contact->setLang($request->getLocale());

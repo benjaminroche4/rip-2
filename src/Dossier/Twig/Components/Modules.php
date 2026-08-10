@@ -602,7 +602,7 @@ final class Modules
                 'pieces' => array_map(static fn (DossierDocumentType $type): string => $type->labelKey(), $types),
             ]);
             $this->em->flush();
-        $this->emit('dossier-documents:changed');
+            $this->emit('dossier-documents:changed');
             $this->lastSentTo = implode(', ', $sent);
         }
         if ($failed) {
@@ -682,7 +682,7 @@ final class Modules
                         'file' => $fileName,
                     ]);
                     $this->em->flush();
-        $this->emit('dossier-documents:changed');
+                    $this->emit('dossier-documents:changed');
 
                     return;
                 }
@@ -766,7 +766,7 @@ final class Modules
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_DOSSIERS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

@@ -1,0 +1,31 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.visits.title'|trans }}{% endblock %}
+
+{% block head %}
+    {# Les sections dépendent de l'heure courante : un snapshot Turbo restauré
+       montrerait un état périmé de la liste au retour. #}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader title="{{ 'admin.visits.title'|trans }}">
+        <twig:Button
+            as="a"
+            size="sm"
+            href="{{ path('admin_visit_new', {adminPrefix: adminPrefix}) }}"
+            data-testid="visit-create-open"
+        >
+            <span class="flex items-center gap-2">
+                {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                {{ 'admin.visits.create.button'|trans }}
+            </span>
+        </twig:Button>
+    </twig:Admin:PageHeader>
+{% endblock %}
+
+{% block body %}
+    <div data-testid="visits-page">
+        <twig:Visit:VisitList :adminPrefix="adminPrefix" />
+    </div>
+{% endblock %}

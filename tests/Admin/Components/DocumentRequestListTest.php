@@ -96,6 +96,34 @@ final class DocumentRequestListTest extends KernelTestCase
         self::assertFalse($component->hasMore());
     }
 
+    public function testDeletionGoesThroughTheConfirmationModal(): void
+    {
+        $this->seedAdmin('docreq-admin@example.com');
+        $request = $this->seedRequest(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+        $this->loginAs('docreq-admin@example.com');
+
+        $component = $this->mountTwigComponent('Admin:DocumentRequestList', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+        $id = (int) $request->getId();
+
+        // Asking opens the modal, nothing is deleted yet.
+        $component->askDelete($id);
+        self::assertSame($id, $component->confirmDeleteId);
+        self::assertNotNull($this->em->find(DocumentRequest::class, $id));
+
+        // Cancelling closes it without deleting.
+        $component->cancelDelete();
+        self::assertNull($component->confirmDeleteId);
+        self::assertNotNull($this->em->find(DocumentRequest::class, $id));
+
+        // Confirming deletes and closes the modal.
+        $component->askDelete($id);
+        $component->delete($id);
+        self::assertNull($component->confirmDeleteId);
+        $this->em->clear();
+        self::assertNull($this->em->find(DocumentRequest::class, $id));
+    }
+
     public function testNonAdminCannotMountTheComponent(): void
     {
         $this->seedUser('user@example.com');

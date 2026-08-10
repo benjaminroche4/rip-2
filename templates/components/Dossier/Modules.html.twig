@@ -4,7 +4,9 @@
 {% set unlocked = this.unlocked %}
         <div {{ attributes.defaults({class: 'space-y-6'}) }} data-testid="dossier-show-modules">
     {% for module in [{key: 'file'}, {key: 'visit'}, {key: 'payment'}] %}
-        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-module-card">
+        {# data-tab-panel : visibilité pilotée par les onglets de la page
+           (attribut rendu côté serveur, donc morph-proof). #}
+        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-tab-panel="{{ module.key }}" data-testid="dossier-module-card">
             {% if unlocked %}
                 <details class="group details-animated rounded-2xl bg-neutral-50 p-2"
                     {% if module.key == 'file' %}data-controller="file-preview" data-action="keydown.esc@window->file-preview#close"{% endif %}>
@@ -310,8 +312,8 @@
                 tabindex="-1"
             ></button>
             <div class="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-                <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
-                    <div>
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
                         <h2 id="module-file-picker-title" class="text-lg font-semibold tracking-tight text-gray-900">
                             {{ 'admin.dossiers.show.modules.file.requestTitle'|trans }}
                         </h2>
@@ -321,56 +323,58 @@
                                 : 'admin.dossiers.show.modules.file.recipientSubtitle')|trans({'%name%': pickerTenant ? pickerTenant.name : ''}) }}
                         </p>
                     </div>
+                    <div class="space-y-5 rounded-xl bg-white px-5 py-4">
 
-                    {% if this.pickerStep == 'select' %}
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="module-file-types">
-                            {% for type in this.documentTypes %}
-                                <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
-                                    <input
-                                        type="checkbox"
-                                        value="{{ type.value }}"
-                                        data-model="norender|selectedTypes[]"
-                                        {% if type.value in this.selectedTypes %}checked{% endif %}
-                                        class="{{ checkboxClass }}"
-                                        data-testid="module-file-type-checkbox"
-                                    >
-                                    {{ type.labelKey|trans }}
-                                </label>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="flex flex-col gap-2" role="radiogroup" data-testid="module-file-recipients">
-                            <p class="text-sm text-gray-600">{{ 'admin.dossiers.show.modules.file.sendTo'|trans }}</p>
-                            {% for recipient in this.recipients %}
-                                <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 transition-colors duration-100 ease-out hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5">
-                                    <input
-                                        type="radio"
-                                        name="module-file-recipient"
-                                        value="{{ recipient.id }}"
-                                        data-model="norender|recipientId"
-                                        {% if this.recipientId == recipient.id %}checked{% endif %}
-                                        class="peer sr-only"
-                                    >
-                                    <span class="min-w-0 flex-1">
-                                        <span class="block truncate text-sm font-medium text-gray-900">
-                                            {{ recipient.name }}
-                                            {% if recipient.primary %}
-                                                <span class="ml-1 rounded-full bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary">{{ 'admin.dossiers.create.person.primaryTag'|trans }}</span>
-                                            {% endif %}
+                        {% if this.pickerStep == 'select' %}
+                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="module-file-types">
+                                {% for type in this.documentTypes %}
+                                    <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                                        <input
+                                            type="checkbox"
+                                            value="{{ type.value }}"
+                                            data-model="norender|selectedTypes[]"
+                                            {% if type.value in this.selectedTypes %}checked{% endif %}
+                                            class="{{ checkboxClass }}"
+                                            data-testid="module-file-type-checkbox"
+                                        >
+                                        {{ type.labelKey|trans }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="flex flex-col gap-2" role="radiogroup" data-testid="module-file-recipients">
+                                <p class="text-sm text-gray-600">{{ 'admin.dossiers.show.modules.file.sendTo'|trans }}</p>
+                                {% for recipient in this.recipients %}
+                                    <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 transition-colors duration-100 ease-out hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5">
+                                        <input
+                                            type="radio"
+                                            name="module-file-recipient"
+                                            value="{{ recipient.id }}"
+                                            data-model="norender|recipientId"
+                                            {% if this.recipientId == recipient.id %}checked{% endif %}
+                                            class="peer sr-only"
+                                        >
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate text-sm font-medium text-gray-900">
+                                                {{ recipient.name|title }}
+                                                {% if recipient.primary %}
+                                                    <span class="ml-1 rounded-full bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary">{{ 'admin.dossiers.create.person.primaryTag'|trans }}</span>
+                                                {% endif %}
+                                            </span>
+                                            <span class="block truncate text-xs text-gray-500">{{ recipient.email }}</span>
                                         </span>
-                                        <span class="block truncate text-xs text-gray-500">{{ recipient.email }}</span>
-                                    </span>
-                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary opacity-0 transition-opacity duration-100 peer-checked:opacity-100', 'aria-hidden': 'true'}) }}
-                                </label>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                                        {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary opacity-0 transition-opacity duration-100 peer-checked:opacity-100', 'aria-hidden': 'true'}) }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
 
-                    {% if this.pickerError %}
-                        <p class="text-sm text-red-600" role="alert" data-testid="module-file-picker-error">{{ this.pickerError|trans }}</p>
-                    {% endif %}
+                        {% if this.pickerError %}
+                            <p class="text-sm text-red-600" role="alert" data-testid="module-file-picker-error">{{ this.pickerError|trans }}</p>
+                        {% endif %}
 
-                    <div class="flex items-center justify-end gap-4">
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
                         {% if this.pickerStep == 'select' %}
                             <button
                                 type="button"
@@ -440,8 +444,8 @@
                 tabindex="-1"
             ></button>
             <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-                <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
-                    <div>
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
                         <h2 id="module-file-resend-title" class="text-lg font-semibold tracking-tight text-gray-900">
                             {{ 'admin.dossiers.show.modules.file.resendModal.title'|trans }}
                         </h2>
@@ -449,29 +453,31 @@
                             {{ 'admin.dossiers.show.modules.file.resendModal.text'|trans }}
                         </p>
                     </div>
-                    {# Plusieurs personnes peuvent être relancées d'un coup. #}
-                    <div class="flex flex-col gap-2" role="group" data-testid="module-file-resend-recipients">
-                        {% for recipient in this.recipients %}
-                            <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 transition-colors duration-100 ease-out hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5">
-                                <input
-                                    type="checkbox"
-                                    value="{{ recipient.id }}"
-                                    data-model="norender|resendRecipientIds[]"
-                                    {% if recipient.id in this.resendRecipientIds %}checked{% endif %}
-                                    class="accent-primary"
-                                    data-testid="module-file-resend-recipient"
-                                >
-                                <span class="min-w-0">
-                                    <span class="block truncate text-sm font-medium text-gray-900">{{ recipient.name }}</span>
-                                    <span class="block truncate text-xs text-gray-500">{{ recipient.email }}</span>
-                                </span>
-                            </label>
-                        {% endfor %}
+                    <div class="space-y-5 rounded-xl bg-white px-5 py-4">
+                        {# Plusieurs personnes peuvent être relancées d'un coup. #}
+                        <div class="flex flex-col gap-2" role="group" data-testid="module-file-resend-recipients">
+                            {% for recipient in this.recipients %}
+                                <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 transition-colors duration-100 ease-out hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5">
+                                    <input
+                                        type="checkbox"
+                                        value="{{ recipient.id }}"
+                                        data-model="norender|resendRecipientIds[]"
+                                        {% if recipient.id in this.resendRecipientIds %}checked{% endif %}
+                                        class="accent-primary"
+                                        data-testid="module-file-resend-recipient"
+                                    >
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-medium text-gray-900">{{ recipient.name|title }}</span>
+                                        <span class="block truncate text-xs text-gray-500">{{ recipient.email }}</span>
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% if this.resendError %}
+                            <p class="text-sm text-red-600" role="alert" data-testid="module-file-resend-error">{{ this.resendError|trans }}</p>
+                        {% endif %}
                     </div>
-                    {% if this.resendError %}
-                        <p class="text-sm text-red-600" role="alert" data-testid="module-file-resend-error">{{ this.resendError|trans }}</p>
-                    {% endif %}
-                    <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
                             data-action="modal-anim#out live#action"
@@ -520,8 +526,8 @@
                 tabindex="-1"
             ></button>
             <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-                <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
-                    <div>
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
                         <h2 id="module-file-delete-title" class="text-lg font-semibold tracking-tight text-gray-900">
                             {{ 'admin.dossiers.show.modules.file.deleteFileConfirm.title'|trans }}
                         </h2>
@@ -529,7 +535,7 @@
                             {{ 'admin.dossiers.show.modules.file.deleteFileConfirm.text'|trans }}
                         </p>
                     </div>
-                    <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
                             data-action="modal-anim#out live#action"
@@ -579,8 +585,8 @@
                 tabindex="-1"
             ></button>
             <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-                <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
-                    <div>
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
                         <h2 id="module-file-refusal-title" class="text-lg font-semibold tracking-tight text-gray-900">
                             {{ 'admin.dossiers.show.modules.file.refuse.title'|trans }}
                         </h2>
@@ -588,19 +594,21 @@
                             {{ 'admin.dossiers.show.modules.file.refuse.text'|trans }}
                         </p>
                     </div>
-                    <div>
-                        <label for="module-file-refusal-reason" class="text-sm text-gray-600">{{ 'admin.dossiers.show.modules.file.refuse.reasonLabel'|trans }}</label>
-                        <textarea
-                            id="module-file-refusal-reason"
-                            rows="3"
-                            maxlength="500"
-                            data-model="norender|refusalReason"
-                            placeholder="{{ 'admin.dossiers.show.modules.file.refuse.reasonPlaceholder'|trans }}"
-                            class="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                            data-testid="module-file-refusal-input"
-                        >{{ this.refusalReason }}</textarea>
+                    <div class="space-y-5 rounded-xl bg-white px-5 py-4">
+                        <div>
+                            <label for="module-file-refusal-reason" class="text-sm text-gray-600">{{ 'admin.dossiers.show.modules.file.refuse.reasonLabel'|trans }}</label>
+                            <textarea
+                                id="module-file-refusal-reason"
+                                rows="3"
+                                maxlength="500"
+                                data-model="norender|refusalReason"
+                                placeholder="{{ 'admin.dossiers.show.modules.file.refuse.reasonPlaceholder'|trans }}"
+                                class="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                data-testid="module-file-refusal-input"
+                            >{{ this.refusalReason }}</textarea>
+                        </div>
                     </div>
-                    <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
                             data-action="modal-anim#out live#action"

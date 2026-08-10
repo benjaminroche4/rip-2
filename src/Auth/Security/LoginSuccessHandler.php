@@ -13,12 +13,13 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 /**
- * Routes ROLE_ADMIN users straight to the admin dashboard, and ROLE_EDITOR
- * users straight to the Outils section, upon successful authentication. Other
+ * Routes back-office staff (ROLE_STAFF and above) straight to the admin
+ * dashboard upon successful authentication. Other
  * users keep Symfony's default behavior (target path stored in session before
  * login, or the homepage as a fallback).
  *
@@ -33,6 +34,7 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private RequestStack $requestStack,
+        private RoleHierarchyInterface $roleHierarchy,
         #[Autowire('%admin_path_prefix%')]
         private string $adminPathPrefix,
         #[Autowire(service: 'monolog.logger.security')]
@@ -75,17 +77,11 @@ final readonly class LoginSuccessHandler implements AuthenticationSuccessHandler
             ]));
         }
 
-        if (\in_array('ROLE_ADMIN', $token->getRoleNames(), true)) {
+        // The dashboard is open to every staff member (per-section roles all
+        // imply ROLE_STAFF via the hierarchy — token roles are the stored
+        // ones, so expand them before checking).
+        if (\in_array('ROLE_STAFF', $this->roleHierarchy->getReachableRoleNames($token->getRoleNames()), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_dashboard', [
-                '_locale' => $locale,
-                'adminPrefix' => $this->adminPathPrefix,
-            ]));
-        }
-
-        // Editors only have access to the Outils section — the dashboard would
-        // 403 them, so land them straight on the tools page.
-        if (\in_array('ROLE_EDITOR', $token->getRoleNames(), true)) {
-            return new RedirectResponse($this->urlGenerator->generate('admin_tools', [
                 '_locale' => $locale,
                 'adminPrefix' => $this->adminPathPrefix,
             ]));

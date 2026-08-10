@@ -44,6 +44,8 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
 
         $this->em->createQuery('DELETE FROM '.DocumentRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.Document::class)->execute();
+        // Reset-password rows FK-reference users: purge them first.
+        $this->em->createQuery('DELETE FROM '.\App\Auth\Entity\ResetPasswordRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class)->execute();
     }
 
@@ -77,22 +79,17 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         self::assertStringContainsString('data-testid="document-request-form"', $html);
         self::assertStringContainsString('data-testid="document-request-person"', $html);
         self::assertStringContainsString('data-testid="document-request-add-person"', $html);
-        self::assertStringContainsString('data-testid="document-request-typology"', $html);
         self::assertStringContainsString('data-testid="document-request-drive"', $html);
         self::assertStringContainsString('data-testid="document-request-language"', $html);
-        self::assertStringContainsString('data-testid="document-request-submit"', $html);
-        // Save + Download are two distinct buttons; the unsaved-changes guard
-        // modal is part of the form markup.
+        // Autosave replaced the explicit save button and the unsaved-changes
+        // guard: the only action left is the download, and every form change
+        // fires the silent `autosave` LiveAction.
         self::assertStringContainsString('data-testid="document-request-download"', $html);
-        self::assertStringContainsString('data-testid="unsaved-changes-dialog"', $html);
-        // The form root wires both the download-trigger and unsaved-changes
-        // Stimulus controllers (LiveComponent prepends its own `live` controller
-        // to the attribute, so we match each token rather than the full value).
+        self::assertStringNotContainsString('data-testid="document-request-submit"', $html);
+        self::assertStringNotContainsString('unsaved-changes', $html);
         self::assertMatchesRegularExpression('/data-controller="[^"]*\bdownload-trigger\b/', $html);
-        self::assertMatchesRegularExpression('/data-controller="[^"]*\bunsaved-changes\b/', $html);
-        // Both modal choices return to the documents hub.
-        self::assertStringContainsString('data-unsaved-changes-redirect-url-value="', $html);
-        self::assertStringContainsString('/admin/outils/documents"', $html);
+        self::assertStringContainsString('change-&gt;live#action', $html);
+        self::assertStringContainsString('data-live-action-param="autosave"', $html);
     }
 
     public function testEditModeMountPrefillsFormFromExistingRequest(): void
@@ -114,7 +111,7 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         self::assertNull($component->request->getId());
     }
 
-    public function testSaveUpdatesExistingRequestInPlace(): void
+    public function testAutosaveUpdatesExistingRequestInPlace(): void
     {
         $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
         $doc = $this->seedDocument();
@@ -129,7 +126,6 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         $formName = $component->component()->getFormName();
         $component->submitForm([
             $formName => [
-                'typology' => 'two_tenants',
                 'note' => 'Updated note',
                 'driveLink' => 'https://drive.example.test/updated',
                 'language' => 'en',
@@ -137,7 +133,7 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
                     ['role' => 'tenant', 'firstName' => 'Updated', 'lastName' => 'Person', 'documents' => [(string) $doc->getId()]],
                 ],
             ],
-        ], 'save');
+        ], 'autosave');
 
         $this->em->clear();
         // Still exactly one row — save() updates in place, it does not insert.
@@ -145,18 +141,15 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         $updated = $this->requestRepository->find($originalId);
         self::assertNotNull($updated);
         self::assertSame('https://drive.example.test/updated', $updated->getDriveLink());
-        self::assertSame(HouseholdTypology::TWO_TENANTS, $updated->getTypology());
+        // Derived from the submitted persons: a single tenant.
+        self::assertSame(HouseholdTypology::ONE_TENANT, $updated->getTypology());
         self::assertSame(RequestLanguage::EN, $updated->getLanguage());
         self::assertSame('Updated note', $updated->getNote());
         self::assertCount(1, $updated->getPersons());
         self::assertSame('Updated', $updated->getPersons()->toArray()[0]->getFirstName());
-
-        // Save persists only — it signals the client to clear the dirty flag,
-        // it does not trigger a download.
-        $this->assertComponentDispatchBrowserEvent($component, 'document-request:saved');
     }
 
-    public function testSaveInCreateModeInsertsANewRow(): void
+    public function testAutosaveInCreateModeInsertsANewRow(): void
     {
         $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
         $doc = $this->seedDocument();
@@ -168,7 +161,6 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         $formName = $component->component()->getFormName();
         $component->submitForm([
             $formName => [
-                'typology' => 'one_tenant',
                 'note' => '',
                 'driveLink' => 'https://drive.example.test/new',
                 'language' => 'fr',
@@ -176,10 +168,60 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
                     ['role' => 'tenant', 'firstName' => 'Alice', 'lastName' => 'Durand', 'documents' => [(string) $doc->getId()]],
                 ],
             ],
-        ], 'save');
+        ], 'autosave');
 
         self::assertCount(1, $this->requestRepository->findAll());
-        $this->assertComponentDispatchBrowserEvent($component, 'document-request:saved');
+    }
+
+    public function testCopyDocumentsFromFirstMirrorsTheSelection(): void
+    {
+        $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        $doc = $this->seedDocument();
+        $this->loginAs('admin@example.com');
+
+        /** @var \App\Admin\Twig\Components\DocumentRequestForm $component */
+        $component = $this->mountTwigComponent('Admin:DocumentRequestForm', ['adminPrefix' => self::ADMIN_PREFIX]);
+        $component->formValues = [
+            'persons' => [
+                ['role' => 'tenant', 'firstName' => 'A', 'lastName' => 'A', 'documents' => [(string) $doc->getId()]],
+                ['role' => 'tenant', 'firstName' => 'B', 'lastName' => 'B', 'documents' => []],
+            ],
+            'note' => '', 'driveLink' => '', 'language' => 'fr',
+        ];
+
+        $component->copyDocumentsFromFirst(self::getContainer()->get('property_accessor'), 1);
+
+        self::assertSame([(string) $doc->getId()], $component->formValues['persons'][1]['documents']);
+
+        // Index 0 (the source) is a no-op.
+        $component->copyDocumentsFromFirst(self::getContainer()->get('property_accessor'), 0);
+        self::assertSame([(string) $doc->getId()], $component->formValues['persons'][0]['documents']);
+    }
+
+    public function testAutosaveSkipsInvalidDraftsSilently(): void
+    {
+        $admin = $this->seedUser('admin@example.com', ['ROLE_ADMIN']);
+        $this->seedDocument();
+
+        $component = $this->createLiveComponent('Admin:DocumentRequestForm', [
+            'adminPrefix' => self::ADMIN_PREFIX,
+        ])->actingAs($admin);
+
+        $formName = $component->component()->getFormName();
+        // No role, no documents: the draft is invalid → nothing persists,
+        // and no validation exception bubbles (silent skip).
+        $component->submitForm([
+            $formName => [
+                'note' => '',
+                'driveLink' => '',
+                'language' => 'fr',
+                'persons' => [
+                    ['role' => '', 'firstName' => 'Alice', 'lastName' => '', 'documents' => []],
+                ],
+            ],
+        ], 'autosave');
+
+        self::assertCount(0, $this->requestRepository->findAll());
     }
 
     public function testDownloadUpsertsAndDispatchesTheDownloadEvent(): void
@@ -194,7 +236,6 @@ final class DocumentRequestFormComponentTest extends KernelTestCase
         $formName = $component->component()->getFormName();
         $component->submitForm([
             $formName => [
-                'typology' => 'one_tenant',
                 'note' => '',
                 'driveLink' => 'https://drive.example.test/dl',
                 'language' => 'fr',

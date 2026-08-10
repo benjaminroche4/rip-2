@@ -25,11 +25,9 @@ class DocumentRequest
     private ?int $id = null;
 
     #[ORM\Column(length: 50, enumType: HouseholdTypology::class)]
-    #[Assert\NotNull(message: 'admin.tools.documents.request.typology.notNull')]
     private ?HouseholdTypology $typology = null;
 
-    #[ORM\Column(length: 512)]
-    #[Assert\NotBlank(message: 'admin.tools.documents.request.driveLink.notBlank')]
+    #[ORM\Column(length: 512, nullable: true)]
     #[Assert\Url(message: 'admin.tools.documents.request.driveLink.url', requireTld: true)]
     #[Assert\Length(max: 512, maxMessage: 'admin.tools.documents.request.driveLink.length')]
     private ?string $driveLink = null;

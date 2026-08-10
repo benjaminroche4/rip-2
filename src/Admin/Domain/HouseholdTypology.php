@@ -23,6 +23,26 @@ enum HouseholdTypology: string
     case TWO_TENANTS_TWO_GUARANTORS = 'two_tenants_two_guarantors';
 
     /**
+     * Derives the typology from the persons' roles. Counts are clamped to
+     * the supported range (1..2 tenants, 0..2 guarantors) so exotic
+     * households still map to the closest composition.
+     */
+    public static function fromCounts(int $tenants, int $guarantors): self
+    {
+        $tenants = max(1, min(2, $tenants));
+        $guarantors = max(0, min(2, $guarantors));
+
+        return match ([$tenants, $guarantors]) {
+            [1, 0] => self::ONE_TENANT,
+            [1, 1] => self::ONE_TENANT_ONE_GUARANTOR,
+            [1, 2] => self::ONE_TENANT_TWO_GUARANTORS,
+            [2, 0] => self::TWO_TENANTS,
+            [2, 1] => self::TWO_TENANTS_ONE_GUARANTOR,
+            default => self::TWO_TENANTS_TWO_GUARANTORS,
+        };
+    }
+
+    /**
      * Translation key for the human-friendly label.
      */
     public function labelKey(): string

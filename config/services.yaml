@@ -30,6 +30,11 @@ services:
     TalesFromADev\Twig\Extra\Tailwind\TailwindRuntime:
         tags: ['twig.runtime']
 
+    # Deposited-documents storage: 'local' (disk) or 'gcs' (private Google
+    # Cloud Storage bucket) picked at runtime from DOSSIER_STORAGE.
+    App\Dossier\Service\DocumentStorage:
+        factory: ['@App\Dossier\Service\DocumentStorageFactory', 'create']
+
     App\Shared\Sanity\SanityService:
         arguments:
             $sanityProjectId: '%env(SANITY_PROJECT_ID)%'

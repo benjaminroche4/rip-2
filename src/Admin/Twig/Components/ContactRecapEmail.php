@@ -26,6 +26,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactRecapEmail', template: 'components/Admin/ContactRecapEmail.html.twig')]
 final class ContactRecapEmail
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -143,7 +144,7 @@ final class ContactRecapEmail
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

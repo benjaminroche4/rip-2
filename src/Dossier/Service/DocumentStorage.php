@@ -6,53 +6,35 @@ namespace App\Dossier\Service;
 
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierDocumentFile;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Uid\Uuid;
 
 /**
- * Disk storage for deposited dossier documents. Files live outside public/
- * (storage/dossiers/<reference>/<uuid>.<ext>) so every read goes through an
- * authenticated controller; the deploy process and cache:clear never touch
- * this directory.
+ * Storage for deposited dossier documents. Never publicly reachable: every
+ * read goes through an authenticated controller streaming the content.
+ *
+ * Implementations: LocalDocumentStorage (dev/test, files under storage/)
+ * and GcsDocumentStorage (prod, private Google Cloud Storage bucket) —
+ * selected by the DOSSIER_STORAGE env var via DocumentStorageFactory.
  */
-final readonly class DocumentStorage
+interface DocumentStorage
 {
-    public function __construct(
-        #[Autowire('%dossier_storage_dir%')]
-        private string $baseDir,
-        private Filesystem $filesystem,
-    ) {
-    }
+    /**
+     * Stores the uploaded file under the dossier's namespace and returns the
+     * stored (UUID-based) file name. The original client name is never used
+     * as a storage key.
+     */
+    public function store(Dossier $dossier, UploadedFile $file): string;
+
+    public function exists(Dossier $dossier, DossierDocumentFile $file): bool;
 
     /**
-     * Moves the uploaded file under the dossier's directory and returns the
-     * stored (UUID-based) file name. The original client name is never used
-     * on disk.
+     * Content stream of the stored file, for controller streaming or zip
+     * building. The caller closes the resource.
+     *
+     * @return resource
      */
-    public function store(Dossier $dossier, UploadedFile $file): string
-    {
-        $extension = $file->guessExtension() ?? 'bin';
-        $storedName = Uuid::v4()->toRfc4122().'.'.$extension;
+    public function readStream(Dossier $dossier, DossierDocumentFile $file);
 
-        $file->move($this->dossierDir($dossier), $storedName);
-
-        return $storedName;
-    }
-
-    public function path(Dossier $dossier, DossierDocumentFile $file): string
-    {
-        return $this->dossierDir($dossier).'/'.$file->getStoredName();
-    }
-
-    public function delete(Dossier $dossier, DossierDocumentFile $file): void
-    {
-        $this->filesystem->remove($this->path($dossier, $file));
-    }
-
-    private function dossierDir(Dossier $dossier): string
-    {
-        return $this->baseDir.'/'.$dossier->getReference();
-    }
+    /** Idempotent: deleting a missing file is a no-op. */
+    public function delete(Dossier $dossier, DossierDocumentFile $file): void;
 }

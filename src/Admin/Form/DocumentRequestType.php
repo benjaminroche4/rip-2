@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Admin\Form;
 
-use App\Admin\Domain\HouseholdTypology;
 use App\Admin\Domain\RequestLanguage;
 use App\Admin\Entity\DocumentRequest;
 use App\Admin\Entity\PersonRequest;
@@ -37,14 +36,6 @@ class DocumentRequestType extends AbstractType
                 'label' => false,
                 'prototype' => true,
                 'prototype_data' => new PersonRequest(),
-            ])
-            ->add('typology', EnumType::class, [
-                'class' => HouseholdTypology::class,
-                'choice_label' => fn (HouseholdTypology $t): string => $t->labelKey(),
-                'expanded' => true,
-                'multiple' => false,
-                'placeholder' => false,
-                'label' => 'admin.tools.documents.request.typology.label',
             ])
             ->add('note', TextareaType::class, [
                 'label' => 'admin.tools.documents.request.note.label',

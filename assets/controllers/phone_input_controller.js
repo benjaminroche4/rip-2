@@ -67,6 +67,10 @@ export default class extends Controller {
         if (this.form) {
             this.form.addEventListener('submit', this.boundSubmit, { capture: true });
         }
+        // Modal forms without a <form> (live action buttons) never fire a
+        // submit: sync the E.164 value when the field loses focus instead.
+        // Idempotent, so doing both never double-prefixes the dial code.
+        this.inputTarget.addEventListener('blur', this.boundSubmit);
 
         // Tear down BEFORE Turbo caches the page so the snapshot doesn't include
         // the .iti wrapper. Without this, a back-nav restores a fossil wrapper
@@ -117,6 +121,9 @@ export default class extends Controller {
         }
         if (this.boundCountryChange && this.hasInputTarget) {
             this.inputTarget.removeEventListener('countrychange', this.boundCountryChange);
+        }
+        if (this.boundSubmit && this.hasInputTarget) {
+            this.inputTarget.removeEventListener('blur', this.boundSubmit);
         }
         clearTimeout(this.paddingTimer);
         if (this.form && this.boundSubmit) {

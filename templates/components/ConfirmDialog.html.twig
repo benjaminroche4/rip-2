@@ -22,14 +22,14 @@
         tabindex="-1"
     ></button>
     <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
-        <div class="space-y-5 rounded-2xl bg-neutral-50 p-6">
-            <div>
+        <div class="rounded-2xl bg-neutral-50 p-2">
+            <div class="p-3">
                 <h2 id="confirm-dialog-title" class="text-lg font-semibold tracking-tight text-gray-900">
                     {{ 'confirmDialog.title'|trans }}
                 </h2>
                 <p class="mt-1 text-sm text-pretty text-gray-500" data-confirm-dialog-target="message"></p>
             </div>
-            <div class="flex items-center justify-end gap-4">
+            <div class="flex items-center justify-end gap-4 p-3">
                 <button
                     type="button"
                     data-action="confirm-dialog#cancel"

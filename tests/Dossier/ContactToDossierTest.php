@@ -39,8 +39,8 @@ final class ContactToDossierTest extends WebTestCase
         $this->em->createQuery('DELETE FROM '.Dossier::class)->execute();
         $this->em->createQuery('DELETE FROM '.ContactNote::class)->execute();
         $this->em->createQuery('DELETE FROM '.Contact::class)->execute();
-        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email = :e')
-            ->setParameter('e', self::ADMIN_EMAIL)->execute();
+        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email IN (:e)')
+            ->setParameter('e', [self::ADMIN_EMAIL, 'dossiers-only@contact-to-dossier.local'])->execute();
 
         $admin = (new User())
             ->setEmail(self::ADMIN_EMAIL)
@@ -114,12 +114,18 @@ final class ContactToDossierTest extends WebTestCase
         $this->client->submit($form);
         $firstLocation = (string) $this->client->getResponse()->headers->get('Location');
 
-        $crawler = $this->client->request('GET', $this->contactUrl($contact));
-        $this->client->submit($crawler->filter('[data-testid="contact-to-dossier"]')->closest('form')->form());
-
+        // Re-posting the same form (stale tab, double click) stays
+        // idempotent: same dossier, no duplicate.
+        $this->client->submit($form);
         self::assertResponseStatusCodeSame(303);
         self::assertSame($firstLocation, (string) $this->client->getResponse()->headers->get('Location'));
         self::assertSame(1, (int) $this->em->getRepository(Dossier::class)->count([]));
+
+        // Once converted, the page swaps the convert action for a direct
+        // link to the dossier.
+        $this->client->request('GET', $this->contactUrl($contact));
+        self::assertSelectorExists('[data-testid="contact-view-dossier"]');
+        self::assertSelectorNotExists('[data-testid="contact-to-dossier"]');
     }
 
     /**
@@ -160,6 +166,32 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('2026-10-01', $fresh->getSearch()->getMoveInAt()?->format('Y-m-d'));
         self::assertCount(2, $fresh->getNotes());
         self::assertSame($contact->getReference(), $fresh->getSourceContactReference());
+    }
+
+    public function testConversionRequiresTheContactsSection(): void
+    {
+        $contact = $this->persistContact();
+
+        // Dossiers-only staff: can read dossiers, but converting reads the
+        // lead's PII into their section. Must be refused.
+        $dossierOnly = (new User())
+            ->setEmail('dossiers-only@contact-to-dossier.local')
+            ->setFirstName('Doss')->setLastName('Only')
+            ->setRoles(['ROLE_STAFF', 'ROLE_SECTION_DOSSIERS'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($dossierOnly);
+        $this->em->flush();
+        $this->client->loginUser($dossierOnly);
+
+        $this->client->request(
+            'POST',
+            '/fr/'.$this->adminPrefix.'/admin/dossiers/depuis-contact/'.$contact->getReference(),
+            ['_token' => 'irrelevant'],
+        );
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(0, (int) $this->em->getRepository(Dossier::class)->count([]));
     }
 
     public function testInvalidCsrfTokenIsRejected(): void

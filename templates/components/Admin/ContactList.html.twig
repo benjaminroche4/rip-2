@@ -66,18 +66,34 @@
                                 {{ contact.nextStep.labelKey|trans }}
                             </span>
                         {% endif %}
-                        {% if contact.recallAt %}
+                        {# Un seul état affiché : la date ne s'affiche jamais à
+                           côté d'une étape sans date (stale d'une étape
+                           précédente). #}
+                        {% if contact.recallAt and (contact.nextStep is null or contact.nextStep.needsDate) %}
                             {% set recallOverdue = contact.recallAt < date() %}
                             <span
                                 class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium tabular-nums {{ recallOverdue ? 'bg-red-50 text-red-600' : 'bg-purple-50 text-purple-700' }}"
                                 title="{{ 'admin.contacts.followUp.recallLabel'|trans }}"
                             >
-                                {{ ux_icon('lucide:calendar-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                {{ 'admin.contacts.card.recallAtText'|trans({
+                                {{ ux_icon(contact.nextStep ? contact.nextStep.icon : 'lucide:calendar-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ('admin.contacts.card.' ~ {visio: 'visioAtText', quote_sent: 'quoteSentAtText'}[contact.nextStep ? contact.nextStep.value : '']|default('recallAtText'))|trans({
                                     '%date%': contact.recallAt|format_datetime(pattern='dd.MM'),
                                     '%time%': contact.recallAt|format_datetime(pattern="HH'h'mm"),
                                 }) }}
                             </span>
+                            {% if contact.nextStep and contact.nextStep.value == 'visio' and contact.visioMeetLink %}
+                                <a
+                                    href="{{ contact.visioMeetLink }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                    title="{{ 'admin.contacts.nextStep.joinVisio'|trans }}"
+                                    data-testid="list-meet-link"
+                                >
+                                    {{ ux_icon('lucide:video', {class: 'size-3 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.contacts.nextStep.joinVisio'|trans }}
+                                </a>
+                            {% endif %}
                         {% endif %}
                         {% if contact.id == confirmedContactId %}
                             <span class="animate-status-confirm flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700" role="status">
@@ -318,11 +334,14 @@
                     data-live-action-param="more"
                     data-testid="contacts-load-more"
                 >
-                    <span data-loading="action(more)|hide" class="flex items-center gap-x-2">
+                    {# contents : l'icône et le libellé deviennent des enfants
+                       directs du bouton (inline-flex gap-2), impossible de
+                       passer à la ligne. #}
+                    <span data-loading="action(more)|hide" class="contents">
                         {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.contacts.button.loadMore'|trans }}
+                        <span class="whitespace-nowrap">{{ 'admin.contacts.button.loadMore'|trans }}</span>
                     </span>
-                    <span data-loading="action(more)|show" class="hidden items-center gap-x-2">
+                    <span data-loading="action(more)|show" class="hidden items-center gap-x-2 whitespace-nowrap">
                         <twig:Spinner class="inline" />
                         {{ 'admin.contacts.button.loading'|trans }}
                     </span>

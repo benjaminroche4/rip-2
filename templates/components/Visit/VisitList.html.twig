@@ -1,0 +1,141 @@
+{% macro visitRow(visit, adminPrefix, position = null) %}
+    <li class="rounded-xl bg-white px-5 py-4" data-testid="visit-row">
+        <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
+            <div class="flex min-w-0 items-center gap-3 sm:flex-1">
+                {% if position is not null %}
+                    {# Même numéro que le pin sur la carte du jour. #}
+                    <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white tabular-nums" data-testid="visit-position">{{ position }}</span>
+                {% endif %}
+                <p class="shrink-0 text-sm font-medium text-gray-900 tabular-nums">{{ visit.scheduledAt|format_datetime(pattern='HH:mm') }}</p>
+                <div class="min-w-0">
+                    <a
+                        href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: visit.dossierReference}) }}"
+                        class="block truncate text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                        data-testid="visit-dossier-link"
+                    >
+                        {{ visit.dossierName }}
+                    </a>
+                    <p class="flex items-center gap-1 truncate text-xs text-gray-500">
+                        {{ ux_icon('lucide:map-pin', {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        <span class="truncate">{{ visit.address }}</span>
+                    </p>
+                </div>
+            </div>
+            {% if visit.agentName %}
+                <p class="flex shrink-0 items-center gap-1.5 text-xs text-gray-600" data-testid="visit-agent">
+                    {{ ux_icon('lucide:briefcase', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    {{ visit.agentName }}
+                </p>
+            {% endif %}
+        </div>
+    </li>
+{% endmacro %}
+
+{% import _self as ui %}
+
+<div {{ attributes }} data-testid="visits-list-component">
+    {% set todayVisits = this.todayVisits %}
+    {% set tomorrowVisits = this.tomorrowVisits %}
+    {% set laterVisits = this.laterVisits %}
+
+    {% if this.totalCount == 0 %}
+        <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="visits-empty">
+            <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                    {{ ux_icon('lucide:calendar-check', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                </div>
+                <div class="space-y-1">
+                    <h2 class="text-sm font-medium text-gray-700">{{ 'admin.visits.empty.title'|trans }}</h2>
+                    <p class="max-w-[40ch] text-xs text-pretty text-gray-400">{{ 'admin.visits.empty.description'|trans }}</p>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <div class="space-y-8">
+            {# Aujourd'hui : carte + liste numérotée comme les pins. #}
+            <section data-testid="visits-today">
+                <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                    {{ 'admin.visits.section.today'|trans }}
+                    <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ todayVisits|length }}</span>
+                </h2>
+
+                {% if todayVisits is empty %}
+                    <p class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-5 py-6 text-sm text-gray-400" data-testid="visits-today-empty">
+                        {{ 'admin.visits.section.todayEmpty'|trans }}
+                    </p>
+                {% else %}
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2 lg:grid lg:grid-cols-[1fr_24rem] lg:items-start">
+                            <ul class="flex flex-col gap-1" role="list">
+                                {% for visit in todayVisits %}
+                                    {{ ui.visitRow(visit, this.adminPrefix, loop.index) }}
+                                {% endfor %}
+                            </ul>
+                            {% if this.mappableTodayVisits is not empty %}
+                                {# Pins numérotés + trajet à pied entre visites consécutives
+                                   (calculé côté serveur via la Routes API), dessinés par le
+                                   controller à partir des payloads JSON. #}
+                                <div
+                                    class="h-80 overflow-hidden rounded-xl max-lg:mt-1 lg:sticky lg:top-6 lg:h-[28rem]"
+                                    data-controller="visit-map"
+                                    data-visit-map-visits-value="{{ this.mapPayload }}"
+                                    data-visit-map-route-value="{{ this.routePayload }}"
+                                    data-testid="visits-map"
+                                >
+                                    {{ ux_map(this.map, {style: 'height: 100%; width: 100%;'}) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+
+            {# Demain. #}
+            <section data-testid="visits-tomorrow">
+                <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                    {{ 'admin.visits.section.tomorrow'|trans }}
+                    <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ tomorrowVisits|length }}</span>
+                </h2>
+                {% if tomorrowVisits is empty %}
+                    <p class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-5 py-6 text-sm text-gray-400" data-testid="visits-tomorrow-empty">
+                        {{ 'admin.visits.section.tomorrowEmpty'|trans }}
+                    </p>
+                {% else %}
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                        <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
+                            {% for visit in tomorrowVisits %}
+                                {{ ui.visitRow(visit, this.adminPrefix) }}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </section>
+
+            {# Prochains jours : la date apparaît au premier créneau de chaque jour. #}
+            {% if laterVisits is not empty %}
+                <section data-testid="visits-later">
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                        {{ 'admin.visits.section.later'|trans }}
+                        <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ laterVisits|length }}</span>
+                    </h2>
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                        <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
+                            {% for visit in laterVisits %}
+                                {% set day = visit.scheduledAt|format_datetime(pattern='yyyy-MM-dd') %}
+                                {% set previousDay = loop.first ? null : laterVisits[loop.index0 - 1].scheduledAt|format_datetime(pattern='yyyy-MM-dd') %}
+                                {% if day != previousDay %}
+                                    <li class="px-3 pt-3 pb-1 first:pt-1">
+                                        <p class="text-xs font-medium text-gray-500 capitalize" data-testid="visits-later-day">
+                                            {{ visit.scheduledAt|format_datetime(pattern='EEEE d MMMM') }}
+                                        </p>
+                                    </li>
+                                {% endif %}
+                                {{ ui.visitRow(visit, this.adminPrefix) }}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

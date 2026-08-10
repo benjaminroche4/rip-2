@@ -14,6 +14,7 @@ final readonly class ContactEventItem
         public ?ContactStatus $status,
         public ?ClosureReason $closureReason,
         public ?string $kind,
+        public ?string $detail,
         public ?string $authorName,
         public ?string $authorAvatar,
         public \DateTimeImmutable $createdAt,

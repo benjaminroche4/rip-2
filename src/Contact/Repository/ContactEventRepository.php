@@ -44,6 +44,7 @@ class ContactEventRepository extends ServiceEntityRepository
                 status: $event->getStatus(),
                 closureReason: $event->getClosureReason(),
                 kind: $event->getKind(),
+                detail: $event->getDetail(),
                 authorName: $event->getAuthorName(),
                 authorAvatar: $event->getAuthorAvatar(),
                 createdAt: $event->getCreatedAt(),
@@ -63,6 +64,24 @@ class ContactEventRepository extends ServiceEntityRepository
             ->setAuthorAvatar($authorAvatar);
 
         $this->getEntityManager()->persist($event);
+    }
+
+    /**
+     * Business event on the follow-up thread (next step confirmed, visio
+     * planned/moved/cancelled...); flushes immediately.
+     */
+    public function recordKind(Contact $contact, string $kind, ?string $detail = null, ?string $authorName = null, ?string $authorAvatar = null): void
+    {
+        $event = (new ContactEvent())
+            ->setContact($contact)
+            ->setKind($kind)
+            ->setDetail($detail)
+            ->setAuthorName($authorName)
+            ->setAuthorAvatar($authorAvatar);
+
+        $em = $this->getEntityManager();
+        $em->persist($event);
+        $em->flush();
     }
 
     /** Recap email sent to the client; flushes immediately. */

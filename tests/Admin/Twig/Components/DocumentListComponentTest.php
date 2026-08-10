@@ -33,6 +33,8 @@ final class DocumentListComponentTest extends KernelTestCase
         $this->em = $container->get('doctrine.orm.entity_manager');
 
         $this->em->createQuery('DELETE FROM '.Document::class)->execute();
+        // Reset-password rows FK-reference users: purge them first.
+        $this->em->createQuery('DELETE FROM '.\App\Auth\Entity\ResetPasswordRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class)->execute();
     }
 
@@ -251,7 +253,39 @@ final class DocumentListComponentTest extends KernelTestCase
         self::assertCount(2, $component->getDocuments());
     }
 
-    /** @param list<string> $roles */
+    public function testDeletionModalWarnsWhenTheDocumentIsUsedByRequests(): void
+    {
+        $this->seedUser('usage-admin@example.com', ['ROLE_ADMIN']);
+        $doc = $this->seedDocument('Pièce utilisée', 'Used doc', 'piece-utilisee', new \DateTimeImmutable());
+        $free = $this->seedDocument('Pièce libre', 'Free doc', 'piece-libre', new \DateTimeImmutable());
+
+        // One sent request using the first document.
+        $request = (new \App\Admin\Entity\DocumentRequest())
+            ->setTypology(\App\Admin\Domain\HouseholdTypology::ONE_TENANT)
+            ->setLanguage(\App\Admin\Domain\RequestLanguage::FR)
+            ->setCreatedAt(new \DateTimeImmutable());
+        $person = (new \App\Admin\Entity\PersonRequest())
+            ->setRole(\App\Admin\Domain\PersonRole::TENANT)
+            ->setFirstName('Jean')
+            ->setLastName('Test');
+        $person->addDocument($doc);
+        $request->addPerson($person);
+        $this->em->persist($request);
+        $this->em->flush();
+
+        $this->loginAs('usage-admin@example.com');
+        $html = (string) $this->renderTwigComponent('Admin:DocumentList', []);
+
+        self::assertStringContainsString('data-testid="document-delete-usage"', $html);
+        self::assertStringContainsString('Utilisé dans 1 demande envoyée', $html);
+
+        /** @var \App\Admin\Twig\Components\DocumentList $component */
+        $component = $this->mountTwigComponent('Admin:DocumentList', []);
+        $counts = $component->getUsageCounts();
+        self::assertSame(1, $counts[(int) $doc->getId()] ?? 0);
+        self::assertArrayNotHasKey((int) $free->getId(), $counts);
+    }
+
     private function seedUser(string $email, array $roles = []): User
     {
         $user = (new User())

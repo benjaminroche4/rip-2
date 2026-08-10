@@ -39,6 +39,10 @@ class ContactEvent
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $kind = null;
 
+    /** Free complement shown after the kind label ("19.08 à 13h13 · WhatsApp"). */
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $detail = null;
+
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $authorName = null;
 
@@ -102,6 +106,18 @@ class ContactEvent
     public function setKind(?string $kind): static
     {
         $this->kind = $kind;
+
+        return $this;
+    }
+
+    public function getDetail(): ?string
+    {
+        return $this->detail;
+    }
+
+    public function setDetail(?string $detail): static
+    {
+        $this->detail = $detail;
 
         return $this;
     }

@@ -1,0 +1,97 @@
+<div {{ attributes.defaults({class: 'p-6'}) }} data-testid="user-identity">
+    {% if this.editing %}
+        <div class="flex flex-col gap-4">
+            {% set inputClass = 'w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none' %}
+
+            {# Avatar : upload en POST multipart classique (les LiveComponents
+               ne transportent pas de fichier), reset en LiveAction. #}
+            <div class="flex flex-wrap items-center gap-4">
+                <twig:Avatar filename="{{ this.avatarFilename }}" name="{{ this.displayName }}" size="12" />
+                <form
+                    action="{{ path('admin_user_avatar', {adminPrefix: this.adminPrefix, uniqueId: this.uniqueId}) }}"
+                    method="post"
+                    enctype="multipart/form-data"
+                    data-controller="auto-submit"
+                    class="contents"
+                >
+                    {# Nommé _csrf_token + controller : requis pour que le
+                       double-submit cookie du CSRF stateless soit posé. #}
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('user-avatar') }}">
+                    <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 focus-within:outline-2 focus-within:outline-primary">
+                        {{ ux_icon('lucide:image-up', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.users.identity.uploadAvatar'|trans }}
+                        <input
+                            type="file"
+                            name="avatar"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            class="sr-only"
+                            data-action="change->auto-submit#submit"
+                            data-testid="user-avatar-input"
+                        >
+                    </label>
+                </form>
+                {% if this.avatarFilename %}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="resetAvatar"
+                        class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-red-600"
+                        data-testid="user-avatar-reset"
+                    >
+                        {{ 'admin.users.identity.resetAvatar'|trans }}
+                    </button>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-user-first-{{ this.userId }}" class="block text-gray-600">{{ 'admin.users.identity.firstName'|trans }}</label>
+                    <input id="edit-user-first-{{ this.userId }}" type="text" data-model="norender|firstName" value="{{ this.firstName }}" maxlength="80" class="{{ inputClass }}" data-testid="user-first-name">
+                </div>
+                <div class="min-w-0 space-y-2">
+                    <label for="edit-user-last-{{ this.userId }}" class="block text-gray-600">{{ 'admin.users.identity.lastName'|trans }}</label>
+                    <input id="edit-user-last-{{ this.userId }}" type="text" data-model="norender|lastName" value="{{ this.lastName }}" maxlength="80" class="{{ inputClass }}" data-testid="user-last-name">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3">
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="cancelEditing"
+                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                    data-testid="user-identity-cancel"
+                >
+                    {{ 'admin.contacts.notes.cancel'|trans }}
+                </button>
+                <twig:Button
+                    size="sm"
+                    data-action="live#action"
+                    data-live-action-param="saveIdentity"
+                    data-testid="user-identity-save"
+                >
+                    {{ 'admin.contacts.notes.save'|trans }}
+                </twig:Button>
+            </div>
+        </div>
+    {% else %}
+        <div class="relative flex flex-wrap items-center gap-4">
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="startEditing"
+                class="absolute -top-3 -right-3 flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                aria-label="{{ 'admin.users.identity.edit'|trans }}"
+                title="{{ 'admin.users.identity.edit'|trans }}"
+                data-testid="user-identity-edit"
+            >
+                {{ ux_icon('lucide:pencil', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+            </button>
+            <twig:Avatar filename="{{ this.avatarFilename }}" name="{{ this.displayName }}" size="12" />
+            <div class="min-w-0 flex-1">
+                <h2 class="text-base font-semibold tracking-tight text-gray-900">{{ this.displayName|title }}</h2>
+                <p class="truncate text-sm text-gray-500">{{ this.email }}</p>
+            </div>
+        </div>
+    {% endif %}
+</div>

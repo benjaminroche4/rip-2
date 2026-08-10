@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -96,6 +97,7 @@ final class DossierController extends AbstractController
             'en' => '/files/from-contact/{reference}',
         ],
         name: 'dossier_from_contact',
+        requirements: ['reference' => 'CT-\\d{6}'],
         methods: ['POST'],
     )]
     public function createFromContact(
@@ -106,6 +108,9 @@ final class DossierController extends AbstractController
         ContactDossierConverter $converter,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
+        // Converting reads the lead's PII (identity, notes) into a dossier:
+        // it requires the contacts section, not just the dossiers one.
+        $this->denyAccessUnlessGranted('ROLE_SECTION_CONTACTS');
 
         if (!$this->isCsrfTokenValid('dossier_from_contact', (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
@@ -153,20 +158,25 @@ final class DossierController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $path = $storage->path($dossier, $file);
-        if (!is_file($path)) {
+        if (!$storage->exists($dossier, $file)) {
             throw $this->createNotFoundException();
         }
 
-        $response = new BinaryFileResponse($path);
+        // Streamed from storage (disk or GCS bucket): the file is never
+        // exposed by URL, only through this authenticated pass-through.
+        $response = new StreamedResponse(static function () use ($storage, $dossier, $file): void {
+            $stream = $storage->readStream($dossier, $file);
+            fpassthru($stream);
+            fclose($stream);
+        });
         $response->headers->set('Content-Type', (string) $file->getMimeType());
         $response->headers->set('X-LiteSpeed-Cache-Control', 'no-cache');
         $response->headers->addCacheControlDirective('no-store');
-        $response->setContentDisposition(
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
             $request->query->getBoolean('download') ? ResponseHeaderBag::DISPOSITION_ATTACHMENT : ResponseHeaderBag::DISPOSITION_INLINE,
             (string) $file->getOriginalName(),
             'document-'.$id,
-        );
+        ));
 
         return $response;
     }
@@ -203,13 +213,12 @@ final class DossierController extends AbstractController
             foreach ($person->getDocuments() as $document) {
                 $label = $this->zipSafe($translator->trans($document->getType()?->labelKey() ?? '', locale: 'fr'));
                 foreach ($document->getFiles() as $index => $file) {
-                    $path = $storage->path($dossier, $file);
-                    if (!is_file($path)) {
+                    if (!$storage->exists($dossier, $file)) {
                         continue;
                     }
                     $extension = pathinfo((string) $file->getStoredName(), \PATHINFO_EXTENSION);
                     $suffix = $document->getFiles()->count() > 1 ? '-'.($index + 1) : '';
-                    $entries[$personDir.'/'.$label.$suffix.('' !== $extension ? '.'.$extension : '')] = $path;
+                    $entries[$personDir.'/'.$label.$suffix.('' !== $extension ? '.'.$extension : '')] = $file;
                 }
             }
         }
@@ -225,10 +234,32 @@ final class DossierController extends AbstractController
         if (true !== $zip->open($tmp, \ZipArchive::OVERWRITE)) {
             throw new \RuntimeException('Unable to open the temporary archive.');
         }
-        foreach ($entries as $entryName => $path) {
-            $zip->addFile($path, $entryName);
+        // The contents are pulled from storage (disk or GCS): each file goes
+        // through a temp copy so ZipArchive can add it, whatever the backend.
+        $tmpFiles = [];
+        foreach ($entries as $entryName => $file) {
+            $tmpFile = tempnam(sys_get_temp_dir(), 'dossier-zip-entry');
+            if (false === $tmpFile) {
+                continue;
+            }
+            $source = $storage->readStream($dossier, $file);
+            $target = fopen($tmpFile, 'w');
+            if (false === $target) {
+                fclose($source);
+                @unlink($tmpFile);
+                continue;
+            }
+            stream_copy_to_stream($source, $target);
+            fclose($source);
+            fclose($target);
+            $tmpFiles[] = $tmpFile;
+            $zip->addFile($tmpFile, $entryName);
         }
         $zip->close();
+        // ZipArchive reads the sources at close(): only clean up afterwards.
+        foreach ($tmpFiles as $tmpFile) {
+            @unlink($tmpFile);
+        }
 
         $response = new BinaryFileResponse($tmp);
         $response->deleteFileAfterSend();

@@ -225,13 +225,51 @@ final class DocumentsToolsAccessTest extends WebTestCase
         // Both saved persons are pre-filled.
         self::assertCount(2, $crawler->filter('[data-testid="document-request-person"]'));
         self::assertSelectorTextContains('[data-testid="document-request-form"]', 'Jean');
-        // The primary button switches to the "save" wording in edit mode.
-        self::assertSelectorTextContains('[data-testid="document-request-submit"]', 'Sauvegarder');
+        // Autosave: no explicit save button anymore, the only action left
+        // is the PDF download.
+        self::assertSelectorNotExists('[data-testid="document-request-submit"]');
+        self::assertSelectorExists('[data-testid="document-request-download"]');
     }
 
-    /**
-     * @param list<array{0:string,1:string}> $persons last name + first name pairs
-     */
+    public function testRequestFormPrefillsTenantsFromADossier(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $em->createQuery('DELETE FROM '.\App\Dossier\Entity\Dossier::class)->execute();
+
+        $dossier = (new \App\Dossier\Entity\Dossier())
+            ->setName('Famille Prefill')
+            ->setReference('DS-778899')
+            ->setPairingCode('PRF44X')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $tenant = (new \App\Dossier\Entity\DossierPerson())
+            ->setRole(\App\Dossier\Domain\DossierPersonRole::TENANT)
+            ->setFirstName('Nadia')
+            ->setLastName('Prefill')
+            ->setEmail('nadia@prefill.local')
+            ->setPrimaryContact(true);
+        $followUp = (new \App\Dossier\Entity\DossierPerson())
+            ->setRole(\App\Dossier\Domain\DossierPersonRole::FOLLOW_UP)
+            ->setFirstName('Suivi')
+            ->setLastName('Seulement')
+            ->setEmail('suivi@prefill.local');
+        $dossier->addPerson($tenant);
+        $dossier->addPerson($followUp);
+        $em->persist($dossier);
+        $em->flush();
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->requestUrl($this->adminPrefix).'?dossier=DS-778899');
+
+        self::assertResponseIsSuccessful();
+        // The dossier's tenant lands pre-filled; follow-up contacts don't.
+        self::assertStringContainsString('Nadia', $crawler->filter('[data-testid="document-request-form"]')->html());
+        self::assertStringNotContainsString('Seulement', $crawler->filter('[data-testid="document-request-form"]')->html());
+        // The "from a dossier" picker lists the open dossier.
+        self::assertSelectorExists('[data-testid="request-from-dossier"]');
+        self::assertSelectorTextContains('[data-testid="request-from-dossier-choice"]', 'Famille Prefill');
+    }
+
     private function persistRequest(HouseholdTypology $typology, RequestLanguage $language, array $persons, \DateTimeImmutable $createdAt): DocumentRequest
     {
         /** @var EntityManagerInterface $em */
@@ -322,11 +360,11 @@ final class DocumentsToolsAccessTest extends WebTestCase
         self::assertSelectorExists('[data-testid="document-request-form"]');
         self::assertCount(1, $crawler->filter('[data-testid="document-request-person"]'));
         self::assertSelectorExists('[data-testid="document-request-add-person"]');
-        // Each major section is present.
-        self::assertSelectorExists('[data-testid="document-request-typology"]');
+        // Each major section is present (the typology derives from the
+        // persons' roles and is no longer a form section).
         self::assertSelectorExists('[data-testid="document-request-drive"]');
         self::assertSelectorExists('[data-testid="document-request-language"]');
-        self::assertSelectorExists('[data-testid="document-request-submit"]');
+        self::assertSelectorExists('[data-testid="document-request-download"]');
         // Back link in the page header points at the documents hub.
         self::assertSelectorExists('a[href$="/admin/outils/documents"]');
     }

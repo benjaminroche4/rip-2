@@ -14,9 +14,9 @@ use App\Dossier\Entity\DossierDocumentFile;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Entity\DossierSearch;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 

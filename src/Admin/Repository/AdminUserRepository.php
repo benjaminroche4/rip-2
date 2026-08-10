@@ -7,6 +7,7 @@ namespace App\Admin\Repository;
 use App\Admin\Domain\UserListItem;
 use App\Admin\Domain\UserProfile;
 use App\Auth\Domain\Language;
+use App\Auth\Domain\StaffFunction;
 use App\Auth\Entity\User;
 use App\Auth\Service\UserSlugger;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,9 @@ final readonly class AdminUserRepository
     }
 
     /**
+     * Every user, admins first, then newest. The list is small enough to
+     * skip pagination.
+     *
      * @return list<UserListItem>
      */
     public function listAll(): array
@@ -35,23 +39,14 @@ final readonly class AdminUserRepository
     }
 
     /**
-     * Returns the first $limit users (newest first). Used for the admin
-     * "load more" pagination — caller passes page * perPage.
+     * Staff members holding a given business function, for the assignment
+     * dropdowns (dossier follow-up, visits, closing).
      *
      * @return list<UserListItem>
      */
-    public function listFirst(int $limit): array
+    public function listWithFunction(StaffFunction $function): array
     {
-        return $this->fetch(max(1, $limit));
-    }
-
-    public function count(): int
-    {
-        return (int) $this->em->createQueryBuilder()
-            ->select('COUNT(u.id)')
-            ->from(User::class, 'u')
-            ->getQuery()
-            ->getSingleScalarResult();
+        return $this->fetch(null, $function);
     }
 
     public function findByUniqueId(string $uniqueId): ?UserProfile
@@ -103,12 +98,18 @@ final readonly class AdminUserRepository
     /**
      * @return list<UserListItem>
      */
-    private function fetch(?int $limit): array
+    private function fetch(?int $limit, ?StaffFunction $function = null): array
     {
         $qb = $this->em->createQueryBuilder()
-            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt')
+            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt, u.googleId, u.isSuspended')
             ->from(User::class, 'u')
             ->orderBy('u.createdAt', 'DESC');
+
+        if (null !== $function) {
+            // JSON list stored as text: match the quoted value.
+            $qb->andWhere('u.staffFunctions LIKE :function')
+                ->setParameter('function', '%"'.$function->value.'"%');
+        }
 
         if (null !== $limit) {
             $qb->setMaxResults($limit);
@@ -116,27 +117,44 @@ final readonly class AdminUserRepository
 
         $rows = $qb->getQuery()->getArrayResult();
 
-        $items = [];
-        foreach ($rows as $row) {
-            $firstName = (string) $row['firstName'];
-            $lastName = (string) $row['lastName'];
-            $email = (string) $row['email'];
+        $items = array_map($this->mapRow(...), $rows);
 
-            $items[] = new UserListItem(
-                id: (int) $row['id'],
-                uniqueId: $this->coerceUlid($row['uniqueId']),
-                slug: $this->userSlugger->slug($firstName, $lastName, $email),
-                email: $email,
-                firstName: $firstName,
-                lastName: $lastName,
-                roles: array_values(array_map('strval', (array) $row['roles'])),
-                avatarFilename: $row['avatarFilename'] ?? null,
-                createdAt: $this->coerceDateTime($row['createdAt']),
-                lastLoginAt: isset($row['lastLoginAt']) ? $this->coerceDateTime($row['lastLoginAt']) : null,
-            );
-        }
+        // Roles are a JSON column, so grade ordering cannot be an ORDER BY;
+        // the list is small, sort in PHP. Admins, then staff, then plain
+        // users, newest first inside each group.
+        $rank = static fn (UserListItem $u): int => match ($u->primaryRole()) {
+            'admin' => 2,
+            'staff' => 1,
+            default => 0,
+        };
+        usort($items, static fn (UserListItem $a, UserListItem $b): int => [$rank($b), $b->createdAt->getTimestamp()] <=> [$rank($a), $a->createdAt->getTimestamp()]);
 
         return $items;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function mapRow(array $row): UserListItem
+    {
+        $firstName = (string) $row['firstName'];
+        $lastName = (string) $row['lastName'];
+        $email = (string) $row['email'];
+
+        return new UserListItem(
+            id: (int) $row['id'],
+            uniqueId: $this->coerceUlid($row['uniqueId']),
+            slug: $this->userSlugger->slug($firstName, $lastName, $email),
+            email: $email,
+            firstName: $firstName,
+            lastName: $lastName,
+            roles: array_values(array_map('strval', (array) $row['roles'])),
+            avatarFilename: $row['avatarFilename'] ?? null,
+            createdAt: $this->coerceDateTime($row['createdAt']),
+            lastLoginAt: isset($row['lastLoginAt']) ? $this->coerceDateTime($row['lastLoginAt']) : null,
+            hasGoogleAuth: null !== ($row['googleId'] ?? null),
+            isSuspended: (bool) ($row['isSuspended'] ?? false),
+        );
     }
 
     private function coerceUlid(mixed $value): Ulid

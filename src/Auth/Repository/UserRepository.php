@@ -23,7 +23,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * Used to upgrade (rehash) the user's password automatically over time.
      */
     /**
-     * Team members a contact submission can be assigned to.
+     * Team members a contact submission can be assigned to: admins plus
+     * anyone granted the Leads section.
      *
      * @return list<User>
      */
@@ -31,8 +32,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         /** @var list<User> $users */
         $users = $this->createQueryBuilder('u')
-            ->andWhere('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_ADMIN%')
+            ->andWhere('u.roles LIKE :admin OR u.roles LIKE :contacts')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('contacts', '%ROLE_SECTION_CONTACTS%')
             ->orderBy('u.firstName', 'ASC')
             ->addOrderBy('u.lastName', 'ASC')
             ->getQuery()
@@ -42,7 +44,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Admin-space staff (admins and editors), assignable on dossiers.
+     * Staff assignable on dossiers: admins plus anyone granted the
+     * Dossiers section.
      *
      * @return list<User>
      */
@@ -50,9 +53,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         /** @var list<User> $users */
         $users = $this->createQueryBuilder('u')
-            ->andWhere('u.roles LIKE :admin OR u.roles LIKE :editor')
+            ->andWhere('u.roles LIKE :admin OR u.roles LIKE :dossiers')
             ->setParameter('admin', '%ROLE_ADMIN%')
-            ->setParameter('editor', '%ROLE_EDITOR%')
+            ->setParameter('dossiers', '%ROLE_SECTION_DOSSIERS%')
             ->orderBy('u.firstName', 'ASC')
             ->addOrderBy('u.lastName', 'ASC')
             ->getQuery()

@@ -14,10 +14,10 @@
         <twig:Admin:EmptyCard message="{{ 'admin.tools.documents.recent.empty'|trans }}" />
     {% else %}
         <div class="rounded-2xl border border-neutral-200 bg-white p-2">
-            <div class="overflow-hidden rounded-xl">
-                <table class="w-full text-left text-sm" data-testid="recent-requests-table" aria-label="{{ 'admin.tools.documents.recent.title'|trans }}">
-                    <thead class="border-b border-gray-950/5 bg-neutral-50/50">
-                        <tr class="text-xs font-semibold tracking-wide text-gray-500">
+            <div class="rounded-xl bg-neutral-50 p-2">
+                <table class="w-full border-separate border-spacing-y-1 text-left text-sm" data-testid="recent-requests-table" aria-label="{{ 'admin.tools.documents.recent.title'|trans }}">
+                    <thead>
+                        <tr class="text-xs font-medium text-gray-400">
                             <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.date'|trans }}</th>
                             <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.persons'|trans }}</th>
                             <th scope="col" class="px-4 py-3 font-semibold whitespace-nowrap">{{ 'admin.tools.documents.recent.column.language'|trans }}</th>
@@ -26,14 +26,14 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-950/5">
+                    <tbody>
                         {% for req in this.items %}
-                            <tr data-testid="recent-request-row">
+                            <tr class="[&>td]:bg-white [&>td]:transition-colors [&>td]:duration-100 [&>td:first-child]:rounded-l-xl [&>td:last-child]:rounded-r-xl hover:[&>td]:bg-neutral-100" data-testid="recent-request-row">
                                 <td class="px-4 py-3 tabular-nums whitespace-nowrap text-gray-700">
                                     {{ req.createdAt|format_datetime('medium', 'short', locale=app.locale) }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-700">
-                                    {%- set names = req.personNames|slice(0, 3)|join(', ') -%}
+                                    {%- set names = req.personNames|slice(0, 3)|map(n => n|title)|join(', ') -%}
                                     {{ names }}
                                     {%- if req.personCount > 3 %}
                                         <span class="ml-1 text-xs text-gray-400">+{{ req.personCount - 3 }}</span>
@@ -43,44 +43,127 @@
                                     <twig:Badge variant="secondary" class="rounded-full uppercase">{{ req.language.value }}</twig:Badge>
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
-                                  <div class="inline-flex items-center justify-end gap-1">
-                                    {% set editUrl = path('admin_tools_documents_request_edit', {adminPrefix: adminPrefix, id: req.id}) %}
-                                    <a
-                                        href="{{ editUrl }}"
-                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-100 hover:text-primary"
-                                        data-testid="recent-request-edit"
-                                        aria-label="{{ 'admin.tools.documents.recent.edit'|trans }}"
+                                    {# Menu d'actions façon shadcn : items groupés, la
+                                       suppression isolée derrière un séparateur. #}
+                                    <details
+                                        class="relative inline-block text-left"
+                                        data-controller="details-dropdown"
+                                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                                        data-testid="recent-request-actions"
                                     >
-                                        {{ ux_icon('lucide:pencil', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                        <span>{{ 'admin.tools.documents.recent.edit'|trans }}</span>
-                                    </a>
-                                    {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
-                                    <a
-                                        href="{{ pdfUrl }}"
-                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-neutral-100 hover:text-primary"
-                                        data-testid="recent-request-download"
-                                        aria-label="{{ 'admin.tools.documents.recent.download'|trans }}"
-                                        data-controller="pdf-download"
-                                        data-pdf-download-url-value="{{ pdfUrl }}"
-                                        data-action="click->pdf-download#download"
-                                    >
-                                        <span class="relative inline-flex items-center justify-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1.5" data-pdf-download-target="label">
-                                                {{ ux_icon('lucide:download', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                                <span>{{ 'admin.tools.documents.recent.download'|trans }}</span>
-                                            </span>
-                                            <span class="hidden absolute inset-0 flex items-center justify-center" data-pdf-download-target="spinner">
-                                                <twig:Spinner />
-                                            </span>
-                                        </span>
-                                    </a>
-                                  </div>
+                                        <summary
+                                            class="inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
+                                            aria-label="{{ 'admin.tools.documents.recent.column.actions'|trans }}"
+                                        >
+                                            {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        </summary>
+                                        <div class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-neutral-200 bg-white p-1 text-left shadow-md">
+                                            {% set editUrl = path('admin_tools_documents_request_edit', {adminPrefix: adminPrefix, id: req.id}) %}
+                                            <a
+                                                href="{{ editUrl }}"
+                                                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                                data-testid="recent-request-edit"
+                                            >
+                                                {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                {{ 'admin.tools.documents.recent.edit'|trans }}
+                                            </a>
+                                            {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
+                                            <a
+                                                href="{{ pdfUrl }}"
+                                                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                                                data-testid="recent-request-download"
+                                                data-controller="pdf-download"
+                                                data-pdf-download-url-value="{{ pdfUrl }}"
+                                                data-action="click->pdf-download#download details-dropdown#close"
+                                            >
+                                                <span class="relative flex w-full items-center gap-2">
+                                                    <span class="flex items-center gap-2" data-pdf-download-target="label">
+                                                        {{ ux_icon('lucide:download', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                        {{ 'admin.tools.documents.recent.download'|trans }}
+                                                    </span>
+                                                    <span class="hidden absolute inset-0 flex items-center justify-center" data-pdf-download-target="spinner">
+                                                        <twig:Spinner />
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                                            <button
+                                                type="button"
+                                                data-action="live#action details-dropdown#close"
+                                                data-live-action-param="askDelete"
+                                                data-live-id-param="{{ req.id }}"
+                                                class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                                                data-testid="recent-request-delete"
+                                            >
+                                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                {{ 'admin.tools.documents.recent.delete'|trans }}
+                                            </button>
+                                        </div>
+                                    </details>
                                 </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            {# Suppression d'une demande : toujours confirmée par modale. #}
+            {% if this.confirmDeleteId is not null %}
+                <div
+                    class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="recent-request-delete-title"
+                    data-controller="modal-focus modal-anim"
+                    data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+                    data-live-action-param="cancelDelete"
+                    data-testid="recent-request-delete-modal"
+                >
+                    <button
+                        type="button"
+                        class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                        data-action="modal-anim#out live#action"
+                        data-live-action-param="cancelDelete"
+                        aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                        tabindex="-1"
+                    ></button>
+                    <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                        <div class="rounded-2xl bg-neutral-50 p-2">
+                            <div class="p-3">
+                                <h2 id="recent-request-delete-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                                    {{ 'admin.tools.documents.recent.deleteConfirm.title'|trans }}
+                                </h2>
+                                <p class="mt-1 text-sm text-pretty text-gray-500">
+                                    {{ 'admin.tools.documents.recent.deleteConfirm.text'|trans }}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-end gap-4 p-3">
+                                <button
+                                    type="button"
+                                    data-action="modal-anim#out live#action"
+                                    data-live-action-param="cancelDelete"
+                                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                    data-testid="recent-request-delete-cancel"
+                                >
+                                    {{ 'admin.contacts.notes.cancel'|trans }}
+                                </button>
+                                <button
+                                    type="button"
+                                    data-action="modal-anim#out live#action"
+                                    data-live-action-param="delete"
+                                    data-live-id-param="{{ this.confirmDeleteId }}"
+                                    data-loading="action(delete)|addAttribute(disabled)"
+                                    class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                                    data-testid="recent-request-delete-confirm"
+                                >
+                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.tools.documents.recent.deleteConfirm.confirm'|trans }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
             {% if this.hasMore %}
                 <div class="flex justify-center px-4 py-4">

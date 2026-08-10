@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="{{ fr ? 'fr' : 'en' }}">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="width=device-width" name="viewport" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta content="telephone=no,address=no,email=no,date=no,url=no" name="format-detection" />
+    <link rel="preload" as="image" href="https://resend-attachments.s3.amazonaws.com/y8VsZ3nZ1GDIWiz" />
+</head>
+<body>
+    {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
+    {% set mode = mode|default('scheduled') %}
+
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
+        <tbody>
+            <tr>
+                <td>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                        style="font-family:{{ fontStack }};font-size:1.077em;min-height:100%;line-height:155%">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                                        style="max-width:600px;width:100%;padding:40px 20px;border:1px solid #e2e2e2;border-radius:12px;background-color:#ffffff;font-family:{{ fontStack }}">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <img
+                                                        src="https://resend-attachments.s3.amazonaws.com/y8VsZ3nZ1GDIWiz"
+                                                        alt="Logo Relocation in Paris"
+                                                        width="166" height="38"
+                                                        style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;border-radius:0" />
+
+                                                    <p style="margin:0;padding:0.5em 0"><br /></p>
+
+                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center">
+                                                        {{ {
+                                                            scheduled: fr ? 'Votre visio est planifiée' : 'Your video call is scheduled',
+                                                            rescheduled: fr ? 'Votre visio est déplacée' : 'Your video call has been rescheduled',
+                                                            cancelled: fr ? 'Votre visio est annulée' : 'Your video call is cancelled',
+                                                        }[mode] }}
+                                                    </h2>
+
+                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
+                                                        {# Relocation : le prospect est souvent à l'étranger, le fuseau
+                                                           doit être explicite pour éviter les visios ratées d'une heure. #}
+                                                        {% set dateFr %}<strong style="color:#111827">le {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ visioAt|format_datetime(pattern="HH'h'mm") }} (heure de Paris)</strong>{% endset %}
+                                                        {% set dateEn %}<strong style="color:#111827">on {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='en') }} at {{ visioAt|format_datetime(pattern='HH:mm') }} (Paris time)</strong>{% endset %}
+                                                        {% if fr %}
+                                                            Bonjour{% if firstName %} {{ firstName }}{% endif %},
+                                                            {% if mode == 'cancelled' %}
+                                                                votre visio avec notre équipe prévue {{ dateFr }} est annulée.
+                                                            {% elseif mode == 'rescheduled' %}
+                                                                votre visio avec notre équipe est déplacée : elle aura lieu {{ dateFr }}.
+                                                            {% else %}
+                                                                votre visio avec notre équipe est prévue {{ dateFr }}.
+                                                            {% endif %}
+                                                        {% else %}
+                                                            Hello{% if firstName %} {{ firstName }}{% endif %},
+                                                            {% if mode == 'cancelled' %}
+                                                                your video call with our team planned {{ dateEn }} has been cancelled.
+                                                            {% elseif mode == 'rescheduled' %}
+                                                                your video call with our team has been moved: it will now take place {{ dateEn }}.
+                                                            {% else %}
+                                                                your video call with our team is scheduled {{ dateEn }}.
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </p>
+
+                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
+                                                        {% if mode == 'cancelled' %}
+                                                            {{ fr
+                                                                ? "Répondez simplement à cet email si vous souhaitez convenir d'un nouveau créneau."
+                                                                : 'Just reply to this email if you would like to arrange a new time slot.' }}
+                                                        {% else %}
+                                                            {{ fr
+                                                                ? "L'invitation en pièce jointe permet d'ajouter le rendez-vous à votre agenda en un clic. Besoin de changer l'horaire ? Répondez simplement à cet email."
+                                                                : 'The attached invitation adds the meeting to your calendar in one click. Need to reschedule? Just reply to this email.' }}
+                                                        {% endif %}
+                                                    </p>
+
+                                                    {% if meetLink %}
+                                                        <p style="margin:0;padding:0.75em 0;text-align:center"><br /></p>
+                                                        <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td align="center">
+                                                                        <a href="{{ meetLink }}"
+                                                                            style="display:inline-block;background-color:#71172e;color:#ffffff;text-decoration:none;font-weight:600;font-size:1em;padding:12px 24px;border-radius:8px">
+                                                                            {{ fr ? 'Rejoindre la visio (Google Meet)' : 'Join the video call (Google Meet)' }}
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    {% endif %}
+
+                                                    {% if mode != 'cancelled' and addToCalendarLinks|default([]) is not empty %}
+                                                        <p style="margin:0;padding:0.6em 0 0;font-size:0.9em;text-align:center;color:#6b7280">
+                                                            {{ fr ? 'Ajouter à votre agenda :' : 'Add to your calendar:' }}
+                                                            {% for label, url in addToCalendarLinks %}
+                                                                <a href="{{ url }}" style="color:#71172e;text-decoration:underline">{{ label }}</a>{% if not loop.last %} · {% endif %}
+                                                            {% endfor %}
+                                                        </p>
+                                                    {% endif %}
+
+                                                    <p style="margin:0;padding:0.75em 0;text-align:center"><br /></p>
+
+                                                    <p style="margin:0;padding:0;font-size:0.9em;text-align:center;color:#9ca3af">
+                                                        Relocation in Paris
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

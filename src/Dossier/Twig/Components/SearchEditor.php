@@ -947,7 +947,7 @@ final class SearchEditor
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_DOSSIERS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

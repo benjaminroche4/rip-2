@@ -1804,9 +1804,12 @@ admin:
         contacts: Leads
         dossiers: Dossiers
         visits: Visites
+        agents: Agents immobiliers
         tools: Outils
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
+    breadcrumb:
+        label: Fil d'Ariane
     dossiers:
         title: Dossiers
         empty:
@@ -1815,6 +1818,10 @@ admin:
         searchPlaceholder: Rechercher un dossier...
         filter:
             all: Tous les dossiers
+        scope:
+            label: Portée de la liste
+            all: Tous les dossiers
+            mine: Mes dossiers
         emptyFiltered:
             title: Aucun dossier ne correspond
             description: Modifiez la recherche ou le filtre de statut pour retrouver vos dossiers.
@@ -1828,13 +1835,8 @@ admin:
                 property_found: Bien trouvé
                 closed: Clôturé
         list:
-            primaryTenant: 'Locataire principal : %name%'
-            personCount: '{1}1 personne|]1,Inf[%count% personnes'
             viewMore: Voir le dossier
         card:
-            type:
-                individual: Individuel
-                family: Famille
             filesStatus:
                 label: Statut des pièces
                 completed: Complet
@@ -1842,7 +1844,6 @@ admin:
             package:
                 label: Formule
             progress:
-                title: Avancement de la relocation
                 started: 'Début :'
                 estimatedFinish: 'Fin estimée :'
             stats:
@@ -1850,11 +1851,10 @@ admin:
                 totalVisits: Visites au total
                 rejections: Refus
             managedBy: 'Géré par :'
-            noManager: Non assigné
         show:
             persons:
                 edit: Modifier
-                save: Enregistrer
+                save: Valider
                 newTitle: Nouvelle personne
                 primaryLocked: Le locataire principal ne peut pas être retiré. Transférez d'abord le rôle à un autre locataire.
                 removeConfirm:
@@ -1878,14 +1878,13 @@ admin:
             facts:
                 createdAt: Créé le
             manager:
-                label: Responsable de dossier
                 remove: Retirer le responsable
             nav:
                 label: Navigation entre dossiers
                 previous: Dossier précédent
                 next: Dossier suivant
             timeline:
-                title: Avancement
+                title: Récapitulatif
                 start: 'Début du dossier :'
                 moveIn: 'Installation souhaitée :'
                 onTrack: Dans les temps
@@ -1988,6 +1987,8 @@ admin:
                         other: Autre
             followUp:
                 origin: Créé depuis la demande
+                timeline: Chronologie
+            requestDocuments: Demander des documents
             closure:
                 badge: Dossier clos
                 closedAt: Clôturé le
@@ -1997,14 +1998,6 @@ admin:
                     title: Clôturer ce dossier ?
                     text: Les fichiers déposés seront définitivement supprimés, le lien de dépôt sera désactivé et la page de dépôt refusera ce dossier. Vous pourrez rouvrir le dossier, mais les fichiers ne seront pas restaurés.
                     confirm: Clôturer
-            notes:
-                deleteConfirm:
-                    title: Supprimer cette note ?
-                    text: La note sera supprimée définitivement du fil de suivi.
-                    confirm: Supprimer
-            feed:
-                title: Fil de suivi
-                subtitle: Historique des actions sur le dossier
             events:
                 statusChanged: 'Statut du dossier : %status%'
                 system: Système
@@ -2215,12 +2208,18 @@ admin:
         title: Demandes de contact
         empty: Aucune demande de contact pour le moment.
         searchPlaceholder: Rechercher (nom, email, téléphone, référence)
-        loading: Chargement des demandes
         show:
-            backToList: Retour aux demandes
             actions: Actions
             exportPdf: Exporter en PDF
+            delete:
+                action: Supprimer la demande
+                title: Supprimer cette demande ?
+                description: '%name% (%reference%) sera supprimé définitivement, avec ses notes et son historique. Cette action est irréversible.'
+                cancel: Annuler
+                confirm: Supprimer définitivement
+            identityTitle: Informations de contact
             toDossier: Transformer en dossier
+            viewDossier: 'Voir le dossier (%reference%)'
             toDossierModal:
                 title: Transformer en dossier
                 description: 'Le dossier centralise le suivi de la relocation de %name% : personnes du foyer, recherche de biens, visites et paiements. Le contact devient le locataire principal du dossier. Si un dossier existe déjà avec cet email, vous y serez redirigé.'
@@ -2245,11 +2244,10 @@ admin:
         followUp:
             title: Suivi
             assignee: Suivi par
+            assignMe: Moi
             assigneeNone: Personne
             recallLabel: À recontacter le
             recallOverdue: Rappel échu
-            timelineShowMore: 'Voir les %count% précédents'
-            timelineShowLess: Réduire l'historique
             recallClear: Effacer
         closure:
             budget_unrealistic: Budget irréaliste
@@ -2315,21 +2313,29 @@ admin:
             invalidEmail: Adresse email invalide.
             noOffer: Aucune formule
         nextStep:
+            visioOverdue:
+                question: "La visio est passée. Que s’est-il passé ?"
+                done: "Visio faite"
+                noShow: "Absent, replanifier"
+            notifyClient: Prévenir le prospect par email (date et canal du recontact)
+            visioNotice: À la validation, le prospect reçoit automatiquement l'invitation par email avec le lien Google Meet, et la visio s'ajoute à votre agenda.
+            channelRequired: Choisis le canal de recontact
+            channelLabel: Par quel canal
+            joinVisio: Rejoindre
+            edit: Modifier
+            confirm: Valider
+            dateRequired: Choisissez une date pour valider cette étape.
+            planner:
+                recontact: Rappel prévu le
+                visio: Visio prévue le
+                quote_sent: Relance du devis prévue le
             label: Prochaine étape
             choice:
-                call: Appeler le prospect
-                video_call: Visio prévue
-                visit: Planifier une visite
-                proposal: Envoyer une proposition
-                awaiting_client: Attente retour client
-                prepare_file: Préparer le dossier
+                recontact: À recontacter
+                visio: Visio
+                quote_preparation: Préparation du devis
+                quote_sent: Devis envoyé
                 other: Autre
-        feed:
-            statusChanged: 'Statut passé à'
-            reasonSet: 'Motif :'
-            recapSent: Récap envoyé au client
-            withPayment: avec lien de paiement
-            withoutPayment: sans lien de paiement
         project:
             title: Projet logement
             subtitle: Rempli à la qualification, pour comparer et filtrer les demandes.
@@ -2338,10 +2344,8 @@ admin:
             budget: Budget mensuel
             budgetUnit: €/mois
             areas: Quartiers visés
-            areasPlaceholder: 11e, 18e, 20e...
             moveIn: Emménagement souhaité
             propertyType: Type de bien
-            propertyTypePlaceholder: T2 meublé, colocation...
             note:
                 label: Note sur le projet
                 placeholder: Précisions sur le projet (contraintes, priorités, contexte...)
@@ -2373,10 +2377,33 @@ admin:
                 great: Très bon budget
             removeArea: 'Retirer %area%'
             unsaved: Le projet logement n'est pas enregistré. Quitter la page quand même ?
+        events:
+            step_recontact: Prochaine étape, à recontacter
+            step_visio: Prochaine étape, visio
+            step_quote_preparation: Prochaine étape, préparation du devis
+            step_quote_sent: Prochaine étape, devis envoyé
+            step_other: Prochaine étape, autre
+            step_cleared: Prochaine étape effacée
+            visio_planned: Visio planifiée
+            visio_rescheduled: Visio déplacée
+            pdf_export: Fiche exportée en PDF
+            recontact_notice: Prospect prévenu du recontact par email
+            visio_done: Visio faite
+            visio_noshow: Visio manquée (no-show)
+            visio_kept: Visio maintenue (lead converti)
+            visio_cancelled: Visio annulée
+            title: Historique
+            status: 'Statut passé à %status%'
+            recap_email: Récapitulatif envoyé par email
+            recap_email_payment: Récapitulatif + lien de paiement envoyé par email
+        drawer:
+            notes: Suivi et notes
+            close: Fermer
         previous:
             title: '{1}1 demande précédente|]1,Inf[%count% demandes précédentes'
-            showMore: 'Voir %count% de plus'
         leadQuality:
+            ratingPromptDismiss: Masquer l'invite
+            ratingPrompt: 'Premier traitement : note la qualité de ce lead'
             internal: Qualification interne, jamais partagée avec le client.
             ratingLabel: Note
             channelLabel: Recontacter par
@@ -2390,7 +2417,8 @@ admin:
             notePlaceholder: Ajouter une note de qualification (facultatif)
             unsaved: La note de qualification n'est pas enregistrée. Quitter la page quand même ?
         notes:
-            title: Fil de suivi
+            title: Notes internes
+            yesterday: Hier
             showMore: 'Afficher %count% de plus'
             internal: Notes internes, visibles uniquement par l'équipe.
             enterHint: Entrée pour envoyer
@@ -2405,9 +2433,6 @@ admin:
             emptyHint: Ajoute la première note pour garder une trace des échanges avec ce contact.
         filter:
             all: Tous
-        button:
-            loadMore: Voir plus
-            loading: Chargement...
         card:
             status:
                 new: À traiter
@@ -2421,7 +2446,9 @@ admin:
             help: 'Demande :'
             created: Reçue le
             statusUpdated: Statut mis à jour
-            recallAtText: Le %date% à %time%
+            recallAtText: Rappel le %date% à %time%
+            visioAtText: Visio le %date% à %time%
+            quoteSentAtText: Devis envoyé, relance le %date% à %time%
             treatedBy: Traité par
             updatedBy: Mis à jour par
             viewMore: Voir plus
@@ -2439,59 +2466,132 @@ admin:
         section:
             business: Métier
             admin: Admin
-            data: Données
         nav:
             label: Sections de l'administration
-            requests: Demandes
-            calls: Appels
             contactsBadge: '{0}Aucune demande à traiter|{1}1 demande à traiter|]1,Inf[%count% demandes à traiter'
-            comingSoon: Bientôt
+            dossiersBadge: '{0}Aucun dossier en cours|{1}1 dossier en cours|]1,Inf[%count% dossiers en cours'
     dashboard:
         title: Tableau de bord
         underConstruction: En cours de construction...
+    visits:
+        title: Visites
+        empty:
+            title: Aucune visite planifiée
+            description: Planifiez votre première visite avec le bouton ci-dessus.
+        new:
+            title: Nouvelle visite
+            summary:
+                title: Récapitulatif
+                mapPlaceholder: Saisissez l'adresse du bien pour la voir sur la carte.
+        section:
+            today: Aujourd'hui
+            todayEmpty: Aucune visite aujourd'hui.
+            tomorrow: Demain
+            tomorrowEmpty: Aucune visite demain.
+            later: Prochains jours
+        create:
+            button: Nouvelle visite
+            title: Nouvelle visite
+            subtitle: Planifiez une visite pour un dossier, avec l'adresse du bien et l'agent qui la fait visiter.
+            cancel: Annuler
+            submit: Planifier la visite
+            submitting: Planification...
+            dossier:
+                label: Dossier
+                placeholder: Choisir un dossier...
+                notNull: Le dossier est obligatoire.
+            agent:
+                label: Agent immobilier
+                placeholder: Aucun agent
+            scheduledAt:
+                label: Date et heure
+                notNull: La date et l'heure sont obligatoires.
+            address:
+                label: Adresse du bien
+                placeholder: 12 rue de la Roquette, 75011 Paris
+                notBlank: L'adresse est obligatoire.
+                length: L'adresse ne peut pas dépasser 255 caractères.
+    agents:
+        title: Agents immobiliers
+        searchPlaceholder: Rechercher un agent...
+        count: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
+        empty:
+            title: Aucun agent pour le moment
+            description: Ajoutez votre premier agent immobilier avec le bouton ci-dessus.
+        emptyFiltered:
+            title: Aucun agent ne correspond
+            description: Modifiez la recherche pour retrouver vos agents.
+        card:
+            noAgency: Indépendant
+        create:
+            button: Nouvel agent
+            title: Nouvel agent immobilier
+            subtitle: Ajoutez un agent partenaire à l'annuaire, avec son agence et ses coordonnées.
+            cancel: Annuler
+            submit: Ajouter l'agent
+            submitting: Ajout...
+            firstName:
+                label: Prénom
+                notBlank: Le prénom est obligatoire.
+                length: Le prénom ne peut pas dépasser 50 caractères.
+            lastName:
+                label: Nom
+                notBlank: Le nom est obligatoire.
+                length: Le nom ne peut pas dépasser 50 caractères.
+            kind:
+                label: Cet agent travaille...
+                agency: En agence
+                independent: En indépendant
+            agency:
+                label: Agence
+                placeholder: Nom de l'agence...
+                help: Une agence déjà connue est réutilisée automatiquement.
+                notBlank: Le nom de l'agence est obligatoire.
+                length: Le nom de l'agence ne peut pas dépasser 100 caractères.
+            email:
+                label: Email
+                invalid: Cette adresse email n'est pas valide.
+                length: L'email ne peut pas dépasser 180 caractères.
+            phone:
+                label: Téléphone
+                length: Le téléphone ne peut pas dépasser 30 caractères.
     tools:
         title: Outils
-        subtitle: 'Actions rapides au quotidien : envoi de documents, gestion de leads, et plus à venir.'
         documents:
             title: Documents
-            subtitle: 'Centralisez tout ce qui touche aux documents : catalogue bilingue et envois aux clients.'
             description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
             cta: Ouvrir
-            backToTools: Retour aux outils
             recent:
                 title: Demandes récentes
                 subtitle: '{0}Aucune demande envoyée pour le moment.|{1}1 demande envoyée. Retéléchargez le PDF en un clic.|]1,Inf[%count% demandes envoyées. Retéléchargez le PDF en un clic.'
                 empty: Aucune demande envoyée pour le moment.
                 download: Télécharger
+                delete: Supprimer
+                deleteConfirm:
+                    title: Supprimer cette demande ?
+                    text: La demande envoyée sera retirée de l'historique. Cette action est définitive.
+                    confirm: Supprimer la demande
                 edit: Modifier
                 loadMore: Voir plus
                 column:
                     date: Date
-                    household: Foyer
                     persons: Personnes
                     language: Langue
                     actions: Actions
             catalogue:
                 title: Catalogue
-                subtitle: Bibliothèque de modèles bilingues utilisés dans le tunnel client.
-                description: Gérez la bibliothèque des modèles bilingues (FR/EN) utilisés dans le tunnel client.
-                cta: Voir le catalogue
-                backToDocuments: Retour aux documents
             request:
                 title: Demander des documents
-                subtitle: Composez la demande pour un foyer, générez un PDF récapitulatif et partagez-le.
-                description: Envoyez à un client une demande de documents (pièce d'identité, justificatifs, contrat signé...) avec un lien sécurisé pour les déposer.
                 cta: Envoyer une demande
-                backToDocuments: Retour aux documents
-                comingSoon: Cette fonctionnalité arrive bientôt.
                 persons:
                     title: Personnes du foyer
-                    count: '{0}Aucune personne|{1}1 personne sur %max%|]1,Inf[%count% personnes sur %max%'
+                    count: '%count%/%max% max'
                     min: Renseigne au moins une personne.
                     max: Le foyer ne peut pas dépasser %limit% personnes.
                 person:
                     heading: 'Personne %number%'
                     toComplete: à compléter
+                    docCount: '{0}Aucune pièce|{1}1 pièce|]1,Inf[%count% pièces'
                     role:
                         label: Rôle
                         tenant: Locataire
@@ -2508,11 +2608,8 @@ admin:
                         label: Pièces demandées
                         min: Sélectionne au moins une pièce pour cette personne.
                         emptyCatalogue: 'Le catalogue est vide. Ajoute des documents depuis l''onglet Catalogue avant de créer une demande.'
+                        checkAll: Tout cocher/décocher
                 typology:
-                    title: Typologie du foyer
-                    subtitle: Sélectionne la composition correspondante.
-                    label: Typologie du foyer
-                    notNull: Choisis une typologie de foyer.
                     two_tenants_two_guarantors: 2 locataires + 2 garants
                     two_tenants_one_guarantor: 2 locataires + 1 garant
                     one_tenant_two_guarantors: 1 locataire + 2 garants
@@ -2521,12 +2618,11 @@ admin:
                     one_tenant: 1 locataire
                 note:
                     label: Note
-                    help: Message libre pour le client (affiché dans le PDF).
+                    help: Message libre pour le client (affiché dans le PDF). À rédiger dans la langue du client.
                     placeholder: Ajoute un mot d'introduction, des consignes particulières, un rappel d'échéance...
                 driveLink:
                     label: Lien du drive
                     help: Lien sécurisé où le client déposera ses pièces. Sera inclus dans le PDF.
-                    notBlank: Le lien du drive est obligatoire.
                     url: Le lien doit être une URL valide (commence par https://...).
                     length: Le lien ne peut pas dépasser 512 caractères.
                 language:
@@ -2535,16 +2631,16 @@ admin:
                     label: Langue
                     fr: Français
                     en: English
+                fromDossier:
+                    button: Depuis un dossier
+                autosaved: Brouillon enregistré
+                autosaving: Enregistrement...
                 actions:
                     addPerson: Ajouter une personne
+                    copyFromFirst: Copier les pièces de la personne 1
                     removePerson: Retirer
                     save: Sauvegarder
                     download: Télécharger
-                unsavedChanges:
-                    title: Modifications non enregistrées
-                    description: Vous avez des modifications non enregistrées. Voulez-vous les sauvegarder avant de quitter ?
-                    save: Sauvegarder et quitter
-                    discard: Quitter sans enregistrer
             actions:
                 add: Nouveau document
                 edit: Modifier
@@ -2554,6 +2650,7 @@ admin:
                 description: Cette action est définitive. Le document « %name% » sera supprimé.
                 cancel: Annuler
                 confirm: Supprimer définitivement
+                usage: '{1}Utilisé dans 1 demande envoyée : elle gardera ses PDF déjà générés.|]1,Inf[Utilisé dans %count% demandes envoyées : elles garderont leurs PDF déjà générés.'
             list:
                 title: Catalogue des documents
                 subtitle: '{0}Aucun document enregistré|{1}1 document enregistré|]1,Inf[%count% documents enregistrés'
@@ -2599,38 +2696,114 @@ admin:
                 language:
                     fr: Français
                     en: Anglais
-        comingSoon:
-            title: Bientôt disponible
-            description: Un nouvel outil est en préparation. Reviens bientôt.
-            badge: À venir
     users:
+        access:
+            title: Accès au back-office
+            subtitle: Sections métier accessibles; l'accès admin donne tout, gestion des utilisateurs comprise
+            master:
+                label: Donner accès au back-office
+                adminLocked: Un admin a toujours accès au back-office. Retirez d'abord son accès admin.
+                grantModal:
+                    title: Donner accès au back-office ?
+                    text: '%name% pourra se connecter au back-office. Choisissez ensuite les sections auxquelles il a accès.'
+                    confirm: Donner l'accès
+                revokeModal:
+                    title: Retirer l'accès au back-office ?
+                    text: '%name% perdra immédiatement l''accès au back-office et toutes ses sections.'
+                    confirm: Retirer l'accès
+            selfHint: Impossible de modifier son propre accès admin
+            contacts: Leads
+            dossiers: Dossiers
+            visits: Visites
+            agents: Agents immobiliers
+            tools: Outils
+            admin: Admin
+            none: Aucun accès
+            allAdmin: Tout (admin)
+            modal:
+                grantTitle: Donner l'accès admin ?
+                grantText: '%name% aura accès à tout le back-office, y compris la gestion des utilisateurs.'
+                grantConfirm: Donner l'accès
+                revokeTitle: "Retirer l'accès admin ?"
+                revokeText: '%name% perdra la gestion des utilisateurs et ne gardera que les sections cochées.'
+                revokeConfirm: "Retirer l'accès"
+        identity:
+            edit: Modifier le profil
+            firstName: Prénom
+            lastName: Nom
+            uploadAvatar: Changer la photo
+            resetAvatar: Réinitialiser l'avatar
+        activity:
+            leads:
+                title: Leads assignés
+                empty: Aucun lead assigné pour le moment.
+            dossiers:
+                title: Dossiers gérés
+                empty: Aucun dossier géré pour le moment.
+        functions:
+            title: Fonctions
+            subtitle: Ce que ce membre peut prendre en charge. Seuls les membres cochés apparaissent dans les listes d'assignation correspondantes.
+            closer:
+                label: Closer
+                description: Peut gérer des leads (prend en charge et qualifie les demandes entrantes)
+            search_agent:
+                label: Agent de recherche
+                description: Peut gérer des dossiers (responsable de la recherche de biens pour un locataire)
+            visit_agent:
+                label: Agent de visite
+                description: Peut réaliser les visites sur place (se déplace pour visiter le bien)
+        suspended: Suspendu
+        suspendedBanner:
+            title: Ce compte est suspendu.
+            text: La connexion est bloquée et toute session ouverte a été coupée. Vous pouvez le réactiver dans la zone en bas de page.
+        danger:
+            admin:
+                title: Accès admin
+                subtitle: Accès complet au back-office, gestion des utilisateurs comprise.
+            suspend:
+                title: Suspension du compte
+                subtitle: Bloque la connexion sans rien supprimer. Réversible à tout moment.
+                action: Suspendre le compte
+                resume: Réactiver le compte
+                selfHint: Impossible de suspendre son propre compte
+                modal:
+                    title: Suspendre %name% ?
+                    text: '%name% sera déconnecté immédiatement et ne pourra plus se connecter tant que le compte est suspendu. Ses données restent intactes.'
+                    confirm: Suspendre
+                resumeModal:
+                    title: Réactiver %name% ?
+                    text: '%name% pourra de nouveau se connecter avec ses accès actuels.'
+                    confirm: Réactiver
+            title: Zone de danger
+            subtitle: Supprime définitivement le compte. Ses leads et dossiers restent en place, sans responsable.
+            delete: Supprimer l'utilisateur
+            selfHint: Impossible de supprimer son propre compte
+            modal:
+                title: Supprimer %name% ?
+                text: Cette action est définitive. Le compte de %name% sera supprimé et ses leads et dossiers resteront en place, sans responsable.
+                confirm: Supprimer définitivement
         title: Utilisateurs
-        subtitle: Gestion des utilisateurs
-        placeholder: La liste des utilisateurs arrivera bientôt.
-        totalCount: '{0}Aucun utilisateur|{1}1 utilisateur|]1,Inf[%count% utilisateurs'
         empty: Aucun utilisateur enregistré pour le moment.
         column:
             name: Nom
-            email: Email
             role: Rôle
+            connection: Connexion
             lastLogin: Dernière connexion
-            createdAt: Inscrit le
+        connection:
+            google: Google
+            website: Site web
         role:
             admin: Admin
-            editor: Éditeur
+            staff: Staff
             user: Utilisateur
+        group:
+            admin: Admins
+            staff: Staff
+            user: Utilisateurs
         lastLoginNever: Jamais
-        button:
-            loadMore: Charger plus
-            loading: Chargement
         profile:
-            title: Profil utilisateur
-            backToList: Retour à la liste
-            section:
-                identity: Identité
-                account: Compte
-                authentication: Authentification
-                activity: Activité
+            copy: Copier
+            copied: Copié !
             field:
                 createdAt: Inscrit le
                 lastLogin: Dernière connexion
@@ -2647,9 +2820,6 @@ admin:
             authMethod:
                 google: Google
                 password: Mot de passe
-            profileComplete:
-                yes: Profil complet
-                no: Profil incomplet
 listProperty:
     hero:
         eyebrow: Propriétaires

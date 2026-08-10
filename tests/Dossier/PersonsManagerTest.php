@@ -68,6 +68,50 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertFalse($added->isPrimaryContact());
     }
 
+    public function testAddingAPersonNotifiesThePageChromeForTheTabBadge(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountManager($dossier);
+
+        $component->startAdd();
+        $component->role = DossierPersonRole::FOLLOW_UP->value;
+        $component->firstName = 'Marie';
+        $component->lastName = 'Durand';
+        $component->email = 'marie@example.com';
+        $component->savePerson();
+        self::assertSame([], $component->errors);
+
+        // The page-refresh controller listens for this browser event to
+        // morph the chrome, so the Personnes tab count badge increments.
+        $responder = self::getContainer()->get(\Symfony\UX\LiveComponent\LiveResponder::class);
+        self::assertContains('dossier-persons:changed', array_column($responder->getBrowserEventsToDispatch(), 'event'));
+    }
+
+    public function testEditingAPersonDoesNotRefreshThePageChrome(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountManager($dossier);
+
+        $component->startEdit($tenant->getId());
+        $component->firstName = 'Jeanne';
+        $component->savePerson();
+        self::assertSame([], $component->errors);
+
+        // The count did not change: no chrome refresh on a plain edit.
+        $responder = self::getContainer()->get(\Symfony\UX\LiveComponent\LiveResponder::class);
+        self::assertNotContains('dossier-persons:changed', array_column($responder->getBrowserEventsToDispatch(), 'event'));
+    }
+
+    public function testSaveButtonLabelIsTranslated(): void
+    {
+        // Regression: the key was missing, the button showed the raw key.
+        foreach (['fr', 'en'] as $locale) {
+            $label = self::getContainer()->get('translator')->trans('admin.dossiers.show.persons.save', locale: $locale);
+            self::assertNotSame('admin.dossiers.show.persons.save', $label, sprintf('Missing translation in "%s".', $locale));
+        }
+    }
+
     public function testAddingASecondTenantUpdatesTheDerivedName(): void
     {
         $dossier = $this->persistDossier();

@@ -9,3 +9,7 @@ framework:
             - submit
             - authenticate
             - logout
+            # Admin avatar upload: the form lives inside a LiveComponent edit
+            # mode, so the token cannot be primed from a crawled page; the
+            # stateless same-origin check fits this plain multipart POST.
+            - user-avatar

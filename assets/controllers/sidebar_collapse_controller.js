@@ -20,6 +20,21 @@ export default class extends Controller {
     #tipLabel = null;
 
     connect() {
+        this.#restore();
+        // A Turbo morph (page refresh in place) redraws the aside expanded
+        // from the server HTML without reconnecting this controller: the
+        // stored collapsed state must be re-applied afterwards.
+        this.onMorph = () => this.#restore();
+        window.addEventListener('turbo:morph', this.onMorph);
+    }
+
+    disconnect() {
+        window.removeEventListener('turbo:morph', this.onMorph);
+        this.#tip?.remove();
+        this.#tip = null;
+    }
+
+    #restore() {
         let collapsed = false;
         try {
             collapsed = '1' === localStorage.getItem(STORAGE_KEY);
@@ -27,11 +42,6 @@ export default class extends Controller {
             // Storage unavailable (private mode): default to expanded.
         }
         this.#apply(collapsed);
-    }
-
-    disconnect() {
-        this.#tip?.remove();
-        this.#tip = null;
     }
 
     toggle() {

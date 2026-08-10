@@ -27,6 +27,10 @@ final readonly class UserListItem
         public ?string $avatarFilename,
         public \DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $lastLoginAt,
+        /** True when the account signs in with Google OAuth. */
+        public bool $hasGoogleAuth = false,
+        /** True when the account is soft-disabled (login blocked). */
+        public bool $isSuspended = false,
     ) {
     }
 
@@ -46,8 +50,10 @@ final readonly class UserListItem
             return 'admin';
         }
 
-        if (\in_array('ROLE_EDITOR', $this->roles, true)) {
-            return 'editor';
+        foreach ($this->roles as $role) {
+            if ('ROLE_STAFF' === $role || str_starts_with($role, 'ROLE_SECTION_')) {
+                return 'staff';
+            }
         }
 
         return 'user';

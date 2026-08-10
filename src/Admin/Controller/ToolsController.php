@@ -6,9 +6,13 @@ namespace App\Admin\Controller;
 
 use App\Admin\Entity\DocumentRequest;
 use App\Admin\Service\DocumentRequestPdfRenderer;
+use App\Dossier\Domain\DossierPersonRole;
+use App\Dossier\Domain\DossierStatus;
+use App\Dossier\Repository\DossierRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -93,12 +97,43 @@ final class ToolsController extends AbstractController
         name: 'tools_documents_request',
         methods: ['GET'],
     )]
-    public function documentsRequest(string $adminPrefix): Response
-    {
+    public function documentsRequest(
+        string $adminPrefix,
+        Request $httpRequest,
+        DossierRepository $dossiers,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
+
+        // Pré-remplissage depuis un dossier (?dossier=DS-xxx) : réservé aux
+        // profils qui voient la section Dossiers — un accès Outils seul ne
+        // doit pas exposer les foyers.
+        $prefillPersons = [];
+        $openDossiers = [];
+        if ($this->isGranted('ROLE_SECTION_DOSSIERS')) {
+            $reference = (string) $httpRequest->query->get('dossier', '');
+            if ('' !== $reference) {
+                $dossier = $dossiers->findOneBy(['reference' => $reference]);
+                foreach ($dossier?->getPersons() ?? [] as $person) {
+                    if (DossierPersonRole::TENANT === $person->getRole()) {
+                        $prefillPersons[] = [
+                            'firstName' => (string) $person->getFirstName(),
+                            'lastName' => (string) $person->getLastName(),
+                        ];
+                    }
+                }
+            }
+
+            foreach ($dossiers->findSummaries() as $summary) {
+                if (DossierStatus::Closed !== $summary->status) {
+                    $openDossiers[] = $summary;
+                }
+            }
+        }
 
         return $this->render('admin/tools/documents/request.html.twig', [
             'adminPrefix' => $adminPrefix,
+            'prefillPersons' => $prefillPersons,
+            'openDossiers' => $openDossiers,
         ]);
     }
 
@@ -119,7 +154,7 @@ final class ToolsController extends AbstractController
     public function documentsRequestEdit(string $adminPrefix, DocumentRequest $request): Response
     {
         $this->ensureValidPrefix($adminPrefix);
-        $this->denyAccessUnlessGranted('ROLE_EDITOR');
+        $this->denyAccessUnlessGranted('ROLE_SECTION_TOOLS');
 
         return $this->render('admin/tools/documents/request.html.twig', [
             'adminPrefix' => $adminPrefix,
@@ -149,7 +184,7 @@ final class ToolsController extends AbstractController
         DocumentRequestPdfRenderer $renderer,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
-        $this->denyAccessUnlessGranted('ROLE_EDITOR');
+        $this->denyAccessUnlessGranted('ROLE_SECTION_TOOLS');
 
         $pdf = $renderer->render($request);
 

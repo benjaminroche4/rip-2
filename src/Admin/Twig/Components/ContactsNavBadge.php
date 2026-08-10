@@ -20,6 +20,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactsNavBadge', template: 'components/Admin/ContactsNavBadge.html.twig')]
 final class ContactsNavBadge
 {
+    use ContactsSectionGuard;
     use DefaultActionTrait;
 
     public function __construct(
@@ -47,7 +48,7 @@ final class ContactsNavBadge
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

@@ -47,7 +47,29 @@
         </aside>
 
         <div class="max-lg:mt-6">
-            <div data-loading="delay(150)|action(filter)|hide">
+            {# Portée : tous les dossiers ou seulement les miens, comme sur Leads. #}
+            <div class="mb-4 flex items-center justify-end">
+                <div class="inline-flex rounded-xl border border-neutral-200 bg-neutral-100 p-1" role="tablist" aria-label="{{ 'admin.dossiers.scope.label'|trans }}" data-testid="dossiers-scope">
+                    {% for scope in ['all', 'mine'] %}
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected="{{ this.scope == scope ? 'true' : 'false' }}"
+                            data-action="live#action"
+                            data-live-action-param="changeScope"
+                            data-live-scope-param="{{ scope }}"
+                            class="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ this.scope == scope ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
+                            data-testid="dossiers-scope-{{ scope }}"
+                        >
+                            {{ ('admin.dossiers.scope.' ~ scope)|trans }}
+                            {% if scope == 'mine' %}
+                                <span class="rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums {{ this.scope == 'mine' ? 'bg-primary/10 text-primary' : 'bg-neutral-200 text-gray-500' }}">{{ this.mineCount }}</span>
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div data-loading="delay(150)|action(filter)|action(changeScope)|hide">
                 {% if dossiers is empty %}
                     <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="dossiers-empty">
                         <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
@@ -72,22 +94,31 @@
                                     <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-3">
                                         <div class="flex min-w-0 items-center gap-3">
                                             <p class="truncate font-medium text-gray-900">{{ dossier.name }}</p>
-                                            <span class="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-2.5 py-0.5 text-xs font-medium text-gray-900">
-                                                <span class="size-1.5 shrink-0 rounded-full bg-emerald-600" aria-hidden="true"></span>
-                                                {{ (dossier.personCount > 1 ? 'admin.dossiers.card.type.family' : 'admin.dossiers.card.type.individual')|trans }}
+                                        </div>
+                                        <div class="flex shrink-0 items-center gap-3">
+                                            {# Responsable : même emplacement que la personne de suivi
+                                               sur la card contact (header, avant le statut). #}
+                                            {% if dossier.managerName %}
+                                                <div class="flex items-center gap-2">
+                                                    <div class="min-w-0 text-right">
+                                                        <p class="text-xs text-gray-500">{{ 'admin.dossiers.card.managedBy'|trans }}</p>
+                                                        <p class="truncate text-xs font-medium text-gray-900">{{ dossier.managerName|title }}</p>
+                                                    </div>
+                                                    <twig:Avatar filename="{{ dossier.managerAvatarFilename }}" name="{{ dossier.managerName }}" size="7" />
+                                                </div>
+                                            {% endif %}
+                                            {# Statut effectif (clôture et pièces en attente déjà déduits). #}
+                                            <span class="flex shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5" data-testid="dossier-status-badge">
+                                                <span class="size-1.5 shrink-0 rounded-full {{ dossier.status.dotClass }}" aria-hidden="true"></span>
+                                                <span class="truncate text-sm font-medium text-gray-900">{{ dossier.status.labelKey|trans }}</span>
                                             </span>
                                         </div>
-                                        {# Statut effectif (clôture et pièces en attente déjà déduits). #}
-                                        <span class="flex shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5" data-testid="dossier-status-badge">
-                                            <span class="size-1.5 shrink-0 rounded-full {{ dossier.status.dotClass }}" aria-hidden="true"></span>
-                                            <span class="truncate text-sm font-medium text-gray-900">{{ dossier.status.labelKey|trans }}</span>
-                                        </span>
                                     </div>
 
                                     <div class="flex flex-col gap-y-4 rounded-t-xl bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
                                         <div class="min-w-0 space-y-2 text-sm sm:flex-1">
                                             <p class="text-gray-600">{{ 'admin.dossiers.create.person.primaryTag'|trans }}</p>
-                                            <p class="truncate font-medium text-gray-900">{{ dossier.primaryTenantName ?: '-' }}</p>
+                                            <p class="truncate font-medium text-gray-900">{{ dossier.primaryTenantName ? dossier.primaryTenantName|title : '-' }}</p>
                                         </div>
                                         <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
                                         <div class="min-w-0 space-y-2 text-sm sm:flex-1">
@@ -118,9 +149,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col gap-4 rounded-b-xl bg-white px-5 pt-5 pb-6">
-                                        <p class="text-sm font-medium text-gray-900">{{ 'admin.dossiers.card.progress.title'|trans }}</p>
-
+                                    <div class="flex flex-col gap-3 rounded-b-xl bg-white px-5 py-4">
                                         <div class="space-y-2">
                                             {# Mock : avancement fixe en attendant le module visites. #}
                                             <div class="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
@@ -137,40 +166,24 @@
                                                 </p>
                                             </div>
                                         </div>
-
                                         {# Mock : compteurs fixes en attendant le module visites. #}
-                                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                                            <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">1</p>
-                                                <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.upcomingVisits'|trans }}</p>
+                                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                            <div class="flex items-baseline justify-center gap-1.5 rounded-lg bg-neutral-50 px-3 py-2">
+                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-sm font-medium text-gray-900 tabular-nums">1</p>
+                                                <p class="text-xs text-gray-600">{{ 'admin.dossiers.card.stats.upcomingVisits'|trans }}</p>
                                             </div>
-                                            <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">9</p>
-                                                <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.totalVisits'|trans }}</p>
+                                            <div class="flex items-baseline justify-center gap-1.5 rounded-lg bg-neutral-50 px-3 py-2">
+                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-sm font-medium text-gray-900 tabular-nums">9</p>
+                                                <p class="text-xs text-gray-600">{{ 'admin.dossiers.card.stats.totalVisits'|trans }}</p>
                                             </div>
-                                            <div class="flex flex-col items-center gap-1 rounded-xl bg-neutral-50 p-3">
-                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-lg font-medium text-gray-900">0</p>
-                                                <p class="text-center text-sm text-gray-600">{{ 'admin.dossiers.card.stats.rejections'|trans }}</p>
+                                            <div class="flex items-baseline justify-center gap-1.5 rounded-lg bg-neutral-50 px-3 py-2">
+                                                <p class="font-['Bricolage_Grotesque',sans-serif] text-sm font-medium text-gray-900 tabular-nums">0</p>
+                                                <p class="text-xs text-gray-600">{{ 'admin.dossiers.card.stats.rejections'|trans }}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="mt-2 mb-1 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-1">
-                                        <div class="flex items-center gap-2 pl-1">
-                                            <p class="text-xs text-gray-900 opacity-50">{{ 'admin.dossiers.card.managedBy'|trans }}</p>
-                                            {% if dossier.managerName %}
-                                                <div class="flex items-center gap-1.5">
-                                                    <twig:Avatar
-                                                        filename="{{ dossier.managerAvatarFilename }}"
-                                                        name="{{ dossier.managerName }}"
-                                                        :size="5"
-                                                    />
-                                                    <p class="truncate text-xs font-medium text-gray-900">{{ dossier.managerName }}</p>
-                                                </div>
-                                            {% else %}
-                                                <p class="text-xs font-medium text-gray-400">{{ 'admin.dossiers.card.noManager'|trans }}</p>
-                                            {% endif %}
-                                        </div>
+                                    <div class="mt-1 flex flex-wrap items-center justify-end gap-x-6 gap-y-2 px-1 pb-1">
                                         <twig:Button
                                             as="a"
                                             size="sm"
@@ -188,7 +201,7 @@
                 {% endif %}
             </div>
             {# Pendant un changement de filtre, squelettes qui pulsent. #}
-            <div data-loading="delay(150)|action(filter)|show" class="hidden" data-testid="dossiers-skeleton">
+            <div data-loading="delay(150)|action(filter)|action(changeScope)|show" class="hidden" data-testid="dossiers-skeleton">
                 <div class="space-y-4">
                     {% for i in 1..3 %}
                         <div class="animate-pulse rounded-3xl border border-neutral-200 bg-white p-2">

@@ -1,27 +1,28 @@
 {# Admin:PageHeader — slim page-top bar shared by every admin page. The
    title is required; the default slot is the right-side actions area
-   (back link, export buttons, etc.).
+   (export buttons, etc.).
 
    Each admin page renders its own `<twig:Admin:PageHeader>` inside the
    `page_header` block (see `templates/admin/base.html.twig`), so the
    slot/prop boundary stays inside a single page's scope — no block
    inheritance crossing the component boundary. #}
 {# @prop title string Rendered as the page `<h1>` — required. #}
-{# @prop breadcrumbLabel string|null Parent-section label rendered as a small link above the title. #}
-{# @prop breadcrumbUrl string|null Target of the breadcrumb link; required for the breadcrumb to render. #}
-{%- props title, breadcrumbLabel = null, breadcrumbUrl = null -%}
+{# @prop crumbs list<{label: string, url: string}> Ancestor pages rendered as links before the title, separated by "/". #}
+{%- props title, crumbs = [] -%}
 <header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-gray-950/5 bg-white px-8 py-3.5">
     <div class="min-w-0">
         {# Breadcrumb inline avec le titre, séparé par un "/" (même ligne sur
            tout le BO). #}
         <div class="flex min-w-0 flex-wrap items-baseline gap-x-2">
-            {% if breadcrumbLabel and breadcrumbUrl %}
-                <nav class="contents" aria-label="{{ breadcrumbLabel }}">
-                    <a
-                        href="{{ breadcrumbUrl }}"
-                        class="truncate text-sm font-medium text-gray-400 transition-colors duration-100 hover:text-gray-900"
-                    >{{ breadcrumbLabel }}</a>
-                    <span class="text-sm font-light text-gray-300" aria-hidden="true">/</span>
+            {% if crumbs is not empty %}
+                <nav class="contents" aria-label="{{ 'admin.breadcrumb.label'|trans }}" data-testid="admin-breadcrumb">
+                    {% for crumb in crumbs %}
+                        <a
+                            href="{{ crumb.url }}"
+                            class="truncate text-sm font-medium text-gray-400 transition-colors duration-100 hover:text-gray-900"
+                        >{{ crumb.label }}</a>
+                        <span class="text-sm font-light text-gray-300" aria-hidden="true">/</span>
+                    {% endfor %}
                 </nav>
             {% endif %}
             <h1 class="text-lg font-semibold tracking-tight text-balance text-gray-900">{{ title }}</h1>

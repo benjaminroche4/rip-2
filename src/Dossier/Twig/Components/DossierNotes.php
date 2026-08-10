@@ -18,15 +18,16 @@ use App\Dossier\Security\DossierNoteVoter;
 use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierEventLogger;
 use App\Dossier\Service\DossierNumberGenerator;
-use Symfony\Component\Clock\ClockInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
+use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -65,13 +66,17 @@ final class DossierNotes
     #[LiveProp]
     public int $eventsLimit = self::FEED_PAGE;
 
-    /** Note id awaiting deletion confirmation in the modal, or null. */
-    #[LiveProp]
-    public ?int $confirmDeleteNoteId = null;
-
     /** True while the closure confirmation modal is open. */
     #[LiveProp]
     public bool $confirmingClosure = false;
+
+    /**
+     * True while the notes drawer is open. Server-driven on purpose: the
+     * drawer lives inside this live component, so a client-only state would
+     * be wiped by the morph of every notes action (add, edit, delete).
+     */
+    #[LiveProp]
+    public bool $notesOpen = false;
 
     private const FEED_PAGE = 5;
 
@@ -133,7 +138,7 @@ final class DossierNotes
         $user = null;
         if (0 !== $id) {
             $user = $this->em->find(User::class, $id);
-            if (null === $user || [] === array_intersect(['ROLE_ADMIN', 'ROLE_EDITOR'], $user->getRoles())) {
+            if (null === $user || [] === array_intersect(['ROLE_ADMIN', 'ROLE_SECTION_DOSSIERS'], $user->getRoles())) {
                 throw new NotFoundHttpException('Assignable user not found.');
             }
         }
@@ -171,7 +176,7 @@ final class DossierNotes
     /**
      * Audit trail (fil de suivi), newest first, capped at eventsLimit.
      *
-     * @return list<array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
+     * @return list<array{text: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
      */
     public function getEvents(): array
     {
@@ -242,6 +247,20 @@ final class DossierNotes
         $dossier->setStatus($status);
         $this->events->log($dossier, 'status_changed', ['status' => $status->labelKey()]);
         $this->em->flush();
+    }
+
+    #[LiveAction]
+    public function openNotes(): void
+    {
+        $this->ensureAdmin();
+        $this->notesOpen = true;
+    }
+
+    #[LiveAction]
+    public function closeNotes(): void
+    {
+        $this->ensureAdmin();
+        $this->notesOpen = false;
     }
 
     #[LiveAction]
@@ -384,26 +403,14 @@ final class DossierNotes
         $this->em->flush();
     }
 
-    /** Opens the deletion confirmation modal for a note. */
-    #[LiveAction]
-    public function askDelete(#[LiveArg] int $id): void
-    {
-        $this->ensureAdmin();
-        $this->confirmDeleteNoteId = $id;
-    }
-
-    #[LiveAction]
-    public function cancelDelete(): void
-    {
-        $this->ensureAdmin();
-        $this->confirmDeleteNoteId = null;
-    }
-
+    /**
+     * Direct deletion from the "…" menu of a note (fade-exit animation on
+     * the client), same gesture as the contact notes drawer.
+     */
     #[LiveAction]
     public function delete(#[LiveArg] int $id): void
     {
         $this->ensureAdmin();
-        $this->confirmDeleteNoteId = null;
 
         $note = $this->notes->find($id);
         if (null === $note || (int) $note->getDossier()?->getId() !== $this->dossierId) {
@@ -444,7 +451,7 @@ final class DossierNotes
     /**
      * Audit events only, newest first.
      *
-     * @return list<array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
+     * @return list<array{text: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}>
      */
     private function eventViews(): array
     {
@@ -458,7 +465,7 @@ final class DossierNotes
     }
 
     /**
-     * @return array{text: string, icon: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}
+     * @return array{text: string, authorName: string|null, authorAvatar: string|null, createdAt: \DateTimeImmutable}
      */
     private function eventView(DossierEvent $event): array
     {
@@ -493,31 +500,8 @@ final class DossierNotes
             default => lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $kind)))),
         };
 
-        $icons = [
-            'documents_requested' => 'lucide:list-checks',
-            'documents_resent' => 'lucide:bell-ring',
-            'document_deposited' => 'lucide:upload',
-            'document_validated' => 'lucide:check',
-            'document_refused' => 'lucide:x',
-            'document_status' => 'lucide:refresh-cw',
-            'document_file_deleted' => 'lucide:trash-2',
-            'document_file_removed' => 'lucide:trash-2',
-            'description_updated' => 'lucide:pencil',
-            'person_added' => 'lucide:user-plus',
-            'person_updated' => 'lucide:user-pen',
-            'person_removed' => 'lucide:user-minus',
-            'primary_changed' => 'lucide:star',
-            'manager_assigned' => 'lucide:user-check',
-            'manager_unassigned' => 'lucide:user-x',
-            'search_updated' => 'lucide:sliders-horizontal',
-            'status_changed' => 'lucide:flag',
-            'dossier_closed' => 'lucide:archive',
-            'dossier_reopened' => 'lucide:archive-restore',
-        ];
-
         return [
             'text' => $this->translator->trans('admin.dossiers.show.events.'.$key, $params),
-            'icon' => $icons[$kind] ?? 'lucide:activity',
             'authorName' => $event->getAuthorName(),
             'authorAvatar' => $event->getAuthorAvatar(),
             'createdAt' => $event->getCreatedAt(),
@@ -606,7 +590,7 @@ final class DossierNotes
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_DOSSIERS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

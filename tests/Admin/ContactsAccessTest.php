@@ -36,7 +36,7 @@ final class ContactsAccessTest extends WebTestCase
         /** @var EntityManagerInterface $em */
         $em = $container->get('doctrine.orm.entity_manager');
         $em->createQuery('DELETE FROM '.User::class.' u WHERE u.email IN (:emails)')
-            ->setParameter('emails', [self::USER_EMAIL, self::ADMIN_EMAIL])
+            ->setParameter('emails', [self::USER_EMAIL, self::ADMIN_EMAIL, 'contacts-test-operator@example.com'])
             ->execute();
         // Full purge: the list sorts untreated-oldest first, so a leftover
         // contact from another test would displace our fixture off card #1.
@@ -74,6 +74,7 @@ final class ContactsAccessTest extends WebTestCase
             ->setHelpType('contact.contactForm.helpType.choice.1')
             ->setMessage('Bonjour, je cherche un appartement.')
             ->setCreatedAt(new \DateTimeImmutable())
+            ->setLeadRating(4)
             ->setLang('fr');
 
         $em->persist($user);
@@ -119,7 +120,6 @@ final class ContactsAccessTest extends WebTestCase
         // the list.
         self::assertSelectorNotExists('[data-testid="contacts-kpis"]');
 
-
         $cardText = $cards->first()->text();
         self::assertStringContainsString('Léa Dupont', $cardText);
         self::assertStringContainsString('contacts-test-lead@example.com', $cardText);
@@ -150,6 +150,9 @@ final class ContactsAccessTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Léa Dupont');
+        // The lead-rating badge sits right next to the lead name, on the
+        // heading row facing the Actions menu.
+        self::assertSelectorTextContains('[data-testid="contact-detail"] [data-testid="lead-rating-title-badge"]', '4');
         self::assertSelectorExists('[data-testid="contact-detail"]');
         self::assertSelectorTextContains('[data-testid="contact-detail"]', 'CT-424242');
         self::assertSelectorTextContains('[data-testid="contact-detail"]', 'Acme Corp');
@@ -171,6 +174,56 @@ final class ContactsAccessTest extends WebTestCase
         $link = $crawler->filter('[data-testid="contact-card-details"]')->first();
         self::assertGreaterThan(0, $link->count());
         self::assertStringContainsString('/admin/contacts/CT-424242', (string) $link->attr('href'));
+    }
+
+    public function testAdminDeletesAContactFromTheActionsMenu(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        // L'entrée Supprimer est là pour un admin, avec sa confirmation.
+        self::assertSelectorExists('[data-testid="contact-delete-trigger"]');
+
+        $form = $crawler->filter('[data-testid="contact-delete-confirm"]')->closest('form')->form();
+        $this->client->submit($form);
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertStringContainsString('/admin/contacts', (string) $this->client->getResponse()->headers->get('Location'));
+
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testContactDeletionRequiresAdminAndCsrf(): void
+    {
+        // Un profil section Leads (non admin) : pas d'entrée ni de route.
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        /** @var UserPasswordHasherInterface $hasher */
+        $hasher = static::getContainer()->get('security.user_password_hasher');
+        $operator = (new User())
+            ->setEmail('contacts-test-operator@example.com')
+            ->setFirstName('Op')
+            ->setLastName('Erator')
+            ->setRoles(['ROLE_SECTION_CONTACTS'])
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)
+            ->setVerified(true);
+        $operator->setPassword($hasher->hashPassword($operator, self::PASSWORD));
+        $em->persist($operator);
+        $em->flush();
+
+        $this->client->loginUser($operator);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+        self::assertSelectorNotExists('[data-testid="contact-delete-trigger"]');
+
+        $this->client->request('POST', $this->contactsUrl($this->adminPrefix).'/CT-424242/supprimer', ['_token' => 'x']);
+        self::assertResponseStatusCodeSame(403);
+
+        // Même admin, un token CSRF invalide est refusé.
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('POST', $this->contactsUrl($this->adminPrefix).'/CT-424242/supprimer', ['_token' => 'invalid']);
+        self::assertResponseStatusCodeSame(403);
     }
 
     private function loginAs(string $email): void

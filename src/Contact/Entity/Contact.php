@@ -113,6 +113,14 @@ class Contact
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $recallAt = null;
 
+    /** Google Calendar event backing the planned visio (stable across reschedules). */
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $visioEventId = null;
+
+    /** Google Meet link auto-generated with the calendar event. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $visioMeetLink = null;
+
     /** Recall reminder emails already sent (reset when the recall moves). */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $recallReminderDaySentAt = null;
@@ -266,6 +274,30 @@ class Contact
     public function setRecallAt(?\DateTimeImmutable $recallAt): static
     {
         $this->recallAt = $recallAt;
+
+        return $this;
+    }
+
+    public function getVisioEventId(): ?string
+    {
+        return $this->visioEventId;
+    }
+
+    public function setVisioEventId(?string $visioEventId): static
+    {
+        $this->visioEventId = $visioEventId;
+
+        return $this;
+    }
+
+    public function getVisioMeetLink(): ?string
+    {
+        return $this->visioMeetLink;
+    }
+
+    public function setVisioMeetLink(?string $visioMeetLink): static
+    {
+        $this->visioMeetLink = $visioMeetLink;
 
         return $this;
     }

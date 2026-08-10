@@ -5,19 +5,45 @@
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ 'admin.tools.documents.request.title'|trans }}"
+        :crumbs="[
+            {label: 'admin.tools.title'|trans, url: path('admin_tools', {adminPrefix: adminPrefix})},
+            {label: 'admin.tools.documents.title'|trans, url: path('admin_tools_documents', {adminPrefix: adminPrefix})},
+        ]"
     >
-        <a
-            href="{{ path('admin_tools_documents', {adminPrefix: adminPrefix}) }}"
-            class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
-        >
-            {{ ux_icon('lucide:arrow-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
-            {{ 'admin.tools.documents.request.backToDocuments'|trans }}
-        </a>
+        {# "Depuis un dossier" : recharge la page avec les locataires du
+           dossier pré-remplis. Visible seulement avec l'accès Dossiers. #}
+        {% if openDossiers|default([]) is not empty %}
+            <details
+                class="relative"
+                data-controller="details-dropdown"
+                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                data-testid="request-from-dossier"
+            >
+                <summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                    {{ ux_icon('lucide:folder-open', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.tools.documents.request.fromDossier.button'|trans }}
+                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                </summary>
+                <div class="absolute right-0 z-20 mt-2 max-h-72 w-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                    {% for dossier in openDossiers %}
+                        <a
+                            href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix, dossier: dossier.reference}) }}"
+                            class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                            data-testid="request-from-dossier-choice"
+                        >
+                            <span class="min-w-0 truncate font-medium">{{ dossier.name }}</span>
+                            <span class="shrink-0 text-xs text-gray-400 tabular-nums">{{ dossier.reference }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </details>
+        {% endif %}
     </twig:Admin:PageHeader>
 {% endblock %}
 
 {% block body %}
-    <div data-testid="tools-documents-request-page">
-        <twig:Admin:DocumentRequestForm :adminPrefix="adminPrefix" :editId="editId|default(null)" />
+    {# Largeur bornée et centrée. #}
+    <div class="mx-auto w-full max-w-7xl" data-testid="tools-documents-request-page">
+        <twig:Admin:DocumentRequestForm :adminPrefix="adminPrefix" :editId="editId|default(null)" :prefillPersons="prefillPersons|default([])" />
     </div>
 {% endblock %}

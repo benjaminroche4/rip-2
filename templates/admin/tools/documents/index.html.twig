@@ -5,47 +5,41 @@
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ 'admin.tools.documents.title'|trans }}"
+        :crumbs="[{label: 'admin.tools.title'|trans, url: path('admin_tools', {adminPrefix: adminPrefix})}]"
     >
-        <a
-            href="{{ path('admin_tools', {adminPrefix: adminPrefix}) }}"
-            class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
-        >
-            {{ ux_icon('lucide:arrow-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
-            {{ 'admin.tools.documents.backToTools'|trans }}
-        </a>
+        {# Actions du hub dans le header : Catalogue + Envoyer une demande. #}
+        <div class="flex flex-wrap items-center gap-2" data-testid="documents-hub-actions">
+            <span data-testid="tool-catalogue-card" class="contents">
+                <twig:Button
+                    as="a"
+                    variant="ghost"
+                    size="sm"
+                    href="{{ path('admin_tools_documents_catalogue', {adminPrefix: adminPrefix}) }}"
+                    class="border border-gray-950/10 text-gray-700 hover:bg-neutral-100"
+                    data-testid="tool-catalogue-cta"
+                >
+                    {{ ux_icon('lucide:library', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    <span>{{ 'admin.tools.documents.catalogue.title'|trans }}</span>
+                </twig:Button>
+            </span>
+            <span data-testid="tool-request-card" class="contents">
+                <twig:Button
+                    as="a"
+                    variant="default"
+                    size="sm"
+                    href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix}) }}"
+                    data-testid="tool-request-cta"
+                >
+                    {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                    <span>{{ 'admin.tools.documents.request.cta'|trans }}</span>
+                </twig:Button>
+            </span>
+        </div>
     </twig:Admin:PageHeader>
 {% endblock %}
 
 {% block body %}
     <div class="space-y-6" data-testid="tools-documents-page">
-        <section class="flex flex-wrap items-center justify-end gap-x-4 gap-y-3" data-testid="documents-hub-actions">
-            <div class="flex flex-wrap items-center gap-2">
-                <span data-testid="tool-catalogue-card" class="contents">
-                    <twig:Button
-                        as="a"
-                        variant="ghost"
-                        href="{{ path('admin_tools_documents_catalogue', {adminPrefix: adminPrefix}) }}"
-                        class="border border-gray-950/10 text-gray-700 hover:bg-neutral-100"
-                        data-testid="tool-catalogue-cta"
-                    >
-                        {{ ux_icon('lucide:library', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                        <span>{{ 'admin.tools.documents.catalogue.title'|trans }}</span>
-                    </twig:Button>
-                </span>
-                <span data-testid="tool-request-card" class="contents">
-                    <twig:Button
-                        as="a"
-                        variant="default"
-                        href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix}) }}"
-                        data-testid="tool-request-cta"
-                    >
-                        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                        <span>{{ 'admin.tools.documents.request.cta'|trans }}</span>
-                    </twig:Button>
-                </span>
-            </div>
-        </section>
-
         <twig:Admin:DocumentRequestList adminPrefix="{{ adminPrefix }}" />
     </div>
 {% endblock %}

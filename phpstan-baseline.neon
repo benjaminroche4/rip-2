@@ -37,12 +37,6 @@ parameters:
 			path: src/Admin/Entity/DocumentRequest.php
 
 		-
-			message: '#^Property App\\Admin\\Entity\\DocumentRequest\:\:\$driveLink type mapping mismatch\: property can contain string\|null but database expects string\.$#'
-			identifier: doctrine.columnType
-			count: 1
-			path: src/Admin/Entity/DocumentRequest.php
-
-		-
 			message: '#^Property App\\Admin\\Entity\\DocumentRequest\:\:\$typology type mapping mismatch\: property can contain App\\Admin\\Domain\\HouseholdTypology\|null but database expects App\\Admin\\Domain\\HouseholdTypology\.$#'
 			identifier: doctrine.columnType
 			count: 1
@@ -73,22 +67,16 @@ parameters:
 			path: src/Admin/Entity/PersonRequest.php
 
 		-
-			message: '#^Access to an undefined property Stripe\\StripeObject\:\:\$name\.$#'
-			identifier: property.notFound
+			message: '#^Offset ''firstName'' on array\{firstName\: string, lastName\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
 			count: 1
-			path: src/Admin/Repository/StripePaymentRepository.php
+			path: src/Admin/Twig/Components/DocumentRequestForm.php
 
 		-
-			message: '#^Attribute class Symfony\\Bridge\\Monolog\\Attribute\\WithMonologChannel does not exist\.$#'
-			identifier: attribute.notFound
+			message: '#^Offset ''lastName'' on array\{firstName\: string, lastName\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
 			count: 1
-			path: src/Admin/Repository/StripePaymentRepository.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: src/Admin/Repository/StripePaymentRepository.php
+			path: src/Admin/Twig/Components/DocumentRequestForm.php
 
 		-
 			message: '#^Method KnpU\\OAuth2ClientBundle\\Client\\OAuth2ClientInterface\:\:redirect\(\) invoked with 1 parameter, 2 required\.$#'
@@ -97,9 +85,21 @@ parameters:
 			path: src/Auth/Controller/GoogleAuthController.php
 
 		-
+			message: '#^Call to an undefined method Symfony\\Component\\Form\\FormInterface\<mixed\>\:\:getStepForm\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Auth/Controller/RegisterController.php
+
+		-
 			message: '#^Call to an undefined method Symfony\\Component\\Form\\FormInterface\<mixed\>\:\:isFinished\(\)\.$#'
 			identifier: method.notFound
 			count: 2
+			path: src/Auth/Controller/RegisterController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Form\\FormInterface\<mixed\>\:\:reset\(\)\.$#'
+			identifier: method.notFound
+			count: 1
 			path: src/Auth/Controller/RegisterController.php
 
 		-
@@ -175,12 +175,6 @@ parameters:
 			path: src/Contact/Entity/Contact.php
 
 		-
-			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
-			identifier: doctrine.columnType
-			count: 1
-			path: src/Contact/Entity/Contact.php
-
-		-
 			message: '#^Property App\\Contact\\Entity\\Contact\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
 			identifier: doctrine.columnType
 			count: 1
@@ -215,6 +209,162 @@ parameters:
 			identifier: doctrine.associationType
 			count: 1
 			path: src/Contact/Entity/ContactNote.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\Dossier\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\Dossier\:\:\$name type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\Dossier\:\:\$pairingCode type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\Dossier\:\:\$reference type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocument\:\:\$person type mapping mismatch\: property can contain App\\Dossier\\Entity\\DossierPerson\|null but database expects App\\Dossier\\Entity\\DossierPerson\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierDocument.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocument\:\:\$requestedAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocument.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocument\:\:\$type type mapping mismatch\: property can contain App\\Dossier\\Domain\\DossierDocumentType\|null but database expects App\\Dossier\\Domain\\DossierDocumentType\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocument.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$document type mapping mismatch\: property can contain App\\Dossier\\Entity\\DossierDocument\|null but database expects App\\Dossier\\Entity\\DossierDocument\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$mimeType type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$originalName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$size type mapping mismatch\: property can contain int\|null but database expects int\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$storedName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierDocumentFile\:\:\$uploadedAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierDocumentFile.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierEvent\:\:\$dossier type mapping mismatch\: property can contain App\\Dossier\\Entity\\Dossier\|null but database expects App\\Dossier\\Entity\\Dossier\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierEvent.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierNote\:\:\$dossier type mapping mismatch\: property can contain App\\Dossier\\Entity\\Dossier\|null but database expects App\\Dossier\\Entity\\Dossier\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierNote.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$dossier type mapping mismatch\: property can contain App\\Dossier\\Entity\\Dossier\|null but database expects App\\Dossier\\Entity\\Dossier\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$email type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$language type mapping mismatch\: property can contain App\\Dossier\\Domain\\ContactLanguage\|null but database expects App\\Dossier\\Domain\\ContactLanguage\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$lastName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierPerson\:\:\$role type mapping mismatch\: property can contain App\\Dossier\\Domain\\DossierPersonRole\|null but database expects App\\Dossier\\Domain\\DossierPersonRole\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Dossier/Entity/DossierPerson.php
+
+		-
+			message: '#^Property App\\Dossier\\Entity\\DossierSearch\:\:\$dossier type mapping mismatch\: property can contain App\\Dossier\\Entity\\Dossier\|null but database expects App\\Dossier\\Entity\\Dossier\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Dossier/Entity/DossierSearch.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Dossier/Service/DossierDocumentRefusalMailer.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/Dossier/Service/DossierDocumentRequestMailer.php
+
+		-
+			message: '#^Method App\\Dossier\\Twig\\Components\\DossierCreate\:\:create\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Dossier/Twig/Components/DossierCreate.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: src/Dossier/Twig/Components/PersonsManager.php
 
 		-
 			message: '#^Parameter \$arrondissements of class App\\Marketplace\\Filter\\PropertySearchCriteria constructor expects array\<int, int\>, array\<int, string\> given\.$#'
@@ -307,16 +457,76 @@ parameters:
 			path: src/PropertyListing/Controller/PropertyListingController.php
 
 		-
+			message: '#^Property App\\RealEstateAgent\\Entity\\Agency\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/RealEstateAgent/Entity/Agency.php
+
+		-
+			message: '#^Property App\\RealEstateAgent\\Entity\\Agency\:\:\$name type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/RealEstateAgent/Entity/Agency.php
+
+		-
+			message: '#^Property App\\RealEstateAgent\\Entity\\RealEstateAgent\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/RealEstateAgent/Entity/RealEstateAgent.php
+
+		-
+			message: '#^Property App\\RealEstateAgent\\Entity\\RealEstateAgent\:\:\$firstName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/RealEstateAgent/Entity/RealEstateAgent.php
+
+		-
+			message: '#^Property App\\RealEstateAgent\\Entity\\RealEstateAgent\:\:\$lastName type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/RealEstateAgent/Entity/RealEstateAgent.php
+
+		-
+			message: '#^Method App\\RealEstateAgent\\Twig\\Components\\AgentCreate\:\:create\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/RealEstateAgent/Twig/Components/AgentCreate.php
+
+		-
 			message: '#^Attribute class Symfony\\Bridge\\Monolog\\Attribute\\WithMonologChannel does not exist\.$#'
 			identifier: attribute.notFound
 			count: 1
 			path: src/Shared/Pdf/DocRaptorPdfRenderer.php
 
 		-
-			message: '#^PHPDoc tag @var with type Symfony\\Contracts\\Cache\\CacheInterface is not subtype of native type Symfony\\Component\\Cache\\Adapter\\ArrayAdapter\.$#'
-			identifier: varTag.nativeType
+			message: '#^Property App\\Visit\\Entity\\Visit\:\:\$address type mapping mismatch\: property can contain string\|null but database expects string\.$#'
+			identifier: doctrine.columnType
 			count: 1
-			path: tests/Admin/Repository/StripePaymentRepositoryTest.php
+			path: src/Visit/Entity/Visit.php
+
+		-
+			message: '#^Property App\\Visit\\Entity\\Visit\:\:\$createdAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Visit/Entity/Visit.php
+
+		-
+			message: '#^Property App\\Visit\\Entity\\Visit\:\:\$dossier type mapping mismatch\: property can contain App\\Dossier\\Entity\\Dossier\|null but database expects App\\Dossier\\Entity\\Dossier\.$#'
+			identifier: doctrine.associationType
+			count: 1
+			path: src/Visit/Entity/Visit.php
+
+		-
+			message: '#^Property App\\Visit\\Entity\\Visit\:\:\$scheduledAt type mapping mismatch\: property can contain DateTimeImmutable\|null but database expects DateTimeImmutable\.$#'
+			identifier: doctrine.columnType
+			count: 1
+			path: src/Visit/Entity/Visit.php
+
+		-
+			message: '#^Property App\\Tests\\Admin\\CsrfLiveActionTest\:\:\$adminPrefix is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/Admin/CsrfLiveActionTest.php
 
 		-
 			message: '#^Method App\\Tests\\Auth\\RegisterControllerTest\:\:registerOneUser\(\) is unused\.$#'
@@ -343,10 +553,40 @@ parameters:
 			path: tests/Controller/PropertyListingControllerTest.php
 
 		-
+			message: '#^Cannot call method upload\(\) on array\<array\<Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: tests/Dossier/DepositTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Mime\\RawMessage\:\:getHtmlBody\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: tests/Dossier/ModulesTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Mime\\RawMessage\:\:getTo\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: tests/Dossier/ModulesTest.php
+
+		-
+			message: '#^Offset ''lat'' does not exist on array\{address\: string, type\: string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: tests/Dossier/SearchEditorTest.php
+
+		-
 			message: '#^Cannot call method tick\(\) on array\<array\<Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: tests/Flow/ContactFlowTest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type App\\RealEstateAgent\\Entity\\Agency\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: tests/RealEstateAgent/AgentCreateTest.php
 
 		-
 			message: '#^Property App\\Tests\\ResetPasswordControllerTest\:\:\$userRepository is never read, only written\.$#'

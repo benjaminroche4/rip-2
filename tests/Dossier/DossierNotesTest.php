@@ -166,29 +166,19 @@ final class DossierNotesTest extends KernelTestCase
         $component->changeStatus('awaiting_documents');
     }
 
-    public function testNoteDeletionGoesThroughTheConfirmationModal(): void
+    public function testNoteDeletionIsDirectFromTheActionsMenu(): void
     {
+        // Same gesture as the contact notes drawer: no modal, the "…" menu
+        // deletes directly (the client plays the fade-exit animation).
         $dossier = $this->persistDossier();
         $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
         $note = $this->persistNote($dossier, (int) $admin->getId(), 'À supprimer');
         $this->loginAs($admin);
 
         $component = $this->mountNotes($dossier);
-
-        // Asking opens the modal, nothing is deleted yet.
-        $component->askDelete((int) $note->getId());
-        self::assertSame((int) $note->getId(), $component->confirmDeleteNoteId);
         self::assertCount(1, $component->getFeed());
 
-        // Cancelling closes it without deleting.
-        $component->cancelDelete();
-        self::assertNull($component->confirmDeleteNoteId);
-        self::assertCount(1, $component->getFeed());
-
-        // Confirming deletes and closes the modal.
-        $component->askDelete((int) $note->getId());
         $component->delete((int) $note->getId());
-        self::assertNull($component->confirmDeleteNoteId);
         self::assertCount(0, $component->getFeed());
     }
 
@@ -269,7 +259,7 @@ final class DossierNotesTest extends KernelTestCase
     {
         $dossier = $this->persistDossier();
         $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
-        $editor = $this->persistUser('editor', ['ROLE_EDITOR']);
+        $editor = $this->persistUser('editor', ['ROLE_SECTION_DOSSIERS']);
         $this->loginAs($admin);
 
         $component = $this->mountNotes($dossier);
@@ -297,6 +287,21 @@ final class DossierNotesTest extends KernelTestCase
 
         $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
         $component->assignManager((int) $plain->getId());
+    }
+
+    public function testNotesDrawerOpensAndClosesServerSide(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAs($this->persistUser('admin', ['ROLE_ADMIN']));
+        $component = $this->mountNotes($dossier);
+
+        self::assertFalse($component->notesOpen);
+
+        $component->openNotes();
+        self::assertTrue($component->notesOpen);
+
+        $component->closeNotes();
+        self::assertFalse($component->notesOpen);
     }
 
     public function testNonAdminCannotMount(): void

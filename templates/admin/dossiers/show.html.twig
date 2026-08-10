@@ -5,8 +5,7 @@
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ dossier.name }}"
-        breadcrumbLabel="{{ 'admin.dossiers.title'|trans }}"
-        breadcrumbUrl="{{ path('admin_dossiers', {adminPrefix: adminPrefix}) }}"
+        :crumbs="[{label: 'admin.dossiers.title'|trans, url: path('admin_dossiers', {adminPrefix: adminPrefix})}]"
     >
         {# Prev/next arrows to move through the dossiers in list order. #}
         <nav class="flex shrink-0 items-center gap-2" aria-label="{{ 'admin.dossiers.show.nav.label'|trans }}" data-testid="dossier-show-nav">
@@ -45,25 +44,130 @@
 {% endblock %}
 
 {% block body %}
-    {# Même disposition que la fiche contact : colonne principale + sidebar
-       sticky (fil de suivi) en 1fr / 26rem, modules en pleine largeur. #}
+    {# Le badge de compteur de l'onglet Personnes vit dans le chrome de page,
+       hors des composants live : un morph Turbo le rafraîchit quand une
+       personne est ajoutée ou retirée. #}
+    <div
+        class="contents"
+        data-controller="page-refresh"
+        data-action="dossier-persons:changed@window->page-refresh#refresh"
+    ></div>
+    {# Même disposition que la fiche contact : rangée Actions, puis colonne
+       principale + sidebar sticky (fil de suivi) en 1fr / 26rem. #}
     <div class="space-y-6" data-testid="dossier-show-page">
+        {% if is_granted('ROLE_SECTION_TOOLS') %}
+            {% set menuRowClass = 'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900' %}
+            <div class="flex items-center justify-end gap-3">
+                <details
+                    class="relative"
+                    data-controller="details-dropdown"
+                    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                    data-testid="dossier-actions-menu"
+                >
+                    <summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                        {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.contacts.show.actions'|trans }}
+                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    </summary>
+                    <div class="absolute right-0 z-10 mt-2 w-60 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                        {# Demande de documents pré-remplie avec les locataires du dossier. #}
+                        <a
+                            href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix, dossier: dossier.reference}) }}"
+                            class="{{ menuRowClass }}"
+                            data-testid="dossier-request-documents"
+                        >
+                            {{ ux_icon('lucide:file-text', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.requestDocuments'|trans }}
+                        </a>
+                    </div>
+                </details>
+            </div>
+        {% endif %}
+
         <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
-        {# flex + gap plutôt que space-y : la racine `contents` du composant
-           Timeline ne porte pas de marge, et un dossier sans timeline ne doit
-           pas laisser d'écart fantôme avant le premier bloc. #}
-        <div class="flex flex-col gap-6">
-        {# ── Timeline (début → installation souhaitée), live ──────────── #}
-        <twig:Dossier:Timeline :dossierId="dossier.id" />
+        {# ── Sections en onglets : l'état actif vit sur ce wrapper statique
+              (data-active-tab) et la visibilité des panneaux est dérivée en
+              CSS, donc les re-rendus des LiveComponents n'y touchent pas. #}
+        <div
+            class="flex min-w-0 flex-col gap-6"
+            data-controller="tabs"
+            data-tabs
+            data-active-tab="recap"
+            data-tabs-active-class="bg-neutral-100 text-primary"
+            data-tabs-inactive-class="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            data-testid="dossier-tabs"
+        >
+            {% set tabItems = [
+                {key: 'recap', icon: 'lucide:gauge', label: 'admin.dossiers.show.timeline.title'},
+                {key: 'persons', icon: 'lucide:users', label: 'admin.dossiers.create.persons.title', count: dossier.persons|length},
+                {key: 'search', icon: 'lucide:search', label: 'admin.dossiers.show.search.title'},
+                {key: 'file', icon: 'lucide:folder-open', label: 'admin.dossiers.show.modules.file.title'},
+                {key: 'visit', icon: 'lucide:calendar-check', label: 'admin.dossiers.show.modules.visit.title'},
+                {key: 'payment', icon: 'lucide:credit-card', label: 'admin.dossiers.show.modules.payment.title'},
+            ] %}
+            {# ── Barre d'onglets : pleine largeur, séparateurs entre les
+                  éléments, pastille glissante (survol + changement) pilotée
+                  par tabs_controller ; badges de compteurs optionnels. #}
+            <div class="rounded-2xl border border-neutral-200 bg-white p-1.5">
+                <div
+                    class="relative flex items-stretch overflow-x-auto"
+                    role="tablist"
+                    aria-label="{{ 'admin.dossiers.title'|trans }}"
+                    data-action="mouseleave->tabs#resetIndicator"
+                >
+                    {# Pastille glissante : suit le survol, revient sur l'actif. #}
+                    <span
+                        data-tabs-target="indicator"
+                        class="absolute top-0 left-0 z-0 rounded-lg bg-neutral-100 transition-[transform,width,height] duration-200 ease-out will-change-transform motion-reduce:transition-none"
+                        aria-hidden="true"
+                        hidden
+                    ></span>
+                    {% for tab in tabItems %}
+                        {% if not loop.first %}
+                            <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
+                        {% endif %}
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                            data-tabs-target="tab"
+                            data-tabs-key="{{ tab.key }}"
+                            data-action="tabs#select mouseenter->tabs#hoverIndicator"
+                            data-tabs-active-class="text-primary"
+                            data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                            class="group/tab relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ loop.first ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                            data-testid="dossier-tab-{{ tab.key }}"
+                        >
+                            {# Même micro-animation d'icône que la sidebar. #}
+                            {{ ux_icon(tab.icon, {class: 'size-4 shrink-0 motion-safe:group-hover/tab:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                            {{ tab.label|trans }}
+                            {% if tab.count is defined and tab.count is not null %}
+                                <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums" data-testid="tab-count-{{ tab.key }}">{{ tab.count }}</span>
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
 
-        {# ── Persons (inline add / edit / remove) ─────────────────────── #}
-        <twig:Dossier:PersonsManager :dossierId="dossier.id" />
 
-        {# ── Search criteria (editable, mirrors the contact "Projet" card) ─ #}
-        <twig:Dossier:Search :dossierId="dossier.id" />
+            {# ── Timeline (début → installation souhaitée), live ──────── #}
+            <div data-tab-panel="recap" class="contents">
+                <twig:Dossier:Timeline :dossierId="dossier.id" />
+            </div>
 
-        {# ── Modules: live, unlock as soon as the search becomes complete. ── #}
-        <twig:Dossier:Modules :dossierId="dossier.id" adminPrefix="{{ adminPrefix }}" />
+            {# ── Persons (inline add / edit / remove) ─────────────────── #}
+            <div data-tab-panel="persons" class="contents">
+                <twig:Dossier:PersonsManager :dossierId="dossier.id" />
+            </div>
+
+            {# ── Search criteria (editable, mirrors the contact "Projet" card) ─ #}
+            <div data-tab-panel="search" class="contents">
+                <twig:Dossier:Search :dossierId="dossier.id" />
+            </div>
+
+            {# ── Modules : chaque card porte son data-tab-panel (file, visit,
+                  payment) directement dans le template du composant. ────── #}
+            <twig:Dossier:Modules :dossierId="dossier.id" adminPrefix="{{ adminPrefix }}" />
         </div>
 
         {# ── Follow-up card (sticky sidebar, like the contact page):

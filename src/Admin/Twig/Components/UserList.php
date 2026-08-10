@@ -9,7 +9,6 @@ use App\Admin\Repository\AdminUserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
-use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -24,11 +23,6 @@ final class UserList
 {
     use DefaultActionTrait;
 
-    private const PER_PAGE = 20;
-
-    #[LiveProp]
-    public int $page = 1;
-
     /**
      * Admin URL prefix, propagated through LiveComponent rerenders so the
      * component can build links to the user profile route. Marked
@@ -39,7 +33,6 @@ final class UserList
 
     /** @var list<UserListItem>|null */
     private ?array $itemsCache = null;
-    private ?int $totalCache = null;
 
     public function __construct(
         private readonly AdminUserRepository $repository,
@@ -52,33 +45,29 @@ final class UserList
         $this->ensureAdmin();
     }
 
-    #[LiveAction]
-    public function more(): void
-    {
-        $this->ensureAdmin();
-        ++$this->page;
-    }
-
     /**
      * @return list<UserListItem>
      */
     public function getItems(): array
     {
-        if (null !== $this->itemsCache) {
-            return $this->itemsCache;
+        return $this->itemsCache ??= $this->repository->listAll();
+    }
+
+    /**
+     * Items grouped by display grade for the sectioned table. Group order is
+     * fixed (admin > staff > user); empty groups are dropped so the template
+     * never renders a lone header.
+     *
+     * @return array<string, list<UserListItem>>
+     */
+    public function getGroups(): array
+    {
+        $groups = ['admin' => [], 'staff' => [], 'user' => []];
+        foreach ($this->getItems() as $item) {
+            $groups[$item->primaryRole()][] = $item;
         }
 
-        return $this->itemsCache = $this->repository->listFirst($this->page * self::PER_PAGE);
-    }
-
-    public function hasMore(): bool
-    {
-        return $this->getTotalCount() > $this->page * self::PER_PAGE;
-    }
-
-    public function getTotalCount(): int
-    {
-        return $this->totalCache ??= $this->repository->count();
+        return array_filter($groups, static fn (array $group): bool => [] !== $group);
     }
 
     private function ensureAdmin(): void

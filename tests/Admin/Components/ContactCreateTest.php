@@ -64,6 +64,7 @@ final class ContactCreateTest extends KernelTestCase
         $component->lastName = 'martin';
         $component->email = '';
         $component->phoneNumber = '+33622334455';
+        $component->chooseOffer('accompagne');
         $component->chooseSource('phone');
 
         $response = $component->create();
@@ -83,7 +84,21 @@ final class ContactCreateTest extends KernelTestCase
         self::assertNull($component->create());
         self::assertArrayHasKey('firstName', $component->errors);
         self::assertArrayHasKey('email', $component->errors);
+        // The default request is the housing search: the offer is required.
+        self::assertArrayHasKey('offer', $component->errors);
+        // Last name, phone: optional on manual intakes.
+        self::assertArrayNotHasKey('lastName', $component->errors);
         self::assertSame(0, (int) $this->em->getRepository(Contact::class)->count([]));
+    }
+
+    public function testOfferIsNotRequiredForNonHousingRequests(): void
+    {
+        $component = $this->mountTwigComponent('Admin:ContactCreate', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+        $component->firstName = 'lea';
+        $component->chooseHelpType(\App\Admin\Twig\Components\ContactDetails::HELP_TYPES[1]);
+        $component->chooseSource('phone');
+
+        self::assertInstanceOf(RedirectResponse::class, $component->create());
     }
 
     public function testFormSourceCannotBePickedManually(): void

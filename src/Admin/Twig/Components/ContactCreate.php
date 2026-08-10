@@ -26,6 +26,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactCreate', template: 'components/Admin/ContactCreate.html.twig')]
 final class ContactCreate
 {
+    use ContactsSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -157,15 +158,17 @@ final class ContactCreate
     {
         $this->ensureAdmin();
 
+        // Required: first name, contact language, request type, and the
+        // offer when the request is a housing search. Everything else
+        // (last name, email, phone…) is optional on manual intakes; only
+        // the email format is checked when something was typed.
         $this->errors = [];
         if ('' === trim($this->firstName)) {
             $this->errors['firstName'] = 'admin.contacts.edit.required';
         }
-        if ('' === trim($this->lastName)) {
-            $this->errors['lastName'] = 'admin.contacts.edit.required';
+        if (ContactType::HOUSING_HELP_TYPE === $this->helpType && '' === $this->offer) {
+            $this->errors['offer'] = 'admin.contacts.edit.required';
         }
-        // Optional on manual intakes (phone…): only the format is checked
-        // when something was typed.
         if ('' !== trim($this->email) && false === filter_var(trim($this->email), \FILTER_VALIDATE_EMAIL)) {
             $this->errors['email'] = 'admin.contacts.edit.invalidEmail';
         }
@@ -192,7 +195,7 @@ final class ContactCreate
             trim($this->firstName),
             trim($this->lastName),
             '' !== trim($this->email) ? trim($this->email) : null,
-            '' !== trim($this->phoneNumber) ? trim($this->phoneNumber) : null,
+            '' !== trim($this->phoneNumber) ? $this->normalizePhone($this->phoneNumber) : null,
             '' !== trim($this->company) ? trim($this->company) : null,
             $this->helpType,
             ContactType::HOUSING_HELP_TYPE === $this->helpType && '' !== $this->offer ? $this->offer : null,
@@ -207,9 +210,21 @@ final class ContactCreate
         ]));
     }
 
+    /**
+     * Stores manual intakes in a searchable shape: digits only, keeping a
+     * leading "+" ("06 12.34-56 78" -> "0612345678"). Phone search strips
+     * separators from the query but compares against the stored column.
+     */
+    private function normalizePhone(string $raw): string
+    {
+        $normalized = (string) preg_replace('/[^0-9+]+/', '', trim($raw));
+
+        return str_starts_with($normalized, '+') ? '+'.str_replace('+', '', $normalized) : str_replace('+', '', $normalized);
+    }
+
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

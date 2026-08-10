@@ -267,12 +267,15 @@
             </div>
         {% endif %}
 
-        {# ---- Drive link — green highlight box (mirrors email's 30-min CTA) ---- #}
-        <div class="drive-card">
-            <p class="drive-label">{{ t.drive }}</p>
-            <p class="drive-help">{{ t.driveHelp }}</p>
-            <a class="cta-link" href="{{ request.driveLink }}">{{ request.driveLink }}</a>
-        </div>
+        {# ---- Drive link — green highlight box (mirrors email's 30-min CTA).
+               Optional: the request can ship without a deposit link. ---- #}
+        {% if request.driveLink %}
+            <div class="drive-card">
+                <p class="drive-label">{{ t.drive }}</p>
+                <p class="drive-help">{{ t.driveHelp }}</p>
+                <a class="cta-link" href="{{ request.driveLink }}">{{ request.driveLink }}</a>
+            </div>
+        {% endif %}
 
         {# ---- Bottom signature, centered like email footer ---- #}
         <hr class="sep" style="margin-top:20pt">

@@ -27,6 +27,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactList', template: 'components/Admin/ContactList.html.twig')]
 final class ContactList
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -60,6 +61,10 @@ final class ContactList
     #[LiveProp(writable: true, url: true, onUpdated: 'onSearchUpdated')]
     public string $search = '';
 
+    /** Rail filter as it was before a search widened it to "all". */
+    #[LiveProp]
+    public string $filterBeforeSearch = '';
+
     /**
      * Card that just left the current filter via a status change. It stays
      * in the rendered list for one more pass so the front can animate its
@@ -92,6 +97,7 @@ final class ContactList
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
+        private readonly \App\Contact\Service\VisioInvitationMailer $visioMailer,
     ) {
     }
 
@@ -137,6 +143,14 @@ final class ContactList
 
         $user = $this->security->getUser();
         $avatar = $user instanceof User ? $user->getAvatarFilename() : null;
+
+        // Planned-visio side effects (cancel + notify, keep on
+        // conversion): same matrix as the detail card.
+        $entity = $this->repository->find($id);
+        if (null !== $entity) {
+            $this->visioMailer->onStatusChange($entity, $newStatus);
+        }
+
         $this->repository->updateStatus($id, $newStatus, $this->currentUserName(), $avatar);
         $this->itemsCache = null;
         $this->totalCache = null;
@@ -166,6 +180,8 @@ final class ContactList
     public function filter(#[LiveArg] string $status): void
     {
         $this->ensureAdmin();
+        // An explicit rail click overrides any pending restore.
+        $this->filterBeforeSearch = '';
 
         if ('all' !== $status && null === ContactStatus::tryFrom($status)) {
             throw new BadRequestHttpException(\sprintf('Unknown contact status filter "%s".', $status));
@@ -232,9 +248,17 @@ final class ContactList
     public function onSearchUpdated(mixed $previousValue): void
     {
         // A search spans every status: drop the rail filter so results are
-        // not silently truncated to the selected status.
+        // not silently truncated to the selected status... and restore it
+        // once the search is cleared, so the admin lands back on their
+        // inbox instead of a silently widened "all".
         if ('' !== trim($this->search)) {
+            if ('all' !== $this->statusFilter) {
+                $this->filterBeforeSearch = $this->statusFilter;
+            }
             $this->statusFilter = 'all';
+        } elseif ('' !== $this->filterBeforeSearch) {
+            $this->statusFilter = $this->filterBeforeSearch;
+            $this->filterBeforeSearch = '';
         }
         $this->page = 1;
         $this->pinnedOrder = [];
@@ -293,7 +317,17 @@ final class ContactList
 
     public function hasMore(): bool
     {
-        return $this->getTotalCount() > $this->page * self::PER_PAGE;
+        // Compared to the cards that actually match the filter on screen
+        // (the one animating its way out does not count): the pinned pass
+        // hides freshly treated cards, and the button must survive until
+        // every matching lead is reachable.
+        $filterStatus = $this->currentStatus();
+        $visible = \count(array_filter(
+            $this->getItems(),
+            static fn (ContactListItem $item): bool => null === $filterStatus || $item->status === $filterStatus,
+        ));
+
+        return $this->getTotalCount() > $visible;
     }
 
     public function getTotalCount(): int
@@ -309,7 +343,9 @@ final class ContactList
             return 0;
         }
 
-        return $this->repository->countFiltered($this->currentStatus(), $this->searchTerm(), (int) $user->getId());
+        // Inventory semantics, like the status rail: the search narrows
+        // the list below, not the scope badges.
+        return $this->repository->countFiltered($this->currentStatus(), null, (int) $user->getId());
     }
 
     private function assigneeFilter(): ?int
@@ -337,7 +373,7 @@ final class ContactList
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

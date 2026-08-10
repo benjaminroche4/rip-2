@@ -1803,9 +1803,12 @@ admin:
         contacts: Leads
         dossiers: Files
         visits: Visits
+        agents: Real estate agents
         tools: Tools
         logout: Log out
         skipToContent: Skip to main content
+    breadcrumb:
+        label: Breadcrumb
     dossiers:
         title: Files
         empty:
@@ -1814,6 +1817,10 @@ admin:
         searchPlaceholder: Search a file...
         filter:
             all: All files
+        scope:
+            label: List scope
+            all: All files
+            mine: My files
         emptyFiltered:
             title: No file matches
             description: Adjust the search or the status filter to find your files.
@@ -1827,13 +1834,8 @@ admin:
                 property_found: Property found
                 closed: Closed
         list:
-            primaryTenant: 'Primary tenant: %name%'
-            personCount: '{1}1 person|]1,Inf[%count% people'
             viewMore: View the file
         card:
-            type:
-                individual: Individual
-                family: Family
             filesStatus:
                 label: Files status
                 completed: Completed
@@ -1841,7 +1843,6 @@ admin:
             package:
                 label: Package
             progress:
-                title: Relocation progress
                 started: 'Started:'
                 estimatedFinish: 'Estimated finish:'
             stats:
@@ -1849,7 +1850,6 @@ admin:
                 totalVisits: Total visits
                 rejections: Rejections
             managedBy: 'Managed by:'
-            noManager: Unassigned
         show:
             persons:
                 edit: Edit
@@ -1877,14 +1877,13 @@ admin:
             facts:
                 createdAt: Created on
             manager:
-                label: File manager
                 remove: Unassign the manager
             nav:
                 label: File navigation
                 previous: Previous file
                 next: Next file
             timeline:
-                title: Progress
+                title: Summary
                 start: 'File started:'
                 moveIn: 'Desired move-in:'
                 onTrack: On track
@@ -1987,6 +1986,8 @@ admin:
                         other: Other
             followUp:
                 origin: Created from the request
+                timeline: Timeline
+            requestDocuments: Request documents
             closure:
                 badge: File closed
                 closedAt: Closed on
@@ -1996,14 +1997,6 @@ admin:
                     title: Close this file?
                     text: The deposited files will be permanently deleted, the deposit link will be disabled and the deposit page will refuse this file. You can reopen the file later, but the files will not be restored.
                     confirm: Close
-            notes:
-                deleteConfirm:
-                    title: Delete this note?
-                    text: The note will be permanently removed from the follow-up thread.
-                    confirm: Delete
-            feed:
-                title: Activity feed
-                subtitle: History of actions on the file
             events:
                 statusChanged: 'File status: %status%'
                 system: System
@@ -2214,12 +2207,18 @@ admin:
         title: Contact requests
         empty: No contact requests yet.
         searchPlaceholder: Search (name, email, phone, reference)
-        loading: Loading requests
         show:
-            backToList: Back to requests
             actions: Actions
             exportPdf: Export as PDF
+            delete:
+                action: Delete the request
+                title: Delete this request?
+                description: '%name% (%reference%) will be permanently deleted, along with its notes and history. This cannot be undone.'
+                cancel: Cancel
+                confirm: Delete permanently
+            identityTitle: Contact information
             toDossier: Convert to file
+            viewDossier: 'View the file (%reference%)'
             toDossierModal:
                 title: Convert to file
                 description: 'The file centralises %name%''s relocation: household members, property search, visits and payments. The contact becomes the file''s primary tenant. If a file already exists with this email, you will be redirected to it.'
@@ -2244,11 +2243,10 @@ admin:
         followUp:
             title: Follow-up
             assignee: Followed by
+            assignMe: Me
             assigneeNone: Nobody
             recallLabel: Recall on
             recallOverdue: Recall overdue
-            timelineShowMore: 'Show the %count% previous'
-            timelineShowLess: Collapse the history
             recallClear: Clear
         closure:
             budget_unrealistic: Unrealistic budget
@@ -2314,21 +2312,29 @@ admin:
             invalidEmail: Invalid email address.
             noOffer: No package
         nextStep:
+            visioOverdue:
+                question: "The video call time has passed. What happened?"
+                done: "Call done"
+                noShow: "No-show, replan"
+            notifyClient: Notify the prospect by email (recontact date and channel)
+            visioNotice: On confirmation, the prospect automatically receives the email invitation with the Google Meet link, and the call is added to your calendar.
+            channelRequired: Pick the recontact channel
+            channelLabel: Via which channel
+            joinVisio: Join
+            edit: Edit
+            confirm: Confirm
+            dateRequired: Pick a date to confirm this step.
+            planner:
+                recontact: Recall planned for
+                visio: Video call planned for
+                quote_sent: Quote follow-up planned for
             label: Next step
             choice:
-                call: Call the prospect
-                video_call: Video call planned
-                visit: Schedule a viewing
-                proposal: Send a proposal
-                awaiting_client: Awaiting client reply
-                prepare_file: Prepare the file
+                recontact: To recontact
+                visio: Video call
+                quote_preparation: Quote in preparation
+                quote_sent: Quote sent
                 other: Other
-        feed:
-            statusChanged: 'Status changed to'
-            reasonSet: 'Reason:'
-            recapSent: Recap sent to the client
-            withPayment: with payment link
-            withoutPayment: without payment link
         project:
             title: Housing project
             subtitle: Filled during qualification, to compare and filter requests.
@@ -2337,7 +2343,6 @@ admin:
             budget: Monthly budget
             budgetUnit: €/month
             areas: Target areas
-            areasPlaceholder: 11th, 18th, 20th...
             moveIn: Desired move-in
             propertyType: Property type
             budgetTier:
@@ -2370,12 +2375,34 @@ admin:
                     short: 1 to 3 months
                     medium: 3 to 12 months
                     long: 12 months and more
-            propertyTypePlaceholder: Furnished 1-bedroom, flatshare...
             unsaved: The housing project is not saved. Leave the page anyway?
+        events:
+            step_recontact: Next step, recontact
+            step_visio: Next step, video call
+            step_quote_preparation: Next step, quote preparation
+            step_quote_sent: Next step, quote sent
+            step_other: Next step, other
+            step_cleared: Next step cleared
+            visio_planned: Video call scheduled
+            visio_rescheduled: Video call rescheduled
+            pdf_export: Lead exported as PDF
+            recontact_notice: Prospect notified of the recontact by email
+            visio_done: Video call done
+            visio_noshow: Video call missed (no-show)
+            visio_kept: Video call kept (lead converted)
+            visio_cancelled: Video call cancelled
+            title: History
+            status: 'Status changed to %status%'
+            recap_email: Recap sent by email
+            recap_email_payment: Recap + payment link sent by email
+        drawer:
+            notes: Activity and notes
+            close: Close
         previous:
             title: '{1}1 previous request|]1,Inf[%count% previous requests'
-            showMore: 'Show %count% more'
         leadQuality:
+            ratingPromptDismiss: Dismiss
+            ratingPrompt: 'First treatment: rate this lead'
             internal: Internal qualification, never shared with the client.
             ratingLabel: Rating
             channelLabel: Recontact via
@@ -2389,7 +2416,8 @@ admin:
             notePlaceholder: Add a qualification note (optional)
             unsaved: Your qualification note is not saved. Leave the page anyway?
         notes:
-            title: Follow-up thread
+            title: Internal notes
+            yesterday: Yesterday
             showMore: 'Show %count% more'
             internal: Internal notes, only visible to the team.
             enterHint: Press Enter to send
@@ -2404,9 +2432,6 @@ admin:
             emptyHint: Add the first note to keep track of your exchanges with this contact.
         filter:
             all: All
-        button:
-            loadMore: Load more
-            loading: Loading...
         card:
             status:
                 new: To handle
@@ -2420,7 +2445,9 @@ admin:
             help: 'Help:'
             created: Created
             statusUpdated: Status updated
-            recallAtText: On %date% at %time%
+            recallAtText: Recall on %date% at %time%
+            visioAtText: Video call on %date% at %time%
+            quoteSentAtText: Quote sent, follow-up on %date% at %time%
             treatedBy: Handled by
             updatedBy: Updated by
             viewMore: View more
@@ -2438,59 +2465,132 @@ admin:
         section:
             business: Business
             admin: Admin
-            data: Data
         nav:
             label: Admin sections
-            requests: Requests
-            calls: Calls
             contactsBadge: '{0}No requests to handle|{1}1 request to handle|]1,Inf[%count% requests to handle'
-            comingSoon: Soon
+            dossiersBadge: '{0}No open file|{1}1 open file|]1,Inf[%count% open files'
     dashboard:
         title: Dashboard
         underConstruction: Under construction...
+    visits:
+        title: Visits
+        empty:
+            title: No scheduled visits
+            description: Schedule your first visit with the button above.
+        new:
+            title: New visit
+            summary:
+                title: Summary
+                mapPlaceholder: Type the property address to see it on the map.
+        section:
+            today: Today
+            todayEmpty: No visits today.
+            tomorrow: Tomorrow
+            tomorrowEmpty: No visits tomorrow.
+            later: Coming days
+        create:
+            button: New visit
+            title: New visit
+            subtitle: Schedule a visit for a file, with the property address and the agent showing it.
+            cancel: Cancel
+            submit: Schedule the visit
+            submitting: Scheduling...
+            dossier:
+                label: File
+                placeholder: Pick a file...
+                notNull: The file is required.
+            agent:
+                label: Real estate agent
+                placeholder: No agent
+            scheduledAt:
+                label: Date and time
+                notNull: The date and time are required.
+            address:
+                label: Property address
+                placeholder: 12 rue de la Roquette, 75011 Paris
+                notBlank: The address is required.
+                length: The address cannot exceed 255 characters.
+    agents:
+        title: Real estate agents
+        searchPlaceholder: Search for an agent...
+        count: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
+        empty:
+            title: No agents yet
+            description: Add your first real estate agent with the button above.
+        emptyFiltered:
+            title: No matching agent
+            description: Adjust the search to find your agents.
+        card:
+            noAgency: Independent
+        create:
+            button: New agent
+            title: New real estate agent
+            subtitle: Add a partner agent to the directory, with their agency and contact details.
+            cancel: Cancel
+            submit: Add agent
+            submitting: Adding...
+            firstName:
+                label: First name
+                notBlank: The first name is required.
+                length: The first name cannot exceed 50 characters.
+            lastName:
+                label: Last name
+                notBlank: The last name is required.
+                length: The last name cannot exceed 50 characters.
+            kind:
+                label: This agent works...
+                agency: With an agency
+                independent: Independently
+            agency:
+                label: Agency
+                placeholder: Agency name...
+                help: A known agency is reused automatically.
+                notBlank: The agency name is required.
+                length: The agency name cannot exceed 100 characters.
+            email:
+                label: Email
+                invalid: This email address is not valid.
+                length: The email cannot exceed 180 characters.
+            phone:
+                label: Phone
+                length: The phone number cannot exceed 30 characters.
     tools:
         title: Tools
-        subtitle: 'Quick everyday actions: document requests, lead management, and more coming.'
         documents:
             title: Documents
-            subtitle: 'Everything document-related in one place: bilingual catalogue and client requests.'
             description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
             cta: Open
-            backToTools: Back to tools
             recent:
                 title: Recent requests
                 subtitle: '{0}No requests sent yet.|{1}1 request sent. Re-download the PDF in one click.|]1,Inf[%count% requests sent. Re-download the PDF in one click.'
                 empty: No requests sent yet.
                 download: Download
+                delete: Delete
+                deleteConfirm:
+                    title: Delete this request?
+                    text: The sent request will be removed from the history. This action is final.
+                    confirm: Delete the request
                 edit: Edit
                 loadMore: Load more
                 column:
                     date: Date
-                    household: Household
                     persons: People
                     language: Language
                     actions: Actions
             catalogue:
                 title: Catalogue
-                subtitle: Library of bilingual templates used across the client journey.
-                description: Manage the library of bilingual (FR/EN) templates used across the client journey.
-                cta: Open catalogue
-                backToDocuments: Back to Documents
             request:
                 title: Request documents
-                subtitle: Compose a request for a household, generate a recap PDF and share it.
-                description: Send a client a request for documents (ID, proof, signed contract…) with a secure link for them to upload.
                 cta: Send a request
-                backToDocuments: Back to Documents
-                comingSoon: This feature is coming soon.
                 persons:
                     title: Household members
-                    count: '{0}No person yet|{1}1 person of %max%|]1,Inf[%count% people of %max%'
+                    count: '%count%/%max% max'
                     min: Add at least one person.
                     max: The household cannot exceed %limit% people.
                 person:
                     heading: 'Person %number%'
                     toComplete: to complete
+                    docCount: '{0}No documents|{1}1 document|]1,Inf[%count% documents'
                     role:
                         label: Role
                         tenant: Tenant
@@ -2507,11 +2607,8 @@ admin:
                         label: Requested documents
                         min: Select at least one document for this person.
                         emptyCatalogue: 'The catalogue is empty. Add documents from the Catalogue tab before creating a request.'
+                        checkAll: Check/uncheck all
                 typology:
-                    title: Household composition
-                    subtitle: Pick the matching composition.
-                    label: Household composition
-                    notNull: Pick a household composition.
                     two_tenants_two_guarantors: 2 tenants + 2 guarantors
                     two_tenants_one_guarantor: 2 tenants + 1 guarantor
                     one_tenant_two_guarantors: 1 tenant + 2 guarantors
@@ -2520,12 +2617,11 @@ admin:
                     one_tenant: 1 tenant
                 note:
                     label: Note
-                    help: Free message for the client (rendered in the PDF).
+                    help: Free message for the client (rendered in the PDF). Write it in the client's language.
                     placeholder: Add a personal intro, special instructions, a deadline reminder...
                 driveLink:
                     label: Drive link
                     help: Secure link where the client will upload their files. Included in the PDF.
-                    notBlank: The drive link is required.
                     url: The link must be a valid URL (starting with https://...).
                     length: The link cannot exceed 512 characters.
                 language:
@@ -2534,16 +2630,16 @@ admin:
                     label: Language
                     fr: Français
                     en: English
+                fromDossier:
+                    button: From a file
+                autosaved: Draft saved
+                autosaving: Saving...
                 actions:
                     addPerson: Add a person
+                    copyFromFirst: Copy person 1's documents
                     removePerson: Remove
                     save: Save
                     download: Download
-                unsavedChanges:
-                    title: Unsaved changes
-                    description: You have unsaved changes. Do you want to save them before leaving?
-                    save: Save and leave
-                    discard: Leave without saving
             actions:
                 add: New document
                 edit: Edit
@@ -2553,6 +2649,7 @@ admin:
                 description: This action is permanent. The document "%name%" will be deleted.
                 cancel: Cancel
                 confirm: Delete permanently
+                usage: '{1}Used in 1 sent request: its generated PDFs are kept.|]1,Inf[Used in %count% sent requests: their generated PDFs are kept.'
             list:
                 title: Document catalogue
                 subtitle: '{0}No document yet|{1}1 document on file|]1,Inf[%count% documents on file'
@@ -2598,38 +2695,114 @@ admin:
                 language:
                     fr: French
                     en: English
-        comingSoon:
-            title: Coming soon
-            description: A new tool is in the works. Check back shortly.
-            badge: Soon
     users:
+        access:
+            title: Back-office access
+            subtitle: Accessible business sections; admin access grants everything, user management included
+            master:
+                label: Grant back-office access
+                adminLocked: An admin always has back-office access. Remove their admin grant first.
+                grantModal:
+                    title: Grant back-office access?
+                    text: '%name% will be able to log into the back-office. Then pick the sections they can access.'
+                    confirm: Grant access
+                revokeModal:
+                    title: Remove back-office access?
+                    text: '%name% will immediately lose back-office access and every section.'
+                    confirm: Remove access
+            selfHint: You cannot change your own admin access
+            contacts: Leads
+            dossiers: Files
+            visits: Visits
+            agents: Real estate agents
+            tools: Tools
+            admin: Admin
+            none: No access
+            allAdmin: Everything (admin)
+            modal:
+                grantTitle: Grant admin access?
+                grantText: '%name% will get access to the whole back office, including user management.'
+                grantConfirm: Grant access
+                revokeTitle: Revoke admin access?
+                revokeText: '%name% will lose user management and keep only the checked sections.'
+                revokeConfirm: Revoke access
+        identity:
+            edit: Edit profile
+            firstName: First name
+            lastName: Last name
+            uploadAvatar: Change photo
+            resetAvatar: Reset avatar
+        activity:
+            leads:
+                title: Assigned leads
+                empty: No assigned lead yet.
+            dossiers:
+                title: Managed files
+                empty: No managed file yet.
+        functions:
+            title: Functions
+            subtitle: What this member can take on. Only checked members show up in the matching assignment lists.
+            closer:
+                label: Closer
+                description: Can handle leads (picks up and qualifies incoming requests)
+            search_agent:
+                label: Search agent
+                description: Can handle files (in charge of the property search for a tenant)
+            visit_agent:
+                label: Visit agent
+                description: Can carry out visits on site (travels to visit the property)
+        suspended: Suspended
+        suspendedBanner:
+            title: This account is suspended.
+            text: Login is blocked and any open session has been cut. You can resume it from the zone at the bottom of the page.
+        danger:
+            admin:
+                title: Admin access
+                subtitle: Full back-office access, user management included.
+            suspend:
+                title: Account suspension
+                subtitle: Blocks login without deleting anything. Reversible at any time.
+                action: Suspend account
+                resume: Resume account
+                selfHint: You cannot suspend your own account
+                modal:
+                    title: Suspend %name%?
+                    text: '%name% will be logged out immediately and unable to log in while suspended. Their data stays intact.'
+                    confirm: Suspend
+                resumeModal:
+                    title: Resume %name%?
+                    text: '%name% will be able to log in again with their current accesses.'
+                    confirm: Resume
+            title: Danger zone
+            subtitle: Permanently deletes the account. Their leads and files stay in place, unassigned.
+            delete: Delete user
+            selfHint: You cannot delete your own account
+            modal:
+                title: Delete %name%?
+                text: This action is permanent. The account of %name% will be deleted and their leads and files will stay in place, unassigned.
+                confirm: Delete permanently
         title: Users
-        subtitle: User management
-        placeholder: The user list is coming soon.
-        totalCount: '{0}No users|{1}1 user|]1,Inf[%count% users'
         empty: No users registered yet.
         column:
             name: Name
-            email: Email
             role: Role
+            connection: Connection
             lastLogin: Last login
-            createdAt: Joined on
+        connection:
+            google: Google
+            website: Website
         role:
             admin: Admin
-            editor: Editor
+            staff: Staff
             user: User
+        group:
+            admin: Admins
+            staff: Staff
+            user: Users
         lastLoginNever: Never
-        button:
-            loadMore: Load more
-            loading: Loading
         profile:
-            title: User profile
-            backToList: Back to list
-            section:
-                identity: Identity
-                account: Account
-                authentication: Authentication
-                activity: Activity
+            copy: Copy
+            copied: Copied!
             field:
                 createdAt: Joined on
                 lastLogin: Last login
@@ -2646,9 +2819,6 @@ admin:
             authMethod:
                 google: Google
                 password: Password
-            profileComplete:
-                yes: Profile complete
-                no: Profile incomplete
 listProperty:
     hero:
         eyebrow: Landlords

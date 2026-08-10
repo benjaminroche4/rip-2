@@ -9,6 +9,7 @@ use App\Contact\Domain\ClosureReason;
 use App\Contact\Entity\Contact;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\LiveComponent\LiveResponder;
@@ -22,6 +23,7 @@ use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 final class ContactQualificationTest extends KernelTestCase
 {
     use InteractsWithTwigComponents;
+    use MailerAssertionsTrait;
 
     private EntityManagerInterface $em;
 
@@ -33,54 +35,117 @@ final class ContactQualificationTest extends KernelTestCase
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@qualif-test.local')->execute();
     }
 
-    public function testRecallDateCanBeSavedAndCleared(): void
+    public function testRecallDateIsSavedOnConfirmAndClearedWithTheStep(): void
     {
         $contact = $this->persistContact();
         $this->loginAsAdmin();
 
         $futureRecall = new \DateTimeImmutable('+2 days 14:30');
 
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->pickChannel('whatsapp');
         $component->recallAt = $futureRecall->format('Y-m-d\TH:i');
-        $component->saveRecall();
 
-        $this->em->clear();
-        self::assertSame($futureRecall->format('Y-m-d H:i'), $this->em->find(Contact::class, $contact->getId())->getRecallAt()?->format('Y-m-d H:i'));
-
-        $component->clearRecall();
+        // Nothing persists while the draft is not confirmed.
         $this->em->clear();
         self::assertNull($this->em->find(Contact::class, $contact->getId())->getRecallAt());
+
+        $component->confirmStep();
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame($futureRecall->format('Y-m-d H:i'), $reloaded->getRecallAt()?->format('Y-m-d H:i'));
+        self::assertSame(\App\Contact\Domain\RecontactChannel::Whatsapp, $reloaded->getRecontactChannel());
+
+        // Switching to a dateless step purges the stale recall: one state only.
+        $component->editStep();
+        $component->pickStep('recontact');
+        $component->pickStep('quote_preparation');
+        $component->confirmStep();
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame(\App\Contact\Domain\NextStep::QuotePreparation, $reloaded->getNextStep());
+        self::assertNull($reloaded->getRecallAt());
+
+        // Deselecting the step and confirming clears both step and date.
+        $component->editStep();
+        $component->pickStep('quote_preparation');
+        $component->confirmStep();
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getNextStep());
+        self::assertNull($reloaded->getRecallAt());
     }
 
-    public function testUnparseableRecallIsIgnored(): void
+    public function testMissingChannelBlocksARecontactConfirmation(): void
     {
         $contact = $this->persistContact();
         $this->loginAsAdmin();
 
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        // Blocked: the draft persists nothing and the editor flags it.
+        self::assertTrue($component->channelMissing);
+        $this->em->clear();
+        self::assertNull($this->em->find(Contact::class, $contact->getId())->getNextStep());
+
+        $component->pickChannel('email');
+        $component->confirmStep();
+        self::assertFalse($component->channelMissing);
+        $this->em->clear();
+        self::assertSame(\App\Contact\Domain\RecontactChannel::Email, $this->em->find(Contact::class, $contact->getId())->getRecontactChannel());
+
+        $this->expectException(BadRequestHttpException::class);
+        $component->pickChannel('pigeon');
+    }
+
+    public function testUnparseableRecallBlocksTheConfirmation(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
         $component->recallAt = 'garbage';
-        $component->saveRecall();
+        $component->confirmStep();
 
+        // The half-filled draft persists nothing: no step, no date.
         $this->em->clear();
-        self::assertNull($this->em->find(Contact::class, $contact->getId())->getRecallAt());
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getRecallAt());
+        self::assertNull($reloaded->getNextStep());
         self::assertSame('', $component->recallAt);
+        self::assertTrue($component->dateMissing);
     }
 
-    public function testPastRecallIsRejected(): void
+    public function testPastRecallBlocksTheConfirmation(): void
     {
         $contact = $this->persistContact();
         $this->loginAsAdmin();
 
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
         $component->recallAt = (new \DateTimeImmutable('-1 day'))->format('Y-m-d\TH:i');
-        $component->saveRecall();
+        $component->confirmStep();
 
         $this->em->clear();
-        self::assertNull($this->em->find(Contact::class, $contact->getId())->getRecallAt());
-        self::assertSame('', $component->recallAt);
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getRecallAt());
+        self::assertNull($reloaded->getNextStep());
+        // The typed value stays on screen so the admin can fix the digit.
+        self::assertNotSame('', $component->recallAt);
+        self::assertTrue($component->dateMissing);
     }
 
     public function testPastMoveInDateIsRejected(): void
@@ -289,40 +354,17 @@ final class ContactQualificationTest extends KernelTestCase
         $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::InProgress, 'Julien Moreau', null);
         $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::Converted, 'Julien Moreau', null);
 
-        $html = (string) $this->renderTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        // La chronologie vit dans le drawer Suivi et notes (ContactNotes).
+        /** @var \App\Admin\Twig\Components\ContactNotes $component */
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+        $history = $component->getHistory();
 
-        self::assertSame(2, substr_count($html, 'data-testid="timeline-event"'));
-        self::assertStringContainsString('Statut passé à', $html);
-        self::assertStringContainsString('En cours', $html);
-        self::assertStringContainsString('Convertie', $html);
-        self::assertStringContainsString('Julien Moreau', $html);
-        // Chronological: "En cours" before "Convertie".
-        self::assertLessThan(strpos($html, 'Convertie'), strpos($html, 'En cours'));
-    }
-
-    public function testTimelineCollapsesBeyondFiveEventsAndExpands(): void
-    {
-        $contact = $this->persistContact();
-        $this->loginAsAdmin();
-
-        $repo = self::getContainer()->get(\App\Contact\Repository\ContactRepository::class);
-        $cycle = ['in_progress', 'converted', 'in_progress', 'closed', 'in_progress', 'converted', 'in_progress'];
-        foreach ($cycle as $status) {
-            $repo->updateStatus((int) $contact->getId(), \App\Contact\Domain\ContactStatus::from($status), 'Julien Moreau', null);
-        }
-
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
-        $component->setLiveResponder(new LiveResponder());
-
-        self::assertCount(5, $component->getTimelineEvents(), 'Collapsed to the 5 most recent.');
-        self::assertSame(2, $component->getHiddenTimelineCount());
-
-        $component->toggleTimeline();
-        self::assertCount(7, $component->getTimelineEvents());
-        self::assertSame(0, $component->getHiddenTimelineCount());
-
-        $component->toggleTimeline();
-        self::assertCount(5, $component->getTimelineEvents());
+        // Reçue le + 2 changements de statut, en ordre chronologique.
+        self::assertCount(3, $history);
+        self::assertStringContainsString('Reçue le', $history[0]['text']);
+        self::assertStringContainsString('En cours', $history[1]['text']);
+        self::assertStringContainsString('Convertie', $history[2]['text']);
+        self::assertSame('Julien Moreau', $history[1]['authorName']);
     }
 
     public function testContactCanBeAssignedAndUnassigned(): void
@@ -332,7 +374,7 @@ final class ContactQualificationTest extends KernelTestCase
         $admin = self::getContainer()->get('security.token_storage')->getToken()->getUser();
         self::assertInstanceOf(User::class, $admin);
 
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
 
         $component->assign((int) $admin->getId());
@@ -349,7 +391,7 @@ final class ContactQualificationTest extends KernelTestCase
         $contact = $this->persistContact();
         $this->loginAsAdmin();
 
-        $component = $this->mountTwigComponent('Admin:ContactFollowUp', ['contactId' => (int) $contact->getId()]);
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
 
         $this->expectException(BadRequestHttpException::class);
@@ -378,23 +420,281 @@ final class ContactQualificationTest extends KernelTestCase
         $component->setLiveResponder(new LiveResponder());
 
         $component->change('in_progress');
-        $component->setNextStep('visit');
+        $component->pickStep('quote_sent');
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
         $this->em->clear();
-        self::assertSame(\App\Contact\Domain\NextStep::Visit, $this->em->find(Contact::class, $contact->getId())->getNextStep());
+        self::assertSame(\App\Contact\Domain\NextStep::QuoteSent, $this->em->find(Contact::class, $contact->getId())->getNextStep());
 
-        // Clicking the selected chip again clears it.
-        $component->setNextStep('visit');
+        // Deselecting the chip and confirming clears the step.
+        $component->editStep();
+        $component->pickStep('quote_sent');
+        $component->confirmStep();
         $this->em->clear();
         self::assertNull($this->em->find(Contact::class, $contact->getId())->getNextStep());
 
-        // Leaving "in progress" drops a stale next step.
-        $component->setNextStep('call');
+        // Leaving "in progress" drops a stale next step and its planned recall.
+        $component->pickStep('recontact');
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
         $component->change('converted');
         $this->em->clear();
-        self::assertNull($this->em->find(Contact::class, $contact->getId())->getNextStep());
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getNextStep());
+        self::assertNull($reloaded->getRecallAt());
 
         $this->expectException(BadRequestHttpException::class);
-        $component->setNextStep('teleport');
+        $component->pickStep('teleport');
+    }
+
+    public function testNextStepEditorClosesOnceTheStepIsFilledIn(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+
+        // A dateless step confirms right away: the recap card replaces the editor.
+        $component->pickStep('quote_preparation');
+        $component->confirmStep();
+        self::assertFalse($component->editingStep);
+
+        // "Modifier" reopens the editor prefilled with the stored step.
+        $component->editStep();
+        self::assertTrue($component->editingStep);
+        self::assertSame('quote_preparation', $component->pendingStep);
+
+        // Cancelling drops the draft and closes the editor.
+        $component->pickStep('quote_sent');
+        $component->cancelStep();
+        self::assertFalse($component->editingStep);
+        $this->em->clear();
+        self::assertSame(\App\Contact\Domain\NextStep::QuotePreparation, $this->em->find(Contact::class, $contact->getId())->getNextStep());
+
+        // A dated step without a date blocks the confirmation, the editor stays open.
+        $component->editStep();
+        $component->pickStep('quote_sent');
+        $component->confirmStep();
+        self::assertTrue($component->editingStep);
+        self::assertTrue($component->dateMissing);
+
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+        self::assertFalse($component->editingStep);
+    }
+
+    public function testPlanningAVisioSendsTheInviteEmails(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('visio');
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+
+        // Still a draft: no invite goes out before the confirmation.
+        self::assertEmailCount(0);
+
+        $component->confirmStep();
+
+        // One email to the prospect, one calendar invite to the agency
+        // inbox. Messenger sync logs each email twice (queued + sent), so
+        // match by recipient over the full list instead of by index.
+        self::assertEmailCount(2);
+        $byRecipient = [];
+        foreach (self::getMailerMessages() as $message) {
+            self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $message);
+            $byRecipient[$message->getTo()[0]->getAddress()] = $message;
+        }
+        self::assertArrayHasKey((string) $contact->getEmail(), $byRecipient);
+        self::assertArrayHasKey('contact@relocation-in-paris.fr', $byRecipient);
+        // The client email carries "add to calendar" links on top of the
+        // attached invite (for prospects who never open attachments).
+        self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'calendar.google.com');
+        self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'outlook.live.com');
+        $agent = $byRecipient['contact@relocation-in-paris.fr'];
+        self::assertEmailAttachmentCount($agent, 1);
+        $ics = $agent->getAttachments()[0]->getBody();
+        self::assertStringContainsString('METHOD:REQUEST', $ics);
+        self::assertStringContainsString('BEGIN:VEVENT', $ics);
+        self::assertStringContainsString('mailto:'.$contact->getEmail(), $ics);
+
+        // Leaving the visio for another step cancels it: both sides get
+        // the cancellation email (a quote follow-up itself stays internal).
+        $component->editStep();
+        $component->pickStep('quote_sent');
+        $component->recallAt = (new \DateTimeImmutable('+3 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+        self::assertEmailCount(4);
+        $cancellation = null;
+        foreach (self::getMailerMessages() as $message) {
+            if ($message instanceof \Symfony\Component\Mime\Email && str_contains((string) $message->getSubject(), 'annulée')) {
+                $cancellation = $message;
+            }
+        }
+        self::assertNotNull($cancellation, 'A cancellation email was sent.');
+
+        // Re-confirming the same quote step sends nothing more.
+        $component->editStep();
+        $component->confirmStep();
+        self::assertEmailCount(4);
+    }
+
+    public function testReschedulingAVisioUpdatesWithoutDuplicates(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('visio');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+        self::assertEmailCount(2);
+
+        // Re-confirming without touching the date: no duplicate emails.
+        $component->editStep();
+        $component->confirmStep();
+        self::assertEmailCount(2);
+
+        // Moving the date re-invites both sides with the new slot.
+        $component->editStep();
+        $component->recallAt = (new \DateTimeImmutable('+3 days 09:30'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+        self::assertEmailCount(4);
+        $subjects = array_map(static fn ($m) => $m instanceof \Symfony\Component\Mime\Email ? (string) $m->getSubject() : '', self::getMailerMessages());
+        self::assertNotEmpty(array_filter($subjects, static fn (string $s): bool => str_contains($s, 'déplacée')), 'A reschedule email was sent.');
+
+        // Converting the lead keeps the meeting: no cancellation goes
+        // out, and the follow-up thread traces the kept slot.
+        $component->change('converted');
+        self::assertEmailCount(4);
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId());
+        $kinds = array_filter(array_map(static fn ($e) => $e->kind, $events));
+        self::assertContains('visio_kept', $kinds);
+        self::assertContains('visio_planned', $kinds);
+        self::assertContains('visio_rescheduled', $kinds);
+    }
+
+    public function testClosingFromTheListCancelsThePlannedVisio(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $card = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $card->setLiveResponder(new LiveResponder());
+        $card->change('in_progress');
+        $card->pickStep('visio');
+        $card->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $card->confirmStep();
+        self::assertEmailCount(2);
+
+        // Closing from the list quick actions goes through the same visio
+        // matrix as the detail card: cancellation notified.
+        $list = $this->mountTwigComponent('Admin:ContactList');
+        $list->setLiveResponder(new LiveResponder());
+        $list->changeStatus((int) $contact->getId(), 'closed');
+        self::assertEmailCount(4);
+        $subjects = array_map(static fn ($m) => $m instanceof \Symfony\Component\Mime\Email ? (string) $m->getSubject() : '', self::getMailerMessages());
+        self::assertNotEmpty(array_filter($subjects, static fn (string $s): bool => str_contains($s, 'annulée')), 'A cancellation email was sent.');
+    }
+
+    public function testRecontactNoticeEmailIsSentOnlyWhenTicked(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->pickChannel('whatsapp');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        // Checkbox unticked: nothing goes out.
+        self::assertEmailCount(0);
+
+        // Ticked: the prospect gets the heads-up, traced in the thread.
+        $component->editStep();
+        $component->recallAt = (new \DateTimeImmutable('+3 days 10:00'))->format('Y-m-d\TH:i');
+        $component->notifyClient = true;
+        $component->confirmStep();
+        self::assertEmailCount(1);
+        $notice = self::getMailerMessage(0);
+        self::assertNotNull($notice);
+        self::assertEmailAddressContains($notice, 'To', (string) $contact->getEmail());
+        self::assertStringContainsString('Nous revenons vers vous', (string) $notice->getSubject());
+
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId());
+        self::assertContains('recontact_notice', array_filter(array_map(static fn ($e) => $e->kind, $events)));
+    }
+
+    public function testOverdueVisioCanBeClosedAsDoneOrNoShow(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('visio');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        // "Visio faite" : l'étape se clôt, l'éditeur rouvre pour la suite.
+        $component->visioDone();
+        self::assertTrue($component->editingStep);
+        self::assertSame('', $component->pendingStep);
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getNextStep());
+        self::assertNull($reloaded->getRecallAt());
+
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId());
+        self::assertContains('visio_done', array_filter(array_map(static fn ($e) => $e->kind, $events)));
+
+        // No-show : replanification préremplie sur visio, date vide.
+        $component->pickStep('visio');
+        $component->recallAt = (new \DateTimeImmutable('+3 days 09:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+        $component->visioNoShow();
+        self::assertTrue($component->editingStep);
+        self::assertSame('visio', $component->pendingStep);
+        self::assertSame('', $component->recallAt);
+        $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId());
+        self::assertContains('visio_noshow', array_filter(array_map(static fn ($e) => $e->kind, $events)));
+    }
+
+    public function testFirstTreatmentPromptsForARating(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $quality = $this->mountTwigComponent('Admin:LeadQuality', ['contactId' => (int) $contact->getId()]);
+        $quality->setLiveResponder(new LiveResponder());
+
+        // First treatment fires the nudge (no rating yet).
+        $quality->onFirstTreatment();
+        self::assertTrue($quality->promptRating);
+
+        // Rating turns it off; a later first-treated event on a rated lead
+        // must not nudge again.
+        $quality->rate(4);
+        self::assertFalse($quality->promptRating);
+        $quality->onFirstTreatment();
+        self::assertFalse($quality->promptRating);
+
+        // The repository reports the first treatment exactly once.
+        $fresh = $this->persistContact();
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactRepository::class);
+        self::assertTrue($repo->updateStatus((int) $fresh->getId(), \App\Contact\Domain\ContactStatus::InProgress));
+        self::assertFalse($repo->updateStatus((int) $fresh->getId(), \App\Contact\Domain\ContactStatus::Closed));
     }
 
     public function testUnknownClosureReasonIsRejected(): void
@@ -447,7 +747,7 @@ final class ContactQualificationTest extends KernelTestCase
         $component->budget = ' 2200 ';
         $component->areas = '  11e, 18e  ';
         $component->moveInAt = '2026-09-01';
-        $component->propertyType = ' T2 meublé ';
+        $component->propertyType = ' t2 , loft ';
         $component->save();
 
         $this->em->clear();
@@ -455,7 +755,7 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertSame(2200, $reloaded->getProjectBudget());
         self::assertSame('11e, 18e', $reloaded->getProjectAreas());
         self::assertSame('2026-09-01', $reloaded->getProjectMoveInAt()?->format('Y-m-d'));
-        self::assertSame('T2 meublé', $reloaded->getProjectPropertyType());
+        self::assertSame('t2,loft', $reloaded->getProjectPropertyType());
 
         // A fresh mount prefills from what was stored.
         $fresh = $this->mountTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
@@ -472,7 +772,9 @@ final class ContactQualificationTest extends KernelTestCase
             ->setPhoneNumber('+33600000000')
             ->setHelpType('contact.contactForm.helpType.choice.1')
             ->setMessage('Hello')->setLang('fr')->setIp('127.0.0.1')
-            ->setCreatedAt(new \DateTimeImmutable('today 10:00'));
+            // Always in the past, whatever the time of day the suite runs:
+            // the reception entry must sort before status events.
+            ->setCreatedAt(new \DateTimeImmutable('-1 day 10:00'));
         $this->em->persist($contact);
         $this->em->flush();
 

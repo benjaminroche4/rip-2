@@ -19,6 +19,7 @@ final readonly class DossierSummary
         public \DateTimeImmutable $createdAt,
         /** Effective status (closure and pending pieces already folded in). */
         public DossierStatus $status = DossierStatus::New,
+        public ?int $managerId = null,
         public ?string $managerName = null,
         public ?string $managerAvatarFilename = null,
         /** Package chosen on the source contact ("accompagne" or "confie"). */

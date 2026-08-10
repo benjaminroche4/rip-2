@@ -2,10 +2,14 @@
 
 {% block title %}{{ 'admin.users.title'|trans }}{% endblock %}
 
+{% block head %}
+    {# Les grades et suspensions bougent en live : un snapshot Turbo restauré
+       montrerait un état périmé de la liste au retour. #}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
 {% block page_header %}
-    <twig:Admin:PageHeader
-        title="{{ 'admin.users.title'|trans }}"
-    />
+    <twig:Admin:PageHeader title="{{ 'admin.users.title'|trans }}" />
 {% endblock %}
 
 {% block body %}

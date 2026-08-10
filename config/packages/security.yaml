@@ -16,6 +16,8 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            # Blocks suspended accounts on every authentication path.
+            user_checker: App\Auth\Security\UserChecker
             entry_point: form_login
             custom_authenticators:
                 - App\Auth\Security\GoogleAuthenticator
@@ -44,10 +46,16 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     role_hierarchy:
-        # ROLE_EDITOR : accès restreint à la seule section Outils du back-office.
-        # ROLE_ADMIN l'englobe (garde donc l'accès Outils en plus de tout le reste).
-        ROLE_ADMIN: [ROLE_USER, ROLE_EDITOR]
-        ROLE_EDITOR: ROLE_USER
+        # Accès BO par section : ROLE_STAFF ouvre le back-office (dashboard),
+        # chaque ROLE_SECTION_* ouvre sa section métier, ROLE_ADMIN a tout
+        # (sections + gestion des utilisateurs).
+        ROLE_ADMIN: [ROLE_USER, ROLE_STAFF, ROLE_SECTION_CONTACTS, ROLE_SECTION_DOSSIERS, ROLE_SECTION_VISITS, ROLE_SECTION_AGENTS, ROLE_SECTION_TOOLS]
+        ROLE_SECTION_CONTACTS: ROLE_STAFF
+        ROLE_SECTION_DOSSIERS: ROLE_STAFF
+        ROLE_SECTION_VISITS: ROLE_STAFF
+        ROLE_SECTION_AGENTS: ROLE_STAFF
+        ROLE_SECTION_TOOLS: ROLE_STAFF
+        ROLE_STAFF: ROLE_USER
 
     access_control:
         # Espace admin : URL = /{_locale}/{adminPrefix}/admin où adminPrefix est un secret
@@ -55,10 +63,16 @@ security:
         # renvoie un 404 du router → pas de leak du format. Les sous-routes /admin/...
         # héritent de la même règle.
         #
-        # La section Outils (/outils en fr, /tools en en) est accessible dès ROLE_EDITOR.
-        # Cette règle DOIT précéder la règle générale (first match wins).
-        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(outils|tools)($|/)', roles: ROLE_EDITOR }
-        - { path: '^/(fr|en)/%admin_path_prefix%/admin($|/)', roles: ROLE_ADMIN }
+        # Une règle par section métier (first match wins), puis la gestion des
+        # utilisateurs réservée aux admins, et enfin le shell (dashboard)
+        # ouvert à tout le staff.
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(outils|tools)($|/)', roles: ROLE_SECTION_TOOLS }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/contacts($|/)', roles: ROLE_SECTION_CONTACTS }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(dossiers|files)($|/)', roles: ROLE_SECTION_DOSSIERS }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(visites|visits)($|/)', roles: ROLE_SECTION_VISITS }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(agents-immobiliers|real-estate-agents)($|/)', roles: ROLE_SECTION_AGENTS }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin/(utilisateurs|users)($|/)', roles: ROLE_ADMIN }
+        - { path: '^/(fr|en)/%admin_path_prefix%/admin($|/)', roles: ROLE_STAFF }
 
 when@test:
     security:

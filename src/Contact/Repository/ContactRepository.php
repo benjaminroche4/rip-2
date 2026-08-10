@@ -255,6 +255,7 @@ class ContactRepository extends ServiceEntityRepository
             recallAt: $c->getRecallAt(),
             closureReason: $c->getClosureReason(),
             nextStep: $c->getNextStep(),
+            visioMeetLink: $c->getVisioMeetLink(),
             leadSource: $c->getLeadSource(),
             source: $c->getSource(),
             projectBudget: $c->getProjectBudget(),
@@ -337,9 +338,11 @@ class ContactRepository extends ServiceEntityRepository
             $contact->setFirstTreatedAt($now);
         }
 
-        // The next step only makes sense while in progress.
+        // The next step and its planned recall only make sense while in
+        // progress: leaving the status drops both.
         if (ContactStatus::InProgress !== $status) {
-            $contact->setNextStep(null);
+            $contact->setNextStep(null)
+                ->setRecallAt(null);
         }
 
         $this->events->record($contact, $status, null, $changedBy, $changedByAvatar);
@@ -391,6 +394,9 @@ class ContactRepository extends ServiceEntityRepository
             ->leftJoin('c.assignedTo', 'a')->addSelect('a')
             ->andWhere('c.recallAt IS NOT NULL')
             ->andWhere('c.recallAt > :now')
+            // Widest reminder window is "+1 day": no point loading recalls
+            // planned months ahead on every cron run.
+            ->andWhere('c.recallAt <= :horizon')->setParameter('horizon', $now->modify('+25 hours'))
             ->setParameter('now', $now)
             ->getQuery()
             ->getResult();
@@ -548,7 +554,7 @@ class ContactRepository extends ServiceEntityRepository
         return array_map($this->toListItem(...), $contacts);
     }
 
-    public function saveRecontactChannel(int $id, RecontactChannel $channel): void
+    public function saveRecontactChannel(int $id, ?RecontactChannel $channel): void
     {
         $contact = $this->find($id);
         if (null === $contact) {
@@ -569,5 +575,4 @@ class ContactRepository extends ServiceEntityRepository
         $contact->setLeadNote(null !== $note && '' !== trim($note) ? trim($note) : null);
         $this->getEntityManager()->flush();
     }
-
 }

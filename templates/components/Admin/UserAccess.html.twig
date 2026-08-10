@@ -1,0 +1,170 @@
+<section {{ attributes.defaults({class: 'rounded-2xl border border-neutral-200 bg-white p-2'}) }} data-testid="user-access">
+    {% set targetIsAdmin = this.isTargetAdmin %}
+    {% set hasAccess = this.hasBackOfficeAccess %}
+    <div class="rounded-xl bg-neutral-50 p-2">
+        <div class="p-3">
+            <h2 class="font-medium text-gray-900">{{ 'admin.users.access.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.access.subtitle'|trans }}</p>
+        </div>
+
+        <div class="flex flex-col overflow-hidden rounded-xl bg-white">
+            {# Toggle maître : donne (ou retire, avec modale) l'accès au BO.
+               Verrouillé pour un admin : retirer l'admin d'abord. #}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="{{ hasAccess ? 'askRevokeBackOffice' : 'askGrantBackOffice' }}"
+                {% if targetIsAdmin %}disabled{% endif %}
+                title="{{ targetIsAdmin ? 'admin.users.access.master.adminLocked'|trans : '' }}"
+                class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition-colors duration-100 ease-out {{ hasAccess ? 'border-b border-gray-950/5' : '' }} {{ targetIsAdmin ? 'cursor-default opacity-60' : 'cursor-pointer hover:bg-gray-50' }}"
+                role="switch"
+                aria-checked="{{ hasAccess ? 'true' : 'false' }}"
+                data-testid="user-access-master"
+            >
+                <span class="flex items-center gap-2 font-medium text-gray-900">
+                    {{ ux_icon(hasAccess ? 'lucide:door-open' : 'lucide:door-closed', {class: 'size-4 shrink-0 ' ~ (hasAccess ? 'text-primary' : 'text-gray-300'), 'aria-hidden': 'true'}) }}
+                    {{ 'admin.users.access.master.label'|trans }}
+                </span>
+                <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ hasAccess ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
+                    <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ hasAccess ? 'translate-x-4' : '' }}"></span>
+                </span>
+            </button>
+
+            {% if hasAccess %}
+                {% for key, role in constant('App\\Admin\\Twig\\Components\\UserAccess::SECTIONS') %}
+                    {% set granted = targetIsAdmin or this.hasSection(key) %}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="toggleSection"
+                        data-live-section-param="{{ key }}"
+                        {% if targetIsAdmin %}disabled{% endif %}
+                        class="flex w-full items-center justify-between gap-3 border-b border-gray-950/5 px-4 py-3 text-left text-sm transition-colors duration-100 ease-out last:border-b-0 {{ targetIsAdmin ? 'cursor-default opacity-60' : 'cursor-pointer hover:bg-gray-50' }}"
+                        role="switch"
+                        aria-checked="{{ granted ? 'true' : 'false' }}"
+                        data-testid="user-access-{{ key }}"
+                    >
+                        <span class="font-medium text-gray-900">{{ ('admin.users.access.' ~ key)|trans }}</span>
+                        <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ granted ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
+                            <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ granted ? 'translate-x-4' : '' }}"></span>
+                        </span>
+                    </button>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# Donner l'accès au back-office : confirmé par modale. #}
+    {% if this.confirmingGrant %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-access-grant-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelGrantBackOffice"
+            data-testid="user-access-grant-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelGrantBackOffice"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-access-grant-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.access.master.grantModal.title'|trans }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.access.master.grantModal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelGrantBackOffice"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-access-grant-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmGrantBackOffice"
+                            data-loading="action(confirmGrantBackOffice)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-access-grant-confirm"
+                        >
+                            {{ ux_icon('lucide:door-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.access.master.grantModal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Retirer l'accès au back-office : toujours confirmé par modale. #}
+    {% if this.confirmingRevoke %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-access-revoke-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelRevokeBackOffice"
+            data-testid="user-access-revoke-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelRevokeBackOffice"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-access-revoke-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.access.master.revokeModal.title'|trans }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.access.master.revokeModal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelRevokeBackOffice"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-access-revoke-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmRevokeBackOffice"
+                            data-loading="action(confirmRevokeBackOffice)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-access-revoke-confirm"
+                        >
+                            {{ ux_icon('lucide:door-closed', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.access.master.revokeModal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</section>

@@ -23,7 +23,6 @@ admin:
                 note:
                     length: "La note ne peut pas dépasser 2000 caractères."
                 driveLink:
-                    notBlank: "Le lien du drive est obligatoire."
                     url: "Le lien doit être une URL valide (commence par https://...)."
                     length: "Le lien ne peut pas dépasser 512 caractères."
                 person:

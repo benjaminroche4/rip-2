@@ -1,0 +1,310 @@
+{# Zone sensible, volontairement discrète : accès admin puis suppression,
+   en simples rangées sous la fiche. Le rouge n'apparaît que sur le bouton
+   de suppression et dans les modales. #}
+<section {{ attributes.defaults({class: 'divide-y divide-gray-950/5 border-t border-gray-950/5 px-1'}) }} data-testid="user-danger">
+    {% set targetIsAdmin = this.isTargetAdmin %}
+
+    <div class="flex flex-wrap items-center justify-between gap-4 py-4">
+        <div>
+            <h2 class="text-sm font-medium text-gray-900">{{ 'admin.users.danger.admin.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.danger.admin.subtitle'|trans }}</p>
+        </div>
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="askToggleAdmin"
+            {% if this.isSelf %}disabled{% endif %}
+            role="switch"
+            aria-checked="{{ targetIsAdmin ? 'true' : 'false' }}"
+            title="{{ this.isSelf ? 'admin.users.access.selfHint'|trans : '' }}"
+            class="flex items-center gap-2.5 text-sm font-medium text-gray-900 {{ this.isSelf ? 'cursor-default opacity-60' : 'cursor-pointer' }}"
+            data-testid="user-access-admin"
+        >
+            {{ ux_icon(targetIsAdmin ? 'lucide:shield-check' : 'lucide:shield', {class: 'size-4 shrink-0 ' ~ (targetIsAdmin ? 'text-primary' : 'text-gray-300'), 'aria-hidden': 'true'}) }}
+            {{ 'admin.users.access.admin'|trans }}
+            <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ targetIsAdmin ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
+                <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ targetIsAdmin ? 'translate-x-4' : '' }}"></span>
+            </span>
+        </button>
+    </div>
+
+    {% set targetIsSuspended = this.isTargetSuspended %}
+    <div class="flex flex-wrap items-center justify-between gap-4 py-4">
+        <div>
+            <h2 class="text-sm font-medium text-gray-900">{{ 'admin.users.danger.suspend.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.danger.suspend.subtitle'|trans }}</p>
+        </div>
+        {% if targetIsSuspended %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="askResume"
+                class="flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50"
+                data-testid="user-resume"
+            >
+                {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                {{ 'admin.users.danger.suspend.resume'|trans }}
+            </button>
+        {% else %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="askSuspend"
+                {% if this.isSelf %}disabled{% endif %}
+                title="{{ this.isSelf ? 'admin.users.danger.suspend.selfHint'|trans : '' }}"
+                class="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 disabled:cursor-default disabled:opacity-60 disabled:hover:bg-white {{ this.isSelf ? 'cursor-default' : 'cursor-pointer' }}"
+                data-testid="user-suspend"
+            >
+                {{ ux_icon('lucide:user-lock', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                {{ 'admin.users.danger.suspend.action'|trans }}
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-4 py-4">
+        <div>
+            <h2 class="text-sm font-medium text-gray-900">{{ 'admin.users.danger.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.danger.subtitle'|trans }}</p>
+        </div>
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="askDelete"
+            {% if this.isSelf %}disabled{% endif %}
+            title="{{ this.isSelf ? 'admin.users.danger.selfHint'|trans : '' }}"
+            class="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:border-red-300 hover:bg-red-50 disabled:cursor-default disabled:opacity-60 disabled:hover:border-red-200 disabled:hover:bg-white {{ this.isSelf ? 'cursor-default' : 'cursor-pointer' }}"
+            data-testid="user-delete"
+        >
+            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ 'admin.users.danger.delete'|trans }}
+        </button>
+    </div>
+
+    {# Donner ou retirer l'accès admin : toujours confirmé par modale. #}
+    {% if this.confirmingAdmin %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-admin-toggle-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelToggleAdmin"
+            data-testid="user-admin-toggle-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelToggleAdmin"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-admin-toggle-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ (targetIsAdmin ? 'admin.users.access.modal.revokeTitle' : 'admin.users.access.modal.grantTitle')|trans }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ (targetIsAdmin ? 'admin.users.access.modal.revokeText' : 'admin.users.access.modal.grantText')|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelToggleAdmin"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-admin-toggle-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmToggleAdmin"
+                            data-loading="action(confirmToggleAdmin)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ targetIsAdmin ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90' }}"
+                            data-testid="user-admin-toggle-confirm"
+                        >
+                            {{ ux_icon(targetIsAdmin ? 'lucide:shield-off' : 'lucide:shield-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ (targetIsAdmin ? 'admin.users.access.modal.revokeConfirm' : 'admin.users.access.modal.grantConfirm')|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Suspendre un compte : toujours confirmé par modale. #}
+    {% if this.confirmingSuspend %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-suspend-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelSuspend"
+            data-testid="user-suspend-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelSuspend"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-suspend-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.danger.suspend.modal.title'|trans({'%name%': this.targetName}) }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.danger.suspend.modal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelSuspend"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-suspend-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmSuspend"
+                            data-loading="action(confirmSuspend)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-suspend-confirm"
+                        >
+                            {{ ux_icon('lucide:user-lock', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.danger.suspend.modal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Réactiver un compte : confirmé par modale aussi. #}
+    {% if this.confirmingResume %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-resume-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelResume"
+            data-testid="user-resume-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelResume"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-resume-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.danger.suspend.resumeModal.title'|trans({'%name%': this.targetName}) }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.danger.suspend.resumeModal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelResume"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-resume-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmResume"
+                            data-loading="action(confirmResume)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-resume-confirm"
+                        >
+                            {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.danger.suspend.resumeModal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Supprimer un compte : toujours confirmé par modale. #}
+    {% if this.confirmingDelete %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-delete-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelDelete"
+            data-testid="user-delete-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelDelete"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-delete-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.danger.modal.title'|trans({'%name%': this.targetName}) }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.danger.modal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelDelete"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-delete-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="confirmDelete"
+                            data-loading="action(confirmDelete)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-delete-confirm"
+                        >
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.danger.modal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</section>

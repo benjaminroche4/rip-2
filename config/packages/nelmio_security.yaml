@@ -36,14 +36,6 @@ nelmio_security:
             - 'no-referrer'
             - 'strict-origin-when-cross-origin'
 
-    # X-XSS-Protection: 0 — the modern recommendation per OWASP. The legacy
-    # XSS auditors were a footgun; CSP is the right protection. We send `0` to
-    # explicitly disable any latent browser heuristic that might mis-fire.
-    xss_protection:
-        enabled: true
-        mode_block: false
-        report_uri: ~
-
     # CSP — enabled in REPORT-ONLY mode: the browser reports violations but
     # never blocks, so shipping this cannot break the site. The current stack
     # still relies on `'unsafe-inline'`/`'unsafe-eval'` on script-src (Stimulus

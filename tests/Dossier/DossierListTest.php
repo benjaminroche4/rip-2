@@ -73,6 +73,28 @@ final class DossierListTest extends KernelTestCase
         self::assertCount(0, $component->getDossiers());
     }
 
+    public function testMineScopeKeepsOnlyTheDossiersIManage(): void
+    {
+        $mine = $this->persistDossier('Famille Martin', 'Jean', 'Martin');
+        $this->persistDossier('Famille Durand', 'Paul', 'Durand');
+        $this->loginAsAdmin();
+
+        // Assign the first dossier to the logged-in admin.
+        $admin = $this->em->getRepository(User::class)->findOneBy(['email' => 'admin@dossier-list-test.local']);
+        $mine->setManager($admin);
+        $this->em->flush();
+
+        $component = $this->mountList();
+        self::assertSame(1, $component->getMineCount());
+        self::assertSame(2, $component->getTotalCount());
+
+        $component->changeScope('mine');
+        $rows = $component->getDossiers();
+        self::assertCount(1, $rows);
+        self::assertSame('Famille Martin', $rows[0]->name);
+        self::assertSame(1, $component->getTotalCount(), 'Counts follow the scope.');
+    }
+
     public function testUnknownFilterValueIsRejected(): void
     {
         $this->loginAsAdmin();

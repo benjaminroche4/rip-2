@@ -5,15 +5,11 @@
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ 'admin.tools.documents.catalogue.title'|trans }}"
-    >
-        <a
-            href="{{ path('admin_tools_documents', {adminPrefix: adminPrefix}) }}"
-            class="inline-flex shrink-0 items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
-        >
-            {{ ux_icon('lucide:arrow-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
-            {{ 'admin.tools.documents.catalogue.backToDocuments'|trans }}
-        </a>
-    </twig:Admin:PageHeader>
+        :crumbs="[
+            {label: 'admin.tools.title'|trans, url: path('admin_tools', {adminPrefix: adminPrefix})},
+            {label: 'admin.tools.documents.title'|trans, url: path('admin_tools_documents', {adminPrefix: adminPrefix})},
+        ]"
+    />
 {% endblock %}
 
 {% block body %}

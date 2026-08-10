@@ -37,6 +37,8 @@ final class DocumentFormComponentTest extends KernelTestCase
         $this->repository = $container->get(DocumentRepository::class);
 
         $this->em->createQuery('DELETE FROM '.Document::class)->execute();
+        // Reset-password rows FK-reference users: purge them first.
+        $this->em->createQuery('DELETE FROM '.\App\Auth\Entity\ResetPasswordRequest::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class)->execute();
     }
 

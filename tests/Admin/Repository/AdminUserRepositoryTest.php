@@ -47,6 +47,26 @@ final class AdminUserRepositoryTest extends KernelTestCase
         self::assertNull($items[1]->lastLoginAt);
     }
 
+    public function testListAllOrdersByGradeThenNewest(): void
+    {
+        $this->persistUser('old-user@example.com', 'Old', 'User', new \DateTimeImmutable('2026-01-01'));
+        $this->persistUser('new-user@example.com', 'New', 'User', new \DateTimeImmutable('2026-05-01'));
+        $this->persistUser('staff@example.com', 'Some', 'Staff', new \DateTimeImmutable('2026-03-01'), ['ROLE_SECTION_DOSSIERS']);
+        $this->persistUser('old-admin@example.com', 'Old', 'Admin', new \DateTimeImmutable('2026-02-01'), ['ROLE_ADMIN']);
+        $this->persistUser('new-admin@example.com', 'New', 'Admin', new \DateTimeImmutable('2026-04-01'), ['ROLE_ADMIN']);
+        $this->em->flush();
+
+        $emails = array_map(static fn ($item) => $item->email, $this->repo->listAll());
+
+        self::assertSame([
+            'new-admin@example.com',
+            'old-admin@example.com',
+            'staff@example.com',
+            'new-user@example.com',
+            'old-user@example.com',
+        ], $emails);
+    }
+
     public function testLastLoginAtIsExposedAsImmutable(): void
     {
         $stamp = new \DateTimeImmutable('2026-04-15 10:30:00');
@@ -103,6 +123,31 @@ final class AdminUserRepositoryTest extends KernelTestCase
         self::assertTrue($profile->hasPasswordAuth);
         self::assertFalse($profile->hasGoogleAuth);
         self::assertFalse($profile->isProfileComplete);
+    }
+
+    public function testListWithFunctionReturnsOnlyHolders(): void
+    {
+        $agent = $this->persistUser('agent@example.com', 'A', 'Gent', new \DateTimeImmutable(), ['ROLE_SECTION_DOSSIERS']);
+        $agent->setStaffFunctions([\App\Auth\Domain\StaffFunction::SearchAgent, \App\Auth\Domain\StaffFunction::Closer]);
+        $this->persistUser('other@example.com', 'Ot', 'Her', new \DateTimeImmutable(), ['ROLE_SECTION_DOSSIERS']);
+        $this->em->flush();
+
+        $searchAgents = $this->repo->listWithFunction(\App\Auth\Domain\StaffFunction::SearchAgent);
+        self::assertCount(1, $searchAgents);
+        self::assertSame('agent@example.com', $searchAgents[0]->email);
+
+        self::assertSame([], $this->repo->listWithFunction(\App\Auth\Domain\StaffFunction::VisitAgent));
+    }
+
+    public function testProfilePrimaryRoleIsStaffForSectionHolders(): void
+    {
+        $user = $this->persistUser('staff@example.com', 'S', 'T', new \DateTimeImmutable(), ['ROLE_SECTION_DOSSIERS']);
+        $this->em->flush();
+
+        $profile = $this->repo->findByUniqueId((string) $user->getUniqueId());
+
+        self::assertNotNull($profile);
+        self::assertSame('staff', $profile->primaryRole());
     }
 
     public function testFindByUniqueIdReturnsNullForUnknownUlid(): void

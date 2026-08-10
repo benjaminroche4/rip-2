@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Admin\Twig\Components;
 
 use App\Admin\Domain\DocumentRequestSummary;
+use App\Admin\Entity\DocumentRequest;
 use App\Admin\Repository\DocumentRequestRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -42,11 +45,16 @@ final class DocumentRequestList
     #[LiveProp]
     public string $adminPrefix = '';
 
+    /** Request id awaiting deletion confirmation in the modal, or null. */
+    #[LiveProp]
+    public ?int $confirmDeleteId = null;
+
     private ?int $totalCountCache = null;
 
     public function __construct(
         private readonly DocumentRequestRepository $repository,
         private readonly Security $security,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -80,15 +88,45 @@ final class DocumentRequestList
         return $this->totalCountCache ??= $this->repository->countTotal();
     }
 
+    /** Opens the deletion confirmation modal. */
+    #[LiveAction]
+    public function askDelete(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteId = $id;
+    }
+
+    #[LiveAction]
+    public function cancelDelete(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteId = null;
+    }
+
+    #[LiveAction]
+    public function delete(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeleteId = null;
+
+        $request = $this->em->find(DocumentRequest::class, $id);
+        if (null === $request) {
+            return;
+        }
+        $this->em->remove($request);
+        $this->em->flush();
+        $this->totalCountCache = null;
+    }
+
     public function isEmpty(): bool
     {
         return 0 === $this->getTotalCount();
     }
 
-    // Part of the Outils section: ROLE_EDITOR suffices (ROLE_ADMIN includes it).
+    // Part of the Outils section: ROLE_SECTION_TOOLS suffices (ROLE_ADMIN includes it).
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_EDITOR')) {
+        if (!$this->security->isGranted('ROLE_SECTION_TOOLS')) {
             throw new AccessDeniedException('Tools access required.');
         }
     }

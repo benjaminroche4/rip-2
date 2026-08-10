@@ -42,6 +42,12 @@ final class ContactNoteVoter extends Voter
             return false;
         }
 
+        // Being the author is not enough: a member moved out of the
+        // contacts section must not keep editing their old notes.
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
+            return false;
+        }
+
         if ($this->security->isGranted('ROLE_ADMIN')) {
             return true;
         }

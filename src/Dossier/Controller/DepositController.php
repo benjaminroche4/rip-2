@@ -19,11 +19,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints\File as FileConstraint;
@@ -232,18 +232,23 @@ final class DepositController extends AbstractController
         }
 
         $file = $this->fileOfDossier($dossier, $id);
-        $path = $storage->path($dossier, $file);
-        if (!is_file($path)) {
+        if (!$storage->exists($dossier, $file)) {
             throw $this->createNotFoundException();
         }
 
-        $response = new BinaryFileResponse($path);
+        // Streamed from storage (disk or GCS bucket): the file is never
+        // exposed by URL, only through this authenticated pass-through.
+        $response = new StreamedResponse(static function () use ($storage, $dossier, $file): void {
+            $stream = $storage->readStream($dossier, $file);
+            fpassthru($stream);
+            fclose($stream);
+        });
         $response->headers->set('Content-Type', (string) $file->getMimeType());
-        $response->setContentDisposition(
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_INLINE,
             (string) $file->getOriginalName(),
             'document-'.$id,
-        );
+        ));
 
         return $this->uncacheable($response);
     }

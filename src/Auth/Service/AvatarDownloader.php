@@ -47,6 +47,22 @@ final readonly class AvatarDownloader
             return null;
         }
 
+        return $this->storeFromBytes($bytes);
+    }
+
+    /**
+     * Normalizes raw image bytes (e.g. an admin upload) to WebP 256×256 and
+     * stores them. Returns the new filename or null on failure (decode,
+     * size, disk). Failures are logged, never thrown.
+     */
+    public function storeFromBytes(string $bytes): ?string
+    {
+        if (\strlen($bytes) > self::MAX_BYTES) {
+            $this->logger->warning('AvatarDownloader: payload too large', ['bytes' => \strlen($bytes)]);
+
+            return null;
+        }
+
         $filename = Uuid::v7()->toRfc4122().'.webp';
         $path = $this->storageDir.'/'.$filename;
 

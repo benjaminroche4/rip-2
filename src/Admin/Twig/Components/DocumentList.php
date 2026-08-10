@@ -42,6 +42,7 @@ final class DocumentList
     public function __construct(
         private readonly DocumentRepository $repository,
         private readonly Security $security,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -112,17 +113,39 @@ final class DocumentList
         );
     }
 
+    /**
+     * How many sent requests use each catalogue document, keyed by document
+     * id. One grouped query for the whole list; feeds the deletion modal's
+     * "used in N requests" guard.
+     *
+     * @return array<int, int>
+     */
+    public function getUsageCounts(): array
+    {
+        $rows = $this->em->createQuery(
+            'SELECT doc.id AS id, COUNT(DISTINCT IDENTITY(p.documentRequest)) AS usages'
+            .' FROM '.\App\Admin\Entity\PersonRequest::class.' p JOIN p.documents doc GROUP BY doc.id'
+        )->getArrayResult();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['id']] = (int) $row['usages'];
+        }
+
+        return $counts;
+    }
+
     public function getTotalCount(): int
     {
         return \count($this->getDocuments());
     }
 
     // Tools components render on the public /_components route (outside the admin
-    // access_control prefix), so they self-guard. ROLE_EDITOR is enough here
+    // access_control prefix), so they self-guard. ROLE_SECTION_TOOLS is enough here
     // (ROLE_ADMIN includes it) since this is part of the Outils section.
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_EDITOR')) {
+        if (!$this->security->isGranted('ROLE_SECTION_TOOLS')) {
             throw new AccessDeniedException('Tools access required.');
         }
     }

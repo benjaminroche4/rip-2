@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Admin\Twig\Components;
 
 use App\Admin\Domain\HouseholdTypology;
+use App\Admin\Domain\PersonRole;
 use App\Admin\Domain\RequestLanguage;
 use App\Admin\Entity\DocumentRequest;
 use App\Admin\Entity\PersonRequest;
@@ -92,12 +93,30 @@ final class DocumentRequestForm extends AbstractController
         return $byId;
     }
 
-    public function mount(?int $editId = null): void
+    /**
+     * @param list<array{firstName: string, lastName: string}> $prefillPersons
+     */
+    public function mount(?int $editId = null, array $prefillPersons = []): void
     {
         $this->ensureAdmin();
         // Taken as a mount argument (not just the post-mount property
         // assignment) so it's already set while we seed the form below.
         $this->editId = $editId;
+        // "Depuis un dossier" : les locataires du dossier arrivent pré-remplis
+        // (create mode only — editing keeps the saved persons).
+        if (null === $this->request && null === $this->editId && [] !== $prefillPersons) {
+            $request = new DocumentRequest();
+            $request->setLanguage(RequestLanguage::FR);
+            $request->setTypology(HouseholdTypology::ONE_TENANT);
+            foreach ($prefillPersons as $prefill) {
+                $person = new PersonRequest();
+                $person->setRole(PersonRole::TENANT);
+                $person->setFirstName($prefill['firstName'] ?? '');
+                $person->setLastName($prefill['lastName'] ?? '');
+                $request->addPerson($person);
+            }
+            $this->request = $request;
+        }
         if (null === $this->request && null !== $this->editId) {
             // Edit mode: seed the form from the saved request, but as an id-less
             // draft so live edits round-trip without Doctrine re-fetching (and
@@ -158,19 +177,46 @@ final class DocumentRequestForm extends AbstractController
     }
 
     /**
-     * Persists the form without downloading. Create mode inserts a new row;
-     * edit mode updates the one identified by $editId. Dispatches
-     * 'document-request:saved' so the client can clear its unsaved-changes flag.
+     * Copies person #1's document selection onto another person — the
+     * common "same pieces for both tenants" case in one click.
      */
     #[LiveAction]
-    public function save(EntityManagerInterface $em): void
+    public function copyDocumentsFromFirst(PropertyAccessorInterface $propertyAccessor, #[LiveArg] int $index): void
     {
         $this->ensureAdmin();
-        $request = $this->upsert($em);
+        if ($index < 1) {
+            return;
+        }
 
-        $this->dispatchBrowserEvent('document-request:saved', [
-            'id' => $request->getId(),
-        ]);
+        $documents = $propertyAccessor->getValue($this->formValues, '[persons][0][documents]') ?? [];
+        if (null !== $propertyAccessor->getValue($this->formValues, '[persons]['.$index.']')) {
+            $propertyAccessor->setValue($this->formValues, '[persons]['.$index.'][documents]', $documents);
+        }
+    }
+
+    /**
+     * Silent draft autosave, fired on every form change. Persists only when
+     * the form is currently valid — an incomplete draft neither saves nor
+     * paints validation errors (those only show on an explicit download).
+     * Create mode inserts a new row; edit mode updates the one identified
+     * by $editId.
+     */
+    #[LiveAction]
+    public function autosave(EntityManagerInterface $em): void
+    {
+        $this->ensureAdmin();
+
+        // Validate on a detached form instance: the component's own form
+        // must NOT be marked validated, or errors would flash while typing.
+        $form = $this->createForm(DocumentRequestType::class, new DocumentRequest());
+        $form->submit($this->formValues);
+        if (!$form->isValid()) {
+            return;
+        }
+
+        /** @var DocumentRequest $draft */
+        $draft = $form->getData();
+        $this->persistDraft($draft, $em);
     }
 
     /**
@@ -181,7 +227,11 @@ final class DocumentRequestForm extends AbstractController
     public function download(EntityManagerInterface $em, UrlGeneratorInterface $urls): void
     {
         $this->ensureAdmin();
-        $request = $this->upsert($em);
+        $this->submitForm();
+
+        /** @var DocumentRequest $validated */
+        $validated = $this->getForm()->getData();
+        $request = $this->persistDraft($validated, $em);
 
         $downloadUrl = $urls->generate('admin_tools_documents_request_pdf', [
             '_locale' => $request->getLanguage()->value,
@@ -195,16 +245,22 @@ final class DocumentRequestForm extends AbstractController
     }
 
     /**
-     * Create-or-update the request from the submitted form, then re-seed the
+     * Create-or-update the request from a bound draft, then re-seed the
      * form as an id-less draft so further edits round-trip and a re-submit
      * targets the same row (via $editId) instead of inserting a duplicate.
      */
-    private function upsert(EntityManagerInterface $em): DocumentRequest
+    private function persistDraft(DocumentRequest $draft, EntityManagerInterface $em): DocumentRequest
     {
-        $this->submitForm();
-
-        /** @var DocumentRequest $draft */
-        $draft = $this->getForm()->getData();
+        // The typology is no longer asked: it derives from the persons' roles.
+        $tenants = $guarantors = 0;
+        foreach ($draft->getPersons() as $person) {
+            match ($person->getRole()) {
+                PersonRole::TENANT => ++$tenants,
+                PersonRole::GUARANTOR => ++$guarantors,
+                null => 0,
+            };
+        }
+        $draft->setTypology(HouseholdTypology::fromCounts($tenants, $guarantors));
 
         $existing = null !== $this->editId ? $this->requestRepository->find($this->editId) : null;
 
@@ -301,10 +357,10 @@ final class DocumentRequestForm extends AbstractController
         return $request;
     }
 
-    // Part of the Outils section: ROLE_EDITOR suffices (ROLE_ADMIN includes it).
+    // Part of the Outils section: ROLE_SECTION_TOOLS suffices (ROLE_ADMIN includes it).
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_EDITOR')) {
+        if (!$this->security->isGranted('ROLE_SECTION_TOOLS')) {
             throw new AccessDeniedException('Tools access required.');
         }
     }

@@ -349,6 +349,38 @@ final class ContactListTest extends KernelTestCase
         self::assertCount(2, $component->getItems());
     }
 
+    public function testLoadMoreSurvivesTreatingACardOnAFullPage(): void
+    {
+        // 11 leads "new": page 1 shows 10, one stays behind the button.
+        for ($i = 0; $i < 11; ++$i) {
+            $this->persistContact();
+        }
+        $this->seedUser('admin@contactlist-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@contactlist-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->filter('new');
+        self::assertCount(10, $component->getItems());
+        self::assertTrue($component->hasMore());
+
+        // Treating a card shrinks the on-screen list to 9: the button must
+        // survive, otherwise the 11th lead becomes unreachable.
+        $first = $component->getItems()[0];
+        $component->changeStatus($first->id, 'in_progress');
+        self::assertTrue($component->hasMore(), 'The load-more button must not vanish while a matching lead is still unreachable.');
+
+        // In production more() runs in a fresh request: simulate the empty
+        // per-request caches the component would start with.
+        \Closure::bind(function (): void {
+            $this->itemsCache = null;
+            $this->totalCache = null;
+        }, $component, \App\Admin\Twig\Components\ContactList::class)();
+        $component->more();
+        self::assertFalse($component->hasMore());
+    }
+
     private function persistContact(): Contact
     {
         $contact = (new Contact())

@@ -1,0 +1,32 @@
+<section {{ attributes.defaults({class: 'rounded-2xl border border-neutral-200 bg-white p-2'}) }} data-testid="user-functions">
+    <div class="rounded-xl bg-neutral-50 p-2">
+        <div class="p-3">
+            <h2 class="font-medium text-gray-900">{{ 'admin.users.functions.title'|trans }}</h2>
+            <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.functions.subtitle'|trans }}</p>
+        </div>
+
+        <div class="flex flex-col overflow-hidden rounded-xl bg-white">
+            {% for function in this.functions %}
+                {% set granted = this.hasFunction(function.value) %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="toggleFunction"
+                    data-live-function-param="{{ function.value }}"
+                    class="flex w-full cursor-pointer items-center justify-between gap-3 border-b border-gray-950/5 px-4 py-3 text-left text-sm transition-colors duration-100 ease-out last:border-b-0 hover:bg-gray-50"
+                    role="switch"
+                    aria-checked="{{ granted ? 'true' : 'false' }}"
+                    data-testid="user-function-{{ function.value }}"
+                >
+                    <span class="min-w-0">
+                        <span class="block font-medium text-gray-900">{{ function.labelKey|trans }}</span>
+                        <span class="mt-0.5 block text-xs text-gray-500">{{ function.descriptionKey|trans }}</span>
+                    </span>
+                    <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ granted ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
+                        <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ granted ? 'translate-x-4' : '' }}"></span>
+                    </span>
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+</section>

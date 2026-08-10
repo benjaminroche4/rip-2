@@ -26,6 +26,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactDetails', template: 'components/Admin/ContactDetails.html.twig')]
 final class ContactDetails
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -81,6 +82,7 @@ final class ContactDetails
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
+        private readonly \App\Contact\Service\VisioInvitationMailer $visioMailer,
     ) {
     }
 
@@ -108,6 +110,17 @@ final class ContactDetails
     public function cancelEditing(): void
     {
         $this->ensureAdmin();
+        // A planned visio follows the fixed identity: attendee email and
+        // event title re-sync (a typo fixed here must reach the agendas).
+        $entity = $this->repository->find($this->contactId);
+        if (null !== $entity && null !== $entity->getVisioEventId()) {
+            $this->visioMailer->refreshAttendees($entity);
+        }
+
+        // The page chrome (title, header, identity summary) lives outside
+        // the live components: a Turbo morph refresh picks up the new name.
+        $this->dispatchBrowserEvent('contact-identity:changed');
+
         $this->prefill();
         $this->editing = false;
         $this->errors = [];
@@ -222,6 +235,17 @@ final class ContactDetails
             $sourceCase,
         );
 
+        // A planned visio follows the fixed identity: attendee email and
+        // event title re-sync (a typo fixed here must reach the agendas).
+        $entity = $this->repository->find($this->contactId);
+        if (null !== $entity && null !== $entity->getVisioEventId()) {
+            $this->visioMailer->refreshAttendees($entity);
+        }
+
+        // The page chrome (title, header, identity summary) lives outside
+        // the live components: a Turbo morph refresh picks up the new name.
+        $this->dispatchBrowserEvent('contact-identity:changed');
+
         $this->prefill();
         $this->editing = false;
         // Name/email may appear elsewhere on the page (header, follow-up).
@@ -244,7 +268,7 @@ final class ContactDetails
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

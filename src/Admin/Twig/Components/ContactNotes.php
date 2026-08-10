@@ -11,6 +11,7 @@ use App\Contact\Repository\ContactRepository;
 use App\Contact\Security\ContactNoteVoter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -28,6 +29,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactNotes', template: 'components/Admin/ContactNotes.html.twig')]
 final class ContactNotes
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -53,6 +55,8 @@ final class ContactNotes
         private readonly ContactNoteRepository $notes,
         private readonly ContactRepository $contacts,
         private readonly Security $security,
+        private readonly \App\Contact\Repository\ContactEventRepository $events,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -130,6 +134,9 @@ final class ContactNotes
 
         // Clears the leave-guard dirty flag on the front.
         $this->dispatchBrowserEvent('contact-notes:saved');
+        $this->dispatchBrowserEvent('contact-notes:count', [
+            'count' => \count($this->notes->listForContact($this->contactId)),
+        ]);
     }
 
     #[LiveAction]
@@ -176,6 +183,9 @@ final class ContactNotes
         $this->editingText = '';
 
         $this->dispatchBrowserEvent('contact-notes:saved');
+        $this->dispatchBrowserEvent('contact-notes:count', [
+            'count' => \count($this->notes->listForContact($this->contactId)),
+        ]);
     }
 
     #[LiveAction]
@@ -196,6 +206,10 @@ final class ContactNotes
             $this->editingNoteId = null;
             $this->editingText = '';
         }
+
+        $this->dispatchBrowserEvent('contact-notes:count', [
+            'count' => \count($this->notes->listForContact($this->contactId)),
+        ]);
     }
 
     private function currentUser(): User
@@ -215,9 +229,65 @@ final class ContactNotes
         return '' !== $fullName ? $fullName : (string) $user->getEmail();
     }
 
+    /**
+     * Audit trail (status changes, recap emails), oldest first — rendered
+     * as the chronologie under the notes thread in the drawer.
+     *
+     * @return list<array{text: string, authorName: string|null, createdAt: \DateTimeImmutable, dotClass: string}>
+     */
+    public function getHistory(): array
+    {
+        $rows = [];
+
+        // Point de départ : la réception de la demande (IP au survol).
+        $contact = $this->contacts->find($this->contactId);
+        if (null !== $contact && null !== $contact->getCreatedAt()) {
+            $rows[] = [
+                'text' => $this->translator->trans('admin.contacts.card.created'),
+                'authorName' => null !== $contact->getIp() ? 'IP : '.$contact->getIp() : null,
+                'createdAt' => $contact->getCreatedAt(),
+                'dotClass' => 'bg-gray-300',
+            ];
+        }
+
+        foreach ($this->events->listForContact($this->contactId) as $event) {
+            if (null !== $event->kind) {
+                $text = $this->translator->trans('admin.contacts.events.'.$event->kind);
+                if (null !== $event->detail) {
+                    $text .= ' : '.$event->detail;
+                }
+                $dotClass = 'bg-blue-400';
+            } elseif (null !== $event->status) {
+                $text = $this->translator->trans('admin.contacts.events.status', [
+                    '%status%' => $this->translator->trans($event->status->labelKey()),
+                ]);
+                if (null !== $event->closureReason) {
+                    $text .= ' : '.$this->translator->trans($event->closureReason->labelKey());
+                }
+                $dotClass = $event->status->dotClass();
+            } elseif (null !== $event->closureReason) {
+                $text = $this->translator->trans('admin.contacts.events.reason', [
+                    '%reason%' => $this->translator->trans($event->closureReason->labelKey()),
+                ]);
+                $dotClass = 'bg-amber-400';
+            } else {
+                continue;
+            }
+            $rows[] = [
+                'text' => $text,
+                'authorName' => $event->authorName,
+                'createdAt' => $event->createdAt,
+                'dotClass' => $dotClass,
+            ];
+        }
+        usort($rows, static fn (array $a, array $b): int => $a['createdAt'] <=> $b['createdAt']);
+
+        return $rows;
+    }
+
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

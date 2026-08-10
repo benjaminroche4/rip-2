@@ -35,6 +35,7 @@ final readonly class ContactListItem
         public ?\DateTimeImmutable $recallAt = null,
         public ?ClosureReason $closureReason = null,
         public ?NextStep $nextStep = null,
+        public ?string $visioMeetLink = null,
         public ?LeadSource $leadSource = null,
         public ContactSource $source = ContactSource::Form,
         public ?int $projectBudget = null,

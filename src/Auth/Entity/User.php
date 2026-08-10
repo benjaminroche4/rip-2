@@ -4,6 +4,7 @@ namespace App\Auth\Entity;
 
 use App\Auth\Domain\Language;
 use App\Auth\Domain\Situation;
+use App\Auth\Domain\StaffFunction;
 use App\Auth\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\EquatableInterface;
@@ -82,8 +83,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     #[ORM\Column]
     private bool $isVerified = false;
 
+    /**
+     * Soft disable: a suspended account keeps all its data but cannot log
+     * in (UserChecker) and loses any open session on the next request
+     * (isEqualTo). Reversible from the admin user profile.
+     */
+    #[ORM\Column]
+    private bool $isSuspended = false;
+
     #[ORM\Column(length: 5, enumType: Language::class, nullable: true)]
     private ?Language $language = null;
+
+    /**
+     * Business functions of a staff member (StaffFunction values), used to
+     * filter assignment dropdowns in the back-office. Not security roles.
+     *
+     * @var list<string>
+     */
+    #[ORM\Column]
+    private array $staffFunctions = [];
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
@@ -197,6 +215,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         }
 
         if ($this->getUserIdentifier() !== $user->getUserIdentifier()) {
+            return false;
+        }
+
+        // Instant access revocation: roles are snapshotted in the session at
+        // login; when they no longer match the DB (an admin granted or
+        // revoked an access), the session is invalidated on the very next
+        // request and the user must log in again with their new rights.
+        $sessionRoles = $this->getRoles();
+        $liveRoles = $user->getRoles();
+        sort($sessionRoles);
+        sort($liveRoles);
+        if ($sessionRoles !== $liveRoles) {
+            return false;
+        }
+
+        // Instant suspension: the open session dies on the next request.
+        if ($this->isSuspended !== $user->isSuspended()) {
             return false;
         }
 
@@ -320,6 +355,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     public function setProfileComplete(bool $isProfileComplete): static
     {
         $this->isProfileComplete = $isProfileComplete;
+
+        return $this;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->isSuspended;
+    }
+
+    public function setSuspended(bool $isSuspended): static
+    {
+        $this->isSuspended = $isSuspended;
+
+        return $this;
+    }
+
+    /**
+     * @return list<StaffFunction>
+     */
+    public function getStaffFunctions(): array
+    {
+        return array_values(array_filter(array_map(
+            static fn (string $value): ?StaffFunction => StaffFunction::tryFrom($value),
+            $this->staffFunctions,
+        )));
+    }
+
+    public function hasStaffFunction(StaffFunction $function): bool
+    {
+        return \in_array($function->value, $this->staffFunctions, true);
+    }
+
+    /**
+     * @param list<StaffFunction> $functions
+     */
+    public function setStaffFunctions(array $functions): static
+    {
+        $this->staffFunctions = array_values(array_unique(array_map(
+            static fn (StaffFunction $function): string => $function->value,
+            $functions,
+        )));
 
         return $this;
     }

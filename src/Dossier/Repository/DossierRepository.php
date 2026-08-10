@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Dossier\Repository;
 
+use App\Contact\Entity\Contact;
 use App\Dossier\Domain\ContactLanguage;
 use App\Dossier\Domain\DossierDetails;
 use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Domain\DossierSearchView;
 use App\Dossier\Domain\DossierSummary;
-use App\Contact\Entity\Contact;
 use App\Dossier\Entity\Dossier;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -70,6 +70,7 @@ class DossierRepository extends ServiceEntityRepository
                 personCount: $dossier->getPersons()->count(),
                 createdAt: $dossier->getCreatedAt() ?? new \DateTimeImmutable(),
                 status: $dossier->getEffectiveStatus(),
+                managerId: null !== $manager ? (int) $manager->getId() : null,
                 managerName: $managerName,
                 managerAvatarFilename: $manager?->getAvatarFilename(),
                 offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
@@ -116,6 +117,16 @@ class DossierRepository extends ServiceEntityRepository
         }
 
         return $offers;
+    }
+
+    /** Number of dossiers currently open (not closed), for the sidebar badge. */
+    public function countOpen(): int
+    {
+        return (int) $this->createQueryBuilder('d')
+            ->select('COUNT(d.id)')
+            ->where('d.closedAt IS NULL')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**

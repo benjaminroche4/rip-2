@@ -29,6 +29,7 @@ use Symfony\UX\Map\Point;
 #[AsLiveComponent(name: 'Admin:ContactProject', template: 'components/Admin/ContactProject.html.twig')]
 final class ContactProject
 {
+    use ContactsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -312,6 +313,18 @@ final class ContactProject
             $moveInAt = null;
         }
 
+        // Writable props re-validated at write time: the chip actions
+        // whitelist their args, but the props themselves travel in the
+        // live payload and could be forged.
+        $types = array_values(array_filter(array_map(trim(...), explode(',', $this->propertyType))));
+        foreach ($types as $type) {
+            if (null === PropertyType::tryFrom($type)) {
+                throw new BadRequestHttpException(\sprintf('Unknown property type "%s".', $type));
+            }
+        }
+        $this->propertyType = implode(',', $types);
+        $this->areas = mb_substr(trim($this->areas), 0, 255);
+
         $this->repository->saveProject($this->contactId, $budget, $this->areas, $moveInAt, $this->propertyType);
 
         $this->budget = null !== $budget ? (string) $budget : '';
@@ -325,7 +338,7 @@ final class ContactProject
 
     private function ensureAdmin(): void
     {
-        if (!$this->security->isGranted('ROLE_ADMIN')) {
+        if (!$this->security->isGranted('ROLE_SECTION_CONTACTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
     }

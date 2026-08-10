@@ -156,6 +156,11 @@ final class DossiersAccessTest extends WebTestCase
         self::assertStringContainsString('Marie Durand', $crawler->filter('[data-testid="dossier-show-persons"]')->text());
         // The 3 module placeholders (Dossier, Visite, Paiement).
         self::assertCount(3, $crawler->filter('[data-testid="dossier-module-card"]'));
+        // Tabbed main column: one tab per section, every panel present in
+        // the DOM (visibility is CSS-driven from the wrapper's active key).
+        self::assertSelectorExists('[data-testid="dossier-tabs"][data-active-tab="recap"]');
+        self::assertCount(6, $crawler->filter('[data-testid^="dossier-tab-"]'));
+        self::assertCount(6, $crawler->filter('[data-tab-panel]'));
         // Start → desired move-in bar under the key facts (search has a
         // moveInAt in the fixture).
         self::assertSelectorExists('[data-testid="dossier-show-timeline"]');

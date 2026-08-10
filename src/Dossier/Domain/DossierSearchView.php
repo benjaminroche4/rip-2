@@ -22,5 +22,4 @@ final readonly class DossierSearchView
         public ?string $note,
     ) {
     }
-
 }
