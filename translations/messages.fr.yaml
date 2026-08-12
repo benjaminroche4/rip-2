@@ -2329,6 +2329,9 @@ admin:
             recall: Rappel le plus proche
             rating: Meilleure note
             budget: Budget le plus élevé
+        button:
+            loadMore: Voir plus
+            loading: Chargement...
         scope:
             label: Portée
             all: Tous les leads

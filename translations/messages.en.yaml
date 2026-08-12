@@ -2325,6 +2325,9 @@ admin:
             recall: Closest recall
             rating: Best rating
             budget: Highest budget
+        button:
+            loadMore: See more
+            loading: Loading...
         scope:
             label: Scope
             all: All leads
