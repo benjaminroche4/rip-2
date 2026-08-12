@@ -81,6 +81,14 @@ class DossierPerson
     private ?string $visaStatus = null;
 
     /**
+     * Id of this person's sub-folder in the dossier's Shared Drive folder
+     * (mode DOSSIER_STORAGE=drive), created lazily on the first deposited
+     * piece. Null when Drive is off or nothing has been deposited yet.
+     */
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $driveFolderId = null;
+
+    /**
      * "No professional activity" flag (the spouse works, stay-at-home
      * parent, …): the whole pro pane is hidden and cleared.
      */
@@ -376,6 +384,18 @@ class DossierPerson
     public function setPosition(int $position): static
     {
         $this->position = $position;
+
+        return $this;
+    }
+
+    public function getDriveFolderId(): ?string
+    {
+        return $this->driveFolderId;
+    }
+
+    public function setDriveFolderId(?string $driveFolderId): static
+    {
+        $this->driveFolderId = $driveFolderId;
 
         return $this;
     }

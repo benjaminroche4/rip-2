@@ -2,15 +2,14 @@
 
 namespace App\Tests\PropertyListing;
 
-use App\PropertyListing\Service\ListingPhotoStorage;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 final class ListingPhotoStorageTest extends TestCase
 {
-    private function storage(): ListingPhotoStorage
+    private function storage(): \App\PropertyListing\Service\ListingPhotoStorage
     {
-        return new ListingPhotoStorage(sys_get_temp_dir().'/listing-photos-test', new AsciiSlugger());
+        return new \App\PropertyListing\Service\LocalListingPhotoStorage(sys_get_temp_dir().'/listing-photos-test', new AsciiSlugger());
     }
 
     private function date(): \DateTimeImmutable

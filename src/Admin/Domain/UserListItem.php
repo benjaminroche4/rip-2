@@ -31,6 +31,8 @@ final readonly class UserListItem
         public bool $hasGoogleAuth = false,
         /** True when the account is soft-disabled (login blocked). */
         public bool $isSuspended = false,
+        /** Two-factor authentication (TOTP) enabled on the account. */
+        public bool $hasTwoFactor = false,
     ) {
     }
 

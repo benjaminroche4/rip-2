@@ -6,7 +6,13 @@ use App\Auth\Domain\Language;
 use App\Auth\Domain\Situation;
 use App\Auth\Domain\StaffFunction;
 use App\Auth\Repository\UserRepository;
+use App\Auth\Security\TotpSecretCipher;
 use Doctrine\ORM\Mapping as ORM;
+use Scheb\TwoFactorBundle\Model\BackupCodeInterface;
+use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
+use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
+use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
+use Scheb\TwoFactorBundle\Model\TrustedDeviceInterface;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -14,7 +20,7 @@ use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface, TwoFactorInterface, BackupCodeInterface, TrustedDeviceInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -44,6 +50,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     #[ORM\Column(nullable: true)]
     private ?string $password = null;
 
+    /**
+     * TOTP secret, encrypted at rest via TotpSecretCipher. Null = 2FA off.
+     */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $totpSecret = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $totpEnabledAt = null;
+
+    /**
+     * One-time recovery codes, stored as keyed HMAC hashes (never plain).
+     *
+     * @var list<string>
+     */
+    #[ORM\Column(type: 'json')]
+    private array $backupCodes = [];
+
+    /**
+     * Bumping it invalidates every "trusted device" cookie of the account
+     * (2FA reset, suspicion of theft).
+     */
+    #[ORM\Column(options: ['default' => 0])]
+    private int $trustedTokenVersion = 0;
+
     #[ORM\Column(length: 50)]
     private ?string $firstName = null;
 
@@ -70,9 +100,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
     private ?string $googleId = null;
 
     /**
-     * UUID-based filename of the user's avatar stored under
-     * %kernel.project_dir%/var/uploads/avatars/. Served via AvatarController
-     * (route /avatars/{filename}) — never exposed in /public/ directly.
+     * UUID-based filename of the user's avatar. The bytes live in the
+     * AvatarStorage (disk in dev, private GCS bucket under user/avatar/ in
+     * prod), served via AvatarController — never a public object URL.
      */
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $avatarFilename = null;
@@ -322,6 +352,106 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
 
         return $this;
     }
+
+    /* ── Two-factor authentication (scheb/2fa) ───────────────────────── */
+
+    public function isTotpAuthenticationEnabled(): bool
+    {
+        return null !== $this->totpSecret;
+    }
+
+    public function getTotpAuthenticationUsername(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * Google Authenticator-compatible parameters (SHA1 / 30s / 6 digits).
+     * The secret is decrypted on the fly; corrupt or unreadable storage
+     * behaves as "2FA misconfigured", never as a bypass.
+     */
+    public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
+    {
+        if (null === $this->totpSecret) {
+            return null;
+        }
+
+        $plain = TotpSecretCipher::decrypt($this->totpSecret);
+
+        return null !== $plain ? new TotpConfiguration($plain, TotpConfiguration::ALGORITHM_SHA1, 30, 6) : null;
+    }
+
+    /** Stores the secret encrypted; null disables 2FA and clears recovery codes. */
+    public function setPlainTotpSecret(?string $plainSecret): static
+    {
+        if (null === $plainSecret) {
+            $this->totpSecret = null;
+            $this->totpEnabledAt = null;
+            $this->backupCodes = [];
+
+            return $this;
+        }
+
+        $this->totpSecret = TotpSecretCipher::encrypt($plainSecret);
+        $this->totpEnabledAt = new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function getTotpEnabledAt(): ?\DateTimeImmutable
+    {
+        return $this->totpEnabledAt;
+    }
+
+    public function isBackupCode(string $code): bool
+    {
+        return \in_array(self::hashBackupCode($code), $this->backupCodes, true);
+    }
+
+    public function invalidateBackupCode(string $code): void
+    {
+        $this->backupCodes = array_values(array_filter(
+            $this->backupCodes,
+            fn (string $stored): bool => !hash_equals($stored, self::hashBackupCode($code)),
+        ));
+    }
+
+    /**
+     * @param list<string> $plainCodes
+     */
+    public function setPlainBackupCodes(array $plainCodes): static
+    {
+        $this->backupCodes = array_values(array_map(self::hashBackupCode(...), $plainCodes));
+
+        return $this;
+    }
+
+    public function getRemainingBackupCodeCount(): int
+    {
+        return \count($this->backupCodes);
+    }
+
+    public function getTrustedTokenVersion(): int
+    {
+        return $this->trustedTokenVersion;
+    }
+
+    /** Invalidates every trusted-device cookie of the account. */
+    public function bumpTrustedTokenVersion(): static
+    {
+        ++$this->trustedTokenVersion;
+
+        return $this;
+    }
+
+    private static function hashBackupCode(string $code): string
+    {
+        $appSecret = (string) ($_ENV['APP_SECRET'] ?? $_SERVER['APP_SECRET'] ?? '');
+
+        return hash_hmac('sha256', trim($code), $appSecret.'|backup-code');
+    }
+
+    /* ─────────────────────────────────────────────────────────────────── */
 
     public function getGoogleId(): ?string
     {

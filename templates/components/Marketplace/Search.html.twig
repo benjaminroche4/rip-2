@@ -339,7 +339,7 @@
                     </button>
                 </div>
 
-                <div class="hidden" data-loading="action(search)|show">
+                <div class="hidden" data-loading="action(search)|removeClass(hidden)">
                     <div class="grid sm:grid-cols-2 3xl:grid-cols-3! gap-6">
                         {% for i in 1..4 %}
                             <div class="flex flex-col border border-slate-200 rounded-2xl bg-white p-1.5">
@@ -357,7 +357,7 @@
                     </div>
                 </div>
 
-                <div data-loading="action(search)|hide">
+                <div data-loading="action(search)|addClass(hidden)">
                     {% if this.items is empty %}
                         <div class="flex flex-col items-center justify-center py-16 text-center">
                             <img src="{{ asset('medias/svg/no-results.svg') }}" alt="{{ 'marketplace.list.properties.noResults'|trans }}" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
@@ -389,8 +389,8 @@
                             data-live-action-param="more"
                             class="px-6 py-3 border border-slate-200 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
                         >
-                            <span data-loading="action(more)|hide">{{ 'marketplace.list.properties.button'|trans|raw }}</span>
-                            <span data-loading="action(more)|show" class="hidden items-center gap-x-2">
+                            <span data-loading="action(more)|addClass(hidden)">{{ 'marketplace.list.properties.button'|trans|raw }}</span>
+                            <span data-loading="action(more)|removeClass(hidden)" class="hidden flex items-center gap-x-2">
                                 <twig:Spinner class="inline" />
                                 {{ 'marketplace.list.properties.loading'|trans|raw }}
                             </span>

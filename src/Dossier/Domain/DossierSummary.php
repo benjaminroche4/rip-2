@@ -24,6 +24,10 @@ final readonly class DossierSummary
         public ?string $managerAvatarFilename = null,
         /** Package chosen on the source contact ("accompagne" or "confie"). */
         public ?string $offer = null,
+        /** Desired move-in date from the dossier search, when filled in. */
+        public ?\DateTimeImmutable $moveInAt = null,
+        /** Progress between creation and move-in; null without a move-in date. */
+        public ?MoveInTimeline $timeline = null,
     ) {
     }
 }

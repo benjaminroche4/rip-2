@@ -82,6 +82,7 @@ final class ContactStatusControl
         private readonly UserRepository $users,
         private readonly VisioInvitationMailer $visioMailer,
         private readonly \App\Contact\Service\RecontactNoticeMailer $recontactNotice,
+        private readonly \App\Contact\Service\RecallCalendarSync $recallSync,
         private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
@@ -271,20 +272,29 @@ final class ContactStatusControl
         $this->repository->saveNextStep($this->contactId, $case);
         if (NextStep::Recontact === $case) {
             $this->repository->saveRecontactChannel($this->contactId, $channel);
-            if ($this->notifyClient) {
-                // Heads-up email to the prospect: planned slot + channel.
-                $entity = $this->repository->find($this->contactId);
-                if (null !== $entity) {
-                    $this->recontactNotice->send($entity);
-                }
-                $this->notifyClient = false;
-            }
         }
         // One coherent state only: the stored date always follows the step.
         // Dateless steps (quote preparation, other) and a cleared step purge
         // any stale recall left by a previous dated step.
         $this->repository->saveRecallAt($this->contactId, $recallAt);
         $this->recallAt = $recallAt?->format('Y-m-d\TH:i') ?? '';
+
+        // Agenda mirror of the recontact: created or moved with the slot,
+        // dropped when the step is no longer a dated recontact.
+        $entity = $this->repository->find($this->contactId);
+        if (null !== $entity) {
+            $this->recallSync->apply($entity);
+        }
+
+        // Heads-up email to the prospect: planned slot + channel. AFTER
+        // saveRecallAt: the mailer reads the stored date, sending earlier
+        // silently dropped the notice on a first confirmation.
+        if (NextStep::Recontact === $case && $this->notifyClient) {
+            if (null !== $entity) {
+                $this->recontactNotice->send($entity);
+            }
+            $this->notifyClient = false;
+        }
 
         if (NextStep::Visio === $case) {
             $unchanged = NextStep::Visio === $stored
@@ -412,6 +422,11 @@ final class ContactStatusControl
         $entity = $this->repository->find($this->contactId);
         if (null !== $entity) {
             $this->visioMailer->onStatusChange($entity, $newStatus);
+            // The recall mirror follows the same matrix, silently: kept
+            // through conversion, dropped on close or rollback to new.
+            if (\in_array($newStatus, [ContactStatus::Closed, ContactStatus::New], true)) {
+                $this->recallSync->clear($entity);
+            }
         }
         [$fullName, $avatar] = $this->authorSnapshot();
         $firstTreatment = $this->repository->updateStatus($this->contactId, $newStatus, $fullName, $avatar);
@@ -495,6 +510,10 @@ final class ContactStatusControl
         $entity = $this->repository->find($this->contactId);
         if (null !== $entity && null !== $entity->getVisioEventId()) {
             $this->visioMailer->refreshAttendees($entity);
+        }
+        // Same swap for a mirrored recall event.
+        if (null !== $entity && null !== $entity->getRecallEventId()) {
+            $this->recallSync->apply($entity);
         }
 
         $this->emit('contacts:changed');

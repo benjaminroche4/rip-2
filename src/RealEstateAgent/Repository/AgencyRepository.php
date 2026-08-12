@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\RealEstateAgent\Repository;
 
+use App\RealEstateAgent\Domain\AgencySummary;
 use App\RealEstateAgent\Entity\Agency;
+use App\RealEstateAgent\Entity\RealEstateAgent;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -43,6 +45,53 @@ class AgencyRepository extends ServiceEntityRepository
         $this->getEntityManager()->persist($agency);
 
         return $agency;
+    }
+
+    /**
+     * Case-insensitive exact-name lookup, used by the standalone agency modal
+     * to reject a duplicate with a clear message (vs. the agent modal's
+     * silent find-or-create).
+     */
+    public function findByName(string $name): ?Agency
+    {
+        $agency = $this->createQueryBuilder('a')
+            ->where('LOWER(a.name) = LOWER(:name)')
+            ->setParameter('name', trim($name))
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $agency instanceof Agency ? $agency : null;
+    }
+
+    /**
+     * Read model for the agencies view: every agency with how many directory
+     * agents belong to it, accent-insensitive alphabetical order.
+     *
+     * @return list<AgencySummary>
+     */
+    public function findSummaries(): array
+    {
+        /** @var list<array{id: int, name: string, createdAt: \DateTimeImmutable, agentCount: int}> $rows */
+        $rows = $this->createQueryBuilder('ag')
+            ->select('ag.id AS id', 'ag.name AS name', 'ag.createdAt AS createdAt', 'COUNT(a.id) AS agentCount')
+            ->leftJoin(RealEstateAgent::class, 'a', 'WITH', 'a.agency = ag')
+            ->groupBy('ag.id')
+            ->getQuery()
+            ->getResult();
+
+        $collator = new \Collator('fr_FR');
+        usort($rows, static fn (array $a, array $b): int => $collator->compare($a['name'], $b['name']) ?: 0);
+
+        return array_map(
+            static fn (array $r): AgencySummary => new AgencySummary(
+                id: (int) $r['id'],
+                name: (string) $r['name'],
+                agentCount: (int) $r['agentCount'],
+                createdAt: $r['createdAt'] instanceof \DateTimeImmutable ? $r['createdAt'] : new \DateTimeImmutable(),
+            ),
+            $rows,
+        );
     }
 
     /**

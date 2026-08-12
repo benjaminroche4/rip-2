@@ -9,6 +9,7 @@ use App\Dossier\Domain\ContactLanguage;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierPerson;
+use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierNumberGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -274,7 +275,7 @@ final class DossierCreateTest extends KernelTestCase
         /** @var \App\Dossier\Repository\DossierRepository $repository */
         $repository = $this->em->getRepository(Dossier::class);
 
-        return $component->create($this->em, new DossierNumberGenerator($repository));
+        return $component->create($this->em, new DossierNumberGenerator($repository), self::getContainer()->get(DossierDriveProvisioner::class));
     }
 
     private function mountComponent(): object

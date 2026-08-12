@@ -23,6 +23,10 @@ import { Controller } from '@hotwired/stimulus'
  *  - setInput (Boolean, default true) write the chosen address back into the input.
  */
 const PARIS_BOUNDS = { north: 48.902145, south: 48.815573, east: 2.46992, west: 2.224199 }
+// Bounding box Île-de-France (8 départements) : biaise et filtre les
+// suggestions quand idfOnly est actif (visites : biens franciliens only).
+const IDF_BOUNDS = { north: 49.242, south: 48.12, east: 3.559, west: 1.446 }
+const IDF_POSTAL = /\b(75|77|78|91|92|93|94|95)\d{3}\b/
 const MIN_LENGTH = 3
 const DEBOUNCE_MS = 280
 const MAX_RESULTS = 5
@@ -41,6 +45,7 @@ export default class extends Controller {
         // Bias + filter the results to Paris (the historic behaviour of the
         // address fields); disable for worldwide pickers like the current city.
         parisOnly: { type: Boolean, default: true },
+        idfOnly: { type: Boolean, default: false },
     }
 
     #suggestions = []
@@ -76,9 +81,10 @@ export default class extends Controller {
             // PlacesService needs a host node; a detached div keeps it out of the DOM.
             this.#placesService = new places.PlacesService(document.createElement('div'))
             this.#SessionToken = places.AutocompleteSessionToken
+            const box = this.idfOnlyValue ? IDF_BOUNDS : PARIS_BOUNDS
             this.#bounds = new google.maps.LatLngBounds(
-                { lat: PARIS_BOUNDS.south, lng: PARIS_BOUNDS.west },
-                { lat: PARIS_BOUNDS.north, lng: PARIS_BOUNDS.east },
+                { lat: box.south, lng: box.west },
+                { lat: box.north, lng: box.east },
             )
             this.#renewToken()
         } catch {
@@ -146,7 +152,7 @@ export default class extends Controller {
             sessionToken: this.#token,
             types: [this.typesValue],
         }
-        if (this.parisOnlyValue) request.bounds = this.#bounds // biases results towards Paris
+        if (this.parisOnlyValue || this.idfOnlyValue) request.bounds = this.#bounds // biases results towards the allowed area
         if (this.countriesValue) request.componentRestrictions = { country: this.countriesValue.split(',') }
         this.#autocompleteService.getPlacePredictions(request, (predictions, status) => {
             // Drop stale responses (user kept typing).
@@ -155,7 +161,9 @@ export default class extends Controller {
             // fields keep Paris results only (750xx arrondissement logic),
             // worldwide pickers keep everything.
             const all = 'OK' === status && predictions ? predictions : []
-            const kept = this.parisOnlyValue ? all.filter((p) => this.#isParis(p)) : all
+            const kept = this.parisOnlyValue
+                ? all.filter((p) => this.#isParis(p))
+                : (this.idfOnlyValue ? all.filter((p) => this.#isIdf(p)) : all)
             this.#suggestions = kept.slice(0, MAX_RESULTS)
             // Google matched the query but nothing survived the Paris filter:
             // let the page explain the empty dropdown.
@@ -289,6 +297,12 @@ export default class extends Controller {
             input.value = value
             input.dispatchEvent(new Event('input', { bubbles: true }))
         }
+    }
+
+    /** Keep only Île-de-France predictions (postal code or explicit mention). */
+    #isIdf(prediction) {
+        const text = prediction.description ?? ''
+        return IDF_POSTAL.test(text) || /\bparis\b/i.test(text)
     }
 
     /** Keep only Paris predictions (the service biases but cannot strictly restrict). */

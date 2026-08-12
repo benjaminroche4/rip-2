@@ -1,7 +1,39 @@
 <div {{ attributes }} data-testid="agents-list-component">
-    {% set agents = this.agents %}
+    {% set agenciesView = this.isAgenciesView %}
 
     <div class="mx-auto max-w-4xl">
+        {# Toggle agents / agences : chips pill, même vocabulaire que le BO. #}
+        <div class="mb-4 flex flex-wrap items-center gap-2" role="tablist" data-testid="agents-view-toggle">
+            <button
+                type="button"
+                role="tab"
+                aria-selected="{{ agenciesView ? 'false' : 'true' }}"
+                data-action="live#action"
+                data-live-action-param="chooseView"
+                data-live-view-param="agents"
+                class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ agenciesView ? 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' : 'border-primary/40 bg-primary/5 text-primary' }}"
+                data-testid="agents-view-agents"
+            >
+                {{ ux_icon('lucide:user', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.agents.view.agents'|trans }}
+                <span class="tabular-nums opacity-60">{{ this.agentTotal }}</span>
+            </button>
+            <button
+                type="button"
+                role="tab"
+                aria-selected="{{ agenciesView ? 'true' : 'false' }}"
+                data-action="live#action"
+                data-live-action-param="chooseView"
+                data-live-view-param="agencies"
+                class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ agenciesView ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                data-testid="agents-view-agencies"
+            >
+                {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.agents.view.agencies'|trans }}
+                <span class="tabular-nums opacity-60">{{ this.agencyTotal }}</span>
+            </button>
+        </div>
+
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div class="relative w-full max-w-xs">
                 {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400', 'aria-hidden': 'true'}) }}
@@ -16,68 +48,108 @@
                 >
             </div>
             <p class="text-xs text-gray-500 tabular-nums" data-testid="agents-count">
-                {{ 'admin.agents.count'|trans({'%count%': this.totalCount}) }}
+                {{ (agenciesView ? 'admin.agencies.count' : 'admin.agents.count')|trans({'%count%': this.totalCount}) }}
             </p>
         </div>
 
-        {% if agents is empty %}
-            <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="agents-empty">
-                <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
-                    <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                        {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : 'lucide:briefcase', {class: 'size-6', 'aria-hidden': 'true'}) }}
+        {% if agenciesView %}
+            {% set agencies = this.agencies %}
+            {% if agencies is empty %}
+                <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="agencies-empty">
+                    <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                            {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : 'lucide:building-2', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                        </div>
+                        <div class="space-y-1">
+                            <h2 class="text-sm font-medium text-gray-700">
+                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.title' : 'admin.agencies.empty.title')|trans }}
+                            </h2>
+                            <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
+                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.description' : 'admin.agencies.empty.description')|trans }}
+                            </p>
+                        </div>
                     </div>
-                    <div class="space-y-1">
-                        <h2 class="text-sm font-medium text-gray-700">
-                            {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.title' : 'admin.agents.empty.title')|trans }}
-                        </h2>
-                        <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
-                            {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.description' : 'admin.agents.empty.description')|trans }}
-                        </p>
-                    </div>
+                </section>
+            {% else %}
+                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agencies-list">
+                    <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
+                        {% for agency in agencies %}
+                            <li class="flex items-center gap-3 rounded-xl bg-white px-5 py-4" data-testid="agency-row">
+                                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
+                                    {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ agency.name }}</p>
+                                    <p class="truncate text-xs text-gray-500" data-testid="agency-agent-count">
+                                        {{ 'admin.agencies.card.agentCount'|trans({'%count%': agency.agentCount}) }}
+                                    </p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
-            </section>
+            {% endif %}
         {% else %}
-            <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agents-list">
-                <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
-                    {% for agent in agents %}
-                        <li class="rounded-xl bg-white px-5 py-4" data-testid="agent-row">
-                            <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
-                                <div class="flex min-w-0 items-center gap-3 sm:flex-1">
-                                    <twig:Avatar name="{{ agent.fullName }}" size="9" />
-                                    <div class="min-w-0">
-                                        <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>
-                                        <p class="truncate text-xs text-gray-500" data-testid="agent-agency">
-                                            {{ agent.agency ?: 'admin.agents.card.noAgency'|trans }}
-                                        </p>
+            {% set agents = this.agents %}
+            {% if agents is empty %}
+                <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="agents-empty">
+                    <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                            {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : 'lucide:briefcase', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                        </div>
+                        <div class="space-y-1">
+                            <h2 class="text-sm font-medium text-gray-700">
+                                {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.title' : 'admin.agents.empty.title')|trans }}
+                            </h2>
+                            <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
+                                {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.description' : 'admin.agents.empty.description')|trans }}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            {% else %}
+                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agents-list">
+                    <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
+                        {% for agent in agents %}
+                            <li class="rounded-xl bg-white px-5 py-4" data-testid="agent-row">
+                                <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
+                                    <div class="flex min-w-0 items-center gap-3 sm:flex-1">
+                                        <twig:Avatar name="{{ agent.fullName }}" size="9" />
+                                        <div class="min-w-0">
+                                            <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>
+                                            <p class="truncate text-xs text-gray-500" data-testid="agent-agency">
+                                                {{ agent.agency ?: 'admin.agents.card.noAgency'|trans }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-1 text-sm sm:justify-end">
+                                        {% if agent.email %}
+                                            <a
+                                                href="mailto:{{ agent.email }}"
+                                                class="flex min-w-0 items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
+                                                data-testid="agent-email"
+                                            >
+                                                {{ ux_icon('lucide:mail', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                <span class="truncate">{{ agent.email }}</span>
+                                            </a>
+                                        {% endif %}
+                                        {% if agent.phone %}
+                                            <a
+                                                href="tel:{{ agent.phone }}"
+                                                class="flex items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
+                                                data-testid="agent-phone"
+                                            >
+                                                {{ ux_icon('lucide:phone', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                <span class="tabular-nums">{{ agent.phone }}</span>
+                                            </a>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <div class="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-1 text-sm sm:justify-end">
-                                    {% if agent.email %}
-                                        <a
-                                            href="mailto:{{ agent.email }}"
-                                            class="flex min-w-0 items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
-                                            data-testid="agent-email"
-                                        >
-                                            {{ ux_icon('lucide:mail', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                            <span class="truncate">{{ agent.email }}</span>
-                                        </a>
-                                    {% endif %}
-                                    {% if agent.phone %}
-                                        <a
-                                            href="tel:{{ agent.phone }}"
-                                            class="flex items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
-                                            data-testid="agent-phone"
-                                        >
-                                            {{ ux_icon('lucide:phone', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                            <span class="tabular-nums">{{ agent.phone }}</span>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 </div>

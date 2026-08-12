@@ -20,9 +20,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
 /**
- * Visit:VisitForm split-screen behaviour: creation (with preview or
- * fallback geocoding), the debounced locate action feeding the summary map,
- * the live summary labels, and validation failures.
+ * Visit:VisitForm quick-booking behaviour: creation (with Places coordinates
+ * or fallback geocoding), the detail-mode toggle, and validation failures.
  */
 final class VisitFormTest extends KernelTestCase
 {
@@ -67,11 +66,12 @@ final class VisitFormTest extends KernelTestCase
         $visit = $this->em->getRepository(Visit::class)->findOneBy(['address' => '12 rue de la Roquette, 75011 Paris']);
         self::assertNotNull($visit);
         self::assertSame($this->dossier->getId(), $visit->getDossier()?->getId());
-        self::assertSame('2026-06-20 10:30', $visit->getScheduledAt()?->format('Y-m-d H:i'));
+        self::assertNotNull($visit->getBookedBy(), 'The operator who booked is stamped at creation.');
+        self::assertNotNull($visit->getScheduledAt());
         self::assertNull($visit->getLatitude(), 'No key, no preview: coordinates stay null.');
     }
 
-    public function testSelectingAPlaceDropsThePinOnTheSummaryMap(): void
+    public function testSelectingAPlaceStoresTheCoordinates(): void
     {
         $component = $this->mountComponent();
         $component->formValues = $this->values();
@@ -82,18 +82,23 @@ final class VisitFormTest extends KernelTestCase
         self::assertSame(48.8553, $component->previewLat);
         self::assertSame(2.3765, $component->previewLng);
         self::assertSame('12 rue de la Roquette, 75011 Paris', $component->locatedAddress);
-        self::assertNotNull($component->getPreviewMap());
     }
 
-    public function testEditingTheAddressAfterASelectionHidesTheStalePin(): void
+    public function testEditingTheAddressAfterASelectionDropsTheStaleCoordinates(): void
     {
         $component = $this->mountComponent();
         $component->formValues = $this->values();
         $component->setLocation(48.8553, 2.3765);
 
-        $component->formValues['address'] = '12 rue de la Roquette, 75011 Paris mais ailleurs';
+        // Address edited by hand after the pick: the stored coordinates no
+        // longer match, creation must re-geocode instead of reusing them.
+        $component->formValues['address'] = '14 rue de la Roquette, 75011 Paris';
+        self::assertInstanceOf(RedirectResponse::class, $component->create($this->em, $this->geocoderReturning(48.86, 2.37)));
 
-        self::assertNull($component->getPreviewMap(), 'The pin only reflects a confirmed address.');
+        $visit = $this->em->getRepository(Visit::class)->findOneBy(['address' => '14 rue de la Roquette, 75011 Paris']);
+        self::assertNotNull($visit);
+        self::assertSame(48.86, $visit->getLatitude());
+        self::assertSame(2.37, $visit->getLongitude());
     }
 
     public function testCreateReusesThePreviewCoordinates(): void
@@ -126,35 +131,30 @@ final class VisitFormTest extends KernelTestCase
         self::assertSame(2.3765, $visit->getLongitude());
     }
 
-    public function testSummaryLabelsFollowTheFormValues(): void
+    public function testToggleDetailsFlipsTheDetailMode(): void
     {
-        $agency = (new Agency())->setName('Foncia Paris 11')->setCreatedAt(new \DateTimeImmutable());
-        $agent = (new RealEstateAgent())
-            ->setFirstName('Jean')->setLastName('Martin')->setAgency($agency)
-            ->setCreatedAt(new \DateTimeImmutable());
-        $this->em->persist($agency);
-        $this->em->persist($agent);
-        $this->em->flush();
-
         $component = $this->mountComponent();
-        $component->formValues = $this->values(agent: (string) $agent->getId());
 
-        self::assertSame('Famille Martin ('.$this->dossier->getReference().')', $component->getSummaryDossier());
-        self::assertSame('Jean Martin (Foncia Paris 11)', $component->getSummaryAgent());
-        self::assertSame('2026-06-20 10:30', $component->getSummaryScheduledAt()?->format('Y-m-d H:i'));
-        self::assertSame('12 rue de la Roquette, 75011 Paris', $component->getSummaryAddress());
+        self::assertFalse($component->detailed, 'The form opens in quick mode.');
+        $component->toggleDetails();
+        self::assertTrue($component->detailed);
+        $component->toggleDetails();
+        self::assertFalse($component->detailed);
     }
 
-    public function testEmptyFormYieldsAnEmptySummary(): void
+    public function testPastScheduleBlocksCreation(): void
     {
         $component = $this->mountComponent();
-        $component->formValues = $this->values(dossier: '', agent: '', scheduledAt: '', address: '');
+        $component->formValues = $this->values(scheduledAt: (new \DateTimeImmutable('-2 hours'))->format('Y-m-d\TH:i'));
 
-        self::assertNull($component->getSummaryDossier());
-        self::assertNull($component->getSummaryAgent());
-        self::assertNull($component->getSummaryScheduledAt());
-        self::assertNull($component->getSummaryAddress());
-        self::assertNull($component->getPreviewMap());
+        try {
+            $component->create($this->em, $this->nullGeocoder());
+            self::fail('Expected an unprocessable-entity exception.');
+        } catch (HttpExceptionInterface $e) {
+            self::assertSame(422, $e->getStatusCode());
+        }
+
+        self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
     }
 
     public function testMissingDossierBlocksCreation(): void
@@ -172,15 +172,20 @@ final class VisitFormTest extends KernelTestCase
         self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
     }
 
-    public function testSplitScreenMarkupRendersFormAndSummary(): void
+    public function testQuickModeMarkupHidesTheDetailFields(): void
     {
         $rendered = (string) $this->renderTwigComponent('Visit:VisitForm', [
             'adminPrefix' => self::PREFIX,
         ]);
 
         self::assertStringContainsString('data-testid="visit-form"', $rendered);
-        self::assertStringContainsString('data-testid="visit-summary"', $rendered);
-        self::assertStringContainsString('data-testid="visit-summary-map-placeholder"', $rendered);
+        // Who performs the visit and the notes stay out of the toggle.
+        self::assertStringContainsString('data-testid="assignee-chips"', $rendered);
+        self::assertStringContainsString('data-testid="visit-form-note"', $rendered);
+        // Only the optional fields sit behind the toggle.
+        self::assertStringContainsString('data-testid="visit-form-details-toggle"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-details"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-client-present"', $rendered);
         // The address field carries the shared Places autocomplete, whose
         // selection trigger feeds the setLocation action.
         self::assertStringContainsString('data-controller="places-autocomplete"', $rendered);
@@ -190,20 +195,119 @@ final class VisitFormTest extends KernelTestCase
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
     }
 
+    public function testDetailModeMarkupRendersTheOptionalFields(): void
+    {
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitForm', [
+            'adminPrefix' => self::PREFIX,
+            'detailed' => true,
+        ]);
+
+        self::assertStringContainsString('data-testid="visit-form-details"', $rendered);
+        self::assertStringContainsString('data-testid="visit-form-agent"', $rendered);
+        self::assertStringContainsString('data-testid="visit-form-listingUrl"', $rendered);
+        self::assertStringContainsString('data-testid="visit-form-client-present"', $rendered);
+    }
+
     /**
      * @return array<string, string>
      */
+    public function testAssigneeIsSavedWithTheVisit(): void
+    {
+        $staff = (new User())
+            ->setEmail('staff+'.bin2hex(random_bytes(4)).'@visit-form-test.local')
+            ->setFirstName('Marie')->setLastName('Curie')
+            ->setRoles(['ROLE_STAFF', 'ROLE_SECTION_VISITS'])->setPassword('x')
+            ->setStaffFunctions([\App\Auth\Domain\StaffFunction::VisitAgent])
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($staff);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        // Le picker en chips expose uniquement les agents de visite.
+        self::assertSame([$staff->getId()], array_column($component->getAssigneeChoices(), 'id'));
+
+        $component->pickAssignee((int) $staff->getId());
+        $component->formValues = $this->values(assignee: (string) $staff->getId());
+        $component->create($this->em, $this->nullGeocoder());
+
+        $visit = $this->em->getRepository(Visit::class)->findOneBy(['address' => '12 rue de la Roquette, 75011 Paris']);
+        self::assertNotNull($visit);
+        self::assertSame($staff->getId(), $visit->getAssignee()?->getId());
+    }
+
+    public function testAStaffWithoutTheVisitAgentFunctionCannotBePicked(): void
+    {
+        $staff = (new User())
+            ->setEmail('nofn+'.bin2hex(random_bytes(4)).'@visit-form-test.local')
+            ->setFirstName('Sans')->setLastName('Fonction')
+            ->setRoles(['ROLE_STAFF', 'ROLE_SECTION_VISITS'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($staff);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        self::assertSame([], $component->getAssigneeChoices(), 'No visit-agent function, no chip.');
+
+        // Un id forgé hors liste est rejeté par le formulaire : rien ne part.
+        $component->formValues = $this->values(assignee: (string) $staff->getId());
+        try {
+            $component->create($this->em, $this->nullGeocoder());
+        } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
+            // Expected: invalid choice.
+        }
+        self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
+    }
+
+    public function testAddressOutsideIleDeFranceIsRejected(): void
+    {
+        $component = $this->mountComponent();
+        // Pas de coordonnées (géocodeur nul) : le code postal fait foi.
+        $component->formValues = $this->values(address: '12 rue de la République, 69001 Lyon');
+
+        try {
+            $component->create($this->em, $this->nullGeocoder());
+            self::fail('An address outside Île-de-France must be rejected.');
+        } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
+            // Expected.
+        }
+        self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
+
+        // Coordonnées géocodées hors de la boîte IDF : refus aussi, même si
+        // l'adresse ne trahit pas sa région.
+        $component = $this->mountComponent();
+        $component->formValues = $this->values(address: 'Grande rue, quelque part');
+        try {
+            $component->create($this->em, $this->geocoderReturning(45.75, 4.85));
+            self::fail('Coordinates outside Île-de-France must be rejected.');
+        } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
+            // Expected.
+        }
+        self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
+    }
+
     private function values(
         ?string $dossier = null,
         string $agent = '',
-        string $scheduledAt = '2026-06-20T10:30',
+        string $assignee = '',
+        ?string $scheduledAt = null,
         string $address = '12 rue de la Roquette, 75011 Paris',
+        string $note = '',
     ): array {
         return [
             'dossier' => $dossier ?? (string) $this->dossier->getId(),
+            'assignee' => $assignee,
             'agent' => $agent,
-            'scheduledAt' => $scheduledAt,
+            'type' => 'property_visit',
+            'durationMinutes' => '30',
+            'listingUrl' => '',
+            'clientPresent' => '1',
+            // Future by default: past slots are rejected since the
+            // "no scheduling in the past" constraint.
+            'scheduledAt' => $scheduledAt ?? (new \DateTimeImmutable('+9 days'))->format('Y-m-d\TH:i'),
             'address' => $address,
+            'note' => $note,
         ];
     }
 

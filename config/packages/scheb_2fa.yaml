@@ -1,0 +1,28 @@
+# 2FA TOTP (Google Authenticator et compatibles) : opt-in par compte depuis
+# la page Mon profil. Voir https://symfony.com/bundles/SchebTwoFactorBundle
+scheb_two_factor:
+    # Tokens interceptés après un login réussi : formulaire (UsernamePassword)
+    # et Google OAuth (PostAuthentication, produit par GoogleAuthenticator).
+    security_tokens:
+        - Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken
+        - Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken
+        # Un re-login via cookie remember_me repasse par le second facteur :
+        # sinon le cookie (7 jours) contournerait entièrement la 2FA.
+        - Symfony\Component\Security\Core\Authentication\Token\RememberMeToken
+
+    totp:
+        enabled: true
+        issuer: 'Relocation In Paris'
+        template: public/auth/2fa_form.html.twig
+
+    # Codes de récupération à usage unique, stockés hachés sur le user.
+    backup_codes:
+        enabled: true
+
+    # "Faire confiance à cet appareil" : cookie signé 30 jours, invalidé en
+    # bloc via User::trustedTokenVersion (reset 2FA, vol suspecté).
+    trusted_device:
+        enabled: true
+        lifetime: 2592000
+        cookie_name: rip_trusted_device
+        extend_lifetime: true

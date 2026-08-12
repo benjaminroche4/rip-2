@@ -32,6 +32,8 @@ final readonly class UserProfile
         public bool $hasPasswordAuth,
         public ?Language $language,
         public bool $isProfileComplete,
+        /** Two-factor authentication (TOTP) enabled on the account. */
+        public bool $hasTwoFactor = false,
     ) {
     }
 

@@ -111,7 +111,7 @@ final class ContactsAccessTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix));
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Demandes de contact');
+        self::assertSelectorTextContains('h1', 'Leads');
 
         $cards = $crawler->filter('[data-testid="contact-card"]');
         self::assertGreaterThanOrEqual(1, $cards->count());
@@ -137,7 +137,9 @@ final class ContactsAccessTest extends WebTestCase
     public function testSidebarExposesContactsLink(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);
+        // The admin root forwards to the first accessible section.
         $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin');
+        $this->client->followRedirect();
 
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('aside a[href$="/admin/contacts"]');
@@ -156,6 +158,37 @@ final class ContactsAccessTest extends WebTestCase
         self::assertSelectorExists('[data-testid="contact-detail"]');
         self::assertSelectorTextContains('[data-testid="contact-detail"]', 'CT-424242');
         self::assertSelectorTextContains('[data-testid="contact-detail"]', 'Acme Corp');
+    }
+
+    public function testDossierActionsNeedTheDossiersSection(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository(User::class)->findOneBy(['email' => self::ADMIN_EMAIL])
+            ?? throw new \RuntimeException('Test user not found.');
+
+        // Contacts-only member: converting a lead needs the dossiers section
+        // server-side, so the entry must not be offered here.
+        $user->setRoles(['ROLE_SECTION_CONTACTS']);
+        $em->flush();
+        $this->client->loginUser($user);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-testid="contact-to-dossier-trigger"]');
+
+        // With both sections, the action is back.
+        $user->setRoles(['ROLE_SECTION_CONTACTS', 'ROLE_SECTION_DOSSIERS']);
+        $em->flush();
+        $this->client->loginUser($user);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-testid="contact-to-dossier-trigger"]');
+
+        // Restore the admin role for the tests that follow.
+        $user->setRoles(['ROLE_ADMIN']);
+        $em->flush();
     }
 
     public function testUnknownReferenceReturns404(): void

@@ -173,7 +173,7 @@ final class DepositTest extends WebTestCase
         self::assertStringEndsWith('.pdf', (string) $file->getStoredName());
         // The original client name is kept for display but never used on disk.
         self::assertSame('piece.pdf', $file->getOriginalName());
-        self::assertFileExists($this->storageDir.'/DS-000042/'.$file->getStoredName());
+        self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
     }
 
     public function testUploadRejectsUnsupportedFileTypes(): void

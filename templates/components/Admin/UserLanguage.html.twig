@@ -1,0 +1,61 @@
+{# Tuile Langue : lecture seule tant que le crayon n'a pas été cliqué (même
+   verrou que la card identité), puis chips de locale. Choisir une chip
+   enregistre et referme l'éditeur. #}
+<div {{ attributes.defaults({class: 'relative rounded-xl border border-neutral-200/70 bg-white p-3'}) }} data-testid="user-language">
+    {% if this.showLabel %}
+        <div class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.users.profile.field.language'|trans }}</div>
+    {% endif %}
+
+    {% if this.editing %}
+        <div class="flex items-center gap-1 {{ this.showLabel ? 'mt-1.5' }}">
+            {% for language in enum('App\\Auth\\Domain\\Language').cases() %}
+                {% set active = this.language is same as(language) %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="chooseLanguage"
+                    data-live-language-param="{{ language.value }}"
+                    aria-pressed="{{ active ? 'true' : 'false' }}"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out {{ active ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900' }}"
+                    data-testid="user-language-{{ language.value }}"
+                >
+                    {{ ux_icon('circle-flags:' ~ language.value, {class: 'size-3.5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                    {{ language.value|upper }}
+                </button>
+            {% endfor %}
+            {# Croix plutôt qu'un libellé : la tuile fait une demi-colonne,
+               "Annuler" y serait tronqué. #}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="cancelEditing"
+                class="ml-0.5 flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                title="{{ 'admin.contacts.notes.cancel'|trans }}"
+                data-testid="user-language-cancel"
+            >
+                {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+            </button>
+        </div>
+    {% else %}
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="startEditing"
+            class="absolute top-2 right-2 flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 {{ this.showLabel ? '' : 'top-0 right-0' }}"
+            aria-label="{{ 'admin.users.language.edit'|trans }}"
+            title="{{ 'admin.users.language.edit'|trans }}"
+            data-testid="user-language-edit"
+        >
+            {{ ux_icon('lucide:pencil', {class: 'size-3.5', 'aria-hidden': 'true'}) }}
+        </button>
+        <div class="flex items-center gap-1.5 text-sm font-medium text-gray-900 {{ this.showLabel ? 'mt-1.5' }}" data-testid="user-language-value">
+            {% if this.language %}
+                {{ ux_icon('circle-flags:' ~ this.language.value, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                {{ this.language.value|upper }}
+            {% else %}
+                <span class="text-gray-400">-</span>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>

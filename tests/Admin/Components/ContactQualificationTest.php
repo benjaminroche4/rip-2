@@ -361,9 +361,9 @@ final class ContactQualificationTest extends KernelTestCase
 
         // Reçue le + 2 changements de statut, en ordre chronologique.
         self::assertCount(3, $history);
-        self::assertStringContainsString('Reçue le', $history[0]['text']);
+        self::assertStringContainsString('Reçu le', $history[0]['text']);
         self::assertStringContainsString('En cours', $history[1]['text']);
-        self::assertStringContainsString('Convertie', $history[2]['text']);
+        self::assertStringContainsString('Converti', $history[2]['text']);
         self::assertSame('Julien Moreau', $history[1]['authorName']);
     }
 
@@ -516,6 +516,9 @@ final class ContactQualificationTest extends KernelTestCase
         // attached invite (for prospects who never open attachments).
         self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'calendar.google.com');
         self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'outlook.live.com');
+        // Subject and hero block: the essential info is readable at a glance.
+        self::assertStringContainsString('Votre visio est confirmée', (string) $byRecipient[(string) $contact->getEmail()]->getSubject());
+        self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'heure de Paris');
         $agent = $byRecipient['contact@relocation-in-paris.fr'];
         self::assertEmailAttachmentCount($agent, 1);
         $ics = $agent->getAttachments()[0]->getBody();
@@ -629,10 +632,100 @@ final class ContactQualificationTest extends KernelTestCase
         $notice = self::getMailerMessage(0);
         self::assertNotNull($notice);
         self::assertEmailAddressContains($notice, 'To', (string) $contact->getEmail());
-        self::assertStringContainsString('Nous revenons vers vous', (string) $notice->getSubject());
+        // Channel-aware subject: who reaches out, how and when, readable
+        // from the inbox list alone.
+        self::assertStringContainsString('vous écrit sur WhatsApp', (string) $notice->getSubject());
+        self::assertEmailHtmlBodyContains($notice, 'heure de Paris');
+        self::assertEmailHtmlBodyContains($notice, 'WhatsApp');
 
         $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId());
         self::assertContains('recontact_notice', array_filter(array_map(static fn ($e) => $e->kind, $events)));
+    }
+
+    public function testRecallAgendaEventIsDroppedWhenTheRecontactNoLongerApplies(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->pickChannel('phone');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        // The Calendar API is not configured in tests: simulate the agenda
+        // event it would have created, then leave the recontact step.
+        $entity = $this->em->find(Contact::class, $contact->getId());
+        $entity->setRecallEventId('fake-recall-event');
+        $this->em->flush();
+
+        $component->editStep();
+        $component->pickStep('quote_preparation');
+        $component->confirmStep();
+
+        $this->em->clear();
+        self::assertNull(
+            $this->em->find(Contact::class, $contact->getId())->getRecallEventId(),
+            'Leaving the recontact step drops the mirrored agenda event.',
+        );
+    }
+
+    public function testRecallAgendaEventIsDroppedWhenTheLeadCloses(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->pickChannel('phone');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        $entity = $this->em->find(Contact::class, $contact->getId());
+        $entity->setRecallEventId('fake-recall-event');
+        $this->em->flush();
+
+        $component->change('closed');
+
+        $this->em->clear();
+        self::assertNull(
+            $this->em->find(Contact::class, $contact->getId())->getRecallEventId(),
+            'Closing the lead drops the mirrored agenda event.',
+        );
+    }
+
+    public function testClientEmailsCarryTheAssignedAgentFirstName(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        // Assign the lead: the client emails should name this agent.
+        $admin = self::getContainer()->get('security.token_storage')->getToken()?->getUser();
+        \assert($admin instanceof User);
+        $entity = $this->em->find(Contact::class, $contact->getId());
+        $entity->setAssignedTo($admin);
+        $this->em->flush();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('recontact');
+        $component->pickChannel('phone');
+        $component->recallAt = (new \DateTimeImmutable('+2 days 14:00'))->format('Y-m-d\TH:i');
+        $component->notifyClient = true;
+        $component->confirmStep();
+
+        self::assertEmailCount(1);
+        $notice = self::getMailerMessage(0);
+        self::assertNotNull($notice);
+        $firstName = (string) $admin->getFirstName();
+        self::assertStringContainsString($firstName, (string) $notice->getSubject());
+        self::assertStringContainsString('vous rappelle', (string) $notice->getSubject());
+        self::assertEmailHtmlBodyContains($notice, $firstName);
     }
 
     public function testOverdueVisioCanBeClosedAsDoneOrNoShow(): void
@@ -724,7 +817,7 @@ final class ContactQualificationTest extends KernelTestCase
 
         $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
         self::assertStringContainsString('data-testid="terminal-banner"', $html);
-        self::assertStringContainsString('Demande fermée', $html);
+        self::assertStringContainsString('Lead clôturé', $html);
         self::assertStringContainsString('Profil inadapté à nos services', $html);
 
         $contact->setStatus(\App\Contact\Domain\ContactStatus::Converted);
@@ -732,7 +825,7 @@ final class ContactQualificationTest extends KernelTestCase
 
         $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
         self::assertStringContainsString('data-testid="terminal-banner"', $html);
-        self::assertStringContainsString('Demande convertie en client', $html);
+        self::assertStringContainsString('Lead converti en client', $html);
         self::assertStringNotContainsString('Profil inadapté', $html, 'Closure reason is closed-only.');
     }
 

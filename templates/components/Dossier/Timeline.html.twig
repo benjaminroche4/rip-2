@@ -54,6 +54,80 @@
                         </p>
                     </div>
                 </div>
+
+                {# Les quatre faits qui décident de l'avancement du dossier :
+                   loyer visé, qui habite, langue d'échange, garantie. #}
+                {% set facts = this.keyFacts %}
+                {% set notSet = 'admin.dossiers.show.facts.none'|trans %}
+                <div class="mt-1 grid grid-cols-2 gap-1 sm:grid-cols-4" data-testid="dossier-key-facts">
+                    <div class="rounded-xl rounded-r-none bg-white px-4 py-3 max-sm:rounded-r-xl max-sm:rounded-b-none sm:rounded-r-none">
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:wallet', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.facts.rent'|trans }}
+                        </p>
+                        <p class="mt-1 flex items-center justify-between gap-2 text-sm font-medium text-gray-900 tabular-nums" data-testid="fact-rent">
+                            {% if facts.budget %}
+                                <span>{{ facts.budget|format_number }} {{ 'admin.contacts.project.budgetUnit'|trans }}</span>
+                                {# Règle des 3x : loyer au-dessus du tiers des
+                                   revenus des locataires, aucun bailleur ne
+                                   suivra. Le plafond conseillé est en tooltip. #}
+                                {% if facts.overBudget %}
+                                    <span
+                                        class="shrink-0 text-amber-500"
+                                        title="{{ 'admin.dossiers.show.search.budgetTooHigh'|trans({'%max%': facts.maxAffordable|format_number}) }}"
+                                        data-testid="fact-rent-alert"
+                                    >
+                                        {{ ux_icon('lucide:triangle-alert', {class: 'size-4 shrink-0', 'aria-label': 'admin.dossiers.show.search.budgetTooHigh'|trans({'%max%': facts.maxAffordable|format_number})}) }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-300">{{ notSet }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="bg-white px-4 py-3 max-sm:rounded-none">
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:users', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.facts.tenants'|trans }}
+                        </p>
+                        <p class="mt-1 text-sm font-medium text-gray-900" data-testid="fact-tenants">
+                            <span class="tabular-nums">{{ facts.tenants }}</span>
+                            {% if facts.household %}
+                                <span class="font-normal text-gray-500">{{ ('admin.dossiers.show.search.householdType.choice.' ~ facts.household)|trans|lower }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="bg-white px-4 py-3 max-sm:rounded-none">
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:languages', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.facts.language'|trans }}
+                        </p>
+                        <p class="mt-1 text-sm font-medium text-gray-900" data-testid="fact-language">
+                            {% if facts.language %}
+                                {{ ('admin.dossiers.create.person.language.' ~ facts.language)|trans }}
+                            {% else %}
+                                <span class="text-gray-300">{{ notSet }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {# Garantie : sans garant, aucun bail ne se signe à Paris. #}
+                    <div class="rounded-xl rounded-l-none bg-white px-4 py-3 max-sm:rounded-t-none max-sm:rounded-l-xl sm:rounded-l-none">
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:shield-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.facts.guarantor'|trans }}
+                        </p>
+                        <p class="mt-1 text-sm font-medium text-gray-900" data-testid="fact-guarantor">
+                            {% if facts.guarantor %}
+                                {{ ('admin.contacts.project.guarantor.choice.' ~ facts.guarantor)|trans }}
+                                {% if facts.guarantorStatus and facts.guarantor == 'garantme' %}
+                                    <span class="font-normal text-gray-500">{{ ('admin.dossiers.show.search.guarantorStatus.choice.' ~ facts.guarantorStatus)|trans|lower }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-gray-300">{{ notSet }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
     {% endif %}

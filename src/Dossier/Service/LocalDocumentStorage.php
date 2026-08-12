@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dossier\Service;
 
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierDocument;
 use App\Dossier\Entity\DossierDocumentFile;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -13,7 +14,7 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * Disk implementation (dev/test): files live outside public/
- * (storage/dossiers/<reference>/<uuid>.<ext>), the deploy process and
+ * (storage/dossiers/<reference>/documents/<uuid>.<ext>), the deploy process and
  * cache:clear never touch this directory.
  */
 final readonly class LocalDocumentStorage implements DocumentStorage
@@ -25,7 +26,7 @@ final readonly class LocalDocumentStorage implements DocumentStorage
     ) {
     }
 
-    public function store(Dossier $dossier, UploadedFile $file): string
+    public function store(Dossier $dossier, DossierDocument $document, UploadedFile $file): string
     {
         $extension = $file->guessExtension() ?? 'bin';
         $storedName = Uuid::v4()->toRfc4122().'.'.$extension;
@@ -57,11 +58,28 @@ final readonly class LocalDocumentStorage implements DocumentStorage
 
     private function path(Dossier $dossier, DossierDocumentFile $file): string
     {
-        return $this->dossierDir($dossier).'/'.$file->getStoredName();
+        $stored = (string) $file->getStoredName();
+        if ($this->unsafe($stored)) {
+            throw new \RuntimeException('Illegal dossier document name.');
+        }
+
+        return $this->dossierDir($dossier).'/'.$stored;
     }
 
     private function dossierDir(Dossier $dossier): string
     {
-        return $this->baseDir.'/'.$dossier->getReference();
+        $ref = (string) $dossier->getReference();
+        if ($this->unsafe($ref)) {
+            throw new \RuntimeException('Illegal dossier reference.');
+        }
+
+        return $this->baseDir.'/'.$ref.'/documents';
+    }
+
+    /** Rejects any path-traversal segment (slash, backslash, "..", null). */
+    private function unsafe(string $segment): bool
+    {
+        return '' === $segment || str_contains($segment, '/') || str_contains($segment, '\\')
+            || str_contains($segment, '..') || str_contains($segment, "\0");
     }
 }

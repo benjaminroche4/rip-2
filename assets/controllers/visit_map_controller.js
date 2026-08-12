@@ -18,21 +18,39 @@ export default class extends Controller {
 
     #map = null
     #markers = []
+    #markersById = new Map()
     #routeLine = null
 
     connect() {
         this.element.addEventListener('ux:map:connect', this.#onMapConnect)
+        // Survol d'une rangée de visite : son pin reste net, les autres
+        // s'estompent (et inversement au départ du survol).
+        this.onRowHover = (event) => this.#dimOthers(event.detail?.id)
+        this.onRowLeave = () => this.#dimOthers(null)
+        window.addEventListener('visit-row:hover', this.onRowHover)
+        window.addEventListener('visit-row:leave', this.onRowLeave)
     }
 
     disconnect() {
+        window.removeEventListener('visit-row:hover', this.onRowHover)
+        window.removeEventListener('visit-row:leave', this.onRowLeave)
         this.element.removeEventListener('ux:map:connect', this.#onMapConnect)
         this.#markers.forEach(marker => marker.setMap(null))
         this.#markers = []
+        this.#markersById.clear()
         if (this.#routeLine) {
             this.#routeLine.setMap(null)
             this.#routeLine = null
         }
         this.#map = null
+    }
+
+    /** Estompe tous les pins sauf celui de la visite survolée. */
+    #dimOthers(id) {
+        this.#markersById.forEach((marker, markerId) => {
+            marker.setOpacity(null === id || id === undefined || markerId === id ? 1 : 0.35)
+            marker.setZIndex(markerId === id ? 999 : undefined)
+        })
     }
 
     #onMapConnect = (event) => {
@@ -47,12 +65,27 @@ export default class extends Controller {
         visits.forEach((visit) => {
             const position = { lat: visit.lat, lng: visit.lng }
             bounds.extend(position)
-            this.#markers.push(new google.maps.Marker({
+            const marker = new google.maps.Marker({
                 map: this.#map,
                 position,
                 title: visit.title,
                 label: { text: visit.label, color: '#ffffff', fontSize: '12px', fontWeight: '600' },
-            }))
+            })
+            // Survol du pin : la rangée correspondante s'illumine.
+            marker.addListener('mouseover', () => {
+                window.dispatchEvent(new CustomEvent('visit-pin:hover', { detail: { id: visit.id } }))
+            })
+            marker.addListener('mouseout', () => {
+                window.dispatchEvent(new CustomEvent('visit-pin:leave'))
+            })
+            // Clic sur le pin : la liste défile jusqu'à la rangée.
+            marker.addListener('click', () => {
+                window.dispatchEvent(new CustomEvent('visit-pin:select', { detail: { id: visit.id } }))
+            })
+            this.#markers.push(marker)
+            if (visit.id !== undefined) {
+                this.#markersById.set(visit.id, marker)
+            }
         })
 
         if (visits.length === 1) {

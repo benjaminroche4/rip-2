@@ -12,6 +12,7 @@ final readonly class VisitSummary
 {
     public function __construct(
         public int $id,
+        public string $reference,
         public \DateTimeImmutable $scheduledAt,
         public string $address,
         public ?float $latitude,
@@ -19,6 +20,19 @@ final readonly class VisitSummary
         public string $dossierName,
         public string $dossierReference,
         public ?string $agentName,
+        public ?int $assigneeId = null,
+        public ?string $assigneeName = null,
+        public ?string $assigneeAvatar = null,
+        public ?string $bookedByName = null,
+        public ?string $bookedByAvatar = null,
+        public ?string $note = null,
+        public VisitType $type = VisitType::PropertyVisit,
+        public VisitStatus $status = VisitStatus::Planned,
+        public ?string $listingUrl = null,
+        public int $durationMinutes = 30,
+        public bool $clientPresent = true,
+        public ?string $report = null,
+        public ?ClientFeeling $clientFeeling = null,
     ) {
     }
 

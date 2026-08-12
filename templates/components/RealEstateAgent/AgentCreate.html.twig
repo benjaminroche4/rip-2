@@ -52,18 +52,22 @@
 
 {% import _self as ui %}
 
-<div {{ attributes.defaults({class: 'shrink-0'}) }} data-testid="agent-create">
-    <twig:Button
-        size="sm"
-        data-action="live#action"
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="agent-create">
+    <button
+        type="button"
+        data-action="live#action details-dropdown#close"
         data-live-action-param="openModal"
+        class="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-50 cursor-pointer"
         data-testid="agent-create-open"
     >
-        <span class="flex items-center gap-2">
-            {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
-            {{ 'admin.agents.create.button'|trans }}
+        <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
+            {{ ux_icon('lucide:user', {class: 'size-4', 'aria-hidden': 'true'}) }}
         </span>
-    </twig:Button>
+        <span class="min-w-0">
+            <span class="block text-sm font-medium text-gray-900">{{ 'admin.agents.create.menuItem.title'|trans }}</span>
+            <span class="block text-xs text-gray-500">{{ 'admin.agents.create.menuItem.subtitle'|trans }}</span>
+        </span>
+    </button>
 
     {% if this.open %}
         <div
@@ -198,11 +202,11 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="agent-create-submit"
                         >
-                            <span data-loading="action(create)|hide" class="flex items-center gap-2">
+                            <span data-loading="action(create)|addClass(hidden)" class="flex items-center gap-2">
                                 {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                                 {{ 'admin.agents.create.submit'|trans }}
                             </span>
-                            <span data-loading="action(create)|show" class="flex items-center gap-2">
+                            <span data-loading="action(create)|removeClass(hidden)" class="hidden flex items-center gap-2">
                                 {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
                                 {{ 'admin.agents.create.submitting'|trans }}
                             </span>

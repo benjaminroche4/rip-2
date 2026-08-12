@@ -232,14 +232,14 @@
                 {% if this.editId %}
                     {# data-loading restaure un display inline sur l'élément
                        togglé : le flex vit donc sur un span interne intouché. #}
-                    <span data-loading="action(autosave)|hide" data-testid="document-request-autosaved">
+                    <span data-loading="action(autosave)|addClass(hidden)" data-testid="document-request-autosaved">
                         <span class="flex items-center gap-1 text-xs whitespace-nowrap text-gray-400">
                             {{ ux_icon('lucide:check', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
                             <span>{{ 'admin.tools.documents.request.autosaved'|trans }}</span>
                         </span>
                     </span>
                 {% endif %}
-                <span class="hidden" data-loading="action(autosave)|show">
+                <span class="hidden" data-loading="action(autosave)|removeClass(hidden)">
                     <span class="flex items-center gap-1 text-xs whitespace-nowrap text-gray-400">
                         <twig:Spinner class="inline size-3" />
                         <span>{{ 'admin.tools.documents.request.autosaving'|trans }}</span>

@@ -98,6 +98,7 @@ final class ContactList
         private readonly ContactRepository $repository,
         private readonly Security $security,
         private readonly \App\Contact\Service\VisioInvitationMailer $visioMailer,
+        private readonly \App\Contact\Service\RecallCalendarSync $recallSync,
     ) {
     }
 
@@ -149,6 +150,11 @@ final class ContactList
         $entity = $this->repository->find($id);
         if (null !== $entity) {
             $this->visioMailer->onStatusChange($entity, $newStatus);
+            // The recall mirror follows the same matrix, silently: kept
+            // through conversion, dropped on close or rollback to new.
+            if (\in_array($newStatus, [ContactStatus::Closed, ContactStatus::New], true)) {
+                $this->recallSync->clear($entity);
+            }
         }
 
         $this->repository->updateStatus($id, $newStatus, $this->currentUserName(), $avatar);

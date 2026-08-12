@@ -85,8 +85,8 @@ final class DossierDocumentFileAccessTest extends WebTestCase
 
         $filesystem = new Filesystem();
         $filesystem->remove($this->storageDir);
-        $filesystem->mkdir($this->storageDir.'/DS-000042');
-        file_put_contents($this->storageDir.'/DS-000042/stored-test.pdf', '%PDF-1.4');
+        $filesystem->mkdir($this->storageDir.'/DS-000042/documents');
+        file_put_contents($this->storageDir.'/DS-000042/documents/stored-test.pdf', '%PDF-1.4');
     }
 
     private function fileUrl(int $id, string $reference = 'DS-000042'): string
@@ -149,7 +149,7 @@ final class DossierDocumentFileAccessTest extends WebTestCase
 
     public function testMissingFileOnDiskIs404(): void
     {
-        (new Filesystem())->remove($this->storageDir.'/DS-000042/stored-test.pdf');
+        (new Filesystem())->remove($this->storageDir.'/DS-000042/documents/stored-test.pdf');
 
         $this->loginAsAdmin();
         $this->client->request('GET', $this->fileUrl($this->fileId));
@@ -181,7 +181,7 @@ final class DossierDocumentFileAccessTest extends WebTestCase
 
     public function testZipOfDossierWithoutFilesIs404(): void
     {
-        (new Filesystem())->remove($this->storageDir.'/DS-000042/stored-test.pdf');
+        (new Filesystem())->remove($this->storageDir.'/DS-000042/documents/stored-test.pdf');
 
         $this->loginAsAdmin();
         $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/dossiers/DS-000042/pieces.zip');

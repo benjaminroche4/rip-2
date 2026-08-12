@@ -206,6 +206,46 @@ final class SearchEditorTest extends KernelTestCase
         self::assertTrue($component->isComplete());
     }
 
+    public function testKeyFactsSummariseTheDossierUnderTheTimeline(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+
+        $timeline = $this->mountTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()]);
+        $facts = $timeline->getKeyFacts();
+
+        self::assertSame(1, $facts['tenants'], 'Only tenants are counted, not guarantors.');
+        self::assertSame('fr', $facts['language'], 'The primary contact drives the language.');
+
+        // Filled in by the search editor, read back on the summary card.
+        $editor = $this->mountEditor($dossier);
+        $editor->budget = '2200';
+        $editor->save();
+        $editor->chooseGuarantorType('garantme');
+        $editor->chooseHouseholdType('couple');
+
+        $facts = $this->mountTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()])->getKeyFacts();
+        self::assertSame(2200, $facts['budget']);
+        self::assertSame('garantme', $facts['guarantor']);
+        self::assertSame('couple', $facts['household']);
+        self::assertFalse($facts['overBudget'], 'No income known yet: nothing to compare the rent to.');
+
+        // 5 500 € of income caps the advisable rent at 1 833 €: 2 200 € is
+        // above, the card must warn (landlord's 3x rule).
+        $dossier->getPersons()->first()->setMonthlyIncome(5500);
+        $this->em->flush();
+        $facts = $this->mountTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()])->getKeyFacts();
+        self::assertSame(1833, $facts['maxAffordable']);
+        self::assertTrue($facts['overBudget']);
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="dossier-key-facts"', $rendered);
+        self::assertStringContainsString('data-testid="fact-rent-alert"', $rendered, 'Rent above a third of the income is flagged.');
+        self::assertStringContainsString('data-testid="fact-rent"', $rendered);
+        self::assertStringContainsString('data-testid="fact-tenants"', $rendered);
+        self::assertStringContainsString('data-testid="fact-language"', $rendered);
+        self::assertStringContainsString('data-testid="fact-guarantor"', $rendered);
+    }
+
     public function testTimelineComponentFollowsTheMoveInDate(): void
     {
         $dossier = $this->persistDossier(withSearch: true);
@@ -471,6 +511,31 @@ final class SearchEditorTest extends KernelTestCase
         $this->em->flush();
 
         return $dossier;
+    }
+
+    /**
+     * The fold state must survive a re-render: rendered from the DOM alone,
+     * the morph restored `open` and a collapsed card popped back open at the
+     * first autosave.
+     */
+    public function testFoldStateSurvivesARerender(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('<details open', $rendered, 'The card opens by default.');
+
+        $component = $this->mountEditor($dossier);
+        $component->toggleCard();
+        self::assertFalse($component->expanded);
+
+        // Collapsed state re-rendered as such, whatever happens next.
+        $collapsed = (string) $this->renderTwigComponent('Dossier:Search', [
+            'dossierId' => (int) $dossier->getId(),
+            'expanded' => false,
+        ]);
+        self::assertStringNotContainsString('<details open', $collapsed);
+        self::assertStringContainsString('data-live-action-param="toggleCard"', $collapsed);
     }
 
     private function mountEditor(Dossier $dossier): object

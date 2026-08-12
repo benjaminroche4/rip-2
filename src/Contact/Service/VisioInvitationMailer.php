@@ -69,7 +69,7 @@ final readonly class VisioInvitationMailer
         $ics = null;
         $event = $this->calendar->upsertVisioEvent(
             $contact->getVisioEventId(),
-            \sprintf('Visio %s | Relocation in Paris', $clientName),
+            \sprintf('Visio Découverte | %s', $clientName),
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
@@ -89,15 +89,18 @@ final readonly class VisioInvitationMailer
 
         try {
             $mode = $rescheduled ? 'rescheduled' : 'scheduled';
-            $dateText = $visioAt->format($fr ? 'd.m.Y à H\hi' : 'd.m.Y, H:i');
+            // Human date up front ("mardi 12 août à 14h00"): the essential
+            // info must be readable from the inbox list alone.
+            $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', self::humanDate($visioAt, $fr), $visioAt->format($fr ? 'H\hi' : 'H:i'));
+            $agentName = self::agentFirstName($contact);
             $client = (new TemplatedEmail())
-                ->from('Contact <contact@relocation-in-paris.fr>')
+                ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
                 ->to($clientEmail)
                 ->subject(match ([$fr, $rescheduled]) {
-                    [true, false] => \sprintf('Votre visio du %s | Relocation in Paris', $dateText),
-                    [true, true] => \sprintf('Votre visio est déplacée au %s | Relocation in Paris', $dateText),
-                    [false, false] => \sprintf('Your video call on %s | Relocation in Paris', $dateText),
-                    default => \sprintf('Your video call moved to %s | Relocation in Paris', $dateText),
+                    [true, false] => \sprintf('✅ Votre visio est confirmée : %s', $dateText),
+                    [true, true] => \sprintf('📅 Votre visio est déplacée au %s', $dateText),
+                    [false, false] => \sprintf('✅ Your video call is confirmed: %s', $dateText),
+                    default => \sprintf('📅 Your video call moved to %s', $dateText),
                 })
                 ->htmlTemplate('emails/contact_visio_client.html.twig')
                 ->context([
@@ -106,6 +109,8 @@ final readonly class VisioInvitationMailer
                     'visioAt' => $visioAt,
                     'meetLink' => $meetLink,
                     'mode' => $mode,
+                    'agentName' => $agentName,
+                    'durationMinutes' => self::DURATION_MINUTES,
                     'addToCalendarLinks' => $this->addToCalendarLinks($clientName, $visioAt, $meetLink),
                 ]);
             $client->addPart(new DataPart($ics, 'visio.ics', 'text/calendar'));
@@ -204,7 +209,7 @@ final readonly class VisioInvitationMailer
         $assigneeEmail = $contact->getAssignedTo()?->getEmail();
         $event = $this->calendar->upsertVisioEvent(
             $eventId,
-            \sprintf('Visio %s | Relocation in Paris', $clientName),
+            \sprintf('Visio Découverte | %s', $clientName),
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
@@ -219,6 +224,35 @@ final readonly class VisioInvitationMailer
                 'googleEvent' => $event['eventId'],
             ]);
         }
+    }
+
+    /**
+     * "mardi 12 août" / "Tuesday 12 August", pinned to Paris time: the
+     * subject line carries the essential info on its own.
+     */
+    public static function humanDate(\DateTimeImmutable $date, bool $fr): string
+    {
+        $formatter = new \IntlDateFormatter(
+            $fr ? 'fr_FR' : 'en_GB',
+            \IntlDateFormatter::NONE,
+            \IntlDateFormatter::NONE,
+            'Europe/Paris',
+            pattern: 'EEEE d MMMM',
+        );
+
+        return (string) $formatter->format($date);
+    }
+
+    /**
+     * First name of the assigned agent, the personal touch of the client
+     * emails; null when the lead is unassigned (templates fall back to
+     * "our team").
+     */
+    public static function agentFirstName(Contact $contact): ?string
+    {
+        $firstName = trim((string) $contact->getAssignedTo()?->getFirstName());
+
+        return '' !== $firstName ? $firstName : null;
     }
 
     /**
@@ -301,13 +335,13 @@ final readonly class VisioInvitationMailer
         $ics = $this->buildIcs($contact, $visioAt, $clientName, $clientEmail, $assigneeEmail, cancelled: true, googleEventId: $eventId);
 
         try {
-            $dateText = $visioAt->format($fr ? 'd.m.Y à H\hi' : 'd.m.Y, H:i');
+            $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', self::humanDate($visioAt, $fr), $visioAt->format($fr ? 'H\hi' : 'H:i'));
             $client = (new TemplatedEmail())
-                ->from('Contact <contact@relocation-in-paris.fr>')
+                ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
                 ->to($clientEmail)
                 ->subject($fr
-                    ? \sprintf('Votre visio du %s est annulée | Relocation in Paris', $dateText)
-                    : \sprintf('Your video call on %s is cancelled | Relocation in Paris', $dateText))
+                    ? \sprintf('Votre visio du %s est annulée', $dateText)
+                    : \sprintf('Your video call on %s is cancelled', $dateText))
                 ->htmlTemplate('emails/contact_visio_client.html.twig')
                 ->context([
                     'fr' => $fr,
@@ -315,6 +349,8 @@ final readonly class VisioInvitationMailer
                     'visioAt' => $visioAt,
                     'meetLink' => null,
                     'mode' => 'cancelled',
+                    'agentName' => self::agentFirstName($contact),
+                    'durationMinutes' => self::DURATION_MINUTES,
                 ]);
             $client->addPart(new DataPart($ics, 'visio.ics', 'text/calendar'));
 
@@ -397,7 +433,7 @@ final readonly class VisioInvitationMailer
             \sprintf('DTSTAMP:%s', $now->format('Ymd\THis\Z')),
             \sprintf('DTSTART:%s', $start->format('Ymd\THis\Z')),
             \sprintf('DTEND:%s', $end->format('Ymd\THis\Z')),
-            \sprintf('SUMMARY:%s', $this->escapeIcs(\sprintf('Visio %s | Relocation in Paris', $clientName))),
+            \sprintf('SUMMARY:%s', $this->escapeIcs(\sprintf('Visio Découverte | %s', $clientName))),
             \sprintf('DESCRIPTION:%s', $this->escapeIcs($description)),
             \sprintf('ORGANIZER;CN=Relocation in Paris:mailto:%s', EmailAddress::CONTACT->value),
             ...(null !== $meetLink ? ['URL:'.$meetLink] : []),

@@ -1795,21 +1795,49 @@ a11y:
     skipToContent: Aller au contenu principal
     previous: Précédent
     next: Suivant
+gallery:
+    open: Agrandir la photo
+    close: Fermer
+    previous: Précédent
+    next: Suivant
 admin:
     meta:
         description: Espace d'administration Relocation in Paris. Accès réservé à l'équipe.
     nav:
-        dashboard: Tableau de bord
         users: Utilisateurs
         contacts: Leads
         dossiers: Dossiers
         visits: Visites
         agents: Agents immobiliers
         tools: Outils
+        profile: Mon profil
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
     breadcrumb:
         label: Fil d'Ariane
+    accessDenied:
+        title: Accès refusé
+        heading: Cette section ne fait pas partie de vos accès
+        text: Demandez à un administrateur de vous l'ouvrir. Vos accès actuels sont listés sur votre profil.
+        backToWork: Retour à mon espace
+        seeMyAccess: Voir mes accès
+    search:
+        trigger: Rechercher...
+        title: Recherche globale
+        placeholder: Nom, email, téléphone ou référence
+        hint: Tapez au moins 2 caractères pour rechercher.
+        noResults: Aucun résultat pour « %query% ».
+        seeAll: Voir tous les résultats
+        closeLabel: Fermer la recherche
+        tryLabel: Essayez
+        example:
+            reference: CT-002987
+            name: Martin
+            phone: +33 6…
+        keys:
+            navigate: Naviguer
+            open: Ouvrir
+            close: Fermer
     dossiers:
         title: Dossiers
         empty:
@@ -1852,6 +1880,9 @@ admin:
                 rejections: Refus
             managedBy: 'Géré par :'
         show:
+            unlock: Déverrouiller la modification
+            lock: Verrouiller la modification
+            reference: Référence
             persons:
                 edit: Modifier
                 save: Valider
@@ -1877,6 +1908,11 @@ admin:
                     seniorityMonths: depuis %count% mois
             facts:
                 createdAt: Créé le
+                none: Non renseigné
+                rent: Loyer recherché
+                tenants: Locataires
+                language: Langue
+                guarantor: Garantie
             manager:
                 remove: Retirer le responsable
             nav:
@@ -1892,6 +1928,16 @@ admin:
                 late: En retard
                 daysLeft: 'J-%count%'
                 daysLate: 'J+%count%'
+            recap:
+                title: Récap express
+                generate: Générer le récap
+                refresh: Actualiser
+                generating: Génération...
+                empty: Aucun récap pour le moment. Générez-le pour obtenir un résumé du dossier à partir des données saisies.
+                error: La génération a échoué. Réessayez dans un instant.
+                nextAction: 'Prochaine action :'
+                generatedAt: Généré le
+                disclaimer: Résumé généré par IA à partir des données du dossier, à vérifier.
             search:
                 guarantorStatus:
                     label: Garantie
@@ -2114,6 +2160,9 @@ admin:
                 visit:
                     title: Visite
                     description: Planification et comptes-rendus de visites.
+                    empty: Aucune visite planifiée pour ce dossier.
+                    plan: Planifier une visite
+                    counter: '%count% à venir'
                 payment:
                     title: Paiement
                     description: Honoraires et suivi des paiements.
@@ -2205,15 +2254,15 @@ admin:
                     placeholder: Choisir un pays
                     invalid: Choisissez un pays dans la liste.
     contacts:
-        title: Demandes de contact
-        empty: Aucune demande de contact pour le moment.
+        title: Leads
+        empty: Aucun lead pour le moment.
         searchPlaceholder: Rechercher (nom, email, téléphone, référence)
         show:
             actions: Actions
             exportPdf: Exporter en PDF
             delete:
-                action: Supprimer la demande
-                title: Supprimer cette demande ?
+                action: Supprimer le lead
+                title: Supprimer ce lead ?
                 description: '%name% (%reference%) sera supprimé définitivement, avec ses notes et son historique. Cette action est irréversible.'
                 cancel: Annuler
                 confirm: Supprimer définitivement
@@ -2227,11 +2276,11 @@ admin:
                 confirm: Créer le dossier
             closureLabel: Motif de clôture
             closurePlaceholder: Choisir un motif
-            closedTitle: Demande fermée
-            convertedTitle: Demande convertie en client
+            closedTitle: Lead clôturé
+            convertedTitle: Lead converti en client
             terminalSince: depuis le %date%
-            prev: Demande précédente
-            next: Demande suivante
+            prev: Lead précédent
+            next: Lead suivant
             field:
                 company: Société
                 offer: Formule choisie
@@ -2258,23 +2307,23 @@ admin:
             other: Autre
         emptyState:
             searchTitle: Aucun résultat
-            searchHint: 'Aucune demande ne correspond à « %search% ». Essayez un nom, un email ou une référence.'
-            mineTitle: Aucune demande assignée
-            mineHint: Les demandes qui vous sont assignées via « Suivi par » apparaîtront ici.
-            mineCta: Voir toutes les demandes
+            searchHint: 'Aucun lead ne correspond à « %search% ». Essayez un nom, un email ou une référence.'
+            mineTitle: Aucun lead assigné
+            mineHint: Les leads qui vous sont assignés via « Suivi par » apparaîtront ici.
+            mineCta: Voir tous les leads
             newTitle: Tout est traité !
-            newHint: Aucune nouvelle demande en attente. Beau travail.
-            defaultTitle: Aucune demande
+            newHint: Aucun nouveau lead en attente. Beau travail.
+            defaultTitle: Aucun lead
             byStatus:
                 in_progress:
-                    title: Aucune demande en cours
-                    hint: Les demandes prises en charge par l'équipe apparaîtront ici.
+                    title: Aucun lead en cours
+                    hint: Les leads pris en charge par l'équipe apparaîtront ici.
                 converted:
                     title: Aucune conversion pour le moment
-                    hint: Les demandes transformées en clients apparaîtront ici.
+                    hint: Les leads convertis en clients apparaîtront ici.
                 closed:
-                    title: Aucune demande fermée
-                    hint: Les demandes clôturées apparaîtront ici.
+                    title: Aucun lead clôturé
+                    hint: Les leads clôturés apparaîtront ici.
         sort:
             recent: Plus récentes
             recall: Rappel le plus proche
@@ -2282,14 +2331,14 @@ admin:
             budget: Budget le plus élevé
         scope:
             label: Portée
-            all: Toutes les demandes
-            mine: Mes demandes
+            all: Tous les leads
+            mine: Mes leads
         create:
-            button: Nouvelle demande
-            title: Nouvelle demande de contact
-            subtitle: Saisie manuelle d'une demande reçue par téléphone, email ou WhatsApp.
-            source: Source de la demande
-            submit: Créer la demande
+            button: Nouveau lead
+            title: Nouveau lead
+            subtitle: Saisie manuelle d'un lead reçu par téléphone, email ou WhatsApp.
+            source: Source du lead
+            submit: Créer le lead
         contactSource:
             form: Formulaire du site
             phone: Téléphone
@@ -2297,16 +2346,16 @@ admin:
             website: Site web
             whatsapp: WhatsApp
         recapEmail:
-            button: Envoyer le récap au client
+            button: Envoyer le récap au prospect
             modalTitle: Envoyer le récapitulatif
-            modalSubtitle: 'L''email sera envoyé à <strong>%email%</strong>, dans la langue du client.'
+            modalSubtitle: 'L''email sera envoyé à <strong>%email%</strong>, dans la langue du prospect.'
             paymentToggle: Inclure le lien de paiement
             paymentHint: 'Formule %offer% (%price%), bouton de paiement sécurisé dans l''email.'
             depositToggle: Acompte de 50 %
             depositHint: 'Le lien demandera 50 % de la formule Confié (1 095 €), le solde sera réglé plus tard.'
             paymentUnavailable: 'Lien de paiement indisponible : renseignez d''abord la formule souhaitée dans les informations du contact.'
             send: Envoyer l'email
-            sent: Récapitulatif envoyé au client
+            sent: Récapitulatif envoyé au prospect
         edit:
             title: Modifier les informations
             required: Ce champ est obligatoire.
@@ -2319,7 +2368,7 @@ admin:
                 noShow: "Absent, replanifier"
             notifyClient: Prévenir le prospect par email (date et canal du recontact)
             visioNotice: À la validation, le prospect reçoit automatiquement l'invitation par email avec le lien Google Meet, et la visio s'ajoute à votre agenda.
-            channelRequired: Choisis le canal de recontact
+            channelRequired: Choisissez le canal de recontact
             channelLabel: Par quel canal
             joinVisio: Rejoindre
             edit: Modifier
@@ -2337,8 +2386,9 @@ admin:
                 quote_sent: Devis envoyé
                 other: Autre
         project:
+            expandMap: Agrandir la carte
+            collapseMap: Réduire la carte
             title: Projet logement
-            subtitle: Rempli à la qualification, pour comparer et filtrer les demandes.
             lock: Verrouiller les champs
             unlock: Déverrouiller les champs
             budget: Budget mensuel
@@ -2400,11 +2450,11 @@ admin:
             notes: Suivi et notes
             close: Fermer
         previous:
-            title: '{1}1 demande précédente|]1,Inf[%count% demandes précédentes'
+            title: '{1}1 lead précédent|]1,Inf[%count% leads précédents'
         leadQuality:
             ratingPromptDismiss: Masquer l'invite
-            ratingPrompt: 'Premier traitement : note la qualité de ce lead'
-            internal: Qualification interne, jamais partagée avec le client.
+            ratingPrompt: 'Premier traitement : notez la qualité de ce lead'
+            internal: Qualification interne, jamais partagée avec le prospect.
             ratingLabel: Note
             channelLabel: Recontacter par
             channel:
@@ -2430,21 +2480,21 @@ admin:
             save: Enregistrer
             cancel: Annuler
             empty: Aucune note pour le moment
-            emptyHint: Ajoute la première note pour garder une trace des échanges avec ce contact.
+            emptyHint: Ajoutez la première note pour garder une trace des échanges avec ce contact.
         filter:
             all: Tous
         card:
             status:
                 new: À traiter
                 in_progress: En cours
-                converted: Convertie
-                closed: Fermée
+                converted: Converti
+                closed: Clôturé
             field:
                 email: Email
                 phone: Tél.
                 language: Langue
             help: 'Demande :'
-            created: Reçue le
+            created: Reçu le
             statusUpdated: Statut mis à jour
             recallAtText: Rappel le %date% à %time%
             visioAtText: Visio le %date% à %time%
@@ -2463,33 +2513,113 @@ admin:
     sidebar:
         label: Navigation principale
         toggle: Réduire ou étendre la navigation
+        twoFactorNudge:
+            title: Sécurisez votre compte
+            text: La double authentification protège vos accès en cas de mot de passe compromis.
+            action: Activer maintenant
         section:
             business: Métier
             admin: Admin
         nav:
             label: Sections de l'administration
-            contactsBadge: '{0}Aucune demande à traiter|{1}1 demande à traiter|]1,Inf[%count% demandes à traiter'
+            contactsBadge: '{0}Aucun lead à traiter|{1}1 lead à traiter|]1,Inf[%count% leads à traiter'
             dossiersBadge: '{0}Aucun dossier en cours|{1}1 dossier en cours|]1,Inf[%count% dossiers en cours'
-    dashboard:
-        title: Tableau de bord
-        underConstruction: En cours de construction...
+            visitsBadge: '%count% visites aujourd''hui'
     visits:
+        type:
+            property_visit: Visite
+            inventory: État des lieux
+            technical_intervention: Intervention technique
+        status:
+            planned: Planifiée
+            done: Effectuée
+            cancelled: Annulée
+            no_show: Client absent
+        feeling:
+            hot: Client chaud
+            warm: Client tiède
+            cold: Client froid
+        show:
+            modules:
+                booking: Prise de visite
+                report: Compte-rendu
+            outcomeTitle: Issue de la visite
+            proxyVisit: Sans le client
+            feelingLabel: Ressenti du client
+            reportPlaceholder: 'Points marquants, objections, prochaine action...'
+            reportSave: Enregistrer le compte-rendu
+            title: 'Visite du %date% à %time%'
+            detailsTitle: 'Détails de la visite'
+        edit:
+            title: Modifier la visite
+        row:
+            openInMaps: Ouvrir dans Google Maps
+            performedBy: Réalisée par
+            unassigned: Non assignée
+            bookedBy: Réservée par
+            open: Ouvrir la visite
+            edit: Modifier
+            delete: Supprimer
+            deleteModal:
+                title: Supprimer cette visite ?
+                text: 'La visite au %address% sera définitivement supprimée.'
+                cancel: Annuler
+                confirm: Supprimer
         title: Visites
         empty:
             title: Aucune visite planifiée
             description: Planifiez votre première visite avec le bouton ci-dessus.
         new:
             title: Nouvelle visite
-            summary:
-                title: Récapitulatif
-                mapPlaceholder: Saisissez l'adresse du bien pour la voir sur la carte.
+        photos:
+            title: Photos du bien
+            add: Ajouter des photos
+            empty: Aucune photo pour le moment. Ajoutez les photos prises pendant la visite.
+            delete: Supprimer
+            rejected: '{1}1 fichier a été refusé (formats acceptés : JPEG, PNG, WebP, 10 Mo max).|]1,Inf[%count% fichiers ont été refusés (formats acceptés : JPEG, PNG, WebP, 10 Mo max).'
+        tabs:
+            label: Visites à venir ou archivées
+            upcoming: À venir
+            archive: Archives
+        archive:
+            title: Archives des visites
+            loadMore: Voir plus
+            shown: '%shown% sur %total% visites'
+            empty:
+                title: Aucune visite archivée
+                description: Les visites passées arrivent ici automatiquement après minuit.
         section:
             today: Aujourd'hui
             todayEmpty: Aucune visite aujourd'hui.
             tomorrow: Demain
-            tomorrowEmpty: Aucune visite demain.
             later: Prochains jours
         create:
+            sections:
+                visit: La visite
+                property: Le bien
+                slot: Le créneau
+                contacts: Agent immobilier et annonce
+                options: Options
+            details:
+                label: Mode détaillé
+                help: Agent immobilier, lien de l'annonce, présence du client.
+            type:
+                label: Type de visite
+            listingUrl:
+                label: "Lien de l'annonce"
+                placeholder: https://www.seloger.com/...
+                invalid: Le lien de l'annonce n'est pas une URL valide.
+                length: Le lien ne peut pas dépasser 500 caractères.
+            duration:
+                label: Durée estimée
+                min15: 15 min
+                min30: 30 min
+                min45: 45 min
+                min60: +1h
+                invalid: Durée invalide.
+            clientPresent:
+                label: Le client participe à la visite
+                help: Décochez si l'agent visite pour son compte (visite par procuration).
             button: Nouvelle visite
             title: Nouvelle visite
             subtitle: Planifiez une visite pour un dossier, avec l'adresse du bien et l'agent qui la fait visiter.
@@ -2500,13 +2630,23 @@ admin:
                 label: Dossier
                 placeholder: Choisir un dossier...
                 notNull: Le dossier est obligatoire.
+            assignee:
+                none: 'Aucun agent de visite. Attribue la fonction "Agent de visite" dans la fiche utilisateur.'
+                label: Effectuée par
+                placeholder: Choisir un membre de l'équipe
             agent:
                 label: Agent immobilier
                 placeholder: Aucun agent
+            note:
+                label: Note libre
+                placeholder: 'Code d''accès, interlocuteur sur place, consignes...'
+                length: La note ne peut pas dépasser 2000 caractères.
             scheduledAt:
+                past: La visite ne peut pas être planifiée dans le passé.
                 label: Date et heure
                 notNull: La date et l'heure sont obligatoires.
             address:
+                idf: L'adresse doit se situer en Île-de-France.
                 label: Adresse du bien
                 placeholder: 12 rue de la Roquette, 75011 Paris
                 notBlank: L'adresse est obligatoire.
@@ -2515,6 +2655,9 @@ admin:
         title: Agents immobiliers
         searchPlaceholder: Rechercher un agent...
         count: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
+        view:
+            agents: Agents
+            agencies: Agences
         empty:
             title: Aucun agent pour le moment
             description: Ajoutez votre premier agent immobilier avec le bouton ci-dessus.
@@ -2524,7 +2667,10 @@ admin:
         card:
             noAgency: Indépendant
         create:
-            button: Nouvel agent
+            button: Créer
+            menuItem:
+                title: Un agent
+                subtitle: Ajouter un agent à l'annuaire
             title: Nouvel agent immobilier
             subtitle: Ajoutez un agent partenaire à l'annuaire, avec son agence et ses coordonnées.
             cancel: Annuler
@@ -2555,6 +2701,29 @@ admin:
             phone:
                 label: Téléphone
                 length: Le téléphone ne peut pas dépasser 30 caractères.
+    agencies:
+        count: '{0}Aucune agence|{1}1 agence|]1,Inf[%count% agences'
+        empty:
+            title: Aucune agence pour le moment
+            description: Créez une agence, ou ajoutez un agent en agence.
+        emptyFiltered:
+            title: Aucune agence ne correspond
+            description: Modifiez la recherche pour retrouver vos agences.
+        card:
+            agentCount: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
+        create:
+            menuItem:
+                title: Une agence
+                subtitle: Créer une agence seule
+            title: Nouvelle agence
+            subtitle: Enregistrez une agence partenaire. Vous pourrez y rattacher des agents ensuite.
+            cancel: Annuler
+            submit: Créer l'agence
+            submitting: Création...
+            name:
+                label: Nom de l'agence
+                placeholder: Foncia, Century 21...
+                exists: Cette agence existe déjà.
     tools:
         title: Outils
         documents:
@@ -2639,7 +2808,7 @@ admin:
                     addPerson: Ajouter une personne
                     copyFromFirst: Copier les pièces de la personne 1
                     removePerson: Retirer
-                    save: Sauvegarder
+                    save: Enregistrer
                     download: Télécharger
             actions:
                 add: Nouveau document
@@ -2696,6 +2865,59 @@ admin:
                 language:
                     fr: Français
                     en: Anglais
+    profile:
+        title: Mon profil
+        access:
+            title: Mes accès
+            subtitle: Sections du back-office auxquelles votre compte a accès. Contactez un admin pour les modifier.
+            granted: Accès
+            denied: Sans accès
+            adminHint: Compte admin, accès à tout le back-office, gestion des utilisateurs comprise.
+        functions:
+            title: Mes fonctions
+            subtitle: Fonctions métier attribuées à votre compte.
+        twoFactor:
+            title: Double authentification
+            subtitle: Un code à 6 chiffres généré par votre téléphone est demandé à chaque connexion.
+            enabledBadge: Activée
+            enabledSince: Activée depuis le %date%.
+            remainingCodes: '{0}Aucun code de récupération restant|{1}1 code de récupération restant|]1,Inf[%count% codes de récupération restants'
+            disabledHint: Protégez votre compte avec une application d'authentification (Google Authenticator, Authy, 1Password...). Même avec votre mot de passe, personne ne pourra se connecter sans votre téléphone.
+            enable: Activer
+            enroll:
+                qrAlt: QR code à scanner avec votre application d'authentification
+                scanTitle: 1. Scannez ce QR code
+                scanHelp: Ouvrez votre application d'authentification et scannez le QR code pour ajouter le compte.
+                manualHelp: Ou saisissez cette clé manuellement dans l'application
+                confirmLabel: 2. Saisissez le code affiché par l'application
+                confirm: Activer
+                cancel: Annuler
+            codes:
+                download: Télécharger mes codes
+                warning: Conservez ces codes de récupération en lieu sûr, ils ne seront plus jamais affichés. Chacun ne fonctionne qu'une seule fois et permet de vous connecter si vous perdez votre téléphone.
+                done: J'ai mis mes codes de côté
+            disable:
+                button: Désactiver
+                passwordHelp: Confirmez avec votre mot de passe pour désactiver la double authentification.
+                codeHelp: Confirmez avec un code de votre application pour désactiver la double authentification.
+                confirm: Désactiver la double authentification
+                cancel: Annuler
+            error:
+                storage: L'envoi a échoué, réessaie dans un instant.
+                invalidCode: Ce code n'est pas valide. Vérifiez l'heure de votre téléphone et réessayez.
+                invalidPassword: Le mot de passe est incorrect.
+        password:
+            title: Mot de passe
+            subtitle: Changez votre mot de passe. La jauge indique sa solidité pendant la saisie.
+            current:
+                label: Mot de passe actuel
+            new:
+                label: Nouveau mot de passe
+            repeat:
+                label: Confirmer le nouveau mot de passe
+            submit: Changer le mot de passe
+            success: Votre mot de passe a bien été changé.
+            googleOnly: Votre compte se connecte avec Google, il n'a pas de mot de passe à changer ici.
     users:
         access:
             title: Accès au back-office
@@ -2733,6 +2955,8 @@ admin:
             lastName: Nom
             uploadAvatar: Changer la photo
             resetAvatar: Réinitialiser l'avatar
+        language:
+            edit: Modifier la langue
         activity:
             leads:
                 title: Leads assignés
@@ -2757,6 +2981,15 @@ admin:
             title: Ce compte est suspendu.
             text: La connexion est bloquée et toute session ouverte a été coupée. Vous pouvez le réactiver dans la zone en bas de page.
         danger:
+            twoFactor:
+                selfBlocked: Un autre administrateur doit réinitialiser votre 2FA.
+                title: Double authentification
+                subtitle: Réinitialisez le 2FA si ce membre a perdu son téléphone et ses codes de récupération.
+                action: Réinitialiser le 2FA
+                modal:
+                    title: Réinitialiser le 2FA de %name% ?
+                    text: '%name% pourra se reconnecter avec son seul mot de passe et devra réactiver la double authentification depuis son profil. Ses appareils de confiance seront aussi déconnectés.'
+                    confirm: Réinitialiser
             admin:
                 title: Accès admin
                 subtitle: Accès complet au back-office, gestion des utilisateurs comprise.
@@ -2788,6 +3021,7 @@ admin:
             name: Nom
             role: Rôle
             connection: Connexion
+            twoFactor: Double auth
             lastLogin: Dernière connexion
         connection:
             google: Google
@@ -2808,18 +3042,19 @@ admin:
                 createdAt: Inscrit le
                 lastLogin: Dernière connexion
                 authMethod: Méthode de connexion
+                twoFactor: Double authentification
                 uniqueId: Identifiant
                 role: Rôle
                 language: Langue
-                accountAge: Ancienneté
-                inactivity: Dernière activité
             stat:
-                daysOld: '{0}Inscrit aujourd''hui|{1}1 jour|]1,Inf[%count% jours'
-                daysIdle: '{0}Connecté aujourd''hui|{1}Hier|]1,Inf[il y a %count% jours'
-                neverLogged: Jamais connecté
+                daysOld: '{0}aujourd''hui|{1}il y a 1 jour|]1,Inf[il y a %count% jours'
+                daysIdle: '{0}aujourd''hui|{1}hier|]1,Inf[il y a %count% jours'
             authMethod:
                 google: Google
                 password: Mot de passe
+            twoFactor:
+                enabled: Activée
+                disabled: Désactivée
 listProperty:
     hero:
         eyebrow: Propriétaires
@@ -3068,3 +3303,20 @@ deposit:
         hosting:
             title: Hébergé en France
             text: Vos données restent sur des serveurs situés en France.
+
+twoFactor:
+    challenge:
+        title: Vérification en deux étapes
+        subtitle: Saisissez le code à 6 chiffres généré par votre application d'authentification.
+        code:
+            label: Code de vérification
+            digit: Chiffre %position% du code
+            help: Le code change toutes les 30 secondes.
+        useRecovery: Utiliser un code de récupération
+        useApp: Revenir au code de l'application
+        recovery:
+            label: Code de récupération
+            help: L'un des 8 codes mis de côté à l'activation. Chaque code ne fonctionne qu'une fois.
+        submit: Vérifier
+        error:
+            title: Vérification impossible

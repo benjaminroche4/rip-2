@@ -51,6 +51,23 @@ final class UserListTest extends KernelTestCase
         self::assertStringContainsString('test_admin_prefix_1234567890abcdef/admin/utilisateurs/', $html);
     }
 
+    public function testTwoFactorStatusIsVisiblePerRow(): void
+    {
+        $this->seedAdmin('admin@example.com');
+        $protected = $this->seedUser('protected@example.com', new \DateTimeImmutable(), ['ROLE_STAFF']);
+        $protected->setPlainTotpSecret('SECRETSECRETSECRET');
+        $this->seedUser('unprotected@example.com', new \DateTimeImmutable(), ['ROLE_STAFF']);
+        $this->em->flush();
+
+        $this->loginAs('admin@example.com');
+        $html = (string) $this->renderTwigComponent('Admin:UserList', ['adminPrefix' => 'test_admin_prefix_1234567890abcdef']);
+
+        self::assertStringContainsString('Double auth', $html, 'The list has a dedicated 2FA column.');
+        // One enabled chip (the protected account), disabled everywhere else.
+        self::assertSame(1, substr_count($html, 'Activée'));
+        self::assertStringContainsString('Désactivée', $html);
+    }
+
     public function testRowsAreGroupedByGradeAndEmptyGroupsAreDropped(): void
     {
         $this->seedAdmin('admin@example.com');

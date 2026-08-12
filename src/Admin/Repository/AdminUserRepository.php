@@ -56,7 +56,7 @@ final readonly class AdminUserRepository
         }
 
         $rows = $this->em->createQueryBuilder()
-            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt, u.googleId, u.password, u.language, u.isProfileComplete')
+            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt, u.googleId, u.password, u.language, u.isProfileComplete, u.totpSecret')
             ->from(User::class, 'u')
             ->where('u.uniqueId = :uniqueId')
             ->setParameter('uniqueId', Ulid::fromString($uniqueId), 'ulid')
@@ -92,6 +92,7 @@ final readonly class AdminUserRepository
             hasPasswordAuth: !empty($row['password']),
             language: $language instanceof Language ? $language : null,
             isProfileComplete: (bool) ($row['isProfileComplete'] ?? false),
+            hasTwoFactor: !empty($row['totpSecret']),
         );
     }
 
@@ -101,7 +102,7 @@ final readonly class AdminUserRepository
     private function fetch(?int $limit, ?StaffFunction $function = null): array
     {
         $qb = $this->em->createQueryBuilder()
-            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt, u.googleId, u.isSuspended')
+            ->select('u.id, u.uniqueId, u.email, u.firstName, u.lastName, u.roles, u.avatarFilename, u.createdAt, u.lastLoginAt, u.googleId, u.isSuspended, u.totpSecret')
             ->from(User::class, 'u')
             ->orderBy('u.createdAt', 'DESC');
 
@@ -154,6 +155,7 @@ final readonly class AdminUserRepository
             lastLoginAt: isset($row['lastLoginAt']) ? $this->coerceDateTime($row['lastLoginAt']) : null,
             hasGoogleAuth: null !== ($row['googleId'] ?? null),
             isSuspended: (bool) ($row['isSuspended'] ?? false),
+            hasTwoFactor: !empty($row['totpSecret']),
         );
     }
 

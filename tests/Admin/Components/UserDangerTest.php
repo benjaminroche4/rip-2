@@ -181,6 +181,19 @@ final class UserDangerTest extends KernelTestCase
         $component->askDelete();
     }
 
+    public function testAdminCannotResetTheirOwnTwoFactor(): void
+    {
+        // Self-reset would clear the second factor without any re-auth: an
+        // admin who lost their device goes through another admin.
+        $admin = $this->loginAsAdmin();
+        $admin->setPlainTotpSecret('JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP');
+        $this->em->flush();
+        $component = $this->mount($admin);
+
+        $this->expectException(AccessDeniedException::class);
+        $component->confirmResetTwoFactor();
+    }
+
     public function testNonAdminCannotMountTheComponent(): void
     {
         $user = $this->seedUser('plain@user-danger-test.local');
@@ -188,6 +201,28 @@ final class UserDangerTest extends KernelTestCase
 
         $this->expectException(AccessDeniedException::class);
         $this->mount($user);
+    }
+
+    public function testTwoFactorResetClearsTheSecretAndTrustedDevices(): void
+    {
+        $this->loginAsAdmin();
+        $target = $this->seedUser('member@user-danger-test.local', ['ROLE_STAFF']);
+        $target->setPlainTotpSecret('SECRETSECRETSECRET');
+        $target->setPlainBackupCodes(['12345678']);
+        $this->em->flush();
+
+        $component = $this->mount($target);
+        self::assertTrue($component->hasTargetTwoFactor());
+
+        // Goes through the confirmation modal, like every sensitive action.
+        $component->askResetTwoFactor();
+        self::assertTrue($component->confirmingTwoFactorReset);
+        $component->confirmResetTwoFactor();
+
+        self::assertFalse($target->isTotpAuthenticationEnabled());
+        self::assertSame(0, $target->getRemainingBackupCodeCount());
+        self::assertSame(1, $target->getTrustedTokenVersion(), 'Trusted-device cookies are invalidated.');
+        self::assertFalse($component->hasTargetTwoFactor());
     }
 
     private function mount(User $target): UserDanger

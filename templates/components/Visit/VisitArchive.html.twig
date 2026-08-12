@@ -1,0 +1,60 @@
+{# Les rangées réutilisent la macro de la liste principale : même card
+   visite partout (l'estompage "déjà passée" s'applique naturellement). #}
+{% import 'components/Visit/VisitList.html.twig' as rows %}
+
+<div {{ attributes }} data-testid="visits-archive-component">
+    {% set visitsByDay = this.visitsByDay %}
+
+    {% if visitsByDay is empty %}
+        <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="visits-archive-empty">
+            <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                    {{ ux_icon('lucide:archive', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                </div>
+                <div class="space-y-1">
+                    <h2 class="text-sm font-medium text-gray-700">{{ 'admin.visits.archive.empty.title'|trans }}</h2>
+                    <p class="max-w-[40ch] text-xs text-pretty text-gray-400">{{ 'admin.visits.archive.empty.description'|trans }}</p>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <div class="space-y-8" data-testid="visits-archive">
+            {# Un groupe par jour, du plus récent au plus ancien. #}
+            {% for day, visits in visitsByDay %}
+                <section>
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-500 uppercase">
+                        {{ visits[0].scheduledAt|format_datetime(pattern='EEEE d MMMM yyyy')|capitalize }}
+                        <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ visits|length }}</span>
+                    </h2>
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                        <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
+                            {% for visit in visits %}
+                                {{ rows.visitRow(visit, this.adminPrefix, false) }}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            {% endfor %}
+
+            {# Voir plus : élargit la fenêtre par pages de 25. #}
+            <div class="flex flex-col items-center gap-2 pb-2">
+                <p class="text-xs text-gray-400 tabular-nums">
+                    {{ 'admin.visits.archive.shown'|trans({'%shown%': this.shownCount, '%total%': this.totalCount}) }}
+                </p>
+                {% if this.hasMore %}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="loadMore"
+                        data-loading="action(loadMore)|addAttribute(disabled)"
+                        class="flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900 disabled:cursor-default disabled:opacity-60"
+                        data-testid="visits-archive-load-more"
+                    >
+                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.visits.archive.loadMore'|trans }}
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>

@@ -47,6 +47,16 @@ when@prod:
                 handler: nested
                 excluded_http_codes: [404, 405]
                 buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+                channels: ["!security"] # audit trail handled below, always on
+            # Piste d'audit toujours écrite (jamais bufferisée par
+            # fingers_crossed) : activation/désactivation 2FA, suspensions,
+            # révocations d'accès. Indispensable en post-incident.
+            security:
+                type: stream
+                path: php://stderr
+                level: notice
+                formatter: monolog.formatter.json
+                channels: ["security"]
             nested:
                 type: stream
                 path: php://stderr

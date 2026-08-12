@@ -71,13 +71,18 @@ final class SendListingEmailHandler
         // admin email.
         if (null !== $message->photosFolder) {
             $budget = self::MAX_ATTACHMENTS_BYTES;
-            foreach ($this->photoStorage->photoPaths($message->photosFolder) as $path) {
-                $size = filesize($path) ?: 0;
-                if ($size > $budget) {
+            foreach ($this->photoStorage->attachments($message->photosFolder) as $photo) {
+                // Budget decided on the known size — the bytes are pulled only
+                // for photos that actually fit, and we stop once full.
+                if ($photo->size > $budget) {
+                    break;
+                }
+                $bytes = $photo->bytes();
+                if ('' === $bytes) {
                     continue;
                 }
-                $budget -= $size;
-                $adminEmail->attachFromPath($path);
+                $budget -= \strlen($bytes);
+                $adminEmail->attach($bytes, $photo->name, $photo->contentType);
             }
         }
 

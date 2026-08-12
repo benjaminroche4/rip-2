@@ -121,6 +121,10 @@ class Contact
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $visioMeetLink = null;
 
+    /** Google Calendar event backing a planned recontact (agent's agenda). */
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $recallEventId = null;
+
     /** Recall reminder emails already sent (reset when the recall moves). */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $recallReminderDaySentAt = null;
@@ -298,6 +302,18 @@ class Contact
     public function setVisioMeetLink(?string $visioMeetLink): static
     {
         $this->visioMeetLink = $visioMeetLink;
+
+        return $this;
+    }
+
+    public function getRecallEventId(): ?string
+    {
+        return $this->recallEventId;
+    }
+
+    public function setRecallEventId(?string $recallEventId): static
+    {
+        $this->recallEventId = $recallEventId;
 
         return $this;
     }

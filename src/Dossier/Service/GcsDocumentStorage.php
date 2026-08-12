@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dossier\Service;
 
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierDocument;
 use App\Dossier\Entity\DossierDocumentFile;
 use Google\Cloud\Storage\Bucket;
 use GuzzleHttp\Psr7\StreamWrapper;
@@ -26,7 +27,7 @@ final readonly class GcsDocumentStorage implements DocumentStorage
     ) {
     }
 
-    public function store(Dossier $dossier, UploadedFile $file): string
+    public function store(Dossier $dossier, DossierDocument $document, UploadedFile $file): string
     {
         $extension = $file->guessExtension() ?? 'bin';
         $storedName = Uuid::v4()->toRfc4122().'.'.$extension;
@@ -75,6 +76,18 @@ final readonly class GcsDocumentStorage implements DocumentStorage
 
     private function objectName(Dossier $dossier, string $storedName): string
     {
-        return 'dossiers/'.$dossier->getReference().'/'.$storedName;
+        $ref = (string) $dossier->getReference();
+        if ($this->unsafe($ref) || $this->unsafe($storedName)) {
+            throw new \RuntimeException('Illegal dossier document path.');
+        }
+
+        return 'dossiers/'.$ref.'/documents/'.$storedName;
+    }
+
+    /** Rejects any path-traversal segment (slash, backslash, "..", null). */
+    private function unsafe(string $segment): bool
+    {
+        return '' === $segment || str_contains($segment, '/') || str_contains($segment, '\\')
+            || str_contains($segment, '..') || str_contains($segment, "\0");
     }
 }

@@ -29,7 +29,7 @@ final class UserAvatarUploadTest extends WebTestCase
         $container = static::getContainer();
 
         $this->adminPrefix = (string) $container->getParameter('admin_path_prefix');
-        $this->storageDir = $container->getParameter('kernel.project_dir').'/var/uploads/avatars';
+        $this->storageDir = $container->getParameter('kernel.project_dir').'/var/uploads';
 
         $this->em = $container->get('doctrine.orm.entity_manager');
         $this->em->createQuery('DELETE FROM '.ResetPasswordRequest::class)->execute();
@@ -60,7 +60,7 @@ final class UserAvatarUploadTest extends WebTestCase
 
         $this->em->refresh($target);
         self::assertNotNull($target->getAvatarFilename());
-        self::assertStringEndsWith('.webp', $target->getAvatarFilename());
+        self::assertMatchesRegularExpression('#^users/'.$target->getUniqueId().'/avatar/[0-9a-f-]{36}\.webp$#', $target->getAvatarFilename());
 
         $stored = $this->storageDir.'/'.$target->getAvatarFilename();
         $this->createdFiles[] = $stored;

@@ -10,6 +10,24 @@
 </head>
 <body>
     {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
+    {% set agentName = agentName|default(null) %}
+    {% set channel = channel|default(null) %}
+    {% set who %}{% if agentName %}{{ agentName }}{% else %}{{ fr ? 'notre équipe' : 'our team' }}{% endif %}{% endset %}
+    {# Verbe adapté au canal : le client sait exactement comment on le joint. #}
+    {% set actionFr = {
+        phone: 'vous rappellera au téléphone',
+        whatsapp: 'vous écrira sur WhatsApp',
+        sms: 'vous enverra un SMS',
+        email: 'vous écrira par email',
+    }[channel]|default('vous recontactera') %}
+    {% set actionEn = {
+        phone: 'will call you',
+        whatsapp: 'will message you on WhatsApp',
+        sms: 'will text you',
+        email: 'will email you',
+    }[channel]|default('will get back to you') %}
+    {% set dateBig = recallAt|format_datetime(pattern='EEEE d MMMM', locale=fr ? 'fr' : 'en') %}
+    {% set timeBig = recallAt|format_datetime(pattern=fr ? "HH'h'mm" : 'HH:mm') %}
 
     <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
         <tbody>
@@ -33,26 +51,54 @@
 
                                                     <p style="margin:0;padding:0.5em 0"><br /></p>
 
-                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center">
-                                                        {{ fr ? 'Nous revenons vers vous' : 'We will get back to you' }}
+                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center;text-wrap:balance">
+                                                        {{ fr ? 'Votre prochain échange est planifié' : 'Your next call is scheduled' }}
                                                     </h2>
 
-                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
+                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252;text-wrap:balance">
                                                         {% if fr %}
-                                                            Bonjour{% if firstName %} {{ firstName }}{% endif %}, notre équipe vous recontactera
-                                                            <strong style="color:#111827">le {{ recallAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ recallAt|format_datetime(pattern="HH'h'mm") }} (heure de Paris)</strong>
-                                                            {%- if channelLabel %} {{ 'par' }} <strong style="color:#111827">{{ channelLabel|lower }}</strong>{% endif %}.
+                                                            Bonjour{% if firstName %} {{ firstName }}{% endif %}, <strong style="color:#111827">{{ who }}</strong> {{ actionFr }} :
                                                         {% else %}
-                                                            Hello{% if firstName %} {{ firstName }}{% endif %}, our team will get back to you
-                                                            <strong style="color:#111827">on {{ recallAt|format_datetime(pattern='dd.MM.yyyy', locale='en') }} at {{ recallAt|format_datetime(pattern='HH:mm') }} (Paris time)</strong>
-                                                            {%- if channelLabel %} {{ 'via' }} <strong style="color:#111827">{{ channelLabel|lower }}</strong>{% endif %}.
+                                                            Hello{% if firstName %} {{ firstName }}{% endif %}, <strong style="color:#111827">{{ who }}</strong> {{ actionEn }}:
                                                         {% endif %}
                                                     </p>
 
-                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
+                                                    <p style="margin:0;padding:0.6em 0;text-align:center"><br /></p>
+
+                                                    {# Bloc rendez-vous : date et heure en très gros, fuseau explicite
+                                                       (prospects souvent à l'étranger), canal et interlocuteur dessous. #}
+                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                                                        style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td align="center" style="padding:24px 16px">
+                                                                    <p style="margin:0;padding:0;font-size:0.8em;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280">
+                                                                        {{ fr ? 'Prochain échange' : 'Next follow-up' }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.35em 0 0;font-size:1.9em;font-weight:700;line-height:1.2;color:#111827;text-wrap:balance">
+                                                                        {{ dateBig }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.15em 0 0;font-size:1.5em;font-weight:700;line-height:1.3;color:#71172e">
+                                                                        {{ timeBig }}
+                                                                        <span style="font-size:0.55em;font-weight:500;color:#6b7280">{{ fr ? '(heure de Paris)' : '(Paris time)' }}</span>
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.7em 0 0;font-size:0.9em;color:#525252">
+                                                                        {% if channelLabel %}
+                                                                            {{ fr ? 'Par' : 'Via' }} <strong style="color:#111827">{{ channelLabel|lower }}</strong>
+                                                                            {%- if agentName %} &middot; {{ fr ? 'avec' : 'with' }} <strong style="color:#111827">{{ agentName }}</strong>{% endif %}
+                                                                        {% elseif agentName %}
+                                                                            {{ fr ? 'Avec' : 'With' }} <strong style="color:#111827">{{ agentName }}</strong>
+                                                                        {% endif %}
+                                                                    </p>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:0.95em;text-align:center;color:#525252;text-wrap:balance">
                                                         {{ fr
-                                                            ? "Ce créneau ne vous convient pas ? Répondez simplement à cet email."
-                                                            : 'Does this slot not suit you? Just reply to this email.' }}
+                                                            ? "Ce créneau ne vous convient pas ? Répondez simplement à cet email, nous en trouverons un autre."
+                                                            : 'Does this slot not suit you? Just reply to this email and we will find another one.' }}
                                                     </p>
 
                                                     <p style="margin:0;padding:0.75em 0;text-align:center"><br /></p>

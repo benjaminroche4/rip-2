@@ -29,4 +29,6 @@ return [
     SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle::class => ['all' => true],
     Sensiolabs\MinifyBundle\SensiolabsMinifyBundle::class => ['all' => true],
     Symfony\UX\CalendarLink\UXCalendarLinkBundle::class => ['all' => true],
+    Scheb\TwoFactorBundle\SchebTwoFactorBundle::class => ['all' => true],
+    Symfony\AI\AiBundle\AiBundle::class => ['all' => true],
 ];

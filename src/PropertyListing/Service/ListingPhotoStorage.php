@@ -1,66 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\PropertyListing\Service;
 
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
- * Stores listing photos under var/uploads (outside the web root: the form is
- * public and unauthenticated, uploaded content must never land in public/).
- * One folder per submission, named after the property address + owner name.
+ * Stores public-form listing photos (never in public/). Local disk in dev,
+ * private GCS bucket in prod under listings/<folder>/photos/<uuid>.<ext>.
+ * Photos are write-once, read-once (attached to the internal email), then
+ * expire (GCS lifecycle rule, or the local purge command).
  */
-final class ListingPhotoStorage
+interface ListingPhotoStorage
 {
-    public function __construct(
-        #[Autowire('%kernel.project_dir%/var/uploads/properties/submissions')]
-        private readonly string $storageDir,
-        private readonly SluggerInterface $slugger,
-        private readonly Filesystem $filesystem = new Filesystem(),
-    ) {
-    }
+    public function folderName(string $address, string $fullName, \DateTimeImmutable $date): string;
 
     /**
      * @param list<UploadedFile> $photos
-     *
-     * @return list<string> absolute paths of the stored files
      */
-    public function store(string $address, string $fullName, array $photos, \DateTimeImmutable $date): array
-    {
-        $directory = $this->storageDir.'/'.$this->folderName($address, $fullName, $date);
-        $this->filesystem->mkdir($directory);
-
-        $paths = [];
-        foreach ($photos as $photo) {
-            $filename = bin2hex(random_bytes(16)).'.'.($photo->guessExtension() ?? 'bin');
-            $paths[] = $photo->move($directory, $filename)->getPathname();
-        }
-
-        return $paths;
-    }
+    public function store(string $folderName, array $photos): void;
 
     /**
-     * @return list<string> absolute paths of the photos stored for a submission
-     */
-    public function photoPaths(string $folderName): array
-    {
-        return glob($this->storageDir.'/'.$folderName.'/*') ?: [];
-    }
-
-    /**
-     * "12 Rue de Rivoli, 75001 Paris" + "Marie Dupont" + 2026-07-20
-     * => "12ruederivoli75001parismariedupont-20260720".
+     * Stored photos of a submission as lazy descriptors: size is known
+     * upfront so the caller can honour a byte budget WITHOUT downloading
+     * every object; bytes() pulls the content only when actually attached.
      *
-     * The date suffix keeps submissions sent on different days apart even
-     * when the same owner re-submits the same address.
+     * @return iterable<ListingPhoto>
      */
-    public function folderName(string $address, string $fullName, \DateTimeImmutable $date): string
-    {
-        $slug = strtolower($this->slugger->slug($address.$fullName)->toString());
-        $slug = preg_replace('/[^a-z0-9]/', '', $slug) ?? '';
-
-        return ('' !== $slug ? $slug : 'unknown').'-'.$date->format('Ymd');
-    }
+    public function attachments(string $folderName): iterable;
 }

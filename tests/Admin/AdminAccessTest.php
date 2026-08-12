@@ -91,25 +91,17 @@ final class AdminAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testAdminSeesDashboardWithNoIndexHeader(): void
+    public function testAdminRootForwardsToTheFirstAccessibleSection(): void
     {
+        // No dashboard page for now: the admin root redirects to the first
+        // section the user can access (contacts for a full admin).
         $this->loginAs(self::ADMIN_EMAIL);
-        $crawler = $this->client->request('GET', $this->adminUrl($this->adminPrefix));
+        $this->client->request('GET', $this->adminUrl($this->adminPrefix));
 
+        self::assertResponseRedirects();
+        $this->client->followRedirect();
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Tableau de bord');
-
-        // The analytics content (KPI tiles, charts, lazy frame) was removed
-        // on purpose: the dashboard is a placeholder until rebuilt.
-        self::assertSelectorExists('[data-testid="dashboard-page"]');
-        self::assertSelectorTextContains('[data-testid="dashboard-page"]', 'En cours de construction');
-        self::assertCount(0, $crawler->filter('turbo-frame[data-testid="dashboard-frame"]'));
-        self::assertCount(0, $crawler->filter('[data-testid="kpi-grid"]'));
-        self::assertCount(0, $crawler->filter('canvas'));
-
-        $robots = (string) $this->client->getResponse()->headers->get('X-Robots-Tag');
-        self::assertStringContainsString('noindex', $robots);
-        self::assertStringContainsString('nofollow', $robots);
+        self::assertStringEndsWith('/contacts', (string) parse_url($this->client->getRequest()->getUri(), \PHP_URL_PATH));
     }
 
     public function testAdminSeesUsersPage(): void
@@ -232,7 +224,11 @@ final class AdminAccessTest extends WebTestCase
         $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/utilisateurs/'.$admin->getUniqueId().'/test-admin');
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('[data-testid="user-functions"]');
+        // An admin holds every section, so both activity blocks render
+        // (each one is gated on its own ROLE_SECTION_*).
         self::assertSelectorExists('[data-testid="user-activity"]');
+        self::assertSelectorTextContains('[data-testid="user-activity"]', 'Leads assignés');
+        self::assertSelectorTextContains('[data-testid="user-activity"]', 'Dossiers gérés');
 
         // Back link in the page header points at the list.
         $crawler = $this->client->request('GET', $url);

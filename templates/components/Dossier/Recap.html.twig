@@ -1,0 +1,81 @@
+{# Card "Récap express" : résumé IA persisté du dossier, généré à la
+   demande (jamais au chargement). Le bouton passe par une LiveAction
+   synchrone; data-loading couvre les quelques secondes d'appel modèle. #}
+{% set recap = this.recap %}
+<div {{ attributes.defaults({class: 'contents'}) }}>
+    <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-recap">
+        <div class="rounded-2xl bg-neutral-50 p-2">
+            <div class="rounded-xl bg-white px-5 pt-4 pb-5">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="flex items-center gap-2 font-medium text-gray-900">
+                        {{ ux_icon('lucide:sparkles', {class: 'size-4 shrink-0 text-primary/70', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.recap.title'|trans }}
+                    </h2>
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="generate"
+                        data-loading="action(generate)|addAttribute(disabled)"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-wait disabled:opacity-60"
+                        data-testid="dossier-recap-generate"
+                    >
+                        {# Bascule par classe (jamais |show/|hide) : ces directives
+                           posent un `display` inline qui écraserait le `flex` et
+                           renverrait l'icône à la ligne. #}
+                        <span data-loading="action(generate)|addClass(hidden)" class="flex items-center gap-1.5">
+                            {{ ux_icon('lucide:refresh-cw', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ (recap ? 'admin.dossiers.show.recap.refresh' : 'admin.dossiers.show.recap.generate')|trans }}
+                        </span>
+                        <span data-loading="action(generate)|removeClass(hidden)" class="hidden flex items-center gap-1.5">
+                            {{ ux_icon('lucide:loader-circle', {class: 'size-3.5 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.recap.generating'|trans }}
+                        </span>
+                    </button>
+                </div>
+
+                {% if this.failed %}
+                    <p class="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700" data-testid="dossier-recap-error">
+                        {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.recap.error'|trans }}
+                    </p>
+                {% endif %}
+
+                {% if recap %}
+                    <div class="space-y-3" data-testid="dossier-recap-content">
+                        <p class="text-sm leading-relaxed text-pretty text-gray-700">{{ recap.summary }}</p>
+
+                        {% if recap.attentionPoints is not empty %}
+                            <ul class="space-y-1.5">
+                                {% for point in recap.attentionPoints %}
+                                    <li class="flex items-start gap-2 text-sm text-gray-700">
+                                        {{ ux_icon('lucide:circle-alert', {class: 'mt-0.5 size-3.5 shrink-0 text-amber-500', 'aria-hidden': 'true'}) }}
+                                        {{ point }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        {% if recap.nextAction %}
+                            <p class="flex items-start gap-2 rounded-lg bg-neutral-50 px-3 py-2 text-sm text-gray-700">
+                                {{ ux_icon('lucide:arrow-right', {class: 'mt-0.5 size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                <span><span class="font-medium text-gray-900">{{ 'admin.dossiers.show.recap.nextAction'|trans }}</span> {{ recap.nextAction }}</span>
+                            </p>
+                        {% endif %}
+
+                        <p class="text-xs text-gray-400">
+                            {{ 'admin.dossiers.show.recap.generatedAt'|trans }}
+                            {% if recap.generatedAt %}
+                                <span class="tabular-nums">{{ recap.generatedAt|format_datetime(pattern='dd.MM.yyyy HH:mm') }}</span>
+                            {% endif %}
+                            &middot; {{ 'admin.dossiers.show.recap.disclaimer'|trans }}
+                        </p>
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-400" data-testid="dossier-recap-empty">
+                        {{ 'admin.dossiers.show.recap.empty'|trans }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>

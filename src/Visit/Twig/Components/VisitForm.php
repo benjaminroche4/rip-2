@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Visit\Twig\Components;
 
-use App\Dossier\Repository\DossierRepository;
-use App\RealEstateAgent\Repository\RealEstateAgentRepository;
 use App\Visit\Entity\Visit;
 use App\Visit\Form\VisitType;
 use App\Visit\Service\AddressGeocoder;
@@ -21,24 +19,18 @@ use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use Symfony\UX\Map\Bridge\Google\GoogleOptions;
-use Symfony\UX\Map\Map;
-use Symfony\UX\Map\Marker;
-use Symfony\UX\Map\Point;
 
 /**
- * "New visit" split screen: the form on the left, a live summary card on the
- * right that fills in as the operator types. The address is geocoded on the
- * fly (debounced locate action through the same AddressGeocoder as creation)
- * so the summary card shows the property pinned on a mini map before saving.
+ * Quick visit booking form: only the essential fields up front, the rest
+ * behind a "detail mode" toggle. Address coordinates come from the Places
+ * autocomplete (setLocation); creation falls back to server geocoding when
+ * the address was typed by hand.
  */
 #[AsLiveComponent(name: 'Visit:VisitForm', template: 'components/Visit/VisitForm.html.twig')]
 final class VisitForm extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
-
-    private const TIMEZONE = 'Europe/Paris';
 
     #[LiveProp(fieldName: 'formData')]
     public ?Visit $visit = null;
@@ -57,10 +49,15 @@ final class VisitForm extends AbstractController
     #[LiveProp]
     public string $locatedAddress = '';
 
+    /** Detail mode: shows assignee, agent, listing link, presence and note. */
+    #[LiveProp]
+    public bool $detailed = false;
+
     public function __construct(
         private readonly Security $security,
-        private readonly DossierRepository $dossiers,
-        private readonly RealEstateAgentRepository $agents,
+        private readonly \App\Auth\Repository\UserRepository $users,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
+        private readonly \App\Visit\Service\VisitNumberGenerator $numbers,
     ) {
     }
 
@@ -97,81 +94,40 @@ final class VisitForm extends AbstractController
         $this->locatedAddress = trim((string) ($this->formValues['address'] ?? ''));
     }
 
-    public function getSummaryDossier(): ?string
+    /** Chevron toggle of the optional fields; kept out of set*() naming. */
+    #[LiveAction]
+    public function toggleDetails(): void
     {
-        $id = (int) ($this->formValues['dossier'] ?? 0);
-        if ($id <= 0) {
-            return null;
-        }
+        $this->ensureAdmin();
 
-        $dossier = $this->dossiers->find($id);
-
-        return null !== $dossier ? $dossier->getName().' ('.$dossier->getReference().')' : null;
+        $this->detailed = !$this->detailed;
     }
 
-    public function getSummaryAgent(): ?string
+    /**
+     * Visit-agent chips of the "performed by" picker.
+     *
+     * @return list<array{id: int, name: string, avatar: ?string}>
+     */
+    public function getAssigneeChoices(): array
     {
-        $id = (int) ($this->formValues['agent'] ?? 0);
-        if ($id <= 0) {
-            return null;
-        }
-
-        $agent = $this->agents->find($id);
-        if (null === $agent) {
-            return null;
-        }
-
-        $name = trim($agent->getFirstName().' '.$agent->getLastName());
-        $agency = $agent->getAgency()?->getName();
-
-        return null !== $agency ? $name.' ('.$agency.')' : $name;
+        return array_map(
+            static fn (\App\Auth\Entity\User $user): array => [
+                'id' => (int) $user->getId(),
+                'name' => trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail(),
+                'avatar' => $user->getAvatarFilename(),
+            ],
+            $this->users->findVisitAgents(),
+        );
     }
 
-    public function getSummaryScheduledAt(): ?\DateTimeImmutable
+    /** Chip toggle: picking the selected agent deselects them. */
+    #[LiveAction]
+    public function pickAssignee(#[LiveArg] int $id): void
     {
-        $raw = trim((string) ($this->formValues['scheduledAt'] ?? ''));
-        if ('' === $raw) {
-            return null;
-        }
+        $this->ensureAdmin();
 
-        try {
-            return new \DateTimeImmutable($raw, new \DateTimeZone(self::TIMEZONE));
-        } catch (\Exception) {
-            return null;
-        }
-    }
-
-    public function getSummaryAddress(): ?string
-    {
-        $address = trim((string) ($this->formValues['address'] ?? ''));
-
-        return '' !== $address ? $address : null;
-    }
-
-    /** Mini map of the summary card, pinned on the located address. */
-    public function getPreviewMap(): ?Map
-    {
-        if (null === $this->previewLat || null === $this->previewLng) {
-            return null;
-        }
-
-        // Editing the address after a selection makes the pin stale: hide it
-        // until a new suggestion is picked.
-        if (trim((string) ($this->formValues['address'] ?? '')) !== $this->locatedAddress) {
-            return null;
-        }
-
-        $point = new Point($this->previewLat, $this->previewLng);
-
-        return (new Map('default'))
-            ->center($point)
-            ->zoom(15)
-            ->options(new GoogleOptions(
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-            ))
-            ->addMarker(new Marker(position: $point));
+        $current = (int) ($this->formValues['assignee'] ?? 0);
+        $this->formValues['assignee'] = $current === $id ? '' : (string) $id;
     }
 
     #[LiveAction]
@@ -200,13 +156,40 @@ final class VisitForm extends AbstractController
             }
         }
 
+        // Property visits only happen in Île-de-France: coordinates
+        // checked against the region's bounding box when available,
+        // postal-code fallback otherwise.
+        if (!$this->isInIleDeFrance($visit)) {
+            $this->getForm()->get('address')->addError(new \Symfony\Component\Form\FormError(
+                $this->translator->trans('admin.visits.create.address.idf'),
+            ));
+
+            throw new \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException('Address outside Île-de-France.');
+        }
+
         $visit->setCreatedAt(new \DateTimeImmutable());
+        $visit->setReference($this->numbers->reference());
+        $user = $this->security->getUser();
+        if ($user instanceof \App\Auth\Entity\User) {
+            $visit->setBookedBy($user);
+        }
         $em->persist($visit);
         $em->flush();
 
         return $this->redirectToRoute('admin_visits', [
             'adminPrefix' => $this->adminPrefix,
         ]);
+    }
+
+    private function isInIleDeFrance(Visit $visit): bool
+    {
+        $lat = $visit->getLatitude();
+        $lng = $visit->getLongitude();
+        if (null !== $lat && null !== $lng) {
+            return $lat >= 48.12 && $lat <= 49.242 && $lng >= 1.446 && $lng <= 3.559;
+        }
+
+        return 1 === preg_match('/\b(75|77|78|91|92|93|94|95)\d{3}\b/', (string) $visit->getAddress());
     }
 
     private function ensureAdmin(): void

@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Auth\Service;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\Exception\TransportException;
-use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Downloads a remote avatar (e.g. Google account picture), normalizes it to a
- * 256×256 WebP and stores it under var/uploads/avatars/<uuid>.webp.
+ * 256×256 WebP and hands it to the AvatarStorage (disk in dev, a
+ * private GCS bucket in prod).
  *
  * Avatars never live in /public/ (CLAUDE.md upload policy) — they are served
  * by App\Auth\Controller\AvatarController which sets long cache headers and
@@ -29,33 +28,32 @@ final readonly class AvatarDownloader
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-        #[Autowire('%kernel.project_dir%/var/uploads/avatars')]
-        private string $storageDir,
+        private \App\Auth\Storage\AvatarStorage $storage,
     ) {
     }
 
     /**
-     * Downloads the URL, normalizes to WebP 256×256 and stores it. Returns
-     * the new filename or null if the operation failed for any reason
+     * Downloads the URL, normalizes to WebP 256×256 and stores it under the
+     * owner's prefix. Returns the object path or null if the operation failed
      * (network, decode, size). Failures are logged, never thrown — a missing
      * avatar is not worth blocking a login.
      */
-    public function downloadAndStore(string $url): ?string
+    public function downloadAndStore(string $url, string $ownerRef): ?string
     {
         $bytes = $this->fetch($url);
         if (null === $bytes) {
             return null;
         }
 
-        return $this->storeFromBytes($bytes);
+        return $this->storeFromBytes($bytes, $ownerRef);
     }
 
     /**
      * Normalizes raw image bytes (e.g. an admin upload) to WebP 256×256 and
-     * stores them. Returns the new filename or null on failure (decode,
+     * stores them under the owner's prefix. Returns the object path or null on failure (decode,
      * size, disk). Failures are logged, never thrown.
      */
-    public function storeFromBytes(string $bytes): ?string
+    public function storeFromBytes(string $bytes, string $ownerRef): ?string
     {
         if (\strlen($bytes) > self::MAX_BYTES) {
             $this->logger->warning('AvatarDownloader: payload too large', ['bytes' => \strlen($bytes)]);
@@ -63,20 +61,18 @@ final readonly class AvatarDownloader
             return null;
         }
 
-        $filename = Uuid::v7()->toRfc4122().'.webp';
-        $path = $this->storageDir.'/'.$filename;
-
-        if (!is_dir($this->storageDir) && !mkdir($this->storageDir, 0o755, true) && !is_dir($this->storageDir)) {
-            $this->logger->error('AvatarDownloader: cannot create storage dir', ['dir' => $this->storageDir]);
-
+        $webp = $this->normalizeToWebp($bytes);
+        if (null === $webp) {
             return null;
         }
 
-        if (!$this->normalizeAndWrite($bytes, $path)) {
+        try {
+            return $this->storage->store($ownerRef, $webp);
+        } catch (\Throwable $e) {
+            $this->logger->error('AvatarDownloader: storage failed', ['error' => $e->getMessage()]);
+
             return null;
         }
-
-        return $filename;
     }
 
     /**
@@ -85,9 +81,10 @@ final readonly class AvatarDownloader
      */
     public function delete(string $filename): void
     {
-        $path = $this->storageDir.'/'.$filename;
-        if (is_file($path)) {
-            @unlink($path);
+        try {
+            $this->storage->delete($filename);
+        } catch (\Throwable $e) {
+            $this->logger->warning('AvatarDownloader: delete failed', ['file' => $filename, 'error' => $e->getMessage()]);
         }
     }
 
@@ -140,36 +137,40 @@ final readonly class AvatarDownloader
         return $bytes;
     }
 
-    private function normalizeAndWrite(string $bytes, string $path): bool
+    /** Decode → 256×256 square → WebP bytes; null on any failure. */
+    private function normalizeToWebp(string $bytes): ?string
     {
         $source = @imagecreatefromstring($bytes);
         if (false === $source) {
-            $this->logger->warning('AvatarDownloader: imagecreatefromstring failed', ['path' => $path]);
+            $this->logger->warning('AvatarDownloader: imagecreatefromstring failed');
 
-            return false;
+            return null;
         }
 
         try {
             $resized = imagescale($source, self::TARGET_SIZE, self::TARGET_SIZE);
             if (false === $resized) {
-                $this->logger->warning('AvatarDownloader: imagescale failed', ['path' => $path]);
+                $this->logger->warning('AvatarDownloader: imagescale failed');
 
-                return false;
+                return null;
             }
 
             try {
-                if (!imagewebp($resized, $path, 80)) {
-                    $this->logger->warning('AvatarDownloader: imagewebp failed', ['path' => $path]);
+                ob_start();
+                $ok = imagewebp($resized, null, 80);
+                $webp = (string) ob_get_clean();
+                if (!$ok || '' === $webp) {
+                    $this->logger->warning('AvatarDownloader: imagewebp failed');
 
-                    return false;
+                    return null;
                 }
+
+                return $webp;
             } finally {
                 imagedestroy($resized);
             }
         } finally {
             imagedestroy($source);
         }
-
-        return true;
     }
 }

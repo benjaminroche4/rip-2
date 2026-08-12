@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dossier\Twig\Components;
 
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Domain\MoveInTimeline;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Repository\DossierRepository;
@@ -71,6 +72,61 @@ final class Timeline
     public function getMoveInAt(): ?\DateTimeImmutable
     {
         return $this->dossier()->getSearch()?->getMoveInAt();
+    }
+
+    /**
+     * The four facts that decide whether a dossier can move forward, read at
+     * a glance under the timeline: budget, who lives there, which language to
+     * write in, and the guarantee (no guarantor, no lease in Paris).
+     *
+     * @return array{
+     *     budget: int|null,
+     *     maxAffordable: int|null,
+     *     overBudget: bool,
+     *     tenants: int,
+     *     household: string|null,
+     *     language: string|null,
+     *     guarantor: string|null,
+     *     guarantorStatus: string|null,
+     * }
+     */
+    public function getKeyFacts(): array
+    {
+        $dossier = $this->dossier();
+        $search = $dossier->getSearch();
+
+        $tenants = 0;
+        $income = 0;
+        $language = null;
+        foreach ($dossier->getPersons() as $person) {
+            if (DossierPersonRole::TENANT === $person->getRole()) {
+                ++$tenants;
+                $income += $person->getMonthlyIncome() ?? 0;
+            }
+            // The primary contact drives the language we write in; fall back
+            // to the first person who declared one.
+            if ($person->isPrimaryContact() && null !== $person->getLanguage()) {
+                $language = $person->getLanguage()->value;
+            } elseif (null === $language && null !== $person->getLanguage()) {
+                $language = $person->getLanguage()->value;
+            }
+        }
+
+        // Landlord's "3x rule": the rent must stay under a third of the
+        // tenants' combined net income, otherwise no application goes through.
+        $budget = $search?->getBudget();
+        $maxAffordable = $income > 0 ? intdiv($income, 3) : null;
+
+        return [
+            'budget' => $budget,
+            'maxAffordable' => $maxAffordable,
+            'overBudget' => null !== $budget && null !== $maxAffordable && $budget > $maxAffordable,
+            'tenants' => $tenants,
+            'household' => $search?->getHouseholdType(),
+            'language' => $language,
+            'guarantor' => $search?->getGuarantorType(),
+            'guarantorStatus' => $search?->getGuarantorStatus(),
+        ];
     }
 
     private function dossier(): Dossier

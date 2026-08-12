@@ -193,7 +193,7 @@ final class GoogleAuthenticator extends OAuth2Authenticator implements Authentic
             return;
         }
 
-        $newFilename = $this->avatarDownloader->downloadAndStore($avatarUrl);
+        $newFilename = $this->avatarDownloader->downloadAndStore($avatarUrl, (string) $user->getUniqueId());
         if (null === $newFilename) {
             return;
         }

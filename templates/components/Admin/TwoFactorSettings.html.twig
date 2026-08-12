@@ -1,0 +1,202 @@
+<div {{ attributes.defaults({class: 'rounded-2xl border border-neutral-200 bg-white p-2'}) }} data-testid="profile-two-factor">
+    {% set enabled = this.enabled %}
+    <div class="rounded-xl bg-neutral-50 p-2">
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3">
+            <div>
+                <h2 class="font-medium text-gray-900">{{ 'admin.profile.twoFactor.title'|trans }}</h2>
+                <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.profile.twoFactor.subtitle'|trans }}</p>
+            </div>
+            {% if enabled %}
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700" data-testid="two-factor-enabled-badge">
+                    {{ ux_icon('lucide:shield-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.profile.twoFactor.enabledBadge'|trans }}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if this.error %}
+            <p class="mx-3 mb-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700" role="alert" data-testid="two-factor-error">
+                {{ this.error|trans }}
+            </p>
+        {% endif %}
+
+        {% if this.step == 'codes' %}
+            {# Codes de récupération : affichés une seule fois, à mettre de côté. #}
+            <div class="flex flex-col gap-4 rounded-xl bg-white px-5 py-4" data-testid="two-factor-recovery-codes">
+                <div class="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    {{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.profile.twoFactor.codes.warning'|trans }}
+                </div>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {% for code in this.recoveryCodes %}
+                        <code class="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-center text-sm font-medium text-gray-900 tabular-nums select-all">{{ code }}</code>
+                    {% endfor %}
+                </div>
+                <div class="flex items-center justify-end gap-3">
+                    {# Export PDF : disponible uniquement pendant la fenêtre
+                       d'affichage unique (session), loader jusqu'à la fin. #}
+                    <button
+                        type="button"
+                        class="relative flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50"
+                        data-controller="pdf-download"
+                        data-pdf-download-url-value="{{ path('admin_profile_recovery_codes_pdf', {adminPrefix: this.adminPrefix}) }}"
+                        data-action="click->pdf-download#download"
+                        data-testid="two-factor-codes-download"
+                    >
+                        <span data-pdf-download-target="label" class="flex items-center gap-2">
+                            {{ ux_icon('lucide:download', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.profile.twoFactor.codes.download'|trans }}
+                        </span>
+                        <span data-pdf-download-target="spinner" class="absolute inset-0 hidden items-center justify-center gap-2 rounded-xl bg-white/80">
+                            <twig:Spinner />
+                            <span data-pdf-download-target="percent" class="text-xs font-medium tabular-nums">0%</span>
+                        </span>
+                    </button>
+                    <twig:Button
+                        size="sm"
+                        data-action="live#action"
+                        data-live-action-param="dismissRecoveryCodes"
+                        data-testid="two-factor-codes-done"
+                    >
+                        {{ 'admin.profile.twoFactor.codes.done'|trans }}
+                    </twig:Button>
+                </div>
+            </div>
+        {% elseif this.step == 'enrolling' %}
+            {# Enrôlement : scanner le QR puis confirmer avec un premier code. #}
+            <div class="flex flex-col gap-5 rounded-xl bg-white px-5 py-4 sm:flex-row sm:items-start" data-testid="two-factor-enrollment">
+                <div class="shrink-0 self-center sm:self-start">
+                    <img
+                        src="{{ this.qrCodeDataUri }}"
+                        alt="{{ 'admin.profile.twoFactor.enroll.qrAlt'|trans }}"
+                        width="200"
+                        height="200"
+                        class="rounded-xl border border-neutral-200"
+                    >
+                </div>
+                <div class="min-w-0 flex-1 space-y-4">
+                    <div class="space-y-1 text-sm">
+                        <p class="font-medium text-gray-900">{{ 'admin.profile.twoFactor.enroll.scanTitle'|trans }}</p>
+                        <p class="text-gray-500">{{ 'admin.profile.twoFactor.enroll.scanHelp'|trans }}</p>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <p class="text-gray-500">{{ 'admin.profile.twoFactor.enroll.manualHelp'|trans }}</p>
+                        <code class="block rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-medium tracking-wider text-gray-900 select-all" data-testid="two-factor-secret">{{ this.enrollmentSecretChunks }}</code>
+                    </div>
+                    <div>
+                        <twig:Label for="two-factor-confirm-code" class="text-gray-600">
+                            {{ 'admin.profile.twoFactor.enroll.confirmLabel'|trans }}
+                        </twig:Label>
+                        <div class="mt-1.5 flex flex-wrap items-center gap-3">
+                            <input
+                                type="text"
+                                id="two-factor-confirm-code"
+                                data-model="confirmCode"
+                                data-action="keydown.enter->live#action:prevent"
+                                data-live-action-param="confirmEnrollment"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                maxlength="6"
+                                autocomplete="one-time-code"
+                                placeholder="123456"
+                                class="w-32 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                data-testid="two-factor-confirm-input"
+                            >
+                            <twig:Button
+                                size="sm"
+                                data-action="live#action"
+                                data-live-action-param="confirmEnrollment"
+                                data-loading="action(confirmEnrollment)|addAttribute(disabled)"
+                                data-testid="two-factor-confirm-submit"
+                            >
+                                {{ 'admin.profile.twoFactor.enroll.confirm'|trans }}
+                            </twig:Button>
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="cancelEnrollment"
+                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                data-testid="two-factor-enroll-cancel"
+                            >
+                                {{ 'admin.profile.twoFactor.enroll.cancel'|trans }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elseif enabled %}
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-5 py-4" data-testid="two-factor-status">
+                <div class="space-y-0.5 text-sm">
+                    <p class="text-gray-900">
+                        {{ 'admin.profile.twoFactor.enabledSince'|trans({'%date%': this.enabledAt|format_date('long', locale=app.request ? app.request.locale : 'fr')}) }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ 'admin.profile.twoFactor.remainingCodes'|trans({'%count%': this.remainingBackupCodes}) }}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="askDisable"
+                    class="cursor-pointer rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                    data-testid="two-factor-disable-trigger"
+                >
+                    {{ 'admin.profile.twoFactor.disable.button'|trans }}
+                </button>
+            </div>
+
+            {% if this.confirmingDisable %}
+                <div class="mt-2 flex flex-col gap-3 rounded-xl border border-red-100 bg-white px-5 py-4" data-testid="two-factor-disable-confirm">
+                    <p class="text-sm text-gray-600">
+                        {{ (this.hasPassword ? 'admin.profile.twoFactor.disable.passwordHelp' : 'admin.profile.twoFactor.disable.codeHelp')|trans }}
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input
+                            type="{{ this.hasPassword ? 'password' : 'text' }}"
+                            data-model="disableCredential"
+                            data-action="keydown.enter->live#action:prevent"
+                            data-live-action-param="confirmDisable"
+                            autocomplete="{{ this.hasPassword ? 'current-password' : 'one-time-code' }}"
+                            class="w-56 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            data-testid="two-factor-disable-credential"
+                        >
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="confirmDisable"
+                            data-loading="action(confirmDisable)|addAttribute(disabled)"
+                            class="cursor-pointer rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="two-factor-disable-submit"
+                        >
+                            {{ 'admin.profile.twoFactor.disable.confirm'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="cancelDisable"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="two-factor-disable-cancel"
+                        >
+                            {{ 'admin.profile.twoFactor.disable.cancel'|trans }}
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-5 py-4" data-testid="two-factor-idle">
+                <p class="max-w-[52ch] text-sm text-pretty text-gray-600">{{ 'admin.profile.twoFactor.disabledHint'|trans }}</p>
+                <twig:Button
+                    size="sm"
+                    data-action="live#action"
+                    data-live-action-param="startEnrollment"
+                    data-testid="two-factor-enable"
+                >
+                    <span class="flex items-center gap-2">
+                        {{ ux_icon('lucide:shield-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.profile.twoFactor.enable'|trans }}
+                    </span>
+                </twig:Button>
+            </div>
+        {% endif %}
+    </div>
+</div>

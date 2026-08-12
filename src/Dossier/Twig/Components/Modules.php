@@ -15,6 +15,8 @@ use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierDocumentRefusalMailer;
 use App\Dossier\Service\DossierDocumentRequestMailer;
 use App\Dossier\Service\DossierEventLogger;
+use App\Visit\Domain\VisitSummary;
+use App\Visit\Repository\VisitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Clock\ClockInterface;
@@ -48,6 +50,16 @@ final class Modules
     /** Admin path prefix, needed to build the file download links. */
     #[LiveProp]
     public string $adminPrefix = '';
+
+    /**
+     * Module keys currently unfolded. Kept server-side: the morph restores
+     * whatever `open` the server rendered, so a DOM-only state would be lost
+     * at the next re-render.
+     *
+     * @var list<string>
+     */
+    #[LiveProp]
+    public array $openModules = [];
 
     /** Person id whose "select pieces" modal is open, or null. */
     #[LiveProp]
@@ -115,6 +127,7 @@ final class Modules
         private readonly DocumentStorage $storage,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly DossierEventLogger $events,
+        private readonly VisitRepository $visits,
     ) {
     }
 
@@ -192,6 +205,29 @@ final class Modules
         return $this->urlGenerator->generate('app_dossier_deposit', [
             'code' => (string) $this->dossier()->getPairingCode(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
+    }
+
+    /**
+     * Visits booked for this dossier, split for the visit module card:
+     * upcoming ones first (soonest on top), then past ones (most recent
+     * on top). "Past" starts at the previous midnight, like the archive.
+     *
+     * @return array{upcoming: list<VisitSummary>, past: list<VisitSummary>}
+     */
+    public function getDossierVisits(): array
+    {
+        $today = $this->clock->now()->setTime(0, 0);
+        $upcoming = [];
+        $past = [];
+        foreach ($this->visits->findByDossierSummaries($this->dossierId) as $summary) {
+            if ($summary->scheduledAt >= $today) {
+                $upcoming[] = $summary;
+            } else {
+                $past[] = $summary;
+            }
+        }
+
+        return ['upcoming' => $upcoming, 'past' => array_reverse($past)];
     }
 
     public function isUnlocked(): bool
@@ -275,6 +311,17 @@ final class Modules
         }
 
         return $recipients;
+    }
+
+    /** Fires alongside the native <details> toggle, to keep the state. */
+    #[LiveAction]
+    public function toggleModule(#[LiveArg] string $module): void
+    {
+        $this->ensureAdmin();
+
+        $this->openModules = \in_array($module, $this->openModules, true)
+            ? array_values(array_diff($this->openModules, [$module]))
+            : [...$this->openModules, $module];
     }
 
     #[LiveAction]

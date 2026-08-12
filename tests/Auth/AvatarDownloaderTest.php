@@ -17,6 +17,8 @@ use Symfony\Component\HttpClient\Response\MockResponse;
  */
 final class AvatarDownloaderTest extends TestCase
 {
+    private const ULID = '01HZY0TESTAVATARULID000000';
+
     private string $storageDir;
 
     protected function setUp(): void
@@ -43,10 +45,10 @@ final class AvatarDownloaderTest extends TestCase
             ]),
         ]);
 
-        $filename = $downloader->downloadAndStore('https://example.com/avatar.png');
+        $filename = $downloader->downloadAndStore('https://example.com/avatar.png', self::ULID);
 
         self::assertNotNull($filename);
-        self::assertMatchesRegularExpression('/^[0-9a-f-]{36}\.webp$/', $filename);
+        self::assertMatchesRegularExpression('#^users/'.self::ULID.'/avatar/[0-9a-f-]{36}\.webp$#', $filename);
         self::assertFileExists($this->storageDir.'/'.$filename);
         // GD writes a real WebP — verify the magic bytes.
         $bytes = file_get_contents($this->storageDir.'/'.$filename);
@@ -60,7 +62,7 @@ final class AvatarDownloaderTest extends TestCase
             new MockResponse('', ['http_code' => 404]),
         ]);
 
-        self::assertNull($downloader->downloadAndStore('https://example.com/missing.png'));
+        self::assertNull($downloader->downloadAndStore('https://example.com/missing.png', self::ULID));
     }
 
     public function testReturnsNullOnUnsupportedMime(): void
@@ -72,7 +74,7 @@ final class AvatarDownloaderTest extends TestCase
             ]),
         ]);
 
-        self::assertNull($downloader->downloadAndStore('https://example.com/page.html'));
+        self::assertNull($downloader->downloadAndStore('https://example.com/page.html', self::ULID));
     }
 
     public function testReturnsNullOnUndecodableBytes(): void
@@ -84,7 +86,7 @@ final class AvatarDownloaderTest extends TestCase
             ]),
         ]);
 
-        self::assertNull($downloader->downloadAndStore('https://example.com/broken.png'));
+        self::assertNull($downloader->downloadAndStore('https://example.com/broken.png', self::ULID));
     }
 
     public function testDeleteRemovesExistingFile(): void
@@ -96,7 +98,7 @@ final class AvatarDownloaderTest extends TestCase
             ]),
         ]);
 
-        $filename = $downloader->downloadAndStore('https://example.com/avatar.png');
+        $filename = $downloader->downloadAndStore('https://example.com/avatar.png', self::ULID);
         self::assertNotNull($filename);
         self::assertFileExists($this->storageDir.'/'.$filename);
 
@@ -118,7 +120,7 @@ final class AvatarDownloaderTest extends TestCase
         return new AvatarDownloader(
             new MockHttpClient($responses),
             new NullLogger(),
-            $this->storageDir,
+            new \App\Auth\Storage\LocalAvatarStorage($this->storageDir, new NullLogger()),
         );
     }
 

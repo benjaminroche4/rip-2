@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Dossier;
 
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierDocument;
 use App\Dossier\Entity\DossierDocumentFile;
 use App\Dossier\Service\GcsDocumentStorage;
 use Google\Cloud\Storage\Bucket;
@@ -35,11 +36,11 @@ final class GcsDocumentStorageTest extends TestCase
                 return $this->createStub(StorageObject::class);
             });
 
-        $storedName = (new GcsDocumentStorage($bucket))->store($this->dossier(), $upload);
+        $storedName = (new GcsDocumentStorage($bucket))->store($this->dossier(), new DossierDocument(), $upload);
 
         // UUID + extension, the client file name never reaches the bucket.
         self::assertMatchesRegularExpression('/^[0-9a-f-]{36}\.pdf$/', $storedName);
-        self::assertSame('dossiers/DS-000042/'.$storedName, $captured['name']);
+        self::assertSame('dossiers/DS-000042/documents/'.$storedName, $captured['name']);
         self::assertSame('application/pdf', $captured['metadata']['contentType']);
         @unlink($tmp);
     }
@@ -50,7 +51,7 @@ final class GcsDocumentStorageTest extends TestCase
         $object->method('downloadAsStream')->willReturn(Utils::streamFor('file-content'));
         $bucket = $this->createMock(Bucket::class);
         $bucket->expects(self::once())->method('object')
-            ->with('dossiers/DS-000042/abc.pdf')
+            ->with('dossiers/DS-000042/documents/abc.pdf')
             ->willReturn($object);
 
         $stream = (new GcsDocumentStorage($bucket))->readStream($this->dossier(), $this->file('abc.pdf'));

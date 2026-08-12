@@ -389,8 +389,12 @@
                 {# ── Chronologie du dossier : création, précédée de la demande
                       d'origine, puis le fil d'événements, repliable comme
                       l'historique de la fiche lead. ───────────────────────── #}
-                <details open class="group details-animated mt-2 rounded-xl bg-white" data-testid="dossier-history">
-                    <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-4 [&::-webkit-details-marker]:hidden">
+                <details {{ this.historyExpanded ? 'open' }} class="group details-animated mt-2 rounded-xl bg-white" data-testid="dossier-history">
+                    <summary
+                        class="flex cursor-pointer list-none items-center justify-between px-5 py-4 [&::-webkit-details-marker]:hidden"
+                        data-action="live#action"
+                        data-live-action-param="toggleHistory"
+                    >
                         <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.followUp.timeline'|trans }}</p>
                         {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-300 transition-transform duration-200 ease-out group-open:rotate-180', 'aria-hidden': 'true'}) }}
                     </summary>
@@ -399,13 +403,21 @@
                             {% if sourceContactReference %}
                                 <li class="relative" data-testid="dossier-origin">
                                     <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-blue-400" aria-hidden="true"></span>
+                                    {# La référence reste lisible, mais elle
+                                       n'est cliquable qu'avec la section
+                                       Leads (sinon le clic finit en 403). #}
+                                    {% set canOpenContact = is_granted('ROLE_SECTION_CONTACTS') %}
                                     <p class="text-gray-900">
                                         {{ 'admin.dossiers.show.followUp.origin'|trans }}
-                                        <a
-                                            href="{{ path('admin_contact_show', {adminPrefix: this.adminPrefix, reference: sourceContactReference}) }}"
-                                            class="text-xs font-medium text-primary transition-colors duration-100 hover:text-primary/80 tabular-nums"
-                                            data-testid="dossier-origin-link"
-                                        >({{ sourceContactReference }})</a>
+                                        {% if canOpenContact %}
+                                            <a
+                                                href="{{ path('admin_contact_show', {adminPrefix: this.adminPrefix, reference: sourceContactReference}) }}"
+                                                class="text-xs font-medium text-primary transition-colors duration-100 hover:text-primary/80 tabular-nums"
+                                                data-testid="dossier-origin-link"
+                                            >({{ sourceContactReference }})</a>
+                                        {% else %}
+                                            <span class="text-xs font-medium text-gray-500 tabular-nums" data-testid="dossier-origin-ref">({{ sourceContactReference }})</span>
+                                        {% endif %}
                                     </p>
                                 </li>
                             {% endif %}

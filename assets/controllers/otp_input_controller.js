@@ -2,133 +2,100 @@
 import { Controller } from '@hotwired/stimulus'
 
 /**
- * Six-box OTP input that keeps a single hidden form field in sync with the visible
- * digit boxes. The visible <input data-otp-input-target="digit"> elements have no
- * `name` attribute — they are pure UI. The submitted value lives on
- * <input type="hidden" data-otp-input-target="hidden" name="…[code]">, which the
- * controller updates on every keystroke and paste.
+ * 6-box one-time-code input for the 2FA challenge. Digits auto-advance,
+ * backspace walks back, pasting a full code fills every box, and the form
+ * auto-submits as soon as the 6th digit lands. A toggle swaps to a plain
+ * input for recovery codes (8 digits, no auto-submit).
  *
- * Keyboard model mirrors what users already know from iOS/Android OTP fields:
- *   - typing a digit advances to the next box
- *   - Backspace on an empty box jumps back and lets the user delete the previous one
- *   - ArrowLeft / ArrowRight navigate between boxes
- *   - Pasting a 6-digit code from the email fills all boxes at once and focuses
- *     the last filled cell so a casual Enter submits the form
- *
- * Non-digit characters are stripped on input to keep the visible boxes coherent
- * with the validated server-side payload (Personal DTO requires /^\d{6}$/).
+ * Whatever the mode, the value ends up in the hidden `_auth_code` field the
+ * firewall reads.
  */
 export default class extends Controller {
-    static targets = ['digit', 'hidden', 'submit', 'submitLabel', 'submitLoading']
+    static targets = ['digit', 'hidden', 'otpZone', 'recoveryZone', 'recoveryInput']
+
+    #submitted = false
 
     connect() {
-        // Restore the visible boxes from any preserved value — happens when the
-        // server returns a 422 after a wrong/expired code and re-renders the form
-        // with the previous submission still on the hidden input.
-        const preserved = (this.hiddenTarget.value || '').replace(/\D/g, '')
-        this.digitTargets.forEach((input, i) => {
-            input.value = preserved[i] || ''
-        })
+        this.digitTargets[0]?.focus()
     }
 
-    onInput(event) {
-        const target = event.target
-        // Strip anything non-numeric and keep only the last typed digit so users
-        // who type fast or hold a key don't end up with "12" in one box.
-        target.value = target.value.replace(/\D/g, '').slice(-1)
-        this.#syncHidden()
-        if (target.value !== '') this.#focusNext(target)
-        this.#trySubmit()
+    /* ---- OTP boxes ---- */
+
+    input(event) {
+        const box = event.target
+        box.value = box.value.replace(/\D/g, '').slice(-1)
+        if (box.value !== '') {
+            const next = this.digitTargets[this.#indexOf(box) + 1]
+            next?.focus()
+            next?.select()
+        }
+        this.#syncAndMaybeSubmit()
     }
 
-    onKeydown(event) {
-        const target = event.target
-
-        if (event.key === 'Backspace' && target.value === '') {
+    keydown(event) {
+        const box = event.target
+        const index = this.#indexOf(box)
+        if (event.key === 'Backspace' && box.value === '' && index > 0) {
+            const previous = this.digitTargets[index - 1]
+            previous.focus()
+            previous.value = ''
+            this.#syncAndMaybeSubmit()
             event.preventDefault()
-            this.#focusPrev(target)
-
-            return
-        }
-
-        if (event.key === 'ArrowLeft') {
+        } else if (event.key === 'ArrowLeft' && index > 0) {
+            this.digitTargets[index - 1].focus()
             event.preventDefault()
-            this.#focusPrev(target)
-
-            return
-        }
-
-        if (event.key === 'ArrowRight') {
+        } else if (event.key === 'ArrowRight' && index < this.digitTargets.length - 1) {
+            this.digitTargets[index + 1].focus()
             event.preventDefault()
-            this.#focusNext(target)
         }
     }
 
-    onPaste(event) {
-        const raw = event.clipboardData?.getData('text') ?? ''
-        const digits = raw.replace(/\D/g, '').slice(0, this.digitTargets.length)
+    paste(event) {
+        const digits = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '')
         if (digits === '') return
-
         event.preventDefault()
-        this.digitTargets.forEach((input, i) => {
-            input.value = digits[i] || ''
-        })
-        this.#syncHidden()
-        const lastIndex = Math.min(digits.length, this.digitTargets.length) - 1
-        const focusTarget = this.digitTargets[lastIndex]
-        focusTarget?.focus()
-        focusTarget?.select?.()
-        this.#trySubmit()
+        this.digitTargets.forEach((box, i) => { box.value = digits[i] ?? '' })
+        const focusIndex = Math.min(digits.length, this.digitTargets.length - 1)
+        this.digitTargets[focusIndex].focus()
+        this.#syncAndMaybeSubmit()
     }
 
-    #syncHidden() {
-        this.hiddenTarget.value = this.digitTargets.map((i) => i.value).join('')
+    /* ---- recovery-code mode ---- */
+
+    showRecovery(event) {
+        event.preventDefault()
+        this.otpZoneTarget.classList.add('hidden')
+        this.recoveryZoneTarget.classList.remove('hidden')
+        this.hiddenTarget.value = ''
+        this.recoveryInputTarget.focus()
     }
 
-    // Auto-submit once all six boxes are filled — saves the user from clicking
-    // the button when the OTP is complete. Sets a busy state to swap the button
-    // label for a spinner and lock the inputs while Turbo navigates.
-    #trySubmit() {
-        if (this.hiddenTarget.value.length !== this.digitTargets.length) return
-        if (this.element.dataset.otpInputSubmitting === '1') return
-
-        this.element.dataset.otpInputSubmitting = '1'
-        this.#setBusy(true)
-        this.element.requestSubmit()
+    showOtp(event) {
+        event.preventDefault()
+        this.recoveryZoneTarget.classList.add('hidden')
+        this.otpZoneTarget.classList.remove('hidden')
+        this.hiddenTarget.value = ''
+        this.digitTargets.forEach((box) => { box.value = '' })
+        this.digitTargets[0]?.focus()
     }
 
-    #setBusy(busy) {
-        this.digitTargets.forEach((i) => {
-            i.disabled = busy
-        })
-
-        if (this.hasSubmitTarget) {
-            this.submitTarget.disabled = busy
-        }
-        if (this.hasSubmitLabelTarget) {
-            this.submitLabelTarget.hidden = busy
-        }
-        if (this.hasSubmitLoadingTarget) {
-            this.submitLoadingTarget.hidden = !busy
-            this.submitLoadingTarget.classList.toggle('inline-flex', busy)
-        }
+    syncRecovery() {
+        this.hiddenTarget.value = this.recoveryInputTarget.value.trim()
     }
 
-    #focusNext(current) {
-        const idx = this.digitTargets.indexOf(current)
-        if (idx >= 0 && idx < this.digitTargets.length - 1) {
-            const next = this.digitTargets[idx + 1]
-            next.focus()
-            next.select?.()
-        }
+    /* ---- internals ---- */
+
+    #indexOf(box) {
+        return this.digitTargets.indexOf(box)
     }
 
-    #focusPrev(current) {
-        const idx = this.digitTargets.indexOf(current)
-        if (idx > 0) {
-            const prev = this.digitTargets[idx - 1]
-            prev.focus()
-            prev.select?.()
+    #syncAndMaybeSubmit() {
+        const code = this.digitTargets.map((box) => box.value).join('')
+        this.hiddenTarget.value = code
+        if (code.length === this.digitTargets.length && !this.#submitted) {
+            // Auto-submit on the last digit; the guard avoids double posts.
+            this.#submitted = true
+            this.element.requestSubmit()
         }
     }
 }

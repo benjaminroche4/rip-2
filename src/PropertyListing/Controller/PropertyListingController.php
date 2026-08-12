@@ -24,6 +24,7 @@ final class PropertyListingController extends AbstractController
         private readonly RateLimiterFactoryInterface $formListingLimiter,
         private readonly ListingPhotoStorage $photoStorage,
         private readonly MessageBusInterface $bus,
+        private readonly \Psr\Log\LoggerInterface $logger,
     ) {
     }
 
@@ -81,8 +82,18 @@ final class PropertyListingController extends AbstractController
 
             $now = new \DateTimeImmutable();
             $photos = $form->get('photos')->getData() ?? [];
-            if ([] !== $photos) {
-                $this->photoStorage->store((string) $data->address, (string) $data->fullName, $photos, $now);
+            $photosFolder = [] !== $photos
+                ? $this->photoStorage->folderName((string) $data->address, (string) $data->fullName, $now)
+                : null;
+            if (null !== $photosFolder) {
+                try {
+                    $this->photoStorage->store($photosFolder, $photos);
+                } catch (\Throwable $e) {
+                    // Photos are accessory: a storage outage must not lose
+                    // the whole submission. The email still goes out.
+                    $this->logger->error('Listing photo storage failed: '.$e->getMessage());
+                    $photosFolder = null;
+                }
             }
 
             $this->bus->dispatch(new SendListingEmailMessage(
@@ -115,7 +126,7 @@ final class PropertyListingController extends AbstractController
                 ),
                 note: null !== $data->note && '' !== trim($data->note) ? trim($data->note) : null,
                 photosCount: \count($photos),
-                photosFolder: [] !== $photos ? $this->photoStorage->folderName((string) $data->address, (string) $data->fullName, $now) : null,
+                photosFolder: $photosFolder,
                 lang: $request->getLocale(),
                 ip: $request->getClientIp(),
                 createdAt: $now,

@@ -68,8 +68,10 @@ final class AgentListTest extends KernelTestCase
         $component->search = 'introuvable';
         self::assertCount(0, $component->getAgents());
 
-        // The total ignores the search: it describes the whole directory.
-        self::assertSame(2, $component->getTotalCount());
+        // The count line reflects the active search (0 matches here)...
+        self::assertSame(0, $component->getTotalCount());
+        // ...while the toggle chip keeps the whole-directory total.
+        self::assertSame(2, $component->getAgentTotal());
     }
 
     public function testListRendersSearchAndRows(): void
@@ -98,6 +100,73 @@ final class AgentListTest extends KernelTestCase
         ]);
 
         self::assertStringContainsString('data-testid="agents-empty"', $rendered);
+    }
+
+    public function testAgenciesViewListsAgenciesWithTheirAgentCount(): void
+    {
+        // Foncia has two agents, Century one, Émeraude none (standalone).
+        $this->persistAgent('Jean', 'Martin', agency: 'Foncia');
+        $this->persistAgent('Paul', 'Durand', agency: 'Foncia');
+        $this->persistAgent('Lea', 'Bern', agency: 'Century 21');
+        $this->em->persist((new Agency())->setName('Émeraude')->setCreatedAt(new \DateTimeImmutable()));
+        $this->em->flush();
+        $this->loginAsAdmin();
+
+        $component = $this->mountList();
+        $component->chooseView('agencies');
+
+        self::assertTrue($component->isAgenciesView());
+        $agencies = $component->getAgencies();
+        self::assertSame(['Century 21', 'Émeraude', 'Foncia'], array_column($agencies, 'name'));
+        $byName = [];
+        foreach ($agencies as $a) {
+            $byName[$a->name] = $a->agentCount;
+        }
+        self::assertSame(2, $byName['Foncia']);
+        self::assertSame(1, $byName['Century 21']);
+        self::assertSame(0, $byName['Émeraude'], 'A standalone agency shows zero agents.');
+
+        // Totals cover both directories regardless of the active view.
+        self::assertSame(3, $component->getAgentTotal());
+        self::assertSame(3, $component->getAgencyTotal());
+    }
+
+    public function testSearchFiltersTheAgenciesView(): void
+    {
+        $this->persistAgent('Jean', 'Martin', agency: 'Foncia');
+        $this->persistAgent('Lea', 'Bern', agency: 'Century 21');
+        $this->loginAsAdmin();
+
+        $component = $this->mountList();
+        $component->chooseView('agencies');
+        $component->search = 'foncia';
+
+        self::assertCount(1, $component->getAgencies());
+        self::assertSame(1, $component->getTotalCount());
+    }
+
+    public function testAgenciesViewRendersRowsAndCounts(): void
+    {
+        $this->persistAgent('Jean', 'Martin', agency: 'Foncia');
+        $this->loginAsAdmin();
+
+        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+            'view' => 'agencies',
+        ]);
+
+        self::assertStringContainsString('data-testid="agents-view-toggle"', $rendered);
+        self::assertStringContainsString('data-testid="agency-row"', $rendered);
+        self::assertStringContainsString('data-testid="agency-agent-count"', $rendered);
+        self::assertStringContainsString('Foncia', $rendered);
+    }
+
+    public function testUnknownViewIsRejected(): void
+    {
+        $this->loginAsAdmin();
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $this->mountList()->chooseView('archived');
     }
 
     public function testMountIsDeniedWithoutTheAgentsSectionRole(): void

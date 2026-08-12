@@ -46,7 +46,7 @@ templates/
 │   └── …
 └── admin/                   ← layout + vues de l'espace privé
     ├── base.html.twig         (layout admin autonome, noindex,nofollow)
-    └── dashboard/index.html.twig
+    └── contacts/, dossiers/, users/, …  (une vue par section)
 ```
 
 ## Décider où va un nouveau fichier

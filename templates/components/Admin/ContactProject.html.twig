@@ -12,16 +12,15 @@
             <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
                 <div>
                     <h2 class="font-medium text-gray-900">{{ 'admin.contacts.project.title'|trans }}</h2>
-                    <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.contacts.project.subtitle'|trans }}</p>
                 </div>
-                <div class="flex shrink-0 items-center gap-1.5">
+                <div class="flex shrink-0 items-center gap-3">
                     {# Cadenas anti-missclick : verrouillé par défaut à chaque
                        chargement, les champs restent lisibles. #}
                     <button
                         type="button"
                         data-action="live#action:prevent:stop"
                         data-live-action-param="toggleLock"
-                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg transition-colors duration-100 ease-out {{ this.locked ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-900' : 'bg-primary/10 text-primary hover:bg-primary/15' }}"
+                        class="flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors duration-100 ease-out {{ this.locked ? 'border-neutral-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'border-primary/30 bg-primary/5 text-primary hover:bg-primary/10' }}"
                         aria-pressed="{{ this.locked ? 'false' : 'true' }}"
                         aria-label="{{ (this.locked ? 'admin.contacts.project.unlock' : 'admin.contacts.project.lock')|trans }}"
                         title="{{ (this.locked ? 'admin.contacts.project.unlock' : 'admin.contacts.project.lock')|trans }}"
@@ -84,19 +83,57 @@
                             class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
                         >
                     </div>
-                    {# La carte n'est pas un contrôle de formulaire : clics
-                       coupés quand le cadenas est fermé. #}
-                    <div class="min-w-0 space-y-2 sm:col-span-2 {{ this.locked ? 'pointer-events-none' }}" data-controller="district-picker">
+                    {# Cadenas fermé : la carte reste consultable (pan, zoom,
+                       plein écran) mais la sélection de quartiers est coupée
+                       via la valeur locked (polygones non cliquables). #}
+                    <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-locked-value="{{ this.locked ? 'true' : 'false' }}">
                         <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
                         {# data-live-ignore : la carte n'est jamais touchée par
                            les re-rendus live (data-skip-morph la remplacerait,
                            détruisant l'instance Google Maps → écran blanc). #}
                         <div data-live-ignore>
+                            {# Cadre extensible : passe en overlay plein écran via le bouton. #}
+                            <div class="relative" data-district-picker-target="frame">
                             {{ ux_map(this.map, {
                                 style: 'height: 260px; width: 100%;',
                                 class: 'overflow-hidden rounded-xl border border-neutral-200',
                                 'data-district-picker-target': 'map',
                             }) }}
+
+                                {# role=button et non <button> : le fieldset
+                                   disabled du cadenas ne doit pas neutraliser
+                                   l'agrandissement, simple consultation. #}
+                                <span
+                                    role="button"
+                                    tabindex="0"
+                                    data-action="click->district-picker#expand keydown.enter->district-picker#expand keydown.space->district-picker#expand:prevent"
+                                    class="absolute top-2 right-2 z-10 flex size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                                    data-district-picker-target="expandButton"
+                                    aria-label="{{ 'admin.contacts.project.expandMap'|trans }}"
+                                    title="{{ 'admin.contacts.project.expandMap'|trans }}"
+                                    data-testid="map-expand"
+                                >
+                                    {{ ux_icon('lucide:maximize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                </span>
+                                <span
+                                    role="button"
+                                    tabindex="0"
+                                    data-action="click->district-picker#collapse keydown.enter->district-picker#collapse keydown.space->district-picker#collapse:prevent"
+                                    class="absolute top-2 right-2 z-10 hidden size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                                    data-district-picker-target="collapseButton"
+                                    aria-label="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                                    title="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                                    data-testid="map-collapse"
+                                >
+                                    {{ ux_icon('lucide:minimize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                </span>
+                            </div>
+                            <div
+                                class="pointer-events-auto fixed inset-0 z-40 hidden bg-gray-950/40 backdrop-blur-[1px]"
+                                data-district-picker-target="backdrop"
+                                data-action="click->district-picker#collapse"
+                                aria-hidden="true"
+                            ></div>
                         </div>
                         <input
                             type="hidden"

@@ -35,6 +35,18 @@ services:
     App\Dossier\Service\DocumentStorage:
         factory: ['@App\Dossier\Service\DocumentStorageFactory', 'create']
 
+    # Drive port used by the dossier storage and provisioner.
+    App\Shared\Google\DriveGateway: '@App\Shared\Google\GoogleDriveClient'
+
+    App\Auth\Storage\AvatarStorage:
+        factory: ['@App\Auth\Storage\AvatarStorageFactory', 'create']
+
+    App\PropertyListing\Service\ListingPhotoStorage:
+        factory: ['@App\PropertyListing\Service\ListingPhotoStorageFactory', 'create']
+
+    App\Visit\Storage\VisitPhotoStorage:
+        factory: ['@App\Visit\Storage\VisitPhotoStorageFactory', 'create']
+
     App\Shared\Sanity\SanityService:
         arguments:
             $sanityProjectId: '%env(SANITY_PROJECT_ID)%'

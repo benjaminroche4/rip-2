@@ -66,6 +66,13 @@ class Dossier
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $closedAt = null;
 
+    /** AI quick recap (JSON: summary, attentionPoints, nextAction), generated on demand. */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $recapJson = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $recapGeneratedAt = null;
+
     /**
      * Reference of the contact request this dossier was converted from, or
      * null for dossiers created from scratch. Displayed as the origin entry
@@ -81,6 +88,22 @@ class Dossier
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $manager = null;
+
+    /**
+     * Id of this dossier's root folder in the agency Shared Drive (mode
+     * DOSSIER_STORAGE=drive), or null when Drive is off or the folder has not
+     * been provisioned yet. Per-person pieces live in sub-folders (see
+     * DossierPerson::$driveFolderId).
+     */
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $driveFolderId = null;
+
+    /**
+     * Id of the Drive permission granting the current manager read access to
+     * the dossier folder, kept so it can be revoked when the manager changes.
+     */
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $driveManagerPermissionId = null;
 
     /**
      * Ordered list of persons attached to the dossier. Bound to the
@@ -259,6 +282,30 @@ class Dossier
         return $this;
     }
 
+    public function getDriveFolderId(): ?string
+    {
+        return $this->driveFolderId;
+    }
+
+    public function setDriveFolderId(?string $driveFolderId): static
+    {
+        $this->driveFolderId = $driveFolderId;
+
+        return $this;
+    }
+
+    public function getDriveManagerPermissionId(): ?string
+    {
+        return $this->driveManagerPermissionId;
+    }
+
+    public function setDriveManagerPermissionId(?string $driveManagerPermissionId): static
+    {
+        $this->driveManagerPermissionId = $driveManagerPermissionId;
+
+        return $this;
+    }
+
     public function getClosedAt(): ?\DateTimeImmutable
     {
         return $this->closedAt;
@@ -267,6 +314,24 @@ class Dossier
     public function setClosedAt(?\DateTimeImmutable $closedAt): static
     {
         $this->closedAt = $closedAt;
+
+        return $this;
+    }
+
+    public function getRecapJson(): ?string
+    {
+        return $this->recapJson;
+    }
+
+    public function getRecapGeneratedAt(): ?\DateTimeImmutable
+    {
+        return $this->recapGeneratedAt;
+    }
+
+    public function setRecap(?string $recapJson, ?\DateTimeImmutable $generatedAt): static
+    {
+        $this->recapJson = $recapJson;
+        $this->recapGeneratedAt = $generatedAt;
 
         return $this;
     }

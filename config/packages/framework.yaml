@@ -39,6 +39,12 @@ framework:
             policy: fixed_window
             limit: 5
             interval: '1 minute'
+        # Brute-force guard on the 2FA code form: 6-digit TOTP codes are
+        # guessable without a hard attempt cap. Keyed by user + IP.
+        two_factor_attempts:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
         # Brute-force guard on the dossier deposit pairing form (email +
         # pairing code) and its uploads.
         form_deposit:
@@ -98,6 +104,8 @@ when@test:
             form_listing:
                 limit: 1000
             form_deposit:
+                limit: 1000
+            two_factor_attempts:
                 limit: 1000
             admin_mutation:
                 limit: 1000

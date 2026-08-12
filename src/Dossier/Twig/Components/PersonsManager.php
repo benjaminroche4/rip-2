@@ -39,6 +39,10 @@ final class PersonsManager
     #[LiveProp]
     public int $dossierId = 0;
 
+    /** Fold state of the card, kept server-side so a morph cannot undo it. */
+    #[LiveProp]
+    public bool $expanded = true;
+
     /** Person id currently in edit mode, or null. */
     #[LiveProp]
     public ?int $editId = null;
@@ -197,6 +201,14 @@ final class PersonsManager
     public function getCanAdd(): bool
     {
         return $this->dossier()->getPersons()->count() < Dossier::MAX_PERSONS;
+    }
+
+    /** Fires alongside the native <details> toggle, to keep the state. */
+    #[LiveAction]
+    public function toggleCard(): void
+    {
+        $this->ensureAdmin();
+        $this->expanded = !$this->expanded;
     }
 
     #[LiveAction]

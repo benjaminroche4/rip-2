@@ -1,0 +1,185 @@
+{% extends 'public/base_auth.html.twig' %}
+
+{% block title %}{{ 'twoFactor.challenge.title'|trans }}{% endblock %}
+{% block description %}{{ 'twoFactor.challenge.subtitle'|trans }}{% endblock %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentParameters = app.request.attributes.get('_route_params') %}
+
+{% block body %}
+    <section class="relative overflow-hidden flex w-full flex-col justify-center px-8 py-12 lg:w-1/2">
+        <twig:Section:GridBackground :auth="true" />
+        <div class="mx-auto w-full max-w-xl lg:w-full">
+            {# Même en-tête que la page de connexion : logo + sélecteur de langue. #}
+            <div class="flex justify-between items-center gap-4">
+                <a href="{{ path('app_home') }}">
+                    <img
+                        src="{{ asset('medias/logos/logo_red.svg') }}"
+                        width="141"
+                        height="32"
+                        loading="eager"
+                        alt="{{ 'header.logo.alt'|trans|raw }}"
+                        class="shrink-0 h-8 w-auto"
+                    />
+                </a>
+                <twig:Button
+                    variant="outline"
+                    popovertarget="desktop-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans|raw }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="desktop-lang"
+                    anchor="bottom"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 px-4 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div
+                        class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        <a
+                            href="{{ path(currentRoute, currentParameters|merge({'_locale': 'fr'})) }}"
+                            hreflang="fr"
+                            lang="fr"
+                            class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.fr'|trans|raw }}
+                        </span>
+                        </a>
+                        <a
+                            href="{{ path(currentRoute, currentParameters|merge({'_locale': 'en'})) }}"
+                            hreflang="en"
+                            lang="en"
+                            class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        >
+                        <span class="flex items-center gap-x-3">
+                            {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                            {{ 'header.lang.type.en'|trans|raw }}
+                        </span>
+                        </a>
+                    </div>
+                </el-popover>
+            </div>
+            <div class="flex flex-col justify-center items-center w-full space-y-2">
+                <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">{{ 'twoFactor.challenge.title'|trans }}</h1>
+                <p class="mx-auto w-full max-w-xs font-light text-neutral-400 text-balance text-center">
+                    {{ 'twoFactor.challenge.subtitle'|trans }}
+                </p>
+            </div>
+
+            <div class="mt-10 mx-auto w-full max-w-sm">
+                <form
+                    method="POST"
+                    action="{{ checkPathUrl ? checkPathUrl : path(checkPathRoute) }}"
+                    class="space-y-6"
+                    data-controller="otp-input"
+                    data-action="paste->otp-input#paste"
+                    data-testid="2fa-form"
+                >
+                    {% if authenticationError %}
+                        <twig:Alert class="border-amber-200 bg-amber-50 text-amber-900" data-testid="2fa-error">
+                            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                            <twig:Alert:Title>{{ 'twoFactor.challenge.error.title'|trans|raw }}</twig:Alert:Title>
+                            <twig:Alert:Description>
+                                {{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}
+                            </twig:Alert:Description>
+                        </twig:Alert>
+                    {% endif %}
+
+                    {# Le firewall lit ce champ, rempli par les cases OTP ou
+                       par le champ code de récupération. #}
+                    <input type="hidden" name="{{ authCodeParameterName }}" data-otp-input-target="hidden">
+
+                    {# Confiance automatique : pas de poste partagé dans
+                       l'équipe, chaque code validé marque l'appareil comme
+                       fiable pour 30 jours (choix produit assumé). #}
+                    {% if displayTrustedOption %}
+                        <input type="hidden" name="{{ trustedParameterName }}" value="on">
+                    {% endif %}
+
+                    {# Mode code d'application : 6 cases, validation directe
+                       à la saisie du dernier chiffre. #}
+                    <div data-otp-input-target="otpZone" class="space-y-6">
+                        <div class="space-y-3">
+                            <div class="flex justify-center gap-2" role="group" aria-label="{{ 'twoFactor.challenge.code.label'|trans }}">
+                                {% for i in 1..6 %}
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        pattern="[0-9]*"
+                                        maxlength="1"
+                                        autocomplete="{{ loop.first ? 'one-time-code' : 'off' }}"
+                                        aria-label="{{ 'twoFactor.challenge.code.digit'|trans({'%position%': i}) }}"
+                                        {% if loop.first %}autofocus{% endif %}
+                                        data-otp-input-target="digit"
+                                        data-action="input->otp-input#input keydown->otp-input#keydown"
+                                        class="size-12 rounded-xl border border-neutral-200 bg-white text-center text-lg font-semibold text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                        data-testid="2fa-digit-{{ i }}"
+                                    >
+                                {% endfor %}
+                            </div>
+                            <p class="text-center text-xs text-gray-400">{{ 'twoFactor.challenge.code.help'|trans }}</p>
+                        </div>
+
+                        {# Volontairement discret : c'est un chemin de secours. #}
+                        <p class="text-center">
+                            <a href="#" data-action="otp-input#showRecovery" class="text-xs font-light text-gray-400 hover:text-gray-600 transition duration-100" data-testid="2fa-use-recovery">
+                                {{ 'twoFactor.challenge.useRecovery'|trans }}
+                            </a>
+                        </p>
+                    </div>
+
+                    {# Mode code de récupération (8 chiffres, pas d'auto-submit). #}
+                    <div data-otp-input-target="recoveryZone" class="hidden space-y-6">
+                        <div>
+                            <twig:Label for="_recovery_code">{{ 'twoFactor.challenge.recovery.label'|trans|raw }}</twig:Label>
+                            <div class="mt-2">
+                                <twig:Input
+                                    type="text"
+                                    id="_recovery_code"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    maxlength="12"
+                                    placeholder="12345678"
+                                    data-otp-input-target="recoveryInput"
+                                    data-action="input->otp-input#syncRecovery"
+                                />
+                            </div>
+                            <p class="mt-1.5 text-xs text-gray-400">{{ 'twoFactor.challenge.recovery.help'|trans }}</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <twig:Button variant="default" size="lg" class="w-full cursor-pointer" data-testid="2fa-submit">
+                                {{ 'twoFactor.challenge.submit'|trans|raw }}
+                            </twig:Button>
+                            <p class="text-center">
+                                <a href="#" data-action="otp-input#showOtp" class="text-xs font-light text-gray-400 hover:text-gray-600 transition duration-100">
+                                    {{ 'twoFactor.challenge.useApp'|trans }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if isCsrfProtectionEnabled %}
+                        <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+                    {% endif %}
+                </form>
+            </div>
+
+        </div>
+    </section>
+    <section class="hidden w-0 flex-1 bg-white p-3 lg:block" aria-hidden="true">
+        <div class="relative h-full w-full overflow-hidden rounded-3xl border border-black/5">
+            <img
+                src="{{ asset('medias/website/rip_1_login.webp') }}"
+                alt=""
+                loading="eager"
+                class="absolute inset-0 size-full object-cover"/>
+            <div class="absolute inset-0 bg-black/10"></div>
+        </div>
+    </section>
+{% endblock %}

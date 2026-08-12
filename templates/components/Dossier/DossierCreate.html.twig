@@ -275,11 +275,11 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="dossier-create-submit"
                         >
-                            <span data-loading="action(create)|hide" class="flex items-center gap-2">
+                            <span data-loading="action(create)|addClass(hidden)" class="flex items-center gap-2">
                                 {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                                 {{ 'admin.dossiers.create.submit'|trans }}
                             </span>
-                            <span data-loading="action(create)|show" class="flex items-center gap-2">
+                            <span data-loading="action(create)|removeClass(hidden)" class="hidden flex items-center gap-2">
                                 {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
                                 {{ 'admin.dossiers.create.submitting'|trans }}
                             </span>

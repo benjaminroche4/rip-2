@@ -1,0 +1,315 @@
+<div {{ attributes }} data-testid="visit-details-card">
+    {% set visit = this.visit %}
+    {% if visit %}
+        {% set locked = this.locked %}
+        <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+            <div class="rounded-2xl bg-neutral-50 p-2">
+                <div class="flex items-center justify-between gap-4 px-4 pt-3 pb-1">
+                    <h2 class="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                        {{ 'admin.visits.show.detailsTitle'|trans }}
+                    </h2>
+                    {# Cadenas anti-fausse manip : les champs ne s'éditent
+                       qu'une fois déverrouillés, comme sur les dossiers. #}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="toggleLock"
+                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        aria-pressed="{{ locked ? 'false' : 'true' }}"
+                        aria-label="{{ (locked ? 'admin.visits.show.unlock' : 'admin.visits.show.lock')|trans }}"
+                        title="{{ (locked ? 'admin.visits.show.unlock' : 'admin.visits.show.lock')|trans }}"
+                        data-testid="visit-details-lock"
+                    >
+                        {{ ux_icon(locked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0 ' ~ (locked ? '' : 'text-primary'), 'aria-hidden': 'true'}) }}
+                    </button>
+                </div>
+                <div class="mt-1 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm {{ locked ? '' : 'ring-1 ring-primary/20' }}">
+                    {# ── Référence (jamais éditable). ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.show.reference'|trans }}</p>
+                        <p class="font-medium text-gray-900 tabular-nums" data-testid="visit-show-reference">{{ visit.reference }}</p>
+                    </div>
+
+                    {# ── Type et déroulement : chips cliquables une fois déverrouillé. ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.type.label'|trans }}</p>
+                        {% if locked %}
+                            <p class="flex items-center gap-1.5 font-medium text-gray-900">
+                                {{ ux_icon(visit.type.icon, {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                {{ visit.type.labelKey|trans }}
+                            </p>
+                        {% else %}
+                            <div class="flex flex-wrap justify-end gap-1.5">
+                                {% for case in enum('App\\Visit\\Domain\\VisitType').cases() %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="chooseType"
+                                        data-live-type-param="{{ case.value }}"
+                                        aria-pressed="{{ case == visit.type ? 'true' : 'false' }}"
+                                        class="flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ case == visit.type ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-testid="visit-type-chip-{{ case.value }}"
+                                    >
+                                        {{ ux_icon(case.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ case.labelKey|trans }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Date et heure. ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.scheduledAt.label'|trans }}</p>
+                        {% if locked %}
+                            <p class="flex items-center gap-2 font-medium text-gray-900 tabular-nums">
+                                <span class="flex size-7 items-center justify-center rounded-full bg-primary/10">
+                                    {{ ux_icon('lucide:clock', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                </span>
+                                {{ visit.scheduledAt|format_datetime(pattern='EEEE d MMMM')|capitalize }}, {{ visit.scheduledAt|format_datetime(pattern="HH'h'mm") }}
+                            </p>
+                        {% else %}
+                            <div class="text-right">
+                                <input
+                                    type="datetime-local"
+                                    data-model="norender|scheduledAt"
+                                    data-action="change->live#action"
+                                    data-live-action-param="save"
+                                    value="{{ this.scheduledAt }}"
+                                    class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                    data-testid="visit-details-scheduled-at"
+                                >
+                                {% if this.errors.scheduledAt is defined %}
+                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.scheduledAt|trans }}</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Durée + client présent. ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.duration.label'|trans }}</p>
+                        {% if locked %}
+                            <p class="font-medium text-gray-900 tabular-nums">{{ visit.durationMinutes }} min
+                                {% if not visit.clientPresent %}
+                                    <span class="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ 'admin.visits.show.proxyVisit'|trans }}</span>
+                                {% endif %}
+                            </p>
+                        {% else %}
+                            <div class="flex items-center gap-3">
+                                <select
+                                    data-model="norender|durationMinutes"
+                                    data-action="change->live#action"
+                                    data-live-action-param="save"
+                                    class="cursor-pointer rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                    data-testid="visit-details-duration"
+                                >
+                                    {% for minutes in [15, 30, 45, 60] %}
+                                        <option value="{{ minutes }}" {{ this.durationMinutes == minutes ? 'selected' }}>{{ ('admin.visits.create.duration.min' ~ minutes)|trans }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label class="flex cursor-pointer items-center gap-1.5 text-xs text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        {{ visit.clientPresent ? 'checked' }}
+                                        data-action="change->live#action"
+                                        data-live-action-param="toggleClientPresent"
+                                        class="size-3.5 cursor-pointer rounded border-neutral-300 accent-[#71172e]"
+                                        data-testid="visit-details-client-present"
+                                    >
+                                    {{ 'admin.visits.create.clientPresent.label'|trans }}
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Lien de l'annonce. ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.listingUrl.label'|trans }}</p>
+                        {% if locked %}
+                            {% if visit.listingUrl %}
+                                <a
+                                    href="{{ visit.listingUrl }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="flex min-w-0 items-center gap-1.5 truncate font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                                    data-testid="visit-show-listing"
+                                >
+                                    {{ ux_icon('lucide:external-link', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    <span class="truncate">{{ visit.listingUrl|replace({'https://': '', 'http://': ''}) }}</span>
+                                </a>
+                            {% else %}
+                                <p class="text-gray-400">-</p>
+                            {% endif %}
+                        {% else %}
+                            <div class="w-full max-w-xs text-right">
+                                <input
+                                    type="url"
+                                    data-model="norender|listingUrl"
+                                    data-action="change->live#action"
+                                    data-live-action-param="save"
+                                    value="{{ this.listingUrl }}"
+                                    maxlength="500"
+                                    placeholder="{{ 'admin.visits.create.listingUrl.placeholder'|trans }}"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="visit-details-listing-url"
+                                >
+                                {% if this.errors.listingUrl is defined %}
+                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.listingUrl|trans }}</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Adresse (géocodée + bornée Île-de-France à la sauvegarde). ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.address.label'|trans }}</p>
+                        {% if locked %}
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query={{ visit.address|url_encode }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="flex min-w-0 items-center gap-1.5 truncate text-right font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                                title="{{ 'admin.visits.row.openInMaps'|trans }}"
+                            >
+                                {{ ux_icon('lucide:map-pin', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                <span class="truncate">{{ visit.address }}</span>
+                            </a>
+                        {% else %}
+                            <div class="w-full max-w-md text-right">
+                                <input
+                                    type="text"
+                                    data-model="norender|address"
+                                    data-action="change->live#action"
+                                    data-live-action-param="save"
+                                    value="{{ this.address }}"
+                                    maxlength="255"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                    data-testid="visit-details-address"
+                                >
+                                {% if this.errors.address is defined %}
+                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.address|trans }}</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Dossier (rattachement en lecture seule). ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.dossier.label'|trans }}</p>
+                        {# Cliquable seulement avec la section Dossiers : un
+                           agent de visite ne doit pas atterrir sur un 403. #}
+                        {% set canOpenDossier = is_granted('ROLE_SECTION_DOSSIERS') %}
+                        <{{ canOpenDossier ? 'a' : 'span' }}
+                            {% if canOpenDossier %}href="{{ path('admin_dossier_show', {adminPrefix: this.adminPrefix, reference: visit.dossierReference}) }}"{% endif %}
+                            class="flex min-w-0 items-center gap-1.5 truncate font-medium text-gray-900 {{ canOpenDossier ? 'transition-colors duration-100 ease-out hover:text-primary' }}"
+                            data-testid="visit-show-dossier"
+                        >
+                            {{ ux_icon('lucide:folder-open', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            <span class="truncate">{{ visit.dossierName }} <span class="font-normal text-gray-400">({{ visit.dossierReference }})</span></span>
+                        </{{ canOpenDossier ? 'a' : 'span' }}>
+                    </div>
+
+                    {# ── Réalisée par : chips des agents de visite. ── #}
+                    <div class="flex items-start justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 pt-1 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.performedBy'|trans }}</p>
+                        {% if locked %}
+                            {% if visit.assigneeName %}
+                                <p class="flex items-center gap-2 font-medium text-gray-900">
+                                    <twig:Avatar filename="{{ visit.assigneeAvatar }}" name="{{ visit.assigneeName }}" size="6" />
+                                    {{ visit.assigneeName|title }}
+                                </p>
+                            {% else %}
+                                <p class="flex items-center gap-1.5 font-medium text-amber-600">
+                                    {{ ux_icon('lucide:circle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.visits.row.unassigned'|trans }}
+                                </p>
+                            {% endif %}
+                        {% else %}
+                            <div class="flex flex-wrap justify-end gap-2" data-testid="visit-details-assignees">
+                                {% for choice in this.assigneeChoices %}
+                                    {% set picked = visit.assigneeId == choice.id %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="pickAssignee"
+                                        data-live-id-param="{{ choice.id }}"
+                                        aria-pressed="{{ picked ? 'true' : 'false' }}"
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5 font-medium text-primary' : 'border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900' }}"
+                                        data-testid="visit-details-assignee-chip"
+                                    >
+                                        <twig:Avatar filename="{{ choice.avatar }}" name="{{ choice.name }}" size="6" class="{{ picked ? '' : 'opacity-70' }}" />
+                                        {{ choice.name|title }}
+                                        {% if picked %}
+                                            {{ ux_icon('lucide:x', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {% endif %}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# ── Réservée par (lecture seule). ── #}
+                    {% if visit.bookedByName %}
+                        <div class="flex items-center justify-between gap-4 px-4 py-3">
+                            <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.bookedBy'|trans }}</p>
+                            <p class="flex items-center gap-2 font-medium text-gray-900">
+                                <twig:Avatar filename="{{ visit.bookedByAvatar }}" name="{{ visit.bookedByName }}" size="6" />
+                                {{ visit.bookedByName|title }}
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    {# ── Agent immobilier. ── #}
+                    <div class="flex items-center justify-between gap-4 px-4 py-3">
+                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.agent.label'|trans }}</p>
+                        {% if locked %}
+                            {% if visit.agentName %}
+                                <p class="flex items-center gap-1.5 font-medium text-gray-900">
+                                    {{ ux_icon('lucide:briefcase', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ visit.agentName }}
+                                </p>
+                            {% else %}
+                                <p class="text-gray-400">-</p>
+                            {% endif %}
+                        {% else %}
+                            <select
+                                data-model="agentId"
+                                class="cursor-pointer rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                                data-testid="visit-details-agent"
+                            >
+                                <option value="0">{{ 'admin.visits.create.agent.placeholder'|trans }}</option>
+                                {% for choice in this.agentChoices %}
+                                    <option value="{{ choice.id }}" {{ this.agentId == choice.id ? 'selected' }}>{{ choice.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </div>
+
+                    {# ── Note libre. ── #}
+                    <div class="px-4 py-3">
+                        <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.note.label'|trans }}</p>
+                        {% if locked %}
+                            {% if visit.note %}
+                                <p class="mt-1.5 leading-relaxed text-pretty whitespace-pre-line text-gray-900" data-testid="visit-show-note">{{ visit.note }}</p>
+                            {% else %}
+                                <p class="mt-1.5 text-gray-400">-</p>
+                            {% endif %}
+                        {% else %}
+                            <textarea
+                                data-model="norender|note"
+                                data-action="change->live#action"
+                                data-live-action-param="save"
+                                rows="3"
+                                maxlength="2000"
+                                placeholder="{{ 'admin.visits.create.note.placeholder'|trans }}"
+                                class="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                data-testid="visit-details-note"
+                            >{{ this.note }}</textarea>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>

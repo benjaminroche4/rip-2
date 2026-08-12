@@ -1,0 +1,17 @@
+ai:
+    platform:
+        anthropic:
+            api_key: '%env(ANTHROPIC_API_KEY)%'
+
+    agent:
+        # Résumés internes du BO (recap dossier) : modèle rapide et peu
+        # coûteux, pas de tools (le contexte vient de la base), sortie
+        # structurée demandée par le service appelant.
+        dossier_recap:
+            platform: 'ai.platform.anthropic'
+            model:
+                name: 'claude-haiku-4-5'
+                options:
+                    temperature: 0.3
+                    max_tokens: 1000
+            tools: false

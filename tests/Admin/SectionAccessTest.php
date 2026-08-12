@@ -76,9 +76,10 @@ final class SectionAccessTest extends WebTestCase
         $this->client->request('GET', $this->adminUrl().'/outils/documents');
         self::assertResponseIsSuccessful();
 
-        // The dashboard is open to every staff member.
+        // No dashboard page: the admin root forwards to the user's first
+        // accessible section.
         $this->client->request('GET', $this->adminUrl());
-        self::assertResponseIsSuccessful();
+        self::assertResponseRedirects();
 
         $this->client->request('GET', $this->adminUrl().'/contacts');
         self::assertResponseStatusCodeSame(403);
@@ -105,9 +106,10 @@ final class SectionAccessTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Nouvelle visite');
         self::assertSelectorTextContains('[data-testid="admin-breadcrumb"]', 'Visites');
 
-        // The dashboard is open to every staff member.
+        // No dashboard page: the admin root forwards to the user's first
+        // accessible section.
         $this->client->request('GET', $this->adminUrl());
-        self::assertResponseIsSuccessful();
+        self::assertResponseRedirects();
 
         $this->client->request('GET', $this->adminUrl().'/contacts');
         self::assertResponseStatusCodeSame(403);
@@ -127,9 +129,10 @@ final class SectionAccessTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Agents immobiliers');
 
-        // The dashboard is open to every staff member.
+        // No dashboard page: the admin root forwards to the user's first
+        // accessible section.
         $this->client->request('GET', $this->adminUrl());
-        self::assertResponseIsSuccessful();
+        self::assertResponseRedirects();
 
         $this->client->request('GET', $this->adminUrl().'/contacts');
         self::assertResponseStatusCodeSame(403);
@@ -165,12 +168,41 @@ final class SectionAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testBareStaffOnlySeesTheDashboard(): void
+    public function testDeniedStaffGetsTheBackOfficeAccessPageNotThePublicOne(): void
+    {
+        // Shared link to a section they were not granted: the member stays
+        // inside the BO and is told to ask an admin, instead of landing on
+        // the public 403 page whose only button leaves the back-office.
+        $this->loginWithRoles(['ROLE_SECTION_VISITS']);
+        $this->client->request('GET', $this->adminUrl().'/dossiers');
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSelectorExists('[data-testid="admin-access-denied"]');
+        self::assertSelectorTextContains('[data-testid="admin-access-denied"]', 'ne fait pas partie de vos accès');
+        // Both ways out stay in the BO: their own space and their profile.
+        self::assertSelectorExists('[data-testid="admin-access-denied-home"]');
+        self::assertSelectorExists('[data-testid="admin-access-denied-profile"]');
+        // The sidebar is still there, showing what they can actually open.
+        self::assertSelectorExists('aside a[href$="/admin/visites"]');
+    }
+
+    public function testDeniedPlainUserKeepsThePublicErrorPage(): void
+    {
+        // No BO access at all: nothing of the back-office must show up.
+        $this->loginWithRoles([]);
+        $this->client->request('GET', $this->adminUrl().'/dossiers');
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSelectorNotExists('[data-testid="admin-access-denied"]');
+    }
+
+    public function testBareStaffWithoutAnySectionIsDeniedEverywhere(): void
     {
         $this->loginWithRoles(['ROLE_STAFF']);
 
+        // No section granted: nothing to land on, the root denies too.
         $this->client->request('GET', $this->adminUrl());
-        self::assertResponseIsSuccessful();
+        self::assertResponseStatusCodeSame(403);
 
         $this->client->request('GET', $this->adminUrl().'/contacts');
         self::assertResponseStatusCodeSame(403);

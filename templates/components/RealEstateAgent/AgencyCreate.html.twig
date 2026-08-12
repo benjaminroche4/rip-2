@@ -1,0 +1,115 @@
+{#
+    RealEstateAgent:AgencyCreate — "new agency" modal, a single name field.
+    Rendered as one item of the "Créer" dropdown; its modal mirrors the
+    agent modal chrome. display:contents so the trigger sits directly in the
+    dropdown menu flow.
+#}
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="agency-create">
+    <button
+        type="button"
+        data-action="live#action details-dropdown#close"
+        data-live-action-param="openModal"
+        class="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-50 cursor-pointer"
+        data-testid="agency-create-open"
+    >
+        <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
+            {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </span>
+        <span class="min-w-0">
+            <span class="block text-sm font-medium text-gray-900">{{ 'admin.agencies.create.menuItem.title'|trans }}</span>
+            <span class="block text-xs text-gray-500">{{ 'admin.agencies.create.menuItem.subtitle'|trans }}</span>
+        </span>
+    </button>
+
+    {% if this.open %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agency-create-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="closeModal"
+            data-testid="agency-create-modal"
+        >
+            {# Clic en dehors de la carte = fermeture. #}
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="closeModal"
+                aria-label="{{ 'admin.agencies.create.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <form
+                class="relative max-h-[92vh] w-full max-w-md overflow-y-auto rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none"
+                data-action="live#action:prevent"
+                data-live-action-param="create"
+                data-model="on(change)|*"
+                novalidate
+                autocomplete="off"
+                data-testid="agency-create-form"
+            >
+                <div class="space-y-3 rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3 pb-0">
+                        <h2 id="agency-create-title" class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.agencies.create.title'|trans }}</h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.agencies.create.subtitle'|trans }}</p>
+                    </div>
+
+                    <div class="rounded-xl bg-white px-4 py-4">
+                        <twig:Label for="{{ form.name.vars.id }}" class="text-gray-600">
+                            {{ 'admin.agencies.create.name.label'|trans }}
+                            <span class="text-red-600" aria-hidden="true">*</span>
+                        </twig:Label>
+                        <div class="mt-1.5">
+                            <input
+                                type="text"
+                                id="{{ form.name.vars.id }}"
+                                name="{{ form.name.vars.full_name }}"
+                                value="{{ form.name.vars.value }}"
+                                maxlength="100"
+                                required
+                                placeholder="{{ 'admin.agencies.create.name.placeholder'|trans }}"
+                                aria-invalid="{{ form.name.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                data-testid="agency-create-name"
+                            >
+                            {% for error in form.name.vars.errors %}
+                                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4 p-3 pt-0">
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="closeModal"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="agency-create-cancel"
+                        >
+                            {{ 'admin.agencies.create.cancel'|trans }}
+                        </button>
+                        {# data-loading disables the button while `create` runs — a
+                           double-click would otherwise insert two agencies. #}
+                        <button
+                            type="submit"
+                            data-loading="action(create)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                            data-testid="agency-create-submit"
+                        >
+                            <span data-loading="action(create)|addClass(hidden)" class="flex items-center gap-2">
+                                {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.agencies.create.submit'|trans }}
+                            </span>
+                            <span data-loading="action(create)|removeClass(hidden)" class="hidden flex items-center gap-2">
+                                {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.agencies.create.submitting'|trans }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>

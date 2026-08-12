@@ -11,8 +11,16 @@
     }) }}
     data-testid="dossier-show-search"
 >
-    <details open class="group details-animated rounded-2xl bg-neutral-50 p-2">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
+    {# L'état du repli vit sur le serveur : le morph réappliquerait sinon le
+       `open` rendu, et la card se rouvrirait au premier autosave. Le clic
+       laisse le toggle natif se faire (ouverture immédiate) puis synchronise
+       la prop pour les re-rendus suivants. #}
+    <details {{ this.expanded ? 'open' }} class="group details-animated rounded-2xl bg-neutral-50 p-2">
+        <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden"
+            data-action="live#action"
+            data-live-action-param="toggleCard"
+        >
             <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                     <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.show.search.title'|trans }}</h2>
@@ -36,14 +44,14 @@
                 </div>
                 <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.search.subtitle'|trans }}</p>
             </div>
-            <div class="flex shrink-0 items-center gap-1.5">
+            <div class="flex shrink-0 items-center gap-3">
                 {# Cadenas anti-missclick : verrouillé par défaut à chaque
                    chargement, les champs ne réagissent qu'une fois déverrouillés. #}
                 <button
                     type="button"
                     data-action="live#action:prevent:stop"
                     data-live-action-param="toggleLock"
-                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg transition-colors duration-100 ease-out {{ this.locked ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-900' : 'bg-primary/10 text-primary hover:bg-primary/15' }}"
+                    class="flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors duration-100 ease-out {{ this.locked ? 'border-neutral-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'border-primary/30 bg-primary/5 text-primary hover:bg-primary/10' }}"
                     aria-pressed="{{ this.locked ? 'false' : 'true' }}"
                     aria-label="{{ (this.locked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
                     title="{{ (this.locked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
@@ -97,8 +105,11 @@
                        locataires (section Personnes), alerte sinon. #}
                     {% set maxAffordableBudget = this.maxAffordableBudget %}
                     {% if this.budget != '' and maxAffordableBudget is not null and this.budget > maxAffordableBudget %}
-                        <p class="flex items-center gap-1.5 text-xs text-red-600" role="alert" data-testid="budget-too-high">
-                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {# Même vocabulaire d'alerte douce que l'incitation 2FA
+                           de la sidebar : c'est un avertissement, pas une
+                           erreur bloquante. #}
+                        <p class="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-pretty text-amber-900" role="alert" data-testid="budget-too-high">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-4 h-lh shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
                             {{ 'admin.dossiers.show.search.budgetTooHigh'|trans({'%max%': maxAffordableBudget|format_number}) }}
                         </p>
                     {% endif %}
@@ -179,19 +190,57 @@
                         label: ('admin.dossiers.show.search.importantAddresses.type.' ~ row.type)|trans ~ ' · ' ~ row.address,
                     }]) %}
                 {% endfor %}
-                {# La carte n'est pas un contrôle de formulaire : on coupe ses
-                   clics quand le cadenas est fermé (le fieldset ne suffit pas). #}
-                <div class="min-w-0 space-y-2 sm:col-span-2 {{ this.locked ? 'pointer-events-none' }}" data-controller="district-picker" data-district-picker-pins-value="{{ addressPins|json_encode }}">
+                {# Cadenas fermé : la carte reste consultable (pan, zoom,
+                   plein écran) mais la sélection de quartiers est coupée via
+                   la valeur locked du controller (polygones non cliquables). #}
+                <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-pins-value="{{ addressPins|json_encode }}" data-district-picker-locked-value="{{ this.locked ? 'true' : 'false' }}">
                     <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
                     {# data-live-ignore : la carte n'est jamais touchée par les
                        re-rendus live (data-skip-morph la remplacerait,
                        détruisant l'instance Google Maps → écran blanc). #}
                     <div data-live-ignore>
+                        {# Cadre extensible : passe en overlay plein écran via le bouton. #}
+                        <div class="relative" data-district-picker-target="frame">
                         {{ ux_map(this.map, {
                             style: 'height: 260px; width: 100%;',
                             class: 'overflow-hidden rounded-xl border border-neutral-200',
                             'data-district-picker-target': 'map',
                         }) }}
+
+                        {# role=button et non <button> : le fieldset disabled du
+                           cadenas ne doit pas neutraliser l'agrandissement,
+                           qui est une simple consultation. #}
+                        <span
+                            role="button"
+                            tabindex="0"
+                            data-action="click->district-picker#expand keydown.enter->district-picker#expand keydown.space->district-picker#expand:prevent"
+                            class="absolute top-2 right-2 z-10 flex size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                            data-district-picker-target="expandButton"
+                            aria-label="{{ 'admin.contacts.project.expandMap'|trans }}"
+                            title="{{ 'admin.contacts.project.expandMap'|trans }}"
+                            data-testid="map-expand"
+                        >
+                            {{ ux_icon('lucide:maximize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        </span>
+                        <span
+                            role="button"
+                            tabindex="0"
+                            data-action="click->district-picker#collapse keydown.enter->district-picker#collapse keydown.space->district-picker#collapse:prevent"
+                            class="absolute top-2 right-2 z-10 hidden size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                            data-district-picker-target="collapseButton"
+                            aria-label="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                            title="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                            data-testid="map-collapse"
+                        >
+                            {{ ux_icon('lucide:minimize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        </span>
+                        </div>
+                        <div
+                        class="pointer-events-auto fixed inset-0 z-40 hidden bg-gray-950/40 backdrop-blur-[1px]"
+                        data-district-picker-target="backdrop"
+                        data-action="click->district-picker#collapse"
+                        aria-hidden="true"
+                        ></div>
                     </div>
                     <input
                         type="hidden"

@@ -1,0 +1,275 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.visits.show.title'|trans({'%date%': visit.scheduledAt|format_datetime(pattern='d MMMM'), '%time%': visit.scheduledAt|format_datetime(pattern="HH'h'mm")}) }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ 'admin.visits.show.title'|trans({'%date%': visit.scheduledAt|format_datetime(pattern='d MMMM'), '%time%': visit.scheduledAt|format_datetime(pattern="HH'h'mm")}) }}"
+        :crumbs="[{label: 'admin.visits.title'|trans, url: path('admin_visits', {adminPrefix: adminPrefix})}]"
+    />
+{% endblock %}
+
+{% block body %}
+    {% set menuRowClass = 'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900' %}
+    <div class="space-y-6" data-testid="visit-show-page">
+        {# Rangée d'en-tête : dossier rattaché + menu Actions, comme partout. #}
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3">
+                <h2 class="truncate text-2xl font-semibold tracking-tight text-gray-900" data-testid="visit-heading">{{ visit.dossierName|title }} <span class="font-normal text-gray-400">({{ visit.reference }})</span></h2>
+                <span class="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium {{ visit.status.badgeClasses }}" data-testid="visit-status-badge">
+                    {{ ux_icon(visit.status.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ visit.status.labelKey|trans }}
+                </span>
+            </div>
+            {# Une seule action sur la fiche : bouton direct, pas de menu
+               intermédiaire. La confirmation reste dans l'AlertDialog. #}
+            <twig:AlertDialog id="delete-visit-show-{{ visit.id }}">
+                <button
+                    type="button"
+                    class="flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:border-red-200 hover:bg-red-50"
+                    data-action="click->alert-dialog#open"
+                    data-alert-dialog-target="trigger"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    data-testid="visit-show-delete-trigger"
+                >
+                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.visits.row.delete'|trans }}
+                </button>
+                <twig:AlertDialog:Content class="sm:max-w-md">
+                    <twig:AlertDialog:Header>
+                        <twig:AlertDialog:Title>
+                            {{ 'admin.visits.row.deleteModal.title'|trans }}
+                        </twig:AlertDialog:Title>
+                        <twig:AlertDialog:Description>
+                            {{ 'admin.visits.row.deleteModal.text'|trans({'%address%': visit.address}) }}
+                        </twig:AlertDialog:Description>
+                    </twig:AlertDialog:Header>
+                    <twig:AlertDialog:Footer class="mt-4">
+                        <twig:AlertDialog:Cancel>
+                            {{ 'admin.visits.row.deleteModal.cancel'|trans }}
+                        </twig:AlertDialog:Cancel>
+                        <form
+                            method="post"
+                            action="{{ path('admin_visit_delete', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                            class="contents"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_visit') }}">
+                            <twig:AlertDialog:Action type="submit" variant="destructive" data-testid="visit-show-delete">
+                                <span class="flex items-center gap-2">
+                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.visits.row.deleteModal.confirm'|trans }}
+                                </span>
+                            </twig:AlertDialog:Action>
+                        </form>
+                    </twig:AlertDialog:Footer>
+                </twig:AlertDialog:Content>
+            </twig:AlertDialog>
+        </div>
+
+        <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
+            {# ══ Module 1 : la prise de visite (réservation + photos). ══ #}
+            <div>
+                <h2 class="mb-3 flex items-center gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase" data-testid="visit-module-booking">
+                    {{ ux_icon('lucide:calendar-check', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.visits.show.modules.booking'|trans }}
+                </h2>
+                {# Le chrome (titre, header, carte sticky) vit hors du
+                   composant : morph au changement d'adresse ou de date. #}
+                <div
+                    class="contents"
+                    data-controller="page-refresh"
+                    data-action="visit-details:changed@window->page-refresh#refresh"
+                ></div>
+                <twig:Visit:VisitDetails :visitId="visit.id" :adminPrefix="adminPrefix" />
+
+            {# ── Photos du bien : stockées dans le bucket, streamées via le
+                  controller (jamais d'URL d'objet publique). ── #}
+            {% set galleryPhotos = photos|map(p => {
+                url: path('admin_visit_photo_file', {adminPrefix: adminPrefix, id: visit.id, photoId: p.id}),
+                alt: p.originalName,
+            }) %}
+            <div class="mt-6 rounded-3xl border border-neutral-200 bg-white p-2" data-testid="visit-photos">
+                <div
+                    class="rounded-2xl bg-neutral-50 p-2"
+                    data-controller="gallery"
+                    data-gallery-photos-value="{{ galleryPhotos|json_encode|e('html_attr') }}"
+                >
+                    <div class="flex flex-wrap items-center justify-between gap-3 px-4 pt-3 pb-1">
+                        <h2 class="flex items-baseline gap-2 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                            {{ 'admin.visits.photos.title'|trans }}
+                            <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ photos|length }}</span>
+                        </h2>
+                        {# Upload multipart classique, plusieurs fichiers,
+                           envoi automatique à la sélection. #}
+                        <form
+                            action="{{ path('admin_visit_photos_upload', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                            method="post"
+                            enctype="multipart/form-data"
+                            data-controller="auto-submit"
+                            class="contents"
+                        >
+                            <input type="hidden" name="_token" value="{{ csrf_token('visit_photos') }}">
+                            <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 focus-within:outline-2 focus-within:outline-primary">
+                                {{ ux_icon('lucide:image-plus', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.photos.add'|trans }}
+                                <input
+                                    type="file"
+                                    name="photos[]"
+                                    multiple
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="sr-only"
+                                    data-action="change->auto-submit#submit"
+                                    data-testid="visit-photos-input"
+                                >
+                            </label>
+                        </form>
+                    </div>
+
+                    {% for count in app.flashes('visit_photos_rejected') %}
+                        <p class="mx-2 mb-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="alert" data-testid="visit-photos-rejected">
+                            {{ 'admin.visits.photos.rejected'|trans({'%count%': count}) }}
+                        </p>
+                    {% endfor %}
+
+                    {% if photos is empty %}
+                        <div class="mt-1 flex items-center justify-center gap-3 rounded-xl border border-dashed border-gray-950/10 bg-white/60 px-5 py-8" data-testid="visit-photos-empty">
+                            {{ ux_icon('lucide:image', {class: 'size-5 shrink-0 text-gray-300', 'aria-hidden': 'true'}) }}
+                            <p class="text-sm text-gray-400">{{ 'admin.visits.photos.empty'|trans }}</p>
+                        </div>
+                    {% else %}
+                        <ul class="mt-1 grid grid-cols-2 gap-2 rounded-xl bg-white p-2 sm:grid-cols-3 lg:grid-cols-4" role="list" data-testid="visit-photos-grid">
+                            {% for photo in photos %}
+                                <li class="group/photo relative overflow-hidden rounded-xl border border-gray-950/5">
+                                    {# Clic : ouvre le lightbox plein écran (même viewer que la marketplace). #}
+                                    <button
+                                        type="button"
+                                        data-action="gallery#open"
+                                        data-gallery-index-param="{{ loop.index0 }}"
+                                        aria-label="{{ 'gallery.open'|trans }}"
+                                        class="block w-full cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                                    >
+                                        <img
+                                            src="{{ path('admin_visit_photo_file', {adminPrefix: adminPrefix, id: visit.id, photoId: photo.id}) }}"
+                                            alt="{{ photo.originalName }}"
+                                            loading="lazy"
+                                            width="400"
+                                            height="300"
+                                            class="aspect-[4/3] w-full object-cover transition-opacity duration-100 ease-out group-hover/photo:opacity-95"
+                                            data-testid="visit-photo"
+                                        >
+                                    </button>
+                                    {# Suppression : voile au survol, POST + CSRF. #}
+                                    <form
+                                        action="{{ path('admin_visit_photo_delete', {adminPrefix: adminPrefix, id: visit.id, photoId: photo.id}) }}"
+                                        method="post"
+                                        class="absolute inset-x-0 bottom-0 flex justify-end bg-gradient-to-t from-gray-950/60 to-transparent p-2 opacity-0 transition-opacity duration-100 ease-out group-hover/photo:opacity-100 focus-within:opacity-100"
+                                    >
+                                        <input type="hidden" name="_token" value="{{ csrf_token('visit_photo_delete') }}">
+                                        <button
+                                            type="submit"
+                                            class="flex cursor-pointer items-center gap-1.5 rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-white"
+                                            title="{{ 'admin.visits.photos.delete'|trans }}"
+                                            aria-label="{{ 'admin.visits.photos.delete'|trans }}"
+                                            data-testid="visit-photo-delete"
+                                        >
+                                            {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ 'admin.visits.photos.delete'|trans }}
+                                        </button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <twig:Gallery:Lightbox :photos="galleryPhotos" />
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+
+            {# ══ Module 2 : le compte-rendu, remplissable à tout moment
+                  (avant, pendant ou après la visite). ══ #}
+            <h2 class="mt-8 -mb-0 flex items-center gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase lg:col-start-1" data-testid="visit-module-report">
+                {{ ux_icon('lucide:clipboard-pen', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                {{ 'admin.visits.show.modules.report'|trans }}
+            </h2>
+            <div class="mt-3 rounded-3xl border border-neutral-200 bg-white p-2 lg:col-start-1">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <h2 class="px-4 pt-3 pb-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                        {{ 'admin.visits.show.outcomeTitle'|trans }}
+                    </h2>
+                    <div class="mt-1 rounded-xl bg-white px-4 py-3 text-sm">
+                        {# Boutons de statut : chacun est un mini formulaire POST. #}
+                        <div class="flex flex-wrap gap-1.5" data-testid="visit-status-actions">
+                            {% for status in ['planned', 'done', 'cancelled', 'no_show'] %}
+                                {% set case = enum('App\\Visit\\Domain\\VisitStatus').from(status) %}
+                                <form method="post" action="{{ path('admin_visit_status', {adminPrefix: adminPrefix, id: visit.id}) }}" class="contents">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('visit_status') }}">
+                                    <input type="hidden" name="status" value="{{ status }}">
+                                    <button
+                                        type="submit"
+                                        {{ visit.status.value == status ? 'disabled' }}
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out disabled:cursor-default {{ visit.status.value == status ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-testid="visit-status-{{ status }}"
+                                    >
+                                        {{ ux_icon(case.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ case.labelKey|trans }}
+                                    </button>
+                                </form>
+                            {% endfor %}
+                        </div>
+
+                        {# Compte-rendu : ressenti client + notes libres,
+                           remplissable à tout moment (pas seulement une
+                           fois la visite effectuée). #}
+                        <form method="post" action="{{ path('admin_visit_report', {adminPrefix: adminPrefix, id: visit.id}) }}" class="mt-4 border-t border-gray-950/5 pt-4" data-testid="visit-report-form">
+                                <input type="hidden" name="_token" value="{{ csrf_token('visit_report') }}">
+                                <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.show.feelingLabel'|trans }}</p>
+                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                    {% for feeling in enum('App\\Visit\\Domain\\ClientFeeling').cases() %}
+                                        <label class="cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="feeling"
+                                                value="{{ feeling.value }}"
+                                                {{ visit.clientFeeling and visit.clientFeeling.value == feeling.value ? 'checked' }}
+                                                class="peer sr-only"
+                                            >
+                                            <span class="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out peer-checked:border-primary/40 peer-checked:bg-primary/5 peer-checked:text-primary hover:bg-gray-50 hover:text-gray-900">
+                                                {{ ux_icon(feeling.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                {{ feeling.labelKey|trans }}
+                                            </span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                                <textarea
+                                    name="report"
+                                    rows="3"
+                                    maxlength="5000"
+                                    placeholder="{{ 'admin.visits.show.reportPlaceholder'|trans }}"
+                                    class="mt-3 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="visit-report-text"
+                                >{{ visit.report }}</textarea>
+                                <div class="mt-2 flex justify-end">
+                                    <twig:Button size="sm" type="submit" data-testid="visit-report-save">
+                                        {{ 'admin.visits.show.reportSave'|trans }}
+                                    </twig:Button>
+                                </div>
+                            </form>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Mini carte épinglée sur le bien. ── #}
+            {% if visit.latitude is not null and visit.longitude is not null %}
+                <aside class="max-lg:mt-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1">
+                    <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                        <div class="h-80 overflow-hidden rounded-2xl" data-testid="visit-show-map">
+                            {{ ux_map(visitMap, {style: 'height: 100%; width: 100%;'}) }}
+                        </div>
+                    </div>
+                </aside>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -58,6 +58,19 @@
                     {% endif %}
                 </span>
             </td>
+            <td class="{{ tdPad }}" data-testid="user-two-factor-cell">
+                {% if user.hasTwoFactor %}
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                        {{ ux_icon('lucide:shield-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.users.profile.twoFactor.enabled'|trans }}
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 text-xs text-gray-400">
+                        {{ ux_icon('lucide:shield-off', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.users.profile.twoFactor.disabled'|trans }}
+                    </span>
+                {% endif %}
+            </td>
             <td class="{{ tdPad }} text-right text-gray-500">
                 {% if user.lastLoginAt %}
                     <span title="{{ user.lastLoginAt|format_datetime('medium', 'short') }}">
@@ -76,6 +89,7 @@
         <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.users.column.name'|trans }}</th>
         <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.users.column.role'|trans }}</th>
         <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.users.column.connection'|trans }}</th>
+        <th scope="col" class="px-4 py-3 font-semibold">{{ 'admin.users.column.twoFactor'|trans }}</th>
         <th scope="col" class="px-4 py-3 text-right font-semibold">{{ 'admin.users.column.lastLogin'|trans }}</th>
     </tr>
 {% endmacro %}
@@ -99,7 +113,7 @@
                         <tbody data-testid="users-group-{{ roleKey }}">
                             <tr>
                                 <th
-                                    colspan="4"
+                                    colspan="5"
                                     scope="colgroup"
                                     class="px-4 pb-1.5 text-left text-xs font-medium tracking-wide text-gray-400 uppercase {{ loop.first ? 'pt-1' : 'pt-5' }}"
                                 >

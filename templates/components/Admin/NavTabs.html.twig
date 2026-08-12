@@ -1,0 +1,55 @@
+{# Composant anonyme Admin:NavTabs — barre d'onglets de navigation (liens)
+   avec la pastille glissante des onglets de la fiche dossier : elle suit le
+   survol et revient sur l'onglet actif. À utiliser pour toute bascule entre
+   pages sœurs (ex : Visites À venir / Archives). #}
+{# @prop items list<{key: string, href: string, label: string, icon?: string, count?: int}> Libellés déjà traduits. #}
+{# @prop active string Clé de l'onglet actif. #}
+{# @prop label string Libellé ARIA de la barre (déjà traduit). #}
+{%- props items, active, label -%}
+<div
+    class="inline-flex rounded-2xl border border-neutral-200 bg-white p-1.5"
+    data-controller="tabs"
+    data-tabs
+    data-active-tab="{{ active }}"
+    data-tabs-active-class="text-primary"
+    data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+    data-testid="nav-tabs"
+>
+    <div
+        class="relative flex items-stretch"
+        role="tablist"
+        aria-label="{{ label }}"
+        data-action="mouseleave->tabs#resetIndicator"
+    >
+        {# Pastille glissante : suit le survol, revient sur l'actif. #}
+        <span
+            data-tabs-target="indicator"
+            class="absolute top-0 left-0 z-0 rounded-lg bg-neutral-100 transition-[transform,width,height] duration-200 ease-out will-change-transform motion-reduce:transition-none"
+            aria-hidden="true"
+            hidden
+        ></span>
+        {% for item in items %}
+            {% if not loop.first %}
+                <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
+            {% endif %}
+            <a
+                href="{{ item.href }}"
+                role="tab"
+                aria-selected="{{ item.key == active ? 'true' : 'false' }}"
+                data-tabs-target="tab"
+                data-tabs-key="{{ item.key }}"
+                data-action="mouseenter->tabs#hoverIndicator"
+                class="group/tab relative z-10 flex cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ item.key == active ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                data-testid="nav-tab-{{ item.key }}"
+            >
+                {% if item.icon is defined %}
+                    {{ ux_icon(item.icon, {class: 'size-4 shrink-0 motion-safe:group-hover/tab:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                {% endif %}
+                {{ item.label }}
+                {% if item.count is defined and item.count is not null %}
+                    <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums">{{ item.count }}</span>
+                {% endif %}
+            </a>
+        {% endfor %}
+    </div>
+</div>

@@ -57,6 +57,10 @@ final class UserDanger
     #[LiveProp]
     public bool $confirmingResume = false;
 
+    /** True while the 2FA reset confirmation modal is open. */
+    #[LiveProp]
+    public bool $confirmingTwoFactorReset = false;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
@@ -212,6 +216,60 @@ final class UserDanger
             $this->audit('account resumed', $user);
             $this->emit('user:suspension-changed');
         }
+    }
+
+    public function hasTargetTwoFactor(): bool
+    {
+        return $this->target()->isTotpAuthenticationEnabled();
+    }
+
+    /**
+     * Last-resort unlock for a member who lost both their phone and their
+     * recovery codes: clears the TOTP secret and kills every trusted-device
+     * cookie. Always confirmed by a modal, always audited.
+     */
+    #[LiveAction]
+    public function askResetTwoFactor(): void
+    {
+        $this->ensureAdmin();
+
+        // Never reset your own 2FA from here: it would clear the second
+        // factor without any re-authentication (stolen-session takeover).
+        // Losing your own device goes through another admin.
+        if ($this->isSelf()) {
+            throw new AccessDeniedException('Reset your own 2FA from another admin account.');
+        }
+        $this->confirmingTwoFactorReset = true;
+    }
+
+    #[LiveAction]
+    public function cancelResetTwoFactor(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmingTwoFactorReset = false;
+    }
+
+    #[LiveAction]
+    public function confirmResetTwoFactor(): void
+    {
+        $this->ensureAdmin();
+        if ($this->isSelf()) {
+            throw new AccessDeniedException('Reset your own 2FA from another admin account.');
+        }
+
+        $this->confirmingTwoFactorReset = false;
+        $user = $this->target();
+        if (!$user->isTotpAuthenticationEnabled()) {
+            return;
+        }
+
+        $user->setPlainTotpSecret(null);
+        $user->bumpTrustedTokenVersion();
+        $this->em->flush();
+
+        $this->audit('two-factor authentication reset', $user);
+        // The 2FA badge lives in the page chrome: morph it.
+        $this->dispatchBrowserEvent('user-access:changed');
     }
 
     /** Deleting an account is always confirmed by a modal. */

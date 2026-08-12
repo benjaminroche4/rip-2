@@ -336,8 +336,8 @@
                    masqué : le squelette est le seul retour visuel. #}
                 <div
                     id="next-step-skeleton"
-                    data-loading="action(confirmStep)|show"
-                    class="mt-2.5 flex animate-pulse items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2"
+                    data-loading="action(confirmStep)|removeClass(hidden)"
+                    class="mt-2.5 hidden flex animate-pulse items-center gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2"
                     data-testid="next-step-skeleton"
                 >
                     <span class="size-8 shrink-0 rounded-full bg-neutral-200" aria-hidden="true"></span>
@@ -360,7 +360,7 @@
         {% if editingStep %}
             {% set pendingCase = this.pendingCase %}
             {% set needsPlanner = pendingCase and pendingCase.needsDate %}
-            <div id="next-step-editor" class="rounded-xl border-2 border-dashed border-primary/40 bg-white px-4 py-3 text-sm" data-loading="action(confirmStep)|hide" data-testid="next-step">
+            <div id="next-step-editor" class="rounded-xl border-2 border-dashed border-primary/40 bg-white px-4 py-3 text-sm" data-loading="action(confirmStep)|addClass(hidden)" data-testid="next-step">
                 <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</p>
                 <div class="mt-2">
                     {{ ui.stepChips(this.pendingStep, this.nextSteps) }}

@@ -41,20 +41,32 @@ final readonly class RecontactNoticeMailer
         $fr = 'fr' === $locale;
         $channel = $contact->getRecontactChannel();
         $channelLabel = null !== $channel ? $this->translator->trans($channel->labelKey(), locale: $locale) : null;
+        $agentName = VisioInvitationMailer::agentFirstName($contact);
 
-        $dateText = $recallAt->format($fr ? 'd.m.Y à H\hi' : 'd.m.Y, H:i');
+        // Subject built around who + how + when ("📞 Sarah vous rappelle
+        // mardi 12 août à 14h00"): everything readable from the inbox list.
+        $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', VisioInvitationMailer::humanDate($recallAt, $fr), $recallAt->format($fr ? 'H\hi' : 'H:i'));
+        $who = $agentName ?? ($fr ? 'Notre équipe' : 'Our team');
+        $subject = match ($channel?->value) {
+            'phone' => $fr ? \sprintf('📞 %s vous rappelle %s', $who, $dateText) : \sprintf('📞 %s will call you %s', $who, $dateText),
+            'whatsapp' => $fr ? \sprintf('💬 %s vous écrit sur WhatsApp %s', $who, $dateText) : \sprintf('💬 %s will message you on WhatsApp %s', $who, $dateText),
+            'sms' => $fr ? \sprintf('💬 %s vous envoie un SMS %s', $who, $dateText) : \sprintf('💬 %s will text you %s', $who, $dateText),
+            'email' => $fr ? \sprintf('✉️ %s vous écrit %s', $who, $dateText) : \sprintf('✉️ %s will email you %s', $who, $dateText),
+            default => $fr ? \sprintf('📅 Nous revenons vers vous %s', $dateText) : \sprintf('📅 We will get back to you %s', $dateText),
+        };
+
         $email = (new TemplatedEmail())
-            ->from('Contact <contact@relocation-in-paris.fr>')
+            ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
             ->to($clientEmail)
-            ->subject($fr
-                ? \sprintf('Nous revenons vers vous le %s | Relocation in Paris', $dateText)
-                : \sprintf('We will get back to you on %s | Relocation in Paris', $dateText))
+            ->subject($subject)
             ->htmlTemplate('emails/contact_recontact_client.html.twig')
             ->context([
                 'fr' => $fr,
                 'firstName' => $contact->getFirstName(),
                 'recallAt' => $recallAt,
+                'channel' => $channel?->value,
                 'channelLabel' => $channelLabel,
+                'agentName' => $agentName,
             ]);
 
         try {

@@ -45,6 +45,14 @@ final class SearchEditor
     #[LiveProp]
     public int $dossierId = 0;
 
+    /**
+     * Fold state of the card. It has to live on the server: the browser's own
+     * `open` attribute is restored by the morph at every re-render (autosave),
+     * so a card collapsed by hand would pop back open on the next keystroke.
+     */
+    #[LiveProp]
+    public bool $expanded = true;
+
     #[LiveProp(writable: true)]
     public string $budget = '';
 
@@ -510,6 +518,14 @@ final class SearchEditor
     {
         $this->ensureAdmin();
         $this->locked = !$this->locked;
+    }
+
+    /** Fires alongside the native <details> toggle, to keep the state. */
+    #[LiveAction]
+    public function toggleCard(): void
+    {
+        $this->ensureAdmin();
+        $this->expanded = !$this->expanded;
     }
 
     /**

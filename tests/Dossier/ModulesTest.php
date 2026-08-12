@@ -189,7 +189,7 @@ final class ModulesTest extends KernelTestCase
         $tenant->addDocument($document);
 
         $storageDir = (string) self::getContainer()->getParameter('dossier_storage_dir');
-        $dossierDir = $storageDir.'/'.$dossier->getReference();
+        $dossierDir = $storageDir.'/'.$dossier->getReference().'/documents';
         (new Filesystem())->mkdir($dossierDir);
         foreach (['first.pdf', 'second.pdf'] as $storedName) {
             file_put_contents($dossierDir.'/'.$storedName, '%PDF-1.4');
@@ -419,6 +419,46 @@ final class ModulesTest extends KernelTestCase
         $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
         self::assertStringContainsString('module-file-deposit-link', $rendered);
         self::assertStringContainsString('depot-de-pieces?code=MODUL1', $rendered);
+    }
+
+    public function testVisitModuleListsTheDossierVisits(): void
+    {
+        $dossier = $this->persistDossier();
+
+        // No visit yet: empty state plus the "schedule" link.
+        $prefix = 'test_admin_prefix_1234567890abcdef';
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringContainsString('module-visit-empty', $rendered);
+        self::assertStringContainsString('module-visit-plan', $rendered);
+        self::assertStringNotContainsString('module-visit-counter', $rendered);
+
+        $upcoming = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('+3 days 10:00'))
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        $past = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('8 avenue Parmentier, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('-10 days 15:00'))
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($upcoming);
+        $this->em->persist($past);
+        $this->em->flush();
+
+        $component = $this->mountModules($dossier);
+        $visits = $component->getDossierVisits();
+        self::assertSame([$upcoming->getId()], array_map(static fn ($v) => $v->id, $visits['upcoming']));
+        self::assertSame([$past->getId()], array_map(static fn ($v) => $v->id, $visits['past']));
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringNotContainsString('module-visit-empty', $rendered);
+        self::assertSame(2, substr_count($rendered, 'data-testid="module-visit-row"'));
+        self::assertStringContainsString('module-visit-counter', $rendered);
+        self::assertStringContainsString('12 rue de la Roquette, 75011 Paris', $rendered);
+        self::assertStringContainsString('8 avenue Parmentier, 75011 Paris', $rendered);
     }
 
     private function persistDossier(bool $completeSearch = true): Dossier

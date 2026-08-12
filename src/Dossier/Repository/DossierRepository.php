@@ -10,7 +10,10 @@ use App\Dossier\Domain\DossierDetails;
 use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Domain\DossierSearchView;
 use App\Dossier\Domain\DossierSummary;
+use App\Dossier\Domain\MoveInTimeline;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierEvent;
+use App\Dossier\Entity\DossierNote;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,12 +42,15 @@ class DossierRepository extends ServiceEntityRepository
             ->addSelect('doc')
             ->leftJoin('d.manager', 'm')
             ->addSelect('m')
+            ->leftJoin('d.search', 's')
+            ->addSelect('s')
             ->orderBy('d.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
 
         $offersByContactReference = $this->findOffersByContactReference($dossiers);
 
+        $now = new \DateTimeImmutable();
         $summaries = [];
         foreach ($dossiers as $dossier) {
             $primaryName = null;
@@ -62,18 +68,23 @@ class DossierRepository extends ServiceEntityRepository
                 $managerName = '' !== $managerName ? $managerName : (string) $manager->getEmail();
             }
 
+            $createdAt = $dossier->getCreatedAt() ?? $now;
+            $moveInAt = $dossier->getSearch()?->getMoveInAt();
+
             $summaries[] = new DossierSummary(
                 id: (int) $dossier->getId(),
                 name: (string) $dossier->getName(),
                 reference: (string) $dossier->getReference(),
                 primaryTenantName: $primaryName,
                 personCount: $dossier->getPersons()->count(),
-                createdAt: $dossier->getCreatedAt() ?? new \DateTimeImmutable(),
+                createdAt: $createdAt,
                 status: $dossier->getEffectiveStatus(),
                 managerId: null !== $manager ? (int) $manager->getId() : null,
                 managerName: $managerName,
                 managerAvatarFilename: $manager?->getAvatarFilename(),
                 offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
+                moveInAt: $moveInAt,
+                timeline: null !== $moveInAt ? MoveInTimeline::fromDates($createdAt, $moveInAt, $now) : null,
             );
         }
 
@@ -117,6 +128,39 @@ class DossierRepository extends ServiceEntityRepository
         }
 
         return $offers;
+    }
+
+    /**
+     * Dossiers whose stored AI recap no longer reflects the file: a note or
+     * an audit event landed after the recap was generated. Closed dossiers
+     * and dossiers nobody ever generated a recap for are left alone, so the
+     * nightly refresh only pays for files that actually moved.
+     *
+     * Oldest recap first: when the run hits its limit, the most outdated
+     * ones are the ones that got refreshed.
+     *
+     * @return list<Dossier>
+     */
+    public function findWithStaleRecap(int $limit, bool $force = false): array
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->where('d.recapJson IS NOT NULL')
+            ->andWhere('d.closedAt IS NULL')
+            ->orderBy('d.recapGeneratedAt', 'ASC')
+            ->setMaxResults($limit);
+
+        if (!$force) {
+            $qb->andWhere(
+                'd.recapGeneratedAt IS NULL'
+                .' OR EXISTS (SELECT n.id FROM '.DossierNote::class.' n WHERE n.dossier = d AND n.createdAt > d.recapGeneratedAt)'
+                .' OR EXISTS (SELECT e.id FROM '.DossierEvent::class.' e WHERE e.dossier = d AND e.createdAt > d.recapGeneratedAt)'
+            );
+        }
+
+        /** @var list<Dossier> $dossiers */
+        $dossiers = $qb->getQuery()->getResult();
+
+        return $dossiers;
     }
 
     /** Number of dossiers currently open (not closed), for the sidebar badge. */

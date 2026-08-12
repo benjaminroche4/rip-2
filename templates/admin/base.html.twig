@@ -91,6 +91,25 @@
                     </button>
                 </div>
 
+                {# Recherche globale Cmd+K : le déclencheur seulement. La
+                   palette vit en fin de layout, hors de l'aside sticky dont
+                   le stacking context passerait sous le contenu principal. #}
+                <div class="px-3 pb-1">
+                    <button
+                        type="button"
+                        data-controller="global-search-trigger"
+                        data-action="global-search-trigger#open"
+                        class="flex w-full cursor-pointer items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-400 transition-colors duration-100 ease-out hover:border-gray-300 hover:text-gray-600 focus-visible:outline-2 focus-visible:outline-primary group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:border-transparent group-data-collapsed/sidebar:bg-transparent group-data-collapsed/sidebar:px-1"
+                        aria-label="{{ 'admin.search.trigger'|trans }}"
+                        title="{{ 'admin.search.trigger'|trans }}"
+                        data-testid="global-search-open"
+                    >
+                        {{ ux_icon('lucide:search', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        <span class="flex-1 text-left group-data-collapsed/sidebar:hidden">{{ 'admin.search.trigger'|trans }}</span>
+                        <kbd class="rounded-md border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 font-sans text-[10px] font-medium text-gray-500 group-data-collapsed/sidebar:hidden">&#8984;K</kbd>
+                    </button>
+                </div>
+
                 {% set currentRoute = app.request.attributes.get('_route') %}
                 <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-5" aria-label="{{ 'admin.sidebar.nav.label'|trans }}">
                     {% macro navItems(items, currentRoute, adminPrefix) %}
@@ -113,17 +132,14 @@
                                         {% if item.openDossiersBadge ?? false %}
                                             <span class="ml-auto group-data-collapsed/sidebar:hidden"><twig:Dossier:DossiersNavBadge /></span>
                                         {% endif %}
+                                        {% if item.todayVisitsBadge ?? false %}
+                                            <span class="ml-auto group-data-collapsed/sidebar:hidden"><twig:Visit:VisitsNavBadge /></span>
+                                        {% endif %}
                                     </a>
                                 </li>
                             {% endif %}
                         {% endfor %}
                     {% endmacro %}
-
-                    <ul class="space-y-0.5" role="list">
-                        {{ _self.navItems([
-                            {route: 'admin_dashboard', icon: 'lucide:home', label: 'admin.nav.dashboard', role: 'ROLE_STAFF'},
-                        ], currentRoute, adminPrefix) }}
-                    </ul>
 
                     {% if is_granted('ROLE_SECTION_CONTACTS') or is_granted('ROLE_SECTION_DOSSIERS') or is_granted('ROLE_SECTION_VISITS') or is_granted('ROLE_SECTION_AGENTS') or is_granted('ROLE_SECTION_TOOLS') %}
                     <div>
@@ -134,7 +150,7 @@
                             {{ _self.navItems([
                                 {route: 'admin_contacts', icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_SECTION_CONTACTS', recentContactsBadge: true},
                                 {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_SECTION_DOSSIERS', openDossiersBadge: true},
-                                {route: 'admin_visits', icon: 'lucide:calendar-check', label: 'admin.nav.visits', role: 'ROLE_SECTION_VISITS'},
+                                {route: 'admin_visits', icon: 'lucide:calendar-check', label: 'admin.nav.visits', role: 'ROLE_SECTION_VISITS', todayVisitsBadge: true},
                                 {route: 'admin_agents', icon: 'lucide:briefcase', label: 'admin.nav.agents', role: 'ROLE_SECTION_AGENTS'},
                                 {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_SECTION_TOOLS'},
                             ], currentRoute, adminPrefix) }}
@@ -158,6 +174,26 @@
                 </nav>
 
                 {% set fullName = ((app.user.firstName ?: '') ~ ' ' ~ (app.user.lastName ?: ''))|trim %}
+                {# Incitation 2FA : visible tant que le compte n'a pas activé
+                   la double authentification, elle disparaît une fois faite.
+                   Masquée quand la sidebar est repliée (plus de place). #}
+                {% if not app.user.totpAuthenticationEnabled %}
+                    <a
+                        href="{{ path('admin_profile', {adminPrefix: adminPrefix}) }}#two-factor"
+                        class="group/2fa mx-3 mb-1 block rounded-xl border border-amber-200 bg-amber-50 p-3 transition-colors duration-100 ease-out hover:border-amber-300 hover:bg-amber-100 group-data-collapsed/sidebar:hidden"
+                        data-testid="sidebar-2fa-nudge"
+                    >
+                        <span class="flex items-center gap-2">
+                            {{ ux_icon('lucide:shield-alert', {class: 'size-4 shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
+                            <span class="text-sm font-medium text-amber-900">{{ 'admin.sidebar.twoFactorNudge.title'|trans }}</span>
+                        </span>
+                        <span class="mt-1 block text-xs text-pretty text-amber-800">{{ 'admin.sidebar.twoFactorNudge.text'|trans }}</span>
+                        <span class="mt-2 flex items-center gap-1 text-xs font-medium text-amber-900">
+                            {{ 'admin.sidebar.twoFactorNudge.action'|trans }}
+                            {{ ux_icon('lucide:arrow-right', {class: 'size-3.5 shrink-0 transition-transform duration-100 ease-out group-hover/2fa:translate-x-0.5', 'aria-hidden': 'true'}) }}
+                        </span>
+                    </a>
+                {% endif %}
                 <div class="shrink-0 p-3 group-data-collapsed/sidebar:p-2">
                     {# Box utilisateur : photo + identité, le menu (déconnexion)
                        s'ouvre vers le haut. #}
@@ -190,6 +226,14 @@
                            droite de l'avatar avec une largeur fixe. #}
                         <div class="absolute inset-x-0 bottom-full z-20 mb-2 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg group-data-collapsed/sidebar:right-auto group-data-collapsed/sidebar:bottom-0 group-data-collapsed/sidebar:left-full group-data-collapsed/sidebar:mb-0 group-data-collapsed/sidebar:ml-2 group-data-collapsed/sidebar:w-52">
                             <a
+                                href="{{ path('admin_profile', {adminPrefix: adminPrefix}) }}"
+                                class="group/item flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-primary"
+                                data-testid="sidebar-profile"
+                            >
+                                {{ ux_icon('lucide:circle-user', {class: 'size-4 shrink-0 text-gray-400 motion-safe:group-hover/item:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.nav.profile'|trans }}
+                            </a>
+                            <a
                                 href="{{ logout_path() }}"
                                 data-turbo-prefetch="false"
                                 class="group/item flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-primary"
@@ -216,6 +260,11 @@
                     </div>
                 </main>
             </div>
+
+            {# Palette de recherche globale : dernier enfant du layout, donc
+               au-dessus de tout à z égal (l'aside sticky piégerait l'overlay
+               sous le contenu principal). #}
+            <twig:Admin:GlobalSearch :adminPrefix="adminPrefix" />
         </div>
     </body>
 </html>

@@ -1,0 +1,128 @@
+{# Recherche globale Cmd+K : déclencheur dans la sidebar + palette overlay.
+   L'ouverture est un LiveProp serveur (pattern des drawers) : les morphs
+   dus à la frappe ne peuvent jamais refermer la palette. #}
+<div {{ attributes }}>
+    {# Le controller vit sur un wrapper interne : un data-controller en dur
+       sur le root serait un attribut dupliqué (le root porte déjà celui du
+       live component) et serait ignoré par le navigateur. #}
+    <div
+        data-controller="global-search"
+        data-action="keydown.meta+k@window->global-search#open:prevent keydown.ctrl+k@window->global-search#open:prevent keydown.esc@window->global-search#close global-search:open@window->global-search#open"
+    >
+    {# Palette. Toujours dans le DOM, cachée via l'attribut hidden. Le
+       déclencheur visible vit dans la sidebar (global-search-trigger). #}
+    <div
+        class="fixed inset-0 z-50"
+        {% if not this.open %}hidden{% endif %}
+        data-global-search-target="modal"
+        data-testid="global-search-modal"
+    >
+        <div
+            class="animate-drawer-backdrop absolute inset-0 bg-gray-950/50"
+            data-action="click->global-search#close"
+            aria-hidden="true"
+        ></div>
+        <div
+            class="animate-palette-panel absolute inset-x-0 top-24 mx-auto w-full max-w-lg px-4 sm:px-0"
+            role="dialog"
+            aria-modal="true"
+            aria-label="{{ 'admin.search.title'|trans }}"
+        >
+            <div class="overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-gray-950/10">
+                <div class="flex items-center gap-2 border-b border-gray-950/5 px-3">
+                    {{ ux_icon('lucide:search', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                    <input
+                        type="text"
+                        name="global-search"
+                        data-model="debounce(300)|query"
+                        data-global-search-target="input"
+                        data-action="keydown.down->global-search#next:prevent keydown.up->global-search#prev:prevent keydown.enter->global-search#go:prevent"
+                        placeholder="{{ 'admin.search.placeholder'|trans }}"
+                        aria-label="{{ 'admin.search.placeholder'|trans }}"
+                        autocomplete="off"
+                        spellcheck="false"
+                        class="h-12 w-full border-0 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-0"
+                        data-testid="global-search-input"
+                    >
+                </div>
+
+                <div class="max-h-80 overflow-y-auto overscroll-contain p-1.5" data-testid="global-search-results">
+                    {% if not this.searchable %}
+                        <div class="flex flex-col items-center gap-3 py-7">
+                            <p class="text-sm text-gray-500">{{ 'admin.search.hint'|trans }}</p>
+                            <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                {{ 'admin.search.tryLabel'|trans }}
+                                {% for exampleKey in ['admin.search.example.reference', 'admin.search.example.name', 'admin.search.example.phone'] %}
+                                    <kbd class="rounded-sm border border-gray-950/10 bg-neutral-50 px-1.5 py-0.5 font-sans text-[10px] font-medium text-gray-500">{{ exampleKey|trans }}</kbd>
+                                {% endfor %}
+                            </p>
+                        </div>
+                    {% else %}
+                        {% set groups = this.groups %}
+                        {% if groups is empty %}
+                            <p class="py-6 text-center text-sm text-gray-500">{{ 'admin.search.noResults'|trans({'%query%': this.query|trim}) }}</p>
+                        {% else %}
+                            {% for group in groups %}
+                                <div class="{{ not loop.first ? 'mt-1.5 border-t border-gray-950/5 pt-1.5' }}" data-testid="global-search-group-{{ group.key }}">
+                                    <p class="px-2 py-1.5 text-xs font-medium text-gray-500">{{ group.labelKey|trans }}</p>
+                                    {% for hit in group.hits %}
+                                        <a
+                                            href="{{ path(hit.route, hit.routeParams|merge({adminPrefix: this.adminPrefix})) }}"
+                                            class="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors duration-100 ease-out hover:bg-neutral-100"
+                                            data-global-search-target="hit"
+                                            data-testid="global-search-hit"
+                                        >
+                                            {{ ux_icon(group.icon, {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                                            <span class="flex min-w-0 flex-1 items-baseline gap-2">
+                                                <span class="truncate text-sm text-gray-900">{{ hit.title }}</span>
+                                                {% if hit.subtitle %}
+                                                    <span class="truncate text-xs text-gray-500">{{ hit.subtitle }}</span>
+                                                {% endif %}
+                                            </span>
+                                            {% if hit.badgeKey %}
+                                                <span class="shrink-0 rounded-md border border-gray-950/10 px-1.5 py-0.5 text-[11px] font-medium text-gray-600">{{ hit.badgeKey|trans }}</span>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                    {% if group.moreRoute %}
+                                        <a
+                                            href="{{ path(group.moreRoute, {adminPrefix: this.adminPrefix, search: this.query|trim}) }}"
+                                            class="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-primary transition-colors duration-100 ease-out hover:bg-primary/5"
+                                            data-global-search-target="hit"
+                                            data-testid="global-search-more-{{ group.key }}"
+                                        >
+                                            {{ ux_icon('lucide:arrow-right', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ 'admin.search.seeAll'|trans }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                {# Barre de raccourcis, façon cmdk. #}
+                <div class="flex items-center gap-4 border-t border-gray-950/5 px-3 py-2 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5">
+                        <kbd class="inline-flex h-5 min-w-5 items-center justify-center rounded-sm border border-gray-950/10 bg-neutral-50 px-1 font-sans text-[10px] font-medium text-gray-500">&#8593;&#8595;</kbd>
+                        {{ 'admin.search.keys.navigate'|trans }}
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <kbd class="inline-flex h-5 min-w-5 items-center justify-center rounded-sm border border-gray-950/10 bg-neutral-50 px-1 font-sans text-[10px] font-medium text-gray-500">&#8629;</kbd>
+                        {{ 'admin.search.keys.open'|trans }}
+                    </span>
+                    <button
+                        type="button"
+                        data-action="global-search#close"
+                        class="ml-auto flex cursor-pointer items-center gap-1.5 transition-colors duration-100 ease-out hover:text-gray-700"
+                        aria-label="{{ 'admin.search.closeLabel'|trans }}"
+                    >
+                        <kbd class="inline-flex h-5 items-center justify-center rounded-sm border border-gray-950/10 bg-neutral-50 px-1 font-sans text-[10px] font-medium text-gray-500">esc</kbd>
+                        {{ 'admin.search.keys.close'|trans }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

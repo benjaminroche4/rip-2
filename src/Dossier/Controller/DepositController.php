@@ -189,7 +189,15 @@ final class DepositController extends AbstractController
         $originalName = substr((string) $upload->getClientOriginalName(), 0, 255);
         $mimeType = (string) ($upload->getMimeType() ?? 'application/octet-stream');
         $size = (int) $upload->getSize();
-        $storedName = $storage->store($dossier, $upload);
+        try {
+            $storedName = $storage->store($dossier, $document, $upload);
+        } catch (\Throwable $e) {
+            // Storage outage: show the depositor a retryable error instead
+            // of a raw 500, and never persist a document row without a file.
+            $this->securityLogger->error('Dossier document storage failed: '.$e->getMessage(), ['dossier' => $dossier->getReference()]);
+
+            return $this->documentsResponse($request, $dossier, $person, $id, 'deposit.documents.error.storage');
+        }
 
         $document->addFile((new DossierDocumentFile())
             ->setStoredName($storedName)

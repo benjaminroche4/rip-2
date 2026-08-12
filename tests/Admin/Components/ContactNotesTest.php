@@ -192,9 +192,9 @@ final class ContactNotesTest extends KernelTestCase
         $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
 
         $history = $component->getHistory();
-        // "Reçue le" ouvre la chronologie, puis les événements en ordre.
+        // "Reçu le" ouvre la chronologie, puis les événements en ordre.
         self::assertCount(3, $history);
-        self::assertStringContainsString('Reçue le', $history[0]['text']);
+        self::assertStringContainsString('Reçu le', $history[0]['text']);
         self::assertStringContainsString('En cours', $history[1]['text']);
         self::assertSame('Julien Moreau', $history[1]['authorName']);
         self::assertStringContainsString('Récapitulatif', $history[2]['text']);

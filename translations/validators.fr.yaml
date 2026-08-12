@@ -1,4 +1,17 @@
 admin:
+    visits:
+        create:
+            scheduledAt:
+                past: "La visite ne peut pas être planifiée dans le passé."
+    profile:
+        password:
+            current:
+                notBlank: "Saisissez votre mot de passe actuel."
+                invalid: "Le mot de passe actuel est incorrect."
+            new:
+                notBlank: "Saisissez un nouveau mot de passe."
+                minLength: "Le mot de passe doit contenir au moins 6 caractères."
+            notMatch: "Les deux mots de passe ne correspondent pas."
     tools:
         documents:
             form:

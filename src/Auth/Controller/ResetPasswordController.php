@@ -166,6 +166,8 @@ class ResetPasswordController extends AbstractController
 
             // Encode(hash) the plain password, and set it.
             $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            // Reset = global revocation: invalidate trusted-device cookies too.
+            $user->bumpTrustedTokenVersion();
             $this->entityManager->flush();
 
             // Forensic trail — combined with the EquatableInterface session

@@ -337,11 +337,11 @@
                     {# contents : l'icône et le libellé deviennent des enfants
                        directs du bouton (inline-flex gap-2), impossible de
                        passer à la ligne. #}
-                    <span data-loading="action(more)|hide" class="contents">
+                    <span data-loading="action(more)|addClass(hidden)" class="contents">
                         {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                         <span class="whitespace-nowrap">{{ 'admin.contacts.button.loadMore'|trans }}</span>
                     </span>
-                    <span data-loading="action(more)|show" class="hidden items-center gap-x-2 whitespace-nowrap">
+                    <span data-loading="action(more)|removeClass(hidden)" class="hidden flex items-center gap-x-2 whitespace-nowrap">
                         <twig:Spinner class="inline" />
                         {{ 'admin.contacts.button.loading'|trans }}
                     </span>
@@ -433,34 +433,57 @@
                         {% endfor %}
                     </div>
                 </details>
-                <div class="inline-flex rounded-xl border border-neutral-200 bg-neutral-100 p-1" role="tablist" aria-label="{{ 'admin.contacts.scope.label'|trans }}" data-testid="contacts-scope">
-                    {% for scope in ['all', 'mine'] %}
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected="{{ this.scope == scope ? 'true' : 'false' }}"
-                            data-action="live#action"
-                            data-live-action-param="changeScope"
-                            data-live-scope-param="{{ scope }}"
-                            class="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ this.scope == scope ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900' }}"
-                            data-testid="contacts-scope-{{ scope }}"
-                        >
-                            {{ ('admin.contacts.scope.' ~ scope)|trans }}
-                            {% if scope == 'mine' %}
-                                <span class="rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums {{ this.scope == 'mine' ? 'bg-primary/10 text-primary' : 'bg-neutral-200 text-gray-500' }}">{{ this.mineCount }}</span>
+                {# Bascule de portée avec la pastille glissante des onglets
+                   dossier (suit le survol, revient sur l'actif). #}
+                <div
+                    class="inline-flex rounded-2xl border border-neutral-200 bg-white p-1.5"
+                    data-controller="tabs"
+                    data-tabs
+                    data-active-tab="{{ this.scope }}"
+                    data-tabs-active-class="text-primary"
+                    data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                    data-testid="contacts-scope"
+                >
+                    <div class="relative flex items-stretch" role="tablist" aria-label="{{ 'admin.contacts.scope.label'|trans }}" data-action="mouseleave->tabs#resetIndicator">
+                        <span
+                            data-tabs-target="indicator"
+                            class="absolute top-0 left-0 z-0 rounded-lg bg-neutral-100 transition-[transform,width,height] duration-200 ease-out will-change-transform motion-reduce:transition-none"
+                            aria-hidden="true"
+                            hidden
+                        ></span>
+                        {% for scope in ['all', 'mine'] %}
+                            {% if not loop.first %}
+                                <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
                             {% endif %}
-                        </button>
-                    {% endfor %}
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected="{{ this.scope == scope ? 'true' : 'false' }}"
+                                data-tabs-target="tab"
+                                data-tabs-key="{{ scope }}"
+                                data-action="live#action mouseenter->tabs#hoverIndicator"
+                                data-live-action-param="changeScope"
+                                data-live-scope-param="{{ scope }}"
+                                class="relative z-10 flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ this.scope == scope ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                                data-testid="contacts-scope-{{ scope }}"
+                            >
+                                {{ ('admin.contacts.scope.' ~ scope)|trans }}
+                                {% if scope == 'mine' %}
+                                    <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums">{{ this.mineCount }}</span>
+                                {% endif %}
+                            </button>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             {# Pendant un changement de filtre/portée/tri, les vraies cards
                laissent place à des squelettes qui pulsent : la page reste
                affichée, pas d'overlay bloquant. Le statut, lui, se met à
                jour en place (glow), donc pas de squelette. #}
-            <div data-loading="delay(150)|action(filter)|action(changeScope)|action(changeSort)|hide">
+            <div data-loading="delay(150)|action(filter)|action(changeScope)|action(changeSort)|addClass(hidden)">
                 {{ _self.cardsBlock(contacts, statuses, this.leavingContactId, this.statusFilter, this.hasMore, this.adminPrefix, this.confirmedContactId, this.scope, this.search) }}
             </div>
-            <div data-loading="delay(150)|action(filter)|action(changeScope)|action(changeSort)|show" class="hidden" data-testid="contacts-skeleton">
+            <div data-loading="delay(150)|action(filter)|action(changeScope)|action(changeSort)|removeClass(hidden)" class="hidden" data-testid="contacts-skeleton">
                 {{ _self.skeletonCards() }}
             </div>
         </div>

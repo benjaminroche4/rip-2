@@ -16,6 +16,7 @@ use App\Dossier\Repository\DossierNoteRepository;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Security\DossierNoteVoter;
 use App\Dossier\Service\DocumentStorage;
+use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierEventLogger;
 use App\Dossier\Service\DossierNumberGenerator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,6 +46,10 @@ final class DossierNotes
 
     #[LiveProp]
     public int $dossierId = 0;
+
+    /** Fold state of the history block, kept server-side (morph-proof). */
+    #[LiveProp]
+    public bool $historyExpanded = true;
 
     #[LiveProp]
     public string $adminPrefix = '';
@@ -131,7 +136,7 @@ final class DossierNotes
     }
 
     #[LiveAction]
-    public function assignManager(#[LiveArg] int $id): void
+    public function assignManager(#[LiveArg] int $id, DossierDriveProvisioner $drive): void
     {
         $this->ensureAdmin();
 
@@ -149,6 +154,10 @@ final class DossierNotes
             'name' => null !== $user ? $this->displayName($user) : '',
         ]);
         $this->em->flush();
+
+        // Re-sync the manager's read access on the dossier's Drive folder
+        // (grant new, revoke previous). No-op when Drive is off.
+        $drive->syncManagerShare($dossier);
     }
 
     /**
@@ -164,6 +173,14 @@ final class DossierNotes
     public function getHiddenFeedCount(): int
     {
         return max(0, \count($this->noteRows()) - $this->feedLimit);
+    }
+
+    /** Fires alongside the native <details> toggle, to keep the state. */
+    #[LiveAction]
+    public function toggleHistory(): void
+    {
+        $this->ensureAdmin();
+        $this->historyExpanded = !$this->historyExpanded;
     }
 
     #[LiveAction]

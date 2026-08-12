@@ -160,7 +160,7 @@ final class ContactListTest extends KernelTestCase
         $html = (string) $this->renderTwigComponent('Admin:ContactList', ['adminPrefix' => $this->adminPrefix()]);
 
         self::assertStringContainsString('Tout est traité', $html);
-        self::assertStringContainsString('Aucune nouvelle demande en attente', $html);
+        self::assertStringContainsString('Aucun nouveau lead en attente', $html);
     }
 
     public function testUnknownFilterIsRejected(): void

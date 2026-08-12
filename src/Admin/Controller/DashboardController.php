@@ -50,14 +50,32 @@ final class DashboardController extends AbstractController
     ) {
     }
 
+    /**
+     * No dashboard page for now (it will come back later): the admin root
+     * forwards to the first section the user can access, in sidebar order.
+     * The route stays: it is the post-login landing and the logo link.
+     */
     #[Route('', name: 'dashboard', methods: ['GET'])]
     public function index(string $adminPrefix): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        return $this->render('admin/dashboard/index.html.twig', [
-            'adminPrefix' => $adminPrefix,
-        ]);
+        $sections = [
+            'ROLE_SECTION_CONTACTS' => 'admin_contacts',
+            'ROLE_SECTION_DOSSIERS' => 'admin_dossiers',
+            'ROLE_SECTION_VISITS' => 'admin_visits',
+            'ROLE_SECTION_AGENTS' => 'admin_agents',
+            'ROLE_SECTION_TOOLS' => 'admin_tools',
+            'ROLE_ADMIN' => 'admin_users',
+        ];
+        foreach ($sections as $role => $route) {
+            if ($this->isGranted($role)) {
+                return $this->redirectToRoute($route, ['adminPrefix' => $adminPrefix]);
+            }
+        }
+
+        // Staff with no section granted: nothing to show yet.
+        throw $this->createAccessDeniedException();
     }
 
     #[Route(
@@ -136,7 +154,7 @@ final class DashboardController extends AbstractController
         methods: ['POST'],
         requirements: ['reference' => 'CT-\\d{6}'],
     )]
-    public function deleteContact(string $adminPrefix, string $reference, Request $request): Response
+    public function deleteContact(string $adminPrefix, string $reference, Request $request, \App\Contact\Service\RecallCalendarSync $recallSync): Response
     {
         $this->ensureValidPrefix($adminPrefix);
         // La suppression définitive d'un lead est réservée aux admins.
@@ -149,9 +167,11 @@ final class DashboardController extends AbstractController
         $contact = $this->contactRepository->findOneBy(['reference' => $reference])
             ?? throw $this->createNotFoundException();
 
-        // Une visio planifiée sort des agendas, sans email : la suppression
-        // d'un lead peut être un effacement RGPD, on ne le recontacte pas.
+        // Une visio ou un rappel planifié sort des agendas, sans email : la
+        // suppression d'un lead peut être un effacement RGPD, on ne le
+        // recontacte pas.
         $this->visioMailer->cancel($contact, notify: false);
+        $recallSync->clear($contact);
 
         // Notes et événements suivent via le ON DELETE CASCADE en base.
         $em = $this->contactRepository->createQueryBuilder('c')->getEntityManager();
@@ -185,10 +205,10 @@ final class DashboardController extends AbstractController
                 $entity,
                 'pdf_export',
                 null,
-                $user instanceof \App\Auth\Entity\User
+                $user instanceof User
                     ? (trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail())
                     : null,
-                $user instanceof \App\Auth\Entity\User ? $user->getAvatarFilename() : null,
+                $user instanceof User ? $user->getAvatarFilename() : null,
             );
         }
 
@@ -299,7 +319,7 @@ final class DashboardController extends AbstractController
         }
 
         // storeFromBytes re-encodes to WebP 256×256 and enforces the size cap.
-        $filename = $avatarDownloader->storeFromBytes($bytes);
+        $filename = $avatarDownloader->storeFromBytes($bytes, (string) $user->getUniqueId());
         if (null === $filename) {
             return $redirect;
         }

@@ -1,0 +1,18 @@
+{# Composant anonyme Visit:Tabs — bascule À venir / Archives des pages
+   visites, alignée à droite. Les jours passés s'archivent d'eux-mêmes à
+   minuit; l'onglet Archives est une page dédiée (volume). #}
+{# @prop adminPrefix string Préfixe secret des URLs admin. #}
+{# @prop active string 'upcoming' ou 'archive'. #}
+{# @prop upcomingCount int Nombre de visites à venir. #}
+{# @prop archivedCount int Nombre de visites archivées. #}
+{%- props adminPrefix, active, upcomingCount, archivedCount -%}
+<div class="mb-6 flex justify-end">
+    <twig:Admin:NavTabs
+        :active="active"
+        label="{{ 'admin.visits.tabs.label'|trans }}"
+        :items="[
+            {key: 'upcoming', href: path('admin_visits', {adminPrefix: adminPrefix}), label: 'admin.visits.tabs.upcoming'|trans, icon: 'lucide:calendar-clock', count: upcomingCount},
+            {key: 'archive', href: path('admin_visits_archive', {adminPrefix: adminPrefix}), label: 'admin.visits.tabs.archive'|trans, icon: 'lucide:archive', count: archivedCount},
+        ]"
+    />
+</div>

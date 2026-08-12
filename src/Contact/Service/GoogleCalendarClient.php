@@ -57,6 +57,7 @@ final class GoogleCalendarClient
         \DateTimeImmutable $start,
         \DateTimeImmutable $end,
         array $attendees,
+        bool $withMeet = true,
     ): ?array {
         if (!$this->isConfigured()) {
             return null;
@@ -85,12 +86,14 @@ final class GoogleCalendarClient
                 // Event gone (deleted from the agenda): create a fresh one.
             }
 
-            $payload['conferenceData'] = [
-                'createRequest' => [
-                    'requestId' => Uuid::v4()->toRfc4122(),
-                    'conferenceSolutionKey' => ['type' => 'hangoutsMeet'],
-                ],
-            ];
+            if ($withMeet) {
+                $payload['conferenceData'] = [
+                    'createRequest' => [
+                        'requestId' => Uuid::v4()->toRfc4122(),
+                        'conferenceSolutionKey' => ['type' => 'hangoutsMeet'],
+                    ],
+                ];
+            }
             $event = $this->request('POST', self::CALENDAR_URL, $payload);
             if (null !== $event) {
                 $this->logger->info('Google Calendar event created', ['eventId' => $event['id'] ?? null]);

@@ -1,0 +1,8 @@
+{% if this.count > 0 %}
+    <span
+        {{ attributes.defaults({class: 'ml-auto inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[11px] leading-none font-semibold tabular-nums text-primary'}) }}
+        title="{{ 'admin.sidebar.nav.visitsBadge'|trans({'%count%': this.count}) }}"
+    >
+        {{ this.count }}
+    </span>
+{% endif %}

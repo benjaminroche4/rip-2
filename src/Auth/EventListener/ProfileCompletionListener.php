@@ -48,6 +48,13 @@ final readonly class ProfileCompletionListener
             return;
         }
 
+        // During the 2FA challenge the token is a TwoFactorToken: redirecting
+        // to the profile/verify pages (refused by the firewall in this state)
+        // would loop forever. Let the challenge run first.
+        if ($this->security->getToken() instanceof \Scheb\TwoFactorBundle\Security\Authentication\Token\TwoFactorTokenInterface) {
+            return;
+        }
+
         if ($this->controllerAllowsIncompleteProfile($event)) {
             return;
         }

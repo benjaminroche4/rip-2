@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Codes de récupération — Relocation in Paris</title>
+    <style>
+        @page { margin: 18mm 16mm 22mm 16mm; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+            color: #1f2937;
+            font-size: 10.5pt;
+            line-height: 1.55;
+            margin: 0;
+            padding: 0;
+        }
+        h1 { font-weight: 600; color: #111827; font-size: 16pt; margin: 0; }
+        .muted { color: #525252; }
+        .narrow { max-width: 480pt; margin: 0 auto; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18pt; }
+        .header img { height: 26pt; }
+        .warning {
+            border: 1pt solid #fcd34d;
+            background: #fffbeb;
+            color: #92400e;
+            border-radius: 8pt;
+            padding: 9pt 12pt;
+            font-size: 9.5pt;
+            margin: 12pt 0 16pt;
+        }
+        .codes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8pt;
+        }
+        .code {
+            border: 1pt solid #e5e5e5;
+            background: #fafafa;
+            border-radius: 8pt;
+            padding: 10pt 0;
+            text-align: center;
+            font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+            font-size: 13pt;
+            font-weight: 600;
+            letter-spacing: 2pt;
+            color: #111827;
+        }
+        .meta { margin-top: 16pt; font-size: 9pt; color: #6b7280; }
+        .footer {
+            margin-top: 28pt;
+            padding-top: 10pt;
+            border-top: 1pt solid #e5e5e5;
+            font-size: 8.5pt;
+            color: #9ca3af;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="narrow">
+        <div class="header">
+            <h1>Codes de récupération</h1>
+            {% if logoDataUri %}
+                <img src="{{ logoDataUri }}" alt="Relocation in Paris">
+            {% endif %}
+        </div>
+
+        <p class="muted">
+            Ces codes permettent de vous connecter au backoffice si vous perdez
+            l'accès à votre application d'authentification. Chaque code ne
+            fonctionne qu'une seule fois.
+        </p>
+
+        <div class="warning">
+            Conservez ce document en lieu sûr (coffre de mots de passe, tiroir
+            fermé). Toute personne en sa possession peut contourner la double
+            authentification de votre compte.
+        </div>
+
+        <div class="codes">
+            {% for code in codes %}
+                <div class="code">{{ code }}</div>
+            {% endfor %}
+        </div>
+
+        <p class="meta">
+            Compte : {{ email }}<br>
+            Généré le {{ generatedAt|format_datetime(pattern='d MMMM yyyy', locale='fr') }} à {{ generatedAt|format_datetime(pattern="HH'h'mm") }} (heure de Paris)
+        </p>
+
+        <div class="footer">
+            Relocation in Paris — Agence de Relocation pour Particuliers et Professionnels<br>
+            155 Rue du Faubourg Saint-Denis, 75010 Paris — France
+        </div>
+    </div>
+</body>
+</html>

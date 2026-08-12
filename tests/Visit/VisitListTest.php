@@ -31,6 +31,12 @@ final class VisitListTest extends KernelTestCase
     protected function setUp(): void
     {
         self::bootKernel();
+
+        // Le menu d'actions des rangées rend un token CSRF : il faut une
+        // session sur la requête courante (absente en KernelTestCase).
+        $request = new \Symfony\Component\HttpFoundation\Request();
+        $request->setSession(new \Symfony\Component\HttpFoundation\Session\Session(new \Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage()));
+        self::getContainer()->get('request_stack')->push($request);
         // Pin "now" before anything instantiates the clock service.
         self::getContainer()->set('clock', new MockClock(self::NOW, 'Europe/Paris'));
 
@@ -121,6 +127,7 @@ final class VisitListTest extends KernelTestCase
     private function persistVisit(string $scheduledAt, string $address, ?float $lat = null, ?float $lng = null): Visit
     {
         $visit = (new Visit())
+            ->setReference('VS-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT))
             ->setDossier($this->dossier)
             ->setScheduledAt(new \DateTimeImmutable($scheduledAt))
             ->setAddress($address)

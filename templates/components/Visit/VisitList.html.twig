@@ -1,32 +1,190 @@
-{% macro visitRow(visit, adminPrefix, position = null) %}
-    <li class="rounded-xl bg-white px-5 py-4" data-testid="visit-row">
-        <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
-            <div class="flex min-w-0 items-center gap-3 sm:flex-1">
-                {% if position is not null %}
-                    {# Même numéro que le pin sur la carte du jour. #}
-                    <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white tabular-nums" data-testid="visit-position">{{ position }}</span>
-                {% endif %}
-                <p class="shrink-0 text-sm font-medium text-gray-900 tabular-nums">{{ visit.scheduledAt|format_datetime(pattern='HH:mm') }}</p>
+{% macro sectionEmpty(text, testid) %}
+    {# État vide de section : cercle icône + texte, groupe centré. #}
+    <div class="flex items-center justify-center gap-3 rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-5 py-5" data-testid="{{ testid }}">
+        <span class="flex size-8 items-center justify-center rounded-full bg-gray-100">
+            {{ ux_icon('lucide:calendar-off', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+        </span>
+        <p class="text-sm text-gray-400">{{ text }}</p>
+    </div>
+{% endmacro %}
+
+{% macro visitRow(visit, adminPrefix, showDate = true) %}
+    {# Une visite déjà passée s'estompe : la prochaine ressort. #}
+    {% set isPast = visit.scheduledAt|date('U') < 'now'|date('U') or visit.status.value in ['cancelled', 'no_show'] %}
+    <li
+        class="group/row relative rounded-xl bg-white px-4 py-3 transition-[opacity,background-color] duration-100 hover:bg-gray-50/60 {{ isPast ? 'opacity-55 hover:opacity-100' }}"
+        data-controller="visit-hover"
+        data-visit-hover-id-value="{{ visit.id }}"
+        data-action="mouseenter->visit-hover#enter mouseleave->visit-hover#leave visit-pin:hover@window->visit-hover#pinEnter visit-pin:leave@window->visit-hover#pinLeave visit-pin:select@window->visit-hover#pinSelect"
+        data-testid="visit-row"
+    >
+        {# Lien étiré : toute la card ouvre le détail; les liens et menus
+           internes repassent au-dessus via z-10. #}
+        <a
+            href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, id: visit.id}) }}"
+            class="absolute inset-0 z-0 rounded-xl"
+            aria-label="{{ 'admin.visits.row.open'|trans }}"
+            data-testid="visit-row-link"
+        ></a>
+        <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-5">
+            <div class="flex min-w-0 items-center gap-3.5 sm:flex-1">
+                {% set dateShort = visit.scheduledAt|format_datetime(pattern='EEE d MMM')|replace({'.': ''}) %}
+                {% set timeShort = visit.scheduledAt|format_datetime(pattern="HH'h'mm") %}
+                {# Heure dans une pastille horloge primary, date dessous. #}
+                <div class="flex shrink-0 items-center gap-2.5" data-testid="visit-time-block">
+                    <span class="flex size-9 items-center justify-center rounded-full bg-primary/10">
+                        {{ ux_icon('lucide:clock', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900 tabular-nums">{{ timeShort }}</p>
+                        {% if showDate %}
+                            <p class="text-[10px] font-medium tracking-wide text-gray-400 uppercase">{{ dateShort }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Séparateur vertical entre l'heure et le bloc dossier. #}
+                <span class="hidden h-10 w-px shrink-0 bg-gray-950/10 sm:block" aria-hidden="true"></span>
                 <div class="min-w-0">
-                    <a
-                        href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: visit.dossierReference}) }}"
-                        class="block truncate text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                    {# Type, mode et issue de la visite en badges. #}
+                    <p class="mb-1 flex flex-wrap items-center gap-1.5">
+                        <span class="flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="visit-type-badge">
+                            {{ ux_icon(visit.type.icon, {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                            {{ visit.type.labelKey|trans }}
+                        </span>
+                        {% if visit.status.value != 'planned' %}
+                            <span class="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium {{ visit.status.badgeClasses }}" data-testid="visit-status-chip">
+                                {{ ux_icon(visit.status.icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ visit.status.labelKey|trans }}
+                            </span>
+                        {% endif %}
+                    </p>
+                    {# Rattachement au dossier : cliquable seulement si le
+                       lecteur a la section Dossiers (un agent de visite ne
+                       doit pas atterrir sur un 403), sinon simple texte. #}
+                    {% set canOpenDossier = is_granted('ROLE_SECTION_DOSSIERS') %}
+                    <{{ canOpenDossier ? 'a' : 'span' }}
+                        {% if canOpenDossier %}href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: visit.dossierReference}) }}"{% endif %}
+                        class="relative z-10 flex items-center gap-1.5 truncate text-sm font-medium text-gray-900 {{ canOpenDossier ? 'transition-colors duration-100 ease-out hover:text-primary' }}"
                         data-testid="visit-dossier-link"
                     >
-                        {{ visit.dossierName }}
-                    </a>
-                    <p class="flex items-center gap-1 truncate text-xs text-gray-500">
+                        {{ ux_icon('lucide:folder-open', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        <span class="truncate">{{ visit.dossierName }} <span class="font-normal text-gray-400">({{ visit.dossierReference }})</span></span>
+                    </{{ canOpenDossier ? 'a' : 'span' }}>
+                    <a
+                        href="https://www.google.com/maps/search/?api=1&query={{ visit.address|url_encode }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="relative z-10 mt-0.5 flex items-center gap-1 truncate text-xs text-gray-500 transition-colors duration-100 ease-out hover:text-primary"
+                        title="{{ 'admin.visits.row.openInMaps'|trans }}"
+                        data-testid="visit-address-link"
+                    >
                         {{ ux_icon('lucide:map-pin', {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
                         <span class="truncate">{{ visit.address }}</span>
-                    </p>
+                    </a>
                 </div>
             </div>
+            {# Qui réalise, qui a réservé : avatars côte à côte. #}
+            <div class="flex shrink-0 items-center gap-5" data-testid="visit-people">
+                <div>
+                    <p class="text-[10px] font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.performedBy'|trans }}</p>
+                    {% if visit.assigneeName %}
+                        <p class="mt-1 flex items-center gap-1.5 text-xs font-medium text-gray-900" data-testid="visit-assignee">
+                            <twig:Avatar filename="{{ visit.assigneeAvatar }}" name="{{ visit.assigneeName }}" size="5" />
+                            {{ visit.assigneeName|title }}
+                        </p>
+                    {% else %}
+                        <p class="mt-1 flex items-center gap-1 text-xs font-medium text-amber-600" data-testid="visit-unassigned">
+                            {{ ux_icon('lucide:circle-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.visits.row.unassigned'|trans }}
+                        </p>
+                    {% endif %}
+                </div>
+                {% if visit.bookedByName %}
+                    <div data-testid="visit-booked-by">
+                        <p class="text-[10px] font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.bookedBy'|trans }}</p>
+                        <p class="mt-1 flex items-center gap-1.5 text-xs font-medium text-gray-900">
+                            <twig:Avatar filename="{{ visit.bookedByAvatar }}" name="{{ visit.bookedByName }}" size="5" />
+                            {{ visit.bookedByName|title }}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
             {% if visit.agentName %}
                 <p class="flex shrink-0 items-center gap-1.5 text-xs text-gray-600" data-testid="visit-agent">
                     {{ ux_icon('lucide:briefcase', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
                     {{ visit.agentName }}
                 </p>
             {% endif %}
+
+            {# Actions de la visite en menu shadcn : … → Modifier / Supprimer. #}
+            <details
+                class="relative z-10 shrink-0"
+                data-controller="details-dropdown"
+                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                data-testid="visit-actions"
+            >
+                <summary
+                    class="flex size-7 cursor-pointer list-none items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
+                    aria-label="{{ 'admin.contacts.show.actions'|trans }}"
+                >
+                    {{ ux_icon('lucide:ellipsis', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                </summary>
+                <div class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-neutral-200 bg-white p-1 text-left shadow-md">
+                    <a
+                        href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                        class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        data-testid="visit-edit"
+                    >
+                        {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.visits.row.edit'|trans }}
+                    </a>
+                    <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                    <twig:AlertDialog id="delete-visit-{{ visit.id }}">
+                        <button
+                            type="button"
+                            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                            data-action="click->alert-dialog#open"
+                            data-alert-dialog-target="trigger"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            data-testid="visit-delete-trigger"
+                        >
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.visits.row.delete'|trans }}
+                        </button>
+                        <twig:AlertDialog:Content class="sm:max-w-md">
+                            <twig:AlertDialog:Header>
+                                <twig:AlertDialog:Title>
+                                    {{ 'admin.visits.row.deleteModal.title'|trans }}
+                                </twig:AlertDialog:Title>
+                                <twig:AlertDialog:Description>
+                                    {{ 'admin.visits.row.deleteModal.text'|trans({'%address%': visit.address}) }}
+                                </twig:AlertDialog:Description>
+                            </twig:AlertDialog:Header>
+                            <twig:AlertDialog:Footer class="mt-4">
+                                <twig:AlertDialog:Cancel>
+                                    {{ 'admin.visits.row.deleteModal.cancel'|trans }}
+                                </twig:AlertDialog:Cancel>
+                                <form
+                                    method="post"
+                                    action="{{ path('admin_visit_delete', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                                    class="contents"
+                                >
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_visit') }}">
+                                    <twig:AlertDialog:Action type="submit" variant="destructive" data-testid="visit-delete">
+                                        <span class="flex items-center gap-2">
+                                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ 'admin.visits.row.deleteModal.confirm'|trans }}
+                                        </span>
+                                    </twig:AlertDialog:Action>
+                                </form>
+                            </twig:AlertDialog:Footer>
+                        </twig:AlertDialog:Content>
+                    </twig:AlertDialog>
+                </div>
+            </details>
         </div>
     </li>
 {% endmacro %}
@@ -38,7 +196,7 @@
     {% set tomorrowVisits = this.tomorrowVisits %}
     {% set laterVisits = this.laterVisits %}
 
-    {% if this.totalCount == 0 %}
+    {% if this.isEmptyEverywhere %}
         <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="visits-empty">
             <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
                 <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
@@ -48,6 +206,12 @@
                     <h2 class="text-sm font-medium text-gray-700">{{ 'admin.visits.empty.title'|trans }}</h2>
                     <p class="max-w-[40ch] text-xs text-pretty text-gray-400">{{ 'admin.visits.empty.description'|trans }}</p>
                 </div>
+                <twig:Button as="a" size="sm" href="{{ path('admin_visit_new', {adminPrefix: this.adminPrefix}) }}" data-testid="visits-empty-cta">
+                    <span class="flex items-center gap-2">
+                        {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.visits.create.button'|trans }}
+                    </span>
+                </twig:Button>
             </div>
         </section>
     {% else %}
@@ -60,47 +224,43 @@
                 </h2>
 
                 {% if todayVisits is empty %}
-                    <p class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-5 py-6 text-sm text-gray-400" data-testid="visits-today-empty">
-                        {{ 'admin.visits.section.todayEmpty'|trans }}
-                    </p>
+                    {{ ui.sectionEmpty('admin.visits.section.todayEmpty'|trans, 'visits-today-empty') }}
                 {% else %}
+                    {% if this.mappableTodayVisits is not empty %}
+                        {# Carte de la tournée du jour, pleine largeur et sans
+                           cadre : pins numérotés reliés par le trajet à pied
+                           entre visites consécutives (Routes API), dessinés
+                           par le controller à partir des payloads JSON. #}
+                        <div
+                            class="mb-3 h-80 overflow-hidden rounded-2xl lg:h-[26rem]"
+                            data-controller="visit-map"
+                            data-visit-map-visits-value="{{ this.mapPayload }}"
+                            data-visit-map-route-value="{{ this.routePayload }}"
+                            data-testid="visits-map"
+                        >
+                            {{ ux_map(this.map, {style: 'height: 100%; width: 100%;'}) }}
+                        </div>
+                    {% endif %}
                     <div class="rounded-3xl border border-neutral-200 bg-white p-2">
-                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2 lg:grid lg:grid-cols-[1fr_24rem] lg:items-start">
+                        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
                             <ul class="flex flex-col gap-1" role="list">
                                 {% for visit in todayVisits %}
-                                    {{ ui.visitRow(visit, this.adminPrefix, loop.index) }}
+                                    {{ ui.visitRow(visit, this.adminPrefix, false) }}
                                 {% endfor %}
                             </ul>
-                            {% if this.mappableTodayVisits is not empty %}
-                                {# Pins numérotés + trajet à pied entre visites consécutives
-                                   (calculé côté serveur via la Routes API), dessinés par le
-                                   controller à partir des payloads JSON. #}
-                                <div
-                                    class="h-80 overflow-hidden rounded-xl max-lg:mt-1 lg:sticky lg:top-6 lg:h-[28rem]"
-                                    data-controller="visit-map"
-                                    data-visit-map-visits-value="{{ this.mapPayload }}"
-                                    data-visit-map-route-value="{{ this.routePayload }}"
-                                    data-testid="visits-map"
-                                >
-                                    {{ ux_map(this.map, {style: 'height: 100%; width: 100%;'}) }}
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
             </section>
 
-            {# Demain. #}
-            <section data-testid="visits-tomorrow">
-                <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
-                    {{ 'admin.visits.section.tomorrow'|trans }}
-                    <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ tomorrowVisits|length }}</span>
-                </h2>
-                {% if tomorrowVisits is empty %}
-                    <p class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 px-5 py-6 text-sm text-gray-400" data-testid="visits-tomorrow-empty">
-                        {{ 'admin.visits.section.tomorrowEmpty'|trans }}
-                    </p>
-                {% else %}
+            {# Demain : masqué quand vide (comme Prochains jours), seul
+               Aujourd'hui garde son encart vide. #}
+            {% if tomorrowVisits is not empty %}
+                <section data-testid="visits-tomorrow">
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                        {{ 'admin.visits.section.tomorrow'|trans }}
+                        <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ tomorrowVisits|length }}</span>
+                    </h2>
                     <div class="rounded-3xl border border-neutral-200 bg-white p-2">
                         <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
                             {% for visit in tomorrowVisits %}
@@ -108,8 +268,8 @@
                             {% endfor %}
                         </ul>
                     </div>
-                {% endif %}
-            </section>
+                </section>
+            {% endif %}
 
             {# Prochains jours : la date apparaît au premier créneau de chaque jour. #}
             {% if laterVisits is not empty %}
@@ -130,12 +290,13 @@
                                         </p>
                                     </li>
                                 {% endif %}
-                                {{ ui.visitRow(visit, this.adminPrefix) }}
+                                {{ ui.visitRow(visit, this.adminPrefix, false) }}
                             {% endfor %}
                         </ul>
                     </div>
                 </section>
             {% endif %}
+
         </div>
     {% endif %}
 </div>

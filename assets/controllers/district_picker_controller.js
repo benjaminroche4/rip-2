@@ -20,8 +20,16 @@ const PIN_COLOR = '#71172e'
 // the selection chips below the map. The optional "pins" value drops one
 // badge marker per important address (icon = destination type).
 export default class extends Controller {
-    static targets = ['input', 'map']
-    static values = { pins: { type: Array, default: [] } }
+    static targets = ['input', 'map', 'frame', 'backdrop', 'expandButton', 'collapseButton']
+    static values = {
+        pins: { type: Array, default: [] },
+        // Padlock state: the map stays browsable (pan, zoom, fullscreen)
+        // but the district polygons stop responding to clicks.
+        locked: { type: Boolean, default: false },
+    }
+
+    #expanded = false
+    #mapStyle = null
 
     #polygons = new Map()
     #onMapConnect = null
@@ -36,6 +44,9 @@ export default class extends Controller {
     }
 
     disconnect() {
+        if (this.#expanded) {
+            this.collapse()
+        }
         this.mapTarget.removeEventListener('ux:map:connect', this.#onMapConnect)
         this.#polygons.forEach(p => p.setMap(null))
         this.#polygons.clear()
@@ -45,6 +56,65 @@ export default class extends Controller {
         this.#map = null
     }
 
+    // ── Plein écran : la carte passe en overlay fixe, l'instance Google
+    //    est resize/recentrée, Échap ou le bouton referment. ──
+    expand() {
+        if (this.#expanded) {
+            return
+        }
+        this.#expanded = true
+        this.#mapStyle = this.mapTarget.getAttribute('style')
+        // "relative" must go: Tailwind emits it after "fixed" in the
+        // stylesheet, so keeping both leaves the frame in-flow (no overlay).
+        this.frameTarget.classList.remove('relative')
+        this.frameTarget.classList.add('fixed', 'inset-3', 'z-50', 'sm:inset-6', 'shadow-2xl')
+        this.mapTarget.style.height = '100%'
+        this.backdropTarget.classList.replace('hidden', 'block')
+        this.expandButtonTarget.classList.replace('flex', 'hidden')
+        this.collapseButtonTarget.classList.replace('hidden', 'flex')
+        document.body.style.overflow = 'hidden'
+        this.#refreshMapViewport()
+    }
+
+    collapse() {
+        if (!this.#expanded) {
+            return
+        }
+        this.#expanded = false
+        this.frameTarget.classList.remove('fixed', 'inset-3', 'z-50', 'sm:inset-6', 'shadow-2xl')
+        this.frameTarget.classList.add('relative')
+        if (null !== this.#mapStyle) {
+            this.mapTarget.setAttribute('style', this.#mapStyle)
+        }
+        this.backdropTarget.classList.replace('block', 'hidden')
+        this.expandButtonTarget.classList.replace('hidden', 'flex')
+        this.collapseButtonTarget.classList.replace('flex', 'hidden')
+        document.body.style.overflow = ''
+        this.#refreshMapViewport()
+    }
+
+    #refreshMapViewport() {
+        // Deferred by a frame: the resize must fire AFTER the browser laid
+        // out the new container size, otherwise the tiles stay grey on the
+        // freshly revealed surface. Second frame as a belt for slower
+        // layouts (fonts, scrollbar removal shifting widths).
+        requestAnimationFrame(() => {
+            this.#redrawMap()
+            requestAnimationFrame(() => this.#redrawMap())
+        })
+    }
+
+    #redrawMap() {
+        if (!this.#map || !window.google) {
+            return
+        }
+        const center = this.#map.getCenter()
+        google.maps.event.trigger(this.#map, 'resize')
+        if (center) {
+            this.#map.setCenter(center)
+        }
+    }
+
     #draw(map) {
         this.#map = map
         for (const district of PARIS_DISTRICTS) {
@@ -52,12 +122,18 @@ export default class extends Controller {
                 paths: district.path,
                 map,
                 zIndex: district.code.length <= 2 ? 1 : 2,
+                clickable: !this.lockedValue,
                 ...this.#style(this.#selected().has(district.code)),
             })
             polygon.addListener('click', () => this.#toggle(district.code))
             this.#polygons.set(district.code, polygon)
         }
         this.#renderPins()
+    }
+
+    // Fired by the live morph when the padlock is toggled.
+    lockedValueChanged() {
+        this.#polygons.forEach(p => p.setOptions({ clickable: !this.lockedValue }))
     }
 
     // Fired by the live morph when an address is added or removed.
@@ -151,6 +227,10 @@ export default class extends Controller {
     }
 
     #toggle(code) {
+        // Belt over the polygons' clickable flag: no mutation while locked.
+        if (this.lockedValue) {
+            return
+        }
         const selected = this.#selected()
         selected.has(code) ? selected.delete(code) : selected.add(code)
         this.#polygons.get(code)?.setOptions(this.#style(selected.has(code)))

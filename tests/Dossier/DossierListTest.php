@@ -120,6 +120,41 @@ final class DossierListTest extends KernelTestCase
         self::assertStringContainsString('Famille Martin', $rendered);
     }
 
+    public function testCardProgressBarFollowsTheSearchMoveInDate(): void
+    {
+        // Started 10 days ago, move-in in 10 days: halfway, green tone.
+        $dossier = $this->persistDossier('Famille Martin', 'Jean', 'Martin');
+        $dossier->setCreatedAt(new \DateTimeImmutable('-10 days'));
+        $dossier->setSearch((new \App\Dossier\Entity\DossierSearch())->setMoveInAt(new \DateTimeImmutable('+10 days')));
+        $this->em->flush();
+        $this->loginAsAdmin();
+
+        $summary = $this->mountList()->getDossiers()[0];
+        self::assertNotNull($summary->timeline);
+        self::assertNotNull($summary->moveInAt);
+        self::assertEqualsWithDelta(50, $summary->timeline->percent, 1);
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:DossierList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+        self::assertStringContainsString('data-testid="dossier-card-bar-green"', $rendered);
+    }
+
+    public function testCardWithoutMoveInDateShowsAnEmptyBar(): void
+    {
+        $this->persistDossier('Famille Martin', 'Jean', 'Martin');
+        $this->loginAsAdmin();
+
+        $summary = $this->mountList()->getDossiers()[0];
+        self::assertNull($summary->timeline);
+        self::assertNull($summary->moveInAt);
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:DossierList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+        self::assertStringNotContainsString('data-testid="dossier-card-bar-', $rendered);
+    }
+
     private function mountList(): DossierList
     {
         /** @var DossierList $component */

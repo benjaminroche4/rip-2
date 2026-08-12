@@ -61,6 +61,27 @@
         {% endif %}
     </div>
 
+    {% if this.hasTargetTwoFactor %}
+        <div class="flex flex-wrap items-center justify-between gap-4 py-4">
+            <div>
+                <h2 class="text-sm font-medium text-gray-900">{{ 'admin.users.danger.twoFactor.title'|trans }}</h2>
+                <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.users.danger.twoFactor.subtitle'|trans }}</p>
+            </div>
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="askResetTwoFactor"
+                {{ this.isSelf ? 'disabled' }}
+                class="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 {{ this.isSelf ? '' : 'cursor-pointer' }}"
+                {% if this.isSelf %}title="{{ 'admin.users.danger.twoFactor.selfBlocked'|trans }}"{% endif %}
+                data-testid="user-two-factor-reset"
+            >
+                {{ ux_icon('lucide:shield-off', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                {{ 'admin.users.danger.twoFactor.action'|trans }}
+            </button>
+        </div>
+    {% endif %}
+
     <div class="flex flex-wrap items-center justify-between gap-4 py-4">
         <div>
             <h2 class="text-sm font-medium text-gray-900">{{ 'admin.users.danger.title'|trans }}</h2>
@@ -187,6 +208,64 @@
                         >
                             {{ ux_icon('lucide:user-lock', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ 'admin.users.danger.suspend.modal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Réinitialiser le 2FA d'un membre (téléphone et codes perdus) :
+       confirmé par modale, audité. #}
+    {% if this.confirmingTwoFactorReset %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-two-factor-reset-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelResetTwoFactor"
+            data-testid="user-two-factor-reset-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelResetTwoFactor"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="user-two-factor-reset-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.users.danger.twoFactor.modal.title'|trans({'%name%': this.targetName}) }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.users.danger.twoFactor.modal.text'|trans({'%name%': this.targetName}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelResetTwoFactor"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="user-two-factor-reset-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="confirmResetTwoFactor"
+                            data-loading="action(confirmResetTwoFactor)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="user-two-factor-reset-confirm"
+                        >
+                            {{ ux_icon('lucide:shield-off', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.users.danger.twoFactor.modal.confirm'|trans }}
                         </button>
                     </div>
                 </div>

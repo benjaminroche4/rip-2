@@ -79,6 +79,28 @@ final class VisitList
         ));
     }
 
+    /**
+     * "Plus tard" grouped by day, chronological: [Y-m-d => visits].
+     *
+     * @return array<string, list<VisitSummary>>
+     */
+    public function getLaterVisitsByDay(): array
+    {
+        $groups = [];
+        foreach ($this->getLaterVisits() as $visit) {
+            $groups[$visit->scheduledAt->format('Y-m-d')][] = $visit;
+        }
+
+        return $groups;
+    }
+
+    public function isEmptyEverywhere(): bool
+    {
+        return [] === $this->getTodayVisits()
+            && [] === $this->getTomorrowVisits()
+            && [] === $this->getLaterVisits();
+    }
+
     public function getTotalCount(): int
     {
         return \count($this->summaries());
@@ -129,6 +151,7 @@ final class VisitList
         $points = [];
         foreach ($this->getMappableTodayVisits() as $entry) {
             $points[] = [
+                'id' => $entry['visit']->id,
                 'lat' => $entry['visit']->latitude,
                 'lng' => $entry['visit']->longitude,
                 'label' => (string) $entry['position'],

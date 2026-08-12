@@ -10,6 +10,7 @@ use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierNote;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Security\DossierNoteVoter;
+use App\Dossier\Service\DossierDriveProvisioner;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -104,7 +105,7 @@ final class DossierNotesTest extends KernelTestCase
         $this->loginAs($admin);
 
         $component = $this->mountNotes($dossier);
-        $component->assignManager((int) $admin->getId());
+        $component->assignManager((int) $admin->getId(), self::getContainer()->get(DossierDriveProvisioner::class));
 
         // Events live in the fil de suivi, never in the comments thread.
         $events = $component->getEvents();
@@ -204,7 +205,7 @@ final class DossierNotesTest extends KernelTestCase
             ->setUploadedAt(new \DateTimeImmutable()));
         $this->em->flush();
         $storageDir = (string) self::getContainer()->getParameter('dossier_storage_dir');
-        $path = $storageDir.'/'.$dossier->getReference().'/closure-test.pdf';
+        $path = $storageDir.'/'.$dossier->getReference().'/documents/closure-test.pdf';
         (new \Symfony\Component\Filesystem\Filesystem())->mkdir(\dirname($path));
         file_put_contents($path, '%PDF-1.4');
         $oldCode = $dossier->getPairingCode();
@@ -265,12 +266,12 @@ final class DossierNotesTest extends KernelTestCase
         $component = $this->mountNotes($dossier);
         self::assertNull($component->getManager());
 
-        $component->assignManager((int) $editor->getId());
+        $component->assignManager((int) $editor->getId(), self::getContainer()->get(DossierDriveProvisioner::class));
         self::assertSame($editor->getId(), $component->getManager()?->id);
         $this->em->clear();
         self::assertSame($editor->getId(), $this->em->find(Dossier::class, $dossier->getId())->getManager()?->getId());
 
-        $component->assignManager(0);
+        $component->assignManager(0, self::getContainer()->get(DossierDriveProvisioner::class));
         self::assertNull($component->getManager());
         $this->em->clear();
         self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getManager());
@@ -286,7 +287,7 @@ final class DossierNotesTest extends KernelTestCase
         $component = $this->mountNotes($dossier);
 
         $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
-        $component->assignManager((int) $plain->getId());
+        $component->assignManager((int) $plain->getId(), self::getContainer()->get(DossierDriveProvisioner::class));
     }
 
     public function testNotesDrawerOpensAndClosesServerSide(): void

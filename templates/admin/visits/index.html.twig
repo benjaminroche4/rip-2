@@ -26,6 +26,7 @@
 
 {% block body %}
     <div data-testid="visits-page">
+        <twig:Visit:Tabs :adminPrefix="adminPrefix" active="upcoming" :upcomingCount="upcomingCount" :archivedCount="archivedCount" />
         <twig:Visit:VisitList :adminPrefix="adminPrefix" />
     </div>
 {% endblock %}

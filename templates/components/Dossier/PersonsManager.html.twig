@@ -95,8 +95,14 @@
    sur un tag de composant serait pris pour un binding de prop). #}
 {% set checkboxClass = 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50' %}
 <section {{ attributes.defaults({class: 'rounded-3xl border border-neutral-200 bg-white p-2'}) }} data-testid="dossier-show-persons">
-    <details open class="group details-animated rounded-2xl bg-neutral-50 p-2">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden">
+    {# Repli piloté par la prop live : un morph écraserait un `open` posé par
+       le navigateur seul. #}
+    <details {{ this.expanded ? 'open' }} class="group details-animated rounded-2xl bg-neutral-50 p-2">
+        <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-4 p-3 [&::-webkit-details-marker]:hidden"
+            data-action="live#action"
+            data-live-action-param="toggleCard"
+        >
             <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.create.persons.title'|trans }}</h2>
             {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
         </summary>
@@ -380,7 +386,7 @@
             </div>
         {% endset %}
 
-        <div class="mt-1 flex flex-col gap-1">
+        <div class="mt-1 flex flex-col gap-3">
         {% for person in persons %}
             {% set editing = this.editId == person.id %}
             <article

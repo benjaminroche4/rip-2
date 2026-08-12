@@ -28,6 +28,29 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      *
      * @return list<User>
      */
+    /**
+     * Staff members who can perform a property visit: any back-office
+     * account (staff or admin) carrying the "visit agent" function.
+     *
+     * @return list<User>
+     */
+    public function findVisitAgents(): array
+    {
+        /** @var list<User> $users */
+        $users = $this->createQueryBuilder('u')
+            ->andWhere('u.roles LIKE :admin OR u.roles LIKE :staff')
+            ->andWhere('u.staffFunctions LIKE :fn')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('staff', '%ROLE_STAFF%')
+            ->setParameter('fn', '%visit_agent%')
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $users;
+    }
+
     public function findAdmins(): array
     {
         /** @var list<User> $users */

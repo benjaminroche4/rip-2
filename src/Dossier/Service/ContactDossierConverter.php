@@ -29,6 +29,7 @@ final class ContactDossierConverter
         private readonly EntityManagerInterface $em,
         private readonly DossierRepository $repository,
         private readonly DossierNumberGenerator $numbers,
+        private readonly DossierDriveProvisioner $drive,
     ) {
     }
 
@@ -79,6 +80,10 @@ final class ContactDossierConverter
 
         $this->em->persist($dossier);
         $this->em->flush();
+
+        // Best-effort: provision the dossier's Shared Drive folder (no-op when
+        // Drive is off), so pieces have a home the moment the dossier exists.
+        $this->drive->ensureDossierFolder($dossier);
 
         return $dossier;
     }

@@ -21,7 +21,7 @@ final class AvatarControllerTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->storageDir = static::getContainer()->getParameter('kernel.project_dir').'/var/uploads/avatars';
+        $this->storageDir = static::getContainer()->getParameter('kernel.project_dir').'/var/uploads';
 
         if (!is_dir($this->storageDir)) {
             mkdir($this->storageDir, 0o755, true);
@@ -30,8 +30,11 @@ final class AvatarControllerTest extends WebTestCase
         // Tiny valid WebP-flagged file is hard to fixture. Use a 1×1 PNG renamed
         // to .webp — the controller streams bytes verbatim and only the route
         // regex enforces the .webp suffix, so this is sufficient for HTTP tests.
-        $this->filename = Uuid::v7()->toRfc4122().'.webp';
-        file_put_contents($this->storageDir.'/'.$this->filename, $this->onePixelPng());
+        // Object path per the convention: users/<ulid>/avatar/<uuid>.webp
+        $this->filename = 'users/'.new \Symfony\Component\Uid\Ulid().'/avatar/'.Uuid::v7()->toRfc4122().'.webp';
+        $full = $this->storageDir.'/'.$this->filename;
+        @mkdir(\dirname($full), 0o755, true);
+        file_put_contents($full, $this->onePixelPng());
     }
 
     protected function tearDown(): void
@@ -53,7 +56,8 @@ final class AvatarControllerTest extends WebTestCase
 
     public function testReturns404OnMissingFile(): void
     {
-        $missing = Uuid::v7()->toRfc4122().'.webp';
+        // Well-formed path (passes the route regex) but no such object.
+        $missing = 'users/'.new \Symfony\Component\Uid\Ulid().'/avatar/'.Uuid::v7()->toRfc4122().'.webp';
         $this->client->request('GET', '/avatars/'.$missing);
 
         self::assertResponseStatusCodeSame(404);

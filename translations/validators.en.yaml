@@ -1,4 +1,17 @@
 admin:
+    visits:
+        create:
+            scheduledAt:
+                past: "The visit cannot be scheduled in the past."
+    profile:
+        password:
+            current:
+                notBlank: "Enter your current password."
+                invalid: "The current password is incorrect."
+            new:
+                notBlank: "Enter a new password."
+                minLength: "The password must contain at least 6 characters."
+            notMatch: "The two passwords do not match."
     tools:
         documents:
             form:

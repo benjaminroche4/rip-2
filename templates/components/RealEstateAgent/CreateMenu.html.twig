@@ -1,0 +1,30 @@
+{#
+    RealEstateAgent:CreateMenu — single "Créer" button opening a small menu
+    with two choices: a new agent or a new agency. Each choice is the trigger
+    of its own live component (AgentCreate / AgencyCreate), so its live action
+    fires from inside its own root; the modals render fixed, above the menu.
+
+    props:
+      adminPrefix: string — secret admin URL prefix, forwarded to the modals
+#}
+{% props adminPrefix = '' %}
+<details
+    class="relative shrink-0"
+    data-controller="details-dropdown"
+    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+    data-testid="agents-create-menu"
+>
+    <summary
+        class="inline-flex cursor-pointer list-none items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 [&::-webkit-details-marker]:hidden"
+        data-testid="agents-create-trigger"
+    >
+        {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+        {{ 'admin.agents.create.button'|trans }}
+        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 opacity-70', 'aria-hidden': 'true'}) }}
+    </summary>
+
+    <div class="absolute right-0 z-30 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-1 shadow-lg">
+        <twig:RealEstateAgent:AgentCreate adminPrefix="{{ adminPrefix }}" />
+        <twig:RealEstateAgent:AgencyCreate adminPrefix="{{ adminPrefix }}" />
+    </div>
+</details>

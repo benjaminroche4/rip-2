@@ -242,18 +242,29 @@ final class DossierController extends AbstractController
             if (false === $tmpFile) {
                 continue;
             }
-            $source = $storage->readStream($dossier, $file);
+            $source = null;
             $target = fopen($tmpFile, 'w');
-            if (false === $target) {
-                fclose($source);
+            try {
+                if (false === $target) {
+                    @unlink($tmpFile);
+                    continue;
+                }
+                $source = $storage->readStream($dossier, $file);
+                stream_copy_to_stream($source, $target);
+                $tmpFiles[] = $tmpFile;
+                $zip->addFile($tmpFile, $entryName);
+            } catch (\Throwable) {
+                // Skip an unreadable file instead of aborting the whole zip;
+                // the temp file is cleaned right here.
                 @unlink($tmpFile);
-                continue;
+            } finally {
+                if (\is_resource($source)) {
+                    fclose($source);
+                }
+                if (\is_resource($target)) {
+                    fclose($target);
+                }
             }
-            stream_copy_to_stream($source, $target);
-            fclose($source);
-            fclose($target);
-            $tmpFiles[] = $tmpFile;
-            $zip->addFile($tmpFile, $entryName);
         }
         $zip->close();
         // ZipArchive reads the sources at close(): only clean up afterwards.

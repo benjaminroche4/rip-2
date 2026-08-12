@@ -9,6 +9,7 @@ use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Form\DossierType;
+use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierNumberGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -150,7 +151,7 @@ final class DossierCreate extends AbstractController
     }
 
     #[LiveAction]
-    public function create(EntityManagerInterface $em, DossierNumberGenerator $numbers): ?RedirectResponse
+    public function create(EntityManagerInterface $em, DossierNumberGenerator $numbers, DossierDriveProvisioner $drive): ?RedirectResponse
     {
         $this->ensureAdmin();
 
@@ -188,6 +189,10 @@ final class DossierCreate extends AbstractController
         $draft->setCreatedAt(new \DateTimeImmutable());
         $em->persist($draft);
         $em->flush();
+
+        // Best-effort: provision the dossier's Shared Drive folder now (no-op
+        // when Drive is off) so staff can drop pieces immediately.
+        $drive->ensureDossierFolder($draft);
 
         return $this->redirectToRoute('admin_dossier_show', [
             'adminPrefix' => $this->adminPrefix,

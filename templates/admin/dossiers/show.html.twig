@@ -55,9 +55,12 @@
     {# Même disposition que la fiche contact : rangée Actions, puis colonne
        principale + sidebar sticky (fil de suivi) en 1fr / 26rem. #}
     <div class="space-y-6" data-testid="dossier-show-page">
+        {# Nom des locataires en tête de page, menu Actions en vis-à-vis :
+           même rangée que la fiche contact. #}
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-2xl font-semibold tracking-tight text-gray-900" data-testid="dossier-heading">{{ dossier.name|title }}</h2>
         {% if is_granted('ROLE_SECTION_TOOLS') %}
             {% set menuRowClass = 'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900' %}
-            <div class="flex items-center justify-end gap-3">
                 <details
                     class="relative"
                     data-controller="details-dropdown"
@@ -81,8 +84,8 @@
                         </a>
                     </div>
                 </details>
-            </div>
         {% endif %}
+        </div>
 
         <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
         {# ── Sections en onglets : l'état actif vit sur ce wrapper statique
@@ -150,9 +153,10 @@
             </div>
 
 
-            {# ── Timeline (début → installation souhaitée), live ──────── #}
+            {# ── Timeline (début → installation souhaitée) + récap IA ── #}
             <div data-tab-panel="recap" class="contents">
                 <twig:Dossier:Timeline :dossierId="dossier.id" />
+                <twig:Dossier:Recap :dossierId="dossier.id" />
             </div>
 
             {# ── Persons (inline add / edit / remove) ─────────────────── #}

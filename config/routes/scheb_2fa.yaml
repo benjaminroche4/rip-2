@@ -1,0 +1,17 @@
+# Challenge 2FA : formulaire de saisie du code après un login réussi sur un
+# compte protégé, et endpoint de vérification intercepté par le firewall.
+2fa_login:
+    path:
+        fr: /{_locale}/connexion/2fa
+        en: /{_locale}/login/2fa
+    requirements:
+        _locale: fr|en
+    defaults:
+        _controller: "scheb_two_factor.form_controller::form"
+
+2fa_login_check:
+    path:
+        fr: /{_locale}/connexion/2fa/verification
+        en: /{_locale}/login/2fa/check
+    requirements:
+        _locale: fr|en

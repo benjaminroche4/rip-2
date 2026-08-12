@@ -11,6 +11,9 @@
 <body>
     {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
     {% set mode = mode|default('scheduled') %}
+    {% set agentName = agentName|default(null) %}
+    {% set dateBig = visioAt|format_datetime(pattern='EEEE d MMMM', locale=fr ? 'fr' : 'en') %}
+    {% set timeBig = visioAt|format_datetime(pattern=fr ? "HH'h'mm" : 'HH:mm') %}
 
     <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
         <tbody>
@@ -34,61 +37,75 @@
 
                                                     <p style="margin:0;padding:0.5em 0"><br /></p>
 
-                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center">
+                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center;text-wrap:balance">
                                                         {{ {
-                                                            scheduled: fr ? 'Votre visio est planifiée' : 'Your video call is scheduled',
+                                                            scheduled: fr ? 'Votre visio est confirmée' : 'Your video call is confirmed',
                                                             rescheduled: fr ? 'Votre visio est déplacée' : 'Your video call has been rescheduled',
                                                             cancelled: fr ? 'Votre visio est annulée' : 'Your video call is cancelled',
                                                         }[mode] }}
                                                     </h2>
 
-                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
-                                                        {# Relocation : le prospect est souvent à l'étranger, le fuseau
-                                                           doit être explicite pour éviter les visios ratées d'une heure. #}
-                                                        {% set dateFr %}<strong style="color:#111827">le {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ visioAt|format_datetime(pattern="HH'h'mm") }} (heure de Paris)</strong>{% endset %}
-                                                        {% set dateEn %}<strong style="color:#111827">on {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='en') }} at {{ visioAt|format_datetime(pattern='HH:mm') }} (Paris time)</strong>{% endset %}
+                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252;text-wrap:balance">
                                                         {% if fr %}
                                                             Bonjour{% if firstName %} {{ firstName }}{% endif %},
                                                             {% if mode == 'cancelled' %}
-                                                                votre visio avec notre équipe prévue {{ dateFr }} est annulée.
+                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} prévue le {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ timeBig }} est annulée.
                                                             {% elseif mode == 'rescheduled' %}
-                                                                votre visio avec notre équipe est déplacée : elle aura lieu {{ dateFr }}.
+                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} change de créneau. Voici le nouveau rendez-vous :
                                                             {% else %}
-                                                                votre visio avec notre équipe est prévue {{ dateFr }}.
+                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} est bien planifiée. Voici l'essentiel :
                                                             {% endif %}
                                                         {% else %}
                                                             Hello{% if firstName %} {{ firstName }}{% endif %},
                                                             {% if mode == 'cancelled' %}
-                                                                your video call with our team planned {{ dateEn }} has been cancelled.
+                                                                your video call with {% if agentName %}{{ agentName }}{% else %}our team{% endif %} planned on {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='en') }} at {{ timeBig }} has been cancelled.
                                                             {% elseif mode == 'rescheduled' %}
-                                                                your video call with our team has been moved: it will now take place {{ dateEn }}.
+                                                                your video call with {% if agentName %}{{ agentName }}{% else %}our team{% endif %} has been moved. Here is the new slot:
                                                             {% else %}
-                                                                your video call with our team is scheduled {{ dateEn }}.
+                                                                your video call with {% if agentName %}{{ agentName }}{% else %}our team{% endif %} is scheduled. Here is what you need:
                                                             {% endif %}
                                                         {% endif %}
                                                     </p>
 
-                                                    <p style="margin:0;padding:0.6em 0 0;font-size:1em;text-align:center;color:#525252">
-                                                        {% if mode == 'cancelled' %}
-                                                            {{ fr
-                                                                ? "Répondez simplement à cet email si vous souhaitez convenir d'un nouveau créneau."
-                                                                : 'Just reply to this email if you would like to arrange a new time slot.' }}
-                                                        {% else %}
-                                                            {{ fr
-                                                                ? "L'invitation en pièce jointe permet d'ajouter le rendez-vous à votre agenda en un clic. Besoin de changer l'horaire ? Répondez simplement à cet email."
-                                                                : 'The attached invitation adds the meeting to your calendar in one click. Need to reschedule? Just reply to this email.' }}
-                                                        {% endif %}
-                                                    </p>
+                                                    {% if mode != 'cancelled' %}
+                                                        <p style="margin:0;padding:0.6em 0;text-align:center"><br /></p>
+
+                                                        {# Bloc rendez-vous : la date et l'heure en très gros, lisibles
+                                                           en un coup d'œil, fuseau explicite (prospects à l'étranger). #}
+                                                        <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                                                            style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td align="center" style="padding:24px 16px">
+                                                                        <p style="margin:0;padding:0;font-size:0.8em;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280">
+                                                                            {{ fr ? 'Visio découverte' : 'Discovery call' }}
+                                                                        </p>
+                                                                        <p style="margin:0;padding:0.35em 0 0;font-size:1.9em;font-weight:700;line-height:1.2;color:#111827;text-wrap:balance">
+                                                                            {{ dateBig }}
+                                                                        </p>
+                                                                        <p style="margin:0;padding:0.15em 0 0;font-size:1.5em;font-weight:700;line-height:1.3;color:#71172e">
+                                                                            {{ timeBig }}
+                                                                            <span style="font-size:0.55em;font-weight:500;color:#6b7280">{{ fr ? '(heure de Paris)' : '(Paris time)' }}</span>
+                                                                        </p>
+                                                                        <p style="margin:0;padding:0.7em 0 0;font-size:0.9em;color:#525252">
+                                                                            {{ fr ? 'Avec' : 'With' }} <strong style="color:#111827">{{ agentName ?: (fr ? 'notre équipe' : 'our team') }}</strong>
+                                                                            &middot; {{ durationMinutes|default(30) }} min &middot; Google Meet
+                                                                        </p>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    {% endif %}
 
                                                     {% if meetLink %}
-                                                        <p style="margin:0;padding:0.75em 0;text-align:center"><br /></p>
+                                                        <p style="margin:0;padding:0.6em 0;text-align:center"><br /></p>
                                                         <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
                                                             <tbody>
                                                                 <tr>
                                                                     <td align="center">
                                                                         <a href="{{ meetLink }}"
-                                                                            style="display:inline-block;background-color:#71172e;color:#ffffff;text-decoration:none;font-weight:600;font-size:1em;padding:12px 24px;border-radius:8px">
-                                                                            {{ fr ? 'Rejoindre la visio (Google Meet)' : 'Join the video call (Google Meet)' }}
+                                                                            style="display:inline-block;background-color:#71172e;color:#ffffff;text-decoration:none;font-weight:600;font-size:1em;padding:14px 28px;border-radius:8px">
+                                                                            {{ fr ? 'Rejoindre la visio' : 'Join the video call' }}
                                                                         </a>
                                                                     </td>
                                                                 </tr>
@@ -97,13 +114,25 @@
                                                     {% endif %}
 
                                                     {% if mode != 'cancelled' and addToCalendarLinks|default([]) is not empty %}
-                                                        <p style="margin:0;padding:0.6em 0 0;font-size:0.9em;text-align:center;color:#6b7280">
+                                                        <p style="margin:0;padding:0.8em 0 0;font-size:0.9em;text-align:center;color:#6b7280">
                                                             {{ fr ? 'Ajouter à votre agenda :' : 'Add to your calendar:' }}
                                                             {% for label, url in addToCalendarLinks %}
-                                                                <a href="{{ url }}" style="color:#71172e;text-decoration:underline">{{ label }}</a>{% if not loop.last %} · {% endif %}
+                                                                <a href="{{ url }}" style="color:#71172e;text-decoration:underline">{{ label }}</a>{% if not loop.last %} &middot; {% endif %}
                                                             {% endfor %}
                                                         </p>
                                                     {% endif %}
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:0.95em;text-align:center;color:#525252;text-wrap:balance">
+                                                        {% if mode == 'cancelled' %}
+                                                            {{ fr
+                                                                ? "Répondez simplement à cet email si vous souhaitez convenir d'un nouveau créneau."
+                                                                : 'Just reply to this email if you would like to arrange a new time slot.' }}
+                                                        {% else %}
+                                                            {{ fr
+                                                                ? "L'invitation en pièce jointe ajoute le rendez-vous à votre agenda en un clic. Besoin de changer l'horaire ? Répondez simplement à cet email."
+                                                                : 'The attached invitation adds the meeting to your calendar in one click. Need to reschedule? Just reply to this email.' }}
+                                                        {% endif %}
+                                                    </p>
 
                                                     <p style="margin:0;padding:0.75em 0;text-align:center"><br /></p>
 
