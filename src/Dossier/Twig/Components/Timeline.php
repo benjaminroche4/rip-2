@@ -34,6 +34,7 @@ final class Timeline
         private readonly DossierRepository $dossiers,
         private readonly ClockInterface $clock,
         private readonly Security $security,
+        private readonly \App\Visit\Repository\VisitRepository $visits,
     ) {
     }
 
@@ -67,6 +68,19 @@ final class Timeline
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->dossier()->getCreatedAt() ?? $this->clock->now();
+    }
+
+    /**
+     * Visit counters of the dossier (cancelled ones excluded), same tiles as
+     * on the list card.
+     *
+     * @return array{upcoming: int, total: int}
+     */
+    public function getVisitCounts(): array
+    {
+        $counts = $this->visits->countsByDossier([$this->dossierId], $this->clock->now());
+
+        return $counts[$this->dossierId] ?? ['upcoming' => 0, 'total' => 0];
     }
 
     public function getMoveInAt(): ?\DateTimeImmutable

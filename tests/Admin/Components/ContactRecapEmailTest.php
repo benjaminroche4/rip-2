@@ -79,12 +79,14 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertTrue($component->includePayment);
 
         $component->send();
-        self::assertSame('sent', $component->state);
+        // Back to idle: la confirmation passe par le toast, pas par un état
+        // « envoyé » qui remplacerait la ligne du menu.
+        self::assertSame('idle', $component->state);
 
         $email = $this->mailer->lastMessage;
         self::assertInstanceOf(Email::class, $email);
         self::assertSame('jane@example.com', $email->getTo()[0]->getAddress());
-        self::assertSame('Votre projet logement à Paris | Relocation in Paris', (string) $email->getSubject());
+        self::assertSame('Votre projet logement à Paris : le récapitulatif', (string) $email->getSubject());
 
         // The stub mailer skips Symfony's BodyRenderer: render the Twig
         // template explicitly, like the real transport would.

@@ -9,6 +9,8 @@ use App\Contact\Form\ContactType;
 use App\Contact\Repository\ContactRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -74,6 +76,7 @@ final class ContactCreate
         private readonly ContactRepository $repository,
         private readonly Security $security,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -203,6 +206,14 @@ final class ContactCreate
             '' !== trim($this->message) ? trim($this->message) : null,
             $sourceCase,
         );
+
+        // Success lands as a toast on the lead we redirect to. Guarded: the
+        // component is also mounted straight from unit tests, without session.
+        $request = $this->requestStack->getCurrentRequest();
+        $session = null !== $request && $request->hasSession() ? $request->getSession() : null;
+        if ($session instanceof FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add('success', 'admin.contacts.create.success');
+        }
 
         return new RedirectResponse($this->urlGenerator->generate('admin_contact_show', [
             'adminPrefix' => $this->adminPrefix,

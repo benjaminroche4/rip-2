@@ -13,7 +13,10 @@ use Psr\Log\LoggerInterface;
 /**
  * Provisions and links the Drive structure of a dossier:
  *
- *   [Shared Drive] / DS-000123 Nom / Nom Prénom / <pièces>
+ *   [Shared Drive] / Dossiers / DS-000123 Nom / Nom Prénom / <pièces>
+ *
+ * The "Dossiers" root groups the whole context in one place, leaving the
+ * Shared Drive root free for the other contexts to come.
  *
  * The dossier folder is created up-front (at dossier creation), person
  * sub-folders lazily on the first deposited piece, so no empty folders
@@ -28,6 +31,9 @@ use Psr\Log\LoggerInterface;
  */
 final readonly class DossierDriveProvisioner
 {
+    /** Root folder of the dossiers context inside the Shared Drive. */
+    private const string ROOT_FOLDER = 'Dossiers';
+
     public function __construct(
         private DriveGateway $drive,
         private EntityManagerInterface $em,
@@ -48,9 +54,14 @@ final readonly class DossierDriveProvisioner
             return $dossier->getDriveFolderId();
         }
 
+        $rootId = $this->ensureRootFolder();
+        if (null === $rootId) {
+            return null;
+        }
+
         try {
             $name = trim(trim((string) $dossier->getReference()).' '.trim((string) $dossier->getName()));
-            $id = $this->drive->ensureFolder($this->safe($name), $this->drive->sharedDriveId(), array_filter([
+            $id = $this->drive->ensureFolder($this->safe($name), $rootId, array_filter([
                 'dossierReference' => (string) $dossier->getReference(),
                 'contactReference' => (string) $dossier->getSourceContactReference(),
                 'managerEmail' => (string) $dossier->getManager()?->getEmail(),
@@ -136,6 +147,44 @@ final readonly class DossierDriveProvisioner
             $this->em->flush();
         } catch (\Throwable $e) {
             $this->logger->error('Dossier manager drive share sync failed: '.$e->getMessage(), ['dossier' => $dossier->getReference()]);
+        }
+    }
+
+    /**
+     * Drops the whole dossier folder (pieces included) when the dossier is
+     * deleted: nothing sensitive must outlive the record. Best-effort, and
+     * a no-op when the dossier was never provisioned. Drive keeps it in the
+     * trash for 30 days, so a mistake stays recoverable.
+     */
+    public function deleteDossierFolder(Dossier $dossier): void
+    {
+        $folderId = $dossier->getDriveFolderId();
+        if (!$this->drive->isConfigured() || null === $folderId) {
+            return;
+        }
+
+        try {
+            $this->drive->deleteFile($folderId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Dossier drive folder deletion failed: '.$e->getMessage(), ['dossier' => $dossier->getReference()]);
+        }
+    }
+
+    /**
+     * The context root inside the Shared Drive, created on first use. Every
+     * dossier lives under it so other contexts (visites, annonces) can get
+     * their own sibling root instead of everything piling up at the drive
+     * root. `ensureFolder` looks the name up before creating, so this is
+     * idempotent and shared by every dossier.
+     */
+    private function ensureRootFolder(): ?string
+    {
+        try {
+            return $this->drive->ensureFolder(self::ROOT_FOLDER, $this->drive->sharedDriveId());
+        } catch (\Throwable $e) {
+            $this->logger->error('Dossier drive root folder provisioning failed: '.$e->getMessage());
+
+            return null;
         }
     }
 

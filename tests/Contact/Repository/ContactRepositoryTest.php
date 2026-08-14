@@ -3,6 +3,7 @@
 namespace App\Tests\Contact\Repository;
 
 use App\Contact\Domain\ContactStatus;
+use App\Contact\Domain\NextStep;
 use App\Contact\Entity\Contact;
 use App\Contact\Repository\ContactRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -185,6 +186,42 @@ final class ContactRepositoryTest extends KernelTestCase
         $this->repository->updateStatus((int) $contact->getId(), ContactStatus::New);
 
         self::assertNull($contact->getFirstTreatedAt());
+    }
+
+    /**
+     * The reminder cron selects on recallAt alone, with no status clause:
+     * that is only safe because a planned date cannot outlive the two
+     * statuses where an appointment means something. Locking the invariant
+     * here keeps the cron honest if updateStatus() ever changes.
+     */
+    public function testOnlyOngoingAndConvertedLeadsKeepAPlannedRecall(): void
+    {
+        $slot = new \DateTimeImmutable('+2 days 14:00');
+
+        foreach ([ContactStatus::InProgress, ContactStatus::Converted] as $keeps) {
+            $contact = $this->persistContact(new \DateTimeImmutable('-1 hour'));
+            $contact->setNextStep(NextStep::Visio)->setRecallAt($slot);
+            $this->em->flush();
+
+            $this->repository->updateStatus((int) $contact->getId(), $keeps);
+            // The meeting still stands: the record must keep it, or the
+            // reminder, the reassignment sync and the cancellation email
+            // all lose their input.
+            self::assertSame(NextStep::Visio, $contact->getNextStep(), $keeps->value);
+            self::assertNotNull($contact->getRecallAt(), $keeps->value);
+        }
+
+        foreach ([ContactStatus::Closed, ContactStatus::New] as $drops) {
+            $contact = $this->persistContact(new \DateTimeImmutable('-1 hour'));
+            $contact->setNextStep(NextStep::Visio)->setRecallAt($slot);
+            $this->em->flush();
+
+            $this->repository->updateStatus((int) $contact->getId(), $drops);
+            // No appointment left, so the cron can never pick it up.
+            self::assertNull($contact->getNextStep(), $drops->value);
+            self::assertNull($contact->getRecallAt(), $drops->value);
+            self::assertNotContains($contact, $this->repository->findWithUpcomingRecall(new \DateTimeImmutable()));
+        }
     }
 
     private function persistContact(\DateTimeImmutable $createdAt): Contact

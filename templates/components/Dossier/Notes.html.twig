@@ -178,7 +178,8 @@
                                 class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                                 data-testid="dossier-close-confirm"
                             >
-                                {{ ux_icon('lucide:archive', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmClose)|removeClass(hidden)" />
+                                {{ ux_icon('lucide:archive', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmClose)|addClass(hidden)'}) }}
                                 {{ 'admin.dossiers.show.closure.modal.confirm'|trans }}
                             </button>
                         </div>
@@ -357,7 +358,9 @@
                                                         size="sm"
                                                         data-action="live#action"
                                                         data-live-action-param="saveEdit"
+                                                        data-loading="action(saveEdit)|addAttribute(disabled)"
                                                     >
+                                                        <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(saveEdit)|removeClass(hidden)" />
                                                         {{ 'admin.contacts.notes.save'|trans }}
                                                     </twig:Button>
                                                 </div>
@@ -446,17 +449,27 @@
                                     <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white bg-gray-300" aria-hidden="true"></span>
                                     <p class="text-gray-900">{{ event.text }}</p>
                                     {% set eventDay = event.createdAt|date('Y-m-d') %}
+                                    {# Auteur en clair, sans vignette : à 16 px l'avatar
+                                       n'était qu'une pastille d'initiale illisible, et il
+                                       cassait la ligne meta au moindre repli. Le nom seul
+                                       suffit à savoir qui a fait le geste. #}
                                     <p
-                                        class="mt-0.5 text-xs text-gray-400 tabular-nums"
-                                        title="{{ event.createdAt|format_datetime('medium', 'short') }}{% if event.authorName %} · {{ event.authorName }}{% endif %}"
+                                        class="mt-0.5 text-xs leading-5 text-gray-400"
+                                        title="{{ event.createdAt|format_datetime('medium', 'short') }}"
                                     >
-                                        {%- if eventDay == 'now'|date('Y-m-d') -%}
-                                            {{ event.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                        {%- elseif eventDay == '-1 day'|date('Y-m-d') -%}
-                                            {{ 'admin.contacts.notes.yesterday'|trans }} {{ event.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                        {%- else -%}
-                                            {{ event.createdAt|format_datetime(pattern='dd.MM.yy') }}
+                                        {%- if event.authorName -%}
+                                            <span class="text-gray-500" data-testid="dossier-event-author">{{ event.authorName|title }}</span>
+                                            <span aria-hidden="true"> &middot; </span>
                                         {%- endif -%}
+                                        <span class="tabular-nums">
+                                            {%- if eventDay == 'now'|date('Y-m-d') -%}
+                                                {{ event.createdAt|format_datetime(pattern="HH'h'mm") }}
+                                            {%- elseif eventDay == '-1 day'|date('Y-m-d') -%}
+                                                {{ 'admin.contacts.notes.yesterday'|trans }} {{ event.createdAt|format_datetime(pattern="HH'h'mm") }}
+                                            {%- else -%}
+                                                {{ event.createdAt|format_datetime(pattern='dd.MM.yy') }}
+                                            {%- endif -%}
+                                        </span>
                                     </p>
                                 </li>
                             {% endfor %}
@@ -493,8 +506,10 @@
                         size="sm"
                         data-action="live#action"
                         data-live-action-param="add"
+                        data-loading="action(add)|addAttribute(disabled)"
                         data-testid="dossier-notes-add"
                     >
+                        <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(add)|removeClass(hidden)" />
                         {{ 'admin.contacts.notes.add'|trans }}
                     </twig:Button>
                 </div>

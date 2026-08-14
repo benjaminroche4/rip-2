@@ -6,6 +6,8 @@ namespace App\Tests\Admin\Components;
 
 use App\Auth\Entity\User;
 use App\Contact\Domain\ContactStatus;
+use App\Contact\Domain\NextStep;
+use App\Contact\Domain\RecontactChannel;
 use App\Contact\Entity\Contact;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -84,6 +86,50 @@ final class ContactStatusControlTest extends KernelTestCase
 
         $this->expectException(AccessDeniedException::class);
         $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => 1]);
+    }
+
+    public function testCancellingAPlannedRecallClearsTheStepAndReopensTheEditor(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress)
+            ->setNextStep(NextStep::Recontact)
+            ->setRecontactChannel(RecontactChannel::Email)
+            ->setRecallAt(new \DateTimeImmutable('+3 days'));
+        $this->seedUser('admin@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->dropStep();
+
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($reloaded->getNextStep(), 'The commitment is dropped, not just edited.');
+        self::assertNull($reloaded->getRecallAt());
+        self::assertNull($reloaded->getRecontactChannel());
+        // The editor reopens so the pipeline never stalls with no next step.
+        self::assertTrue($component->editingStep);
+        self::assertSame('', $component->pendingStep);
+    }
+
+    public function testAnUndatedStepCannotBeCancelled(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress)
+            ->setNextStep(NextStep::QuotePreparation);
+        $this->seedUser('admin@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->dropStep();
+
+        $this->em->clear();
+        // Only visio and recontact expose a Cancel button: a stale DOM
+        // posting dropStep on anything else must be a no-op.
+        self::assertSame(NextStep::QuotePreparation, $this->em->find(Contact::class, $contact->getId())->getNextStep());
     }
 
     private function persistContact(): Contact

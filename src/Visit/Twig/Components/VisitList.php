@@ -163,6 +163,50 @@ final class VisitList
     }
 
     /**
+     * "Prochains jours" visits placeable on the map: the section shows them
+     * as plain dots (no numbering, no route, the days are not a single tour).
+     * Coordinates missing but address filled in still count: the controller
+     * geocodes those in the browser.
+     *
+     * @return list<VisitSummary>
+     */
+    public function getMappableLaterVisits(): array
+    {
+        return array_values(array_filter(
+            $this->getLaterVisits(),
+            static fn (VisitSummary $visit): bool => $visit->hasCoordinates() || '' !== trim($visit->address),
+        ));
+    }
+
+    /**
+     * JSON payload of the "Prochains jours" map: one dot per visit, the
+     * tooltip carries the date since the pins are spread over several days.
+     */
+    public function getLaterMapPayload(): string
+    {
+        $points = [];
+        foreach ($this->getMappableLaterVisits() as $visit) {
+            $points[] = [
+                'id' => $visit->id,
+                'lat' => $visit->latitude,
+                'lng' => $visit->longitude,
+                // Adresse embarquée : une visite créée sans passer par
+                // l'autocomplétion Places n'a pas de coordonnées, le
+                // controller la géocode côté navigateur plutôt que de la
+                // laisser disparaître de la carte.
+                'address' => $visit->address,
+                'title' => (string) \IntlDateFormatter::formatObject(
+                    $visit->scheduledAt,
+                    "EEEE d MMMM, HH'h'mm",
+                    \Locale::getDefault(),
+                ),
+            ];
+        }
+
+        return json_encode($points, \JSON_THROW_ON_ERROR);
+    }
+
+    /**
      * Walking path through today's pins, decoded server-side from the Routes
      * API (the client only draws a polyline). Empty when the route is
      * unavailable — pins alone still work.

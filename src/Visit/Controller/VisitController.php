@@ -173,7 +173,7 @@ final class VisitController extends AbstractController
         requirements: ['id' => '\\d+'],
         methods: ['POST'],
     )]
-    public function status(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em): Response
+    public function status(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em, \App\Dossier\Service\DossierStatusAdvancer $advancer): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -189,6 +189,13 @@ final class VisitController extends AbstractController
         // at any point of the visit's life, not only once it is done.
         $visit->setStatus($status);
         $em->flush();
+
+        // Une visite réalisée valide l'étape Visite du dossier : le statut
+        // du dossier suit (Bien trouvé) sans geste supplémentaire.
+        $dossier = $visit->getDossier();
+        if (null !== $dossier) {
+            $advancer->advance($dossier);
+        }
 
         return $this->redirectToRoute('admin_visit_show', ['adminPrefix' => $adminPrefix, 'id' => $id], 303);
     }

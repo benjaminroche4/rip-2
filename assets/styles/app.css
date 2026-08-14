@@ -393,6 +393,28 @@ turbo-frame#blog-list[busy] {
     .animate-palette-panel { animation: none; }
 }
 
+/* Full-screen "creating..." overlay (lead -> dossier conversion): a soft fade
+   in for the backdrop, and an indeterminate bar that slides back and forth to
+   signal ongoing work of unknown duration. */
+@keyframes creating-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-creating-overlay {
+    animation: creating-overlay-in 0.2s ease-out backwards;
+}
+@keyframes creating-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+}
+.animate-creating-bar {
+    animation: creating-bar 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    .animate-creating-overlay { animation: none; }
+    .animate-creating-bar { animation: creating-bar 1.6s linear infinite; }
+}
+
 /* Onglets du détail dossier (tabs_controller) : la visibilité des panneaux
    dérive de l'attribut data-active-tab porté par le wrapper statique de la
    page. Les panneaux vivent dans des LiveComponents ; en ne faisant que
@@ -478,4 +500,53 @@ details.details-animated[open]::details-content {
 }
 @utility animate-sidebar-wiggle {
     animation: sidebar-wiggle 350ms ease-in-out;
+}
+
+/* Pastille "IA" du Récap dossier : disque discret rempli à moitié, dont la
+   surface ondule. Le truc classique du liquide en CSS : un carré à coins très
+   arrondis qui tourne lentement derrière le masque rond, ce qui fait monter
+   et descendre la ligne d'eau. Deux vagues décalées pour la profondeur. */
+@keyframes ai-orb-wave {
+    to { transform: rotate(360deg); }
+}
+@utility ai-orb {
+    position: relative;
+    display: inline-block;
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--color-primary) 8%, white);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 25%, transparent);
+
+    /* Vague de fond, la plus lente. */
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        left: -60%;
+        width: 220%;
+        height: 220%;
+        top: 45%;
+        border-radius: 42% 45% 40% 47%;
+        background-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+        animation: ai-orb-wave 6s linear infinite;
+    }
+
+    /* Vague de premier plan, plus marquée et légèrement décalée. */
+    &::after {
+        top: 52%;
+        border-radius: 46% 40% 44% 42%;
+        background-color: var(--color-primary);
+        animation-duration: 4.2s;
+        animation-direction: reverse;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-orb::before,
+    .ai-orb::after {
+        animation: none;
+    }
 }

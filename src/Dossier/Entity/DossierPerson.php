@@ -418,6 +418,14 @@ class DossierPerson
         return $this;
     }
 
+    /** Detaching a piece deletes it: the collection is orphan-removing. */
+    public function removeDocument(DossierDocument $document): static
+    {
+        $this->documents->removeElement($document);
+
+        return $this;
+    }
+
     public function getDossier(): ?Dossier
     {
         return $this->dossier;

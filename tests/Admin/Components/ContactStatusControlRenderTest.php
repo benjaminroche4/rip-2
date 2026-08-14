@@ -117,13 +117,19 @@ final class ContactStatusControlRenderTest extends KernelTestCase
         $html = (string) $live->render();
         self::assertStringContainsString('next-step-callout', $html, 'Recontact recap card shows.');
         self::assertStringContainsString('recontact-channel-badge', $html, 'The chosen channel shows on the recap card.');
+        // Un engagement daté s'annule aussi : Modifier + Annuler côte à côte.
+        self::assertStringContainsString('data-testid="next-step-edit"', $html);
+        self::assertStringContainsString('data-testid="next-step-drop"', $html, 'A planned recall can be cancelled.');
 
         // Modifier -> bascule vers une étape sans date.
         $live->call('editStep');
         $live->call('pickStep', ['step' => 'recontact']);
         $live->call('pickStep', ['step' => 'other']);
         $live->call('confirmStep');
-        self::assertStringContainsString('next-step-callout', (string) $live->render(), 'Switching to a dateless step keeps a recap card.');
+        $html = (string) $live->render();
+        self::assertStringContainsString('next-step-callout', $html, 'Switching to a dateless step keeps a recap card.');
+        self::assertStringContainsString('data-testid="next-step-edit"', $html);
+        self::assertStringNotContainsString('data-testid="next-step-drop"', $html, 'A dateless step has nothing to cancel: Modifier alone.');
 
         // Re-update du statut en cours avec étape présente (cas signalé).
         $live->call('change', ['status' => 'in_progress']);

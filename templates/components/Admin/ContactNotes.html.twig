@@ -114,7 +114,9 @@
                                                 size="sm"
                                                 data-action="live#action"
                                                 data-live-action-param="saveEdit"
+                                                data-loading="action(saveEdit)|addAttribute(disabled)"
                                             >
+                                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(saveEdit)|removeClass(hidden)" />
                                                 {{ 'admin.contacts.notes.save'|trans }}
                                             </twig:Button>
                                         </div>
@@ -159,17 +161,27 @@
                                 <span class="absolute top-1 -left-[26px] size-2.5 rounded-full border-2 border-white {{ entry.dotClass }}" aria-hidden="true"></span>
                                 <p class="text-gray-900">{{ entry.text }}</p>
                                 {% set entryDay = entry.createdAt|date('Y-m-d') %}
+                                {# Auteur en clair, sans vignette : à 16 px l'avatar
+                                   n'était qu'une pastille d'initiale illisible, et il
+                                   cassait la ligne meta au moindre repli. Le nom seul
+                                   suffit à savoir qui a fait le geste. #}
                                 <p
-                                    class="mt-0.5 text-xs text-gray-400 tabular-nums"
-                                    title="{{ entry.createdAt|format_datetime('medium', 'short') }}{% if entry.authorName %} · {{ entry.authorName }}{% endif %}"
+                                    class="mt-0.5 text-xs leading-5 text-gray-400"
+                                    title="{{ entry.createdAt|format_datetime('medium', 'short') }}{% if entry.hint %} · {{ entry.hint }}{% endif %}"
                                 >
-                                    {%- if entryDay == 'now'|date('Y-m-d') -%}
-                                        {{ entry.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                    {%- elseif entryDay == '-1 day'|date('Y-m-d') -%}
-                                        {{ 'admin.contacts.notes.yesterday'|trans }} {{ entry.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                    {%- else -%}
-                                        {{ entry.createdAt|format_datetime(pattern='dd.MM.yy') }}
+                                    {%- if entry.authorName -%}
+                                        <span class="text-gray-500" data-testid="contact-history-author">{{ entry.authorName|title }}</span>
+                                        <span aria-hidden="true"> &middot; </span>
                                     {%- endif -%}
+                                    <span class="tabular-nums">
+                                        {%- if entryDay == 'now'|date('Y-m-d') -%}
+                                            {{ entry.createdAt|format_datetime(pattern="HH'h'mm") }}
+                                        {%- elseif entryDay == '-1 day'|date('Y-m-d') -%}
+                                            {{ 'admin.contacts.notes.yesterday'|trans }} {{ entry.createdAt|format_datetime(pattern="HH'h'mm") }}
+                                        {%- else -%}
+                                            {{ entry.createdAt|format_datetime(pattern='dd.MM.yy') }}
+                                        {%- endif -%}
+                                    </span>
                                 </p>
                             </li>
                         {% endfor %}
@@ -200,8 +212,10 @@
                 size="sm"
                 data-action="live#action"
                 data-live-action-param="add"
+                data-loading="action(add)|addAttribute(disabled)"
                 data-testid="contact-notes-add"
             >
+                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(add)|removeClass(hidden)" />
                 {{ 'admin.contacts.notes.add'|trans }}
             </twig:Button>
         </div>

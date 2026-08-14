@@ -6,6 +6,7 @@ namespace App\Tests\Visit;
 
 use App\Auth\Entity\User;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierSearch;
 use App\RealEstateAgent\Entity\Agency;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use App\Visit\Entity\Visit;
@@ -46,7 +47,9 @@ final class VisitFormTest extends KernelTestCase
             ->setName('Famille Martin')
             ->setReference('DS-'.random_int(100000, 999999))
             ->setPairingCode(substr(strtoupper(bin2hex(random_bytes(4))), 0, 6))
-            ->setCreatedAt(new \DateTimeImmutable());
+            ->setCreatedAt(new \DateTimeImmutable())
+            // Booking a visit requires complete search criteria.
+            ->setSearch($this->completeSearch());
         $this->em->persist($this->dossier);
         $this->em->flush();
 
@@ -172,11 +175,35 @@ final class VisitFormTest extends KernelTestCase
         self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
     }
 
-    public function testQuickModeMarkupHidesTheDetailFields(): void
+    public function testTheFormStartsWithTheDossierFieldAlone(): void
     {
+        // Sans dossier choisi, rien d'autre à remplir : ni le bien, ni le
+        // créneau, ni le bouton de planification.
         $rendered = (string) $this->renderTwigComponent('Visit:VisitForm', [
             'adminPrefix' => self::PREFIX,
         ]);
+
+        self::assertStringContainsString('data-testid="visit-form-dossier"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-dossier-recap"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-address"', $rendered);
+        self::assertStringNotContainsString('data-testid="assignee-chips"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-details-toggle"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-submit"', $rendered);
+    }
+
+    public function testPickingADossierRevealsItsRecapCards(): void
+    {
+        $rendered = $this->renderWithDossier();
+
+        self::assertStringContainsString('data-testid="visit-form-dossier-recap"', $rendered);
+        // La formule pilote ce qu'on fait sur place : elle ouvre le rappel.
+        self::assertStringContainsString('data-testid="visit-form-dossier-offer"', $rendered);
+        self::assertStringContainsString('Famille Martin', $rendered);
+    }
+
+    public function testQuickModeMarkupHidesTheDetailFields(): void
+    {
+        $rendered = $this->renderWithDossier();
 
         self::assertStringContainsString('data-testid="visit-form"', $rendered);
         // Who performs the visit and the notes stay out of the toggle.
@@ -197,10 +224,7 @@ final class VisitFormTest extends KernelTestCase
 
     public function testDetailModeMarkupRendersTheOptionalFields(): void
     {
-        $rendered = (string) $this->renderTwigComponent('Visit:VisitForm', [
-            'adminPrefix' => self::PREFIX,
-            'detailed' => true,
-        ]);
+        $rendered = $this->renderWithDossier(detailed: true);
 
         self::assertStringContainsString('data-testid="visit-form-details"', $rendered);
         self::assertStringContainsString('data-testid="visit-form-agent"', $rendered);
@@ -287,6 +311,68 @@ final class VisitFormTest extends KernelTestCase
         self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
     }
 
+    public function testItRefusesToBookOnADossierWithIncompleteSearchCriteria(): void
+    {
+        $incomplete = (new Dossier())
+            ->setName('Dossier a completer')
+            ->setReference('DS-'.random_int(100000, 999999))
+            ->setPairingCode(substr(strtoupper(bin2hex(random_bytes(4))), 0, 6))
+            ->setCreatedAt(new \DateTimeImmutable())
+            // Budget seul : les six autres critères manquent.
+            ->setSearch((new DossierSearch())->setBudget(2500));
+        $this->em->persist($incomplete);
+        $this->em->flush();
+
+        // Le formulaire s'arrête au choix du dossier et explique pourquoi.
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitForm', [
+            'adminPrefix' => self::PREFIX,
+            'visit' => (new Visit())->setDossier($incomplete),
+        ]);
+        self::assertStringContainsString('data-testid="visit-form-dossier-incomplete"', $rendered);
+        // Le lien ouvre le dossier directement sur l'onglet Recherche.
+        self::assertStringContainsString('tab=search', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-form-submit"', $rendered);
+
+        // Garde serveur : l'appel direct au endpoint live est refusé.
+        $component = $this->mountComponent();
+        $component->formValues = $this->values(dossier: (string) $incomplete->getId());
+        try {
+            $component->create($this->em, $this->nullGeocoder());
+            self::fail('Booking on an incomplete dossier must be rejected.');
+        } catch (\Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException) {
+            // Expected.
+        }
+        self::assertSame(0, (int) $this->em->getRepository(Visit::class)->count([]));
+
+        // Recherche complétée : la réservation repasse.
+        $incomplete->getSearch()
+            ?->setAreas('11e, 12e')
+            ->setMoveInAt(new \DateTimeImmutable('+3 months'))
+            ->setPropertyType('t2,t3')
+            ->setStayDuration('long')
+            ->setFurnishing('furnished')
+            ->setGuarantorType('physical');
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        $component->formValues = $this->values(dossier: (string) $incomplete->getId());
+        self::assertInstanceOf(RedirectResponse::class, $component->create($this->em, $this->nullGeocoder()));
+        self::assertSame(1, (int) $this->em->getRepository(Visit::class)->count([]));
+    }
+
+    /** Les sept critères que DossierSearch::isComplete() exige. */
+    private function completeSearch(): DossierSearch
+    {
+        return (new DossierSearch())
+            ->setBudget(2500)
+            ->setAreas('11e, 12e')
+            ->setMoveInAt(new \DateTimeImmutable('+3 months'))
+            ->setPropertyType('t2,t3')
+            ->setStayDuration('long')
+            ->setFurnishing('furnished')
+            ->setGuarantorType('physical');
+    }
+
     private function values(
         ?string $dossier = null,
         string $agent = '',
@@ -330,6 +416,18 @@ final class VisitFormTest extends KernelTestCase
         return new AddressGeocoder(new MockHttpClient(function (): MockResponse {
             self::fail('The geocoder must not be called here.');
         }), 'test-key');
+    }
+
+    /** Rendu du formulaire avec un dossier déjà choisi. */
+    private function renderWithDossier(bool $detailed = false): string
+    {
+        $visit = (new Visit())->setDossier($this->dossier);
+
+        return (string) $this->renderTwigComponent('Visit:VisitForm', [
+            'adminPrefix' => self::PREFIX,
+            'visit' => $visit,
+            'detailed' => $detailed,
+        ]);
     }
 
     private function mountComponent(): object

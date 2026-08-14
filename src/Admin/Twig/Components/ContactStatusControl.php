@@ -394,6 +394,53 @@ final class ContactStatusControl
         $this->emit('contacts:changed');
     }
 
+    /**
+     * Cancels the planned step outright instead of editing it: a visio is
+     * withdrawn from both agendas with its cancellation emails, a recall
+     * loses its agenda mirror. The lead ends up with no next step and the
+     * editor open, so the pipeline never stalls on an empty state.
+     * Only dated commitments (visio, recontact) can be cancelled.
+     */
+    #[LiveAction]
+    public function dropStep(): void
+    {
+        $this->ensureAdmin();
+
+        $entity = $this->repository->find($this->contactId);
+        $stored = $entity?->getNextStep();
+        if (null === $entity || !\in_array($stored, [NextStep::Visio, NextStep::Recontact], true)) {
+            return;
+        }
+
+        if (NextStep::Visio === $stored) {
+            // Reads the step and date, so it must run before they are
+            // cleared. Records the visio_cancelled event itself.
+            $this->visioMailer->cancel($entity);
+        } else {
+            [$fullName, $avatar] = $this->authorSnapshot();
+            $this->events->recordKind($entity, 'step_cancelled', $entity->getRecallAt()?->format('d.m.Y H\hi'), $fullName, $avatar);
+        }
+
+        $this->repository->saveNextStep($this->contactId, null);
+        $this->repository->saveRecallAt($this->contactId, null);
+        $this->repository->saveRecontactChannel($this->contactId, null);
+
+        // Drops the recall mirror from the agent's agenda (no-op otherwise).
+        $entity = $this->repository->find($this->contactId);
+        if (null !== $entity) {
+            $this->recallSync->apply($entity);
+        }
+
+        $this->pendingStep = '';
+        $this->recallAt = '';
+        $this->pendingChannel = '';
+        $this->dateMissing = false;
+        $this->channelMissing = false;
+        $this->editingStep = true;
+
+        $this->emit('contacts:changed');
+    }
+
     #[LiveAction]
     public function editStep(): void
     {

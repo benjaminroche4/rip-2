@@ -43,16 +43,18 @@ final readonly class RecontactNoticeMailer
         $channelLabel = null !== $channel ? $this->translator->trans($channel->labelKey(), locale: $locale) : null;
         $agentName = VisioInvitationMailer::agentFirstName($contact);
 
-        // Subject built around who + how + when ("📞 Sarah vous rappelle
-        // mardi 12 août à 14h00"): everything readable from the inbox list.
+        // Subject built around who + how + when ("Sarah vous rappelle mardi
+        // 12 août à 14h00"): everything readable from the inbox list. No
+        // emoji on client-facing subjects (premium tone, and they weigh
+        // against deliverability).
         $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', VisioInvitationMailer::humanDate($recallAt, $fr), $recallAt->format($fr ? 'H\hi' : 'H:i'));
         $who = $agentName ?? ($fr ? 'Notre équipe' : 'Our team');
         $subject = match ($channel?->value) {
-            'phone' => $fr ? \sprintf('📞 %s vous rappelle %s', $who, $dateText) : \sprintf('📞 %s will call you %s', $who, $dateText),
-            'whatsapp' => $fr ? \sprintf('💬 %s vous écrit sur WhatsApp %s', $who, $dateText) : \sprintf('💬 %s will message you on WhatsApp %s', $who, $dateText),
-            'sms' => $fr ? \sprintf('💬 %s vous envoie un SMS %s', $who, $dateText) : \sprintf('💬 %s will text you %s', $who, $dateText),
-            'email' => $fr ? \sprintf('✉️ %s vous écrit %s', $who, $dateText) : \sprintf('✉️ %s will email you %s', $who, $dateText),
-            default => $fr ? \sprintf('📅 Nous revenons vers vous %s', $dateText) : \sprintf('📅 We will get back to you %s', $dateText),
+            'phone' => $fr ? \sprintf('%s vous rappelle %s', $who, $dateText) : \sprintf('%s will call you %s', $who, $dateText),
+            'whatsapp' => $fr ? \sprintf('%s vous écrit sur WhatsApp %s', $who, $dateText) : \sprintf('%s will message you on WhatsApp %s', $who, $dateText),
+            'sms' => $fr ? \sprintf('%s vous envoie un SMS %s', $who, $dateText) : \sprintf('%s will text you %s', $who, $dateText),
+            'email' => $fr ? \sprintf('%s vous écrit %s', $who, $dateText) : \sprintf('%s will email you %s', $who, $dateText),
+            default => $fr ? \sprintf('Nous revenons vers vous %s', $dateText) : \sprintf('We will get back to you %s', $dateText),
         };
 
         $email = (new TemplatedEmail())

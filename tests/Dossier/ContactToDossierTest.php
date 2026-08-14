@@ -12,6 +12,7 @@ use App\Contact\Entity\ContactNote;
 use App\Dossier\Domain\ContactLanguage;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierPerson;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -102,6 +103,20 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('Alice Staff', $notes[0]->getAuthorName());
         self::assertSame('2026-07-01', $notes[0]->getCreatedAt()->format('Y-m-d'));
         self::assertSame('Relance par email.', $notes[1]->getText());
+    }
+
+    public function testTheConversionShowsACreatingOverlay(): void
+    {
+        $contact = $this->persistContact();
+
+        $crawler = $this->client->request('GET', $this->contactUrl($contact));
+        self::assertResponseIsSuccessful();
+
+        // The overlay is present on the page (hidden until the submit fires),
+        // and the conversion form is flagged so the controller reveals it.
+        self::assertSelectorExists('[data-testid="creating-overlay"][data-controller="creating-overlay"]');
+        $form = $crawler->filter('[data-testid="contact-to-dossier"]')->closest('form');
+        self::assertNotNull($form->attr('data-creating-overlay-trigger'));
     }
 
     public function testConvertingTwiceLandsOnTheSameDossier(): void
@@ -206,6 +221,37 @@ final class ContactToDossierTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(403);
         self::assertSame(0, (int) $this->em->getRepository(Dossier::class)->count([]));
+    }
+
+    public function testConvertIsHiddenWhenADossierAlreadyCoversTheEmail(): void
+    {
+        // A dossier converted from a *different* contact reference but carrying
+        // the same primary-tenant email already covers this lead: converting
+        // again would only land on it, so the action must not be offered.
+        $contact = $this->persistContact();
+
+        $dossier = (new Dossier())
+            ->setName('Doe')
+            ->setReference('DS-777777')
+            ->setPairingCode('ABCDEF')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setSourceContactReference('CT-999999');
+        $dossier->addPerson((new DossierPerson())
+            ->setRole(DossierPersonRole::TENANT)
+            ->setFirstName('Jane')->setLastName('Doe')
+            ->setEmail('repro@example.com')
+            ->setLanguage(ContactLanguage::EN)
+            ->setPrimaryContact(true)
+            ->setPosition(0));
+        $this->em->persist($dossier);
+        $this->em->flush();
+
+        $this->client->request('GET', $this->contactUrl($contact));
+        self::assertResponseIsSuccessful();
+
+        // "Voir le dossier" is offered, the conversion action is gone.
+        self::assertSelectorExists('[data-testid="contact-view-dossier"]');
+        self::assertSelectorNotExists('[data-testid="contact-to-dossier-trigger"]');
     }
 
     private function persistContact(): Contact

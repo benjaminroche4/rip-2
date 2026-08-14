@@ -1,0 +1,55 @@
+{# Compteurs de visites d'un dossier (annulées exclues), même bande sur la
+   card de la liste et sur le Récapitulatif de la fiche : libellé à gauche,
+   valeur à droite. Les couleurs alertent sur l'enlisement de la recherche.
+
+   Une seule bande blanche, les trois compteurs séparés par des filets plutôt
+   que découpés en trois blocs : ce sont trois mesures d'un même bilan, pas
+   trois cards. Pas d'icône non plus, elle n'ajoute rien à un chiffre et
+   volait la place du libellé.
+
+   rounded : 'bottom' quand la bande ferme une card, 'full' quand elle vit
+   au milieu d'un empilement de bandes.
+   manager : renseigné sur un dossier archivé, où la première tuile passe des
+   visites à venir (toujours 0, la recherche est finie) au responsable, la
+   première chose qu'on cherche en relisant un dossier clos.
+   alerts  : les couleurs d'alerte n'ont de sens que sur un dossier en cours ;
+   sur un dossier clôturé il n'y a plus rien à corriger, les chiffres restent
+   neutres. #}
+{%- props upcoming = 0, total = 0, rejections = 0, rounded = 'bottom', manager = null, alerts = true -%}
+{# Visites au total : plus la recherche traîne, plus le compteur chauffe ;
+   10 visites et plus = rouge franc. #}
+{% set totalClass = alerts ? [
+    'text-emerald-600', 'text-emerald-600',
+    'text-lime-600', 'text-lime-600',
+    'text-amber-500', 'text-amber-500',
+    'text-orange-500', 'text-orange-500',
+    'text-orange-600', 'text-orange-600',
+    'text-red-600',
+][min(total, 10)] : '' %}
+{# Refus : sur 3 candidatures, la couleur passe du vert au rouge à chaque
+   refus (3 = plus de marge). #}
+{% set rejectionClass = alerts ? ['text-emerald-600', 'text-amber-500', 'text-orange-600', 'text-red-600'][min(rejections, 3)] : '' %}
+<dl
+    class="grid grid-cols-3 divide-x divide-gray-950/10 bg-white {{ rounded == 'full' ? 'rounded-xl' : 'rounded-b-xl' }}"
+    data-testid="dossier-card-stats"
+>
+    {% for stat in [
+        manager
+            ? {value: manager.name ? manager.name|title : '-', avatar: manager.avatar, labelKey: 'admin.dossiers.card.managedBy', testid: 'dossier-card-manager'}
+            : {value: upcoming, labelKey: 'admin.dossiers.card.stats.upcomingVisits', testid: 'dossier-card-upcoming-visits'},
+        {value: '<span class="' ~ totalClass ~ '">' ~ total ~ '</span>', labelKey: 'admin.dossiers.card.stats.totalVisits', testid: 'dossier-card-total-visits'},
+        {value: '<span class="' ~ rejectionClass ~ '">' ~ rejections ~ '</span><span class="text-xs font-normal text-gray-400">/3</span>', labelKey: 'admin.dossiers.card.stats.rejections', testid: 'dossier-card-rejections'},
+    ] %}
+        <div class="flex min-w-0 items-center justify-between gap-3 px-4 py-3">
+            <dt class="min-w-0 truncate text-xs text-gray-500">{{ stat.labelKey|trans }}</dt>
+            {# |raw : seul le chiffre porte la couleur d'alerte, le « /3 »
+               reste en retrait (plus petit, gris clair). #}
+            <dd class="flex min-w-0 shrink items-center gap-1.5 text-sm font-medium text-gray-900 tabular-nums" data-testid="{{ stat.testid }}">
+                {% if stat.avatar is defined and manager.name %}
+                    <twig:Avatar filename="{{ stat.avatar }}" name="{{ manager.name }}" size="6" />
+                {% endif %}
+                <span class="truncate">{{ stat.value|raw }}</span>
+            </dd>
+        </div>
+    {% endfor %}
+</dl>

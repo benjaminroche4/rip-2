@@ -634,6 +634,7 @@ login:
         google: Se connecter avec Google
     resetPassword:
         title: Mot de passe oublié
+        emailSubject: Réinitialisation de votre mot de passe
         subTitle: Un email avec un lien pour réinitialiser le mot de passe va vous être envoyé.
         tooManyAttempts: Trop de demandes de réinitialisation depuis cette adresse. Réessayez dans quelques minutes.
         form:
@@ -735,14 +736,7 @@ register:
         alreadyUsed: Un compte existe déjà avec cette adresse email. Connectez-vous.
         sendFailed: Impossible d'envoyer le code de confirmation. Vérifiez votre adresse email et réessayez.
     phoneNumber:
-        notBlank: Le numéro de téléphone est obligatoire.
-        maxLength: Le numéro de téléphone est trop long.
         invalidFormat: Le format du numéro de téléphone n'est pas valide.
-    nationality:
-        notBlank: La nationalité est obligatoire.
-        invalid: Cette nationalité n'est pas valide.
-    situation:
-        required: La situation professionnelle est obligatoire.
     password:
         notBlank: Le mot de passe est obligatoire.
         minLength: Le mot de passe doit contenir au moins 8 caractères.
@@ -771,8 +765,6 @@ register:
             resendThrottled: Attendez une minute avant de demander un nouveau code.
             resendThrottledTitle: Patientez un instant
             invalid: Code incorrect ou expiré. Réessayez ou demandez un nouveau code.
-            required: Saisissez le code reçu par email.
-            format: Le code doit comporter 6 chiffres.
             tooManyAttempts: Trop de tentatives. Réessayez dans quelques minutes.
             spam: Pensez à vérifier vos spams si vous ne le voyez pas.
             help: Vous n'avez pas reçu le code ?
@@ -1100,7 +1092,6 @@ propertyManagement:
             label: Email
             placeholder: "Email: john@doe.com"
             notBlank: L'adresse email ne doit pas être vide.
-            invalid: L'adresse email n'est pas valide.
         button:  Estimer mes revenus locatifs
         trust:
             1: Réponse sous 2h
@@ -1803,6 +1794,8 @@ gallery:
 admin:
     meta:
         description: Espace d'administration Relocation in Paris. Accès réservé à l'équipe.
+    busyGuard:
+        message: Une action est encore en cours. Si vous quittez la page maintenant, elle risque de ne pas être enregistrée.
     nav:
         users: Utilisateurs
         contacts: Leads
@@ -1840,6 +1833,9 @@ admin:
             close: Fermer
     dossiers:
         title: Dossiers
+        creating:
+            title: Votre dossier est en cours de création
+            subtitle: Un instant, on prépare tout.
         empty:
             title: Aucun dossier pour le moment
             description: Créez votre premier dossier avec le bouton ci-dessus.
@@ -1850,6 +1846,7 @@ admin:
             label: Portée de la liste
             all: Tous les dossiers
             mine: Mes dossiers
+            archived: Archives
         emptyFiltered:
             title: Aucun dossier ne correspond
             description: Modifiez la recherche ou le filtre de statut pour retrouver vos dossiers.
@@ -1873,12 +1870,15 @@ admin:
                 label: Formule
             progress:
                 started: 'Début :'
+                closed: 'Clôture :'
                 estimatedFinish: 'Fin estimée :'
             stats:
                 upcomingVisits: Visites à venir
                 totalVisits: Visites au total
                 rejections: Refus
             managedBy: 'Géré par :'
+            archived: Clôturé
+            closedIn: 'Clôturé en {0}moins d''un jour|{1}1 jour|]1,Inf[%count% jours'
         show:
             unlock: Déverrouiller la modification
             lock: Verrouiller la modification
@@ -1928,16 +1928,37 @@ admin:
                 late: En retard
                 daysLeft: 'J-%count%'
                 daysLate: 'J+%count%'
+            steps:
+                lockedHint: 'Validez l''étape %step% pour y accéder.'
+                persons:
+                    label: Personnes
+                    todo: Ajoutez au moins un locataire et désignez le contact principal.
+                search:
+                    label: Recherche
+                    todo: Complétez les critères de recherche.
+                file:
+                    label: Dossier
+                    todo: Demandez les pièces justificatives et validez-les toutes.
+                visit:
+                    label: Visite
+                    todo: Marquez au moins une visite comme réalisée.
+                payment:
+                    label: Paiement
+                    todo: Dernière étape du parcours.
             recap:
-                title: Récap express
+                title: Récap IA du dossier
                 generate: Générer le récap
                 refresh: Actualiser
                 generating: Génération...
-                empty: Aucun récap pour le moment. Générez-le pour obtenir un résumé du dossier à partir des données saisies.
+                emptyCta: Générez le premier récap du dossier.
+                emptyHintCompact: D'après les notes, la recherche et l'historique.
                 error: La génération a échoué. Réessayez dans un instant.
-                nextAction: 'Prochaine action :'
+                sections:
+                    summary: Résumé
+                    attention: Points d'attention
+                    nextAction: Prochaine action
+                disclaimerShort: Résumé IA à vérifier.
                 generatedAt: Généré le
-                disclaimer: Résumé généré par IA à partir des données du dossier, à vérifier.
             search:
                 guarantorStatus:
                     label: Garantie
@@ -2021,7 +2042,6 @@ admin:
                     label: Adresses importantes
                     typeLabel: Type de lieu
                     placeholder: Tapez l'adresse à ajouter…
-                    add: Ajouter cette adresse
                     remove: Retirer cette adresse
                     openInMaps: Ouvrir dans Google Maps
                     type:
@@ -2037,6 +2057,8 @@ admin:
             requestDocuments: Demander des documents
             closure:
                 badge: Dossier clos
+                bannerTitle: Dossier clôturé
+                by: par %name%
                 closedAt: Clôturé le
                 close: Clôturer le dossier
                 reopen: Rouvrir
@@ -2044,6 +2066,12 @@ admin:
                     title: Clôturer ce dossier ?
                     text: Les fichiers déposés seront définitivement supprimés, le lien de dépôt sera désactivé et la page de dépôt refusera ce dossier. Vous pourrez rouvrir le dossier, mais les fichiers ne seront pas restaurés.
                     confirm: Clôturer
+            deletion:
+                delete: Supprimer le dossier
+                modal:
+                    title: 'Supprimer le dossier %reference% ?'
+                    text: Le dossier, les locataires, les pièces, les notes, l'historique et les visites seront supprimés définitivement, ainsi que le dossier Drive et tous les fichiers qu'il contient. Cette action est irréversible.
+                    confirm: Supprimer définitivement
             events:
                 statusChanged: 'Statut du dossier : %status%'
                 system: Système
@@ -2054,6 +2082,7 @@ admin:
                 documentRefused: 'Pièce refusée : %piece% (%tenant%). Motif : %reason%'
                 documentRefusedNoReason: 'Pièce refusée : %piece% (%tenant%)'
                 documentStatus: 'Statut de la pièce %piece% (%tenant%) passé à "%status%"'
+                documentDeleted: 'Pièce retirée du dossier : %piece% (%tenant%)'
                 documentFileDeleted: 'Fichier supprimé sur la pièce %piece% (%tenant%) : %file%'
                 documentFileRemoved: 'Fichier retiré par le déposant sur la pièce %piece% : %file%'
                 descriptionUpdated: 'Précision ajoutée sur la pièce %piece% (%tenant%) : %description%'
@@ -2112,6 +2141,11 @@ admin:
                         title: Supprimer ce fichier ?
                         text: Le fichier sera supprimé définitivement. Si c'était le dernier de la pièce, elle repasse en demandée.
                         confirm: Supprimer
+                    deletePiece: Retirer cette pièce du dossier
+                    deletePieceConfirm:
+                        title: Retirer cette pièce ?
+                        text: La pièce et les fichiers déjà déposés seront supprimés définitivement. Le locataire ne la verra plus dans son dépôt.
+                        confirm: Retirer
                     counter: '%deposited%/%total% déposées'
                     resend: Relancer
                     resendTitle: Renvoyer l'email de demande pour les pièces encore attendues
@@ -2173,19 +2207,13 @@ admin:
             cancel: Annuler
             submit: Créer le dossier
             submitting: Création en cours
+            success: Dossier créé.
             name:
                 label: Nom du dossier
-                notBlank: Le nom du dossier est obligatoire.
-                length: Le nom doit faire entre 2 et 100 caractères.
             persons:
                 title: Personnes
                 count: '%count% / %max% personnes'
                 add: Ajouter une personne
-                min: Le dossier doit contenir au moins une personne.
-                max: Le dossier ne peut pas contenir plus de 4 personnes.
-                tenantRequired: Le dossier doit contenir au moins un locataire.
-                maxTenants: Le dossier ne peut pas contenir plus de 2 locataires.
-                maxFollowUps: Le dossier ne peut pas contenir plus de 2 demandes de suivi.
             person:
                 heading: Personne %number%
                 remove: Retirer
@@ -2193,29 +2221,18 @@ admin:
                 makePrimary: Définir comme principal
                 role:
                     label: Rôle
-                    notNull: Choisissez un rôle pour cette personne.
                     tenant: Locataire
                     follow_up: Demande de suivi
                 firstName:
                     label: Prénom
-                    notBlank: Le prénom est obligatoire.
-                    length: Le prénom doit faire entre 2 et 50 caractères.
                 lastName:
                     label: Nom
-                    notBlank: Le nom est obligatoire.
-                    length: Le nom doit faire entre 2 et 50 caractères.
                 email:
                     label: Email
-                    notBlank: L'email est obligatoire.
-                    invalid: Cet email n'est pas valide.
-                    length: L'email ne peut pas dépasser 180 caractères.
                 phone:
                     label: Téléphone
-                    invalid: Ce numéro n'est pas valide (chiffres, espaces, points et tirets uniquement).
-                    length: Le téléphone ne peut pas dépasser 30 caractères.
                 language:
                     label: Langue de contact
-                    notNull: Choisissez une langue de contact.
                     fr: Français
                     en: Anglais
                 profession:
@@ -2342,6 +2359,7 @@ admin:
             subtitle: Saisie manuelle d'un lead reçu par téléphone, email ou WhatsApp.
             source: Source du lead
             submit: Créer le lead
+            success: Lead créé.
         contactSource:
             form: Formulaire du site
             phone: Téléphone
@@ -2375,6 +2393,7 @@ admin:
             channelLabel: Par quel canal
             joinVisio: Rejoindre
             edit: Modifier
+            cancelStep: Annuler
             confirm: Valider
             dateRequired: Choisissez une date pour valider cette étape.
             planner:
@@ -2397,6 +2416,7 @@ admin:
             budget: Budget mensuel
             budgetUnit: €/mois
             areas: Quartiers visés
+            allAreas: Tous les arrondissements
             moveIn: Emménagement souhaité
             propertyType: Type de bien
             note:
@@ -2437,6 +2457,7 @@ admin:
             step_quote_sent: Prochaine étape, devis envoyé
             step_other: Prochaine étape, autre
             step_cleared: Prochaine étape effacée
+            step_cancelled: Rappel annulé
             visio_planned: Visio planifiée
             visio_rescheduled: Visio déplacée
             pdf_export: Fiche exportée en PDF
@@ -2553,6 +2574,7 @@ admin:
             reportSave: Enregistrer le compte-rendu
             title: 'Visite du %date% à %time%'
             detailsTitle: 'Détails de la visite'
+            reference: Référence
         edit:
             title: Modifier la visite
         row:
@@ -2596,6 +2618,8 @@ admin:
             todayEmpty: Aucune visite aujourd'hui.
             tomorrow: Demain
             later: Prochains jours
+            showMap: Voir sur la carte
+            hideMap: Masquer la carte
         create:
             sections:
                 visit: La visite
@@ -2611,15 +2635,15 @@ admin:
             listingUrl:
                 label: "Lien de l'annonce"
                 placeholder: https://www.seloger.com/...
-                invalid: Le lien de l'annonce n'est pas une URL valide.
-                length: Le lien ne peut pas dépasser 500 caractères.
+            duplicate:
+                title: '{1}Une visite est déjà prévue sur ce bien.|]1,Inf[%count% visites sont déjà prévues sur ce bien.'
+                item: 'le %date% pour %dossier%'
             duration:
                 label: Durée estimée
                 min15: 15 min
                 min30: 30 min
                 min45: 45 min
                 min60: +1h
-                invalid: Durée invalide.
             clientPresent:
                 label: Le client participe à la visite
                 help: Décochez si l'agent visite pour son compte (visite par procuration).
@@ -2632,7 +2656,8 @@ admin:
             dossier:
                 label: Dossier
                 placeholder: Choisir un dossier...
-                notNull: Le dossier est obligatoire.
+                incomplete: Complétez la recherche de ce dossier pour pouvoir planifier une visite.
+                incompleteLink: Compléter la recherche
             assignee:
                 none: 'Aucun agent de visite. Attribue la fonction "Agent de visite" dans la fiche utilisateur.'
                 label: Effectuée par
@@ -2643,17 +2668,13 @@ admin:
             note:
                 label: Note libre
                 placeholder: 'Code d''accès, interlocuteur sur place, consignes...'
-                length: La note ne peut pas dépasser 2000 caractères.
             scheduledAt:
                 past: La visite ne peut pas être planifiée dans le passé.
                 label: Date et heure
-                notNull: La date et l'heure sont obligatoires.
             address:
                 idf: L'adresse doit se situer en Île-de-France.
                 label: Adresse du bien
                 placeholder: 12 rue de la Roquette, 75011 Paris
-                notBlank: L'adresse est obligatoire.
-                length: L'adresse ne peut pas dépasser 255 caractères.
     agents:
         title: Agents immobiliers
         searchPlaceholder: Rechercher un agent...
@@ -2681,12 +2702,8 @@ admin:
             submitting: Ajout...
             firstName:
                 label: Prénom
-                notBlank: Le prénom est obligatoire.
-                length: Le prénom ne peut pas dépasser 50 caractères.
             lastName:
                 label: Nom
-                notBlank: Le nom est obligatoire.
-                length: Le nom ne peut pas dépasser 50 caractères.
             kind:
                 label: Cet agent travaille...
                 agency: En agence
@@ -2695,15 +2712,10 @@ admin:
                 label: Agence
                 placeholder: Nom de l'agence...
                 help: Une agence déjà connue est réutilisée automatiquement.
-                notBlank: Le nom de l'agence est obligatoire.
-                length: Le nom de l'agence ne peut pas dépasser 100 caractères.
             email:
                 label: Email
-                invalid: Cette adresse email n'est pas valide.
-                length: L'email ne peut pas dépasser 180 caractères.
             phone:
                 label: Téléphone
-                length: Le téléphone ne peut pas dépasser 30 caractères.
     agencies:
         count: '{0}Aucune agence|{1}1 agence|]1,Inf[%count% agences'
         empty:
@@ -3215,7 +3227,7 @@ listProperty:
         admin:
             subject: "🏡 Nouveau bien proposé (%details%) | Relocation In Paris"
         client:
-            subject: "Bien reçu ! Nous examinons votre bien, réponse sous 24h"
+            subject: "Votre bien est en cours d'examen, réponse sous 24h"
     steps:
         1:
             title: Renseignez l'adresse
@@ -3284,8 +3296,6 @@ deposit:
             refused: Refusée
         error:
             noFile: Aucun fichier reçu. Merci de réessayer.
-            mimeType: 'Format non accepté. Seul le PDF est autorisé.'
-            maxSize: Le fichier dépasse 10 Mo. Merci d'envoyer une version plus légère.
             locked: Cette pièce a été validée, son fichier ne peut plus être retiré.
     manager:
         title: Votre interlocuteur dédié

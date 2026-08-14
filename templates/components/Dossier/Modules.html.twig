@@ -1,12 +1,14 @@
 {# Cards modules du détail dossier : même coque repliable que la
-   Recherche, verrouillées tant que la recherche n'est pas complète.
-   Composant live : se déverrouille dès l'événement "dossier-search:changed". #}
-{% set unlocked = this.unlocked %}
+   Recherche. Chaque module correspond à une étape du parcours et reste
+   verrouillé tant que l'étape précédente n'est pas validée (même calcul que
+   la barre d'onglets). Composant live : se déverrouille dès les événements
+   "dossier-search:changed" / "dossier-documents:changed". #}
         <div {{ attributes.defaults({class: 'space-y-6'}) }} data-testid="dossier-show-modules">
     {% for module in [{key: 'file'}, {key: 'visit'}, {key: 'payment'}] %}
         {# data-tab-panel : visibilité pilotée par les onglets de la page
            (attribut rendu côté serveur, donc morph-proof). #}
         <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-tab-panel="{{ module.key }}" data-testid="dossier-module-card">
+            {% set unlocked = this.isModuleUnlocked(module.key) %}
             {% if unlocked %}
                 {% set dossierVisits = module.key == 'visit' ? this.dossierVisits : null %}
                 {# Repli piloté par la prop live : sans ça, le morph refermerait
@@ -111,6 +113,18 @@
                                                                 >
                                                                     {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
                                                                 </button>
+                                                                {# Retirer la demande : la pièce disparaît aussi du dépôt client. #}
+                                                                <button
+                                                                    type="button"
+                                                                    data-action="live#action"
+                                                                    data-live-action-param="askDeletePiece"
+                                                                    data-live-key-param="{{ document.id }}"
+                                                                    title="{{ 'admin.dossiers.show.modules.file.deletePiece'|trans }}"
+                                                                    class="cursor-pointer rounded p-0.5 text-gray-300 transition-colors duration-100 ease-out hover:text-red-600"
+                                                                    data-testid="module-piece-delete"
+                                                                >
+                                                                    {{ ux_icon('lucide:trash-2', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                                                </button>
                                                             </div>
                                                             {% if this.editingDescriptionId == document.id %}
                                                                 <div class="mt-1.5 flex items-center gap-1.5">
@@ -125,8 +139,9 @@
                                                                         class="w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
                                                                         data-testid="module-file-description-input"
                                                                     >
-                                                                    <button type="button" data-action="live#action" data-live-action-param="saveDescription" class="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-100 ease-out hover:bg-primary/90" title="{{ 'admin.dossiers.show.persons.save'|trans }}" data-testid="module-file-description-save">
-                                                                        {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                                    <button type="button" data-action="live#action" data-live-action-param="saveDescription" data-loading="action(saveDescription)|addAttribute(disabled)" class="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60" title="{{ 'admin.dossiers.show.persons.save'|trans }}" data-testid="module-file-description-save">
+                                                                        {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(saveDescription)|addClass(hidden)'}) }}
+                                                                        <twig:Spinner class="hidden size-3.5 shrink-0" data-loading="action(saveDescription)|removeClass(hidden)" />
                                                                     </button>
                                                                     <button type="button" data-action="live#action" data-live-action-param="cancelDescription" class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:text-gray-700" title="{{ 'admin.dossiers.create.cancel'|trans }}">
                                                                         {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
@@ -333,9 +348,10 @@
                             <p class="mt-0.5 text-xs text-gray-500">{{ moduleDescription }}</p>
                         </div>
                         {# Texte complet du verrou en tooltip. #}
+                        {% set blockingStep = this.blockingStepLabel(module.key) %}
                         <span
                             class="flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 py-1 pr-2.5 pl-1.5 text-xs font-medium text-gray-500"
-                            title="{{ 'admin.dossiers.show.modules.locked'|trans }}"
+                            title="{{ blockingStep ? 'admin.dossiers.show.steps.lockedHint'|trans({'%step%': blockingStep|trans}) : 'admin.dossiers.show.modules.locked'|trans }}"
                         >
                             {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ 'admin.dossiers.show.modules.lockedShort'|trans }}
@@ -474,7 +490,8 @@
                                 class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                                 data-testid="module-file-send"
                             >
-                                {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(sendRequest)|removeClass(hidden)" />
+                                {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(sendRequest)|addClass(hidden)'}) }}
                                 {{ 'admin.dossiers.show.modules.file.send'|trans }}
                             </button>
                         {% endif %}
@@ -557,8 +574,68 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="module-file-resend-confirm"
                         >
-                            {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmResend)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmResend)|addClass(hidden)'}) }}
                             {{ 'admin.dossiers.show.modules.file.resendModal.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# ── Modal de confirmation de retrait d'une pièce demandée. ────────── #}
+    {% if this.confirmDeletePieceId is not null %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="module-piece-delete-title"
+            data-controller="modal-focus modal-anim"
+            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-live-action-param="cancelDeletePiece"
+            data-testid="module-piece-delete-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="modal-anim#out live#action"
+                data-live-action-param="cancelDeletePiece"
+                aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="module-piece-delete-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.dossiers.show.modules.file.deletePieceConfirm.title'|trans }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.dossiers.show.modules.file.deletePieceConfirm.text'|trans }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="cancelDeletePiece"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="module-piece-delete-cancel"
+                        >
+                            {{ 'admin.dossiers.create.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="modal-anim#out live#action"
+                            data-live-action-param="deletePiece"
+                            data-live-key-param="{{ this.confirmDeletePieceId }}"
+                            data-loading="action(deletePiece)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="module-piece-delete-confirm"
+                        >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(deletePiece)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(deletePiece)|addClass(hidden)'}) }}
+                            {{ 'admin.dossiers.show.modules.file.deletePieceConfirm.confirm'|trans }}
                         </button>
                     </div>
                 </div>
@@ -616,7 +693,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="module-file-delete-confirm"
                         >
-                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(deleteFile)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(deleteFile)|addClass(hidden)'}) }}
                             {{ 'admin.dossiers.show.modules.file.deleteFileConfirm.confirm'|trans }}
                         </button>
                     </div>
@@ -688,7 +766,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="module-file-refusal-confirm"
                         >
-                            {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmRefusal)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmRefusal)|addClass(hidden)'}) }}
                             {{ 'admin.dossiers.show.modules.file.refuse.confirm'|trans }}
                         </button>
                     </div>

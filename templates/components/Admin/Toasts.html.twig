@@ -1,0 +1,42 @@
+{# Pile de toasts de succès, à droite de l'écran. Les flashes "success" du
+   serveur sont rendus au chargement (actions qui redirigent) ; les
+   LiveComponents qui restent sur la page émettent l'événement "toast:show".
+   Le <template> garde le markup ici plutôt que dans le controller JS. #}
+{% set toastClass = 'group/toast pointer-events-auto flex items-start gap-2.5 rounded-xl border border-neutral-200 bg-white px-4 py-3 shadow-lg shadow-gray-950/5 translate-x-2 opacity-0 transition duration-200 ease-out data-entered:translate-x-0 data-entered:opacity-100 motion-reduce:transition-none' %}
+<div
+    class="pointer-events-none fixed right-6 bottom-6 z-50 flex w-80 max-w-[calc(100vw---spacing(12))] flex-col gap-2"
+    data-controller="toast"
+    data-testid="toasts"
+>
+    <div class="flex flex-col gap-2" role="status" aria-live="polite" data-toast-target="list">
+        {% for message in app.flashes('success') %}
+            <div class="{{ toastClass }}" data-toast>
+                {{ ux_icon('lucide:circle-check', {class: 'size-4 h-lh shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                <p class="min-w-0 flex-1 text-sm text-pretty text-gray-900" data-toast-message>{{ message|trans }}</p>
+                <button
+                    type="button"
+                    data-action="toast#dismiss"
+                    class="-mr-1 shrink-0 cursor-pointer rounded-lg p-1 text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                    aria-label="{{ 'admin.toast.dismiss'|trans }}"
+                >
+                    {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <template data-toast-target="template">
+        <div class="{{ toastClass }}" data-toast>
+            {{ ux_icon('lucide:circle-check', {class: 'size-4 h-lh shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+            <p class="min-w-0 flex-1 text-sm text-pretty text-gray-900" data-toast-message></p>
+            <button
+                type="button"
+                data-action="toast#dismiss"
+                class="-mr-1 shrink-0 cursor-pointer rounded-lg p-1 text-gray-400 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                aria-label="{{ 'admin.toast.dismiss'|trans }}"
+            >
+                {{ ux_icon('lucide:x', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+            </button>
+        </div>
+    </template>
+</div>

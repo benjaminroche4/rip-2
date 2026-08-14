@@ -1,0 +1,38 @@
+{#
+    Admin:CreatingOverlay — full-screen "creating..." overlay, revealed by
+    creating_overlay_controller.js while a form marked
+    data-creating-overlay-trigger is submitting (lead -> dossier conversion).
+
+    Starts hidden; place it once on the page, near the end of the content.
+
+    props:
+      title:    i18n key of the headline (e.g. "Votre dossier est en cours de création")
+      subtitle: optional i18n key of a reassuring second line
+      icon:     lucide icon name for the pulsing badge (default folder-plus)
+#}
+{% props title, subtitle = null, icon = 'lucide:folder-plus' %}
+<div
+    data-controller="creating-overlay"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-white/85 backdrop-blur-sm animate-creating-overlay"
+    role="status"
+    aria-live="polite"
+    data-testid="creating-overlay"
+>
+    <div class="flex w-full max-w-sm flex-col items-center gap-5 px-6 text-center">
+        <span class="relative flex size-14 items-center justify-center">
+            <span class="absolute inset-0 rounded-2xl bg-primary/10 animate-ping motion-reduce:hidden" aria-hidden="true"></span>
+            <span class="relative flex size-14 items-center justify-center rounded-2xl bg-primary/5 text-primary">
+                {{ ux_icon(icon, {class: 'size-7', 'aria-hidden': 'true'}) }}
+            </span>
+        </span>
+        <div class="space-y-1">
+            <p class="text-base font-semibold text-gray-900">{{ title|trans }}</p>
+            {% if subtitle %}
+                <p class="text-sm text-pretty text-gray-500">{{ subtitle|trans }}</p>
+            {% endif %}
+        </div>
+        <div class="h-1 w-40 overflow-hidden rounded-full bg-neutral-200/80">
+            <div class="h-full w-1/3 rounded-full bg-primary animate-creating-bar"></div>
+        </div>
+    </div>
+</div>

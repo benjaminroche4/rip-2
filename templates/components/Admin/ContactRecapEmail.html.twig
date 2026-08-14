@@ -1,14 +1,10 @@
-{# Rendered as a row of the contact "Actions" dropdown menu — the trigger and
-   the sent chip use the menu-row vocabulary; the confirmation modal itself is
-   fixed-positioned so it overlays the page from anywhere. #}
+{# Rendered as a row of the contact "Actions" dropdown menu — the trigger uses
+   the menu-row vocabulary; the confirmation modal itself is fixed-positioned
+   so it overlays the page from anywhere. L'envoi ne laisse pas de trace ici :
+   la confirmation passe par le toast. #}
 <div {{ attributes }} data-testid="contact-recap-email">
     {% set contact = this.contact %}
-    {% if this.state == 'sent' %}
-        <span class="animate-slide-in flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-green-700" role="status">
-            {{ ux_icon('lucide:mail-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-            {{ 'admin.contacts.recapEmail.sent'|trans }}
-        </span>
-    {% elseif contact and not contact.email %}
+    {% if contact and not contact.email %}
         {# No email on this contact (manual intake) — nothing to send to. #}
     {% else %}
         <button
@@ -114,10 +110,12 @@
                             type="button"
                             data-action="live#action"
                             data-live-action-param="send"
-                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90"
+                            data-loading="action(send)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="contact-recap-confirm"
                         >
-                            {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ ux_icon('lucide:send', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(send)|addClass(hidden)'}) }}
+                            {{ ux_icon('lucide:loader-circle', {class: 'hidden size-4 shrink-0 animate-spin', 'aria-hidden': 'true', 'data-loading': 'action(send)|removeClass(hidden)'}) }}
                             {{ 'admin.contacts.recapEmail.send'|trans }}
                         </button>
                     </div>

@@ -233,7 +233,7 @@ final class ContactNotes
      * Audit trail (status changes, recap emails), oldest first — rendered
      * as the chronologie under the notes thread in the drawer.
      *
-     * @return list<array{text: string, authorName: string|null, createdAt: \DateTimeImmutable, dotClass: string}>
+     * @return list<array{text: string, authorName: string|null, authorAvatar: string|null, hint: string|null, createdAt: \DateTimeImmutable, dotClass: string}>
      */
     public function getHistory(): array
     {
@@ -244,7 +244,11 @@ final class ContactNotes
         if (null !== $contact && null !== $contact->getCreatedAt()) {
             $rows[] = [
                 'text' => $this->translator->trans('admin.contacts.card.created'),
-                'authorName' => null !== $contact->getIp() ? 'IP : '.$contact->getIp() : null,
+                // Pas un auteur : l'IP de la soumission reste une info
+                // technique, elle vit en infobulle (jamais d'avatar "I").
+                'authorName' => null,
+                'authorAvatar' => null,
+                'hint' => null !== $contact->getIp() ? 'IP : '.$contact->getIp() : null,
                 'createdAt' => $contact->getCreatedAt(),
                 'dotClass' => 'bg-gray-300',
             ];
@@ -276,6 +280,8 @@ final class ContactNotes
             $rows[] = [
                 'text' => $text,
                 'authorName' => $event->authorName,
+                'authorAvatar' => $event->authorAvatar,
+                'hint' => null,
                 'createdAt' => $event->createdAt,
                 'dotClass' => $dotClass,
             ];

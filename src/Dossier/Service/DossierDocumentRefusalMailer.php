@@ -38,17 +38,21 @@ final readonly class DossierDocumentRefusalMailer
         $locale = $recipient->getLanguage()?->value ?? 'fr';
         $fr = 'fr' === $locale;
 
+        $piece = $this->translator->trans($document->getType()?->labelKey() ?? '', locale: $locale);
+
         $email = (new TemplatedEmail())
             ->from('Contact <contact@relocation-in-paris.fr>')
             ->to((string) $recipient->getEmail())
+            // La pièce concernée dans l'objet : le destinataire sait quoi
+            // reprendre sans ouvrir, et l'action attendue est explicite.
             ->subject($fr
-                ? 'Une pièce de votre dossier locatif est à redéposer | Relocation in Paris'
-                : 'A document of your rental application needs a new upload | Relocation in Paris')
+                ? \sprintf('Pièce à redéposer : %s', $piece)
+                : \sprintf('Document to upload again: %s', $piece))
             ->htmlTemplate('emails/dossier_document_refused.html.twig')
             ->context([
                 'fr' => $fr,
                 'recipientFirstName' => trim((string) $recipient->getFirstName()),
-                'piece' => $this->translator->trans($document->getType()?->labelKey() ?? '', locale: $locale),
+                'piece' => $piece,
                 'personName' => trim(trim((string) $document->getPerson()?->getFirstName()).' '.trim((string) $document->getPerson()?->getLastName())),
                 'forSelf' => $recipient === $document->getPerson(),
                 'reason' => (string) $document->getRefusalReason(),

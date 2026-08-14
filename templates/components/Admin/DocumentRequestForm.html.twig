@@ -424,7 +424,7 @@
                                 {% if choice.vars.checked %}checked{% endif %}
                                 class="sr-only"
                             />
-                            {{ ux_icon(choice.vars.value == 'fr' ? 'circle-flags:fr' : 'circle-flags:en', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ ux_icon(choice.vars.value == 'fr' ? 'circle-flags:fr' : 'circle-flags:en', {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
                             {{ choice.vars.label|trans }}
                         </label>
                     {% endfor %}

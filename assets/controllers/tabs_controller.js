@@ -10,9 +10,11 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static targets = ['tab', 'indicator'];
     static classes = ['active', 'inactive'];
+    /** Query parameter mirroring the active tab, so a copied URL reopens it. */
+    static values = { param: String };
 
     connect() {
-        this.apply(this.element.dataset.activeTab || this.tabTargets[0]?.dataset.tabsKey);
+        this.apply(this.keyFromUrl() || this.element.dataset.activeTab || this.tabTargets[0]?.dataset.tabsKey);
         // Position the sliding pill once the layout is settled, and follow
         // width changes (viewport resize, fonts).
         this.frame = requestAnimationFrame(() => this.moveIndicatorToActive(false));
@@ -28,6 +30,35 @@ export default class extends Controller {
     select(event) {
         this.apply(event.currentTarget.dataset.tabsKey);
         this.moveIndicator(event.currentTarget);
+        this.writeUrl(event.currentTarget.dataset.tabsKey);
+    }
+
+    /** Tab asked for by the URL, ignored when it names no existing tab. */
+    keyFromUrl() {
+        if (!this.hasParamValue || '' === this.paramValue) {
+            return null;
+        }
+        const key = new URL(window.location.href).searchParams.get(this.paramValue);
+
+        return this.tabTargets.some((tab) => tab.dataset.tabsKey === key) ? key : null;
+    }
+
+    /**
+     * The tab is view state, not navigation: replaceState keeps the URL
+     * copyable without stacking a history entry per click (back leaves the
+     * page, as expected).
+     */
+    writeUrl(key) {
+        if (!this.hasParamValue || '' === this.paramValue || !key) {
+            return;
+        }
+        const url = new URL(window.location.href);
+        if (key === this.tabTargets[0]?.dataset.tabsKey) {
+            url.searchParams.delete(this.paramValue);
+        } else {
+            url.searchParams.set(this.paramValue, key);
+        }
+        window.history.replaceState(window.history.state, '', url);
     }
 
     /** The pill follows the hovered tab... */

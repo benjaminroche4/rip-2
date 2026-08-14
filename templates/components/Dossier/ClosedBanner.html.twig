@@ -1,0 +1,31 @@
+{# Bandeau d'état terminal du dossier, jumeau de Admin:ContactTerminalBanner
+   sur un lead : plein largeur, en tête de page, il ne laisse aucun doute sur
+   le fait que le dossier est archivé. #}
+<div {{ attributes.defaults({class: 'empty:hidden'}) }}>
+    {%- set closedAt = this.closedAt -%}
+    {%- if closedAt -%}
+        <div
+            class="flex items-center gap-4 rounded-2xl border border-neutral-300 bg-linear-to-r from-neutral-200/80 to-neutral-100/40 px-5 py-4 shadow-sm"
+            role="status"
+            data-testid="dossier-closed-banner"
+        >
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-gray-600 shadow-sm">
+                {{ ux_icon('lucide:archive', {class: 'size-5', 'aria-hidden': 'true'}) }}
+            </span>
+            {%- set closedBy = this.closedBy -%}
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold text-gray-900">{{ 'admin.dossiers.show.closure.bannerTitle'|trans }}</p>
+                <p class="mt-0.5 text-sm leading-5 text-gray-600">
+                    {{ 'admin.contacts.show.terminalSince'|trans({'%date%': closedAt|format_date('medium')}) }}
+                    {# Qui a clôturé : lu sur la piste d'audit du dossier. Nom
+                       seul, comme sur le fil de suivi : la vignette d'auteur
+                       n'apporte rien à cette taille. #}
+                    {%- if closedBy -%}
+                        <span aria-hidden="true"> &middot; </span>
+                        <span data-testid="dossier-closed-by">{{ 'admin.dossiers.show.closure.by'|trans({'%name%': closedBy.name|title}) }}</span>
+                    {%- endif -%}
+                </p>
+            </div>
+        </div>
+    {%- endif -%}
+</div>

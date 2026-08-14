@@ -105,6 +105,62 @@ final class VisitListTest extends KernelTestCase
         self::assertStringContainsString('Famille Martin', $rendered);
     }
 
+    public function testTheComingDaysMapCarriesOneDatedDotPerVisit(): void
+    {
+        // Créée sans passer par Places : pas de coordonnées en base, mais une
+        // adresse. Elle part quand même sur la carte, le controller la
+        // géocode côté navigateur.
+        $this->persistVisit('2026-06-20 09:30', 'Sans coordonnées');
+        $this->persistVisit('2026-06-21 14:00', 'Nation', lat: 48.8484, lng: 2.3958);
+
+        $component = $this->mountList();
+
+        self::assertSame(
+            ['Sans coordonnées', 'Nation'],
+            array_column($component->getMappableLaterVisits(), 'address'),
+        );
+
+        $payload = json_decode($component->getLaterMapPayload(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertCount(2, $payload);
+        self::assertNull($payload[0]['lat'], 'Sans coordonnées : le front géocode depuis l\'adresse.');
+        self::assertSame('Sans coordonnées', $payload[0]['address']);
+        self::assertSame(48.8484, $payload[1]['lat']);
+        // Le survol du point donne la date : elle voyage dans le payload.
+        self::assertStringContainsString('juin', $payload[1]['title']);
+        self::assertStringContainsString('14h00', $payload[1]['title']);
+    }
+
+    public function testTheComingDaysSectionOffersItsMapBehindTheHeaderToggle(): void
+    {
+        $this->persistVisit('2026-06-20 09:30', 'Nation', lat: 48.8484, lng: 2.3958);
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertStringContainsString('data-testid="visits-later-map-toggle"', $rendered);
+        self::assertStringContainsString('data-controller="visit-days-map"', $rendered);
+        // Repliée au chargement : la liste se lit d'abord.
+        self::assertMatchesRegularExpression(
+            '/class="[^"]*hidden[^"]*"[^>]*data-visit-days-map-target="frame"/',
+            $rendered,
+        );
+    }
+
+    public function testAVisitWithoutStoredCoordinatesStillGetsItsMap(): void
+    {
+        // Une adresse suffit : le controller géocode dans le navigateur, la
+        // carte ne doit pas disparaître pour autant.
+        $this->persistVisit('2026-06-20 09:30', '12 rue de la Roquette, 75011 Paris');
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertStringContainsString('data-testid="visits-later"', $rendered);
+        self::assertStringContainsString('data-testid="visits-later-map-toggle"', $rendered);
+    }
+
     public function testEmptyStateRendersWithoutVisits(): void
     {
         $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [

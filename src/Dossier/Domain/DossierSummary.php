@@ -28,6 +28,10 @@ final readonly class DossierSummary
         public ?\DateTimeImmutable $moveInAt = null,
         /** Progress between creation and move-in; null without a move-in date. */
         public ?MoveInTimeline $timeline = null,
+        /** Set once the dossier is archived; drives the "Clôturé" card. */
+        public ?\DateTimeImmutable $closedAt = null,
+        /** Search criteria filled in: gates the modules and visit booking. */
+        public bool $searchComplete = false,
     ) {
     }
 }

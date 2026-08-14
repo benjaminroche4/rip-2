@@ -19,6 +19,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use App\Dossier\Domain\DossierStep;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -110,6 +111,8 @@ final class SearchEditor
         private readonly DossierRepository $dossiers,
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
+        private readonly \App\Dossier\Service\DossierStatusAdvancer $advancer,
+        private readonly \App\Dossier\Service\DossierProgressCalculator $progress,
     ) {
     }
 
@@ -163,6 +166,12 @@ final class SearchEditor
         );
     }
 
+    /** Active state of the "tous les arrondissements" pill above the map. */
+    public function getAllArrondissementsSelected(): bool
+    {
+        return ParisDistricts::allArrondissementsSelected($this->areas);
+    }
+
     /**
      * @return list<PropertyType>
      */
@@ -187,7 +196,7 @@ final class SearchEditor
     public function togglePropertyType(#[LiveArg] string $type): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -226,7 +235,7 @@ final class SearchEditor
     public function chooseStayDuration(#[LiveArg] string $duration): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -239,9 +248,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setStayDuration($search->getStayDuration() === $case->value ? null : $case->value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -265,7 +272,7 @@ final class SearchEditor
     public function chooseFurnishing(#[LiveArg] string $furnishing): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -283,9 +290,7 @@ final class SearchEditor
             : [...$selected, $furnishing];
 
         $this->search()->setFurnishing(implode(',', $selected) ?: null);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -305,7 +310,7 @@ final class SearchEditor
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -318,9 +323,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setGuarantorType($search->getGuarantorType() === $case->value ? null : $case->value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /** Progress of the guarantee, clear labels in translations. */
@@ -343,7 +346,7 @@ final class SearchEditor
     public function chooseGuarantorStatus(#[LiveArg] string $status): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -357,9 +360,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setGuarantorStatus($search->getGuarantorStatus() === $status ? null : $status);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     public function getCurrentOccupants(): ?int
@@ -371,7 +372,7 @@ final class SearchEditor
     public function chooseOccupants(#[LiveArg] int $count): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -381,9 +382,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setOccupants($search->getOccupants() === $count ? null : $count);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -408,7 +407,7 @@ final class SearchEditor
     public function chooseEquipment(#[LiveArg] string $equipment): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -426,9 +425,7 @@ final class SearchEditor
             : [...$selected, $equipment];
 
         $this->search()->setEquipment(implode(',', $selected) ?: null);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /** Allowed values of the optional yes/no criteria (pets, early move-in). */
@@ -461,7 +458,7 @@ final class SearchEditor
     public function chooseLeaseType(#[LiveArg] string $lease): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -479,9 +476,7 @@ final class SearchEditor
             : [...$selected, $lease];
 
         $this->search()->setLeaseTypes(implode(',', $selected) ?: null);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -568,7 +563,7 @@ final class SearchEditor
     public function addImportantAddress(): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -607,7 +602,7 @@ final class SearchEditor
     public function removeImportantAddress(#[LiveArg] int $index): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -633,7 +628,7 @@ final class SearchEditor
     public function choosePets(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -647,9 +642,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setPets($search->getPets() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -665,7 +658,7 @@ final class SearchEditor
     public function chooseHouseholdType(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -675,9 +668,7 @@ final class SearchEditor
 
         $this->householdType = $value;
         $this->search()->setHouseholdType('' !== $value ? $value : null);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     public function getCurrentEarlyMoveIn(): ?string
@@ -690,7 +681,7 @@ final class SearchEditor
     public function chooseEarlyMoveIn(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -704,9 +695,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setEarlyMoveIn($search->getEarlyMoveIn() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /** Chips 1..4 ("4+"), single-select with toggle-off. */
@@ -719,7 +708,7 @@ final class SearchEditor
     public function chooseMinBedrooms(#[LiveArg] int $count): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -729,9 +718,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setMinBedrooms($search->getMinBedrooms() === $count ? null : $count);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     public function getCurrentElevator(): ?string
@@ -744,7 +731,7 @@ final class SearchEditor
     public function chooseElevator(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -758,9 +745,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setElevator($search->getElevator() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     /**
@@ -796,7 +781,7 @@ final class SearchEditor
     public function chooseGroundFloor(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -810,9 +795,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setGroundFloor($search->getGroundFloor() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     public function getCurrentTopFloor(): ?string
@@ -825,7 +808,7 @@ final class SearchEditor
     public function chooseTopFloor(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -839,9 +822,7 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setTopFloor($search->getTopFloor() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     public function getCurrentParking(): ?string
@@ -854,7 +835,7 @@ final class SearchEditor
     public function chooseParking(#[LiveArg] string $value): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -868,16 +849,14 @@ final class SearchEditor
 
         $search = $this->search();
         $search->setParking($search->getParking() === $value ? null : $value);
-        $this->em->flush();
-
-        $this->emit('dossier-search:changed');
+        $this->commit();
     }
 
     #[LiveAction]
     public function save(): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -910,8 +889,8 @@ final class SearchEditor
         $this->propertyType = trim($this->propertyType);
         $this->minSurface = null !== $minSurface ? (string) $minSurface : '';
 
-        // Unlocks the modules card live when completeness flips.
-        $this->emit('dossier-search:changed');
+        // Unlocks the next step live when completeness flips.
+        $this->commit(alreadyFlushed: true);
         // Clears the leave-guard dirty flag on the front.
         $this->dispatchBrowserEvent('dossier-search:saved');
     }
@@ -920,7 +899,7 @@ final class SearchEditor
     public function saveNote(): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isFrozen()) {
             return;
         }
 
@@ -959,6 +938,35 @@ final class SearchEditor
     {
         return $this->dossiers->find($this->dossierId)
             ?? throw new NotFoundHttpException('Dossier not found.');
+    }
+
+    /**
+     * Aucune écriture possible tant que le cadenas anti-missclick est mis,
+     * ni tant que l'étape Personnes n'est pas validée : la recherche est la
+     * deuxième étape du parcours, elle n'ouvre qu'après la première.
+     */
+    private function isFrozen(): bool
+    {
+        return $this->locked || !$this->isStepOpen();
+    }
+
+    public function isStepOpen(): bool
+    {
+        return $this->progress->forDossier($this->dossier())->isUnlocked(DossierStep::Search);
+    }
+
+    /**
+     * Commit d'un autosave : persiste, réaligne le statut du dossier sur les
+     * étapes désormais validées, puis prévient les autres cards (la barre
+     * d'onglets déverrouille l'étape suivante sans rechargement).
+     */
+    private function commit(bool $alreadyFlushed = false): void
+    {
+        if (!$alreadyFlushed) {
+            $this->em->flush();
+        }
+        $this->advancer->advance($this->dossier());
+        $this->emit('dossier-search:changed');
     }
 
     private function ensureAdmin(): void

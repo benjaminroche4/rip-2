@@ -12,8 +12,11 @@ use App\Shared\Google\DriveGateway;
  */
 final class FakeDriveGateway implements DriveGateway
 {
-    /** @var list<array{name: string, parent: string, props: array<string, string>}> */
+    /** @var list<array{id: string, name: string, parent: string, props: array<string, string>}> */
     public array $createdFolders = [];
+
+    /** @var array<string, string> "parent/name" => folder id, mirroring the real look-up-then-create. */
+    private array $foldersByPath = [];
 
     /** @var list<array{name: string, parent: string, mime: string, size: int, props: array<string, string>}> */
     public array $uploads = [];
@@ -53,9 +56,19 @@ final class FakeDriveGateway implements DriveGateway
         if (!$this->configured) {
             return null;
         }
-        $this->createdFolders[] = ['name' => $name, 'parent' => $parentId, 'props' => $appProperties];
 
-        return 'folder-'.(++$this->seq);
+        // The real gateway looks the folder up under its parent before
+        // creating it: a second call for the same path must not duplicate.
+        $path = $parentId.'/'.$name;
+        if (isset($this->foldersByPath[$path])) {
+            return $this->foldersByPath[$path];
+        }
+
+        $id = 'folder-'.(++$this->seq);
+        $this->foldersByPath[$path] = $id;
+        $this->createdFolders[] = ['id' => $id, 'name' => $name, 'parent' => $parentId, 'props' => $appProperties];
+
+        return $id;
     }
 
     public function uploadFile(string $name, string $parentId, string $bytes, string $mimeType, array $appProperties = []): ?string

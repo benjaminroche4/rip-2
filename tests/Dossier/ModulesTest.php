@@ -226,6 +226,47 @@ final class ModulesTest extends KernelTestCase
         self::assertNull($fresh->getReceivedAt());
     }
 
+    public function testDeletePieceRemovesTheRequestAndItsFiles(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $document = (new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable('2026-08-01'))
+            ->setReceivedAt(new \DateTimeImmutable('2026-08-02'));
+        $tenant->addDocument($document);
+
+        $storageDir = (string) self::getContainer()->getParameter('dossier_storage_dir');
+        $dossierDir = $storageDir.'/'.$dossier->getReference().'/documents';
+        (new Filesystem())->mkdir($dossierDir);
+        file_put_contents($dossierDir.'/piece.pdf', '%PDF-1.4');
+        $document->addFile((new DossierDocumentFile())
+            ->setStoredName('piece.pdf')
+            ->setOriginalName('carte-identite.pdf')
+            ->setMimeType('application/pdf')
+            ->setSize(8)
+            ->setUploadedAt(new \DateTimeImmutable('2026-08-02')));
+        $this->em->flush();
+        $documentId = (int) $document->getId();
+
+        $component = $this->mountModules($dossier);
+
+        // Cancelling the modal leaves the piece untouched.
+        $component->askDeletePiece($documentId);
+        self::assertSame($documentId, $component->confirmDeletePieceId);
+        $component->cancelDeletePiece();
+        self::assertNull($component->confirmDeletePieceId);
+        self::assertNotNull($this->em->find(DossierDocument::class, $documentId));
+
+        $component->askDeletePiece($documentId);
+        $component->deletePiece($documentId);
+
+        $this->em->clear();
+        self::assertNull($this->em->find(DossierDocument::class, $documentId), 'The piece itself is gone, not just its files.');
+        self::assertFileDoesNotExist($dossierDir.'/piece.pdf');
+    }
+
     public function testRefusalGoesThroughTheModalAndNotifiesTheTenant(): void
     {
         $dossier = $this->persistDossier();
@@ -425,8 +466,17 @@ final class ModulesTest extends KernelTestCase
     {
         $dossier = $this->persistDossier();
 
-        // No visit yet: empty state plus the "schedule" link.
         $prefix = 'test_admin_prefix_1234567890abcdef';
+
+        // Parcours séquentiel : tant que les pièces ne sont pas validées,
+        // le module Visite reste verrouillé.
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringNotContainsString('module-visit-empty', $rendered);
+        self::assertStringContainsString('dossier-module-locked', $rendered);
+
+        $this->validateFileStep($dossier);
+
+        // No visit yet: empty state plus the "schedule" link.
         $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
         self::assertStringContainsString('module-visit-empty', $rendered);
         self::assertStringContainsString('module-visit-plan', $rendered);
@@ -459,6 +509,18 @@ final class ModulesTest extends KernelTestCase
         self::assertStringContainsString('module-visit-counter', $rendered);
         self::assertStringContainsString('12 rue de la Roquette, 75011 Paris', $rendered);
         self::assertStringContainsString('8 avenue Parmentier, 75011 Paris', $rendered);
+    }
+
+    /** Valide l'étape Dossier : une pièce demandée, puis validée. */
+    private function validateFileStep(Dossier $dossier): void
+    {
+        $tenant = $dossier->getPersons()->first();
+        self::assertNotFalse($tenant);
+        $tenant->addDocument((new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Validated)
+            ->setRequestedAt(new \DateTimeImmutable()));
+        $this->em->flush();
     }
 
     private function persistDossier(bool $completeSearch = true): Dossier

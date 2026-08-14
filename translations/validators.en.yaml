@@ -2,172 +2,249 @@ admin:
     visits:
         create:
             scheduledAt:
-                past: "The visit cannot be scheduled in the past."
+                past: 'The visit cannot be scheduled in the past.'
+                notNull: 'The date and time are required.'
+            address:
+                length: 'The address cannot exceed 255 characters.'
+                notBlank: 'The address is required.'
+            dossier:
+                notNull: 'The file is required.'
+            duration:
+                invalid: 'Invalid duration.'
+            listingUrl:
+                invalid: 'The listing link is not a valid URL.'
+                length: 'The link cannot exceed 500 characters.'
+            note:
+                length: 'The note cannot exceed 2000 characters.'
     profile:
         password:
             current:
-                notBlank: "Enter your current password."
-                invalid: "The current password is incorrect."
+                notBlank: 'Enter your current password.'
+                invalid: 'The current password is incorrect.'
             new:
-                notBlank: "Enter a new password."
-                minLength: "The password must contain at least 6 characters."
-            notMatch: "The two passwords do not match."
+                notBlank: 'Enter a new password.'
+                minLength: 'The password must contain at least 6 characters.'
+            notMatch: 'The two passwords do not match.'
     tools:
         documents:
             form:
                 nameFr:
-                    notBlank: "The French name is required."
-                    length: "The name must be between 2 and 255 characters."
+                    notBlank: 'The French name is required.'
+                    length: 'The name must be between 2 and 255 characters.'
                 nameEn:
-                    notBlank: "The English name is required."
-                    length: "The name must be between 2 and 255 characters."
+                    notBlank: 'The English name is required.'
+                    length: 'The name must be between 2 and 255 characters.'
                 description:
-                    length: "The description cannot exceed 5000 characters."
+                    length: 'The description cannot exceed 5000 characters.'
                 slug:
-                    unique: "A document with a similar identifier already exists."
+                    unique: 'A document with a similar identifier already exists.'
                 category:
-                    notNull: "Pick a category for this document."
+                    notNull: 'Pick a category for this document.'
             request:
                 persons:
-                    min: "Add at least one person."
-                    max: "The household cannot exceed {{ limit }} people."
+                    min: 'Add at least one person.'
+                    max: 'The household cannot exceed {{ limit }} people.'
                 typology:
-                    notNull: "Pick a household composition."
+                    notNull: 'Pick a household composition.'
                 note:
-                    length: "The note cannot exceed 2000 characters."
+                    length: 'The note cannot exceed 2000 characters.'
                 driveLink:
-                    url: "The link must be a valid URL (starting with https://...)."
-                    length: "The link cannot exceed 512 characters."
+                    url: 'The link must be a valid URL (starting with https://...).'
+                    length: 'The link cannot exceed 512 characters.'
                 person:
                     role:
-                        notNull: "Pick a role for this person."
+                        notNull: 'Pick a role for this person.'
                     firstName:
-                        notBlank: "First name is required."
-                        length: "The first name must be between 2 and 50 characters."
+                        notBlank: 'First name is required.'
+                        length: 'The first name must be between 2 and 50 characters.'
                     lastName:
-                        notBlank: "Last name is required."
-                        length: "The last name must be between 2 and 50 characters."
+                        notBlank: 'Last name is required.'
+                        length: 'The last name must be between 2 and 50 characters.'
                     documents:
-                        min: "Select at least one document for this person."
+                        min: 'Select at least one document for this person.'
+    agents:
+        create:
+            agency:
+                length: 'The agency name cannot exceed 100 characters.'
+                notBlank: 'The agency name is required.'
+            email:
+                invalid: 'This email address is not valid.'
+                length: 'The email cannot exceed 180 characters.'
+            firstName:
+                length: 'The first name cannot exceed 50 characters.'
+                notBlank: 'The first name is required.'
+            lastName:
+                length: 'The last name cannot exceed 50 characters.'
+                notBlank: 'The last name is required.'
+            phone:
+                length: 'The phone number cannot exceed 30 characters.'
+    dossiers:
+        create:
+            name:
+                length: 'The name must be between 2 and 100 characters.'
+                notBlank: 'The file name is required.'
+            person:
+                email:
+                    invalid: 'This email is not valid.'
+                    length: 'The email cannot exceed 180 characters.'
+                    notBlank: 'The email is required.'
+                firstName:
+                    length: 'The first name must be between 2 and 50 characters.'
+                    notBlank: 'The first name is required.'
+                language:
+                    notNull: 'Pick a contact language.'
+                lastName:
+                    length: 'The last name must be between 2 and 50 characters.'
+                    notBlank: 'The last name is required.'
+                phone:
+                    invalid: 'This number is not valid (digits, spaces, dots and dashes only).'
+                    length: 'The phone number cannot exceed 30 characters.'
+                role:
+                    notNull: 'Pick a role for this person.'
+            persons:
+                max: 'The file cannot contain more than 4 people.'
+                min: 'The file must contain at least one person.'
+                maxFollowUps: 'The file cannot contain more than 2 follow-up requests.'
+                maxTenants: 'The file cannot contain more than 2 tenants.'
+                tenantRequired: 'The file must contain at least one tenant.'
 contact:
     contactForm:
         firstName:
-            notBlank: "Please enter your first name."
+            notBlank: 'Please enter your first name.'
         lastName:
-            notBlank: "Please enter your last name."
+            notBlank: 'Please enter your last name.'
         email:
-            notBlank: "Please enter your email address."
+            notBlank: 'Please enter your email address.'
         phoneNumber:
-            notBlank: "Please enter your phone number."
+            notBlank: 'Please enter your phone number.'
         helpType:
-            notBlank: "Please select a request type."
+            notBlank: 'Please select a request type.'
         accept:
-            label: "You must accept the terms to continue."
+            label: 'You must accept the terms to continue.'
 newsletter:
     form:
         email:
-            notBlank: "Please enter your email address."
-            invalid: "This email address is not valid."
+            notBlank: 'Please enter your email address.'
+            invalid: 'This email address is not valid.'
     email:
-        unique: "This email address is already subscribed to the newsletter."
+        unique: 'This email address is already subscribed to the newsletter.'
 listProperty:
     form:
         fullName:
-            notBlank: "Please enter your full name."
-            length: "The name cannot exceed {{ limit }} characters."
+            notBlank: 'Please enter your full name.'
+            length: 'The name cannot exceed {{ limit }} characters.'
         email:
-            notBlank: "Please enter your email address."
-            invalid: "This email address is not valid."
+            notBlank: 'Please enter your email address.'
+            invalid: 'This email address is not valid.'
         phoneNumber:
-            notBlank: "Please enter your phone number."
-            invalidFormat: "This phone number is not valid."
+            notBlank: 'Please enter your phone number.'
+            invalidFormat: 'This phone number is not valid.'
         photos:
-            tooMany: "You cannot upload more than {{ limit }} photos."
-            mimeTypes: "Accepted formats: JPG, PNG or WebP."
-            maxSize: "Each photo cannot exceed 8 MB."
+            tooMany: 'You cannot upload more than {{ limit }} photos.'
+            mimeTypes: 'Accepted formats: JPG, PNG or WebP.'
+            maxSize: 'Each photo cannot exceed 8 MB.'
         address:
-            notBlank: "Please enter the property address."
-            length: "The address cannot exceed {{ limit }} characters."
-            notSelected: "Please select the property address from the suggestions list."
+            notBlank: 'Please enter the property address.'
+            length: 'The address cannot exceed {{ limit }} characters.'
+            notSelected: 'Please select the property address from the suggestions list.'
         propertyType:
-            notBlank: "Please select the property type."
+            notBlank: 'Please select the property type.'
         propertyStatus:
-            notBlank: "Please select the property status."
+            notBlank: 'Please select the property status.'
         bedrooms:
-            notBlank: "Please specify the number of bedrooms."
+            notBlank: 'Please specify the number of bedrooms.'
         bathrooms:
-            notBlank: "Please specify the number of bathrooms."
+            notBlank: 'Please specify the number of bathrooms.'
         surface:
-            notBlank: "Please specify the surface area."
-            range: "The surface area must be between {{ min }} and {{ max }} sqm."
+            notBlank: 'Please specify the surface area.'
+            range: 'The surface area must be between {{ min }} and {{ max }} sqm.'
         furnishing:
-            notBlank: "Please specify whether the property is furnished or unfurnished."
+            notBlank: 'Please specify whether the property is furnished or unfurnished.'
         floor:
-            notBlank: "Please specify the property floor."
-            range: "The floor must be between {{ min }} and {{ max }}."
+            notBlank: 'Please specify the property floor.'
+            range: 'The floor must be between {{ min }} and {{ max }}.'
         buildingFloors:
-            notBlank: "Please specify the number of floors in the building."
-            range: "The number of floors must be between {{ min }} and {{ max }}."
-            belowFloor: "The number of building floors must be at least the property floor."
+            notBlank: 'Please specify the number of floors in the building.'
+            range: 'The number of floors must be between {{ min }} and {{ max }}.'
+            belowFloor: 'The number of building floors must be at least the property floor.'
         note:
-            length: "The note cannot exceed {{ limit }} characters."
+            length: 'The note cannot exceed {{ limit }} characters.'
         orientations:
-            notBlank: "Please select at least one orientation."
+            notBlank: 'Please select at least one orientation.'
         leaseType:
-            notBlank: "Please select the preferred lease type."
+            notBlank: 'Please select the preferred lease type.'
         rent:
-            notBlank: "Please specify the rent excluding charges."
-            range: "The rent must be between {{ min }} and {{ max }} euros."
+            notBlank: 'Please specify the rent excluding charges.'
+            range: 'The rent must be between {{ min }} and {{ max }} euros.'
         charges:
-            notBlank: "Please specify the amount of charges."
-            range: "The charges must be between {{ min }} and {{ max }} euros."
+            notBlank: 'Please specify the amount of charges.'
+            range: 'The charges must be between {{ min }} and {{ max }} euros.'
         deposit:
-            notBlank: "Please specify the security deposit."
-            range: "The security deposit must be between {{ min }} and {{ max }} euros."
+            notBlank: 'Please specify the security deposit.'
+            range: 'The security deposit must be between {{ min }} and {{ max }} euros.'
 propertyManagement:
     form:
         address:
-            notBlank: "Please enter the property address."
+            notBlank: 'Please enter the property address.'
         propertyCondition:
-            notBlank: "Please select the property condition."
+            notBlank: 'Please select the property condition.'
         bedroom:
-            notBlank: "Please specify the number of bedrooms."
+            notBlank: 'Please specify the number of bedrooms.'
         bathroom:
-            notBlank: "Please specify the number of bathrooms."
+            notBlank: 'Please specify the number of bathrooms.'
         surface:
-            notBlank: "Please specify the property surface area."
+            notBlank: 'Please specify the property surface area.'
         phoneNumber:
-            notBlank: "Please enter your phone number."
+            notBlank: 'Please enter your phone number.'
         email:
-            notBlank: "Please enter your email address."
+            notBlank: 'Please enter your email address.'
+            invalid: 'The email address is not valid.'
 register:
     firstName:
-        notBlank: "First name is required."
-        minLength: "First name must be at least 2 characters long."
-        maxLength: "First name cannot exceed 50 characters."
+        notBlank: 'First name is required.'
+        minLength: 'First name must be at least 2 characters long.'
+        maxLength: 'First name cannot exceed 50 characters.'
     lastName:
-        notBlank: "Last name is required."
-        minLength: "Last name must be at least 2 characters long."
-        maxLength: "Last name cannot exceed 50 characters."
+        notBlank: 'Last name is required.'
+        minLength: 'Last name must be at least 2 characters long.'
+        maxLength: 'Last name cannot exceed 50 characters.'
     email:
-        notBlank: "Email address is required."
-        invalid: "This email address is not valid."
-        maxLength: "Email address is too long."
-        alreadyUsed: "An account already exists with this email. Please sign in."
+        notBlank: 'Email address is required.'
+        invalid: 'This email address is not valid.'
+        maxLength: 'Email address is too long.'
+        alreadyUsed: 'An account already exists with this email. Please sign in.'
     password:
-        notBlank: "Password is required."
-        minLength: "Password must be at least 8 characters long."
-        weak: "This password is too weak. Mix upper case, digits, and symbols."
-        compromised: "This password has appeared in a data breach. Please pick another one."
+        notBlank: 'Password is required.'
+        minLength: 'Password must be at least 8 characters long.'
+        weak: 'This password is too weak. Mix upper case, digits, and symbols.'
+        compromised: 'This password has appeared in a data breach. Please pick another one.'
+    nationality:
+        invalid: 'This nationality is not valid.'
+        notBlank: 'Nationality is required.'
+    phoneNumber:
+        maxLength: 'Phone number is too long.'
+        notBlank: 'Phone number is required.'
+    situation:
+        required: 'Professional situation is required.'
+    verify:
+        code:
+            format: 'The code must be 6 digits.'
+            required: 'Enter the code we sent to your inbox.'
 resetPassword:
-    empty: "Please enter a password."
-    minLength: "Your password should be at least {{ limit }} characters."
-    notMatch: "The password fields must match."
+    email:
+        notBlank: 'Please enter your email address.'
+    empty: 'Please enter a password.'
+    minLength: 'Your password should be at least {{ limit }} characters.'
+    notMatch: 'The password fields must match.'
 deposit:
     pairing:
         email:
-            required: Please enter your email address.
-            invalid: This email address is not valid.
+            required: 'Please enter your email address.'
+            invalid: 'This email address is not valid.'
         code:
-            required: Please enter the file code.
-            invalid: The code is 6 characters long.
+            required: 'Please enter the file code.'
+            invalid: 'The code is 6 characters long.'
+    documents:
+        error:
+            maxSize: 'The file exceeds 10 MB. Please send a lighter version.'
+            mimeType: 'Format not accepted. Only PDF is allowed.'

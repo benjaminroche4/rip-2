@@ -16,6 +16,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * "Send the recap to the client" button on the contact detail page. Opens
@@ -33,7 +34,7 @@ final class ContactRecapEmail
     #[LiveProp]
     public int $contactId = 0;
 
-    /** 'idle' | 'modal' | 'sent' */
+    /** 'idle' | 'modal' */
     #[LiveProp]
     public string $state = 'idle';
 
@@ -49,6 +50,7 @@ final class ContactRecapEmail
         private readonly ContactEventRepository $events,
         private readonly ContactRecapMailer $recapMailer,
         private readonly Security $security,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -138,7 +140,12 @@ final class ContactRecapEmail
             $this->events->recordRecapSent($entity, $withPayment, $fullName, $avatar);
         }
 
-        $this->state = 'sent';
+        // Back to idle: the confirmation lives in the toast only, the menu row
+        // stays available (no "sent" chip replacing the trigger).
+        $this->state = 'idle';
+        $this->dispatchBrowserEvent('toast:show', [
+            'message' => $this->translator->trans('admin.contacts.recapEmail.sent'),
+        ]);
         $this->emit('contacts:changed');
     }
 

@@ -68,7 +68,9 @@
         {% set currentGuarantor = this.currentGuarantorType %}
         {% set currentEarlyMoveIn = this.currentEarlyMoveIn %}
         <div class="mt-1 flex flex-col gap-1">
-            <fieldset {% if this.locked %}disabled{% endif %} class="contents">
+            {# Verrou anti-missclick, doublé de la garde d'étape : la recherche
+               n'ouvre qu'une fois l'étape Personnes validée. #}
+            <fieldset {% if this.locked or not this.stepOpen %}disabled{% endif %} class="contents">
             <div class="bg-white px-5 py-4 rounded-t-xl">
                 <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.search.section.essentials'|trans }}</h3>
                 <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
@@ -194,7 +196,19 @@
                    plein écran) mais la sélection de quartiers est coupée via
                    la valeur locked du controller (polygones non cliquables). #}
                 <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-pins-value="{{ addressPins|json_encode }}" data-district-picker-locked-value="{{ this.locked ? 'true' : 'false' }}">
-                    <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                        {# Raccourci : coche/décoche les 20 arrondissements d'un
+                           coup (la petite couronne reste manuelle). #}
+                        <button
+                            type="button"
+                            data-action="district-picker#toggleAll"
+                            class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out {{ this.allArrondissementsSelected ? 'border-primary/40 bg-primary/5 text-primary hover:border-primary/60 hover:bg-primary/10' : 'border-neutral-200 text-gray-600 hover:border-neutral-300 hover:text-gray-900' }}"
+                            data-testid="areas-select-all"
+                        >
+                            {{ 'admin.contacts.project.allAreas'|trans }}
+                        </button>
+                    </div>
                     {# data-live-ignore : la carte n'est jamais touchée par les
                        re-rendus live (data-skip-morph la remplacerait,
                        détruisant l'instance Google Maps → écran blanc). #}
@@ -284,22 +298,7 @@
                 } %}
                 {% set canAddImportantAddress = importantAddresses|length < constant('App\\Dossier\\Twig\\Components\\SearchEditor::MAX_IMPORTANT_ADDRESSES') %}
                 <div class="min-w-0 space-y-2 sm:col-span-2">
-                    <div class="flex items-center justify-between gap-3">
-                        <p class="text-gray-600">{{ 'admin.dossiers.show.search.importantAddresses.label'|trans }}</p>
-                        {% if canAddImportantAddress %}
-                            <button
-                                type="button"
-                                data-action="live#action"
-                                data-live-action-param="addImportantAddress"
-                                class="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                                aria-label="{{ 'admin.dossiers.show.search.importantAddresses.add'|trans }}"
-                                title="{{ 'admin.dossiers.show.search.importantAddresses.add'|trans }}"
-                                data-testid="important-address-add"
-                            >
-                                {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                            </button>
-                        {% endif %}
-                    </div>
+                    <p class="text-gray-600">{{ 'admin.dossiers.show.search.importantAddresses.label'|trans }}</p>
                     {% if importantAddresses is not empty %}
                         <ul class="space-y-1.5" role="list">
                             {% for row in importantAddresses %}
@@ -397,6 +396,17 @@
                                     role="listbox"
                                     class="absolute inset-x-0 top-full z-10 mt-1 hidden rounded-xl border border-neutral-200 bg-white p-1 shadow-lg"
                                 ></ul>
+                                {# Relais sélection Places -> addImportantAddress :
+                                   choisir une suggestion suffit à poser le pin,
+                                   l'action revide le champ pour la suivante. #}
+                                <span
+                                    class="hidden"
+                                    data-places-autocomplete-target="trigger"
+                                    data-action="places-autocomplete:select->live#action"
+                                    data-live-action-param="addImportantAddress"
+                                    aria-hidden="true"
+                                    data-testid="important-address-trigger"
+                                ></span>
                             </div>
                         </div>
                     {% endif %}

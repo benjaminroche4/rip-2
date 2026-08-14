@@ -174,9 +174,11 @@
                             type="button"
                             data-action="live#action"
                             data-live-action-param="create"
-                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90"
+                            data-loading="action(create)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="contact-create-submit"
                         >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(create)|removeClass(hidden)" />
                             {{ 'admin.contacts.create.submit'|trans }}
                         </button>
                     </div>

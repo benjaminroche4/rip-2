@@ -37,7 +37,7 @@ final class SendEstimationEmailHandler
         $adminEmail = (new TemplatedEmail())
             ->from('Contact <contact@relocation-in-paris.fr>')
             ->to(EmailAddress::CONTACT->value)
-            ->subject("🏠 Demande d'éstimation | Relocation In Paris")
+            ->subject("🏠 Demande d'estimation | Relocation In Paris")
             ->htmlTemplate('emails/property_estimation.html.twig')
             ->context($context);
 

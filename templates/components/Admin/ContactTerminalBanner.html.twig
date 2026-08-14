@@ -37,8 +37,19 @@
                 {%- if contact.statusChangedAt -%}
                     {%- set detailParts = detailParts|merge(['admin.contacts.show.terminalSince'|trans({'%date%': contact.statusChangedAt|format_date('medium')})]) -%}
                 {%- endif -%}
-                {% if detailParts is not empty %}
-                    <p class="mt-0.5 text-sm {{ styles.detail }}">{{ detailParts|join(' · ') }}</p>
+                {%- set author = this.statusAuthor -%}
+                {% if detailParts is not empty or author %}
+                    <p class="mt-0.5 text-sm leading-5 {{ styles.detail }}">
+                        {%- if detailParts is not empty -%}
+                            {{ detailParts|join(' · ') }}
+                        {%- endif -%}
+                        {# Qui a posé l'état terminal : lu sur le fil de suivi.
+                           Nom seul, sans vignette, comme sur le fil. #}
+                        {%- if author -%}
+                            {% if detailParts is not empty %}<span aria-hidden="true"> &middot; </span>{% endif %}
+                            <span data-testid="terminal-banner-author">{{ 'admin.dossiers.show.closure.by'|trans({'%name%': author.name|title}) }}</span>
+                        {%- endif -%}
+                    </p>
                 {% endif %}
             </div>
         </div>

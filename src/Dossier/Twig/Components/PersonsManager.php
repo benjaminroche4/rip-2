@@ -156,6 +156,7 @@ final class PersonsManager
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
         private readonly DossierEventLogger $events,
+        private readonly \App\Dossier\Service\DossierStatusAdvancer $advancer,
     ) {
     }
 
@@ -562,6 +563,11 @@ final class PersonsManager
             }
             $dossier->setName(mb_substr(implode(' & ', array_filter($names)), 0, 100) ?: $dossier->getName());
         }
+
+        // Le parcours démarre ici : un locataire principal désigné valide
+        // l'étape et peut débloquer un statut plus avancé (recherche déjà
+        // complète, par exemple).
+        $this->advancer->advance($dossier);
     }
 
     private function dossier(): Dossier

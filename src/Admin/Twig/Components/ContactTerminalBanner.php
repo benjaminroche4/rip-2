@@ -29,6 +29,7 @@ final class ContactTerminalBanner
 
     public function __construct(
         private readonly ContactRepository $repository,
+        private readonly \App\Contact\Repository\ContactEventRepository $events,
         private readonly Security $security,
     ) {
     }
@@ -48,6 +49,19 @@ final class ContactTerminalBanner
     public function getContact(): ?ContactListItem
     {
         return $this->repository->listByIds([$this->contactId])[0] ?? null;
+    }
+
+    /**
+     * Qui a posé l'état terminal, lu sur le fil de suivi (chaque entrée porte
+     * déjà le nom et l'avatar de son auteur).
+     *
+     * @return array{name: string, avatar: ?string}|null
+     */
+    public function getStatusAuthor(): ?array
+    {
+        $status = $this->getContact()?->status;
+
+        return null !== $status ? $this->events->findStatusAuthor($this->contactId, $status) : null;
     }
 
     private function ensureAdmin(): void

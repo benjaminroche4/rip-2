@@ -51,44 +51,67 @@ class DossierRepository extends ServiceEntityRepository
         $offersByContactReference = $this->findOffersByContactReference($dossiers);
 
         $now = new \DateTimeImmutable();
-        $summaries = [];
-        foreach ($dossiers as $dossier) {
-            $primaryName = null;
-            foreach ($dossier->getPersons() as $person) {
-                if ($person->isPrimaryContact()) {
-                    $primaryName = trim($person->getFirstName().' '.$person->getLastName());
-                    break;
-                }
-            }
 
-            $manager = $dossier->getManager();
-            $managerName = null;
-            if (null !== $manager) {
-                $managerName = trim(($manager->getFirstName() ?? '').' '.($manager->getLastName() ?? ''));
-                $managerName = '' !== $managerName ? $managerName : (string) $manager->getEmail();
-            }
+        return array_map(
+            fn (Dossier $dossier): DossierSummary => $this->toSummary($dossier, $offersByContactReference, $now),
+            $dossiers,
+        );
+    }
 
-            $createdAt = $dossier->getCreatedAt() ?? $now;
-            $moveInAt = $dossier->getSearch()?->getMoveInAt();
-
-            $summaries[] = new DossierSummary(
-                id: (int) $dossier->getId(),
-                name: (string) $dossier->getName(),
-                reference: (string) $dossier->getReference(),
-                primaryTenantName: $primaryName,
-                personCount: $dossier->getPersons()->count(),
-                createdAt: $createdAt,
-                status: $dossier->getEffectiveStatus(),
-                managerId: null !== $manager ? (int) $manager->getId() : null,
-                managerName: $managerName,
-                managerAvatarFilename: $manager?->getAvatarFilename(),
-                offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
-                moveInAt: $moveInAt,
-                timeline: null !== $moveInAt ? MoveInTimeline::fromDates($createdAt, $moveInAt, $now) : null,
-            );
+    /**
+     * Same read model for a single dossier: feeds the recap cards of the
+     * visit booking form once a dossier is picked.
+     */
+    public function findSummaryById(int $id): ?DossierSummary
+    {
+        $dossier = $this->find($id);
+        if (null === $dossier) {
+            return null;
         }
 
-        return $summaries;
+        return $this->toSummary($dossier, $this->findOffersByContactReference([$dossier]), new \DateTimeImmutable());
+    }
+
+    /**
+     * @param array<string, string> $offersByContactReference
+     */
+    private function toSummary(Dossier $dossier, array $offersByContactReference, \DateTimeImmutable $now): DossierSummary
+    {
+        $primaryName = null;
+        foreach ($dossier->getPersons() as $person) {
+            if ($person->isPrimaryContact()) {
+                $primaryName = trim($person->getFirstName().' '.$person->getLastName());
+                break;
+            }
+        }
+
+        $manager = $dossier->getManager();
+        $managerName = null;
+        if (null !== $manager) {
+            $managerName = trim(($manager->getFirstName() ?? '').' '.($manager->getLastName() ?? ''));
+            $managerName = '' !== $managerName ? $managerName : (string) $manager->getEmail();
+        }
+
+        $createdAt = $dossier->getCreatedAt() ?? $now;
+        $moveInAt = $dossier->getSearch()?->getMoveInAt();
+
+        return new DossierSummary(
+            id: (int) $dossier->getId(),
+            name: (string) $dossier->getName(),
+            reference: (string) $dossier->getReference(),
+            primaryTenantName: $primaryName,
+            personCount: $dossier->getPersons()->count(),
+            createdAt: $createdAt,
+            status: $dossier->getEffectiveStatus(),
+            managerId: null !== $manager ? (int) $manager->getId() : null,
+            managerName: $managerName,
+            managerAvatarFilename: $manager?->getAvatarFilename(),
+            offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
+            moveInAt: $moveInAt,
+            timeline: null !== $moveInAt ? MoveInTimeline::fromDates($createdAt, $moveInAt, $now) : null,
+            searchComplete: $dossier->getSearch()?->isComplete() ?? false,
+            closedAt: $dossier->getClosedAt(),
+        );
     }
 
     /**

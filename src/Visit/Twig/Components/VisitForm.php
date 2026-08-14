@@ -58,6 +58,8 @@ final class VisitForm extends AbstractController
         private readonly \App\Auth\Repository\UserRepository $users,
         private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
         private readonly \App\Visit\Service\VisitNumberGenerator $numbers,
+        private readonly \App\Visit\Repository\VisitRepository $visits,
+        private readonly \App\Dossier\Repository\DossierRepository $dossiers,
     ) {
     }
 
@@ -120,6 +122,35 @@ final class VisitForm extends AbstractController
         );
     }
 
+    /**
+     * Dossier choisi dans le premier champ : tant qu'il est vide, le reste du
+     * formulaire ne s'affiche pas (une visite sans dossier n'existe pas).
+     */
+    public function getSelectedDossier(): ?\App\Dossier\Domain\DossierSummary
+    {
+        $id = (int) ($this->formValues['dossier'] ?? 0);
+
+        return 0 !== $id ? $this->dossiers->findSummaryById($id) : null;
+    }
+
+    /**
+     * Visites déjà prévues sur le même bien (même adresse ou même lien
+     * d'annonce), recalculées à chaque re-rendu du formulaire.
+     *
+     * @return list<\App\Visit\Domain\VisitSummary>
+     */
+    public function getMatchingVisits(): array
+    {
+        $address = trim((string) ($this->formValues['address'] ?? ''));
+        $listingUrl = trim((string) ($this->formValues['listingUrl'] ?? ''));
+        // Une adresse à peine commencée matcherait n'importe quoi.
+        if (mb_strlen($address) < 5) {
+            $address = '';
+        }
+
+        return $this->visits->findMatchingSummaries($address, $listingUrl);
+    }
+
     /** Chip toggle: picking the selected agent deselects them. */
     #[LiveAction]
     public function pickAssignee(#[LiveArg] int $id): void
@@ -141,6 +172,18 @@ final class VisitForm extends AbstractController
 
         /** @var Visit $visit */
         $visit = $this->getForm()->getData();
+
+        // Une visite se prépare sur les critères de recherche du dossier :
+        // tant qu'ils sont incomplets, il n'y a rien pour cadrer le bien à
+        // visiter. Le template masque déjà le formulaire, cette garde couvre
+        // l'appel direct au endpoint /_components/.
+        if (!$this->isSearchComplete($visit->getDossier())) {
+            $this->getForm()->get('dossier')->addError(new \Symfony\Component\Form\FormError(
+                $this->translator->trans('admin.visits.create.dossier.incomplete'),
+            ));
+
+            throw new \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException('Dossier search criteria incomplete.');
+        }
 
         // Reuse the coordinates already located for the preview when they
         // match the submitted address; geocode once otherwise.
@@ -179,6 +222,11 @@ final class VisitForm extends AbstractController
         return $this->redirectToRoute('admin_visits', [
             'adminPrefix' => $this->adminPrefix,
         ]);
+    }
+
+    private function isSearchComplete(?\App\Dossier\Entity\Dossier $dossier): bool
+    {
+        return $dossier?->getSearch()?->isComplete() ?? false;
     }
 
     private function isInIleDeFrance(Visit $visit): bool

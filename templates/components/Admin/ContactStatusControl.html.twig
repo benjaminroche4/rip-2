@@ -254,7 +254,11 @@
                 </div>
             </div>
 
-            {% if inProgress and contact.nextStep and not editingStep %}
+            {# Un rendez-vous survit à la conversion (agenda et emails le
+               conservent) : la card reste visible pour qu'il ne devienne pas
+               invisible, mais seule l'annulation reste offerte. #}
+            {% set converted = contact.status.value == 'converted' %}
+            {% if (inProgress or converted) and contact.nextStep and not editingStep %}
                 {% set planned = contact.recallAt and contact.nextStep.needsDate %}
                 {% set overdue = planned and contact.recallAt < date() %}
                 {# Card récap deux niveaux : pastille icône ambre, micro-label,
@@ -315,16 +319,39 @@
                         </div>
                     </div>
                 {% else %}
-                    <div class="mt-1.5 flex justify-end">
+                    {# Un engagement daté (visio, rappel) s'annule aussi, pas
+                       seulement se modifie : le second bouton retire la visio
+                       des agendas ou le rappel de l'agenda de l'agent. #}
+                    {% set cancellable = contact.nextStep.value in ['visio', 'recontact'] %}
+                    <div class="mt-1.5 flex gap-2">
+                        {# Lead converti : l'éditeur d'étape n'existe plus (le
+                           pipeline est terminé), seule l'annulation reste. #}
+                        {% if inProgress %}
                         <button
                             type="button"
                             data-action="live#action"
                             data-live-action-param="editStep"
-                            class="cursor-pointer text-xs text-gray-500 underline underline-offset-2 transition-colors duration-100 hover:text-gray-900"
+                            class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                             data-testid="next-step-edit"
                         >
+                            {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ 'admin.contacts.nextStep.edit'|trans }}
                         </button>
+                        {% endif %}
+                        {% if cancellable %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="dropStep"
+                                data-loading="action(dropStep)|addAttribute(disabled)"
+                                class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:cursor-default disabled:opacity-60"
+                                data-testid="next-step-drop"
+                            >
+                                <twig:Spinner class="hidden size-3.5 shrink-0" data-loading="action(dropStep)|removeClass(hidden)" />
+                                {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(dropStep)|addClass(hidden)'}) }}
+                                {{ 'admin.contacts.nextStep.cancelStep'|trans }}
+                            </button>
+                        {% endif %}
                     </div>
                 {% endif %}
             {% endif %}
@@ -382,17 +409,22 @@
                         {{ 'admin.contacts.nextStep.channelRequired'|trans }}
                     </p>
                 {% endif %}
-                {# Rien ne part avant Valider : le choix reste un brouillon. #}
+                {# Rien ne part avant Valider : le choix reste un brouillon.
+                   Annuler n'apparaît que s'il y a un état à retrouver : à la
+                   première saisie l'éditeur reste ouvert de toute façon, le
+                   bouton ne ferait rien. #}
                 <div class="mt-3 flex items-center justify-end gap-4 border-t border-gray-950/5 pt-3">
-                    <button
-                        type="button"
-                        data-action="live#action"
-                        data-live-action-param="cancelStep"
-                        class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
-                        data-testid="next-step-cancel"
-                    >
-                        {{ 'admin.contacts.notes.cancel'|trans }}
-                    </button>
+                    {% if contact.nextStep %}
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="cancelStep"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="next-step-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                    {% endif %}
                     <twig:Button
                         size="sm"
                         data-action="live#action"

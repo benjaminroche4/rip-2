@@ -35,12 +35,14 @@ final class DossierDriveStorageTest extends TestCase
 
         $fileId = $storage->store($dossier, $document, $this->upload());
 
-        // A dossier root folder, then the person sub-folder were created.
-        self::assertCount(2, $gateway->createdFolders);
-        self::assertSame('DS-000042 Martin', $gateway->createdFolders[0]['name']);
+        // The context root, then the dossier folder, then the person sub-folder.
+        self::assertCount(3, $gateway->createdFolders);
+        self::assertSame('Dossiers', $gateway->createdFolders[0]['name']);
         self::assertSame('shared-drive-root', $gateway->createdFolders[0]['parent']);
-        self::assertSame('Martin Jean', $gateway->createdFolders[1]['name']);
-        self::assertSame($dossier->getDriveFolderId(), $gateway->createdFolders[1]['parent']);
+        self::assertSame('DS-000042 Martin', $gateway->createdFolders[1]['name']);
+        self::assertSame($gateway->createdFolders[0]['id'], $gateway->createdFolders[1]['parent'], 'Dossiers hang under the context root, not the drive root.');
+        self::assertSame('Martin Jean', $gateway->createdFolders[2]['name']);
+        self::assertSame($dossier->getDriveFolderId(), $gateway->createdFolders[2]['parent']);
 
         // The piece is uploaded under the person folder, named by its type.
         self::assertCount(1, $gateway->uploads);
@@ -63,8 +65,8 @@ final class DossierDriveStorageTest extends TestCase
 
         self::assertSame('Bulletins de salaire.pdf', $gateway->uploads[0]['name']);
         self::assertSame('Bulletins de salaire-2.pdf', $gateway->uploads[1]['name']);
-        // The person folder is reused, not recreated.
-        self::assertCount(2, $gateway->createdFolders);
+        // The root, dossier and person folders are reused, not recreated.
+        self::assertCount(3, $gateway->createdFolders);
     }
 
     public function testStoreThrowsWhenDriveIsUnavailable(): void

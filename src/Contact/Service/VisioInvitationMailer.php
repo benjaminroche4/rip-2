@@ -96,11 +96,13 @@ final readonly class VisioInvitationMailer
             $client = (new TemplatedEmail())
                 ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
                 ->to($clientEmail)
+                // Aucun emoji dans les objets adressés au client : la marque
+                // se joue premium, et les filtres promotions les pénalisent.
                 ->subject(match ([$fr, $rescheduled]) {
-                    [true, false] => \sprintf('✅ Votre visio est confirmée : %s', $dateText),
-                    [true, true] => \sprintf('📅 Votre visio est déplacée au %s', $dateText),
-                    [false, false] => \sprintf('✅ Your video call is confirmed: %s', $dateText),
-                    default => \sprintf('📅 Your video call moved to %s', $dateText),
+                    [true, false] => \sprintf('Votre visio est confirmée : %s', $dateText),
+                    [true, true] => \sprintf('Votre visio est déplacée au %s', $dateText),
+                    [false, false] => \sprintf('Your video call is confirmed: %s', $dateText),
+                    default => \sprintf('Your video call moved to %s', $dateText),
                 })
                 ->htmlTemplate('emails/contact_visio_client.html.twig')
                 ->context([

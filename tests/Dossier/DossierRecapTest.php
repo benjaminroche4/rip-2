@@ -175,6 +175,24 @@ final class DossierRecapTest extends KernelTestCase
         self::assertStringContainsString('12.08.2026', $rendered);
     }
 
+    public function testCardShipsAHiddenSkeletonShownWhileGenerating(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAsAdmin();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Recap', ['dossierId' => (int) $dossier->getId()]);
+
+        // Le squelette est dans le DOM dès le rendu : `data-loading` ne fait
+        // que basculer la classe `hidden` pendant la LiveAction.
+        self::assertStringContainsString('data-testid="dossier-recap-skeleton"', $rendered);
+        self::assertStringContainsString('action(generate)|removeClass(hidden)', $rendered);
+        self::assertStringContainsString('action(generate)|addClass(hidden)', $rendered);
+        // Jamais |show/|hide : ces directives posent un display inline qui
+        // casserait les conteneurs flex de la card.
+        self::assertStringNotContainsString('action(generate)|show', $rendered);
+        self::assertStringNotContainsString('action(generate)|hide', $rendered);
+    }
+
     private function generatorReturning(string $answer): DossierRecapGenerator
     {
         $agent = new class($answer) implements AgentInterface {

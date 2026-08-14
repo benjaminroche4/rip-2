@@ -194,6 +194,15 @@
                         {% endif %}
                     </div>
 
+                    {# Même bien déjà visité : bandeau informatif, sous l'adresse
+                       et le lien d'annonce qui le déclenchent. #}
+                    {% set duplicates = this.matchingVisits %}
+                    {% if duplicates is not empty %}
+                        <div class="px-4 pb-3">
+                            <twig:Visit:DuplicateWarning :visits="duplicates" adminPrefix="{{ this.adminPrefix }}" />
+                        </div>
+                    {% endif %}
+
                     {# ── Dossier (rattachement en lecture seule). ── #}
                     <div class="flex items-center justify-between gap-4 px-4 py-3">
                         <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.dossier.label'|trans }}</p>

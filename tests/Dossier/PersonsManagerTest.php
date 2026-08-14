@@ -647,6 +647,26 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertFalse($added->isNoProfession());
     }
 
+    public function testLanguageAndNationalityFlagsAreRound(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $tenant->setNationality('AL');
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:PersonsManager', ['dossierId' => $dossier->getId()]);
+
+        // Flags read as circles everywhere in the back-office: the
+        // nationality image and the language icon both carry rounded-full.
+        self::assertMatchesRegularExpression('/flags\/circle\/al\.svg[^>]*rounded-full/', $rendered);
+        self::assertStringContainsString('size-4 shrink-0 rounded-full', $rendered);
+        self::assertDoesNotMatchRegularExpression(
+            '/<svg[^>]*class="size-[\d.]+ shrink-0"[^>]*>(?:(?!<\/svg>).)*?circle-flags/s',
+            $rendered,
+            'No flag is left without rounded-full.',
+        );
+    }
+
     private function mountManager(Dossier $dossier): object
     {
         return $this->mountTwigComponent('Dossier:PersonsManager', ['dossierId' => $dossier->getId()]);

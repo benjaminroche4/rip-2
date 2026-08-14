@@ -339,8 +339,12 @@ class ContactRepository extends ServiceEntityRepository
         }
 
         // The next step and its planned recall only make sense while in
-        // progress: leaving the status drops both.
-        if (ContactStatus::InProgress !== $status) {
+        // progress: closing or rolling back to "new" drops both. Conversion
+        // is the exception — the meeting is deliberately kept in both
+        // agendas, so the record must keep its date too, or the appointment
+        // becomes unreachable: no reassignment sync, no cancellation email,
+        // no reminder (the callers all read nextStep + recallAt).
+        if (!\in_array($status, [ContactStatus::InProgress, ContactStatus::Converted], true)) {
             $contact->setNextStep(null)
                 ->setRecallAt(null);
         }

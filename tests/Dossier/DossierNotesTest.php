@@ -210,6 +210,7 @@ final class DossierNotesTest extends KernelTestCase
         file_put_contents($path, '%PDF-1.4');
         $oldCode = $dossier->getPairingCode();
 
+        $spy = $this->spyOnSecurityLog();
         $component = $this->mountNotes($dossier);
 
         // The modal must be confirmed; cancelling changes nothing.
@@ -228,6 +229,13 @@ final class DossierNotesTest extends KernelTestCase
         self::assertNotSame($oldCode, $fresh->getPairingCode(), 'The emailed deposit links must die.');
         self::assertFileDoesNotExist($path);
         self::assertCount(0, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+
+        // Piste d'audit : la clôture purge des données client, elle part sur
+        // le canal security comme la suppression.
+        self::assertNotSame([], array_filter(
+            $spy->records,
+            static fn (array $record): bool => 'Dossier closed' === $record['message'],
+        ), 'The closure must be written to the security channel.');
 
         // Reopening lifts the closure but never restores the files.
         $component->reopen();
@@ -384,6 +392,54 @@ final class DossierNotesTest extends KernelTestCase
         $this->em->flush();
 
         return $user;
+    }
+
+    public function testTheClosedBannerAppearsOnlyOnAClosedDossier(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAs($this->persistUser('staff', ['ROLE_SECTION_DOSSIERS']));
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:ClosedBanner', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="dossier-closed-banner"', $rendered);
+
+        $dossier->setClosedAt(new \DateTimeImmutable());
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:ClosedBanner', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="dossier-closed-banner"', $rendered);
+        self::assertStringContainsString('Dossier clôturé', $rendered);
+    }
+
+    public function testTheClosedBannerNamesWhoArchivedTheDossier(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAs($this->persistUser('staff', ['ROLE_SECTION_DOSSIERS']));
+
+        $notes = $this->mountNotes($dossier);
+        $notes->askClose();
+        $notes->confirmClose();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:ClosedBanner', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="dossier-closed-by"', $rendered);
+        // Le nom vient de la piste d'audit, capturé au moment du geste.
+        self::assertStringContainsString('Staff Staff', $rendered);
+    }
+
+    /** Capture du canal d'audit "security" le temps du test. */
+    private function spyOnSecurityLog(): object
+    {
+        $spy = new class extends \Psr\Log\AbstractLogger {
+            /** @var list<array{level: mixed, message: string}> */
+            public array $records = [];
+
+            public function log($level, \Stringable|string $message, array $context = []): void
+            {
+                $this->records[] = ['level' => $level, 'message' => (string) $message];
+            }
+        };
+        self::getContainer()->set('monolog.logger.security', $spy);
+
+        return $spy;
     }
 
     private function mountNotes(Dossier $dossier): object

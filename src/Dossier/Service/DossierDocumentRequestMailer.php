@@ -43,9 +43,10 @@ final readonly class DossierDocumentRequestMailer
         $email = (new TemplatedEmail())
             ->from('Contact <contact@relocation-in-paris.fr>')
             ->to((string) $recipient->getEmail())
-            ->subject($fr
-                ? 'Pièces à fournir pour votre dossier locatif | Relocation in Paris'
-                : 'Documents needed for your rental application | Relocation in Paris')
+            // Le nombre de pièces en tête : le destinataire sait ce qui
+            // l'attend avant d'ouvrir, et le suffixe de marque disparaît (il
+            // répétait l'expéditeur en mangeant l'aperçu mobile).
+            ->subject($this->subject($fr, \count($pieces)))
             ->htmlTemplate('emails/dossier_documents_request.html.twig')
             ->context([
                 'fr' => $fr,
@@ -62,5 +63,18 @@ final readonly class DossierDocumentRequestMailer
             ]);
 
         $this->mailer->send($email);
+    }
+
+    private function subject(bool $fr, int $count): string
+    {
+        if ($fr) {
+            return 1 === $count
+                ? 'Une pièce à fournir pour votre dossier locatif'
+                : \sprintf('%d pièces à fournir pour votre dossier locatif', $count);
+        }
+
+        return 1 === $count
+            ? 'One document to provide for your rental application'
+            : \sprintf('%d documents to provide for your rental application', $count);
     }
 }

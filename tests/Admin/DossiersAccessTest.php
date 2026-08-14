@@ -136,6 +136,24 @@ final class DossiersAccessTest extends WebTestCase
         self::assertStringEndsWith('/admin/dossiers/DS-000042', $href);
     }
 
+    public function testTheActiveTabCanBePinnedInTheUrl(): void
+    {
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        // Un lien copié avec ?tab= rouvre la section, rendue active dès le
+        // serveur (pas de saut visuel, et un morph Turbo la conserve).
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042?tab=persons');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-testid="dossier-tabs"][data-active-tab="persons"]');
+        self::assertSame('true', $crawler->filter('[data-testid="dossier-tab-persons"]')->attr('aria-selected'));
+        self::assertSame('false', $crawler->filter('[data-testid="dossier-tab-recap"]')->attr('aria-selected'));
+
+        // Une clé inconnue retombe sur le premier onglet, jamais d'écran vide.
+        $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042?tab=nope');
+        self::assertSelectorExists('[data-testid="dossier-tabs"][data-active-tab="recap"]');
+    }
+
     public function testAdminSeesDossierDetailPage(): void
     {
         $this->persistDossier();
@@ -222,32 +240,89 @@ final class DossiersAccessTest extends WebTestCase
         self::assertSelectorNotExists('[data-testid="dossier-nav-next"]');
     }
 
-    public function testModulesUnlockOnlyWhenTheSearchIsComplete(): void
+    public function testEachStepUnlocksTheNextOneAndAdvancesTheStatus(): void
     {
         $this->persistDossier();
         $this->loginAs(self::ADMIN_EMAIL);
-
-        // The fixture search misses stayDuration → modules stay locked.
-        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
-        self::assertCount(3, $crawler->filter('[data-testid="dossier-module-locked"]'));
-        self::assertCount(0, $crawler->filter('[data-testid="dossier-show-modules"] details'));
-        self::assertSelectorExists('[data-testid="dossier-search-incomplete"]');
 
         /** @var EntityManagerInterface $em */
         $em = static::getContainer()->get('doctrine.orm.entity_manager');
         /** @var Dossier $dossier */
         $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+
+        // Étape 1 (Personnes) validée par la fixture, étape 2 (Recherche)
+        // incomplète : les 3 modules restent fermés, l'onglet Dossier aussi.
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        self::assertCount(3, $crawler->filter('[data-testid="dossier-module-locked"]'));
+        self::assertCount(0, $crawler->filter('[data-testid="dossier-show-modules"] details'));
+        self::assertSelectorExists('[data-testid="dossier-search-incomplete"]');
+        self::assertSelectorExists('[data-testid="dossier-tab-search"]');
+        self::assertSelectorExists('[data-testid="dossier-tab-file-locked"]');
+
+        // Recherche complète : seul le module Dossier s'ouvre, et le statut
+        // du dossier suit tout seul.
         $dossier->getSearch()->setStayDuration('long');
         $em->flush();
 
         $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
-        self::assertCount(0, $crawler->filter('[data-testid="dossier-module-locked"]'));
-        self::assertCount(3, $crawler->filter('[data-testid="dossier-show-modules"] details'));
+        self::assertCount(2, $crawler->filter('[data-testid="dossier-module-locked"]'), 'Visite et Paiement restent fermés.');
+        self::assertCount(1, $crawler->filter('[data-testid="dossier-show-modules"] details'));
         self::assertSelectorExists('[data-testid="dossier-search-complete"]');
-        self::assertSelectorNotExists('[data-testid="dossier-search-incomplete"]');
-        // The file module lists the tenants ("Nom Prénom").
+        self::assertSelectorExists('[data-testid="dossier-tab-file"]');
+        self::assertSelectorExists('[data-testid="dossier-tab-visit-locked"]');
         self::assertCount(1, $crawler->filter('[data-testid="module-file-tenant"]'));
-        self::assertStringContainsString('Dupont Jean', $crawler->filter('[data-testid="module-file-tenant"]')->text());
+
+        // Pièces demandées puis validées : le module Visite s'ouvre.
+        // Le kernel est relancé à chaque requête client : on relit le dossier
+        // pour travailler sur des entités managées.
+        $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $tenant = $dossier->getPersons()->first();
+        $document = (new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Validated)
+            ->setRequestedAt(new \DateTimeImmutable());
+        $tenant->addDocument($document);
+        $em->persist($document);
+        $em->flush();
+
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        self::assertCount(1, $crawler->filter('[data-testid="dossier-module-locked"]'), 'Seul le Paiement reste fermé.');
+        self::assertSelectorExists('[data-testid="dossier-tab-visit"]');
+        self::assertSelectorExists('[data-testid="dossier-tab-payment-locked"]');
+
+        // Visite réalisée : dernière étape ouverte, statut "Bien trouvé".
+        $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $em->persist((new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('-2 days 10:00'))
+            ->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable()));
+        $em->flush();
+
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        self::assertCount(0, $crawler->filter('[data-testid="dossier-module-locked"]'));
+        self::assertCount(3, $crawler->filter('[data-testid="dossier-module-card"]'));
+        self::assertSelectorExists('[data-testid="dossier-tab-payment"]');
+        // Le parcours est fini : plus aucun onglet verrouillé.
+        self::assertCount(0, $crawler->filter('[data-testid^="dossier-tab-"][data-testid$="-locked"]'));
+    }
+
+    public function testALockedStepCannotBeOpenedFromTheUrl(): void
+    {
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        // La recherche de la fixture est incomplète : ?tab=file pointe une
+        // étape fermée, la page retombe sur le récap plutôt que d'ouvrir un
+        // panneau interdit.
+        $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042?tab=file');
+        self::assertSelectorExists('[data-testid="dossier-tabs"][data-active-tab="recap"]');
+        self::assertSelectorExists('[data-testid="dossier-tab-file-locked"]');
+        // L'étape Personnes est validée par la fixture : la Recherche, elle,
+        // reste ouverte à l'édition même si ses critères sont incomplets.
+        self::assertSelectorExists('[data-testid="dossier-tab-search"]');
     }
 
     public function testUnknownReferenceReturns404(): void
@@ -266,6 +341,62 @@ final class DossiersAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(302);
         $location = (string) $this->client->getResponse()->headers->get('Location');
         self::assertStringContainsString('connexion', $location);
+    }
+
+    public function testTheListOpenedOnAFilteredUrlShowsThatFilterOnly(): void
+    {
+        // Retour arrière depuis une fiche : l'URL porte le filtre, la liste
+        // doit repartir dessus et pas sur "Tous les dossiers".
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=property_found');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(0, $crawler->filter('[data-testid="dossier-row"]')->count(), 'No dossier holds that status.');
+
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=new');
+        self::assertSame(1, $crawler->filter('[data-testid="dossier-row"]')->count());
+    }
+
+    public function testDeletionFromTheActionsMenuNeedsTheDossiersSectionAndACsrfToken(): void
+    {
+        $this->persistDossier();
+        $deleteUrl = $this->dossiersUrl($this->adminPrefix).'/DS-000042/supprimer';
+
+        // Staff sans la section Dossiers : refusé.
+        $this->loginAs(self::USER_EMAIL);
+        $this->client->request('POST', $deleteUrl, ['_token' => 'nope']);
+        self::assertResponseStatusCodeSame(403);
+
+        // Bon rôle mais jeton CSRF invalide : refusé aussi.
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('POST', $deleteUrl, ['_token' => 'nope']);
+        self::assertResponseStatusCodeSame(403);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        self::assertNotNull($em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']));
+    }
+
+    public function testTheActionsMenuDeletesTheDossierForGood(): void
+    {
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        // Le déclencheur vit dans le menu Actions de la fiche.
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        self::assertSelectorExists('[data-testid="dossier-actions-menu"] [data-testid="dossier-delete"]');
+
+        $this->client->submit($crawler->filter('[data-testid="dossier-delete-confirm"]')->closest('form')->form());
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertStringContainsString('dossier', (string) $this->client->getResponse()->headers->get('Location'));
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $em->clear();
+        self::assertNull($em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']));
     }
 
     private function persistDossier(): void

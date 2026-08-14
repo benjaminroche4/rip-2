@@ -127,6 +127,7 @@
                                     method="post"
                                     action="{{ path('admin_dossier_from_contact', {adminPrefix: adminPrefix, reference: contact.reference}) }}"
                                     class="contents"
+                                    data-creating-overlay-trigger
                                 >
                                     <input type="hidden" name="_token" value="{{ csrf_token('dossier_from_contact') }}">
                                     <twig:AlertDialog:Action type="submit" data-testid="contact-to-dossier">
@@ -389,4 +390,10 @@
             </div>
         </div>
     </div>
+
+    {# Revealed while the lead -> dossier conversion POST is in flight. #}
+    <twig:Admin:CreatingOverlay
+        title="admin.dossiers.creating.title"
+        subtitle="admin.dossiers.creating.subtitle"
+    />
 {% endblock %}

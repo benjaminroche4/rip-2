@@ -122,6 +122,22 @@ final class VisitDetails
         );
     }
 
+    /**
+     * Autres visites déjà prévues sur le même bien (même adresse ou même lien
+     * d'annonce), la visite courante exclue.
+     *
+     * @return list<\App\Visit\Domain\VisitSummary>
+     */
+    public function getMatchingVisits(): array
+    {
+        $address = trim($this->address);
+        if (mb_strlen($address) < 5) {
+            $address = '';
+        }
+
+        return $this->visits->findMatchingSummaries($address, trim($this->listingUrl), $this->visitId);
+    }
+
     #[LiveAction]
     public function toggleLock(): void
     {

@@ -87,7 +87,19 @@
                        plein écran) mais la sélection de quartiers est coupée
                        via la valeur locked (polygones non cliquables). #}
                     <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-locked-value="{{ this.locked ? 'true' : 'false' }}">
-                        <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
+                            {# Raccourci : coche/décoche les 20 arrondissements
+                               d'un coup (la petite couronne reste manuelle). #}
+                            <button
+                                type="button"
+                                data-action="district-picker#toggleAll"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out {{ this.allArrondissementsSelected ? 'border-primary/40 bg-primary/5 text-primary hover:border-primary/60 hover:bg-primary/10' : 'border-neutral-200 text-gray-600 hover:border-neutral-300 hover:text-gray-900' }}"
+                                data-testid="areas-select-all"
+                            >
+                                {{ 'admin.contacts.project.allAreas'|trans }}
+                            </button>
+                        </div>
                         {# data-live-ignore : la carte n'est jamais touchée par
                            les re-rendus live (data-skip-morph la remplacerait,
                            détruisant l'instance Google Maps → écran blanc). #}

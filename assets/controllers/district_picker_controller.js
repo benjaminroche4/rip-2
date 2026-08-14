@@ -14,6 +14,12 @@ const PIN_ICONS = {
 }
 const PIN_COLOR = '#71172e'
 
+// Paris arrondissements only ("1er", "2e"…): the petite couronne codes
+// ("92", "93", "94") stay out of the select-all shortcut.
+const ARRONDISSEMENTS = PARIS_DISTRICTS
+    .filter(d => /^\d+(er|e)$/.test(d.code))
+    .map(d => d.code)
+
 // Clickable Paris arrondissements + petite couronne polygons on a Google
 // Map. Toggling a district syncs the hidden "areas" input (CSV of codes)
 // and submits it to the ContactProject live component, which re-renders
@@ -234,7 +240,25 @@ export default class extends Controller {
         const selected = this.#selected()
         selected.has(code) ? selected.delete(code) : selected.add(code)
         this.#polygons.get(code)?.setOptions(this.#style(selected.has(code)))
+        this.#commit(selected)
+    }
 
+    // "Tous les arrondissements" pill above the map: selects the 20 Paris
+    // arrondissements at once, and clears them when they are all selected.
+    toggleAll() {
+        if (this.lockedValue) {
+            return
+        }
+        const selected = this.#selected()
+        const select = !ARRONDISSEMENTS.every(code => selected.has(code))
+        for (const code of ARRONDISSEMENTS) {
+            select ? selected.add(code) : selected.delete(code)
+            this.#polygons.get(code)?.setOptions(this.#style(select))
+        }
+        this.#commit(selected)
+    }
+
+    #commit(selected) {
         this.inputTarget.value = [...selected].join(',')
         // "input" feeds the live model, "change" triggers the autosave action.
         this.inputTarget.dispatchEvent(new Event('input', { bubbles: true }))

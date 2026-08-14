@@ -5,13 +5,18 @@ declare(strict_types=1);
 namespace App\Dossier\Controller;
 
 use App\Contact\Entity\Contact;
+use App\Dossier\Domain\DossierStep;
+use App\Dossier\Domain\DossierStepView;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierDocumentFile;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\ContactDossierConverter;
 use App\Dossier\Service\DocumentStorage;
+use App\Dossier\Service\DossierDriveProvisioner;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,6 +42,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 )]
 final class DossierController extends AbstractController
 {
+    /** Vue d'ensemble : toujours accessible, hors du parcours d'étapes. */
+    private const RECAP_TAB = 'recap';
+
     public function __construct(
         #[Autowire('%admin_path_prefix%')]
         private readonly string $adminPathPrefix,
@@ -70,20 +78,64 @@ final class DossierController extends AbstractController
         requirements: ['reference' => 'DS-\d{6}'],
         methods: ['GET'],
     )]
-    public function show(string $adminPrefix, string $reference, DossierRepository $repository): Response
-    {
+    public function show(
+        string $adminPrefix,
+        string $reference,
+        Request $request,
+        DossierRepository $repository,
+        \App\Dossier\Service\DossierProgressCalculator $calculator,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
         $dossier = $repository->findDetailsByReference($reference);
-        if (null === $dossier) {
+        $entity = $repository->findOneBy(['reference' => $reference]);
+        if (null === $dossier || null === $entity) {
             throw $this->createNotFoundException();
         }
+
+        // Parcours de gauche à droite : chaque étape ouvre la suivante. Les
+        // onglets restent visibles (cadenas) pour que le chemin complet se
+        // lise dès l'arrivée.
+        $progress = $calculator->forDossier($entity);
+        $steps = array_map(
+            static fn (DossierStep $step): DossierStepView => DossierStepView::fromStep(
+                $step,
+                $progress,
+                DossierStep::Persons === $step ? \count($dossier->persons) : null,
+            ),
+            DossierStep::ordered(),
+        );
 
         return $this->render('admin/dossiers/show.html.twig', [
             'adminPrefix' => $adminPrefix,
             'dossier' => $dossier,
             'adjacent' => $repository->findAdjacentReferences($reference),
+            'steps' => $steps,
+            'activeTab' => $this->resolveTab($request->query->get('tab'), $steps),
+            'currentStep' => $progress->currentStep()?->value,
         ]);
+    }
+
+    /**
+     * Onglet ouvert au chargement : celui de l'URL s'il est déverrouillé,
+     * sinon le récap. Un lien vers une étape encore fermée ne doit jamais
+     * afficher un panneau interdit.
+     *
+     * @param list<DossierStepView> $steps
+     */
+    private function resolveTab(?string $requested, array $steps): string
+    {
+        if (null === $requested || self::RECAP_TAB === $requested) {
+            return self::RECAP_TAB;
+        }
+
+        foreach ($steps as $step) {
+            if ($step->key === $requested) {
+                return $step->unlocked ? $step->key : self::RECAP_TAB;
+            }
+        }
+
+        return self::RECAP_TAB;
     }
 
     /**
@@ -125,6 +177,69 @@ final class DossierController extends AbstractController
             'adminPrefix' => $adminPrefix,
             'reference' => $dossier->getReference(),
         ], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * Deletes the dossier for good, from the "Actions" menu of the detail
+     * page: deposited files first (so nothing is left in storage), then the
+     * Drive folder, then the record. Persons, documents, notes, search,
+     * events and visits follow through the ORM and database cascades.
+     * Written to the security audit channel: this destroys client data.
+     */
+    #[Route(
+        path: [
+            'fr' => '/dossiers/{reference}/supprimer',
+            'en' => '/files/{reference}/delete',
+        ],
+        name: 'dossier_delete',
+        requirements: ['reference' => 'DS-\\d{6}'],
+        methods: ['POST'],
+    )]
+    public function delete(
+        string $adminPrefix,
+        string $reference,
+        Request $request,
+        EntityManagerInterface $em,
+        DossierRepository $repository,
+        DocumentStorage $storage,
+        DossierDriveProvisioner $drive,
+        Security $security,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
+    ): Response {
+        $this->ensureValidPrefix($adminPrefix);
+        $this->denyAccessUnlessGranted('ROLE_SECTION_DOSSIERS');
+
+        if (!$this->isCsrfTokenValid('delete_dossier', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $dossier = $repository->findOneBy(['reference' => $reference])
+            ?? throw $this->createNotFoundException();
+
+        foreach ($dossier->getPersons() as $person) {
+            foreach ($person->getDocuments() as $document) {
+                foreach ($document->getFiles() as $file) {
+                    // A storage outage must not block the deletion: the
+                    // Drive folder purge below is the safety net.
+                    try {
+                        $storage->delete($dossier, $file);
+                    } catch (\Throwable) {
+                    }
+                }
+            }
+        }
+        $drive->deleteDossierFolder($dossier);
+
+        $securityLogger->notice('Dossier deleted', [
+            'actor' => $security->getUser()?->getUserIdentifier(),
+            'dossier' => $reference,
+        ]);
+
+        $em->remove($dossier);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_dossiers', ['adminPrefix' => $adminPrefix], Response::HTTP_SEE_OTHER);
     }
 
     /**

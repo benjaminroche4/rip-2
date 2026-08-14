@@ -97,6 +97,10 @@ final class Modules
     #[LiveProp]
     public ?int $confirmDeleteFileId = null;
 
+    /** Piece (document) id awaiting deletion confirmation, or null. */
+    #[LiveProp]
+    public ?int $confirmDeletePieceId = null;
+
     /** Tenant id whose resend modal is open, or null. */
     #[LiveProp]
     public ?int $resendingId = null;
@@ -128,6 +132,8 @@ final class Modules
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly DossierEventLogger $events,
         private readonly VisitRepository $visits,
+        private readonly \App\Dossier\Service\DossierProgressCalculator $progress,
+        private readonly \App\Dossier\Service\DossierStatusAdvancer $advancer,
     ) {
     }
 
@@ -230,9 +236,33 @@ final class Modules
         return ['upcoming' => $upcoming, 'past' => array_reverse($past)];
     }
 
+    /**
+     * Étape ouverte pour un module donné : le parcours de la fiche est
+     * séquentiel, chaque module attend la validation de l'étape précédente.
+     * Même calcul que la barre d'onglets (DossierProgressCalculator), donc
+     * aucune dérive possible entre l'écran et les gardes serveur.
+     */
+    public function isModuleUnlocked(string $key): bool
+    {
+        $step = \App\Dossier\Domain\DossierStep::tryFrom($key);
+
+        return null !== $step && $this->progress->forDossier($this->dossier())->isUnlocked($step);
+    }
+
+    /** Étape à valider pour ouvrir ce module, pour l'infobulle du cadenas. */
+    public function blockingStepLabel(string $key): ?string
+    {
+        $step = \App\Dossier\Domain\DossierStep::tryFrom($key);
+
+        return null !== $step
+            ? $this->progress->forDossier($this->dossier())->blockedBy($step)?->labelKey()
+            : null;
+    }
+
+    /** Garde des actions du module Dossier (pièces justificatives). */
     public function isUnlocked(): bool
     {
-        return $this->dossier()->getSearch()?->isComplete() ?? false;
+        return $this->isModuleUnlocked(\App\Dossier\Domain\DossierStep::File->value);
     }
 
     /**
@@ -438,6 +468,7 @@ final class Modules
             'pieces' => array_map(static fn (DossierDocumentType $type): string => $type->labelKey(), $types),
         ]);
         $this->em->flush();
+        $this->advancer->advance($this->dossier());
         $this->emit('dossier-documents:changed');
 
         $this->mailer->send($dossier, $tenant, $recipient, $types);
@@ -486,6 +517,7 @@ final class Modules
             'status' => $target->labelKey(),
         ]);
         $this->em->flush();
+        $this->advancer->advance($this->dossier());
         $this->emit('dossier-documents:changed');
     }
 
@@ -511,6 +543,7 @@ final class Modules
             'reason' => $reason,
         ]);
         $this->em->flush();
+        $this->advancer->advance($this->dossier());
         $this->emit('dossier-documents:changed');
 
         $this->refusalMailer->send($this->dossier(), $document);
@@ -551,6 +584,7 @@ final class Modules
             'description' => $description,
         ]);
         $this->em->flush();
+        $this->advancer->advance($this->dossier());
         $this->emit('dossier-documents:changed');
 
         $this->editingDescriptionId = null;
@@ -729,6 +763,7 @@ final class Modules
                         'file' => $fileName,
                     ]);
                     $this->em->flush();
+                    $this->advancer->advance($this->dossier());
                     $this->emit('dossier-documents:changed');
 
                     return;
@@ -737,6 +772,57 @@ final class Modules
         }
 
         throw new NotFoundHttpException('File not found on this dossier.');
+    }
+
+    /** Opens the deletion confirmation modal for a whole requested piece. */
+    #[LiveAction]
+    public function askDeletePiece(#[LiveArg] int $key): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeletePieceId = $key;
+    }
+
+    #[LiveAction]
+    public function cancelDeletePiece(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeletePieceId = null;
+    }
+
+    /**
+     * Withdraws a requested piece entirely (wrong type picked, piece no
+     * longer needed): the deposited files are removed from storage first,
+     * then the row itself, so the tenant stops seeing it in the deposit
+     * page. Unlike deleteFile() this leaves nothing behind.
+     */
+    #[LiveAction]
+    public function deletePiece(#[LiveArg] int $key): void
+    {
+        $this->ensureAdmin();
+        $this->confirmDeletePieceId = null;
+        $dossier = $this->dossier();
+        $document = $this->document($key);
+        $person = $document->getPerson();
+
+        foreach ($document->getFiles() as $file) {
+            // Storage may be down: the piece must still disappear from the
+            // dossier, an orphan blob is preferable to a stuck row.
+            try {
+                $this->storage->delete($dossier, $file);
+            } catch (\Throwable) {
+            }
+        }
+
+        $this->events->log($dossier, 'document_deleted', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => $this->personName($person),
+        ]);
+
+        $person?->removeDocument($document);
+        $this->em->remove($document);
+        $this->em->flush();
+        $this->advancer->advance($this->dossier());
+        $this->emit('dossier-documents:changed');
     }
 
     /**

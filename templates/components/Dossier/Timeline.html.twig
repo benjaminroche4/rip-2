@@ -102,8 +102,10 @@
                             {{ ux_icon('lucide:languages', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ 'admin.dossiers.show.facts.language'|trans }}
                         </p>
-                        <p class="mt-1 text-sm font-medium text-gray-900" data-testid="fact-language">
+                        <p class="mt-1 flex items-center gap-1.5 text-sm font-medium text-gray-900" data-testid="fact-language">
                             {% if facts.language %}
+                                {# Drapeau à gauche, comme le sélecteur de langue de la fiche lead. #}
+                                {{ ux_icon('circle-flags:' ~ facts.language, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
                                 {{ ('admin.dossiers.create.person.language.' ~ facts.language)|trans }}
                             {% else %}
                                 <span class="text-gray-300">{{ notSet }}</span>
@@ -127,6 +129,17 @@
                             {% endif %}
                         </p>
                     </div>
+                </div>
+
+                {# Compteurs de visites : mêmes tuiles que sur la card de la
+                   liste des dossiers. #}
+                {% set visitCounts = this.visitCounts %}
+                <div class="mt-1">
+                    <twig:Dossier:VisitStats
+                        :upcoming="visitCounts.upcoming"
+                        :total="visitCounts.total"
+                        rounded="full"
+                    />
                 </div>
             </div>
         </section>

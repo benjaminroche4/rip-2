@@ -54,9 +54,11 @@ final readonly class ContactRecapMailer
         $email = (new TemplatedEmail())
             ->from('Contact <contact@relocation-in-paris.fr>')
             ->to((string) $contact->email)
+            // Le nom d'expéditeur porte déjà la marque : le suffixe la
+            // répétait au prix des caractères visibles sur mobile.
             ->subject($fr
-                ? 'Votre projet logement à Paris | Relocation in Paris'
-                : 'Your housing project in Paris | Relocation in Paris')
+                ? 'Votre projet logement à Paris : le récapitulatif'
+                : 'Your housing project in Paris: the recap')
             ->htmlTemplate('emails/contact_recap.html.twig')
             ->context([
                 'locale' => $locale,

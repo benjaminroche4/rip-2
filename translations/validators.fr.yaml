@@ -2,106 +2,164 @@ admin:
     visits:
         create:
             scheduledAt:
-                past: "La visite ne peut pas être planifiée dans le passé."
+                past: 'La visite ne peut pas être planifiée dans le passé.'
+                notNull: "La date et l'heure sont obligatoires."
+            address:
+                length: "L'adresse ne peut pas dépasser 255 caractères."
+                notBlank: "L'adresse est obligatoire."
+            dossier:
+                notNull: 'Le dossier est obligatoire.'
+            duration:
+                invalid: 'Durée invalide.'
+            listingUrl:
+                invalid: "Le lien de l'annonce n'est pas une URL valide."
+                length: 'Le lien ne peut pas dépasser 500 caractères.'
+            note:
+                length: 'La note ne peut pas dépasser 2000 caractères.'
     profile:
         password:
             current:
-                notBlank: "Saisissez votre mot de passe actuel."
-                invalid: "Le mot de passe actuel est incorrect."
+                notBlank: 'Saisissez votre mot de passe actuel.'
+                invalid: 'Le mot de passe actuel est incorrect.'
             new:
-                notBlank: "Saisissez un nouveau mot de passe."
-                minLength: "Le mot de passe doit contenir au moins 6 caractères."
-            notMatch: "Les deux mots de passe ne correspondent pas."
+                notBlank: 'Saisissez un nouveau mot de passe.'
+                minLength: 'Le mot de passe doit contenir au moins 6 caractères.'
+            notMatch: 'Les deux mots de passe ne correspondent pas.'
     tools:
         documents:
             form:
                 nameFr:
-                    notBlank: "Le nom français est obligatoire."
-                    length: "Le nom doit faire entre 2 et 255 caractères."
+                    notBlank: 'Le nom français est obligatoire.'
+                    length: 'Le nom doit faire entre 2 et 255 caractères.'
                 nameEn:
-                    notBlank: "Le nom anglais est obligatoire."
-                    length: "Le nom doit faire entre 2 et 255 caractères."
+                    notBlank: 'Le nom anglais est obligatoire.'
+                    length: 'Le nom doit faire entre 2 et 255 caractères.'
                 description:
-                    length: "La description ne peut pas dépasser 5000 caractères."
+                    length: 'La description ne peut pas dépasser 5000 caractères.'
                 slug:
-                    unique: "Un document avec un identifiant similaire existe déjà."
+                    unique: 'Un document avec un identifiant similaire existe déjà.'
                 category:
-                    notNull: "Choisis une catégorie pour ce document."
+                    notNull: 'Choisis une catégorie pour ce document.'
             request:
                 persons:
-                    min: "Renseigne au moins une personne."
-                    max: "Le foyer ne peut pas dépasser {{ limit }} personnes."
+                    min: 'Renseigne au moins une personne.'
+                    max: 'Le foyer ne peut pas dépasser {{ limit }} personnes.'
                 typology:
-                    notNull: "Choisis une typologie de foyer."
+                    notNull: 'Choisis une typologie de foyer.'
                 note:
-                    length: "La note ne peut pas dépasser 2000 caractères."
+                    length: 'La note ne peut pas dépasser 2000 caractères.'
                 driveLink:
-                    url: "Le lien doit être une URL valide (commence par https://...)."
-                    length: "Le lien ne peut pas dépasser 512 caractères."
+                    url: 'Le lien doit être une URL valide (commence par https://...).'
+                    length: 'Le lien ne peut pas dépasser 512 caractères.'
                 person:
                     role:
-                        notNull: "Choisis un rôle pour cette personne."
+                        notNull: 'Choisis un rôle pour cette personne.'
                     firstName:
-                        notBlank: "Le prénom est obligatoire."
-                        length: "Le prénom doit faire entre 2 et 50 caractères."
+                        notBlank: 'Le prénom est obligatoire.'
+                        length: 'Le prénom doit faire entre 2 et 50 caractères.'
                     lastName:
-                        notBlank: "Le nom est obligatoire."
-                        length: "Le nom doit faire entre 2 et 50 caractères."
+                        notBlank: 'Le nom est obligatoire.'
+                        length: 'Le nom doit faire entre 2 et 50 caractères.'
                     documents:
-                        min: "Sélectionne au moins une pièce pour cette personne."
+                        min: 'Sélectionne au moins une pièce pour cette personne.'
+    agents:
+        create:
+            agency:
+                length: "Le nom de l'agence ne peut pas dépasser 100 caractères."
+                notBlank: "Le nom de l'agence est obligatoire."
+            email:
+                invalid: "Cette adresse email n'est pas valide."
+                length: "L'email ne peut pas dépasser 180 caractères."
+            firstName:
+                length: 'Le prénom ne peut pas dépasser 50 caractères.'
+                notBlank: 'Le prénom est obligatoire.'
+            lastName:
+                length: 'Le nom ne peut pas dépasser 50 caractères.'
+                notBlank: 'Le nom est obligatoire.'
+            phone:
+                length: 'Le téléphone ne peut pas dépasser 30 caractères.'
+    dossiers:
+        create:
+            name:
+                length: 'Le nom doit faire entre 2 et 100 caractères.'
+                notBlank: 'Le nom du dossier est obligatoire.'
+            person:
+                email:
+                    invalid: "Cet email n'est pas valide."
+                    length: "L'email ne peut pas dépasser 180 caractères."
+                    notBlank: "L'email est obligatoire."
+                firstName:
+                    length: 'Le prénom doit faire entre 2 et 50 caractères.'
+                    notBlank: 'Le prénom est obligatoire.'
+                language:
+                    notNull: 'Choisissez une langue de contact.'
+                lastName:
+                    length: 'Le nom doit faire entre 2 et 50 caractères.'
+                    notBlank: 'Le nom est obligatoire.'
+                phone:
+                    invalid: "Ce numéro n'est pas valide (chiffres, espaces, points et tirets uniquement)."
+                    length: 'Le téléphone ne peut pas dépasser 30 caractères.'
+                role:
+                    notNull: 'Choisissez un rôle pour cette personne.'
+            persons:
+                max: 'Le dossier ne peut pas contenir plus de 4 personnes.'
+                min: 'Le dossier doit contenir au moins une personne.'
+                maxFollowUps: 'Le dossier ne peut pas contenir plus de 2 demandes de suivi.'
+                maxTenants: 'Le dossier ne peut pas contenir plus de 2 locataires.'
+                tenantRequired: 'Le dossier doit contenir au moins un locataire.'
 contact:
     contactForm:
         firstName:
-            notBlank: "Veuillez renseigner votre prénom."
+            notBlank: 'Veuillez renseigner votre prénom.'
         lastName:
-            notBlank: "Veuillez renseigner votre nom."
+            notBlank: 'Veuillez renseigner votre nom.'
         email:
-            notBlank: "Veuillez renseigner votre adresse email."
+            notBlank: 'Veuillez renseigner votre adresse email.'
         phoneNumber:
-            notBlank: "Veuillez renseigner votre numéro de téléphone."
+            notBlank: 'Veuillez renseigner votre numéro de téléphone.'
         helpType:
-            notBlank: "Veuillez sélectionner un type de demande."
+            notBlank: 'Veuillez sélectionner un type de demande.'
         accept:
-            label: "Vous devez accepter les conditions pour continuer."
+            label: 'Vous devez accepter les conditions pour continuer.'
 newsletter:
     form:
         email:
-            notBlank: "Veuillez renseigner votre adresse email."
+            notBlank: 'Veuillez renseigner votre adresse email.'
             invalid: "Cette adresse email n'est pas valide."
     email:
-        unique: "Cette adresse email est déjà inscrite à la newsletter."
+        unique: 'Cette adresse email est déjà inscrite à la newsletter.'
 listProperty:
     form:
         fullName:
-            notBlank: "Veuillez renseigner votre nom complet."
-            length: "Le nom ne peut pas dépasser {{ limit }} caractères."
+            notBlank: 'Veuillez renseigner votre nom complet.'
+            length: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
         email:
-            notBlank: "Veuillez renseigner votre adresse email."
+            notBlank: 'Veuillez renseigner votre adresse email.'
             invalid: "Cette adresse email n'est pas valide."
         phoneNumber:
-            notBlank: "Veuillez renseigner votre numéro de téléphone."
+            notBlank: 'Veuillez renseigner votre numéro de téléphone.'
             invalidFormat: "Ce numéro de téléphone n'est pas valide."
         photos:
-            tooMany: "Vous ne pouvez pas envoyer plus de {{ limit }} photos."
-            mimeTypes: "Formats acceptés : JPG, PNG ou WebP."
-            maxSize: "Chaque photo ne peut pas dépasser 8 Mo."
+            tooMany: 'Vous ne pouvez pas envoyer plus de {{ limit }} photos.'
+            mimeTypes: 'Formats acceptés : JPG, PNG ou WebP.'
+            maxSize: 'Chaque photo ne peut pas dépasser 8 Mo.'
         address:
             notBlank: "Veuillez renseigner l'adresse du bien."
             length: "L'adresse ne peut pas dépasser {{ limit }} caractères."
             notSelected: "Veuillez sélectionner l'adresse du bien dans la liste de suggestions."
         propertyType:
-            notBlank: "Veuillez sélectionner le type de bien."
+            notBlank: 'Veuillez sélectionner le type de bien.'
         propertyStatus:
-            notBlank: "Veuillez sélectionner le statut du bien."
+            notBlank: 'Veuillez sélectionner le statut du bien.'
         bedrooms:
-            notBlank: "Veuillez indiquer le nombre de chambres."
+            notBlank: 'Veuillez indiquer le nombre de chambres.'
         bathrooms:
-            notBlank: "Veuillez indiquer le nombre de salles de bains."
+            notBlank: 'Veuillez indiquer le nombre de salles de bains.'
         surface:
-            notBlank: "Veuillez indiquer la surface du bien."
-            range: "La surface doit être entre {{ min }} et {{ max }} m2."
+            notBlank: 'Veuillez indiquer la surface du bien.'
+            range: 'La surface doit être entre {{ min }} et {{ max }} m2.'
         furnishing:
-            notBlank: "Veuillez indiquer si le bien est meublé ou vide."
+            notBlank: 'Veuillez indiquer si le bien est meublé ou vide.'
         floor:
             notBlank: "Veuillez indiquer l'étage du bien."
             range: "L'étage doit être entre {{ min }} et {{ max }}."
@@ -110,20 +168,20 @@ listProperty:
             range: "Le nombre d'étages doit être entre {{ min }} et {{ max }}."
             belowFloor: "Le nombre d'étages de l'immeuble doit être au moins égal à l'étage du bien."
         orientations:
-            notBlank: "Veuillez sélectionner au moins une orientation."
+            notBlank: 'Veuillez sélectionner au moins une orientation.'
         note:
-            length: "La note ne peut pas dépasser {{ limit }} caractères."
+            length: 'La note ne peut pas dépasser {{ limit }} caractères.'
         leaseType:
-            notBlank: "Veuillez sélectionner le type de bail souhaité."
+            notBlank: 'Veuillez sélectionner le type de bail souhaité.'
         rent:
-            notBlank: "Veuillez indiquer le loyer hors charges."
-            range: "Le loyer doit être entre {{ min }} et {{ max }} euros."
+            notBlank: 'Veuillez indiquer le loyer hors charges.'
+            range: 'Le loyer doit être entre {{ min }} et {{ max }} euros.'
         charges:
-            notBlank: "Veuillez indiquer le montant des charges."
-            range: "Les charges doivent être entre {{ min }} et {{ max }} euros."
+            notBlank: 'Veuillez indiquer le montant des charges.'
+            range: 'Les charges doivent être entre {{ min }} et {{ max }} euros.'
         deposit:
-            notBlank: "Veuillez indiquer le dépôt de garantie."
-            range: "Le dépôt de garantie doit être entre {{ min }} et {{ max }} euros."
+            notBlank: 'Veuillez indiquer le dépôt de garantie.'
+            range: 'Le dépôt de garantie doit être entre {{ min }} et {{ max }} euros.'
 propertyManagement:
     form:
         address:
@@ -131,43 +189,62 @@ propertyManagement:
         propertyCondition:
             notBlank: "Veuillez sélectionner l'état du bien."
         bedroom:
-            notBlank: "Veuillez indiquer le nombre de chambres."
+            notBlank: 'Veuillez indiquer le nombre de chambres.'
         bathroom:
-            notBlank: "Veuillez indiquer le nombre de salles de bain."
+            notBlank: 'Veuillez indiquer le nombre de salles de bain.'
         surface:
-            notBlank: "Veuillez indiquer la surface du bien."
+            notBlank: 'Veuillez indiquer la surface du bien.'
         phoneNumber:
-            notBlank: "Veuillez renseigner votre numéro de téléphone."
+            notBlank: 'Veuillez renseigner votre numéro de téléphone.'
         email:
-            notBlank: "Veuillez renseigner votre adresse email."
+            notBlank: 'Veuillez renseigner votre adresse email.'
+            invalid: "L'adresse email n'est pas valide."
 register:
     firstName:
-        notBlank: "Le prénom est obligatoire."
-        minLength: "Le prénom doit contenir au moins 2 caractères."
-        maxLength: "Le prénom ne peut pas dépasser 50 caractères."
+        notBlank: 'Le prénom est obligatoire.'
+        minLength: 'Le prénom doit contenir au moins 2 caractères.'
+        maxLength: 'Le prénom ne peut pas dépasser 50 caractères.'
     lastName:
-        notBlank: "Le nom est obligatoire."
-        minLength: "Le nom doit contenir au moins 2 caractères."
-        maxLength: "Le nom ne peut pas dépasser 50 caractères."
+        notBlank: 'Le nom est obligatoire.'
+        minLength: 'Le nom doit contenir au moins 2 caractères.'
+        maxLength: 'Le nom ne peut pas dépasser 50 caractères.'
     email:
         notBlank: "L'adresse email est obligatoire."
         invalid: "Cette adresse email n'est pas valide."
         maxLength: "L'adresse email est trop longue."
-        alreadyUsed: "Un compte existe déjà avec cette adresse email. Connectez-vous."
+        alreadyUsed: 'Un compte existe déjà avec cette adresse email. Connectez-vous.'
     password:
-        notBlank: "Le mot de passe est obligatoire."
-        minLength: "Le mot de passe doit contenir au moins 8 caractères."
-        weak: "Ce mot de passe est trop faible. Combinez majuscules, chiffres et symboles."
-        compromised: "Ce mot de passe a été exposé dans une fuite de données. Choisissez-en un autre."
+        notBlank: 'Le mot de passe est obligatoire.'
+        minLength: 'Le mot de passe doit contenir au moins 8 caractères.'
+        weak: 'Ce mot de passe est trop faible. Combinez majuscules, chiffres et symboles.'
+        compromised: 'Ce mot de passe a été exposé dans une fuite de données. Choisissez-en un autre.'
+    nationality:
+        invalid: "Cette nationalité n'est pas valide."
+        notBlank: 'La nationalité est obligatoire.'
+    phoneNumber:
+        maxLength: 'Le numéro de téléphone est trop long.'
+        notBlank: 'Le numéro de téléphone est obligatoire.'
+    situation:
+        required: 'La situation professionnelle est obligatoire.'
+    verify:
+        code:
+            format: 'Le code doit comporter 6 chiffres.'
+            required: 'Saisissez le code reçu par email.'
 resetPassword:
-    empty: "Veuillez entrer un mot de passe."
-    minLength: "Votre mot de passe doit contenir au moins {{ limit }} caractères."
-    notMatch: "Les mots de passe ne correspondent pas."
+    email:
+        notBlank: 'Veuillez renseigner votre adresse email.'
+    empty: 'Veuillez entrer un mot de passe.'
+    minLength: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.'
+    notMatch: 'Les mots de passe ne correspondent pas.'
 deposit:
     pairing:
         email:
-            required: Veuillez renseigner votre adresse email.
-            invalid: Cette adresse email n'est pas valide.
+            required: 'Veuillez renseigner votre adresse email.'
+            invalid: "Cette adresse email n'est pas valide."
         code:
-            required: Veuillez renseigner le code du dossier.
-            invalid: Le code fait 6 caractères.
+            required: 'Veuillez renseigner le code du dossier.'
+            invalid: 'Le code fait 6 caractères.'
+    documents:
+        error:
+            maxSize: "Le fichier dépasse 10 Mo. Merci d'envoyer une version plus légère."
+            mimeType: 'Format non accepté. Seul le PDF est autorisé.'

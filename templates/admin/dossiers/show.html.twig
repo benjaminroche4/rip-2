@@ -59,7 +59,11 @@
            même rangée que la fiche contact. #}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-2xl font-semibold tracking-tight text-gray-900" data-testid="dossier-heading">{{ dossier.name|title }}</h2>
-        {% if is_granted('ROLE_SECTION_TOOLS') %}
+        {# Le menu s'affiche dès qu'une de ses entrées est accessible : la
+           demande de documents vit dans Outils, la suppression dans Dossiers. #}
+        {% set canRequestDocuments = is_granted('ROLE_SECTION_TOOLS') %}
+        {% set canDeleteDossier = is_granted('ROLE_SECTION_DOSSIERS') %}
+        {% if canRequestDocuments or canDeleteDossier %}
             {% set menuRowClass = 'flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900' %}
                 <details
                     class="relative"
@@ -73,6 +77,7 @@
                         {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
                     </summary>
                     <div class="absolute right-0 z-10 mt-2 w-60 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                        {% if canRequestDocuments %}
                         {# Demande de documents pré-remplie avec les locataires du dossier. #}
                         <a
                             href="{{ path('admin_tools_documents_request', {adminPrefix: adminPrefix, dossier: dossier.reference}) }}"
@@ -82,35 +87,82 @@
                             {{ ux_icon('lucide:file-text', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
                             {{ 'admin.dossiers.show.requestDocuments'|trans }}
                         </a>
+                        {% endif %}
+
+                        {% if canDeleteDossier %}
+                        {# Suppression définitive : isolée derrière un
+                           séparateur, toujours confirmée. Même geste que sur
+                           la fiche lead (POST + CSRF, pas de LiveAction). #}
+                        <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                        <twig:AlertDialog id="delete-dossier-{{ dossier.id }}">
+                            <button
+                                type="button"
+                                class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                                data-action="click->alert-dialog#open"
+                                data-alert-dialog-target="trigger"
+                                aria-haspopup="dialog"
+                                data-testid="dossier-delete"
+                            >
+                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.deletion.delete'|trans }}
+                            </button>
+                            <twig:AlertDialog:Content class="sm:max-w-md">
+                                <twig:AlertDialog:Header>
+                                    <twig:AlertDialog:Title>
+                                        {{ 'admin.dossiers.show.deletion.modal.title'|trans({'%reference%': dossier.reference}) }}
+                                    </twig:AlertDialog:Title>
+                                    <twig:AlertDialog:Description>
+                                        {{ 'admin.dossiers.show.deletion.modal.text'|trans }}
+                                    </twig:AlertDialog:Description>
+                                </twig:AlertDialog:Header>
+                                <twig:AlertDialog:Footer class="mt-4">
+                                    <twig:AlertDialog:Cancel>
+                                        {{ 'admin.contacts.notes.cancel'|trans }}
+                                    </twig:AlertDialog:Cancel>
+                                    <form
+                                        method="post"
+                                        action="{{ path('admin_dossier_delete', {adminPrefix: adminPrefix, reference: dossier.reference}) }}"
+                                        class="contents"
+                                    >
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_dossier') }}">
+                                        <twig:AlertDialog:Action type="submit" class="bg-red-600 hover:bg-red-700" data-testid="dossier-delete-confirm">
+                                            <span class="flex items-center gap-2">
+                                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                                {{ 'admin.dossiers.show.deletion.modal.confirm'|trans }}
+                                            </span>
+                                        </twig:AlertDialog:Action>
+                                    </form>
+                                </twig:AlertDialog:Footer>
+                            </twig:AlertDialog:Content>
+                        </twig:AlertDialog>
+                        {% endif %}
                     </div>
                 </details>
         {% endif %}
         </div>
 
+        {# Dossier clôturé : bandeau pleine largeur au-dessus des onglets,
+           même geste que le bandeau terminal d'un lead. #}
+        <twig:Dossier:ClosedBanner :dossierId="dossier.id" />
+
         <div class="lg:grid lg:grid-cols-[1fr_26rem] lg:items-start lg:gap-6">
-        {# ── Sections en onglets : l'état actif vit sur ce wrapper statique
-              (data-active-tab) et la visibilité des panneaux est dérivée en
-              CSS, donc les re-rendus des LiveComponents n'y touchent pas. #}
+        {# ── Sections en onglets : le Récap est une vue d'ensemble, toujours
+              ouverte ; les 5 étapes suivantes se parcourent de gauche à
+              droite, chacune déverrouillée par la validation de la
+              précédente (calcul serveur, cf. DossierProgressCalculator).
+              L'état actif vit sur ce wrapper statique (data-active-tab) et la
+              visibilité des panneaux est dérivée en CSS, donc les re-rendus
+              des LiveComponents n'y touchent pas. #}
         <div
             class="flex min-w-0 flex-col gap-6"
             data-controller="tabs"
             data-tabs
-            data-active-tab="recap"
+            data-active-tab="{{ activeTab }}"
+            data-tabs-param-value="tab"
             data-tabs-active-class="bg-neutral-100 text-primary"
             data-tabs-inactive-class="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             data-testid="dossier-tabs"
         >
-            {% set tabItems = [
-                {key: 'recap', icon: 'lucide:gauge', label: 'admin.dossiers.show.timeline.title'},
-                {key: 'persons', icon: 'lucide:users', label: 'admin.dossiers.create.persons.title', count: dossier.persons|length},
-                {key: 'search', icon: 'lucide:search', label: 'admin.dossiers.show.search.title'},
-                {key: 'file', icon: 'lucide:folder-open', label: 'admin.dossiers.show.modules.file.title'},
-                {key: 'visit', icon: 'lucide:calendar-check', label: 'admin.dossiers.show.modules.visit.title'},
-                {key: 'payment', icon: 'lucide:credit-card', label: 'admin.dossiers.show.modules.payment.title'},
-            ] %}
-            {# ── Barre d'onglets : pleine largeur, séparateurs entre les
-                  éléments, pastille glissante (survol + changement) pilotée
-                  par tabs_controller ; badges de compteurs optionnels. #}
             <div class="rounded-2xl border border-neutral-200 bg-white p-1.5">
                 <div
                     class="relative flex items-stretch overflow-x-auto"
@@ -125,33 +177,75 @@
                         aria-hidden="true"
                         hidden
                     ></span>
-                    {% for tab in tabItems %}
+
+                    {# Vue d'ensemble, hors parcours : pas de numéro. #}
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected="{{ 'recap' == activeTab ? 'true' : 'false' }}"
+                        data-tabs-target="tab"
+                        data-tabs-key="recap"
+                        data-action="tabs#select mouseenter->tabs#hoverIndicator"
+                        data-tabs-active-class="text-primary"
+                        data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                        class="group/tab relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ 'recap' == activeTab ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                        data-testid="dossier-tab-recap"
+                    >
+                        {{ ux_icon('lucide:gauge', {class: 'size-4 shrink-0 motion-safe:group-hover/tab:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.timeline.title'|trans }}
+                    </button>
+
+                    <span class="z-0 mx-1 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
+
+                    {% for step in steps %}
                         {% if not loop.first %}
                             <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
                         {% endif %}
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected="{{ loop.first ? 'true' : 'false' }}"
-                            data-tabs-target="tab"
-                            data-tabs-key="{{ tab.key }}"
-                            data-action="tabs#select mouseenter->tabs#hoverIndicator"
-                            data-tabs-active-class="text-primary"
-                            data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
-                            class="group/tab relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ loop.first ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
-                            data-testid="dossier-tab-{{ tab.key }}"
-                        >
-                            {# Même micro-animation d'icône que la sidebar. #}
-                            {{ ux_icon(tab.icon, {class: 'size-4 shrink-0 motion-safe:group-hover/tab:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
-                            {{ tab.label|trans }}
-                            {% if tab.count is defined and tab.count is not null %}
-                                <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums" data-testid="tab-count-{{ tab.key }}">{{ tab.count }}</span>
-                            {% endif %}
-                        </button>
+                        {% if step.unlocked %}
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected="{{ step.key == activeTab ? 'true' : 'false' }}"
+                                data-tabs-target="tab"
+                                data-tabs-key="{{ step.key }}"
+                                data-action="tabs#select mouseenter->tabs#hoverIndicator"
+                                data-tabs-active-class="text-primary"
+                                data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                                class="group/tab relative z-10 flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ step.key == activeTab ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                                data-testid="dossier-tab-{{ step.key }}"
+                                {{ step.validated ? 'data-step-validated' : '' }}
+                            >
+                                {# Étape franchie : coche verte à la place du
+                                   numéro, l'avancement se lit d'un coup d'œil. #}
+                                {% if step.validated %}
+                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-emerald-500', 'aria-hidden': 'true'}) }}
+                                {% else %}
+                                    <span class="flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-[10px] font-semibold text-gray-500 tabular-nums group-aria-selected/tab:bg-primary/10 group-aria-selected/tab:text-primary">{{ step.rank }}</span>
+                                {% endif %}
+                                {{ step.labelKey|trans }}
+                                {% if step.count is not null %}
+                                    <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums" data-testid="tab-count-{{ step.key }}">{{ step.count }}</span>
+                                {% endif %}
+                            </button>
+                        {% else %}
+                            {# Verrouillé : visible pour montrer le chemin, mais
+                               ni cliquable ni focusable. L'infobulle dit quoi
+                               valider pour y accéder. #}
+                            <span
+                                role="tab"
+                                aria-selected="false"
+                                aria-disabled="true"
+                                class="relative z-10 flex flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap text-gray-300"
+                                title="{{ 'admin.dossiers.show.steps.lockedHint'|trans({'%step%': step.blockedByLabelKey|trans}) }}"
+                                data-testid="dossier-tab-{{ step.key }}-locked"
+                            >
+                                {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ step.labelKey|trans }}
+                            </span>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
-
 
             {# ── Timeline (début → installation souhaitée) + récap IA ── #}
             <div data-tab-panel="recap" class="contents">
@@ -164,9 +258,20 @@
                 <twig:Dossier:PersonsManager :dossierId="dossier.id" />
             </div>
 
-            {# ── Search criteria (editable, mirrors the contact "Projet" card) ─ #}
+            {# ── Search criteria (editable, mirrors the contact "Projet" card).
+                  Étape 2 : la card n'est rendue qu'une fois l'étape Personnes
+                  validée, sinon on affiche le même verrou que les modules. #}
             <div data-tab-panel="search" class="contents">
-                <twig:Dossier:Search :dossierId="dossier.id" />
+                {% set searchStep = steps|filter(s => s.key == 'search')|first %}
+                {% if searchStep.unlocked %}
+                    <twig:Dossier:Search :dossierId="dossier.id" />
+                {% else %}
+                    <twig:Dossier:StepLocked
+                        title="{{ searchStep.labelKey|trans }}"
+                        :blockedBy="searchStep.blockedByLabelKey"
+                        todo="{{ searchStep.todoKey|trans }}"
+                    />
+                {% endif %}
             </div>
 
             {# ── Modules : chaque card porte son data-tab-panel (file, visit,

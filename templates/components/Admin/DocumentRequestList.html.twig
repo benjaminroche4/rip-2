@@ -156,7 +156,8 @@
                                     class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                                     data-testid="recent-request-delete-confirm"
                                 >
-                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(delete)|removeClass(hidden)" />
+                                    {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(delete)|addClass(hidden)'}) }}
                                     {{ 'admin.tools.documents.recent.deleteConfirm.confirm'|trans }}
                                 </button>
                             </div>

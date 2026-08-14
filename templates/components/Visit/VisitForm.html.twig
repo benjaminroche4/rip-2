@@ -140,20 +140,79 @@
         class="mx-auto max-w-2xl"
         data-testid="visit-form"
     >
+        {# Le dossier commande tout le reste : tant qu'il n'est pas choisi, le
+           formulaire se limite à ce champ (une visite sans dossier n'existe
+           pas, et les cards de rappel n'auraient rien à afficher). #}
+        {% set dossier = this.selectedDossier %}
+        {# Une visite se cadre sur les critères de recherche : dossier
+           incomplet, le formulaire s'arrête au choix du dossier. #}
+        {% set ready = dossier and dossier.searchComplete %}
         <div class="rounded-3xl border border-neutral-200 bg-white p-2">
             <div class="space-y-2 rounded-2xl bg-neutral-50 p-2">
 
                 {# ── L'essentiel, en bandes séparées comme la card Recherche :
                       dossier et type, le bien, le créneau, l'agent, la note. ── #}
                 <div class="flex flex-col gap-1">
-                    <div class="rounded-t-xl bg-white px-5 py-4">
+                    <div class="{{ ready ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4">
                         <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.visit'|trans }}</h3>
                         <div class="space-y-4">
                             {{ ui.select(form.dossier, 'admin.visits.create.dossier.label') }}
-                            {{ ui.enumChips(form.type, 'admin.visits.create.type.label', enum('App\\Visit\\Domain\\VisitType').cases()) }}
+                            {% if dossier and not ready %}
+                                <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50 px-3.5 py-3" data-testid="visit-form-dossier-incomplete">
+                                    <p class="flex items-start gap-2 text-sm text-amber-700">
+                                        {{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ 'admin.visits.create.dossier.incomplete'|trans }}
+                                    </p>
+                                    <a
+                                        {# Directement sur l'onglet Recherche du dossier : le lien
+                                           doit tomber sur le champ à compléter, pas sur le récap. #}
+                                        href="{{ path('admin_dossier_show', {adminPrefix: this.adminPrefix, reference: dossier.reference, tab: 'search'}) }}"
+                                        class="flex items-center gap-1.5 text-xs font-medium text-amber-800 transition-colors duration-100 ease-out hover:text-amber-900"
+                                        data-testid="visit-form-dossier-incomplete-link"
+                                    >
+                                        {{ 'admin.visits.create.dossier.incompleteLink'|trans }}
+                                        {{ ux_icon('lucide:arrow-right', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if ready %}
+                                {# Rappel du dossier : la formule d'abord, elle
+                                   décide de ce qu'on fait sur place. #}
+                                <div class="grid gap-1.5 sm:grid-cols-3" data-testid="visit-form-dossier-recap">
+                                    <div class="rounded-xl border border-primary/40 bg-primary/5 px-3.5 py-3" data-testid="visit-form-dossier-offer">
+                                        <p class="flex items-center gap-1.5 text-xs text-primary/70">
+                                            {{ ux_icon('lucide:badge-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            <span class="truncate">{{ 'admin.dossiers.card.package.label'|trans }}</span>
+                                        </p>
+                                        <p class="mt-1 truncate text-sm font-medium text-primary">
+                                            {{ dossier.offer ? ('contact.contactForm.offer.' ~ dossier.offer ~ '.title')|trans : 'admin.contacts.edit.noOffer'|trans }}
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-3">
+                                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                            {{ ux_icon('lucide:user', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            <span class="truncate">{{ 'admin.dossiers.create.person.primaryTag'|trans }}</span>
+                                        </p>
+                                        <p class="mt-1 truncate text-sm font-medium text-gray-900">
+                                            {{ dossier.primaryTenantName ? dossier.primaryTenantName|title : '-' }}
+                                        </p>
+                                    </div>
+                                    <div class="rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-3">
+                                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                            {{ ux_icon('lucide:calendar-heart', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            <span class="truncate">{{ 'admin.contacts.project.moveIn'|trans }}</span>
+                                        </p>
+                                        <p class="mt-1 truncate text-sm font-medium text-gray-900 tabular-nums">
+                                            {{ dossier.moveInAt ? dossier.moveInAt|format_datetime(pattern='dd MMM yyyy') : '-' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                {{ ui.enumChips(form.type, 'admin.visits.create.type.label', enum('App\\Visit\\Domain\\VisitType').cases()) }}
+                            {% endif %}
                         </div>
                     </div>
 
+                    {% if ready %}
                     <div class="bg-white px-5 py-4">
                         <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.property'|trans }}</h3>
                         {# Adresse : autocomplete Places (même widget que "Proposer
@@ -203,6 +262,7 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        <twig:Visit:DuplicateWarning :visits="this.matchingVisits" adminPrefix="{{ this.adminPrefix }}" />
                     </div>
 
                     <div class="bg-white px-5 py-4">
@@ -295,8 +355,10 @@
                             <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                         {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
 
+                {% if ready %}
                 {# ── Mode détaillé : le complément, replié par défaut. ── #}
                 <button
                     type="button"
@@ -355,6 +417,7 @@
                         </div>
                     </div>
                 {% endif %}
+                {% endif %}
 
                 {# Pied : annuler / planifier. #}
                 <div class="flex items-center justify-end gap-4 p-3">
@@ -365,6 +428,7 @@
                     >
                         {{ 'admin.visits.create.cancel'|trans }}
                     </a>
+                    {% if ready %}
                     {# data-loading désactive le bouton pendant create :
                        un double-clic créerait deux visites. #}
                     <button
@@ -379,6 +443,7 @@
                             {{ 'admin.visits.create.submitting'|trans }}
                         </span>
                     </button>
+                    {% endif %}
                 </div>
             </div>
         </div>

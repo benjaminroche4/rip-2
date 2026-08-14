@@ -1,0 +1,20 @@
+{# Card d'étape verrouillée : même coque et même vocabulaire que les cards
+   modules (pastille cadenas + phrase de déblocage), pour qu'un onglet fermé
+   se lise de la même façon partout sur la fiche. #}
+<section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-step-locked">
+    <div class="rounded-2xl bg-neutral-50 p-2">
+        <div class="flex items-center justify-between gap-4 p-3">
+            <div class="min-w-0">
+                <h2 class="font-medium text-gray-900">{{ title }}</h2>
+                <p class="mt-0.5 text-xs text-gray-500">{{ todo }}</p>
+            </div>
+            <span
+                class="flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 py-1 pr-2.5 pl-1.5 text-xs font-medium text-gray-500"
+                title="{{ blockedBy ? 'admin.dossiers.show.steps.lockedHint'|trans({'%step%': blockedBy|trans}) : '' }}"
+            >
+                {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.dossiers.show.modules.lockedShort'|trans }}
+            </span>
+        </div>
+    </div>
+</section>

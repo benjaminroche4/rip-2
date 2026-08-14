@@ -20,9 +20,12 @@ use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierEventLogger;
 use App\Dossier\Service\DossierNumberGenerator;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -97,6 +100,8 @@ final class DossierNotes
         private readonly DocumentStorage $storage,
         private readonly DossierNumberGenerator $numbers,
         private readonly ClockInterface $clock,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $securityLogger,
     ) {
     }
 
@@ -403,6 +408,15 @@ final class DossierNotes
         $dossier->setPairingCode($this->numbers->pairingCode());
         $this->events->log($dossier, 'dossier_closed', ['count' => $purged]);
         $this->em->flush();
+
+        // Piste d'audit : la clôture purge les pièces déposées et invalide le
+        // lien de dépôt, elle rejoint la suppression sur le canal security.
+        $this->securityLogger->notice('Dossier closed', [
+            'actor' => $this->security->getUser()?->getUserIdentifier(),
+            'dossier' => $dossier->getReference(),
+            'purgedFiles' => $purged,
+        ]);
+        $this->emit('dossier-closure:changed');
     }
 
     /** Reopens the dossier (the rotated pairing code stays the new one). */
@@ -418,6 +432,12 @@ final class DossierNotes
         $dossier->setClosedAt(null);
         $this->events->log($dossier, 'dossier_reopened');
         $this->em->flush();
+
+        $this->securityLogger->notice('Dossier reopened', [
+            'actor' => $this->security->getUser()?->getUserIdentifier(),
+            'dossier' => $dossier->getReference(),
+        ]);
+        $this->emit('dossier-closure:changed');
     }
 
     /**

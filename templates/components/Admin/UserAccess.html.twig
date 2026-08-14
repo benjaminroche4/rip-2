@@ -102,7 +102,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-access-grant-confirm"
                         >
-                            {{ ux_icon('lucide:door-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmGrantBackOffice)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:door-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmGrantBackOffice)|addClass(hidden)'}) }}
                             {{ 'admin.users.access.master.grantModal.confirm'|trans }}
                         </button>
                     </div>
@@ -159,7 +160,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-access-revoke-confirm"
                         >
-                            {{ ux_icon('lucide:door-closed', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmRevokeBackOffice)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:door-closed', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmRevokeBackOffice)|addClass(hidden)'}) }}
                             {{ 'admin.users.access.master.revokeModal.confirm'|trans }}
                         </button>
                     </div>

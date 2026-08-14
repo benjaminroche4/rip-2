@@ -7,8 +7,10 @@
         <div class="rounded-2xl bg-neutral-50 p-2">
             <div class="rounded-xl bg-white px-5 pt-4 pb-5">
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    {# Orbe animé à la Siri : signale que le contenu est écrit
+                       par le modèle, sans le dire une fois de plus. #}
                     <h2 class="flex items-center gap-2 font-medium text-gray-900">
-                        {{ ux_icon('lucide:sparkles', {class: 'size-4 shrink-0 text-primary/70', 'aria-hidden': 'true'}) }}
+                        <span class="ai-orb" aria-hidden="true"></span>
                         {{ 'admin.dossiers.show.recap.title'|trans }}
                     </h2>
                     <button
@@ -40,41 +42,92 @@
                     </p>
                 {% endif %}
 
+                {# Pendant la génération, le contenu (ou l'état vide) cède la
+                   place à un squelette de la même forme : pas de saut de
+                   layout et l'utilisateur voit ce qui arrive. Bascule par
+                   classe uniquement (cf. le bouton ci-dessus). #}
+                <div data-loading="action(generate)|addClass(hidden)">
                 {% if recap %}
-                    <div class="space-y-3" data-testid="dossier-recap-content">
-                        <p class="text-sm leading-relaxed text-pretty text-gray-700">{{ recap.summary }}</p>
+                    {% set points = recap.attentionPoints %}
+                    <div class="space-y-4" data-testid="dossier-recap-content">
+                        <div class="space-y-1.5">
+                            <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.summary'|trans }}</p>
+                            <p class="text-sm leading-relaxed text-pretty text-gray-700">{{ recap.summary }}</p>
+                        </div>
 
-                        {% if recap.attentionPoints is not empty %}
-                            <ul class="space-y-1.5">
-                                {% for point in recap.attentionPoints %}
-                                    <li class="flex items-start gap-2 text-sm text-gray-700">
-                                        {{ ux_icon('lucide:circle-alert', {class: 'mt-0.5 size-3.5 shrink-0 text-amber-500', 'aria-hidden': 'true'}) }}
-                                        {{ point }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                        {% if points is not empty %}
+                            <div class="space-y-1.5 border-t border-neutral-100 pt-4">
+                                <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.attention'|trans }}</p>
+                                <ul class="space-y-1.5">
+                                    {% for point in points %}
+                                        <li class="flex items-start gap-2 text-sm text-gray-700">
+                                            {{ ux_icon('lucide:circle-alert', {class: 'mt-0.5 size-3.5 shrink-0 text-amber-500', 'aria-hidden': 'true'}) }}
+                                            {{ point }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         {% endif %}
 
                         {% if recap.nextAction %}
-                            <p class="flex items-start gap-2 rounded-lg bg-neutral-50 px-3 py-2 text-sm text-gray-700">
-                                {{ ux_icon('lucide:arrow-right', {class: 'mt-0.5 size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                <span><span class="font-medium text-gray-900">{{ 'admin.dossiers.show.recap.nextAction'|trans }}</span> {{ recap.nextAction }}</span>
-                            </p>
+                            <div class="space-y-1.5 border-t border-neutral-100 pt-4">
+                                <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.nextAction'|trans }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ recap.nextAction }}</p>
+                            </div>
                         {% endif %}
 
-                        <p class="text-xs text-gray-400">
-                            {{ 'admin.dossiers.show.recap.generatedAt'|trans }}
-                            {% if recap.generatedAt %}
-                                <span class="tabular-nums">{{ recap.generatedAt|format_datetime(pattern='dd.MM.yyyy HH:mm') }}</span>
-                            {% endif %}
-                            &middot; {{ 'admin.dossiers.show.recap.disclaimer'|trans }}
+                        {# flex : sans lui, le preflight met le SVG en display:block
+                           et l'icône partirait seule sur sa ligne. #}
+                        <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                            {{ ux_icon('lucide:clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            <span>
+                                {{ 'admin.dossiers.show.recap.generatedAt'|trans }}
+                                {% if recap.generatedAt %}
+                                    <span class="tabular-nums">{{ recap.generatedAt|format_datetime(pattern='dd.MM.yyyy HH:mm') }}</span>
+                                {% endif %}
+                                &middot; {{ 'admin.dossiers.show.recap.disclaimerShort'|trans }}
+                            </span>
                         </p>
                     </div>
                 {% else %}
-                    <p class="text-sm text-gray-400" data-testid="dossier-recap-empty">
-                        {{ 'admin.dossiers.show.recap.empty'|trans }}
+                    {# Une seule bande, l'action est déjà dans le bouton du
+                       titre : l'état vide se contente de la demander. #}
+                    <p class="flex items-center gap-2 rounded-lg bg-neutral-50 px-3 py-2 text-xs text-gray-500" data-testid="dossier-recap-empty">
+                        {{ ux_icon('lucide:sparkles', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        <span>
+                            {{ 'admin.dossiers.show.recap.emptyCta'|trans }}
+                            <span class="text-gray-400">{{ 'admin.dossiers.show.recap.emptyHintCompact'|trans }}</span>
+                        </span>
                     </p>
                 {% endif %}
+                </div>
+
+                <div
+                    data-loading="action(generate)|removeClass(hidden)"
+                    class="hidden animate-pulse space-y-3"
+                    aria-hidden="true"
+                    data-testid="dossier-recap-skeleton"
+                >
+                    <div class="space-y-2">
+                        <div class="h-2.5 w-full rounded-full bg-neutral-100"></div>
+                        <div class="h-2.5 w-11/12 rounded-full bg-neutral-100"></div>
+                        <div class="h-2.5 w-8/12 rounded-full bg-neutral-100"></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="size-3.5 shrink-0 rounded-full bg-neutral-100"></span>
+                            <span class="h-2.5 w-7/12 rounded-full bg-neutral-100"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="size-3.5 shrink-0 rounded-full bg-neutral-100"></span>
+                            <span class="h-2.5 w-5/12 rounded-full bg-neutral-100"></span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-lg bg-neutral-50 px-3 py-2.5">
+                        <span class="size-3.5 shrink-0 rounded-full bg-neutral-200/70"></span>
+                        <span class="h-2.5 w-6/12 rounded-full bg-neutral-200/70"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

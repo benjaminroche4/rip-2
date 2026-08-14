@@ -126,6 +126,34 @@ final class ContactsAccessTest extends WebTestCase
         self::assertStringContainsString('Bonjour, je cherche un appartement.', $cardText);
     }
 
+    public function testTheListOpenedOnAFilteredUrlShowsThatFilterOnly(): void
+    {
+        // Retour arrière depuis une fiche : l'URL porte le filtre, la liste
+        // doit repartir dessus (et pas sur les cards "À traiter" par défaut).
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $inProgress = (new Contact())
+            ->setReference('CT-424243')
+            ->setFirstName('Marc')->setLastName('Traité')
+            ->setEmail('contacts-test-inprogress@example.com')
+            ->setHelpType('contact.contactForm.helpType.choice.1')
+            ->setMessage('Déjà pris en charge.')
+            ->setStatus(\App\Contact\Domain\ContactStatus::InProgress)
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setLang('fr');
+        $em->persist($inProgress);
+        $em->flush();
+
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'?statusFilter=in_progress');
+
+        self::assertResponseIsSuccessful();
+        $cards = $crawler->filter('[data-testid="contact-card"]');
+        self::assertSame(1, $cards->count(), 'Only the in-progress lead belongs to that filter.');
+        self::assertStringContainsString('Marc Traité', $cards->first()->text());
+    }
+
     public function testWrongPrefixReturns404EvenAuthenticated(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);

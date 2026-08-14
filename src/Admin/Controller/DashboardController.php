@@ -134,6 +134,21 @@ final class DashboardController extends AbstractController
         $from = $request->query->getString('from');
         $from = 'all' === $from || null !== \App\Contact\Domain\ContactStatus::tryFrom($from) ? $from : null;
 
+        // A dossier already covers this contact when one was converted from it
+        // (source reference) OR when one already carries the same primary-tenant
+        // email — the exact idempotency the converter uses. Resolving both here
+        // keeps the "Transformer en dossier" action hidden whenever converting
+        // would only land on an existing dossier.
+        // Exception : un dossier de même email mais sans contact d'origine
+        // (créé à la main, ou d'avant la copie de la recherche) reste
+        // convertible, la conversion l'adopte et complète son instantané.
+        $contactEmail = trim((string) $contact->email);
+        $convertedDossier = $dossierRepository->findOneBy(['sourceContactReference' => $contact->reference]);
+        if (null === $convertedDossier && '' !== $contactEmail) {
+            $sameEmail = $dossierRepository->findByPrimaryTenantEmail($contactEmail);
+            $convertedDossier = null !== $sameEmail?->getSourceContactReference() ? $sameEmail : null;
+        }
+
         return $this->render('admin/contacts/show.html.twig', [
             'adminPrefix' => $adminPrefix,
             'contact' => $contact,
@@ -141,7 +156,7 @@ final class DashboardController extends AbstractController
             'adjacent' => $this->contactRepository->adjacentReferences($contact->id, $from),
             'previousRequests' => $this->contactRepository->listOtherByEmail($contact->email, $contact->id),
             'notesCount' => \count($noteRepository->listForContact($contact->id)),
-            'convertedDossierRef' => $dossierRepository->findOneBy(['sourceContactReference' => $contact->reference])?->getReference(),
+            'convertedDossierRef' => $convertedDossier?->getReference(),
         ]);
     }
 

@@ -109,6 +109,7 @@
                                 data-loading="action(confirmEnrollment)|addAttribute(disabled)"
                                 data-testid="two-factor-confirm-submit"
                             >
+                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmEnrollment)|removeClass(hidden)" />
                                 {{ 'admin.profile.twoFactor.enroll.confirm'|trans }}
                             </twig:Button>
                             <button
@@ -168,6 +169,7 @@
                             class="cursor-pointer rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="two-factor-disable-submit"
                         >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmDisable)|removeClass(hidden)" />
                             {{ 'admin.profile.twoFactor.disable.confirm'|trans }}
                         </button>
                         <button
@@ -189,8 +191,10 @@
                     size="sm"
                     data-action="live#action"
                     data-live-action-param="startEnrollment"
+                    data-loading="action(startEnrollment)|addAttribute(disabled)"
                     data-testid="two-factor-enable"
                 >
+                    <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(startEnrollment)|removeClass(hidden)" />
                     <span class="flex items-center gap-2">
                         {{ ux_icon('lucide:shield-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
                         {{ 'admin.profile.twoFactor.enable'|trans }}

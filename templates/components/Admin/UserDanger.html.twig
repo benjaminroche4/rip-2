@@ -149,6 +149,7 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ targetIsAdmin ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90' }}"
                             data-testid="user-admin-toggle-confirm"
                         >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmToggleAdmin)|removeClass(hidden)" />
                             {{ ux_icon(targetIsAdmin ? 'lucide:shield-off' : 'lucide:shield-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                             {{ (targetIsAdmin ? 'admin.users.access.modal.revokeConfirm' : 'admin.users.access.modal.grantConfirm')|trans }}
                         </button>
@@ -206,7 +207,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-suspend-confirm"
                         >
-                            {{ ux_icon('lucide:user-lock', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmSuspend)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:user-lock', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmSuspend)|addClass(hidden)'}) }}
                             {{ 'admin.users.danger.suspend.modal.confirm'|trans }}
                         </button>
                     </div>
@@ -264,7 +266,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-two-factor-reset-confirm"
                         >
-                            {{ ux_icon('lucide:shield-off', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmResetTwoFactor)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:shield-off', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmResetTwoFactor)|addClass(hidden)'}) }}
                             {{ 'admin.users.danger.twoFactor.modal.confirm'|trans }}
                         </button>
                     </div>
@@ -321,7 +324,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-resume-confirm"
                         >
-                            {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmResume)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmResume)|addClass(hidden)'}) }}
                             {{ 'admin.users.danger.suspend.resumeModal.confirm'|trans }}
                         </button>
                     </div>
@@ -378,7 +382,8 @@
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                             data-testid="user-delete-confirm"
                         >
-                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmDelete)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmDelete)|addClass(hidden)'}) }}
                             {{ 'admin.users.danger.modal.confirm'|trans }}
                         </button>
                     </div>

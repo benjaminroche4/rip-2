@@ -22,7 +22,8 @@
                     class="sr-only"
                 />
                 {% if option.icon is defined %}
-                    {{ ux_icon(option.icon, {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {# Les drapeaux sont ronds partout dans le BO. #}
+                    {{ ux_icon(option.icon, {class: 'size-4 shrink-0' ~ (option.icon starts with 'circle-flags:' ? ' rounded-full' : ''), 'aria-hidden': 'true'}) }}
                 {% endif %}
                 {{ option.label|trans }}
             </label>
@@ -379,7 +380,8 @@
                     class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                     data-testid="person-edit-save"
                 >
-                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(savePerson)|removeClass(hidden)" />
+                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(savePerson)|addClass(hidden)'}) }}
                     {{ 'admin.dossiers.show.persons.save'|trans }}
                 </button>
             </div>
@@ -470,9 +472,9 @@
                     {% if person.role.value == 'tenant' %}
                     <div class="min-w-0">
                         <dt class="text-gray-600">{{ 'admin.dossiers.create.person.language.label'|trans }}</dt>
-                        <dd class="mt-0.5 flex items-center gap-1.5 font-medium text-gray-900">
-                            {{ ux_icon('circle-flags:' ~ person.language.value, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                            {{ person.language.labelKey|trans }}
+                        <dd class="mt-0.5 flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                            {{ ux_icon('circle-flags:' ~ person.language.value, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="truncate">{{ person.language.labelKey|trans }}</span>
                         </dd>
                     </div>
                     <div class="min-w-0">
@@ -491,10 +493,10 @@
                     </div>
                     <div class="min-w-0">
                         <dt class="text-gray-600">{{ 'admin.dossiers.create.person.nationality.label'|trans }}</dt>
-                        <dd class="mt-0.5 flex items-center gap-1.5 truncate font-medium {{ person.nationality ? 'text-gray-900' : 'text-gray-400' }}">
+                        <dd class="mt-0.5 flex min-w-0 items-center gap-2 font-medium {{ person.nationality ? 'text-gray-900' : 'text-gray-400' }}">
                             {% if person.nationality %}
-                                <img src="{{ asset('flags/circle/' ~ person.nationality|lower ~ '.svg') }}" width="14" height="14" alt="" loading="lazy" class="size-3.5 shrink-0 rounded-full">
-                                {{ person.nationality|country_name }}
+                                <img src="{{ asset('flags/circle/' ~ person.nationality|lower ~ '.svg') }}" width="16" height="16" alt="" loading="lazy" class="size-4 shrink-0 rounded-full">
+                                <span class="truncate">{{ person.nationality|country_name }}</span>
                             {% else %}
                                 -
                             {% endif %}
@@ -668,7 +670,8 @@
                                 class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
                                 data-testid="person-remove-confirm"
                             >
-                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(removePerson)|removeClass(hidden)" />
+                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(removePerson)|addClass(hidden)'}) }}
                                 {{ 'admin.dossiers.show.persons.removeConfirm.confirm'|trans }}
                             </button>
                         </div>

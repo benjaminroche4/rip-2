@@ -53,6 +53,34 @@ class ContactEventRepository extends ServiceEntityRepository
         );
     }
 
+    /**
+     * Who last moved the submission to this status, read from the follow-up
+     * thread (each entry snapshots its author). Feeds the terminal banner:
+     * a lead can be closed, reopened and closed again by someone else.
+     *
+     * @return array{name: string, avatar: ?string}|null
+     */
+    public function findStatusAuthor(int $contactId, ContactStatus $status): ?array
+    {
+        /** @var ContactEvent|null $event */
+        $event = $this->createQueryBuilder('e')
+            ->andWhere('e.contact = :contactId')
+            ->andWhere('e.status = :status')
+            ->setParameter('contactId', $contactId)
+            ->setParameter('status', $status)
+            ->orderBy('e.createdAt', 'DESC')
+            ->addOrderBy('e.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $name = $event?->getAuthorName();
+
+        return null !== $name && '' !== $name
+            ? ['name' => $name, 'avatar' => $event->getAuthorAvatar()]
+            : null;
+    }
+
     /** Persisted with the caller's flush (no flush here). */
     public function record(Contact $contact, ?ContactStatus $status, ?ClosureReason $closureReason, ?string $authorName, ?string $authorAvatar): void
     {

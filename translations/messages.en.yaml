@@ -631,6 +631,7 @@ login:
         google: Sign in with Google
     resetPassword:
         title: Reset your password
+        emailSubject: Reset your password
         subTitle: Enter your email address, and we will send you a link to reset your password.
         tooManyAttempts: Too many reset requests from this address. Try again in a few minutes.
         form:
@@ -732,14 +733,7 @@ register:
         alreadyUsed: An account already exists with this email. Please sign in.
         sendFailed: Could not send the confirmation code. Please check your email address and try again.
     phoneNumber:
-        notBlank: Phone number is required.
-        maxLength: Phone number is too long.
         invalidFormat: The phone number format is not valid.
-    nationality:
-        notBlank: Nationality is required.
-        invalid: This nationality is not valid.
-    situation:
-        required: Professional situation is required.
     password:
         notBlank: Password is required.
         minLength: Password must be at least 8 characters long.
@@ -768,8 +762,6 @@ register:
             resendThrottled: Please wait a minute before requesting a new code.
             resendThrottledTitle: Hold on a moment
             invalid: Wrong or expired code. Try again or request a new one.
-            required: Enter the code we sent to your inbox.
-            format: The code must be 6 digits.
             tooManyAttempts: Too many attempts. Try again in a few minutes.
             spam: Check your spam folder if you don't see it.
             help: Didn't get the code?
@@ -1097,7 +1089,6 @@ propertyManagement:
             label: Email
             placeholder: "Email: john@doe.com"
             notBlank: The email address must not be empty.
-            invalid: The email address is not valid.
         button: Estimate my rental income
         trust:
             1: Response in 2h
@@ -1799,6 +1790,8 @@ gallery:
 admin:
     meta:
         description: Relocation in Paris admin area. Team access only.
+    busyGuard:
+        message: An action is still running. Leaving the page now may lose it.
     nav:
         users: Users
         contacts: Leads
@@ -1836,6 +1829,9 @@ admin:
             close: Close
     dossiers:
         title: Files
+        creating:
+            title: Your dossier is being created
+            subtitle: One moment, setting everything up.
         empty:
             title: No files yet
             description: Create your first file with the button above.
@@ -1846,6 +1842,7 @@ admin:
             label: List scope
             all: All files
             mine: My files
+            archived: Archive
         emptyFiltered:
             title: No file matches
             description: Adjust the search or the status filter to find your files.
@@ -1869,12 +1866,15 @@ admin:
                 label: Package
             progress:
                 started: 'Started:'
+                closed: 'Closed:'
                 estimatedFinish: 'Estimated finish:'
             stats:
                 upcomingVisits: Upcoming visits
                 totalVisits: Total visits
                 rejections: Rejections
             managedBy: 'Managed by:'
+            archived: Completed
+            closedIn: 'Closed in {0}less than a day|{1}1 day|]1,Inf[%count% days'
         show:
             unlock: Unlock editing
             lock: Lock editing
@@ -1924,16 +1924,37 @@ admin:
                 late: Late
                 daysLeft: 'D-%count%'
                 daysLate: 'D+%count%'
+            steps:
+                lockedHint: 'Validate the %step% step to get in.'
+                persons:
+                    label: People
+                    todo: Add at least one tenant and pick the primary contact.
+                search:
+                    label: Search
+                    todo: Complete the search criteria.
+                file:
+                    label: File
+                    todo: Request the supporting documents and validate them all.
+                visit:
+                    label: Visit
+                    todo: Mark at least one visit as carried out.
+                payment:
+                    label: Payment
+                    todo: Last step of the path.
             recap:
-                title: Quick recap
+                title: AI file recap
                 generate: Generate the recap
                 refresh: Refresh
                 generating: Generating...
-                empty: No recap yet. Generate one to get a summary of the file based on the data entered.
+                emptyCta: Generate the file's first recap.
+                emptyHintCompact: From the notes, the search and the history.
                 error: Generation failed. Try again in a moment.
-                nextAction: 'Next action:'
+                sections:
+                    summary: Summary
+                    attention: Watch out
+                    nextAction: Next action
+                disclaimerShort: AI summary, double-check it.
                 generatedAt: Generated on
-                disclaimer: AI-generated summary based on the file data, double-check it.
             search:
                 guarantorStatus:
                     label: Guarantee
@@ -2017,7 +2038,6 @@ admin:
                     label: Important addresses
                     typeLabel: Place type
                     placeholder: Type the address to add…
-                    add: Add this address
                     remove: Remove this address
                     openInMaps: Open in Google Maps
                     type:
@@ -2033,6 +2053,8 @@ admin:
             requestDocuments: Request documents
             closure:
                 badge: File closed
+                bannerTitle: File closed
+                by: by %name%
                 closedAt: Closed on
                 close: Close the file
                 reopen: Reopen
@@ -2040,6 +2062,12 @@ admin:
                     title: Close this file?
                     text: The deposited files will be permanently deleted, the deposit link will be disabled and the deposit page will refuse this file. You can reopen the file later, but the files will not be restored.
                     confirm: Close
+            deletion:
+                delete: Delete the file
+                modal:
+                    title: 'Delete file %reference%?'
+                    text: The file, its tenants, pieces, notes, history and visits will be permanently deleted, along with the Drive folder and every document it holds. This cannot be undone.
+                    confirm: Delete permanently
             events:
                 statusChanged: 'File status: %status%'
                 system: System
@@ -2050,6 +2078,7 @@ admin:
                 documentRefused: 'Document refused: %piece% (%tenant%). Reason: %reason%'
                 documentRefusedNoReason: 'Document refused: %piece% (%tenant%)'
                 documentStatus: 'Status of %piece% (%tenant%) set to "%status%"'
+                documentDeleted: 'Piece removed from the dossier: %piece% (%tenant%)'
                 documentFileDeleted: 'File deleted on %piece% (%tenant%): %file%'
                 documentFileRemoved: 'File removed by the depositor on %piece%: %file%'
                 descriptionUpdated: 'Precision added on %piece% (%tenant%): %description%'
@@ -2108,6 +2137,11 @@ admin:
                         title: Delete this file?
                         text: The file will be permanently deleted. If it was the piece's last one, it goes back to requested.
                         confirm: Delete
+                    deletePiece: Remove this piece from the dossier
+                    deletePieceConfirm:
+                        title: Remove this piece?
+                        text: The piece and any files already deposited will be permanently deleted. The tenant will no longer see it in their upload page.
+                        confirm: Remove
                     counter: '%deposited%/%total% deposited'
                     resend: Remind
                     resendTitle: Re-send the request email for the pieces still awaited
@@ -2169,19 +2203,13 @@ admin:
             cancel: Cancel
             submit: Create the file
             submitting: Creating
+            success: File created.
             name:
                 label: File name
-                notBlank: The file name is required.
-                length: The name must be between 2 and 100 characters.
             persons:
                 title: People
                 count: '%count% / %max% people'
                 add: Add a person
-                min: The file must contain at least one person.
-                max: The file cannot contain more than 4 people.
-                tenantRequired: The file must contain at least one tenant.
-                maxTenants: The file cannot contain more than 2 tenants.
-                maxFollowUps: The file cannot contain more than 2 follow-up requests.
             person:
                 heading: Person %number%
                 remove: Remove
@@ -2189,29 +2217,18 @@ admin:
                 makePrimary: Set as primary
                 role:
                     label: Role
-                    notNull: Pick a role for this person.
                     tenant: Tenant
                     follow_up: Follow-up request
                 firstName:
                     label: First name
-                    notBlank: The first name is required.
-                    length: The first name must be between 2 and 50 characters.
                 lastName:
                     label: Last name
-                    notBlank: The last name is required.
-                    length: The last name must be between 2 and 50 characters.
                 email:
                     label: Email
-                    notBlank: The email is required.
-                    invalid: This email is not valid.
-                    length: The email cannot exceed 180 characters.
                 phone:
                     label: Phone
-                    invalid: This number is not valid (digits, spaces, dots and dashes only).
-                    length: The phone number cannot exceed 30 characters.
                 language:
                     label: Contact language
-                    notNull: Pick a contact language.
                     fr: French
                     en: English
                 profession:
@@ -2338,6 +2355,7 @@ admin:
             subtitle: Manual entry for a lead received by phone, email or WhatsApp.
             source: Lead source
             submit: Create the lead
+            success: Lead created.
         contactSource:
             form: Website form
             phone: Phone
@@ -2371,6 +2389,7 @@ admin:
             channelLabel: Via which channel
             joinVisio: Join
             edit: Edit
+            cancelStep: Cancel
             confirm: Confirm
             dateRequired: Pick a date to confirm this step.
             planner:
@@ -2393,6 +2412,7 @@ admin:
             budget: Monthly budget
             budgetUnit: €/month
             areas: Target areas
+            allAreas: All arrondissements
             moveIn: Desired move-in
             propertyType: Property type
             budgetTier:
@@ -2433,6 +2453,7 @@ admin:
             step_quote_sent: Next step, quote sent
             step_other: Next step, other
             step_cleared: Next step cleared
+            step_cancelled: Recall cancelled
             visio_planned: Video call scheduled
             visio_rescheduled: Video call rescheduled
             pdf_export: Lead exported as PDF
@@ -2549,6 +2570,7 @@ admin:
             reportSave: Save the report
             title: 'Visit on %date% at %time%'
             detailsTitle: 'Visit details'
+            reference: Reference
         edit:
             title: Edit the visit
         row:
@@ -2592,6 +2614,8 @@ admin:
             todayEmpty: No visits today.
             tomorrow: Tomorrow
             later: Coming days
+            showMap: See on the map
+            hideMap: Hide the map
         create:
             sections:
                 visit: The visit
@@ -2607,15 +2631,15 @@ admin:
             listingUrl:
                 label: Listing link
                 placeholder: https://www.seloger.com/...
-                invalid: The listing link is not a valid URL.
-                length: The link cannot exceed 500 characters.
+            duplicate:
+                title: '{1}A visit is already booked for this property.|]1,Inf[%count% visits are already booked for this property.'
+                item: 'on %date% for %dossier%'
             duration:
                 label: Estimated duration
                 min15: 15 min
                 min30: 30 min
                 min45: 45 min
                 min60: +1h
-                invalid: Invalid duration.
             clientPresent:
                 label: The client attends the visit
                 help: Untick if the agent visits on their behalf (proxy visit).
@@ -2628,7 +2652,8 @@ admin:
             dossier:
                 label: File
                 placeholder: Pick a file...
-                notNull: The file is required.
+                incomplete: Complete this file's search criteria before scheduling a visit.
+                incompleteLink: Complete the search
             assignee:
                 none: 'No visit agent yet. Grant the "Visit agent" function on the user profile.'
                 label: Performed by
@@ -2639,17 +2664,13 @@ admin:
             note:
                 label: Free note
                 placeholder: 'Access code, on-site contact, instructions...'
-                length: The note cannot exceed 2000 characters.
             scheduledAt:
                 past: The visit cannot be scheduled in the past.
                 label: Date and time
-                notNull: The date and time are required.
             address:
                 idf: The address must be located in Île-de-France.
                 label: Property address
                 placeholder: 12 rue de la Roquette, 75011 Paris
-                notBlank: The address is required.
-                length: The address cannot exceed 255 characters.
     agents:
         title: Real estate agents
         searchPlaceholder: Search for an agent...
@@ -2677,12 +2698,8 @@ admin:
             submitting: Adding...
             firstName:
                 label: First name
-                notBlank: The first name is required.
-                length: The first name cannot exceed 50 characters.
             lastName:
                 label: Last name
-                notBlank: The last name is required.
-                length: The last name cannot exceed 50 characters.
             kind:
                 label: This agent works...
                 agency: With an agency
@@ -2691,15 +2708,10 @@ admin:
                 label: Agency
                 placeholder: Agency name...
                 help: A known agency is reused automatically.
-                notBlank: The agency name is required.
-                length: The agency name cannot exceed 100 characters.
             email:
                 label: Email
-                invalid: This email address is not valid.
-                length: The email cannot exceed 180 characters.
             phone:
                 label: Phone
-                length: The phone number cannot exceed 30 characters.
     agencies:
         count: '{0}No agencies|{1}1 agency|]1,Inf[%count% agencies'
         empty:
@@ -3211,7 +3223,7 @@ listProperty:
         admin:
             subject: "🏡 Nouveau bien proposé (%details%) | Relocation In Paris"
         client:
-            subject: "Received! We are reviewing your property, reply within 24h"
+            subject: "Your property is under review, reply within 24h"
     steps:
         1:
             title: Enter the address
@@ -3280,8 +3292,6 @@ deposit:
             refused: Refused
         error:
             noFile: No file received. Please try again.
-            mimeType: 'Format not accepted. Only PDF is allowed.'
-            maxSize: The file exceeds 10 MB. Please send a lighter version.
             locked: This piece has been validated, its file can no longer be removed.
     manager:
         title: Your dedicated advisor

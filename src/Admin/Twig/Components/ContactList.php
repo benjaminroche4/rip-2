@@ -17,6 +17,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 /**
  * Paginated admin contact submissions list. Same security model as
@@ -105,7 +106,21 @@ final class ContactList
     public function mount(): void
     {
         $this->ensureAdmin();
+    }
 
+    /**
+     * Les props liées à l'URL (?statusFilter=…) sont posées sur l'événement
+     * PostMount, donc APRÈS mount() : normaliser et épingler ici. Sinon un
+     * retour arrière depuis une fiche épingle les cards du filtre par défaut
+     * alors que la colonne de gauche affiche déjà le filtre de l'URL.
+     *
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    #[PostMount]
+    public function initializeFromUrl(array $data): array
+    {
         // The filter can arrive from a hand-edited URL — fall back to "all"
         // rather than 500 on an unknown value.
         if ('all' !== $this->statusFilter && null === ContactStatus::tryFrom($this->statusFilter)) {
@@ -121,6 +136,8 @@ final class ContactList
         // Pin the order NOW: live props are dehydrated before the template
         // body runs, so populating pinnedOrder during render never persists.
         $this->getItems();
+
+        return $data;
     }
 
     #[LiveAction]

@@ -37,6 +37,22 @@ final class ParisDistricts
         '94' => 'Val-de-Marne (94)',
     ];
 
+    /** Paris arrondissements only, petite couronne excluded. */
+    public const ARRONDISSEMENTS = [
+        '1er', '2e', '3e', '4e', '5e', '6e', '7e', '8e', '9e', '10e',
+        '11e', '12e', '13e', '14e', '15e', '16e', '17e', '18e', '19e', '20e',
+    ];
+
+    /**
+     * True when every Paris arrondissement is part of the CSV selection.
+     */
+    public static function allArrondissementsSelected(string $areas): bool
+    {
+        $selected = array_filter(array_map(trim(...), explode(',', $areas)));
+
+        return [] === array_diff(self::ARRONDISSEMENTS, $selected);
+    }
+
     /** code => [[lat, lng], ...] simplified outlines. */
     public const PATHS = [
         '1er' => [[48.86992, 2.32801], [48.86819, 2.33066], [48.86341, 2.35095], [48.85735, 2.34756], [48.85405, 2.34459], [48.85839, 2.33755], [48.86306, 2.3209], [48.86945, 2.32516], [48.86992, 2.32801]],

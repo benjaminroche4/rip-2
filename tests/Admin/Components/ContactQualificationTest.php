@@ -365,6 +365,11 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertStringContainsString('En cours', $history[1]['text']);
         self::assertStringContainsString('Converti', $history[2]['text']);
         self::assertSame('Julien Moreau', $history[1]['authorName']);
+
+        // L'IP de la soumission n'est pas un auteur : elle part en infobulle,
+        // sinon la ligne "Reçu le" affiche un avatar "I".
+        self::assertNull($history[0]['authorName']);
+        self::assertStringContainsString('IP :', (string) $history[0]['hint']);
     }
 
     public function testContactCanBeAssignedAndUnassigned(): void
@@ -582,6 +587,46 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertContains('visio_kept', $kinds);
         self::assertContains('visio_planned', $kinds);
         self::assertContains('visio_rescheduled', $kinds);
+    }
+
+    public function testAConvertedLeadKeepsItsMeetingReachable(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('in_progress');
+        $component->pickStep('visio');
+        $slot = new \DateTimeImmutable('+2 days 14:00');
+        $component->recallAt = $slot->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        $component->change('converted');
+
+        // The meeting is deliberately kept on conversion, so the record
+        // must keep it too: wiping the step and date left it unreachable
+        // (no reassignment sync, no cancellation email, no reminder).
+        $this->em->clear();
+        $fresh = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame(\App\Contact\Domain\NextStep::Visio, $fresh->getNextStep());
+        self::assertSame($slot->format('Y-m-d H:i'), $fresh->getRecallAt()?->format('Y-m-d H:i'));
+
+        // Closing it afterwards still cancels properly, which is only
+        // possible because the step survived the conversion.
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('closed');
+
+        $this->em->clear();
+        $fresh = $this->em->find(Contact::class, $contact->getId());
+        self::assertNull($fresh->getNextStep(), 'Closing drops the step for good.');
+        self::assertNull($fresh->getRecallAt());
+        $kinds = array_filter(array_map(
+            static fn ($e) => $e->kind,
+            self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)->listForContact((int) $contact->getId()),
+        ));
+        self::assertContains('visio_cancelled', $kinds);
     }
 
     public function testClosingFromTheListCancelsThePlannedVisio(): void
@@ -827,6 +872,21 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertStringContainsString('data-testid="terminal-banner"', $html);
         self::assertStringContainsString('Lead converti en client', $html);
         self::assertStringNotContainsString('Profil inadapté', $html, 'Closure reason is closed-only.');
+    }
+
+    public function testTheTerminalBannerNamesWhoClosedTheLead(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->change('closed');
+
+        $html = (string) $this->renderTwigComponent('Admin:ContactTerminalBanner', ['contactId' => (int) $contact->getId()]);
+        self::assertStringContainsString('data-testid="terminal-banner-author"', $html);
+        // Le nom vient du fil de suivi, capturé au moment du changement.
+        self::assertStringContainsString('First Last', $html);
     }
 
     public function testProjectFieldsAreSavedAndPrefilled(): void

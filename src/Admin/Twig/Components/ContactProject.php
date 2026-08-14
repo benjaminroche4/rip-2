@@ -146,6 +146,12 @@ final class ContactProject
         );
     }
 
+    /** Active state of the "tous les arrondissements" pill above the map. */
+    public function getAllArrondissementsSelected(): bool
+    {
+        return \App\Contact\Domain\ParisDistricts::allArrondissementsSelected($this->areas);
+    }
+
     /**
      * Same catalogue as the public "list my property" form.
      *

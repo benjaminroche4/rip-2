@@ -16,6 +16,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -56,6 +58,7 @@ final class DossierCreate extends AbstractController
 
     public function __construct(
         private readonly Security $security,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -193,6 +196,14 @@ final class DossierCreate extends AbstractController
         // Best-effort: provision the dossier's Shared Drive folder now (no-op
         // when Drive is off) so staff can drop pieces immediately.
         $drive->ensureDossierFolder($draft);
+
+        // Success lands as a toast on the dossier we redirect to. Guarded:
+        // the component is also mounted straight from unit tests, no session.
+        $request = $this->requestStack->getCurrentRequest();
+        $session = null !== $request && $request->hasSession() ? $request->getSession() : null;
+        if ($session instanceof FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add('success', 'admin.dossiers.create.success');
+        }
 
         return $this->redirectToRoute('admin_dossier_show', [
             'adminPrefix' => $this->adminPrefix,

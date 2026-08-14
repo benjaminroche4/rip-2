@@ -31,6 +31,8 @@ final class SearchEditorTest extends KernelTestCase
     {
         self::bootKernel();
         $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
+        // Les visites d'abord : elles référencent le dossier.
+        $this->em->createQuery('DELETE FROM '.\App\Visit\Entity\Visit::class)->execute();
         $this->em->createQuery('DELETE FROM '.Dossier::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@search-editor-test.local')->execute();
         $this->loginAsAdmin();
@@ -246,6 +248,39 @@ final class SearchEditorTest extends KernelTestCase
         self::assertStringContainsString('data-testid="fact-guarantor"', $rendered);
     }
 
+    public function testTheSummaryCardCountsTheVisitsOfTheDossier(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $this->persistVisit($dossier, '+3 days');
+        $this->persistVisit($dossier, '-3 days');
+        // Annulée : elle n'a jamais eu lieu, elle ne compte pas.
+        $this->persistVisit($dossier, '+5 days', \App\Visit\Domain\VisitStatus::Cancelled);
+
+        $timeline = $this->mountTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()]);
+        self::assertSame(['upcoming' => 1, 'total' => 2], $timeline->getVisitCounts());
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="dossier-card-upcoming-visits"', $rendered);
+        self::assertStringContainsString('data-testid="dossier-card-total-visits"', $rendered);
+        self::assertStringContainsString('data-testid="dossier-card-rejections"', $rendered);
+    }
+
+    private function persistVisit(
+        Dossier $dossier,
+        string $scheduledAt,
+        \App\Visit\Domain\VisitStatus $status = \App\Visit\Domain\VisitStatus::Planned,
+    ): void {
+        $visit = (new \App\Visit\Entity\Visit())
+            ->setReference('VS-'.str_pad((string) random_int(0, 999999), 6, '0', \STR_PAD_LEFT))
+            ->setDossier($dossier)
+            ->setScheduledAt(new \DateTimeImmutable($scheduledAt))
+            ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setStatus($status)
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($visit);
+        $this->em->flush();
+    }
+
     public function testTimelineComponentFollowsTheMoveInDate(): void
     {
         $dossier = $this->persistDossier(withSearch: true);
@@ -357,6 +392,38 @@ final class SearchEditorTest extends KernelTestCase
         $rows = $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getImportantAddresses();
         self::assertCount(2, $rows);
         self::assertSame('Adresse 0', $rows[0]['address']);
+    }
+
+    public function testPickingAnAddressAddsItWithoutAnAddButton(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+
+        // No "+" button any more: selecting a Places suggestion fires the
+        // LiveAction through the hidden trigger.
+        self::assertStringNotContainsString('data-testid="important-address-add"', $rendered);
+        self::assertStringContainsString('data-testid="important-address-trigger"', $rendered);
+        self::assertStringContainsString('data-live-action-param="addImportantAddress"', $rendered);
+        self::assertStringContainsString('data-testid="important-address-input"', $rendered);
+
+        // Once two are stored, the empty field is still offered right below.
+        $component = $this->mountEditor($dossier);
+        foreach (['work', 'school'] as $type) {
+            $component->addressDraft = 'Adresse '.$type;
+            $component->addressTypeDraft = $type;
+            $component->addImportantAddress();
+        }
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertSame(2, substr_count($rendered, 'data-testid="important-address-row"'));
+        self::assertStringContainsString('data-testid="important-address-input"', $rendered);
+
+        // At the cap the field disappears: nothing left to add.
+        $component->addressDraft = 'Adresse gym';
+        $component->addressTypeDraft = 'gym';
+        $component->addImportantAddress();
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="important-address-input"', $rendered);
     }
 
     public function testImportantAddressStoresCoordinatesForTheMapPin(): void
@@ -475,6 +542,12 @@ final class SearchEditorTest extends KernelTestCase
         // now, keep only the most recent entry per field.
         $fields = [];
         foreach ($events as $event) {
+            // L'avancement automatique du statut (étape Recherche validée)
+            // a son propre event, distinct de l'audit champ par champ.
+            if ('status_changed' === $event->getKind()) {
+                self::assertTrue($event->getPayload()['auto'] ?? false);
+                continue;
+            }
             self::assertSame('search_updated', $event->getKind());
             $fields[$event->getPayload()['field']] ??= $event->getPayload()['value'];
         }

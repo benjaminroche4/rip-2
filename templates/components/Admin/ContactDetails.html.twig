@@ -177,8 +177,10 @@
                     size="sm"
                     data-action="live#action"
                     data-live-action-param="saveDetails"
+                    data-loading="action(saveDetails)|addAttribute(disabled)"
                     data-testid="contact-details-save"
                 >
+                    {{ ux_icon('lucide:loader-circle', {class: 'hidden size-4 shrink-0 animate-spin', 'aria-hidden': 'true', 'data-loading': 'action(saveDetails)|removeClass(hidden)'}) }}
                     {{ 'admin.contacts.notes.save'|trans }}
                 </twig:Button>
             </div>

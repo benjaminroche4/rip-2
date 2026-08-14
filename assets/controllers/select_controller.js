@@ -125,6 +125,10 @@ export default class extends Controller {
 
     #select(value) {
         this.selectTarget.value = value;
+        // "input" then "change", exactly what a native <select> fires when the
+        // user picks an option: a live model bound with on(input) would never
+        // see the choice otherwise.
+        this.selectTarget.dispatchEvent(new Event('input', { bubbles: true }));
         this.selectTarget.dispatchEvent(new Event('change', { bubbles: true }));
         this.#syncDisplay();
     }

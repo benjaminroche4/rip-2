@@ -21,7 +21,8 @@
                     class="sr-only"
                 />
                 {% if icons[choice.vars.value] is defined %}
-                    {{ ux_icon(icons[choice.vars.value], {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    {# Les drapeaux sont ronds partout dans le BO. #}
+                    {{ ux_icon(icons[choice.vars.value], {class: 'size-4 shrink-0' ~ (icons[choice.vars.value] starts with 'circle-flags:' ? ' rounded-full' : ''), 'aria-hidden': 'true'}) }}
                 {% endif %}
                 {{ choice.vars.label|trans }}
             </label>
