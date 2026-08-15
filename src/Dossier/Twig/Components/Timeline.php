@@ -25,6 +25,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:Timeline', template: 'components/Dossier/Timeline.html.twig')]
 final class Timeline
 {
+    use DossiersSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

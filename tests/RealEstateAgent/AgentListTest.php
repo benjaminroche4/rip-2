@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\RealEstateAgent;
 
 use App\Auth\Entity\User;
+use App\RealEstateAgent\Domain\AgencyPosition;
+use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Entity\Agency;
+use App\RealEstateAgent\Entity\Brand;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use App\RealEstateAgent\Twig\Components\AgentList;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +33,7 @@ final class AgentListTest extends KernelTestCase
         $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
         $this->em->createQuery('DELETE FROM '.RealEstateAgent::class)->execute();
         $this->em->createQuery('DELETE FROM '.Agency::class)->execute();
+        $this->em->createQuery('DELETE FROM '.Brand::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@agent-list-test.local')->execute();
     }
 
@@ -76,7 +80,15 @@ final class AgentListTest extends KernelTestCase
 
     public function testListRendersSearchAndRows(): void
     {
-        $this->persistAgent('Jean', 'Martin', agency: 'Foncia Paris 11', email: 'jean@foncia.fr', phone: '+33611223344');
+        $this->persistAgent(
+            'Jean',
+            'Martin',
+            agency: 'Foncia Paris 11',
+            email: 'jean@foncia.fr',
+            phone: '+33611223344',
+            specialties: [AgentSpecialty::Location, AgentSpecialty::Transaction],
+            position: AgencyPosition::Manager,
+        );
         $this->loginAsAdmin();
 
         $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
@@ -89,6 +101,13 @@ final class AgentListTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agent-phone"', $rendered);
         self::assertStringContainsString('Jean Martin', $rendered);
         self::assertStringContainsString('Foncia Paris 11', $rendered);
+        // Discreet badges: both specialties next to the name, the position
+        // appended to the agency line.
+        self::assertSame(2, substr_count($rendered, 'data-testid="agent-specialty"'));
+        self::assertStringContainsString('Location', $rendered);
+        self::assertStringContainsString('Transaction', $rendered);
+        self::assertStringContainsString('data-testid="agent-position"', $rendered);
+        self::assertStringContainsString('Gérant', $rendered);
     }
 
     public function testEmptyStateRendersWithoutAgents(): void
@@ -145,9 +164,27 @@ final class AgentListTest extends KernelTestCase
         self::assertSame(1, $component->getTotalCount());
     }
 
+    public function testAgenciesViewSearchMatchesTheBrand(): void
+    {
+        $this->persistAgent('Jean', 'Martin', agency: 'Agence du Marais');
+        $this->persistAgent('Lea', 'Bern', agency: 'Century 21');
+        $this->attachBrand('Agence du Marais', 'Orpi');
+        $this->loginAsAdmin();
+
+        $component = $this->mountList();
+        $component->chooseView('agencies');
+        $component->search = 'orpi';
+
+        $agencies = $component->getAgencies();
+        self::assertCount(1, $agencies);
+        self::assertSame('Agence du Marais', $agencies[0]->name);
+        self::assertSame('Orpi', $agencies[0]->brand);
+    }
+
     public function testAgenciesViewRendersRowsAndCounts(): void
     {
         $this->persistAgent('Jean', 'Martin', agency: 'Foncia');
+        $this->attachBrand('Foncia', 'Foncia Groupe');
         $this->loginAsAdmin();
 
         $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
@@ -159,6 +196,9 @@ final class AgentListTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agency-row"', $rendered);
         self::assertStringContainsString('data-testid="agency-agent-count"', $rendered);
         self::assertStringContainsString('Foncia', $rendered);
+        // The brand shows as a discreet badge next to the agency name.
+        self::assertStringContainsString('data-testid="agency-brand"', $rendered);
+        self::assertStringContainsString('Foncia Groupe', $rendered);
     }
 
     public function testUnknownViewIsRejected(): void
@@ -195,12 +235,28 @@ final class AgentListTest extends KernelTestCase
         return $component;
     }
 
+    private function attachBrand(string $agencyName, string $brandName): void
+    {
+        $brand = new Brand($brandName);
+        $this->em->persist($brand);
+
+        $agency = $this->em->getRepository(Agency::class)->findOneBy(['name' => $agencyName]);
+        self::assertNotNull($agency);
+        $agency->setBrand($brand);
+        $this->em->flush();
+    }
+
+    /**
+     * @param list<AgentSpecialty> $specialties
+     */
     private function persistAgent(
         string $firstName,
         string $lastName,
         ?string $agency = null,
         ?string $email = null,
         ?string $phone = null,
+        array $specialties = [],
+        ?AgencyPosition $position = null,
     ): RealEstateAgent {
         $agencyEntity = null;
         if (null !== $agency) {
@@ -215,6 +271,8 @@ final class AgentListTest extends KernelTestCase
             ->setAgency($agencyEntity)
             ->setEmail($email)
             ->setPhone($phone)
+            ->setSpecialties($specialties)
+            ->setPosition($position)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($agent);
         $this->em->flush();

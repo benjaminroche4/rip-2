@@ -10,10 +10,25 @@ export default class extends Controller {
     #swipeStartX = 0
     #swiping = false
     #didSwipe = false
+    #idleCallbackId = null
 
     connect() {
         this.#photos = JSON.parse(this.element.dataset.galleryPhotosValue || '[]')
         this.#preloadFullSize()
+    }
+
+    disconnect() {
+        // The document-level keydown listener and the body scroll lock are set
+        // in open() and normally removed in close(); if the controller is torn
+        // down while the dialog is open (e.g. Turbo navigation), clean them up.
+        document.removeEventListener('keydown', this.#handleKeydown)
+        document.body.style.overflow = ''
+
+        if (this.#idleCallbackId !== null) {
+            const cancel = window.cancelIdleCallback || clearTimeout
+            cancel(this.#idleCallbackId)
+            this.#idleCallbackId = null
+        }
     }
 
     // Warm the browser cache so the first open() paints instantly.
@@ -28,7 +43,7 @@ export default class extends Controller {
         preload(urlFor(this.#photos[0]))
 
         const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 500))
-        idle(() => {
+        this.#idleCallbackId = idle(() => {
             for (let i = 1; i < this.#photos.length; i++) {
                 preload(urlFor(this.#photos[i]))
             }

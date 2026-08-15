@@ -56,7 +56,6 @@ final class GcsDocumentStorageTest extends TestCase
 
         $stream = (new GcsDocumentStorage($bucket))->readStream($this->dossier(), $this->file('abc.pdf'));
 
-        self::assertIsResource($stream);
         self::assertSame('file-content', stream_get_contents($stream));
         fclose($stream);
     }

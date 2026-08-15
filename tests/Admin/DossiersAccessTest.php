@@ -79,6 +79,89 @@ final class DossiersAccessTest extends WebTestCase
         $em->flush();
     }
 
+    public function testAdminUploadsAFileOnAPiece(): void
+    {
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        /** @var \Doctrine\ORM\EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $document = (new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Requested)
+            ->setRequestedAt(new \DateTimeImmutable('2026-08-01'));
+        $dossier->getPersons()->first()->addDocument($document);
+        $em->flush();
+        $documentId = (int) $document->getId();
+        // Le module Dossier ne se rend qu'étape Recherche validée.
+        static::getContainer()->get(\App\Dossier\Service\DossierStepValidator::class)
+            ->validate($dossier, \App\Dossier\Domain\DossierStep::Search);
+
+        // CSRF depuis une page admin rendue.
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        $token = $crawler->filter('[data-testid="module-file-admin-upload"]')->closest('form')->filter('input[name="_token"]')->attr('value');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'piece').'.pdf';
+        file_put_contents($tmp, '%PDF-1.4 test');
+        $upload = new \Symfony\Component\HttpFoundation\File\UploadedFile($tmp, 'quittance.pdf', 'application/pdf', null, true);
+
+        $this->client->request(
+            'POST',
+            $this->dossiersUrl($this->adminPrefix).'/DS-000042/pieces/'.$documentId.'/fichier',
+            ['_token' => $token],
+            ['file' => $upload],
+        );
+
+        self::assertResponseStatusCodeSame(303);
+        $em->clear();
+        $fresh = $em->find(\App\Dossier\Entity\DossierDocument::class, $documentId);
+        self::assertCount(1, $fresh->getFiles());
+        // Coherent display name (piece type + person), not the picked file's.
+        self::assertSame("Pièce d'identité - Jean Dupont.pdf", $fresh->getFiles()->first()->getOriginalName());
+        self::assertSame(\App\Dossier\Domain\DossierDocumentStatus::Received, $fresh->getStatus());
+        self::assertNotNull($fresh->getReceivedAt());
+    }
+
+    public function testAdminUploadRejectsUnsupportedFileTypes(): void
+    {
+        $this->persistDossier();
+        $this->loginAs(self::ADMIN_EMAIL);
+
+        /** @var \Doctrine\ORM\EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $document = (new \App\Dossier\Entity\DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Requested)
+            ->setRequestedAt(new \DateTimeImmutable('2026-08-01'));
+        $dossier->getPersons()->first()->addDocument($document);
+        $em->flush();
+        $documentId = (int) $document->getId();
+        static::getContainer()->get(\App\Dossier\Service\DossierStepValidator::class)
+            ->validate($dossier, \App\Dossier\Domain\DossierStep::Search);
+
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
+        $token = $crawler->filter('[data-testid="module-file-admin-upload"]')->closest('form')->filter('input[name="_token"]')->attr('value');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'piece').'.txt';
+        file_put_contents($tmp, 'plain text');
+        $upload = new \Symfony\Component\HttpFoundation\File\UploadedFile($tmp, 'notes.txt', 'text/plain', null, true);
+
+        $this->client->request(
+            'POST',
+            $this->dossiersUrl($this->adminPrefix).'/DS-000042/pieces/'.$documentId.'/fichier',
+            ['_token' => $token],
+            ['file' => $upload],
+        );
+
+        self::assertResponseStatusCodeSame(303);
+        $em->clear();
+        $fresh = $em->find(\App\Dossier\Entity\DossierDocument::class, $documentId);
+        self::assertCount(0, $fresh->getFiles(), 'Unsupported type never reaches the storage.');
+        self::assertSame(\App\Dossier\Domain\DossierDocumentStatus::Requested, $fresh->getStatus());
+    }
+
     private function dossiersUrl(string $prefix): string
     {
         return '/fr/'.$prefix.'/admin/dossiers';
@@ -240,7 +323,7 @@ final class DossiersAccessTest extends WebTestCase
         self::assertSelectorNotExists('[data-testid="dossier-nav-next"]');
     }
 
-    public function testEachStepUnlocksTheNextOneAndAdvancesTheStatus(): void
+    public function testEachValidatedStepUnlocksTheNextOneAndAdvancesTheStatus(): void
     {
         $this->persistDossier();
         $this->loginAs(self::ADMIN_EMAIL);
@@ -251,55 +334,45 @@ final class DossiersAccessTest extends WebTestCase
         $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
 
         // Étape 1 (Personnes) validée par la fixture, étape 2 (Recherche)
-        // incomplète : les 3 modules restent fermés, l'onglet Dossier aussi.
+        // pas encore validée : les 3 modules restent fermés, l'onglet
+        // Dossier aussi, et la card Recherche porte son bouton Valider.
         $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
         self::assertCount(3, $crawler->filter('[data-testid="dossier-module-locked"]'));
         self::assertCount(0, $crawler->filter('[data-testid="dossier-show-modules"] details'));
-        self::assertSelectorExists('[data-testid="dossier-search-incomplete"]');
         self::assertSelectorExists('[data-testid="dossier-tab-search"]');
         self::assertSelectorExists('[data-testid="dossier-tab-file-locked"]');
+        self::assertSelectorExists('[data-testid="step-validate"]');
 
-        // Recherche complète : seul le module Dossier s'ouvre, et le statut
-        // du dossier suit tout seul.
-        $dossier->getSearch()->setStayDuration('long');
-        $em->flush();
+        // Recherche validée : seul le module Dossier s'ouvre, et le statut
+        // nomme l'étape en attente, "Dossier" (pièces).
+        $validator = static::getContainer()->get(\App\Dossier\Service\DossierStepValidator::class);
+        $validator->validate($dossier, \App\Dossier\Domain\DossierStep::Search);
 
         $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
         self::assertCount(2, $crawler->filter('[data-testid="dossier-module-locked"]'), 'Visite et Paiement restent fermés.');
         self::assertCount(1, $crawler->filter('[data-testid="dossier-show-modules"] details'));
-        self::assertSelectorExists('[data-testid="dossier-search-complete"]');
         self::assertSelectorExists('[data-testid="dossier-tab-file"]');
         self::assertSelectorExists('[data-testid="dossier-tab-visit-locked"]');
         self::assertCount(1, $crawler->filter('[data-testid="module-file-tenant"]'));
+        self::assertSame(
+            \App\Dossier\Domain\DossierStatus::File,
+            $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042'])->getStatus(),
+        );
 
-        // Pièces demandées puis validées : le module Visite s'ouvre.
+        // Étape Dossier validée : le module Visite s'ouvre.
         // Le kernel est relancé à chaque requête client : on relit le dossier
         // pour travailler sur des entités managées.
         $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
-        $tenant = $dossier->getPersons()->first();
-        $document = (new \App\Dossier\Entity\DossierDocument())
-            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
-            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Validated)
-            ->setRequestedAt(new \DateTimeImmutable());
-        $tenant->addDocument($document);
-        $em->persist($document);
-        $em->flush();
+        $validator->validate($dossier, \App\Dossier\Domain\DossierStep::File);
 
         $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
         self::assertCount(1, $crawler->filter('[data-testid="dossier-module-locked"]'), 'Seul le Paiement reste fermé.');
         self::assertSelectorExists('[data-testid="dossier-tab-visit"]');
         self::assertSelectorExists('[data-testid="dossier-tab-payment-locked"]');
 
-        // Visite réalisée : dernière étape ouverte, statut "Bien trouvé".
+        // Visite validée : dernière étape ouverte, statut "Finalisation".
         $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
-        $em->persist((new \App\Visit\Entity\Visit())
-            ->setDossier($dossier)
-            ->setAddress('12 rue de la Roquette, 75011 Paris')
-            ->setScheduledAt(new \DateTimeImmutable('-2 days 10:00'))
-            ->setStatus(\App\Visit\Domain\VisitStatus::Done)
-            ->setReference('VS-'.random_int(100000, 999999))
-            ->setCreatedAt(new \DateTimeImmutable()));
-        $em->flush();
+        $validator->validate($dossier, \App\Dossier\Domain\DossierStep::Visit);
 
         $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042');
         self::assertCount(0, $crawler->filter('[data-testid="dossier-module-locked"]'));
@@ -307,6 +380,10 @@ final class DossiersAccessTest extends WebTestCase
         self::assertSelectorExists('[data-testid="dossier-tab-payment"]');
         // Le parcours est fini : plus aucun onglet verrouillé.
         self::assertCount(0, $crawler->filter('[data-testid^="dossier-tab-"][data-testid$="-locked"]'));
+        self::assertSame(
+            \App\Dossier\Domain\DossierStatus::Finalization,
+            $em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042'])->getStatus(),
+        );
     }
 
     public function testALockedStepCannotBeOpenedFromTheUrl(): void
@@ -314,14 +391,14 @@ final class DossiersAccessTest extends WebTestCase
         $this->persistDossier();
         $this->loginAs(self::ADMIN_EMAIL);
 
-        // La recherche de la fixture est incomplète : ?tab=file pointe une
-        // étape fermée, la page retombe sur le récap plutôt que d'ouvrir un
+        // L'étape Recherche n'est pas validée : ?tab=file pointe une étape
+        // fermée, la page retombe sur le récap plutôt que d'ouvrir un
         // panneau interdit.
         $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'/DS-000042?tab=file');
         self::assertSelectorExists('[data-testid="dossier-tabs"][data-active-tab="recap"]');
         self::assertSelectorExists('[data-testid="dossier-tab-file-locked"]');
-        // L'étape Personnes est validée par la fixture : la Recherche, elle,
-        // reste ouverte à l'édition même si ses critères sont incomplets.
+        // L'étape Personnes est validée par la fixture : la Recherche est
+        // donc l'étape actuellement ouverte.
         self::assertSelectorExists('[data-testid="dossier-tab-search"]');
     }
 
@@ -350,12 +427,14 @@ final class DossiersAccessTest extends WebTestCase
         $this->persistDossier();
         $this->loginAs(self::ADMIN_EMAIL);
 
-        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=property_found');
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=finalization');
 
         self::assertResponseIsSuccessful();
         self::assertSame(0, $crawler->filter('[data-testid="dossier-row"]')->count(), 'No dossier holds that status.');
 
-        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=new');
+        // La fixture pose les étapes sans passer par le validateur : le
+        // statut stocké reste celui d'origine, "persons".
+        $crawler = $this->client->request('GET', $this->dossiersUrl($this->adminPrefix).'?statusFilter=persons');
         self::assertSame(1, $crawler->filter('[data-testid="dossier-row"]')->count());
     }
 
@@ -437,6 +516,9 @@ final class DossiersAccessTest extends WebTestCase
             ->setReference('DS-000042')
             ->setPairingCode('ABE78L')
             ->setCreatedAt(new \DateTimeImmutable())
+            // Parcours manuel : l'étape Personnes a été validée par le staff,
+            // la Recherche est l'étape ouverte.
+            ->addValidatedStep(\App\Dossier\Domain\DossierStep::Persons)
             ->addPerson($tenant)
             ->addPerson($followUp)
             ->setSearch((new DossierSearch())
@@ -445,6 +527,7 @@ final class DossiersAccessTest extends WebTestCase
                 ->setMoveInAt(new \DateTimeImmutable('2026-10-01'))
                 ->setPropertyType('t2,t3')
                 ->setFurnishing('unfurnished,furnished')
+                ->setStayDuration('long')
                 ->setGuarantorType('physical'))
             ->addNote((new DossierNote())
                 ->setText('Premier appel, très motivée.')

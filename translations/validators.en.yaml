@@ -78,7 +78,24 @@ admin:
                 notBlank: 'The last name is required.'
             phone:
                 length: 'The phone number cannot exceed 30 characters.'
+    agencies:
+        create:
+            brand:
+                length: 'The brand name cannot exceed 100 characters.'
+                notBlank: 'The brand name is required.'
+            address:
+                length: 'The address cannot exceed 255 characters.'
+            email:
+                invalid: 'This email address is not valid.'
+                length: 'The email cannot exceed 180 characters.'
+            phone:
+                length: 'The phone number cannot exceed 30 characters.'
     dossiers:
+        show:
+            modules:
+                file:
+                    upload:
+                        invalid: 'File rejected: PDF or image, 10 MB max.'
         create:
             name:
                 length: 'The name must be between 2 and 100 characters.'

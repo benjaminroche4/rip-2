@@ -23,12 +23,13 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 /**
  * Quick visit booking form: only the essential fields up front, the rest
  * behind a "detail mode" toggle. Address coordinates come from the Places
- * autocomplete (setLocation); creation falls back to server geocoding when
+ * autocomplete (chooseLocation); creation falls back to server geocoding when
  * the address was typed by hand.
  */
 #[AsLiveComponent(name: 'Visit:VisitForm', template: 'components/Visit/VisitForm.html.twig')]
 final class VisitForm extends AbstractController
 {
+    use VisitsSectionGuard;
     use ComponentWithFormTrait;
     use DefaultActionTrait;
 
@@ -80,7 +81,7 @@ final class VisitForm extends AbstractController
      * the coordinates, no server-side geocoding involved.
      */
     #[LiveAction]
-    public function setLocation(#[LiveArg] ?float $lat = null, #[LiveArg] ?float $lng = null): void
+    public function chooseLocation(#[LiveArg] ?float $lat = null, #[LiveArg] ?float $lng = null): void
     {
         $this->ensureAdmin();
 
@@ -218,6 +219,12 @@ final class VisitForm extends AbstractController
         }
         $em->persist($visit);
         $em->flush();
+
+        try {
+            $this->addFlash('success', 'admin.toast.visitPlanned');
+        } catch (\LogicException) {
+            // Sessionless context (component tests): no toast to queue.
+        }
 
         return $this->redirectToRoute('admin_visits', [
             'adminPrefix' => $this->adminPrefix,

@@ -49,6 +49,7 @@ final class LeadQuality
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -104,6 +105,7 @@ final class LeadQuality
         // The rating badge in the identity card header lives outside the
         // live components: morph-refresh the page chrome.
         $this->dispatchBrowserEvent('contact-identity:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.ratingSaved')]);
     }
 
     #[LiveAction]
@@ -121,6 +123,7 @@ final class LeadQuality
         // component (the qualify modal on the list) close itself.
         $this->dispatchBrowserEvent('lead-quality:saved');
         $this->emit('lead-quality:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteUpdated')]);
     }
 
     /**
@@ -132,7 +135,7 @@ final class LeadQuality
     }
 
     #[LiveAction]
-    public function setChannel(#[LiveArg] string $channel): void
+    public function chooseChannel(#[LiveArg] string $channel): void
     {
         $this->ensureAdmin();
 

@@ -55,35 +55,15 @@
     </el-popover>
 {% endmacro %}
 
-{% macro trustStrip() %}
-    <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="deposit-trust">
-        <div class="rounded-2xl bg-neutral-50 p-2">
-            <ul role="list" class="grid grid-cols-1 gap-1 sm:grid-cols-2">
-                {% for item in [
-                    {icon: 'lucide:lock', key: 'encrypted'},
-                    {icon: 'lucide:eye-off', key: 'private'},
-                    {icon: 'lucide:timer', key: 'retention'},
-                    {icon: 'lucide:map-pin', key: 'hosting'},
-                ] %}
-                    <li class="flex items-start gap-2.5 rounded-xl bg-white px-4 py-3">
-                        {{ ux_icon(item.icon, {'class': 'mt-0.5 size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold text-gray-900">{{ ('deposit.trust.' ~ item.key ~ '.title')|trans }}</p>
-                            <p class="mt-0.5 text-xs text-pretty text-gray-500">{{ ('deposit.trust.' ~ item.key ~ '.text')|trans }}</p>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </section>
-{% endmacro %}
-
 {% import _self as shell %}
 {% set codeParam = app.request.query.get('code') ? {code: app.request.query.get('code')} : {} %}
 
 {% block body %}
     {% if paired %}
-        <div class="flex min-h-full w-full flex-col bg-neutral-50">
+        {# isolate : sans contexte d'empilement, le fond -z-10 du motif se
+           peindrait sous le bg-neutral-50 de la coque et resterait invisible. #}
+        <div class="relative isolate flex min-h-full w-full flex-col overflow-hidden bg-neutral-50">
+            <twig:Section:GridBackground :auth="true" />
             <div class="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 lg:py-12">
                 <div class="mb-8 flex items-center justify-between">
                     <a href="{{ path('app_home') }}" class="shrink-0">
@@ -100,18 +80,13 @@
                     </div>
                 </div>
 
+                {# Région d'annonce hors du markup remplacé par les streams :
+                   les lecteurs d'écran entendent la confirmation de dépôt. #}
+                <p id="deposit-announcer" class="sr-only" aria-live="polite"></p>
+
                 {% include 'public/dossier/_documents.html.twig' with {deposit: deposit} only %}
 
-                <div class="mt-8">
-                    {{ shell.trustStrip() }}
-                </div>
-
                 <div class="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-gray-400">
-                    <p>
-                        Relocation in Paris ·
-                        <a href="mailto:contact@relocation-in-paris.fr" class="underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-600">contact@relocation-in-paris.fr</a>
-                    </p>
-                    <span aria-hidden="true">·</span>
                     <form action="{{ path('app_dossier_deposit_leave') }}" method="post" data-turbo="true">
                         <input type="hidden" name="_token" value="{{ csrf_token('deposit_leave') }}">
                         <button type="submit" class="cursor-pointer underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-600" data-testid="deposit-leave">
@@ -145,13 +120,7 @@
 
             {% include 'public/dossier/_pairing.html.twig' with {pairingForm: pairingForm, prefilledCode: prefilledCode} only %}
 
-            <div class="mx-auto mt-10 w-full max-w-xl">
-                {{ shell.trustStrip() }}
-                <p class="mt-8 text-center text-xs text-gray-400">
-                    Relocation in Paris ·
-                    <a href="mailto:contact@relocation-in-paris.fr" class="underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-600">contact@relocation-in-paris.fr</a>
-                </p>
-            </div>
         </section>
     {% endif %}
+
 {% endblock %}

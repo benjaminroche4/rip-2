@@ -20,6 +20,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:ClosedBanner', template: 'components/Dossier/ClosedBanner.html.twig')]
 final class ClosedBanner
 {
+    use DossiersSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

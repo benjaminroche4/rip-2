@@ -1,11 +1,10 @@
 {#
     RealEstateAgent:CreateMenu — single "Créer" button opening a small menu
-    with two choices: a new agent or a new agency. Each choice is the trigger
-    of its own live component (AgentCreate / AgencyCreate), so its live action
-    fires from inside its own root; the modals render fixed, above the menu.
+    with two choices: a new agent or a new agency. Each choice is a plain
+    link to its dedicated creation page (admin_agent_new / admin_agency_new).
 
     props:
-      adminPrefix: string — secret admin URL prefix, forwarded to the modals
+      adminPrefix: string — secret admin URL prefix, forwarded to the pages
 #}
 {% props adminPrefix = '' %}
 <details
@@ -24,7 +23,31 @@
     </summary>
 
     <div class="absolute right-0 z-30 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-1 shadow-lg">
-        <twig:RealEstateAgent:AgentCreate adminPrefix="{{ adminPrefix }}" />
-        <twig:RealEstateAgent:AgencyCreate adminPrefix="{{ adminPrefix }}" />
+        <a
+            href="{{ path('admin_agent_new', {adminPrefix: adminPrefix}) }}"
+            class="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-50"
+            data-testid="agent-create-open"
+        >
+            <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
+                {{ ux_icon('lucide:user', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            </span>
+            <span class="min-w-0">
+                <span class="block text-sm font-medium text-gray-900">{{ 'admin.agents.create.menuItem.title'|trans }}</span>
+                <span class="block text-xs text-gray-500">{{ 'admin.agents.create.menuItem.subtitle'|trans }}</span>
+            </span>
+        </a>
+        <a
+            href="{{ path('admin_agency_new', {adminPrefix: adminPrefix}) }}"
+            class="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-50"
+            data-testid="agency-create-open"
+        >
+            <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary">
+                {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
+            </span>
+            <span class="min-w-0">
+                <span class="block text-sm font-medium text-gray-900">{{ 'admin.agencies.create.menuItem.title'|trans }}</span>
+                <span class="block text-xs text-gray-500">{{ 'admin.agencies.create.menuItem.subtitle'|trans }}</span>
+            </span>
+        </a>
     </div>
 </details>

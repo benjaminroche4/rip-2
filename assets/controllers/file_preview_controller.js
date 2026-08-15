@@ -10,7 +10,7 @@ import { Controller } from '@hotwired/stimulus';
  * data-file-preview-type (mime type).
  */
 export default class extends Controller {
-    static targets = ['overlay', 'frame', 'image', 'title', 'newTab'];
+    static targets = ['overlay', 'frame', 'image', 'title', 'newTab', 'loader'];
 
     open(event) {
         if (!this.hasOverlayTarget) {
@@ -32,7 +32,18 @@ export default class extends Controller {
 
         this.newTabTarget.href = link.href;
         this.titleTarget.textContent = link.dataset.filePreviewName ?? link.textContent.trim();
+        if (this.hasLoaderTarget) {
+            this.loaderTarget.hidden = false;
+        }
         this.overlayTarget.hidden = false;
+    }
+
+    /** `load` of the visible viewer: the document is in, drop the loader.
+        Guarded because the iframe also fires on its about:blank resets. */
+    loaded() {
+        if (this.hasLoaderTarget && !this.overlayTarget.hidden) {
+            this.loaderTarget.hidden = true;
+        }
     }
 
     /** Backdrop click closes; clicks on the document itself do not. */
@@ -47,6 +58,9 @@ export default class extends Controller {
             return;
         }
         this.overlayTarget.hidden = true;
+        if (this.hasLoaderTarget) {
+            this.loaderTarget.hidden = true;
+        }
         // Stop any renderer left running in the hidden viewers.
         this.frameTarget.src = 'about:blank';
         this.imageTarget.removeAttribute('src');

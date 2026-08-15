@@ -5,7 +5,7 @@
 <div id="deposit-pairing" data-turbo="true" class="mx-auto w-full max-w-xl">
     <div class="flex w-full flex-col items-center space-y-2">
         <h1 class="mt-12 text-2xl/9 font-semibold tracking-tight text-gray-900">{{ 'deposit.pairing.title'|trans }}</h1>
-        <p class="text-center font-light text-pretty text-neutral-400">{{ 'deposit.pairing.text'|trans }}</p>
+        <p class="max-w-sm text-center font-light text-balance text-neutral-400">{{ 'deposit.pairing.text'|trans }}</p>
     </div>
 
     <div class="mx-auto mt-10 w-full max-w-sm">
@@ -34,17 +34,40 @@
 
             <div>
                 {{ form_label(pairingForm.code, null, {'label_attr': {'class': 'flex items-center gap-2 text-sm/6 font-medium select-none text-gray-900'}}) }}
-                <div class="mt-2">
+                {# Segmented code entry: the real form field stays as the no-JS
+                   fallback and the submitted value; the six boxes are revealed
+                   by the controller and mirror into it (paste fills them all). #}
+                <div class="mt-2" data-controller="otp-input" data-testid="deposit-code-otp">
                     {{ form_widget(pairingForm.code, {'value': pairingForm.code.vars.value ?: prefilledCode, 'attr': {
                         'class': inputClass ~ ' tracking-[0.3em] uppercase placeholder:tracking-normal placeholder:normal-case',
                         'placeholder': 'deposit.pairing.code.placeholder'|trans,
-                        'aria-required': 'true'
+                        'aria-required': 'true',
+                        'data-otp-input-target': 'input'
                     }}) }}
+                    <div class="hidden justify-between gap-2 [&:not(.hidden)]:flex" data-otp-boxes>
+                        {% for i in 1..6 %}
+                            <input
+                                type="text"
+                                inputmode="text"
+                                autocapitalize="characters"
+                                autocomplete="{{ loop.first ? 'one-time-code' : 'off' }}"
+                                spellcheck="false"
+                                maxlength="2"
+                                aria-label="{{ 'deposit.pairing.code.charLabel'|trans({'%position%': i}) }}"
+                                class="size-10 rounded-xl border border-neutral-200 bg-white text-center text-base font-semibold text-gray-900 uppercase transition-colors duration-100 ease-out focus:border-gray-400 focus:outline-none sm:size-12 sm:text-lg"
+                                data-otp-input-target="box"
+                                data-action="input->otp-input#input keydown->otp-input#keydown paste->otp-input#paste focus->otp-input#select"
+                            >
+                        {% endfor %}
+                    </div>
                 </div>
                 {% for error in pairingForm.code.vars.errors %}
                     <p class="mt-1 text-xs text-red-600" role="alert">{{ error.message }}</p>
                 {% endfor %}
-                <p class="mt-1.5 text-xs text-neutral-400">{{ 'deposit.pairing.code.hint'|trans }}</p>
+                <p class="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-400">
+                    {{ ux_icon('lucide:circle-help', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'deposit.pairing.code.hint'|trans }}
+                </p>
             </div>
 
             {{ form_widget(pairingForm.website) }}

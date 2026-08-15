@@ -22,7 +22,7 @@
             {# Un groupe par jour, du plus récent au plus ancien. #}
             {% for day, visits in visitsByDay %}
                 <section>
-                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-500 uppercase">
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">
                         {{ visits[0].scheduledAt|format_datetime(pattern='EEEE d MMMM yyyy')|capitalize }}
                         <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ visits|length }}</span>
                     </h2>

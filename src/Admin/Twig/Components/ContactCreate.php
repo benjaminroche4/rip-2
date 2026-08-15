@@ -215,6 +215,12 @@ final class ContactCreate
             $session->getFlashBag()->add('success', 'admin.contacts.create.success');
         }
 
+        try {
+            $this->requestStack->getSession()->getFlashBag()->add('success', 'admin.toast.contactCreated');
+        } catch (\LogicException) {
+            // Sessionless context (component tests): no toast to queue.
+        }
+
         return new RedirectResponse($this->urlGenerator->generate('admin_contact_show', [
             'adminPrefix' => $this->adminPrefix,
             'reference' => $reference,

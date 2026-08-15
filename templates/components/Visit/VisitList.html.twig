@@ -112,48 +112,42 @@
             </div>
 
             {% if visit.agentName %}
+                {# Avatar (repli initiale) : une personne s'affiche toujours
+                   via <twig:Avatar>, jamais avec une icône générique. Taille 5
+                   pour rester au diapason des avatars voisins de la rangée. #}
                 <p class="flex shrink-0 items-center gap-1.5 text-xs text-gray-600" data-testid="visit-agent">
-                    {{ ux_icon('lucide:briefcase', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    <twig:Avatar name="{{ visit.agentName }}" size="5" />
                     {{ visit.agentName }}
                 </p>
             {% endif %}
 
-            {# Actions de la visite en menu shadcn : … → Modifier / Supprimer. #}
-            <details
-                class="relative z-10 shrink-0"
-                data-controller="details-dropdown"
-                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                data-testid="visit-actions"
-            >
-                <summary
-                    class="flex size-7 cursor-pointer list-none items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
-                    aria-label="{{ 'admin.contacts.show.actions'|trans }}"
+            {# Actions directes (convention stylo direct) : crayon pour ouvrir
+               le détail, corbeille pour supprimer (modale de confirmation
+               existante conservée). #}
+            <div class="relative z-10 flex shrink-0 items-center gap-1" data-testid="visit-actions">
+                <a
+                    href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                    class="flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
+                    aria-label="{{ 'admin.visits.row.edit'|trans }}"
+                    title="{{ 'admin.visits.row.edit'|trans }}"
+                    data-testid="visit-edit"
                 >
-                    {{ ux_icon('lucide:ellipsis', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                </summary>
-                <div class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-neutral-200 bg-white p-1 text-left shadow-md">
-                    <a
-                        href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, id: visit.id}) }}"
-                        class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
-                        data-testid="visit-edit"
+                    {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                </a>
+                <twig:AlertDialog id="delete-visit-{{ visit.id }}">
+                    <button
+                        type="button"
+                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                        data-action="click->alert-dialog#open"
+                        data-alert-dialog-target="trigger"
+                        aria-haspopup="dialog"
+                        aria-expanded="false"
+                        aria-label="{{ 'admin.visits.row.delete'|trans }}"
+                        title="{{ 'admin.visits.row.delete'|trans }}"
+                        data-testid="visit-delete-trigger"
                     >
-                        {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.visits.row.edit'|trans }}
-                    </a>
-                    <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
-                    <twig:AlertDialog id="delete-visit-{{ visit.id }}">
-                        <button
-                            type="button"
-                            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
-                            data-action="click->alert-dialog#open"
-                            data-alert-dialog-target="trigger"
-                            aria-haspopup="dialog"
-                            aria-expanded="false"
-                            data-testid="visit-delete-trigger"
-                        >
-                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                            {{ 'admin.visits.row.delete'|trans }}
-                        </button>
+                        {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    </button>
                         <twig:AlertDialog:Content class="sm:max-w-md">
                             <twig:AlertDialog:Header>
                                 <twig:AlertDialog:Title>
@@ -218,7 +212,7 @@
         <div class="space-y-8">
             {# Aujourd'hui : carte + liste numérotée comme les pins. #}
             <section data-testid="visits-today">
-                <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                <h2 class="mb-3 flex items-baseline gap-2 px-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">
                     {{ 'admin.visits.section.today'|trans }}
                     <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ todayVisits|length }}</span>
                 </h2>
@@ -257,7 +251,7 @@
                Aujourd'hui garde son encart vide. #}
             {% if tomorrowVisits is not empty %}
                 <section data-testid="visits-tomorrow">
-                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">
                         {{ 'admin.visits.section.tomorrow'|trans }}
                         <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ tomorrowVisits|length }}</span>
                     </h2>
@@ -282,7 +276,7 @@
                     {% endif %}
                 >
                     <div class="mb-3 flex items-center justify-between gap-3 px-1">
-                        <h2 class="flex items-baseline gap-2 text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                        <h2 class="flex items-baseline gap-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
                             {{ 'admin.visits.section.later'|trans }}
                             <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ laterVisits|length }}</span>
                         </h2>

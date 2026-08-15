@@ -39,8 +39,8 @@ final class DossierListTest extends KernelTestCase
 
     public function testCountsAndFilterFollowTheEffectiveStatus(): void
     {
-        $this->persistDossier('Famille Martin', 'Jean', 'Martin', status: DossierStatus::Searching);
-        $closed = $this->persistDossier('Famille Durand', 'Paul', 'Durand', status: DossierStatus::Searching);
+        $this->persistDossier('Famille Martin', 'Jean', 'Martin', status: DossierStatus::Search);
+        $closed = $this->persistDossier('Famille Durand', 'Paul', 'Durand', status: DossierStatus::Search);
         $closed->setClosedAt(new \DateTimeImmutable());
         $this->em->flush();
         $this->loginAsAdmin();
@@ -50,7 +50,7 @@ final class DossierListTest extends KernelTestCase
         // Le dossier clôturé a quitté la liste courante : il ne compte plus
         // ni dans les chips de statut, ni dans le total.
         $counts = $component->getStatusCounts();
-        self::assertSame(1, $counts['searching']);
+        self::assertSame(1, $counts['search']);
         self::assertSame(0, $counts['closed']);
         self::assertSame(1, $component->getTotalCount());
         self::assertSame(['Famille Martin'], array_column($component->getDossiers(), 'name'));
@@ -61,8 +61,8 @@ final class DossierListTest extends KernelTestCase
 
     public function testClosedDossiersMoveToTheArchiveTab(): void
     {
-        $this->persistDossier('Famille Martin', 'Jean', 'Martin', status: DossierStatus::Searching);
-        $closed = $this->persistDossier('Famille Durand', 'Paul', 'Durand', status: DossierStatus::Searching);
+        $this->persistDossier('Famille Martin', 'Jean', 'Martin', status: DossierStatus::Search);
+        $closed = $this->persistDossier('Famille Durand', 'Paul', 'Durand', status: DossierStatus::Search);
         $closed->setClosedAt(new \DateTimeImmutable());
         $this->em->flush();
         $this->loginAsAdmin();
@@ -311,7 +311,7 @@ final class DossierListTest extends KernelTestCase
         string $name,
         string $firstName,
         string $lastName,
-        DossierStatus $status = DossierStatus::New,
+        DossierStatus $status = DossierStatus::Persons,
     ): Dossier {
         $dossier = (new Dossier())
             ->setName($name)

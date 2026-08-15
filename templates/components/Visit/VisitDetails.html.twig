@@ -5,7 +5,7 @@
         <div class="rounded-3xl border border-neutral-200 bg-white p-2">
             <div class="rounded-2xl bg-neutral-50 p-2">
                 <div class="flex items-center justify-between gap-4 px-4 pt-3 pb-1">
-                    <h2 class="text-sm font-semibold tracking-wide text-gray-900 uppercase">
+                    <h2 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">
                         {{ 'admin.visits.show.detailsTitle'|trans }}
                     </h2>
                     {# Cadenas anti-fausse manip : les champs ne s'éditent
@@ -90,24 +90,47 @@
                     <div class="flex items-center justify-between gap-4 px-4 py-3">
                         <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.duration.label'|trans }}</p>
                         {% if locked %}
-                            <p class="font-medium text-gray-900 tabular-nums">{{ visit.durationMinutes }} min
+                            <p class="font-medium text-gray-900 tabular-nums">{{ 'admin.visits.show.durationMinutes'|trans({'%count%': visit.durationMinutes}) }}
                                 {% if not visit.clientPresent %}
                                     <span class="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ 'admin.visits.show.proxyVisit'|trans }}</span>
                                 {% endif %}
                             </p>
                         {% else %}
                             <div class="flex items-center gap-3">
-                                <select
-                                    data-model="norender|durationMinutes"
-                                    data-action="change->live#action"
-                                    data-live-action-param="save"
-                                    class="cursor-pointer rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                                    data-testid="visit-details-duration"
+                                {# Dropdown custom (même mécanique <details> que
+                                   les statuts) : chaque choix persiste via
+                                   chooseDuration. #}
+                                <details
+                                    class="relative"
+                                    data-controller="details-dropdown"
+                                    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
                                 >
-                                    {% for minutes in [15, 30, 45, 60] %}
-                                        <option value="{{ minutes }}" {{ this.durationMinutes == minutes ? 'selected' }}>{{ ('admin.visits.create.duration.min' ~ minutes)|trans }}</option>
-                                    {% endfor %}
-                                </select>
+                                    <summary
+                                        class="flex w-28 cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
+                                        aria-label="{{ 'admin.visits.create.duration.label'|trans }}"
+                                        data-testid="visit-details-duration"
+                                    >
+                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900 tabular-nums">{{ ('admin.visits.create.duration.min' ~ this.durationMinutes)|trans }}</span>
+                                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    </summary>
+                                    <div class="absolute left-0 z-10 mt-2 w-32 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                        {% for minutes in [15, 30, 45, 60] %}
+                                            <button
+                                                type="button"
+                                                data-action="live#action details-dropdown#close"
+                                                data-live-action-param="chooseDuration"
+                                                data-live-minutes-param="{{ minutes }}"
+                                                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors duration-100 ease-out {{ this.durationMinutes == minutes ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                                data-testid="visit-details-duration-choice"
+                                            >
+                                                <span class="min-w-0 flex-1 truncate">{{ ('admin.visits.create.duration.min' ~ minutes)|trans }}</span>
+                                                {% if this.durationMinutes == minutes %}
+                                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                                {% endif %}
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                </details>
                                 <label class="flex cursor-pointer items-center gap-1.5 text-xs text-gray-600">
                                     <input
                                         type="checkbox"
@@ -274,24 +297,66 @@
                         <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.agent.label'|trans }}</p>
                         {% if locked %}
                             {% if visit.agentName %}
-                                <p class="flex items-center gap-1.5 font-medium text-gray-900">
-                                    {{ ux_icon('lucide:briefcase', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                <p class="flex items-center gap-2 font-medium text-gray-900">
+                                    <twig:Avatar name="{{ visit.agentName }}" size="6" />
                                     {{ visit.agentName }}
                                 </p>
                             {% else %}
                                 <p class="text-gray-400">-</p>
                             {% endif %}
                         {% else %}
-                            <select
-                                data-model="agentId"
-                                class="cursor-pointer rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                                data-testid="visit-details-agent"
+                            {# Dropdown custom (même mécanique <details> que les
+                               statuts) : le choix persiste via chooseAgent,
+                               '0' = aucun agent. #}
+                            {% set currentAgentName = '' %}
+                            {% for choice in this.agentChoices %}
+                                {% if this.agentId == choice.id %}{% set currentAgentName = choice.name %}{% endif %}
+                            {% endfor %}
+                            <details
+                                class="relative w-full max-w-xs"
+                                data-controller="details-dropdown"
+                                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
                             >
-                                <option value="0">{{ 'admin.visits.create.agent.placeholder'|trans }}</option>
-                                {% for choice in this.agentChoices %}
-                                    <option value="{{ choice.id }}" {{ this.agentId == choice.id ? 'selected' }}>{{ choice.name }}</option>
-                                {% endfor %}
-                            </select>
+                                <summary
+                                    class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
+                                    aria-label="{{ 'admin.visits.create.agent.label'|trans }}"
+                                    data-testid="visit-details-agent"
+                                >
+                                    {% if currentAgentName %}
+                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ currentAgentName }}</span>
+                                    {% else %}
+                                        <span class="min-w-0 flex-1 truncate text-sm text-gray-400">{{ 'admin.visits.create.agent.placeholder'|trans }}</span>
+                                    {% endif %}
+                                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                </summary>
+                                <div class="absolute right-0 z-10 mt-2 max-h-60 w-full min-w-56 overflow-auto rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                    <button
+                                        type="button"
+                                        data-action="live#action details-dropdown#close"
+                                        data-live-action-param="chooseAgent"
+                                        data-live-id-param="0"
+                                        class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.agentId == '0' ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-testid="visit-details-agent-choice"
+                                    >
+                                        <span class="min-w-0 flex-1 truncate">{{ 'admin.visits.create.agent.placeholder'|trans }}</span>
+                                    </button>
+                                    {% for choice in this.agentChoices %}
+                                        <button
+                                            type="button"
+                                            data-action="live#action details-dropdown#close"
+                                            data-live-action-param="chooseAgent"
+                                            data-live-id-param="{{ choice.id }}"
+                                            class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.agentId == choice.id ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                            data-testid="visit-details-agent-choice"
+                                        >
+                                            <span class="min-w-0 flex-1 truncate">{{ choice.name }}</span>
+                                            {% if this.agentId == choice.id %}
+                                                {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                            {% endif %}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </details>
                         {% endif %}
                     </div>
 

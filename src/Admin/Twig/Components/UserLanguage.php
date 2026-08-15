@@ -30,6 +30,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserLanguage', template: 'components/Admin/UserLanguage.html.twig')]
 final class UserLanguage
 {
+    use StaffGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

@@ -7,8 +7,13 @@ namespace App\Dossier\Controller;
 use App\Contact\Entity\Contact;
 use App\Dossier\Domain\DossierStep;
 use App\Dossier\Domain\DossierStepView;
+use App\Dossier\Domain\DossierDocumentStatus;
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierDocument;
 use App\Dossier\Entity\DossierDocumentFile;
+use App\Dossier\Service\DossierDocumentNamer;
+use App\Dossier\Service\DossierEventLogger;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\ContactDossierConverter;
 use App\Dossier\Service\DocumentStorage;
@@ -23,7 +28,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\File as FileConstraint;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 // Same security model as other admin controllers: access_control on the
@@ -59,13 +69,21 @@ final class DossierController extends AbstractController
         name: 'dossiers',
         methods: ['GET'],
     )]
-    public function index(string $adminPrefix): Response
-    {
+    public function index(
+        string $adminPrefix,
+        DossierRepository $repository,
+        \Symfony\Component\Clock\ClockInterface $clock,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
         // The list itself lives in the Dossier:DossierList live component.
+        // The expired-pairing-code alert only renders when it has something
+        // to say (open dossiers, dead code, pieces still awaited).
         return $this->render('admin/dossiers/index.html.twig', [
             'adminPrefix' => $adminPrefix,
+            'expiredPairingAlerts' => $repository->findExpiredPairingAlerts(
+                $clock->now()->modify(\sprintf('-%d days', Dossier::PAIRING_CODE_TTL_DAYS)),
+            ),
         ]);
     }
 
@@ -81,9 +99,10 @@ final class DossierController extends AbstractController
     public function show(
         string $adminPrefix,
         string $reference,
-        Request $request,
         DossierRepository $repository,
         \App\Dossier\Service\DossierProgressCalculator $calculator,
+        #[MapQueryParameter]
+        ?string $tab = null,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -111,7 +130,7 @@ final class DossierController extends AbstractController
             'dossier' => $dossier,
             'adjacent' => $repository->findAdjacentReferences($reference),
             'steps' => $steps,
-            'activeTab' => $this->resolveTab($request->query->get('tab'), $steps),
+            'activeTab' => $this->resolveTab($tab, $steps),
             'currentStep' => $progress->currentStep()?->value,
         ]);
     }
@@ -262,6 +281,8 @@ final class DossierController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         DocumentStorage $storage,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -276,6 +297,15 @@ final class DossierController extends AbstractController
         if (!$storage->exists($dossier, $file)) {
             throw $this->createNotFoundException();
         }
+
+        // Audit trail: dossier pieces are sensitive documents, every read
+        // is traced (who accessed which file of which dossier).
+        $securityLogger->notice('Dossier document accessed', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'dossier' => $reference,
+            'file' => $id,
+            'download' => $request->query->getBoolean('download'),
+        ]);
 
         // Streamed from storage (disk or GCS bucket): the file is never
         // exposed by URL, only through this authenticated pass-through.
@@ -316,11 +346,19 @@ final class DossierController extends AbstractController
         EntityManagerInterface $em,
         DocumentStorage $storage,
         TranslatorInterface $translator,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
         $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => $reference])
             ?? throw $this->createNotFoundException();
+
+        // Audit trail: a full-dossier export is the heaviest document read.
+        $securityLogger->notice('Dossier documents archive downloaded', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'dossier' => $reference,
+        ]);
 
         $entries = [];
         foreach ($dossier->getPersons() as $person) {
@@ -392,7 +430,27 @@ final class DossierController extends AbstractController
         $response->headers->set('Content-Type', 'application/zip');
         $response->headers->set('X-LiteSpeed-Cache-Control', 'no-cache');
         $response->headers->addCacheControlDirective('no-store');
-        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $reference.'-pieces.zip');
+        // "Nom Prénom - DS-000042.zip", named after the primary tenant so
+        // the archive is self-explanatory once saved among others.
+        $primary = null;
+        foreach ($dossier->getPersons() as $person) {
+            if (DossierPersonRole::TENANT !== $person->getRole()) {
+                continue;
+            }
+            if ($person->isPrimaryContact()) {
+                $primary = $person;
+                break;
+            }
+            $primary ??= $person;
+        }
+        $who = null !== $primary
+            ? $this->zipSafe(trim(trim((string) $primary->getLastName()).' '.trim((string) $primary->getFirstName())))
+            : '';
+        $zipName = ('' !== $who ? $who.' - ' : '').$reference.'.zip';
+        // ASCII fallback for the Content-Disposition header (accents in
+        // tenant names would make the raw header value invalid).
+        $fallback = trim((string) preg_replace('/[^\x20-\x7E]/', '', $zipName));
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName, '' !== $fallback ? $fallback : $reference.'.zip');
 
         return $response;
     }
@@ -404,6 +462,117 @@ final class DossierController extends AbstractController
         $value = (string) preg_replace('/[[:cntrl:]]+/', '', $value);
 
         return '' !== $value ? $value : 'dossier';
+    }
+
+
+    /**
+     * Dépôt d'une pièce par le staff : le locataire l'a envoyée en direct
+     * (email, WhatsApp...), l'admin la verse au dossier comme un dépôt
+     * classique. Miroir du flux public (stockage, statut, fil de suivi),
+     * avec en plus les images acceptées (photos de documents).
+     */
+    #[Route(
+        path: [
+            'fr' => '/dossiers/{reference}/pieces/{id}/fichier',
+            'en' => '/files/{reference}/documents/{id}/file',
+        ],
+        name: 'dossier_document_upload',
+        requirements: ['reference' => 'DS-\d{6}', 'id' => '\d+'],
+        methods: ['POST'],
+    )]
+    public function documentUpload(
+        string $adminPrefix,
+        string $reference,
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        DocumentStorage $storage,
+        ValidatorInterface $validator,
+        DossierEventLogger $events,
+        ClockInterface $clock,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
+        DossierDocumentNamer $namer,
+    ): Response {
+        $this->ensureValidPrefix($adminPrefix);
+
+        if (!$this->isCsrfTokenValid('admin_document_upload', (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        $dossier = $em->getRepository(Dossier::class)->findOneBy(['reference' => $reference])
+            ?? throw $this->createNotFoundException();
+        $document = $em->getRepository(DossierDocument::class)->find($id);
+        if (null === $document || $document->getPerson()?->getDossier() !== $dossier) {
+            throw $this->createNotFoundException();
+        }
+
+        $redirect = $this->redirectToRoute('admin_dossier_show', [
+            'adminPrefix' => $adminPrefix,
+            'reference' => $reference,
+            'tab' => 'file',
+        ], Response::HTTP_SEE_OTHER);
+
+        $upload = $request->files->get('file');
+        if (!$upload instanceof UploadedFile) {
+            $this->addFlash('error', 'admin.dossiers.show.modules.file.upload.noFile');
+
+            return $redirect;
+        }
+
+        $violations = $validator->validate($upload, new FileConstraint(
+            maxSize: '10M',
+            mimeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            mimeTypesMessage: 'admin.dossiers.show.modules.file.upload.invalid',
+            maxSizeMessage: 'admin.dossiers.show.modules.file.upload.invalid',
+        ));
+        if (\count($violations) > 0) {
+            $this->addFlash('error', 'admin.dossiers.show.modules.file.upload.invalid');
+
+            return $redirect;
+        }
+
+        // Coherent display name ("Pièce d'identité - Jean Dupont.pdf")
+        // instead of the picked file's own name, same rule as the tenant
+        // deposit page.
+        $originalName = $namer->displayName($document, (string) ($upload->guessExtension() ?? 'pdf'));
+        $mimeType = (string) ($upload->getMimeType() ?? 'application/octet-stream');
+        $size = (int) $upload->getSize();
+        try {
+            $storedName = $storage->store($dossier, $document, $upload);
+        } catch (\Throwable $e) {
+            $securityLogger->error('Dossier document storage failed: '.$e->getMessage(), ['dossier' => $dossier->getReference()]);
+            $this->addFlash('error', 'admin.dossiers.show.modules.file.upload.storage');
+
+            return $redirect;
+        }
+
+        $document->addFile((new DossierDocumentFile())
+            ->setStoredName($storedName)
+            ->setOriginalName($originalName)
+            ->setMimeType($mimeType)
+            ->setSize($size)
+            ->setUploadedAt($clock->now()));
+        // Une pièce encore attendue passe "Déposée"; une pièce déjà validée
+        // garde son statut (l'admin complète, il ne rétrograde pas).
+        if (\in_array($document->getStatus(), [DossierDocumentStatus::Requested, DossierDocumentStatus::Refused], true)) {
+            $document->setStatus(DossierDocumentStatus::Received);
+        }
+        if (null === $document->getReceivedAt()) {
+            $document->setReceivedAt($clock->now());
+        }
+        // Fil de suivi : même événement qu'un dépôt, l'auteur (admin) est
+        // porté par le logger.
+        $events->log($dossier, 'document_deposited', [
+            'piece' => $document->getType()?->labelKey() ?? '',
+            'tenant' => trim(trim((string) $document->getPerson()->getFirstName()).' '.trim((string) $document->getPerson()->getLastName())),
+            'file' => $originalName,
+        ]);
+        $em->flush();
+
+        $this->addFlash('success', 'admin.toast.fileUploaded');
+
+        return $redirect;
     }
 
     private function ensureValidPrefix(string $adminPrefix): void

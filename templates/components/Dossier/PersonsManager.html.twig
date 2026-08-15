@@ -51,15 +51,6 @@
     {% endif %}
 {% endmacro %}
 
-{# Pill teinté doux, la teinte porte le rôle (bordeaux locataire, ambre
-   suivi), sans icône. #}
-{% macro pRoleChip(person) %}
-    {% set tenant = person.role.value == 'tenant' %}
-    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ tenant ? 'bg-primary/5 text-primary' : 'bg-amber-50 text-amber-700' }}">
-        {{ person.role.labelKey|trans }}
-    </span>
-{% endmacro %}
-
 {% import _self as ui %}
 
 {% set roleOptions = [
@@ -95,7 +86,10 @@
 {# Mêmes classes que <twig:Checkbox> (input natif requis ici : data-model
    sur un tag de composant serait pris pour un binding de prop). #}
 {% set checkboxClass = 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50' %}
-<section {{ attributes.defaults({class: 'rounded-3xl border border-neutral-200 bg-white p-2'}) }} data-testid="dossier-show-persons">
+{# Wrapper : la card et, dessous, le pied "Valider l'étape" (hors coque,
+   décision utilisateur août 2026). #}
+<div {{ attributes.defaults({class: 'flex min-w-0 flex-col gap-3'}) }} data-testid="dossier-show-persons">
+<section class="rounded-3xl border border-neutral-200 bg-white p-2">
     {# Repli piloté par la prop live : un morph écraserait un `open` posé par
        le navigateur seul. #}
     <details {{ this.expanded ? 'open' }} class="group details-animated rounded-2xl bg-neutral-50 p-2">
@@ -115,17 +109,20 @@
             {# Scope pro-fields : englobe les chips de rôle ET le volet pro,
                pour replier le volet dès que le rôle n'est pas locataire. #}
             <div data-controller="pro-fields" data-action="change->pro-fields#refresh">
-            <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                {# Le rôle d'abord : il conditionne les champs affichés
-                   (une demande de suivi = identité + contact, c'est tout). #}
-                <div class="min-w-0 sm:col-span-2">
-                    <p class="text-gray-600">
-                        {{ 'admin.dossiers.create.person.role.label'|trans }}
-                        <span class="text-red-600" aria-hidden="true">*</span>
-                    </p>
-                    {{ ui.chipRadios('role', roleOptions, this.role, 'pm-role', {'data-pro-fields-target': 'role'}) }}
-                    {{ ui.fieldError(this.errors, 'role') }}
-                </div>
+            {# Le rôle d'abord : il conditionne les sections affichées
+               (une demande de suivi = identité + contact, c'est tout). #}
+            <div class="min-w-0 text-sm">
+                <p class="text-gray-600">
+                    {{ 'admin.dossiers.create.person.role.label'|trans }}
+                    <span class="text-red-600" aria-hidden="true">*</span>
+                </p>
+                {{ ui.chipRadios('role', roleOptions, this.role, 'pm-role', {'data-pro-fields-target': 'role'}) }}
+                {{ ui.fieldError(this.errors, 'role') }}
+            </div>
+            {# ── Identité & contact ── #}
+            <div class="mt-4 border-t border-gray-950/5 pt-4">
+                <h4 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.identity'|trans }}</h4>
+                <div class="mt-3 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div class="min-w-0">
                     <twig:Label for="pm-first" class="text-gray-600">
                         {{ 'admin.dossiers.create.person.firstName.label'|trans }}
@@ -171,11 +168,17 @@
                     </div>
                     {{ ui.fieldError(this.errors, 'phone') }}
                 </div>
+                </div>
+            </div>
+            {# ── Situation personnelle : un seul panneau, replié dès que le
+                  rôle n'est pas locataire. ── #}
+            <div class="mt-4 border-t border-gray-950/5 pt-4" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %} data-testid="person-personal-pane">
+                <h4 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.personal'|trans }}</h4>
+                <div class="mt-3 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 {# L'âge se calcule côté client (controller age-badge) : il
                    suit chaque frappe et disparaît dès que la date est vidée. #}
                 <div
                     class="min-w-0"
-                    data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %}
                     data-controller="age-badge"
                     data-age-badge-template-value="{{ 'admin.dossiers.create.person.birthDate.age'|trans({'%age%': '%age%'}) }}"
                 >
@@ -192,7 +195,6 @@
                 </div>
                 <div
                     class="relative min-w-0"
-                    data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %}
                     data-controller="country-select"
                     data-country-select-search-placeholder-value="{{ 'register.form.nationality.searchPlaceholder'|trans }}"
                     data-country-select-empty-label-value="{{ 'register.form.nationality.empty'|trans }}"
@@ -255,7 +257,6 @@
                 {# Ville actuelle : autocomplete Google Places restreint aux
                    villes, monde entier (fallback saisie libre sans Places). #}
                 <div class="min-w-0"
-                     data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %}
                      data-controller="places-autocomplete"
                      data-places-autocomplete-types-value="(cities)"
                      data-places-autocomplete-countries-value=""
@@ -278,17 +279,18 @@
                         ></ul>
                     </div>
                 </div>
-                <div class="min-w-0" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %}>
+                <div class="min-w-0">
                     <p class="text-gray-600">{{ 'admin.dossiers.create.person.visa.label'|trans }}</p>
                     {{ ui.chipRadios('visaStatus', visaOptions, this.visaStatus, 'pm-visa') }}
                 </div>
-                <div class="min-w-0" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %}>
+                <div class="min-w-0">
                     <p class="text-gray-600">
                         {{ 'admin.dossiers.create.person.language.label'|trans }}
                         <span class="text-red-600" aria-hidden="true">*</span>
                     </p>
                     {{ ui.chipRadios('language', languageOptions, this.language, 'pm-language') }}
                     {{ ui.fieldError(this.errors, 'language') }}
+                </div>
                 </div>
             </div>
             {# Volet pro : section à part, même carte. Visible uniquement pour
@@ -298,6 +300,7 @@
                la checkbox "sans activité" replie tout le volet. #}
             {% set proShows = constant('App\\Dossier\\Twig\\Components\\PersonsManager::PRO_FIELD_PROFESSIONS') %}
             <div class="mt-4 border-t border-gray-950/5 pt-4 text-sm" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %} data-testid="person-pro-pane">
+                <h4 class="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.pro'|trans }}</h4>
                 {# Input natif (pas <twig:Checkbox>) : sur un tag de composant,
                    data-model serait interprété comme un binding de prop. #}
                 <label class="flex w-fit cursor-pointer items-center gap-2 text-gray-600">
@@ -396,45 +399,52 @@
                 data-controller="name-preview"
                 data-testid="dossier-show-person"
             >
-                <header class="flex items-center justify-between gap-2 px-4 py-3">
-                    <div class="flex min-w-0 items-center gap-1.5">
-                        {{ ui.pStar(person) }}
-                        <p class="truncate text-sm font-medium text-gray-900" data-name-preview-target="output" data-default="{{ person.fullName|title }}">{{ person.fullName|title }}</p>
-                    </div>
-                    <div class="flex shrink-0 items-center gap-1.5">
-                        {{ ui.pRoleChip(person) }}
-                        {% if not editing %}
-                            {# Même stylo direct que la card identité du lead
-                               (ContactDetails) : pas de menu intermédiaire. #}
+                {% set tenantRole = person.role.value == 'tenant' %}
+                {% set headerActions %}
+                    {% if not editing %}
+                        {# Même stylo direct que la card identité du lead
+                           (ContactDetails) : pas de menu intermédiaire. #}
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="startEdit"
+                            data-live-key-param="{{ person.id }}"
+                            class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                            aria-label="{{ 'admin.dossiers.show.persons.edit'|trans }}"
+                            title="{{ 'admin.dossiers.show.persons.edit'|trans }}"
+                            data-testid="person-edit"
+                        >
+                            {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        </button>
+                        {# Le locataire principal ne peut pas être retiré
+                           (le rôle se transfère d'abord via l'étoile). #}
+                        {% if not person.primaryContact %}
                             <button
                                 type="button"
                                 data-action="live#action"
-                                data-live-action-param="startEdit"
+                                data-live-action-param="askRemove"
                                 data-live-key-param="{{ person.id }}"
-                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
-                                aria-label="{{ 'admin.dossiers.show.persons.edit'|trans }}"
-                                title="{{ 'admin.dossiers.show.persons.edit'|trans }}"
-                                data-testid="person-edit"
+                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                aria-label="{{ 'admin.dossiers.create.person.remove'|trans }}"
+                                title="{{ 'admin.dossiers.create.person.remove'|trans }}"
+                                data-testid="person-remove"
                             >
-                                {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                             </button>
-                            {# Le locataire principal ne peut pas être retiré
-                               (le rôle se transfère d'abord via l'étoile). #}
-                            {% if not person.primaryContact %}
-                                <button
-                                    type="button"
-                                    data-action="live#action"
-                                    data-live-action-param="askRemove"
-                                    data-live-key-param="{{ person.id }}"
-                                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
-                                    aria-label="{{ 'admin.dossiers.create.person.remove'|trans }}"
-                                    title="{{ 'admin.dossiers.create.person.remove'|trans }}"
-                                    data-testid="person-remove"
-                                >
-                                    {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                </button>
-                            {% endif %}
                         {% endif %}
+                    {% endif %}
+                {% endset %}
+                <header class="m-2 mb-0 flex items-center justify-between gap-2 rounded-lg bg-neutral-50 px-3 py-2.5">
+                    <div class="flex min-w-0 items-center gap-2.5">
+                        <twig:Avatar name="{{ person.fullName }}" email="{{ person.email }}" size="8" />
+                        <p class="truncate text-sm font-semibold text-gray-900" data-name-preview-target="output" data-default="{{ person.fullName|title }}">{{ person.fullName|title }}</p>
+                        {{ ui.pStar(person) }}
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1.5">
+                        <span class="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-medium {{ tenantRole ? 'text-primary' : 'text-amber-700' }}">
+                            {{ person.role.labelKey|trans }}
+                        </span>
+                        {{ headerActions }}
                     </div>
                 </header>
                 {% if editing %}
@@ -593,8 +603,9 @@
         {% if this.adding %}
             {# Nouvelle personne : même carte inline, mêmes boutons. #}
             <article class="animate-card-in flex flex-col rounded-xl bg-white ring-1 ring-primary/40" data-controller="name-preview" data-testid="person-add-form">
-                <header class="flex items-center justify-between gap-2 px-4 py-3">
-                    <p class="truncate text-sm font-medium text-gray-900" data-name-preview-target="output" data-default="{{ 'admin.dossiers.show.persons.newTitle'|trans }}">{{ 'admin.dossiers.show.persons.newTitle'|trans }}</p>
+                {# Même bandeau gris encastré que les cards personnes. #}
+                <header class="m-2 mb-0 flex items-center justify-between gap-2 rounded-lg bg-neutral-50 px-3 py-2.5">
+                    <p class="truncate text-sm font-semibold text-gray-900" data-name-preview-target="output" data-default="{{ 'admin.dossiers.show.persons.newTitle'|trans }}">{{ 'admin.dossiers.show.persons.newTitle'|trans }}</p>
                 </header>
                 <div class="border-t border-gray-950/5 px-4 py-4">{{ editFields }}</div>
             </article>
@@ -681,3 +692,13 @@
         {% endif %}
     </details>
 </section>
+
+{# Valider l'étape Personnes déverrouille la card Recherche. #}
+<twig:Dossier:StepValidateFooter
+    :validated="this.isStepValidated()"
+    :canReopen="this.canReopenStep"
+    action="validateStep"
+    reopenAction="reopenStep"
+    :standalone="true"
+/>
+</div>

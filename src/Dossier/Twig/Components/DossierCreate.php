@@ -36,6 +36,7 @@ use Symfony\UX\LiveComponent\LiveCollectionTrait;
 #[AsLiveComponent(name: 'Dossier:DossierCreate', template: 'components/Dossier/DossierCreate.html.twig')]
 final class DossierCreate extends AbstractController
 {
+    use DossiersSectionGuard;
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
@@ -189,6 +190,9 @@ final class DossierCreate extends AbstractController
 
         $draft->setReference($numbers->reference());
         $draft->setPairingCode($numbers->pairingCode());
+        // A fresh code is armed: the deposit page refuses it 90 days after
+        // the last email embedding it (each send re-arms).
+        $draft->setPairingCodeSentAt(new \DateTimeImmutable());
         $draft->setCreatedAt(new \DateTimeImmutable());
         $em->persist($draft);
         $em->flush();
@@ -203,6 +207,12 @@ final class DossierCreate extends AbstractController
         $session = null !== $request && $request->hasSession() ? $request->getSession() : null;
         if ($session instanceof FlashBagAwareSessionInterface) {
             $session->getFlashBag()->add('success', 'admin.dossiers.create.success');
+        }
+
+        try {
+            $this->addFlash('success', 'admin.toast.dossierCreated');
+        } catch (\LogicException) {
+            // Sessionless context (component tests): no toast to queue.
         }
 
         return $this->redirectToRoute('admin_dossier_show', [

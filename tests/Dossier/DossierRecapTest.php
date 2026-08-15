@@ -7,6 +7,7 @@ namespace App\Tests\Dossier;
 use App\Auth\Entity\User;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Domain\DossierRecap;
+use App\Dossier\Domain\DossierStep;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Service\DossierRecapGenerator;
@@ -18,6 +19,7 @@ use Symfony\AI\Platform\Message\UserMessage;
 use Symfony\AI\Platform\Result\ResultInterface;
 use Symfony\AI\Platform\Result\TextResult;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Clock\MockClock;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
@@ -109,13 +111,8 @@ final class DossierRecapTest extends KernelTestCase
     public function testContextCarriesTheDossierBusinessData(): void
     {
         $dossier = $this->persistDossier();
-        $captured = null;
-        $agent = new class($captured) implements AgentInterface {
+        $agent = new class implements AgentInterface {
             public ?string $prompt = null;
-
-            public function __construct(private mixed $unused)
-            {
-            }
 
             public function call(string|MessageBag|UserMessage $input, array $options = []): ResultInterface
             {
@@ -140,6 +137,7 @@ final class DossierRecapTest extends KernelTestCase
             $this->em,
             new NullLogger(),
             self::getContainer()->get('translator'),
+            new MockClock('2026-08-15 09:40:00'),
         );
 
         $generator->generate($dossier);
@@ -149,12 +147,37 @@ final class DossierRecapTest extends KernelTestCase
         self::assertStringContainsString('Jean Recaptest', $agent->prompt);
         // Status handed over in French: the model quotes it verbatim in its
         // summary, "awaiting_documents" would leak into the UI.
-        self::assertStringContainsString('Statut : Nouveau', $agent->prompt);
+        self::assertStringContainsString('Statut : Personnes', $agent->prompt);
+        // The model has no clock: without today's date it computes deadlines
+        // from the creation date (a passed move-in date reads as "13 days
+        // left"). The date must open the context.
+        self::assertStringContainsString("Date du jour : 15/08/2026\n", $agent->prompt);
+    }
+
+    public function testCardStaysHiddenUntilPersonsAndSearchAreValidated(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAsAdmin();
+
+        // Étapes non validées : pas de récap, mais une card verrouillée qui
+        // incite à compléter les étapes (pas un vide silencieux).
+        $locked = (string) $this->renderTwigComponent('Dossier:Recap', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="dossier-show-recap"', $locked);
+        self::assertStringContainsString('data-testid="dossier-recap-locked"', $locked);
+        self::assertStringContainsString('Validez les étapes Personnes et Recherche', $locked);
+
+        // La seule étape Personnes ne suffit pas : la Recherche cadre le récap.
+        $dossier->addValidatedStep(DossierStep::Persons);
+        $this->em->flush();
+        $partial = (string) $this->renderTwigComponent('Dossier:Recap', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="dossier-show-recap"', $partial);
+        self::assertStringContainsString('data-testid="dossier-recap-locked"', $partial);
     }
 
     public function testCardRendersTheStoredRecapAndTheEmptyState(): void
     {
         $dossier = $this->persistDossier();
+        $this->unlockRecap($dossier);
         $this->loginAsAdmin();
 
         $empty = (string) $this->renderTwigComponent('Dossier:Recap', ['dossierId' => (int) $dossier->getId()]);
@@ -178,6 +201,7 @@ final class DossierRecapTest extends KernelTestCase
     public function testCardShipsAHiddenSkeletonShownWhileGenerating(): void
     {
         $dossier = $this->persistDossier();
+        $this->unlockRecap($dossier);
         $this->loginAsAdmin();
 
         $rendered = (string) $this->renderTwigComponent('Dossier:Recap', ['dossierId' => (int) $dossier->getId()]);
@@ -212,6 +236,13 @@ final class DossierRecapTest extends KernelTestCase
         };
 
         return new DossierRecapGenerator($agent, $this->em, new NullLogger());
+    }
+
+    /** La card récap n'apparaît qu'une fois Personnes et Recherche validées. */
+    private function unlockRecap(Dossier $dossier): void
+    {
+        $dossier->addValidatedStep(DossierStep::Persons)->addValidatedStep(DossierStep::Search);
+        $this->em->flush();
     }
 
     private function persistDossier(): Dossier

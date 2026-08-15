@@ -114,57 +114,40 @@ final class DossierNotesTest extends KernelTestCase
         self::assertCount(0, $component->getFeed());
     }
 
-    public function testOperatorChangesTheManualStatusAndTheFeedRecordsIt(): void
+    public function testStatusIsAutomaticAndFollowsTheValidatedSteps(): void
     {
+        // Plus de sélecteur manuel : le statut suit la validation des étapes.
         $dossier = $this->persistDossier();
         $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
         $this->loginAs($admin);
 
         $component = $this->mountNotes($dossier);
-        self::assertSame(\App\Dossier\Domain\DossierStatus::New, $component->getEffectiveStatus());
+        // Dossier neuf : l'étape en attente est Personnes.
+        self::assertSame(\App\Dossier\Domain\DossierStatus::Persons, $component->getEffectiveStatus());
 
-        $component->changeStatus('searching');
+        $validator = self::getContainer()->get(\App\Dossier\Service\DossierStepValidator::class);
+        $validator->validate($dossier, \App\Dossier\Domain\DossierStep::Persons);
+        $validator->validate($dossier, \App\Dossier\Domain\DossierStep::Search);
 
+        // Personnes et Recherche validées : le Dossier (pièces) est en attente.
+        self::assertSame(\App\Dossier\Domain\DossierStatus::File, $component->getEffectiveStatus());
         $this->em->clear();
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
-        self::assertSame(\App\Dossier\Domain\DossierStatus::Searching, $fresh->getStatus());
-        self::assertStringContainsString('Recherche en cours', $component->getEvents()[0]['text']);
+        self::assertSame(\App\Dossier\Domain\DossierStatus::File, $fresh->getStatus());
     }
 
-    public function testDerivedStatusesOverrideTheManualPick(): void
+    public function testClosureOverridesTheStepStatus(): void
     {
         $dossier = $this->persistDossier();
         $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
         $this->loginAs($admin);
 
         $component = $this->mountNotes($dossier);
-        $component->changeStatus('property_found');
-
-        // A requested piece flips the dossier to "awaiting documents".
-        $tenant = $dossier->getPersons()->first();
-        $tenant->addDocument((new \App\Dossier\Entity\DossierDocument())
-            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
-            ->setStatus(\App\Dossier\Domain\DossierDocumentStatus::Requested)
-            ->setRequestedAt(new \DateTimeImmutable()));
-        $this->em->flush();
-        self::assertSame(\App\Dossier\Domain\DossierStatus::AwaitingDocuments, $component->getEffectiveStatus());
-
-        // Closure wins over everything.
+        $dossier->setStatus(\App\Dossier\Domain\DossierStatus::Finalization);
         $dossier->setClosedAt(new \DateTimeImmutable());
         $this->em->flush();
+
         self::assertSame(\App\Dossier\Domain\DossierStatus::Closed, $component->getEffectiveStatus());
-    }
-
-    public function testUnknownOrDerivedStatusValuesAreRejected(): void
-    {
-        $dossier = $this->persistDossier();
-        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
-        $this->loginAs($admin);
-
-        $component = $this->mountNotes($dossier);
-
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
-        $component->changeStatus('awaiting_documents');
     }
 
     public function testNoteDeletionIsDirectFromTheActionsMenu(): void

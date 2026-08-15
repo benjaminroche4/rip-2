@@ -102,6 +102,7 @@ sitemap:
     subTitle: Explore Our Services
     general: General
     blog: Blog
+    property: Our properties
     menu:
         findAccommodation: Property search
         companies: Corporate services
@@ -123,6 +124,8 @@ sitemap:
         deposit: Upload my file
     blogMenu:
         blog: Blog
+    propertyMenu:
+        ourProperty: All our properties for rent (Marketplace)
 footer:
     logo:
         alt: Relocation in Paris logo
@@ -1782,13 +1785,61 @@ a11y:
     skipToContent: Skip to main content
     previous: Previous
     next: Next
+    close: Close
 gallery:
     open: Enlarge photo
     close: Close
     previous: Previous
     next: Next
 admin:
+    toast:
+        dismiss: Dismiss the notification
+        saved: Changes saved.
+        fileRenamed: File renamed.
+        noteAdded: Note added.
+        noteUpdated: Note updated.
+        noteDeleted: Note deleted.
+        stepValidated: Step validated.
+        stepReopened: Step reopened.
+        statusUpdated: Status updated.
+        assigned: 'Assigned to %name%.'
+        unassigned: Assignment removed.
+        personSaved: Person saved.
+        personRemoved: Person removed from the file.
+        personPrimary: '%name% is now the primary tenant.'
+        dossierClosed: File closed.
+        dossierReopened: File reopened.
+        recapGenerated: Recap generated.
+        driveProvisioned: Folder created in Drive.
+        fileUploaded: File added to the document.
+        depositLocked: Deposit space locked.
+        depositUnlocked: Deposit space unlocked.
+        pieceDeleted: Document removed from the file.
+        fileDeleted: File deleted.
+        pieceRefused: Document refused, the tenant has been notified.
+        descriptionSaved: Note saved.
+        ratingSaved: Rating saved.
+        twoFactorEnabled: Two-factor authentication enabled.
+        twoFactorDisabled: Two-factor authentication disabled.
+        twoFactorReset: Two-factor authentication reset.
+        accessGranted: Back-office access granted.
+        accessRevoked: Back-office access revoked.
+        adminGranted: Administrator role granted.
+        adminRevoked: Administrator role removed.
+        userSuspended: Account suspended.
+        userResumed: Account reactivated.
+        userDeleted: Account deleted.
+        avatarReset: Profile photo reset.
+        documentSaved: Document saved.
+        documentDeleted: Document deleted.
+        requestDeleted: Request deleted.
+        visitPlanned: Visit scheduled.
+        dossierCreated: File created.
+        contactCreated: Lead created.
+        agencyCreated: Agency created.
+        agentCreated: Agent created.
     meta:
+        titlePrefix: Admin
         description: Relocation in Paris admin area. Team access only.
     busyGuard:
         message: An action is still running. Leaving the page now may lose it.
@@ -1802,6 +1853,7 @@ admin:
         profile: My profile
         logout: Log out
         skipToContent: Skip to main content
+        logoLabel: Relocation In Paris, admin home
     breadcrumb:
         label: Breadcrumb
     accessDenied:
@@ -1829,8 +1881,11 @@ admin:
             close: Close
     dossiers:
         title: Files
+        expiredPairing:
+            title: Deposit code expired
+            hint: The deposit code has expired, resend the document request to reactivate it.
         creating:
-            title: Your dossier is being created
+            title: Your file is being created
             subtitle: One moment, setting everything up.
         empty:
             title: No files yet
@@ -1848,12 +1903,13 @@ admin:
             description: Adjust the search or the status filter to find your files.
         status:
             label: Status
-            autoHint: Automatic status, derived from closure and pending documents
+            autoHint: Automatic status, it follows the file's validated steps
             choice:
-                new: New
-                awaiting_documents: Awaiting documents
-                searching: Search in progress
-                property_found: Property found
+                persons: People
+                search: Search
+                file: Application
+                visit: Visit
+                finalization: Finalization
                 closed: Closed
         list:
             viewMore: View the file
@@ -1874,7 +1930,7 @@ admin:
                 rejections: Rejections
             managedBy: 'Managed by:'
             archived: Completed
-            closedIn: 'Closed in {0}less than a day|{1}1 day|]1,Inf[%count% days'
+            duration: '{0}less than a day|{1}1 day|]1,Inf[%count% days'
         show:
             unlock: Unlock editing
             lock: Lock editing
@@ -1883,6 +1939,10 @@ admin:
                 edit: Edit
                 save: Save
                 newTitle: New person
+                sections:
+                    identity: Identity and contact
+                    personal: Personal situation
+                    pro: Professional situation
                 primaryLocked: The primary tenant cannot be removed. Transfer the role to another tenant first.
                 removeConfirm:
                     title: Remove this person?
@@ -1917,6 +1977,7 @@ admin:
                 next: Next file
             timeline:
                 title: Summary
+                locked: Fill in the desired move-in date in the Search to track progress.
                 start: 'File started:'
                 moveIn: 'Desired move-in:'
                 onTrack: On track
@@ -1926,6 +1987,9 @@ admin:
                 daysLate: 'D+%count%'
             steps:
                 lockedHint: 'Validate the %step% step to get in.'
+                validate: Validate step
+                validatedNote: Step validated
+                reopen: Reopen step
                 persons:
                     label: People
                     todo: Add at least one tenant and pick the primary contact.
@@ -1934,15 +1998,16 @@ admin:
                     todo: Complete the search criteria.
                 file:
                     label: File
-                    todo: Request the supporting documents and validate them all.
+                    todo: Request the supporting documents and track their deposit.
                 visit:
                     label: Visit
-                    todo: Mark at least one visit as carried out.
+                    todo: Plan and track the file's visits.
                 payment:
                     label: Payment
                     todo: Last step of the path.
             recap:
                 title: AI file recap
+                locked: Validate the People and Search steps to unlock the recap.
                 generate: Generate the recap
                 refresh: Refresh
                 generating: Generating...
@@ -1970,8 +2035,7 @@ admin:
                     label: Must-have amenities
                 title: Search
                 subtitle: Tenant search criteria
-                toComplete: To complete
-                complete: Search complete
+                validateBlocked: Complete the criteria to validate the step.
                 section:
                     essentials: Budget & timing
                     property: The property
@@ -2078,7 +2142,7 @@ admin:
                 documentRefused: 'Document refused: %piece% (%tenant%). Reason: %reason%'
                 documentRefusedNoReason: 'Document refused: %piece% (%tenant%)'
                 documentStatus: 'Status of %piece% (%tenant%) set to "%status%"'
-                documentDeleted: 'Piece removed from the dossier: %piece% (%tenant%)'
+                documentDeleted: 'Document removed from the file: %piece% (%tenant%)'
                 documentFileDeleted: 'File deleted on %piece% (%tenant%): %file%'
                 documentFileRemoved: 'File removed by the depositor on %piece%: %file%'
                 descriptionUpdated: 'Precision added on %piece% (%tenant%): %description%'
@@ -2090,7 +2154,11 @@ admin:
                 managerAssigned: File assigned to %name%
                 managerUnassigned: File unassigned
                 dossierClosed: 'File closed: %count% file(s) deleted, deposit link disabled'
+                depositLocked: Deposit space locked
+                depositUnlocked: Deposit space unlocked
                 dossierReopened: File reopened
+                stepValidated: '%step% step validated'
+                stepReopened: '%step% step reopened'
                 searchUpdated: 'Search updated, %field%: %value%'
                 searchCleared: Search updated, %field% cleared
                 searchField:
@@ -2132,19 +2200,19 @@ admin:
                     send: Send the email
                     sendTo: 'Send the request to:'
                     sent: Request email sent to %email%
-                    deleteFile: Delete this file (the piece goes back to requested if none is left)
+                    deleteFile: Delete this file (the document goes back to requested if none is left)
                     deleteFileConfirm:
                         title: Delete this file?
-                        text: The file will be permanently deleted. If it was the piece's last one, it goes back to requested.
+                        text: The file will be permanently deleted. If it was the document's last one, it goes back to requested.
                         confirm: Delete
-                    deletePiece: Remove this piece from the dossier
+                    deletePiece: Remove this document from the file
                     deletePieceConfirm:
-                        title: Remove this piece?
-                        text: The piece and any files already deposited will be permanently deleted. The tenant will no longer see it in their upload page.
+                        title: Remove this document?
+                        text: The document and any files already deposited will be permanently deleted. The tenant will no longer see it in their upload page.
                         confirm: Remove
                     counter: '%deposited%/%total% deposited'
                     resend: Remind
-                    resendTitle: Re-send the request email for the pieces still awaited
+                    resendTitle: Re-send the request email for the documents still awaited
                     resendModal:
                         title: Remind about the awaited documents
                         text: Choose who receives the reminder email with the deposit link.
@@ -2152,7 +2220,7 @@ admin:
                         sendFailed: Some emails failed to send. Successful ones are logged in the thread; retry for the others.
                     downloadZip: Download all (.zip)
                     refuse:
-                        title: Refuse this piece?
+                        title: Refuse this document?
                         text: The tenant will be notified by email and asked to upload a new version.
                         reasonLabel: Reason (optional, visible to the tenant)
                         reasonPlaceholder: 'E.g. unreadable document, a page is missing...'
@@ -2163,15 +2231,28 @@ admin:
                     depositLink:
                         label: Deposit link to share
                         copy: Copy
+                        copyCode: Copy the pairing code
                         copied: Copied!
                     error:
                         none: Select at least one document.
                         allRequested: All these documents have already been requested.
                         noRecipient: Choose a recipient.
+                    none: No documents requested yet.
+                    provisionDrive: Create the folder in Drive
+                    depositLock:
+                        lock: Lock the deposit
+                        locked: Deposit locked
+                        unlock: Unlock the client deposit
+                    sizeMb: '%size% MB'
+                    renameFile: Rename the file
+                    upload:
+                        button: Add a file
+                        noFile: No file received, try again.
+                        invalid: 'File rejected: PDF or image, 10 MB max.'
+                        storage: 'Storage unavailable, try again in a moment.'
                     table:
-                        piece: Document
                         requestedAt: Requested on
-                        status: Status
+                    requestedAgo: '%count% day ago|%count% days ago'
                     status:
                         requested: Requested
                         received: Deposited
@@ -2382,7 +2463,7 @@ admin:
             visioOverdue:
                 question: "The video call time has passed. What happened?"
                 done: "Call done"
-                noShow: "No-show, replan"
+                noShow: "No-show, reschedule"
             notifyClient: Notify the prospect by email (recontact date and channel)
             visioNotice: On confirmation, the prospect automatically receives the email invitation with the Google Meet link, and the call is added to your calendar.
             channelRequired: Pick the recontact channel
@@ -2571,6 +2652,7 @@ admin:
             title: 'Visit on %date% at %time%'
             detailsTitle: 'Visit details'
             reference: Reference
+            durationMinutes: '%count% min'
         edit:
             title: Edit the visit
         row:
@@ -2654,6 +2736,9 @@ admin:
                 placeholder: Pick a file...
                 incomplete: Complete this file's search criteria before scheduling a visit.
                 incompleteLink: Complete the search
+                loading: Loading the file...
+            recap:
+                title: Summary
             assignee:
                 none: 'No visit agent yet. Grant the "Visit agent" function on the user profile.'
                 label: Performed by
@@ -2686,6 +2771,15 @@ admin:
             description: Adjust the search to find your agents.
         card:
             noAgency: Independent
+        specialty:
+            location: Rental
+            transaction: Sales
+        position:
+            assistant: Assistant
+            consultant_sale: Sales consultant
+            consultant_rental: Rental consultant
+            partner: Partner
+            manager: Manager
         create:
             button: Create
             menuItem:
@@ -2708,6 +2802,11 @@ admin:
                 label: Agency
                 placeholder: Agency name...
                 help: A known agency is reused automatically.
+                notBlank: The agency name is required.
+            specialties:
+                label: Specialties
+            position:
+                label: Position in the agency
             email:
                 label: Email
             phone:
@@ -2733,8 +2832,18 @@ admin:
             submitting: Creating...
             name:
                 label: Agency name
-                placeholder: Foncia, Century 21...
+                placeholder: Foncia Paris 11, Century 21 Bastille...
                 exists: This agency already exists.
+            brand:
+                label: Brand
+                placeholder: Foncia, Century 21...
+                help: A known brand is reused automatically.
+            address:
+                label: Address
+            phone:
+                label: Phone
+            email:
+                label: Email
     tools:
         title: Tools
         documents:
@@ -2907,6 +3016,14 @@ admin:
                 download: Download my codes
                 warning: Store these recovery codes somewhere safe, they will never be shown again. Each one works only once and lets you sign in if you lose your phone.
                 done: I saved my codes
+            pdf:
+                title: Recovery codes
+                intro: These codes let you sign in to the back office if you lose access to your authenticator app. Each code works only once.
+                warning: Keep this document somewhere safe (password vault, locked drawer). Anyone holding it can bypass your account's two-factor authentication.
+                account: 'Account:'
+                generatedAt: Generated on %date% at %time% (Paris time)
+                footerTag: Relocation Agency for Individuals and Businesses
+                footerAddress: 155 Rue du Faubourg Saint-Denis, 75010 Paris, France
             disable:
                 button: Disable
                 passwordHelp: Confirm with your password to disable two-factor authentication.
@@ -3258,23 +3375,35 @@ deposit:
         code:
             label: File code
             placeholder: 6-character code
+            charLabel: Character %position% of the code
             hint: The code is in the email you received.
         submit: Access my file
         error:
             noMatch: These details do not match any file. Please check the email and code you received.
+            depositLocked: Your access is temporarily locked. Please try again later or contact your advisor.
             tooManyRequests: Too many attempts. Please wait a minute before trying again.
     documents:
         title: Hello %firstName%
+        nameJoin: and
         text: Upload the requested documents below, your advisor reviews them as they arrive.
         formats:
-            label: 'Accepted format:'
-            maxSize: 10 MB max per file
-        reference: File %reference%
+            formatLabel: Accepted format
+            sizeLabel: Maximum size
+            sizeValue: 10 MB per file
+        dropPdfOnly: Only PDF files are accepted.
+        complete:
+            title: File complete
+            text: All your documents are validated, your advisor takes it from here.
+        referenceLabel: Your file
         empty: No document is expected at the moment.
         upload: Upload
         uploadMore: Add
         uploading: Uploading... %percent%
+        uploadingMany: File %index%/%count%... %percent%
         uploadFailed: Upload failed, please retry
+        dropTooLarge: 'File too large: 10 MB max per file.'
+        cancelUpload: Cancel the upload
+        uploadedAnnounce: Files uploaded, document statuses are up to date.
         leave: Sign out
         sizeMb: '%size% MB'
         sizeKb: '%size% KB'
@@ -3293,25 +3422,8 @@ deposit:
         error:
             noFile: No file received. Please try again.
             locked: This piece has been validated, its file can no longer be removed.
-    manager:
-        title: Your dedicated advisor
-        call: Call
-        write: Write
     progress:
-        label: Your file progress
-    trust:
-        encrypted:
-            title: Encrypted connection
-            text: Your documents travel over HTTPS and are stored away from any public access.
-        private:
-            title: Restricted access
-            text: Only the team handling your file can view your documents.
-        retention:
-            title: Limited retention
-            text: Your documents are deleted when your file is closed.
-        hosting:
-            title: Hosted in France
-            text: Your data stays on servers located in France.
+        detail: '%deposited% of %total% documents uploaded, %validated% validated'
 
 twoFactor:
     challenge:

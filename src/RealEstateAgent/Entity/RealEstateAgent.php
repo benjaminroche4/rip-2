@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\RealEstateAgent\Entity;
 
+use App\RealEstateAgent\Domain\AgencyPosition;
+use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Repository\RealEstateAgentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -45,6 +48,19 @@ class RealEstateAgent
     #[ORM\Column(length: 30, nullable: true)]
     #[Assert\Length(max: 30, maxMessage: 'admin.agents.create.phone.length')]
     private ?string $phone = null;
+
+    /**
+     * Deal types the agent handles (an agent can do both), stored as the
+     * enum backing values; null = not filled in.
+     *
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $specialties = null;
+
+    /** Job inside the agency; only meaningful for agency agents. */
+    #[ORM\Column(length: 30, nullable: true, enumType: AgencyPosition::class)]
+    private ?AgencyPosition $position = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -110,6 +126,40 @@ class RealEstateAgent
     public function setPhone(?string $phone): static
     {
         $this->phone = '' !== trim((string) $phone) ? $phone : null;
+
+        return $this;
+    }
+
+    /**
+     * @return list<AgentSpecialty>
+     */
+    public function getSpecialties(): array
+    {
+        return array_map(AgentSpecialty::from(...), $this->specialties ?? []);
+    }
+
+    /**
+     * @param list<AgentSpecialty> $specialties
+     */
+    public function setSpecialties(array $specialties): static
+    {
+        $values = array_values(array_unique(array_map(
+            static fn (AgentSpecialty $specialty): string => $specialty->value,
+            $specialties,
+        )));
+        $this->specialties = [] !== $values ? $values : null;
+
+        return $this;
+    }
+
+    public function getPosition(): ?AgencyPosition
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?AgencyPosition $position): static
+    {
+        $this->position = $position;
 
         return $this;
     }

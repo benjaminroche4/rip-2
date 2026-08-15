@@ -46,6 +46,15 @@ final class RecallCalendarSyncTest extends KernelTestCase
             'client_email' => 'visio@service-account.test',
             'private_key' => $pem,
         ]));
+        $this->resetCalls();
+    }
+
+    /**
+     * Resets the recorded HTTP calls through a method so PHPStan does not
+     * narrow the property type to an empty array within the test method.
+     */
+    private function resetCalls(): void
+    {
         $this->calls = [];
     }
 
@@ -87,7 +96,7 @@ final class RecallCalendarSyncTest extends KernelTestCase
         $contact = $this->persistContact();
         $sync = $this->sync();
         $sync->apply($contact);
-        $this->calls = [];
+        $this->resetCalls();
 
         $contact->setRecallAt(new \DateTimeImmutable('+5 days 11:00'));
         $this->em->flush();
@@ -104,7 +113,7 @@ final class RecallCalendarSyncTest extends KernelTestCase
         $contact = $this->persistContact();
         $sync = $this->sync();
         $sync->apply($contact);
-        $this->calls = [];
+        $this->resetCalls();
 
         // The step became a visio (or a dateless one): the recall mirror
         // has nothing left to mirror.
@@ -136,7 +145,7 @@ final class RecallCalendarSyncTest extends KernelTestCase
         $contact = $this->persistContact();
         $sync = $this->sync();
         $sync->apply($contact);
-        $this->calls = [];
+        $this->resetCalls();
 
         // Lead closed or deleted: the agent's agenda must not keep it.
         $sync->clear($contact);

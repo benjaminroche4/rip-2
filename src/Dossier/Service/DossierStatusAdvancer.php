@@ -10,12 +10,12 @@ use App\Dossier\Entity\DossierEvent;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Moves the dossier status forward as steps get validated (search complete
- * -> "Recherche en cours", visit carried out -> "Bien trouvé").
- *
- * Only ever forward: an operator who picked a further status by hand keeps
- * it, and nothing here can walk a dossier backwards. Closed dossiers are
- * left alone entirely.
+ * Keeps the dossier status aligned with the step path: the status names the
+ * first step still pending ("Personnes", "Recherche", ...), and switches to
+ * "Finalisation" once the visit step is validated (apartment found). Works
+ * in both directions: reopening a step walks the status back too. The
+ * status has no manual selector, the step path is its single source of
+ * truth. Closed dossiers are left alone entirely.
  */
 final readonly class DossierStatusAdvancer
 {
@@ -36,8 +36,10 @@ final readonly class DossierStatusAdvancer
             return $current;
         }
 
-        $reached = $this->progress->forDossier($dossier)->reachedStatus();
-        if (null === $reached || self::rank($reached) <= self::rank($current)) {
+        // Le statut nomme l'étape en attente : première étape non validée,
+        // ou "Finalisation" une fois la visite faite (bien trouvé).
+        $reached = DossierStatus::fromPendingStep($this->progress->forDossier($dossier)->currentStep());
+        if ($reached === $current) {
             return $current;
         }
 
@@ -55,13 +57,5 @@ final readonly class DossierStatusAdvancer
         $this->em->flush();
 
         return $reached;
-    }
-
-    /** Position in the manual pipeline; unknown statuses stay at the back. */
-    private static function rank(DossierStatus $status): int
-    {
-        $index = array_search($status, DossierStatus::manualCases(), true);
-
-        return false === $index ? -1 : $index;
     }
 }

@@ -20,6 +20,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:ContactHeading', template: 'components/Admin/ContactHeading.html.twig')]
 final class ContactHeading
 {
+    use ContactsSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

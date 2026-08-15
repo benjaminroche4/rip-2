@@ -79,7 +79,12 @@
                                     {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
                                 </span>
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-900">{{ agency.name }}</p>
+                                    <div class="flex min-w-0 items-center gap-2">
+                                        <p class="truncate text-sm font-medium text-gray-900">{{ agency.name }}</p>
+                                        {% if agency.brand %}
+                                            <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-brand">{{ agency.brand }}</span>
+                                        {% endif %}
+                                    </div>
                                     <p class="truncate text-xs text-gray-500" data-testid="agency-agent-count">
                                         {{ 'admin.agencies.card.agentCount'|trans({'%count%': agency.agentCount}) }}
                                     </p>
@@ -116,9 +121,14 @@
                                     <div class="flex min-w-0 items-center gap-3 sm:flex-1">
                                         <twig:Avatar name="{{ agent.fullName }}" size="9" />
                                         <div class="min-w-0">
-                                            <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>
+                                            <div class="flex min-w-0 items-center gap-2">
+                                                <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>
+                                                {% for specialty in agent.specialties %}
+                                                    <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agent-specialty">{{ specialty.labelKey|trans }}</span>
+                                                {% endfor %}
+                                            </div>
                                             <p class="truncate text-xs text-gray-500" data-testid="agent-agency">
-                                                {{ agent.agency ?: 'admin.agents.card.noAgency'|trans }}
+                                                {{ agent.agency ?: 'admin.agents.card.noAgency'|trans }}{% if agent.position %} &middot; <span data-testid="agent-position">{{ agent.position.labelKey|trans }}</span>{% endif %}
                                             </p>
                                         </div>
                                     </div>

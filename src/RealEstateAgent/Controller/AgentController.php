@@ -49,6 +49,42 @@ final class AgentController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: [
+            'fr' => '/agents-immobiliers/nouveau',
+            'en' => '/real-estate-agents/new',
+        ],
+        name: 'agent_new',
+        methods: ['GET'],
+    )]
+    public function newAgent(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        // The form itself lives in the RealEstateAgent:AgentCreate live component.
+        return $this->render('admin/agents/new_agent.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/agents-immobiliers/nouvelle-agence',
+            'en' => '/real-estate-agents/new-agency',
+        ],
+        name: 'agency_new',
+        methods: ['GET'],
+    )]
+    public function newAgency(string $adminPrefix): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        // The form itself lives in the RealEstateAgent:AgencyCreate live component.
+        return $this->render('admin/agents/new_agency.html.twig', [
+            'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
     private function ensureValidPrefix(string $adminPrefix): void
     {
         if (!hash_equals($this->adminPathPrefix, $adminPrefix)) {

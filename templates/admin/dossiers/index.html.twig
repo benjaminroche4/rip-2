@@ -16,6 +16,26 @@
 
 {% block body %}
     <div data-testid="dossiers-page">
+        {# Alerte discrète : rendue uniquement quand un dossier ouvert a des
+           pièces en attente et un code de dépôt expiré. Le renvoi de la
+           demande de pièces ré-arme le code, c'est l'action de résolution. #}
+        {% if expiredPairingAlerts is defined and expiredPairingAlerts is not empty %}
+            <div data-testid="expired-pairing-alert" class="mb-4 rounded-3xl border border-amber-200 bg-amber-50 p-4">
+                <p class="text-sm font-medium text-amber-900">{{ 'admin.dossiers.expiredPairing.title'|trans }}</p>
+                <p class="mt-1 text-sm text-amber-800">{{ 'admin.dossiers.expiredPairing.hint'|trans }}</p>
+                <ul class="mt-2 space-y-1">
+                    {% for alert in expiredPairingAlerts %}
+                        <li>
+                            <a
+                                data-testid="expired-pairing-alert-link"
+                                href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: alert.reference}) }}"
+                                class="text-sm font-medium text-amber-900 underline decoration-amber-400 underline-offset-2 transition-colors duration-100 ease-out hover:text-amber-700"
+                            >{{ alert.reference }} · {{ alert.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         <twig:Dossier:DossierList :adminPrefix="adminPrefix" />
     </div>
 {% endblock %}

@@ -23,6 +23,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Visit:VisitArchive', template: 'components/Visit/VisitArchive.html.twig')]
 final class VisitArchive
 {
+    use VisitsSectionGuard;
     use DefaultActionTrait;
 
     private const TIMEZONE = 'Europe/Paris';

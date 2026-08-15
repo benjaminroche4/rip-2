@@ -8,12 +8,14 @@ use App\Admin\Domain\DocumentRequestSummary;
 use App\Admin\Entity\DocumentRequest;
 use App\Admin\Repository\DocumentRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -30,6 +32,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:DocumentRequestList', template: 'components/Admin/DocumentRequestList.html.twig')]
 final class DocumentRequestList
 {
+    use ToolsSectionGuard;
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     private const PER_PAGE = 25;
@@ -55,6 +59,8 @@ final class DocumentRequestList
         private readonly DocumentRequestRepository $repository,
         private readonly Security $security,
         private readonly EntityManagerInterface $em,
+        private readonly LoggerInterface $securityLogger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -113,9 +119,17 @@ final class DocumentRequestList
         if (null === $request) {
             return;
         }
+
+        // Audit trail: a request carries tenant names, log its removal.
+        $this->securityLogger->notice('Document request deleted', [
+            'actor' => $this->security->getUser()?->getUserIdentifier(),
+            'documentRequest' => $id,
+        ]);
+
         $this->em->remove($request);
         $this->em->flush();
         $this->totalCountCache = null;
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.requestDeleted')]);
     }
 
     public function isEmpty(): bool

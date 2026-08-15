@@ -1,8 +1,24 @@
+{# One-time PDF of the freshly generated 2FA recovery codes. Localized in
+   the viewer's locale (the download happens inside the staff request), on
+   the same t.* dictionary model as pdf/contact.html.twig. #}
+{% set locale = app.request and app.request.locale in ['fr', 'en'] ? app.request.locale : 'fr' %}
+{% set t = {
+    title: 'admin.profile.twoFactor.pdf.title'|trans([], 'messages', locale),
+    intro: 'admin.profile.twoFactor.pdf.intro'|trans([], 'messages', locale),
+    warning: 'admin.profile.twoFactor.pdf.warning'|trans([], 'messages', locale),
+    account: 'admin.profile.twoFactor.pdf.account'|trans([], 'messages', locale),
+    generatedAt: 'admin.profile.twoFactor.pdf.generatedAt'|trans({
+        '%date%': generatedAt|format_datetime(pattern='d MMMM yyyy', locale=locale),
+        '%time%': generatedAt|format_datetime(pattern=(locale == 'fr' ? "HH'h'mm" : 'HH:mm')),
+    }, 'messages', locale),
+    footerTag: 'admin.profile.twoFactor.pdf.footerTag'|trans([], 'messages', locale),
+    footerAddress: 'admin.profile.twoFactor.pdf.footerAddress'|trans([], 'messages', locale),
+} %}
 <!doctype html>
-<html lang="fr">
+<html lang="{{ locale }}">
 <head>
     <meta charset="UTF-8">
-    <title>Codes de récupération — Relocation in Paris</title>
+    <title>{{ t.title }} - Relocation in Paris</title>
     <style>
         @page { margin: 18mm 16mm 22mm 16mm; }
         body {
@@ -58,23 +74,15 @@
 <body>
     <div class="narrow">
         <div class="header">
-            <h1>Codes de récupération</h1>
+            <h1>{{ t.title }}</h1>
             {% if logoDataUri %}
                 <img src="{{ logoDataUri }}" alt="Relocation in Paris">
             {% endif %}
         </div>
 
-        <p class="muted">
-            Ces codes permettent de vous connecter au backoffice si vous perdez
-            l'accès à votre application d'authentification. Chaque code ne
-            fonctionne qu'une seule fois.
-        </p>
+        <p class="muted">{{ t.intro }}</p>
 
-        <div class="warning">
-            Conservez ce document en lieu sûr (coffre de mots de passe, tiroir
-            fermé). Toute personne en sa possession peut contourner la double
-            authentification de votre compte.
-        </div>
+        <div class="warning">{{ t.warning }}</div>
 
         <div class="codes">
             {% for code in codes %}
@@ -83,13 +91,13 @@
         </div>
 
         <p class="meta">
-            Compte : {{ email }}<br>
-            Généré le {{ generatedAt|format_datetime(pattern='d MMMM yyyy', locale='fr') }} à {{ generatedAt|format_datetime(pattern="HH'h'mm") }} (heure de Paris)
+            {{ t.account }} {{ email }}<br>
+            {{ t.generatedAt }}
         </p>
 
         <div class="footer">
-            Relocation in Paris — Agence de Relocation pour Particuliers et Professionnels<br>
-            155 Rue du Faubourg Saint-Denis, 75010 Paris — France
+            Relocation in Paris &middot; {{ t.footerTag }}<br>
+            {{ t.footerAddress }}
         </div>
     </div>
 </body>

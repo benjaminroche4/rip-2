@@ -8,6 +8,7 @@ use App\Auth\Entity\User;
 use App\Dossier\Domain\DossierDocumentStatus;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Domain\DossierStatus;
+use App\Dossier\Domain\DossierStep;
 use App\Dossier\Repository\DossierRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -19,6 +20,13 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Table(name: 'dossier')]
 class Dossier
 {
+    /**
+     * Sliding validity window of the pairing code, in days, re-armed by
+     * every email embedding the code (see $pairingCodeSentAt). Shared by
+     * the public deposit pairing check and the back-office expiry alert.
+     */
+    public const PAIRING_CODE_TTL_DAYS = 90;
+
     public const MAX_PERSONS = 4;
     public const MIN_PERSONS = 1;
     /** Max persons per role: 2 tenants + 2 follow-up requests. */
@@ -48,16 +56,25 @@ class Dossier
     #[ORM\Column(length: 6, unique: true)]
     private ?string $pairingCode = null;
 
+    /**
+     * Last arming of the pairing code: dossier creation (or code rotation),
+     * then every email embedding the code re-arms it. The public deposit
+     * page refuses a code older than PAIRING_CODE_TTL, exactly like an
+     * unknown code; null means "never armed" and is refused too.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $pairingCodeSentAt = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
-     * Manual part of the semi-automatic lifecycle: the operator only picks
-     * between new / searching / property_found. The two derived statuses
-     * (awaiting documents, closed) are computed by getEffectiveStatus().
+     * Fully automatic: names the step currently pending, kept aligned with
+     * the validated steps by DossierStatusAdvancer. "Closed" is derived from
+     * closedAt by getEffectiveStatus(), never stored here.
      */
-    #[ORM\Column(length: 20, enumType: DossierStatus::class, options: ['default' => DossierStatus::New])]
-    private DossierStatus $status = DossierStatus::New;
+    #[ORM\Column(length: 20, enumType: DossierStatus::class, options: ['default' => DossierStatus::Persons])]
+    private DossierStatus $status = DossierStatus::Persons;
 
     /**
      * Closure timestamp: a closed dossier has its deposited files purged,
@@ -65,6 +82,16 @@ class Dossier
      */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $closedAt = null;
+
+    /**
+     * Verrou temporaire de l'espace de dépôt public : posé/levé par le
+     * staff depuis la card Dossier. Verrouillé, l'appairage répond "accès
+     * verrouillé, réessayez plus tard" et les sessions appairées retombent
+     * sur le formulaire. Rien n'est purgé ni tourné (contrairement à la
+     * clôture) : c'est une pause, pas une fin.
+     */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $depositLockedAt = null;
 
     /** AI quick recap (JSON: summary, attentionPoints, nextAction), generated on demand. */
     #[ORM\Column(type: 'text', nullable: true)]
@@ -104,6 +131,17 @@ class Dossier
      */
     #[ORM\Column(length: 128, nullable: true)]
     private ?string $driveManagerPermissionId = null;
+
+    /**
+     * Steps of the path explicitly validated by the staff ("Valider" button
+     * at the bottom of each step card), as DossierStep values. Sequential by
+     * construction: DossierStepValidator only accepts the first step still
+     * open, so the list is always a prefix of DossierStep::ordered().
+     *
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $validatedSteps = null;
 
     /**
      * Ordered list of persons attached to the dossier. Bound to the
@@ -227,6 +265,18 @@ class Dossier
         return $this;
     }
 
+    public function getPairingCodeSentAt(): ?\DateTimeImmutable
+    {
+        return $this->pairingCodeSentAt;
+    }
+
+    public function setPairingCodeSentAt(?\DateTimeImmutable $pairingCodeSentAt): static
+    {
+        $this->pairingCodeSentAt = $pairingCodeSentAt;
+
+        return $this;
+    }
+
     public function getSearch(): ?DossierSearch
     {
         return $this->search;
@@ -306,9 +356,56 @@ class Dossier
         return $this;
     }
 
+    /**
+     * @return list<string>
+     */
+    public function getValidatedSteps(): array
+    {
+        return $this->validatedSteps ?? [];
+    }
+
+    public function isStepValidated(DossierStep $step): bool
+    {
+        return \in_array($step->value, $this->getValidatedSteps(), true);
+    }
+
+    public function addValidatedStep(DossierStep $step): static
+    {
+        if (!$this->isStepValidated($step)) {
+            $this->validatedSteps = [...$this->getValidatedSteps(), $step->value];
+        }
+
+        return $this;
+    }
+
+    public function removeValidatedStep(DossierStep $step): static
+    {
+        $steps = array_values(array_diff($this->getValidatedSteps(), [$step->value]));
+        $this->validatedSteps = [] !== $steps ? $steps : null;
+
+        return $this;
+    }
+
     public function getClosedAt(): ?\DateTimeImmutable
     {
         return $this->closedAt;
+    }
+
+    public function isDepositLocked(): bool
+    {
+        return null !== $this->depositLockedAt;
+    }
+
+    public function getDepositLockedAt(): ?\DateTimeImmutable
+    {
+        return $this->depositLockedAt;
+    }
+
+    public function setDepositLockedAt(?\DateTimeImmutable $depositLockedAt): static
+    {
+        $this->depositLockedAt = $depositLockedAt;
+
+        return $this;
     }
 
     public function setClosedAt(?\DateTimeImmutable $closedAt): static
@@ -369,7 +466,7 @@ class Dossier
 
     public function getEffectiveStatus(): DossierStatus
     {
-        return DossierStatus::effective($this->status, $this->isClosed(), $this->hasPendingDocuments());
+        return DossierStatus::effective($this->status, $this->isClosed());
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\RealEstateAgent\Form;
 
+use App\RealEstateAgent\Domain\AgencyPosition;
+use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -54,6 +57,26 @@ class RealEstateAgentType extends AbstractType
                     new Assert\Length(max: 100, maxMessage: 'admin.agents.create.agency.length'),
                 ],
                 'attr' => ['maxlength' => 100, 'autocomplete' => 'off'],
+            ])
+            // Only meaningful (and only shown) for agency agents; the
+            // component resets it to null for an independent agent.
+            ->add('position', EnumType::class, [
+                'label' => 'admin.agents.create.position.label',
+                'class' => AgencyPosition::class,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                'placeholder' => false,
+                'choice_label' => static fn (AgencyPosition $position): string => $position->labelKey(),
+            ])
+            // Checkboxes rendered as chips: an agent can do both.
+            ->add('specialties', EnumType::class, [
+                'label' => 'admin.agents.create.specialties.label',
+                'class' => AgentSpecialty::class,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => true,
+                'choice_label' => static fn (AgentSpecialty $specialty): string => $specialty->labelKey(),
             ])
             ->add('email', EmailType::class, [
                 'label' => 'admin.agents.create.email.label',

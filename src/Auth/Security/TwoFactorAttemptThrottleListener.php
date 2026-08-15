@@ -8,7 +8,7 @@ use App\Auth\Entity\User;
 use Psr\Log\LoggerInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvent;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvents;
-use Symfony\Bridge\Monolog\Attribute\WithMonologChannel;
+use Monolog\Attribute\WithMonologChannel;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;

@@ -25,6 +25,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'RealEstateAgent:AgentList', template: 'components/RealEstateAgent/AgentList.html.twig')]
 final class AgentList
 {
+    use AgentsSectionGuard;
     use DefaultActionTrait;
 
     private const VIEWS = ['agents', 'agencies'];
@@ -123,7 +124,8 @@ final class AgentList
 
         return array_values(array_filter(
             $this->agencySummaries(),
-            static fn (AgencySummary $agency): bool => false !== mb_stripos($agency->name, $needle),
+            static fn (AgencySummary $agency): bool => false !== mb_stripos($agency->name, $needle)
+                || (null !== $agency->brand && false !== mb_stripos($agency->brand, $needle)),
         ));
     }
 

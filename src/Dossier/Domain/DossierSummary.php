@@ -18,7 +18,7 @@ final readonly class DossierSummary
         public int $personCount,
         public \DateTimeImmutable $createdAt,
         /** Effective status (closure and pending pieces already folded in). */
-        public DossierStatus $status = DossierStatus::New,
+        public DossierStatus $status = DossierStatus::Persons,
         public ?int $managerId = null,
         public ?string $managerName = null,
         public ?string $managerAvatarFilename = null,

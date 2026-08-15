@@ -3,6 +3,29 @@
    synchrone; data-loading couvre les quelques secondes d'appel modèle. #}
 {% set recap = this.recap %}
 <div {{ attributes.defaults({class: 'contents'}) }}>
+    {# Le récap n'est disponible qu'une fois les étapes Personnes et
+       Recherche validées : avant, le modèle n'aurait pas de matière fiable
+       à résumer. En attendant, la card reste visible avec l'incitation à
+       compléter les étapes (même vocabulaire que StepLocked). #}
+    {% if not this.unlocked %}
+    <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-recap-locked">
+        <div class="rounded-2xl bg-neutral-50 p-2">
+            <div class="flex items-center justify-between gap-4 p-3">
+                <div class="min-w-0">
+                    <h2 class="flex items-center gap-2 font-medium text-gray-900">
+                        <span class="ai-orb" aria-hidden="true"></span>
+                        {{ 'admin.dossiers.show.recap.title'|trans }}
+                    </h2>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.recap.locked'|trans }}</p>
+                </div>
+                <span class="flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 py-1 pr-2.5 pl-1.5 text-xs font-medium text-gray-500">
+                    {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.dossiers.show.modules.lockedShort'|trans }}
+                </span>
+            </div>
+        </div>
+    </section>
+    {% else %}
     <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-recap">
         <div class="rounded-2xl bg-neutral-50 p-2">
             <div class="rounded-xl bg-white px-5 pt-4 pb-5">
@@ -131,4 +154,5 @@
             </div>
         </div>
     </section>
+    {% endif %}
 </div>

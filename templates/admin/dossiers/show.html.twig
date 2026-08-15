@@ -50,7 +50,7 @@
     <div
         class="contents"
         data-controller="page-refresh"
-        data-action="dossier-persons:changed@window->page-refresh#refresh"
+        data-action="dossier-persons:changed@window->page-refresh#refresh dossier-progress:changed@window->page-refresh#refresh"
     ></div>
     {# Même disposition que la fiche contact : rangée Actions, puis colonne
        principale + sidebar sticky (fil de suivi) en 1fr / 26rem. #}
@@ -158,6 +158,7 @@
             data-controller="tabs"
             data-tabs
             data-active-tab="{{ activeTab }}"
+            data-action="dossier-step:validated@window->tabs#goTo"
             data-tabs-param-value="tab"
             data-tabs-active-class="bg-neutral-100 text-primary"
             data-tabs-inactive-class="text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -215,13 +216,7 @@
                                 data-testid="dossier-tab-{{ step.key }}"
                                 {{ step.validated ? 'data-step-validated' : '' }}
                             >
-                                {# Étape franchie : coche verte à la place du
-                                   numéro, l'avancement se lit d'un coup d'œil. #}
-                                {% if step.validated %}
-                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-emerald-500', 'aria-hidden': 'true'}) }}
-                                {% else %}
-                                    <span class="flex size-4 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-[10px] font-semibold text-gray-500 tabular-nums group-aria-selected/tab:bg-primary/10 group-aria-selected/tab:text-primary">{{ step.rank }}</span>
-                                {% endif %}
+                                {{ ux_icon(step.icon, {class: 'size-4 shrink-0 motion-safe:group-hover/tab:animate-sidebar-wiggle', 'aria-hidden': 'true'}) }}
                                 {{ step.labelKey|trans }}
                                 {% if step.count is not null %}
                                     <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums" data-testid="tab-count-{{ step.key }}">{{ step.count }}</span>
@@ -281,7 +276,7 @@
 
         {# ── Follow-up card (sticky sidebar, like the contact page):
               manager assignment chips + interactive notes thread. #}
-        <div class="space-y-6 max-lg:mt-6 lg:sticky lg:top-6">
+        <div class="space-y-6 max-lg:mt-6 lg:sticky lg:top-6 lg:z-30">
             <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-show-followup">
                 <div class="flex h-full flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
                     <twig:Dossier:Notes :dossierId="dossier.id" adminPrefix="{{ adminPrefix }}" />

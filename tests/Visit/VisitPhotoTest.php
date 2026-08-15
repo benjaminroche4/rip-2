@@ -170,6 +170,100 @@ final class VisitPhotoTest extends WebTestCase
         self::assertFalse($this->storage()->exists($path));
     }
 
+    public function testDeleteRejectsAnInvalidCsrfToken(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+        $path = (string) $photo->getPath();
+
+        $this->client->request(
+            'POST',
+            $this->visitUrl().'/photos/'.$photo->getId().'/suppression',
+            ['_token' => 'not-a-valid-token'],
+        );
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(1, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+        self::assertTrue($this->storage()->exists($path), 'The stored object must survive a forged deletion.');
+    }
+
+    public function testDeletingAPhotoOfAnotherVisitIs404(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $other = (new Visit())
+            ->setDossier($em->find(Dossier::class, $this->visit->getDossier()->getId()))
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setScheduledAt(new \DateTimeImmutable('+3 days 10:00'))
+            ->setAddress('Ailleurs')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $em->persist($other);
+        $em->flush();
+
+        // A valid token for the right action, but a visit id the photo does
+        // not belong to: the ownership guard answers 404.
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        $token = (string) $crawler->filter('[data-testid="visit-photo-delete"]')->closest('form')->filter('input[name="_token"]')->attr('value');
+
+        $this->client->request(
+            'POST',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$other->getId().'/photos/'.$photo->getId().'/suppression',
+            ['_token' => $token],
+        );
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertSame(1, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
+    public function testDeleteRequiresTheVisitsSection(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $staff = (new User())
+            ->setEmail('staff@visit-photo-test.local')
+            ->setFirstName('Staff')->setLastName('NoVisits')
+            ->setRoles(['ROLE_STAFF', 'ROLE_SECTION_CONTACTS'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $em->persist($staff);
+        $em->flush();
+        $this->client->loginUser($staff);
+
+        $this->client->request(
+            'POST',
+            $this->visitUrl().'/photos/'.$photo->getId().'/suppression',
+            ['_token' => 'irrelevant'],
+        );
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSame(1, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
+    public function testDeleteOnAWrongPrefixIs404EvenAuthenticated(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+
+        $this->client->request(
+            'POST',
+            '/fr/00000000000000000000000000000000/admin/visites/'.$this->visit->getId().'/photos/'.$photo->getId().'/suppression',
+            ['_token' => 'irrelevant'],
+        );
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertSame(1, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
     public function testPathGuardRejectsForeignShapes(): void
     {
         $this->expectException(\RuntimeException::class);

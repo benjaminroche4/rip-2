@@ -149,8 +149,15 @@ final class VisitController extends AbstractController
         requirements: ['id' => '\\d+'],
         methods: ['POST'],
     )]
-    public function delete(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em): Response
-    {
+    public function delete(
+        string $adminPrefix,
+        int $id,
+        Request $request,
+        \App\Visit\Repository\VisitRepository $visits,
+        \Doctrine\ORM\EntityManagerInterface $em,
+        #[Autowire(service: 'monolog.logger.security')]
+        \Psr\Log\LoggerInterface $securityLogger,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
         if (!$this->isCsrfTokenValid('delete_visit', (string) $request->request->get('_token'))) {
@@ -158,6 +165,14 @@ final class VisitController extends AbstractController
         }
 
         $visit = $visits->find($id) ?? throw $this->createNotFoundException();
+
+        // Audit trail: permanent data removal, keep who deleted which visit.
+        $securityLogger->notice('Visit deleted', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'visit' => $id,
+            'reference' => (string) $visit->getReference(),
+        ]);
+
         $em->remove($visit);
         $em->flush();
 
@@ -173,7 +188,7 @@ final class VisitController extends AbstractController
         requirements: ['id' => '\\d+'],
         methods: ['POST'],
     )]
-    public function status(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em, \App\Dossier\Service\DossierStatusAdvancer $advancer): Response
+    public function status(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em, \App\Dossier\Service\DossierStatusAdvancer $advancer, \Symfony\Component\Validator\Validator\ValidatorInterface $validator): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -182,16 +197,19 @@ final class VisitController extends AbstractController
         }
 
         $visit = $visits->find($id) ?? throw $this->createNotFoundException();
-        $status = \App\Visit\Domain\VisitStatus::tryFrom((string) $request->request->get('status'))
-            ?? throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Unknown visit status.');
+
+        $input = new \App\Visit\Domain\VisitStatusInput((string) $request->request->get('status'));
+        if ($validator->validate($input)->count() > 0) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Unknown visit status.');
+        }
 
         // The report survives status changes on purpose: it can be written
         // at any point of the visit's life, not only once it is done.
-        $visit->setStatus($status);
+        $visit->setStatus($input->toStatus());
         $em->flush();
 
         // Une visite réalisée valide l'étape Visite du dossier : le statut
-        // du dossier suit (Bien trouvé) sans geste supplémentaire.
+        // du dossier suit (Finalisation) sans geste supplémentaire.
         $dossier = $visit->getDossier();
         if (null !== $dossier) {
             $advancer->advance($dossier);
@@ -209,7 +227,7 @@ final class VisitController extends AbstractController
         requirements: ['id' => '\\d+'],
         methods: ['POST'],
     )]
-    public function report(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em): Response
+    public function report(string $adminPrefix, int $id, Request $request, \App\Visit\Repository\VisitRepository $visits, \Doctrine\ORM\EntityManagerInterface $em, \Symfony\Component\Validator\Validator\ValidatorInterface $validator): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -219,14 +237,18 @@ final class VisitController extends AbstractController
 
         $visit = $visits->find($id) ?? throw $this->createNotFoundException();
 
-        $report = trim((string) $request->request->get('report'));
-        $feeling = '' !== (string) $request->request->get('feeling')
-            ? (\App\Visit\Domain\ClientFeeling::tryFrom((string) $request->request->get('feeling'))
-                ?? throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Unknown client feeling.'))
-            : null;
+        $feeling = (string) $request->request->get('feeling');
+        $input = new \App\Visit\Domain\VisitReportInput(
+            report: trim((string) $request->request->get('report')),
+            feeling: '' !== $feeling ? $feeling : null,
+        );
+        $violations = $validator->validate($input);
+        if ($violations->count() > 0) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException((string) $violations);
+        }
 
-        $visit->setReport('' !== $report ? mb_substr($report, 0, 5000) : null)
-            ->setClientFeeling($feeling);
+        $visit->setReport($input->reportOrNull())
+            ->setClientFeeling($input->toFeeling());
         $em->flush();
 
         return $this->redirectToRoute('admin_visit_show', ['adminPrefix' => $adminPrefix, 'id' => $id], 303);
@@ -347,6 +369,8 @@ final class VisitController extends AbstractController
         Request $request,
         \App\Visit\Storage\VisitPhotoStorage $storage,
         \Doctrine\ORM\EntityManagerInterface $em,
+        #[Autowire(service: 'monolog.logger.security')]
+        \Psr\Log\LoggerInterface $securityLogger,
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -358,6 +382,13 @@ final class VisitController extends AbstractController
         if (null === $photo || $photo->getVisit()?->getId() !== $id) {
             throw $this->createNotFoundException();
         }
+
+        // Audit trail: permanent file removal, keep who deleted which photo.
+        $securityLogger->notice('Visit photo deleted', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'visit' => $id,
+            'photo' => $photoId,
+        ]);
 
         $storage->delete((string) $photo->getPath());
         $em->remove($photo);

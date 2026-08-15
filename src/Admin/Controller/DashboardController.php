@@ -169,8 +169,14 @@ final class DashboardController extends AbstractController
         methods: ['POST'],
         requirements: ['reference' => 'CT-\\d{6}'],
     )]
-    public function deleteContact(string $adminPrefix, string $reference, Request $request, \App\Contact\Service\RecallCalendarSync $recallSync): Response
-    {
+    public function deleteContact(
+        string $adminPrefix,
+        string $reference,
+        Request $request,
+        \App\Contact\Service\RecallCalendarSync $recallSync,
+        #[Autowire(service: 'monolog.logger.security')]
+        LoggerInterface $securityLogger,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
         // La suppression définitive d'un lead est réservée aux admins.
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -187,6 +193,13 @@ final class DashboardController extends AbstractController
         // recontacte pas.
         $this->visioMailer->cancel($contact, notify: false);
         $recallSync->clear($contact);
+
+        // Audit trail: a permanent lead deletion may be a GDPR erasure,
+        // keep a trace of who removed which reference.
+        $securityLogger->notice('Contact deleted', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'contact' => $reference,
+        ]);
 
         // Notes et événements suivent via le ON DELETE CASCADE en base.
         $em = $this->contactRepository->createQueryBuilder('c')->getEntityManager();

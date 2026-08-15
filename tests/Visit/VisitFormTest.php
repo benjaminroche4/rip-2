@@ -80,7 +80,7 @@ final class VisitFormTest extends KernelTestCase
         $component->formValues = $this->values();
 
         // Fired by the places-autocomplete trigger after a suggestion pick.
-        $component->setLocation(48.8553, 2.3765);
+        $component->chooseLocation(48.8553, 2.3765);
 
         self::assertSame(48.8553, $component->previewLat);
         self::assertSame(2.3765, $component->previewLng);
@@ -91,7 +91,7 @@ final class VisitFormTest extends KernelTestCase
     {
         $component = $this->mountComponent();
         $component->formValues = $this->values();
-        $component->setLocation(48.8553, 2.3765);
+        $component->chooseLocation(48.8553, 2.3765);
 
         // Address edited by hand after the pick: the stored coordinates no
         // longer match, creation must re-geocode instead of reusing them.
@@ -109,7 +109,7 @@ final class VisitFormTest extends KernelTestCase
         $component = $this->mountComponent();
         $component->formValues = $this->values();
 
-        $component->setLocation(48.8553, 2.3765);
+        $component->chooseLocation(48.8553, 2.3765);
         // The geocoder must not be called at creation: Places already gave
         // the coordinates for this exact address.
         self::assertInstanceOf(RedirectResponse::class, $component->create($this->em, $this->failingGeocoder()));
@@ -184,6 +184,8 @@ final class VisitFormTest extends KernelTestCase
         ]);
 
         self::assertStringContainsString('data-testid="visit-form-dossier"', $rendered);
+        // Le changement de dossier a son loader live, masqué au repos.
+        self::assertStringContainsString('data-loading="model(visit.dossier)|removeClass(hidden)"', $rendered);
         self::assertStringNotContainsString('data-testid="visit-form-dossier-recap"', $rendered);
         self::assertStringNotContainsString('data-testid="visit-form-address"', $rendered);
         self::assertStringNotContainsString('data-testid="assignee-chips"', $rendered);
@@ -199,6 +201,11 @@ final class VisitFormTest extends KernelTestCase
         // La formule pilote ce qu'on fait sur place : elle ouvre le rappel.
         self::assertStringContainsString('data-testid="visit-form-dossier-offer"', $rendered);
         self::assertStringContainsString('Famille Martin', $rendered);
+        // Pendant un changement de dossier, tout ce qui décrit le dossier se
+        // masque le temps du re-rendu (récap, bandes suivantes, submit).
+        self::assertStringContainsString('data-loading="model(visit.dossier)|addClass(hidden)"', $rendered);
+        // La colonne récap de droite apparaît avec le dossier choisi.
+        self::assertStringContainsString('data-testid="visit-form-recap"', $rendered);
     }
 
     public function testQuickModeMarkupHidesTheDetailFields(): void
@@ -214,12 +221,13 @@ final class VisitFormTest extends KernelTestCase
         self::assertStringNotContainsString('data-testid="visit-form-details"', $rendered);
         self::assertStringNotContainsString('data-testid="visit-form-client-present"', $rendered);
         // The address field carries the shared Places autocomplete, whose
-        // selection trigger feeds the setLocation action.
+        // selection trigger feeds the chooseLocation action.
         self::assertStringContainsString('data-controller="places-autocomplete"', $rendered);
         self::assertStringContainsString('data-places-autocomplete-target="results"', $rendered);
-        self::assertStringContainsString('data-live-action-param="setLocation"', $rendered);
-        // Anti double-submit guard on the create action.
-        self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
+        self::assertStringContainsString('data-live-action-param="chooseLocation"', $rendered);
+        // Anti double-submit guard on the create action, plus the button
+        // hides while a dossier change re-renders the form.
+        self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled) model(visit.dossier)|addClass(hidden)"', $rendered);
     }
 
     public function testDetailModeMarkupRendersTheOptionalFields(): void
@@ -232,9 +240,6 @@ final class VisitFormTest extends KernelTestCase
         self::assertStringContainsString('data-testid="visit-form-client-present"', $rendered);
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function testAssigneeIsSavedWithTheVisit(): void
     {
         $staff = (new User())

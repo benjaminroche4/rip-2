@@ -71,6 +71,9 @@ final class ContactDossierConverter
             ->setName('' !== $lastName ? mb_substr($lastName, 0, 100) : 'Dossier')
             ->setReference($this->numbers->reference())
             ->setPairingCode($this->numbers->pairingCode())
+            // A fresh code is armed: the deposit page refuses it 90 days
+            // after the last email embedding it (each send re-arms).
+            ->setPairingCodeSentAt(new \DateTimeImmutable())
             ->setCreatedAt(new \DateTimeImmutable())
             ->addPerson($person)
             ->setSearch($this->buildSearch($contact))

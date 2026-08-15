@@ -18,14 +18,14 @@ use App\Dossier\Security\DossierNoteVoter;
 use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierEventLogger;
+use App\Dossier\Service\DossierNoteThreadAdapter;
 use App\Dossier\Service\DossierNumberGenerator;
+use App\Shared\Notes\NoteThreadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Clock\ClockInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -44,6 +44,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:Notes', template: 'components/Dossier/Notes.html.twig')]
 final class DossierNotes
 {
+    use DossiersSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -100,8 +101,9 @@ final class DossierNotes
         private readonly DocumentStorage $storage,
         private readonly DossierNumberGenerator $numbers,
         private readonly ClockInterface $clock,
-        private readonly UrlGeneratorInterface $urlGenerator,
         private readonly LoggerInterface $securityLogger,
+        private readonly NoteThreadService $thread,
+        private readonly DossierNoteThreadAdapter $threadAdapter,
     ) {
     }
 
@@ -163,6 +165,11 @@ final class DossierNotes
         // Re-sync the manager's read access on the dossier's Drive folder
         // (grant new, revoke previous). No-op when Drive is off.
         $drive->syncManagerShare($dossier);
+
+        $this->dispatchBrowserEvent('toast:show', ['message' => null !== $user
+            ? $this->translator->trans('admin.toast.assigned', ['%name%' => $this->displayName($user)])
+            : $this->translator->trans('admin.toast.unassigned'),
+        ]);
     }
 
     /**
@@ -231,44 +238,13 @@ final class DossierNotes
     }
 
     /**
-     * Manual statuses the operator can pick from.
-     *
-     * @return list<DossierStatus>
+     * Statut entièrement automatique : dérivé des étapes validées
+     * (DossierStatusAdvancer), de la clôture et des pièces en attente.
+     * Aucun sélecteur manuel.
      */
-    public function getStatusChoices(): array
-    {
-        return DossierStatus::manualCases();
-    }
-
-    public function getManualStatus(): DossierStatus
-    {
-        return $this->dossier()->getStatus();
-    }
-
-    /** Closure and pending pieces folded in; drives the auto badge. */
     public function getEffectiveStatus(): DossierStatus
     {
         return $this->dossier()->getEffectiveStatus();
-    }
-
-    #[LiveAction]
-    public function changeStatus(#[LiveArg] string $value): void
-    {
-        $this->ensureAdmin();
-
-        $status = DossierStatus::tryFrom($value);
-        if (null === $status || !$status->isManual()) {
-            throw new NotFoundHttpException('Unknown manual dossier status.');
-        }
-
-        $dossier = $this->dossier();
-        if ($dossier->getStatus() === $status) {
-            return;
-        }
-
-        $dossier->setStatus($status);
-        $this->events->log($dossier, 'status_changed', ['status' => $status->labelKey()]);
-        $this->em->flush();
     }
 
     #[LiveAction]
@@ -295,18 +271,19 @@ final class DossierNotes
             return;
         }
 
-        $user = $this->currentUser();
+        $author = $this->thread->currentAuthor();
         $this->notes->add(
             $this->dossier(),
             $text,
-            (int) $user->getId(),
-            $this->displayName($user),
-            $user->getAvatarFilename(),
+            $author->id,
+            $author->displayName,
+            $author->avatarFilename,
         );
         $this->newNote = '';
 
         // Clears the leave-guard dirty flag on the front.
         $this->dispatchBrowserEvent('dossier-notes:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteAdded')]);
     }
 
     #[LiveAction]
@@ -314,16 +291,13 @@ final class DossierNotes
     {
         $this->ensureAdmin();
 
-        $note = $this->notes->find($id);
-        if (null === $note || (int) $note->getDossier()?->getId() !== $this->dossierId) {
+        $text = $this->thread->beginEdit($this->threadAdapter, $id, $this->dossierId);
+        if (null === $text) {
             return;
-        }
-        if (!$this->security->isGranted(DossierNoteVoter::EDIT, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can edit a note.');
         }
 
         $this->editingNoteId = $id;
-        $this->editingText = $note->getText();
+        $this->editingText = $text;
     }
 
     #[LiveAction]
@@ -339,20 +313,15 @@ final class DossierNotes
     {
         $this->ensureAdmin();
 
-        $note = null !== $this->editingNoteId ? $this->notes->find($this->editingNoteId) : null;
-        $text = trim($this->editingText);
-        if (null === $note || '' === $text) {
+        if (!$this->thread->saveEdit($this->threadAdapter, $this->editingNoteId, $this->editingText, $this->dossierId)) {
             return;
         }
-        if (!$this->security->isGranted(DossierNoteVoter::EDIT, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can edit a note.');
-        }
 
-        $this->notes->updateText($note, $text);
         $this->editingNoteId = null;
         $this->editingText = '';
 
         $this->dispatchBrowserEvent('dossier-notes:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteUpdated')]);
     }
 
     public function getClosedAt(): ?\DateTimeImmutable
@@ -406,6 +375,9 @@ final class DossierNotes
 
         $dossier->setClosedAt($this->clock->now());
         $dossier->setPairingCode($this->numbers->pairingCode());
+        // The rotated code is born now: its 90-day expiry window starts at
+        // the rotation, and stays valid if the dossier ever reopens.
+        $dossier->setPairingCodeSentAt($this->clock->now());
         $this->events->log($dossier, 'dossier_closed', ['count' => $purged]);
         $this->em->flush();
 
@@ -417,6 +389,7 @@ final class DossierNotes
             'purgedFiles' => $purged,
         ]);
         $this->emit('dossier-closure:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.dossierClosed')]);
     }
 
     /** Reopens the dossier (the rotated pairing code stays the new one). */
@@ -438,6 +411,7 @@ final class DossierNotes
             'dossier' => $dossier->getReference(),
         ]);
         $this->emit('dossier-closure:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.dossierReopened')]);
     }
 
     /**
@@ -449,19 +423,15 @@ final class DossierNotes
     {
         $this->ensureAdmin();
 
-        $note = $this->notes->find($id);
-        if (null === $note || (int) $note->getDossier()?->getId() !== $this->dossierId) {
+        if (!$this->thread->delete($this->threadAdapter, $id, $this->dossierId)) {
             return;
         }
-        if (!$this->security->isGranted(DossierNoteVoter::DELETE, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can delete a note.');
-        }
 
-        $this->notes->remove($note);
         if ($this->editingNoteId === $id) {
             $this->editingNoteId = null;
             $this->editingText = '';
         }
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteDeleted')]);
     }
 
     /**
@@ -522,6 +492,7 @@ final class DossierNotes
             '%description%' => (string) ($payload['description'] ?? ''),
             '%role%' => isset($payload['role']) ? $this->translator->trans((string) $payload['role']) : '',
             '%status%' => isset($payload['status']) ? $this->translator->trans((string) $payload['status']) : '',
+            '%step%' => isset($payload['step']) ? $this->translator->trans((string) $payload['step']) : '',
             '%pieces%' => implode(', ', array_map(
                 fn (string $key): string => $this->translator->trans($key),
                 (array) ($payload['pieces'] ?? []),
@@ -606,16 +577,6 @@ final class DossierNotes
     {
         return $this->dossiers->find($this->dossierId)
             ?? throw new NotFoundHttpException('Dossier not found.');
-    }
-
-    private function currentUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new AccessDeniedException('Admin access required.');
-        }
-
-        return $user;
     }
 
     private function displayName(User $user): string

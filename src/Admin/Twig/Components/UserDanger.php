@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -31,6 +32,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserDanger', template: 'components/Admin/UserDanger.html.twig')]
 final class UserDanger
 {
+    use AdminSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -67,6 +69,8 @@ final class UserDanger
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly AvatarDownloader $avatarDownloader,
         private readonly LoggerInterface $securityLogger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -144,6 +148,7 @@ final class UserDanger
         // re-visits in Turbo (staff-only cards may appear or vanish).
         $this->emit('user:access-changed');
         $this->dispatchBrowserEvent('user-access:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans($granted ? 'admin.toast.adminGranted' : 'admin.toast.adminRevoked')]);
     }
 
     public function isTargetSuspended(): bool
@@ -186,6 +191,7 @@ final class UserDanger
 
         $this->audit('account suspended', $user);
         $this->emit('user:suspension-changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.userSuspended')]);
     }
 
     #[LiveAction]
@@ -216,6 +222,7 @@ final class UserDanger
             $this->audit('account resumed', $user);
             $this->emit('user:suspension-changed');
         }
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.userResumed')]);
     }
 
     public function hasTargetTwoFactor(): bool
@@ -270,6 +277,7 @@ final class UserDanger
         $this->audit('two-factor authentication reset', $user);
         // The 2FA badge lives in the page chrome: morph it.
         $this->dispatchBrowserEvent('user-access:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.twoFactorReset')]);
     }
 
     /** Deleting an account is always confirmed by a modal. */
@@ -316,6 +324,11 @@ final class UserDanger
 
         $this->em->remove($user);
         $this->em->flush();
+        try {
+            $this->requestStack->getSession()->getFlashBag()->add('success', 'admin.toast.userDeleted');
+        } catch (\LogicException) {
+            // Sessionless context (component tests): no toast to queue.
+        }
 
         return new RedirectResponse($this->urlGenerator->generate('admin_users', ['adminPrefix' => $this->adminPrefix]));
     }

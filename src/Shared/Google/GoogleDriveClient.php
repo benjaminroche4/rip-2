@@ -6,6 +6,7 @@ namespace App\Shared\Google;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpClient\Response\StreamableInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -148,6 +149,9 @@ final class GoogleDriveClient implements DriveGateway
         ]);
         if (200 !== $response->getStatusCode()) {
             throw new \RuntimeException('Google Drive file unreadable: '.$fileId);
+        }
+        if (!$response instanceof StreamableInterface) {
+            throw new \LogicException(\sprintf('HTTP client response "%s" cannot be streamed: it does not implement "%s".', $response::class, StreamableInterface::class));
         }
 
         return $response->toStream();

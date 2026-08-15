@@ -131,22 +131,23 @@
 {% import _self as ui %}
 
 <div {{ attributes }} data-testid="visit-form-page">
+    {# Le dossier commande tout le reste : tant qu'il n'est pas choisi, le
+       formulaire se limite à ce champ (une visite sans dossier n'existe
+       pas, et les cards de rappel n'auraient rien à afficher). #}
+    {% set dossier = this.selectedDossier %}
+    {# Une visite se cadre sur les critères de recherche : dossier
+       incomplet, le formulaire s'arrête au choix du dossier. #}
+    {% set ready = dossier and dossier.searchComplete %}
+    <div class="mx-auto flex max-w-2xl flex-col gap-4 lg:max-w-5xl lg:flex-row lg:items-start lg:gap-6">
     <form
         data-action="live#action:prevent"
         data-live-action-param="create"
         data-model="on(input)|debounce(400)|*"
         novalidate
         autocomplete="off"
-        class="mx-auto max-w-2xl"
+        class="min-w-0 flex-1"
         data-testid="visit-form"
     >
-        {# Le dossier commande tout le reste : tant qu'il n'est pas choisi, le
-           formulaire se limite à ce champ (une visite sans dossier n'existe
-           pas, et les cards de rappel n'auraient rien à afficher). #}
-        {% set dossier = this.selectedDossier %}
-        {# Une visite se cadre sur les critères de recherche : dossier
-           incomplet, le formulaire s'arrête au choix du dossier. #}
-        {% set ready = dossier and dossier.searchComplete %}
         <div class="rounded-3xl border border-neutral-200 bg-white p-2">
             <div class="space-y-2 rounded-2xl bg-neutral-50 p-2">
 
@@ -157,8 +158,20 @@
                         <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.visit'|trans }}</h3>
                         <div class="space-y-4">
                             {{ ui.select(form.dossier, 'admin.visits.create.dossier.label') }}
+                            {# Le choix d'un dossier déclenche un re-rendu live (récap,
+                               critères) : petit loader le temps de la requête. #}
+                            <div
+                                data-loading="model(visit.dossier)|removeClass(hidden)"
+                                class="hidden flex items-center gap-2 text-sm text-gray-400"
+                                data-testid="visit-form-dossier-loading"
+                            >
+                                {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.create.dossier.loading'|trans }}
+                            </div>
                             {% if dossier and not ready %}
-                                <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50 px-3.5 py-3" data-testid="visit-form-dossier-incomplete">
+                                {# Masquée pendant le changement de dossier : elle décrit
+                                   l'ancien dossier tant que le nouveau n'est pas rendu. #}
+                                <div data-loading="model(visit.dossier)|addClass(hidden)" class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50 px-3.5 py-3" data-testid="visit-form-dossier-incomplete">
                                     <p class="flex items-start gap-2 text-sm text-amber-700">
                                         {{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4 shrink-0', 'aria-hidden': 'true'}) }}
                                         {{ 'admin.visits.create.dossier.incomplete'|trans }}
@@ -176,6 +189,10 @@
                                 </div>
                             {% endif %}
                             {% if ready %}
+                                {# Tout ce qui décrit le dossier se masque pendant qu'un
+                                   autre dossier charge : le récap affiché serait celui
+                                   de l'ancien. #}
+                                <div data-loading="model(visit.dossier)|addClass(hidden)" class="space-y-4">
                                 {# Rappel du dossier : la formule d'abord, elle
                                    décide de ce qu'on fait sur place. #}
                                 <div class="grid gap-1.5 sm:grid-cols-3" data-testid="visit-form-dossier-recap">
@@ -208,15 +225,19 @@
                                     </div>
                                 </div>
                                 {{ ui.enumChips(form.type, 'admin.visits.create.type.label', enum('App\\Visit\\Domain\\VisitType').cases()) }}
+                                </div>
                             {% endif %}
                         </div>
                     </div>
 
                     {% if ready %}
+                    {# Les bandes suivantes dépendent du dossier : masquées le
+                       temps qu'un changement de dossier se re-rende. #}
+                    <div data-loading="model(visit.dossier)|addClass(hidden)" class="flex flex-col gap-1">
                     <div class="bg-white px-5 py-4">
                         <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.property'|trans }}</h3>
                         {# Adresse : autocomplete Places (même widget que "Proposer
-                           un bien"), les coordonnées partent via setLocation. #}
+                           un bien"), les coordonnées partent via chooseLocation. #}
                         <div
                             class="relative min-w-0"
                             data-controller="places-autocomplete"
@@ -249,12 +270,12 @@
                                     role="listbox"
                                     class="absolute top-full right-0 left-0 z-50 mt-2 hidden max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl shadow-gray-500/10"
                                 ></ul>
-                                {# Relais sélection Places -> LiveAction setLocation. #}
+                                {# Relais sélection Places -> LiveAction chooseLocation. #}
                                 <span
                                     class="hidden"
                                     data-places-autocomplete-target="trigger"
                                     data-action="places-autocomplete:select->live#action"
-                                    data-live-action-param="setLocation"
+                                    data-live-action-param="chooseLocation"
                                     aria-hidden="true"
                                 ></span>
                                 {% for error in form.address.vars.errors %}
@@ -355,10 +376,12 @@
                             <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                         {% endfor %}
                     </div>
+                    </div>
                     {% endif %}
                 </div>
 
                 {% if ready %}
+                <div data-loading="model(visit.dossier)|addClass(hidden)" class="space-y-2">
                 {# ── Mode détaillé : le complément, replié par défaut. ── #}
                 <button
                     type="button"
@@ -417,6 +440,7 @@
                         </div>
                     </div>
                 {% endif %}
+                </div>
                 {% endif %}
 
                 {# Pied : annuler / planifier. #}
@@ -433,7 +457,7 @@
                        un double-clic créerait deux visites. #}
                     <button
                         type="submit"
-                        data-loading="action(create)|addAttribute(disabled)"
+                        data-loading="action(create)|addAttribute(disabled) model(visit.dossier)|addClass(hidden)"
                         class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                         data-testid="visit-form-submit"
                     >
@@ -448,4 +472,87 @@
             </div>
         </div>
     </form>
+
+    {% if ready %}
+        {# ── Récapitulatif de la visite en cours de saisie : colonne sticky à
+              droite sur desktop, re-rendue à chaque frappe (le formulaire est
+              déjà un live model). Masquée sur mobile (elle ne ferait que
+              dupliquer le formulaire juste au-dessus) et pendant qu'un
+              changement de dossier charge. ── #}
+        {% set recapType = (this.formValues['type'] ?? '') ? enum('App\\Visit\\Domain\\VisitType').tryFrom(this.formValues['type']) : null %}
+        {% set recapAddress = (this.formValues['address'] ?? '')|trim %}
+        {% set recapScheduledAt = this.formValues['scheduledAt'] ?? '' %}
+        {% set recapDurationLabel = '' %}
+        {% for choice in form.durationMinutes.vars.choices %}
+            {% if choice.value == form.durationMinutes.vars.value %}{% set recapDurationLabel = choice.label|trans %}{% endif %}
+        {% endfor %}
+        {% set recapAssignee = this.assigneeChoices|filter(c => c.id == (this.formValues['assignee'] ?? ''))|first %}
+        <aside
+            data-loading="model(visit.dossier)|addClass(hidden)"
+            class="hidden lg:sticky lg:top-6 lg:block lg:w-80 lg:shrink-0"
+            data-testid="visit-form-recap"
+        >
+            <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="rounded-xl bg-white px-5 py-4">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.recap.title'|trans }}</h3>
+                        <dl class="space-y-3.5">
+                            <div class="min-w-0">
+                                <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                    {{ ux_icon('lucide:folder', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    <span class="truncate">{{ 'admin.visits.create.dossier.label'|trans }}</span>
+                                </dt>
+                                <dd class="mt-1 truncate text-sm font-medium text-gray-900">
+                                    {{ dossier.name }}
+                                    <span class="font-normal text-gray-400">{{ dossier.reference }}</span>
+                                </dd>
+                            </div>
+                            {% if recapType %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon(recapType.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.type.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900">{{ recapType.labelKey|trans }}</dd>
+                                </div>
+                            {% endif %}
+                            {% if recapAddress %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:map-pin', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.address.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 text-sm font-medium text-gray-900">{{ recapAddress }}</dd>
+                                </div>
+                            {% endif %}
+                            {% if recapScheduledAt %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:calendar-clock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.scheduledAt.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900 tabular-nums">
+                                        {{ recapScheduledAt|format_datetime(pattern='EEE d MMM yyyy, HH:mm') }}
+                                        {% if recapDurationLabel %}
+                                            <span class="font-normal text-gray-400">· {{ recapDurationLabel }}</span>
+                                        {% endif %}
+                                    </dd>
+                                </div>
+                            {% endif %}
+                            {% if recapAssignee %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:user', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.assignee.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900">{{ recapAssignee.name|title }}</dd>
+                                </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    {% endif %}
+    </div>
 </div>

@@ -114,7 +114,13 @@ final class DossierDriveStorageTest extends TestCase
         $dossier->setManager($this->user('bob@rip.test'));
         $provisioner->syncManagerShare($dossier);
         self::assertSame([['file' => 'folder-root', 'permission' => $firstPermission]], $gateway->revocations);
-        self::assertSame('bob@rip.test', $gateway->shares[1]['email']);
+        self::assertSame(
+            [
+                ['file' => 'folder-root', 'email' => 'alice@rip.test'],
+                ['file' => 'folder-root', 'email' => 'bob@rip.test'],
+            ],
+            $gateway->shares,
+        );
 
         // Unassigning revokes and clears the stored permission.
         $dossier->setManager(null);

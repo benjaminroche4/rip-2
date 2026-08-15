@@ -136,7 +136,9 @@ final class VisioInvitationMailerTest extends KernelTestCase
         self::assertEmailCount(2);
         self::assertNotEmpty(array_filter($this->subjects(), static fn (string $s): bool => str_contains($s, 'annul')));
         // METHOD:CANCEL clears the meeting from non-Google calendars too.
-        $body = (string) self::getMailerMessages()[0]->getAttachments()[0]->getBody();
+        $cancellation = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $cancellation);
+        $body = (string) $cancellation->getAttachments()[0]->getBody();
         self::assertStringContainsString('METHOD:CANCEL', $body);
 
         self::assertContains('visio_cancelled', $this->eventKinds($contact));
@@ -228,7 +230,9 @@ final class VisioInvitationMailerTest extends KernelTestCase
         // The ICS fallback is the whole point: the meeting still reaches
         // both calendars through the attachment.
         self::assertEmailCount(2);
-        self::assertNotEmpty(self::getMailerMessages()[0]->getAttachments());
+        $invitation = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $invitation);
+        self::assertNotEmpty($invitation->getAttachments());
     }
 
     private function mailer(bool $configured = true): VisioInvitationMailer

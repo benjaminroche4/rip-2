@@ -21,9 +21,6 @@ final class ValidationMessagesAreTranslatedTest extends KernelTestCase
 {
     private const DOMAIN = 'validators';
 
-    /** Messages that are deliberately plain text handled by Symfony itself. */
-    private const IGNORED = [];
-
     public function testEveryConstraintMessageResolvesInBothLocales(): void
     {
         self::bootKernel();
@@ -72,7 +69,7 @@ final class ValidationMessagesAreTranslatedTest extends KernelTestCase
             foreach ($matches[1] as $key) {
                 // Concatenated keys ('prefix.'.$var) and plain sentences are
                 // out of scope: only complete dotted keys are checkable.
-                if (!str_contains($key, '.') || str_ends_with($key, '.') || \in_array($key, self::IGNORED, true)) {
+                if (!str_contains($key, '.') || str_ends_with($key, '.')) {
                     continue;
                 }
                 $keys[$key] = true;

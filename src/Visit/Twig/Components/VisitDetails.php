@@ -31,6 +31,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Visit:VisitDetails', template: 'components/Visit/VisitDetails.html.twig')]
 final class VisitDetails
 {
+    use VisitsSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -55,14 +56,15 @@ final class VisitDetails
     #[LiveProp(writable: true)]
     public string $listingUrl = '';
 
-    #[LiveProp(writable: true)]
+    /** Persisted through chooseDuration (dropdown), not the autosave form. */
+    #[LiveProp]
     public string $durationMinutes = '30';
 
     #[LiveProp(writable: true)]
     public string $note = '';
 
-    /** Agent immobilier sélectionné ('0' = aucun), autosauvé au changement. */
-    #[LiveProp(writable: true, onUpdated: 'onAgentUpdated')]
+    /** Agent immobilier sélectionné ('0' = aucun), persisté via chooseAgent. */
+    #[LiveProp]
     public string $agentId = '0';
 
     /** field name => translation key. */
@@ -76,6 +78,7 @@ final class VisitDetails
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
         private readonly AddressGeocoder $geocoder,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -194,7 +197,26 @@ final class VisitDetails
         $this->em->flush();
     }
 
-    public function onAgentUpdated(): void
+    /** Durée choisie dans le dropdown custom, persistée immédiatement. */
+    #[LiveAction]
+    public function chooseDuration(#[LiveArg] int $minutes): void
+    {
+        $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
+
+        if (!\in_array($minutes, [15, 30, 45, 60], true)) {
+            throw new BadRequestHttpException(\sprintf('Invalid duration "%d".', $minutes));
+        }
+        $this->durationMinutes = (string) $minutes;
+        $this->entity()->setDurationMinutes($minutes);
+        $this->em->flush();
+    }
+
+    /** Agent immobilier choisi dans le dropdown custom (0 = aucun). */
+    #[LiveAction]
+    public function chooseAgent(#[LiveArg] int $id): void
     {
         $this->ensureAdmin();
         if ($this->locked) {
@@ -202,7 +224,6 @@ final class VisitDetails
         }
 
         $visit = $this->entity();
-        $id = (int) $this->agentId;
         if (0 === $id) {
             $visit->setAgent(null);
         } else {
@@ -210,6 +231,7 @@ final class VisitDetails
                 ?? throw new BadRequestHttpException('Unknown real-estate agent.');
             $visit->setAgent($agent);
         }
+        $this->agentId = (string) $id;
         $this->em->flush();
     }
 
@@ -274,7 +296,6 @@ final class VisitDetails
             return;
         }
 
-        \assert(null !== $scheduledAt);
         $visit->setScheduledAt($scheduledAt)
             ->setAddress($address)
             ->setListingUrl('' !== $listingUrl ? $listingUrl : null)
@@ -289,6 +310,7 @@ final class VisitDetails
         // The page chrome (title, header, sticky map) lives outside the
         // component: morph-refresh it.
         $this->dispatchBrowserEvent('visit-details:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.saved')]);
     }
 
     private function entity(): Visit

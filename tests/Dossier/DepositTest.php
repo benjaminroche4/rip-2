@@ -85,6 +85,52 @@ final class DepositTest extends WebTestCase
         self::assertStringContainsString('DS-000042', $crawler->filter('#deposit-documents')->text());
     }
 
+    public function testLockedDossierRefusesPairingWithADedicatedMessage(): void
+    {
+        $this->persistDossier();
+        $em = self::getContainer()->get('doctrine.orm.entity_manager');
+        $em->getRepository(\App\Dossier\Entity\Dossier::class)->findOneBy(['reference' => 'DS-000042'])
+            ->setDepositLockedAt(new \DateTimeImmutable());
+        $em->flush();
+
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+
+        // Pas de session appairée : on reste sur le formulaire, avec le
+        // message dédié (le couple email/code était pourtant valide).
+        // 422 en fallback non-Turbo, 200 en stream (convention du projet).
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+        self::assertStringContainsString('momentanément verrouillé', (string) $this->client->getResponse()->getContent());
+
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorNotExists('#deposit-documents');
+    }
+
+    public function testLockingPausesAnAlreadyPairedSession(): void
+    {
+        $this->persistDossier();
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $this->client->followRedirect();
+        self::assertSelectorExists('#deposit-documents');
+
+        $em = self::getContainer()->get('doctrine.orm.entity_manager');
+        $dossier = $em->getRepository(\App\Dossier\Entity\Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $dossier->setDepositLockedAt(new \DateTimeImmutable());
+        $em->flush();
+
+        // La session appairée retombe sur le formulaire tant que le verrou
+        // est posé, et revient dès qu'il est levé.
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorNotExists('#deposit-documents');
+
+        // Le kernel a redémarré entre-temps : on repart d'un EM frais.
+        $em = self::getContainer()->get('doctrine.orm.entity_manager');
+        $em->getRepository(\App\Dossier\Entity\Dossier::class)->findOneBy(['reference' => 'DS-000042'])
+            ->setDepositLockedAt(null);
+        $em->flush();
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorExists('#deposit-documents');
+    }
+
     public function testPairingIsCaseInsensitiveOnEmailAndCode(): void
     {
         $this->persistDossier();
@@ -171,8 +217,9 @@ final class DepositTest extends WebTestCase
         $file = $document->getFiles()->first();
         self::assertSame('application/pdf', $file->getMimeType());
         self::assertStringEndsWith('.pdf', (string) $file->getStoredName());
-        // The original client name is kept for display but never used on disk.
-        self::assertSame('piece.pdf', $file->getOriginalName());
+        // The client's own file name is replaced by the coherent display
+        // name (piece type + person); the disk name stays a UUID.
+        self::assertSame("Pièce d'identité - Jean Dupont.pdf", $file->getOriginalName());
         self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
     }
 
@@ -229,6 +276,7 @@ final class DepositTest extends WebTestCase
             ->setName('Famille Martin')
             ->setReference('DS-000043')
             ->setPairingCode('QQQ11Q')
+            ->setPairingCodeSentAt(new \DateTimeImmutable())
             ->setCreatedAt(new \DateTimeImmutable())
             ->addPerson($otherTenant);
         $this->em->persist($other);
@@ -296,10 +344,8 @@ final class DepositTest extends WebTestCase
         self::assertSelectorNotExists('header nav');
         self::assertSelectorNotExists('footer');
 
-        // Dedicated advisor card with contact links.
-        self::assertStringContainsString('Alice Advisor', $crawler->filter('[data-testid="deposit-manager"]')->text());
-        self::assertSelectorExists('[data-testid="deposit-manager"] a[href="mailto:advisor@example.com"]');
-        self::assertSelectorExists('[data-testid="deposit-manager"] a[href="tel:+33611223344"]');
+        // No advisor card on the deposit shell (removed by design).
+        self::assertSelectorNotExists('[data-testid="deposit-manager"]');
 
         // Statuses and deposit dates per piece.
         $statuses = $crawler->filter('[data-testid="deposit-document-status"]')->each(static fn ($node) => $node->text());
@@ -316,9 +362,6 @@ final class DepositTest extends WebTestCase
 
         // Progress ring: 1 of 2 validated.
         self::assertStringContainsString('1/2', $crawler->filter('[data-testid="deposit-progress"]')->text());
-
-        // Trust strip present on the paired state.
-        self::assertSelectorExists('[data-testid="deposit-trust"]');
     }
 
     public function testRefusalReasonAndDescriptionAreShownToTheTenant(): void
@@ -378,8 +421,10 @@ final class DepositTest extends WebTestCase
         $this->pair('jean.dupont@example.com', 'ABE78L');
         $crawler = $this->client->followRedirect();
 
-        // A file on each of the two pieces.
-        foreach ([0, 1] as $index) {
+        // A file on each of the two pieces. Urgency sorting keeps the piece
+        // still awaiting a deposit on top, so the first card is always the
+        // right target.
+        foreach ([0, 0] as $index) {
             $form = $crawler->filter('[data-testid="deposit-document"]')->eq($index)->filter('form')->form();
             $form['file']->upload($this->makePdf());
             $this->client->submit($form);
@@ -432,6 +477,77 @@ final class DepositTest extends WebTestCase
         self::assertStringContainsString('ne correspondent à aucun dossier', (string) $this->client->getResponse()->getContent());
     }
 
+    public function testExpiredPairingCodeIsRefusedExactlyLikeAnUnknownCode(): void
+    {
+        $this->persistDossier();
+        $this->armPairingCode(new \DateTimeImmutable('-91 days'));
+
+        // Unknown code first: the reference response.
+        $this->pair('jean.dupont@example.com', 'ZZZZZZ');
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+        $unknown = (string) $this->client->getResponse()->getContent();
+
+        // Expired (but existing) code: same status family, same generic
+        // message, and no distinctive hint that the code once existed.
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+        $expired = (string) $this->client->getResponse()->getContent();
+
+        self::assertStringContainsString('ne correspondent à aucun dossier', $unknown);
+        self::assertStringContainsString('ne correspondent à aucun dossier', $expired);
+        self::assertStringNotContainsStringIgnoringCase('expir', $expired);
+
+        // No grant was created: the deposit page still shows the form.
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorExists('#deposit-pairing');
+    }
+
+    public function testNeverArmedPairingCodeIsRefused(): void
+    {
+        $this->persistDossier();
+        $this->armPairingCode(null);
+
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+        self::assertStringContainsString('ne correspondent à aucun dossier', (string) $this->client->getResponse()->getContent());
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorExists('#deposit-pairing');
+    }
+
+    public function testReArmedCodeCanPairAgainAfterExpiry(): void
+    {
+        $this->persistDossier();
+        $this->armPairingCode(new \DateTimeImmutable('-91 days'));
+
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        self::assertContains($this->client->getResponse()->getStatusCode(), [200, 422]);
+
+        // A new email embedding the code re-arms the window (this is what
+        // the request/reminder/refusal mailers do after a successful send).
+        $this->armPairingCode(new \DateTimeImmutable());
+
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        self::assertResponseStatusCodeSame(303);
+        $this->client->followRedirect();
+        self::assertSelectorExists('#deposit-documents');
+    }
+
+    public function testAlreadyPairedSessionSurvivesTheCodeExpiry(): void
+    {
+        $this->persistDossier();
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $this->client->followRedirect();
+
+        // The code dies while the session grant is alive: the expiry only
+        // guards new pairings, the paired person keeps depositing.
+        $this->armPairingCode(new \DateTimeImmutable('-91 days'));
+
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('#deposit-documents');
+    }
+
     public function testLocaleSwitchKeepsThePrefilledCode(): void
     {
         $crawler = $this->client->request('GET', '/fr/depot-de-pieces?code=ABE78L');
@@ -440,14 +556,6 @@ final class DepositTest extends WebTestCase
         $links = $crawler->filter('[data-testid="deposit-locale-switch"] a')->each(static fn ($node) => $node->attr('href'));
         self::assertContains('/en/document-upload?code=ABE78L', $links);
         self::assertContains('/fr/depot-de-pieces?code=ABE78L', $links);
-    }
-
-    public function testPairingPageCarriesTheTrustStrip(): void
-    {
-        $this->client->request('GET', '/fr/depot-de-pieces');
-
-        self::assertResponseIsSuccessful();
-        self::assertSelectorExists('[data-testid="deposit-trust"]');
     }
 
     /**
@@ -463,6 +571,16 @@ final class DepositTest extends WebTestCase
         }
 
         return $crawler;
+    }
+
+    /** Moves the last arming of DS-000042's pairing code (null = never armed). */
+    private function armPairingCode(?\DateTimeImmutable $sentAt): void
+    {
+        /** @var Dossier $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $dossier->setPairingCodeSentAt($sentAt);
+        $this->em->flush();
+        $this->em->clear();
     }
 
     private function pair(string $email, string $code, bool $turbo = false, string $website = ''): void
@@ -517,6 +635,9 @@ final class DepositTest extends WebTestCase
             ->setName('Famille Dupont')
             ->setReference('DS-000042')
             ->setPairingCode('ABE78L')
+            // Freshly armed code: the sliding 90-day expiry stays out of the
+            // way of every scenario that does not test it explicitly.
+            ->setPairingCodeSentAt(new \DateTimeImmutable())
             ->setCreatedAt(new \DateTimeImmutable())
             ->addPerson($tenant)
             ->addPerson($followUp);

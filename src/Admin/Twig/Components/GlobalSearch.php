@@ -21,6 +21,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:GlobalSearch', template: 'components/Admin/GlobalSearch.html.twig')]
 final class GlobalSearch
 {
+    use StaffGuard;
     use DefaultActionTrait;
 
     private const MIN_CHARS = 2;

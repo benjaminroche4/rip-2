@@ -6,14 +6,14 @@
 
     Spacing / surface conventions mirror DocumentList:
       - section heading: text-base font-semibold + text-sm text-gray-500 sub
-      - container cards: rounded-2xl border border-neutral-200 bg-white p-2
-      - inner surface: rounded-xl bg-neutral-50/50 p-4..p-5
+      - container cards: rounded-3xl border border-neutral-200 bg-white p-2
+      - inner surface: rounded-2xl bg-neutral-50 p-2, white bands rounded-xl
       - vertical rhythm: space-y-6 between sections, gap-* inside flex/grid
 #}
 
 {# Macro: form fields for a single person. Reused as the body of the
    right-hand panel — keeps the input markup in a single place. #}
-{% macro personFields(personForm, docsById, locale) %}
+{% macro personFields(personForm, docsById) %}
     {% set hasFirstNameErrors = personForm.firstName.vars.errors|length > 0 %}
     {% set hasLastNameErrors = personForm.lastName.vars.errors|length > 0 %}
 
@@ -151,7 +151,7 @@
                                         </span>
                                         <span class="min-w-0 flex-1">
                                             <span class="flex items-center gap-1.5">
-                                                <span class="block text-sm font-medium text-gray-900">{{ doc ? doc.getName(locale) : docChoice.vars.label|trans }}</span>
+                                                <span class="block text-sm font-medium text-gray-900">{{ doc ? doc.name : docChoice.vars.label|trans }}</span>
                                                 {% if doc and doc.pinned %}
                                                     <twig:ux:icon
                                                         name="lucide:pin"
@@ -164,7 +164,7 @@
                                                 {% endif %}
                                             </span>
                                             {% if doc %}
-                                                {% set desc = doc.getDescription(locale) %}
+                                                {% set desc = doc.description %}
                                                 {% if desc %}
                                                     <span class="mt-0.5 block text-xs text-gray-500">{{ desc }}</span>
                                                 {% endif %}
@@ -347,7 +347,7 @@
                                 {% endif %}
                             </span>
                         </header>
-                        {{ ui.personFields(personForm, docsById, app.locale) }}
+                        {{ ui.personFields(personForm, docsById) }}
                     </div>
                 {% endfor %}
             </div>

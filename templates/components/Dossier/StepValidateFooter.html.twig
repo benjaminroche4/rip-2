@@ -1,0 +1,45 @@
+{% props validated, canReopen, action, reopenAction, module = null, standalone = false, blockedHint = null %}
+{# Pied commun aux étapes du dossier : le bouton "Valider" clôt l'étape et
+   déverrouille la card suivante. Une fois validée, la mention verte
+   remplace le bouton; "Rouvrir" n'apparaît que sur la dernière étape
+   validée (rouvrir plus tôt casserait la séquence). En `standalone`, le
+   pied vit sous la card (pas de bande blanche) : cards Personnes et
+   Recherche; la variante par défaut reste pour les bandes des modules. #}
+<div class="{{ standalone ? 'flex items-center justify-end gap-4 px-2' : 'mt-1 flex items-center justify-end gap-4 rounded-xl bg-white px-5 py-3' }}" data-testid="step-validate-footer">
+    {% if validated %}
+        <p class="flex items-center gap-1.5 text-xs font-medium text-green-700" data-testid="step-validated-note">
+            {{ ux_icon('lucide:check-circle-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ 'admin.dossiers.show.steps.validatedNote'|trans }}
+        </p>
+        {% if canReopen %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="{{ reopenAction }}"
+                {% if module %}data-live-module-param="{{ module }}"{% endif %}
+                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                data-testid="step-reopen"
+            >
+                {{ 'admin.dossiers.show.steps.reopen'|trans }}
+            </button>
+        {% endif %}
+    {% elseif blockedHint %}
+        {# Prérequis manquant (ex : critères de recherche incomplets) : la
+           phrase remplace le bouton, pas de bouton grisé à expliquer. #}
+        <p class="text-xs text-gray-400" data-testid="step-validate-blocked">{{ blockedHint }}</p>
+    {% else %}
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="{{ action }}"
+            {% if module %}data-live-module-param="{{ module }}"{% endif %}
+            data-loading="action({{ action }})|addAttribute(disabled)"
+            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+            data-testid="step-validate"
+        >
+            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action({{ action }})|removeClass(hidden)" />
+            {{ ux_icon('lucide:check', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(' ~ action ~ ')|addClass(hidden)'}) }}
+            {{ 'admin.dossiers.show.steps.validate'|trans }}
+        </button>
+    {% endif %}
+</div>

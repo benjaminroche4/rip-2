@@ -24,21 +24,21 @@ class VisitPhoto
     /** Photos die with their visit. */
     #[ORM\ManyToOne(targetEntity: Visit::class, inversedBy: 'photos')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?Visit $visit = null;
+    private Visit $visit;
 
     /** Full object path, e.g. visits/VS-087526/photos/<uuid>.webp. */
     #[ORM\Column(length: 255)]
-    private ?string $path = null;
+    private string $path;
 
     /** Client file name, display only — never used as a storage key. */
     #[ORM\Column(length: 255)]
-    private ?string $originalName = null;
+    private string $originalName;
 
     #[ORM\Column(length: 30)]
-    private ?string $mimeType = null;
+    private string $mimeType;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     public function getId(): ?int
     {
@@ -50,7 +50,7 @@ class VisitPhoto
         return $this->visit;
     }
 
-    public function setVisit(?Visit $visit): static
+    public function setVisit(Visit $visit): static
     {
         $this->visit = $visit;
 

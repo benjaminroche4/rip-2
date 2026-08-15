@@ -493,12 +493,6 @@ parameters:
 			path: src/RealEstateAgent/Twig/Components/AgentCreate.php
 
 		-
-			message: '#^Attribute class Symfony\\Bridge\\Monolog\\Attribute\\WithMonologChannel does not exist\.$#'
-			identifier: attribute.notFound
-			count: 1
-			path: src/Shared/Pdf/DocRaptorPdfRenderer.php
-
-		-
 			message: '#^Property App\\Visit\\Entity\\Visit\:\:\$address type mapping mismatch\: property can contain string\|null but database expects string\.$#'
 			identifier: doctrine.columnType
 			count: 1
@@ -587,12 +581,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: tests/RealEstateAgent/AgentCreateTest.php
-
-		-
-			message: '#^Property App\\Tests\\ResetPasswordControllerTest\:\:\$userRepository is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: tests/ResetPasswordControllerTest.php
 
 		-
 			message: '#^Call to function method_exists\(\) with ''Symfony\\\\Component\\\\Dotenv\\\\Dotenv'' and ''bootEnv'' will always evaluate to true\.$#'

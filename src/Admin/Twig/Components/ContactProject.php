@@ -66,6 +66,7 @@ final class ContactProject
     public function __construct(
         private readonly ContactRepository $repository,
         private readonly Security $security,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -104,6 +105,7 @@ final class ContactProject
         // the textarea open.
         $this->editingProjectNote = '' === $this->projectNote;
         $this->dispatchBrowserEvent('contact-project:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteUpdated')]);
     }
 
     #[LiveAction]
@@ -340,6 +342,7 @@ final class ContactProject
 
         // Clears the leave-guard dirty flag on the front.
         $this->dispatchBrowserEvent('contact-project:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.saved')]);
     }
 
     private function ensureAdmin(): void

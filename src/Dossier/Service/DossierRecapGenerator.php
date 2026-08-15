@@ -11,6 +11,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\AI\Agent\AgentInterface;
 use Symfony\AI\Platform\Message\Message;
 use Symfony\AI\Platform\Message\MessageBag;
+use Symfony\Component\Clock\Clock;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -40,6 +42,11 @@ final readonly class DossierRecapGenerator
         - "attentionPoints" : 0 à 4 points courts sur ce qui bloque ou mérite
           vigilance (pièces manquantes, échéance proche, budget serré...).
         - "nextAction" : la prochaine action concrète recommandée, ou null.
+        - La première ligne des données donne la date du jour : tout délai ou
+          échéance (installation, ancienneté du dossier) se calcule par rapport
+          à elle, jamais par rapport à la date de création. Une date
+          d'installation déjà passée se signale comme dépassée, pas comme un
+          délai restant.
         - N'invente aucune information absente des données. Pas de tiret
           cadratin. Vouvoie personne : style télégraphique professionnel.
         PROMPT;
@@ -50,6 +57,7 @@ final readonly class DossierRecapGenerator
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
         private ?TranslatorInterface $translator = null,
+        private ClockInterface $clock = new Clock(),
     ) {
     }
 
@@ -88,7 +96,7 @@ final readonly class DossierRecapGenerator
             return null;
         }
 
-        $generatedAt = new \DateTimeImmutable();
+        $generatedAt = \DateTimeImmutable::createFromInterface($this->clock->now());
         $dossier->setRecap($recap->toJson(), $generatedAt);
         $this->em->flush();
 
@@ -105,6 +113,10 @@ final readonly class DossierRecapGenerator
         // status verbatim in its summary.
         $status = $dossier->getEffectiveStatus();
         $lines = [
+            // Le modèle n'a pas d'horloge : sans cette ligne, il raisonne
+            // comme au jour de création (délais restants faux, échéances
+            // dépassées annoncées comme à venir).
+            'Date du jour : '.$this->clock->now()->format('d/m/Y'),
             'Dossier : '.$dossier->getName().' ('.$dossier->getReference().')',
             'Créé le : '.$dossier->getCreatedAt()?->format('d/m/Y'),
             'Statut : '.($this->translator?->trans($status->labelKey(), locale: 'fr') ?? $status->value),

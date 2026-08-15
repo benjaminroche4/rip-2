@@ -41,6 +41,12 @@ final readonly class DossierDriveProvisioner
     ) {
     }
 
+    /** Drive configuré : conditionne l'affichage du bouton de création. */
+    public function isEnabled(): bool
+    {
+        return $this->drive->isConfigured();
+    }
+
     /**
      * Ensures the dossier root folder exists in the Shared Drive and returns
      * its id (null when Drive is off or provisioning failed). Idempotent.
@@ -102,7 +108,7 @@ final readonly class DossierDriveProvisioner
             $name = trim(trim((string) $person->getLastName()).' '.trim((string) $person->getFirstName()));
             $id = $this->drive->ensureFolder($this->safe('' !== $name ? $name : 'personne'), $parentId, array_filter([
                 'dossierReference' => (string) $dossier->getReference(),
-                'personRole' => $person->getRole()?->value ?? '',
+                'personRole' => $person->getRole()->value,
                 'personEmail' => (string) $person->getEmail(),
             ]));
             if (null === $id) {

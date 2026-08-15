@@ -287,6 +287,56 @@ final class ContactsAccessTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
+    public function testContactPdfReturns404ForAnonymousOnAWrongPrefix(): void
+    {
+        $this->client->request('GET', $this->contactsUrl('00000000000000000000000000000000').'/CT-424242/pdf');
+
+        // Wrong prefix must 404 before any auth challenge (no login redirect).
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testContactPdfNeedsTheContactsSection(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository(User::class)->findOneBy(['email' => self::USER_EMAIL])
+            ?? throw new \RuntimeException('Test user not found.');
+        $user->setRoles(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $em->flush();
+        $this->client->loginUser($user);
+
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242/pdf');
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testContactPdfDownloadsWithTheSectionRole(): void
+    {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository(User::class)->findOneBy(['email' => self::USER_EMAIL])
+            ?? throw new \RuntimeException('Test user not found.');
+        $user->setRoles(['ROLE_STAFF', 'ROLE_SECTION_CONTACTS']);
+        $em->flush();
+        $this->client->loginUser($user);
+
+        // The suite must never reach DocRaptor: swap the backend behind the
+        // PdfRenderer interface, exactly what it exists for.
+        static::getContainer()->set(\App\Shared\Pdf\PdfRenderer::class, new class implements \App\Shared\Pdf\PdfRenderer {
+            public function render(string $html, ?\App\Shared\Pdf\PdfOptions $options = null): string
+            {
+                return "%PDF-1.4 stubbed";
+            }
+        });
+
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242/pdf');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('application/pdf', $this->client->getResponse()->headers->get('Content-Type'));
+        self::assertStringContainsString('attachment', (string) $this->client->getResponse()->headers->get('Content-Disposition'));
+        self::assertStringStartsWith('%PDF', (string) $this->client->getResponse()->getContent());
+    }
+
     private function loginAs(string $email): void
     {
         /** @var EntityManagerInterface $em */

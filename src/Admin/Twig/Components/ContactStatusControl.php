@@ -153,7 +153,7 @@ final class ContactStatusControl
     }
 
     #[LiveAction]
-    public function setClosureReason(#[LiveArg] string $reason): void
+    public function chooseClosureReason(#[LiveArg] string $reason): void
     {
         $this->ensureAdmin();
 
@@ -490,6 +490,7 @@ final class ContactStatusControl
         $this->recallAt = '';
         $this->dateMissing = false;
         $this->emit('contacts:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.statusUpdated')]);
     }
 
     /**
@@ -564,6 +565,10 @@ final class ContactStatusControl
         }
 
         $this->emit('contacts:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => null !== $user
+            ? $this->translator->trans('admin.toast.assigned', ['%name%' => trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail()])
+            : $this->translator->trans('admin.toast.unassigned'),
+        ]);
     }
 
     private function ensureAdmin(): void

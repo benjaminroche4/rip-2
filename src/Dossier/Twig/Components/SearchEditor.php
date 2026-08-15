@@ -8,10 +8,20 @@ use App\Contact\Domain\Furnishing;
 use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\ParisDistricts;
 use App\Contact\Domain\StayDuration;
-use App\Dossier\Domain\DossierPersonRole;
+use App\Dossier\Domain\AffordableRent;
+use App\Dossier\Domain\CsvSelection;
+use App\Dossier\Domain\DossierStep;
+use App\Dossier\Domain\ImportantAddressList;
+use App\Dossier\Domain\LeaseCompatibility;
+use App\Dossier\Domain\SearchAutosave;
+use App\Dossier\Domain\SearchCriterion;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierSearch;
 use App\Dossier\Repository\DossierRepository;
+use App\Dossier\Service\DossierProgressCalculator;
+use App\Dossier\Service\DossierStatusAdvancer;
+use App\Dossier\Service\DossierStepValidator;
+use App\Dossier\Service\SearchCriterionToggler;
 use App\PropertyListing\Domain\Amenity;
 use App\PropertyListing\Domain\PropertyType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +29,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use App\Dossier\Domain\DossierStep;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -36,12 +45,19 @@ use Symfony\UX\Map\Point;
  * Editable "Recherche" card on the dossier detail page: same fields and
  * autosave flow as Admin:ContactProject, persisted on the dossier's own
  * DossierSearch row (a snapshot: edits never touch the source contact).
+ *
+ * The component only orchestrates the live props and actions; the chip
+ * toggle semantics, autosave normalization and address list rules live in
+ * the Dossier domain (SearchCriterion, SearchAutosave, ImportantAddressList).
  */
 #[AsLiveComponent(name: 'Dossier:Search', template: 'components/Dossier/Search.html.twig')]
 final class SearchEditor
 {
+    use DossiersSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
+
+    public const MAX_IMPORTANT_ADDRESSES = ImportantAddressList::MAX;
 
     #[LiveProp]
     public int $dossierId = 0;
@@ -111,8 +127,11 @@ final class SearchEditor
         private readonly DossierRepository $dossiers,
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
-        private readonly \App\Dossier\Service\DossierStatusAdvancer $advancer,
-        private readonly \App\Dossier\Service\DossierProgressCalculator $progress,
+        private readonly DossierStatusAdvancer $advancer,
+        private readonly DossierProgressCalculator $progress,
+        private readonly SearchCriterionToggler $toggler,
+        private readonly DossierStepValidator $stepValidator,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -185,7 +204,7 @@ final class SearchEditor
      */
     public function getSelectedPropertyTypes(): array
     {
-        return array_values(array_filter(explode(',', $this->propertyType)));
+        return CsvSelection::values($this->propertyType);
     }
 
     /**
@@ -196,11 +215,7 @@ final class SearchEditor
     public function togglePropertyType(#[LiveArg] string $type): void
     {
         $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $type) {
+        if ($this->isFrozen() || '' === $type) {
             return;
         }
 
@@ -208,12 +223,7 @@ final class SearchEditor
             throw new BadRequestHttpException(\sprintf('Unknown property type "%s".', $type));
         }
 
-        $selected = $this->getSelectedPropertyTypes();
-        $selected = \in_array($type, $selected, true)
-            ? array_values(array_diff($selected, [$type]))
-            : [...$selected, $type];
-
-        $this->propertyType = implode(',', $selected);
+        $this->propertyType = CsvSelection::toggle($this->propertyType, $type);
         $this->save();
     }
 
@@ -234,21 +244,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseStayDuration(#[LiveArg] string $duration): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $duration) {
-            return;
-        }
-
-        $case = StayDuration::tryFrom($duration)
-            ?? throw new BadRequestHttpException(\sprintf('Unknown stay duration "%s".', $duration));
-
-        $search = $this->search();
-        $search->setStayDuration($search->getStayDuration() === $case->value ? null : $case->value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::StayDuration, $duration);
     }
 
     /**
@@ -264,33 +260,14 @@ final class SearchEditor
      */
     public function getSelectedFurnishings(): array
     {
-        return array_values(array_filter(explode(',', (string) $this->dossier()->getSearch()?->getFurnishing())));
+        return CsvSelection::values($this->dossier()->getSearch()?->getFurnishing());
     }
 
     /** Multi-select: a tenant can be open to both. */
     #[LiveAction]
     public function chooseFurnishing(#[LiveArg] string $furnishing): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $furnishing) {
-            return;
-        }
-
-        if (null === Furnishing::tryFrom($furnishing)) {
-            throw new BadRequestHttpException(\sprintf('Unknown furnishing "%s".', $furnishing));
-        }
-
-        $selected = $this->getSelectedFurnishings();
-        $selected = \in_array($furnishing, $selected, true)
-            ? array_values(array_diff($selected, [$furnishing]))
-            : [...$selected, $furnishing];
-
-        $this->search()->setFurnishing(implode(',', $selected) ?: null);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Furnishing, $furnishing);
     }
 
     /**
@@ -309,32 +286,15 @@ final class SearchEditor
     #[LiveAction]
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $guarantor) {
-            return;
-        }
-
-        $case = GuarantorType::tryFrom($guarantor)
-            ?? throw new BadRequestHttpException(\sprintf('Unknown guarantor type "%s".', $guarantor));
-
-        $search = $this->search();
-        $search->setGuarantorType($search->getGuarantorType() === $case->value ? null : $case->value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::GuarantorType, $guarantor);
     }
-
-    /** Progress of the guarantee, clear labels in translations. */
-    public const GUARANTOR_STATUSES = ['not_started', 'in_progress', 'obtained', 'refused'];
 
     /**
      * @return list<string>
      */
     public function getGuarantorStatuses(): array
     {
-        return self::GUARANTOR_STATUSES;
+        return SearchCriterion::GUARANTOR_STATUSES;
     }
 
     public function getCurrentGuarantorStatus(): ?string
@@ -345,22 +305,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseGuarantorStatus(#[LiveArg] string $status): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $status) {
-            return;
-        }
-
-        if (!\in_array($status, self::GUARANTOR_STATUSES, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown guarantor status "%s".', $status));
-        }
-
-        $search = $this->search();
-        $search->setGuarantorStatus($search->getGuarantorStatus() === $status ? null : $status);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::GuarantorStatus, $status);
     }
 
     public function getCurrentOccupants(): ?int
@@ -371,18 +316,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseOccupants(#[LiveArg] int $count): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ($count < 1 || $count > 6) {
-            throw new BadRequestHttpException(\sprintf('Invalid occupants count "%d".', $count));
-        }
-
-        $search = $this->search();
-        $search->setOccupants($search->getOccupants() === $count ? null : $count);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Occupants, $count);
     }
 
     /**
@@ -400,49 +334,21 @@ final class SearchEditor
      */
     public function getSelectedEquipment(): array
     {
-        return array_values(array_filter(explode(',', (string) $this->dossier()->getSearch()?->getEquipment())));
+        return CsvSelection::values($this->dossier()->getSearch()?->getEquipment());
     }
 
     #[LiveAction]
     public function chooseEquipment(#[LiveArg] string $equipment): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $equipment) {
-            return;
-        }
-
-        if (null === Amenity::tryFrom($equipment)) {
-            throw new BadRequestHttpException(\sprintf('Unknown equipment "%s".', $equipment));
-        }
-
-        $selected = $this->getSelectedEquipment();
-        $selected = \in_array($equipment, $selected, true)
-            ? array_values(array_diff($selected, [$equipment]))
-            : [...$selected, $equipment];
-
-        $this->search()->setEquipment(implode(',', $selected) ?: null);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Equipment, $equipment);
     }
-
-    /** Allowed values of the optional yes/no criteria (pets, early move-in). */
-    private const YES_NO = ['yes', 'no'];
-
-    /** Household typologies of the project, clear labels in translations. */
-    private const HOUSEHOLD_TYPES = ['alone', 'couple', 'family', 'flatshare', 'other'];
-
-    /** Desired lease types (French rental market), multi-select. */
-    private const LEASE_TYPES = ['civil_code', 'alur', 'mobility'];
 
     /**
      * @return list<string>
      */
     public function getLeaseTypes(): array
     {
-        return self::LEASE_TYPES;
+        return SearchCriterion::LEASE_TYPES;
     }
 
     /**
@@ -450,63 +356,25 @@ final class SearchEditor
      */
     public function getSelectedLeaseTypes(): array
     {
-        return array_values(array_filter(explode(',', (string) $this->dossier()->getSearch()?->getLeaseTypes())));
+        return CsvSelection::values($this->dossier()->getSearch()?->getLeaseTypes());
     }
 
     /** Multi-select chips: a tenant can be open to several lease types. */
     #[LiveAction]
     public function chooseLeaseType(#[LiveArg] string $lease): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $lease) {
-            return;
-        }
-
-        if (!\in_array($lease, self::LEASE_TYPES, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown lease type "%s".', $lease));
-        }
-
-        $selected = $this->getSelectedLeaseTypes();
-        $selected = \in_array($lease, $selected, true)
-            ? array_values(array_diff($selected, [$lease]))
-            : [...$selected, $lease];
-
-        $this->search()->setLeaseTypes(implode(',', $selected) ?: null);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::LeaseTypes, $lease);
     }
 
-    /**
-     * Lease type vs stay duration guard: a mobility lease is capped at 10
-     * months, an ALUR lease starts at 1 year. Returns the translation key
-     * of the mismatch to surface, or null when consistent.
-     */
+    /** Translation key of the lease/stay-duration mismatch, null when consistent. */
     public function getLeaseMismatch(): ?string
     {
         $search = $this->dossier()->getSearch();
-        if (null === $search) {
-            return null;
-        }
 
-        $leases = explode(',', (string) $search->getLeaseTypes());
-        $duration = $search->getStayDuration();
-
-        if (\in_array('mobility', $leases, true) && 'long' === $duration) {
-            return 'admin.dossiers.show.search.leaseMismatch.mobilityLong';
-        }
-        if (\in_array('alur', $leases, true) && 'short' === $duration) {
-            return 'admin.dossiers.show.search.leaseMismatch.alurShort';
-        }
-
-        return null;
+        return null !== $search
+            ? LeaseCompatibility::mismatchKey($search->getLeaseTypes(), $search->getStayDuration())
+            : null;
     }
-
-    /** Common destinations for the "important addresses" rows. */
-    private const IMPORTANT_ADDRESS_TYPES = ['work', 'school', 'daycare', 'family', 'gym', 'other'];
-    public const MAX_IMPORTANT_ADDRESSES = 3;
 
     #[LiveAction]
     public function toggleLock(): void
@@ -528,7 +396,7 @@ final class SearchEditor
      */
     public function getImportantAddressTypes(): array
     {
-        return self::IMPORTANT_ADDRESS_TYPES;
+        return ImportantAddressList::TYPES;
     }
 
     /**
@@ -552,7 +420,7 @@ final class SearchEditor
             return;
         }
 
-        if (!\in_array($type, self::IMPORTANT_ADDRESS_TYPES, true)) {
+        if (!\in_array($type, ImportantAddressList::TYPES, true)) {
             throw new BadRequestHttpException(\sprintf('Unknown address type "%s".', $type));
         }
 
@@ -567,28 +435,24 @@ final class SearchEditor
             return;
         }
 
-        $address = mb_substr(trim($this->addressDraft), 0, 255);
-        if ('' === $address) {
+        if ('' === trim($this->addressDraft)) {
             return;
         }
-        if (!\in_array($this->addressTypeDraft, self::IMPORTANT_ADDRESS_TYPES, true)) {
+        if (!\in_array($this->addressTypeDraft, ImportantAddressList::TYPES, true)) {
             throw new BadRequestHttpException(\sprintf('Unknown address type "%s".', $this->addressTypeDraft));
         }
 
-        $rows = $this->getImportantAddresses();
-        if (\count($rows) >= self::MAX_IMPORTANT_ADDRESSES) {
+        $rows = ImportantAddressList::add(
+            $this->getImportantAddresses(),
+            $this->addressDraft,
+            $this->addressTypeDraft,
+            $this->addressLatDraft,
+            $this->addressLngDraft,
+        );
+        if (null === $rows) {
             return;
         }
 
-        $row = ['address' => $address, 'type' => $this->addressTypeDraft];
-        $lat = filter_var(trim($this->addressLatDraft), \FILTER_VALIDATE_FLOAT);
-        $lng = filter_var(trim($this->addressLngDraft), \FILTER_VALIDATE_FLOAT);
-        if (false !== $lat && false !== $lng && abs($lat) <= 90.0 && abs($lng) <= 180.0) {
-            $row['lat'] = round($lat, 6);
-            $row['lng'] = round($lng, 6);
-        }
-
-        $rows[] = $row;
         $this->search()->setImportantAddresses($rows);
         $this->em->flush();
 
@@ -606,13 +470,12 @@ final class SearchEditor
             return;
         }
 
-        $rows = $this->getImportantAddresses();
-        if (!isset($rows[$index])) {
+        $rows = ImportantAddressList::remove($this->getImportantAddresses(), $index);
+        if (null === $rows) {
             return;
         }
 
-        unset($rows[$index]);
-        $this->search()->setImportantAddresses(array_values($rows));
+        $this->search()->setImportantAddresses($rows);
         $this->em->flush();
 
         $this->dispatchBrowserEvent('dossier-search:saved');
@@ -627,22 +490,7 @@ final class SearchEditor
     #[LiveAction]
     public function choosePets(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown pets value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setPets($search->getPets() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Pets, $value);
     }
 
     /**
@@ -650,7 +498,7 @@ final class SearchEditor
      */
     public function getHouseholdTypes(): array
     {
-        return self::HOUSEHOLD_TYPES;
+        return SearchCriterion::HOUSEHOLD_TYPES;
     }
 
     /** Optional custom dropdown: choosing persists immediately ('' = none). */
@@ -662,7 +510,7 @@ final class SearchEditor
             return;
         }
 
-        if ('' !== $value && !\in_array($value, self::HOUSEHOLD_TYPES, true)) {
+        if ('' !== $value && !\in_array($value, SearchCriterion::HOUSEHOLD_TYPES, true)) {
             throw new BadRequestHttpException(\sprintf('Unknown household type "%s".', $value));
         }
 
@@ -680,22 +528,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseEarlyMoveIn(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown early move-in value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setEarlyMoveIn($search->getEarlyMoveIn() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::EarlyMoveIn, $value);
     }
 
     /** Chips 1..4 ("4+"), single-select with toggle-off. */
@@ -707,18 +540,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseMinBedrooms(#[LiveArg] int $count): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ($count < 1 || $count > 4) {
-            throw new BadRequestHttpException(\sprintf('Invalid bedroom count "%d".', $count));
-        }
-
-        $search = $this->search();
-        $search->setMinBedrooms($search->getMinBedrooms() === $count ? null : $count);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::MinBedrooms, $count);
     }
 
     public function getCurrentElevator(): ?string
@@ -730,38 +552,13 @@ final class SearchEditor
     #[LiveAction]
     public function chooseElevator(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown elevator value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setElevator($search->getElevator() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Elevator, $value);
     }
 
-    /**
-     * Highest advisable monthly rent given the tenants' net incomes (the
-     * landlord's "3x rule"). Null while no tenant income is known.
-     */
+    /** Highest advisable monthly rent; null while no tenant income is known. */
     public function getMaxAffordableBudget(): ?int
     {
-        $income = 0;
-        foreach ($this->dossier()->getPersons() as $person) {
-            if (DossierPersonRole::TENANT === $person->getRole()) {
-                $income += $person->getMonthlyIncome() ?? 0;
-            }
-        }
-
-        return $income > 0 ? intdiv($income, 3) : null;
+        return AffordableRent::maxBudget($this->dossier()->getPersons());
     }
 
     #[LiveListener('dossier-persons:changed')]
@@ -780,22 +577,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseGroundFloor(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown ground floor value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setGroundFloor($search->getGroundFloor() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::GroundFloor, $value);
     }
 
     public function getCurrentTopFloor(): ?string
@@ -807,22 +589,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseTopFloor(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown top floor value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setTopFloor($search->getTopFloor() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::TopFloor, $value);
     }
 
     public function getCurrentParking(): ?string
@@ -834,22 +601,7 @@ final class SearchEditor
     #[LiveAction]
     public function chooseParking(#[LiveArg] string $value): void
     {
-        $this->ensureAdmin();
-        if ($this->isFrozen()) {
-            return;
-        }
-
-        if ('' === $value) {
-            return;
-        }
-
-        if (!\in_array($value, self::YES_NO, true)) {
-            throw new BadRequestHttpException(\sprintf('Unknown parking value "%s".', $value));
-        }
-
-        $search = $this->search();
-        $search->setParking($search->getParking() === $value ? null : $value);
-        $this->commit();
+        $this->applyToggle(SearchCriterion::Parking, $value);
     }
 
     #[LiveAction]
@@ -860,34 +612,22 @@ final class SearchEditor
             return;
         }
 
-        $budget = '' !== trim($this->budget) && is_numeric(trim($this->budget))
-            ? max(0, (int) trim($this->budget))
-            : null;
-        $moveInAt = '' !== trim($this->moveInAt)
-            ? (\DateTimeImmutable::createFromFormat('!Y-m-d', trim($this->moveInAt)) ?: null)
-            : null;
-        if (null !== $moveInAt && $moveInAt < new \DateTimeImmutable('today')) {
-            // A desired move-in date can only be today or later.
-            $moveInAt = null;
-        }
-
-        $minSurface = '' !== trim($this->minSurface) && is_numeric(trim($this->minSurface))
-            ? max(0, (int) trim($this->minSurface))
-            : null;
-
-        $search = $this->search();
-        $search->setBudget($budget);
-        $search->setAreas('' !== trim($this->areas) ? trim($this->areas) : null);
-        $search->setMoveInAt($moveInAt);
-        $search->setPropertyType('' !== trim($this->propertyType) ? trim($this->propertyType) : null);
-        $search->setMinSurface($minSurface);
+        $autosave = SearchAutosave::fromRaw(
+            $this->budget,
+            $this->moveInAt,
+            $this->minSurface,
+            $this->areas,
+            $this->propertyType,
+        );
+        $autosave->apply($this->search());
         $this->em->flush();
 
-        $this->budget = null !== $budget ? (string) $budget : '';
-        $this->areas = trim($this->areas);
-        $this->moveInAt = $moveInAt?->format('Y-m-d') ?? '';
-        $this->propertyType = trim($this->propertyType);
-        $this->minSurface = null !== $minSurface ? (string) $minSurface : '';
+        // Props mirror what was actually persisted (normalized values).
+        $this->budget = $autosave->budgetProp();
+        $this->areas = $autosave->areas;
+        $this->moveInAt = $autosave->moveInAtProp();
+        $this->propertyType = $autosave->propertyType;
+        $this->minSurface = $autosave->minSurfaceProp();
 
         // Unlocks the next step live when completeness flips.
         $this->commit(alreadyFlushed: true);
@@ -918,6 +658,25 @@ final class SearchEditor
     {
         $this->ensureAdmin();
         $this->editingNote = true;
+    }
+
+    /**
+     * Guard + toggle shared by every chip action ('' clicks are no-ops,
+     * unknown values are rejected by the toggler with a 400).
+     */
+    private function applyToggle(SearchCriterion $criterion, string|int $value): void
+    {
+        $this->ensureAdmin();
+        if ($this->isFrozen()) {
+            return;
+        }
+
+        if ('' === $value) {
+            return;
+        }
+
+        $this->toggler->toggle($this->search(), $criterion, $value);
+        $this->commit();
     }
 
     /** Get-or-create: dossiers created from scratch start without a row. */
@@ -953,6 +712,52 @@ final class SearchEditor
     public function isStepOpen(): bool
     {
         return $this->progress->forDossier($this->dossier())->isUnlocked(DossierStep::Search);
+    }
+
+    /** État validé de l'étape Recherche, pour le pied de card. */
+    public function isStepValidated(): bool
+    {
+        return $this->progress->forDossier($this->dossier())->isValidated(DossierStep::Search);
+    }
+
+    /** "Rouvrir" uniquement tant que l'étape suivante n'est pas validée. */
+    public function getCanReopenStep(): bool
+    {
+        $progress = $this->progress->forDossier($this->dossier());
+
+        return $progress->isValidated(DossierStep::Search) && !$progress->isValidated(DossierStep::File);
+    }
+
+    /** Bouton "Valider" en bas de la card : déverrouille l'étape suivante. */
+    #[LiveAction]
+    public function validateStep(): void
+    {
+        $this->ensureAdmin();
+        // Une étape Recherche ne se valide qu'avec des critères complets :
+        // le pied de card masque déjà le bouton, cette garde couvre l'appel
+        // direct au endpoint /_components/.
+        if (!$this->isComplete()) {
+            return;
+        }
+        if ($this->stepValidator->validate($this->dossier(), DossierStep::Search)) {
+            // Enchaînement naturel : l'onglet suivant s'ouvre (l'URL est
+            // mise à jour avant le morph déclenché par progress:changed).
+            $this->dispatchBrowserEvent('dossier-step:validated', ['next' => DossierStep::File->value]);
+            // La barre d'onglets vit dans le chrome de page : un morph Turbo
+            // la met à jour (déverrouillage de l'onglet suivant).
+            $this->dispatchBrowserEvent('dossier-progress:changed');
+            $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.stepValidated')]);
+        }
+    }
+
+    #[LiveAction]
+    public function reopenStep(): void
+    {
+        $this->ensureAdmin();
+        if ($this->stepValidator->reopen($this->dossier(), DossierStep::Search)) {
+            $this->dispatchBrowserEvent('dossier-progress:changed');
+            $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.stepReopened')]);
+        }
     }
 
     /**

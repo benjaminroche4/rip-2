@@ -15,8 +15,8 @@
     <div class="fixed inset-x-0 top-0 z-20 flex items-center justify-between gap-3 p-4">
         {# Badge = type de la pièce (Pièce d'identité...), pas le nom du
            fichier déposé. #}
-        <p class="inline-flex min-w-0 items-center rounded-full bg-white/10 px-3 py-1.5">
-            <span class="truncate text-xs font-medium text-white" data-file-preview-target="title"></span>
+        <p class="inline-flex min-w-0 items-center rounded-full bg-white px-3 py-1.5 shadow-sm">
+            <span class="truncate text-xs font-medium text-gray-900" data-file-preview-target="title"></span>
         </p>
         <div class="flex shrink-0 items-center gap-2">
             <a
@@ -43,13 +43,18 @@
     </div>
 
     {# Clic sur le fond = fermeture (le contenu stoppe la propagation). #}
-    <div class="flex h-full w-full items-center justify-center px-4 pt-16 pb-8" data-action="click->file-preview#closeOnBackdrop">
+    <div class="relative flex h-full w-full items-center justify-center px-4 pt-16 pb-8" data-action="click->file-preview#closeOnBackdrop">
+        {# Loader affiché à l'ouverture, masqué au `load` du document. #}
+        <div data-file-preview-target="loader" hidden class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+            <twig:Spinner class="size-8 text-white/80" />
+        </div>
         <img
             data-file-preview-target="image"
             src=""
             alt=""
             hidden
             draggable="false"
+            data-action="load->file-preview#loaded error->file-preview#loaded"
             class="max-h-full max-w-full rounded-xl object-contain select-none"
         />
         <iframe
@@ -57,6 +62,7 @@
             src="about:blank"
             title="{{ 'filePreview.title'|trans }}"
             hidden
+            data-action="load->file-preview#loaded"
             class="h-full w-full max-w-3xl rounded-xl bg-white"
         ></iframe>
     </div>

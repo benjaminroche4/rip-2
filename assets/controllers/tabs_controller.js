@@ -20,11 +20,31 @@ export default class extends Controller {
         this.frame = requestAnimationFrame(() => this.moveIndicatorToActive(false));
         this.onResize = () => this.moveIndicatorToActive(false);
         window.addEventListener('resize', this.onResize);
+        // A morph refresh can change [data-active-tab] server-side (e.g.
+        // jump to the next step after a validation): follow with the pill.
+        this.observer = new MutationObserver(() => this.moveIndicatorToActive(false));
+        this.observer.observe(this.element, { attributes: true, attributeFilter: ['data-active-tab'] });
     }
 
     disconnect() {
         cancelAnimationFrame(this.frame);
         window.removeEventListener('resize', this.onResize);
+        this.observer?.disconnect();
+    }
+
+    /**
+     * Step validated: land on the next step's tab. At this point the next
+     * tab is still rendered locked (the unlock happens server-side), so we
+     * only mirror the key in the URL; the morph refresh triggered by
+     * dossier-progress:changed re-renders the bar and the panel with that
+     * tab active.
+     */
+    goTo(event) {
+        const key = event.detail?.next;
+        if (!key) {
+            return;
+        }
+        this.writeUrl(key);
     }
 
     select(event) {

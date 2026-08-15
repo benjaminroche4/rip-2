@@ -143,5 +143,22 @@
                 </div>
             </div>
         </section>
+    {% else %}
+        {# Pas encore de date d'installation (dossier tout neuf) : card
+           verrouillée incitative, même vocabulaire que le récap IA. #}
+        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="dossier-timeline-locked">
+            <div class="rounded-2xl bg-neutral-50 p-2">
+                <div class="flex items-center justify-between gap-4 p-3">
+                    <div class="min-w-0">
+                        <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.show.timeline.title'|trans }}</h2>
+                        <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.timeline.locked'|trans }}</p>
+                    </div>
+                    <span class="flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 py-1 pr-2.5 pl-1.5 text-xs font-medium text-gray-500">
+                        {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.dossiers.show.modules.lockedShort'|trans }}
+                    </span>
+                </div>
+            </div>
+        </section>
     {% endif %}
 </div>

@@ -20,12 +20,6 @@ class VisitRepository extends ServiceEntityRepository
         parent::__construct($registry, Visit::class);
     }
 
-    /**
-     * Read model for the visits page: every visit from the start of the given
-     * day (Europe/Paris) onwards, chronological.
-     *
-     * @return list<VisitSummary>
-     */
     public function findOneSummary(int $id): ?VisitSummary
     {
         $visit = $this->find($id);
@@ -172,6 +166,12 @@ class VisitRepository extends ServiceEntityRepository
         return array_map($this->toSummary(...), $visits);
     }
 
+    /**
+     * Read model for the visits page: every visit from the start of the given
+     * day (Europe/Paris) onwards, chronological.
+     *
+     * @return list<VisitSummary>
+     */
     public function findUpcomingSummaries(\DateTimeImmutable $from): array
     {
         /** @var list<Visit> $visits */

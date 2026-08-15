@@ -7,6 +7,7 @@ namespace App\Admin\Twig\Components;
 use App\Admin\Entity\Document;
 use App\Admin\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -30,6 +31,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:DocumentList', template: 'components/Admin/DocumentList.html.twig')]
 final class DocumentList
 {
+    use ToolsSectionGuard;
     use DefaultActionTrait;
     use ComponentToolsTrait;
 
@@ -43,6 +45,8 @@ final class DocumentList
         private readonly DocumentRepository $repository,
         private readonly Security $security,
         private readonly EntityManagerInterface $em,
+        private readonly LoggerInterface $securityLogger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -73,10 +77,18 @@ final class DocumentList
 
         $doc = $this->repository->find($id);
         if (null !== $doc) {
+            // Audit trail: catalogue mutations land on the security channel.
+            $this->securityLogger->notice('Document catalogue entry deleted', [
+                'actor' => $this->security->getUser()?->getUserIdentifier(),
+                'document' => $id,
+                'slug' => (string) $doc->getSlug(),
+            ]);
+
             $em->remove($doc);
             $em->flush();
         }
         $this->documentsCache = null;
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.documentDeleted')]);
     }
 
     /**

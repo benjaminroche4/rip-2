@@ -10,6 +10,7 @@ use App\Dossier\Domain\DossierDetails;
 use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Domain\DossierSearchView;
 use App\Dossier\Domain\DossierSummary;
+use App\Dossier\Domain\ExpiredPairingCodeAlert;
 use App\Dossier\Domain\MoveInTimeline;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierEvent;
@@ -184,6 +185,43 @@ class DossierRepository extends ServiceEntityRepository
         $dossiers = $qb->getQuery()->getResult();
 
         return $dossiers;
+    }
+
+    /**
+     * Open dossiers whose pairing code expired (never armed, or last armed
+     * before the threshold) while pieces are still awaiting a deposit
+     * (requested or refused): the emailed deposit link is dead, staff should
+     * resend the document request to re-arm the code. A dossier whose pieces
+     * are all validated (or received) does not need a live code and stays
+     * out of the alert. One scalar query, oldest first, no N+1.
+     *
+     * @return list<ExpiredPairingCodeAlert>
+     */
+    public function findExpiredPairingAlerts(\DateTimeImmutable $threshold): array
+    {
+        /** @var list<array{reference: string, name: string}> $rows */
+        $rows = $this->createQueryBuilder('d')
+            ->select('d.reference', 'd.name')
+            ->where('d.closedAt IS NULL')
+            ->andWhere('d.pairingCodeSentAt IS NULL OR d.pairingCodeSentAt < :threshold')
+            ->andWhere('EXISTS (
+                SELECT doc.id FROM '.\App\Dossier\Entity\DossierDocument::class.' doc
+                JOIN doc.person p
+                WHERE p.dossier = d AND doc.status IN (:awaiting)
+            )')
+            ->setParameter('threshold', $threshold)
+            ->setParameter('awaiting', [
+                \App\Dossier\Domain\DossierDocumentStatus::Requested->value,
+                \App\Dossier\Domain\DossierDocumentStatus::Refused->value,
+            ])
+            ->orderBy('d.createdAt', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn (array $row): ExpiredPairingCodeAlert => new ExpiredPairingCodeAlert($row['reference'], $row['name']),
+            $rows,
+        );
     }
 
     /** Number of dossiers currently open (not closed), for the sidebar badge. */

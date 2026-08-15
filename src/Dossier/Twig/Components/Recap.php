@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dossier\Twig\Components;
 
 use App\Dossier\Domain\DossierRecap;
+use App\Dossier\Domain\DossierStep;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\DossierRecapGenerator;
@@ -14,6 +15,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -25,6 +27,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:Recap', template: 'components/Dossier/Recap.html.twig')]
 final class Recap
 {
+    use DossiersSectionGuard;
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -38,6 +42,7 @@ final class Recap
         private readonly DossierRepository $dossiers,
         private readonly DossierRecapGenerator $generator,
         private readonly Security $security,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -51,7 +56,29 @@ final class Recap
     {
         $this->ensureAdmin();
 
+        // Le template ne rend pas la card tant que les étapes ne sont pas
+        // validées : cette garde couvre l'appel direct au endpoint
+        // /_components/.
+        if (!$this->isUnlocked()) {
+            throw new AccessDeniedException('Recap requires the persons and search steps to be validated.');
+        }
+
         $this->failed = null === $this->generator->generate($this->dossier());
+        if (!$this->failed) {
+            $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.recapGenerated')]);
+        }
+    }
+
+    /**
+     * Un récap n'a de matière fiable qu'une fois les locataires et les
+     * critères de recherche validés : avant, la card n'apparaît pas.
+     */
+    public function isUnlocked(): bool
+    {
+        $dossier = $this->dossier();
+
+        return $dossier->isStepValidated(DossierStep::Persons)
+            && $dossier->isStepValidated(DossierStep::Search);
     }
 
     public function getRecap(): ?DossierRecap

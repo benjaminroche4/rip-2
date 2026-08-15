@@ -167,7 +167,8 @@ final class DossierDocumentFileAccessTest extends WebTestCase
         $response = $this->client->getResponse();
         self::assertSame('application/zip', $response->headers->get('Content-Type'));
         self::assertStringContainsString('attachment', (string) $response->headers->get('Content-Disposition'));
-        self::assertStringContainsString('DS-000042-pieces.zip', (string) $response->headers->get('Content-Disposition'));
+        // Named after the primary tenant: self-explanatory once saved.
+        self::assertStringContainsString('Dupont Jean - DS-000042.zip', (string) $response->headers->get('Content-Disposition'));
         // A zip stream starts with the PK signature.
         self::assertStringStartsWith('PK', (string) $content);
     }

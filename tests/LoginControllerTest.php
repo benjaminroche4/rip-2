@@ -198,6 +198,64 @@ final class LoginControllerTest extends WebTestCase
         self::assertNull($this->findRememberMeCookie(), 'REMEMBERME cookie must NOT be set when unchecked.');
     }
 
+    public function testItRejectsLoginWithInvalidCsrfToken(): void
+    {
+        // Prime the session, then POST with a forged token: valid credentials
+        // must not be enough without the CSRF token.
+        $this->client->request('GET', self::LOGIN_PATH);
+
+        $this->client->request('POST', self::LOGIN_PATH, [
+            '_username' => self::TEST_EMAIL,
+            '_password' => self::TEST_PASSWORD,
+            '_csrf_token' => 'forged-token',
+        ]);
+
+        self::assertResponseRedirects(self::LOGIN_PATH, message: 'A forged CSRF token must bounce back to the login page.');
+        $this->client->followRedirect();
+        self::assertSelectorExists('[role="alert"]');
+        self::assertNull($this->findRememberMeCookie());
+    }
+
+    public function testItThrottlesRepeatedLoginFailures(): void
+    {
+        // The test firewall raises login_throttling to 1000 attempts so the
+        // suite's repeated logins never flake; replaying 1000 HTTP failures
+        // is not viable, so the local (username+IP) counter is pre-exhausted
+        // on the very limiter instances the firewall listener consumes,
+        // obtained from the DefaultLoginRateLimiter service itself (its key
+        // derivation is internal, guessing it here would be brittle).
+        $email = 'throttled-user@example.com';
+        /** @var \Symfony\Component\Security\Http\RateLimiter\DefaultLoginRateLimiter $loginLimiter */
+        $loginLimiter = static::getContainer()->get('security.login_throttling.main.limiter');
+        $throttledRequest = \Symfony\Component\HttpFoundation\Request::create(self::LOGIN_PATH, 'POST', server: ['REMOTE_ADDR' => '127.0.0.1']);
+        $throttledRequest->attributes->set(\Symfony\Component\Security\Http\SecurityRequestAttributes::LAST_USERNAME, $email);
+        $limiters = (new \ReflectionMethod($loginLimiter, 'getLimiters'))->invoke($loginLimiter, $throttledRequest);
+        // [global(ip), local(username+ip)]: exhaust the local one only.
+        end($limiters)->consume(1000);
+
+        try {
+            $this->client->request('GET', self::LOGIN_PATH);
+            $this->client->submitForm(self::SUBMIT_BUTTON, [
+                '_username' => $email,
+                '_password' => 'whatever',
+            ]);
+
+            self::assertResponseRedirects(self::LOGIN_PATH);
+            $this->client->followRedirect();
+            // The throttling message names the attempts, unlike the generic
+            // invalid-credentials alert.
+            self::assertSelectorExists('[role="alert"]');
+            self::assertStringContainsString(
+                'tentatives',
+                (string) $this->client->getCrawler()->filter('[role="alert"]')->text(),
+                'The alert must be the login-throttling one, not invalid credentials.',
+            );
+        } finally {
+            // Never leak an exhausted counter into the shared test cache.
+            $loginLimiter->reset($throttledRequest);
+        }
+    }
+
     /**
      * Returns the REMEMBERME cookie that *creates* the session (non-empty value),
      * not the preventive clear-cookie Symfony also emits on every login response.

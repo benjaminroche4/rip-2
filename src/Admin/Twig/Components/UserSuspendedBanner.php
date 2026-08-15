@@ -22,6 +22,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserSuspendedBanner', template: 'components/Admin/UserSuspendedBanner.html.twig')]
 final class UserSuspendedBanner
 {
+    use AdminSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

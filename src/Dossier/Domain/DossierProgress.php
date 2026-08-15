@@ -81,20 +81,6 @@ final readonly class DossierProgress
         return null;
     }
 
-    /** Furthest status the validated steps grant, null when none does. */
-    public function reachedStatus(): ?DossierStatus
-    {
-        $reached = null;
-        foreach (DossierStep::ordered() as $step) {
-            if (!$this->isValidated($step)) {
-                break;
-            }
-            $reached = $step->reachedStatus() ?? $reached;
-        }
-
-        return $reached;
-    }
-
     public function validatedCount(): int
     {
         return \count(array_filter($this->validated));

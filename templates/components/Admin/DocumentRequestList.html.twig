@@ -13,8 +13,8 @@
     {% if this.empty %}
         <twig:Admin:EmptyCard message="{{ 'admin.tools.documents.recent.empty'|trans }}" />
     {% else %}
-        <div class="rounded-2xl border border-neutral-200 bg-white p-2">
-            <div class="rounded-xl bg-neutral-50 p-2">
+        <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+            <div class="rounded-2xl bg-neutral-50 p-2">
                 <table class="w-full border-separate border-spacing-y-1 text-left text-sm" data-testid="recent-requests-table" aria-label="{{ 'admin.tools.documents.recent.title'|trans }}">
                     <thead>
                         <tr class="text-xs font-medium text-gray-400">
@@ -43,63 +43,51 @@
                                     <twig:Badge variant="secondary" class="rounded-full uppercase">{{ req.language.value }}</twig:Badge>
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
-                                    {# Menu d'actions façon shadcn : items groupés, la
-                                       suppression isolée derrière un séparateur. #}
-                                    <details
-                                        class="relative inline-block text-left"
-                                        data-controller="details-dropdown"
-                                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                                        data-testid="recent-request-actions"
-                                    >
-                                        <summary
-                                            class="inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden"
-                                            aria-label="{{ 'admin.tools.documents.recent.column.actions'|trans }}"
+                                    {# Actions directes (convention stylo direct) :
+                                       crayon, téléchargement PDF, corbeille (la
+                                       suppression garde sa modale de confirmation). #}
+                                    <div class="inline-flex items-center gap-1" data-testid="recent-request-actions">
+                                        {% set editUrl = path('admin_tools_documents_request_edit', {adminPrefix: adminPrefix, id: req.id}) %}
+                                        <a
+                                            href="{{ editUrl }}"
+                                            class="flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
+                                            aria-label="{{ 'admin.tools.documents.recent.edit'|trans }}"
+                                            title="{{ 'admin.tools.documents.recent.edit'|trans }}"
+                                            data-testid="recent-request-edit"
                                         >
-                                            {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                        </summary>
-                                        <div class="absolute right-0 z-20 mt-1 w-44 rounded-lg border border-neutral-200 bg-white p-1 text-left shadow-md">
-                                            {% set editUrl = path('admin_tools_documents_request_edit', {adminPrefix: adminPrefix, id: req.id}) %}
-                                            <a
-                                                href="{{ editUrl }}"
-                                                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
-                                                data-testid="recent-request-edit"
-                                            >
-                                                {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                {{ 'admin.tools.documents.recent.edit'|trans }}
-                                            </a>
-                                            {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
-                                            <a
-                                                href="{{ pdfUrl }}"
-                                                class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
-                                                data-testid="recent-request-download"
-                                                data-controller="pdf-download"
-                                                data-pdf-download-url-value="{{ pdfUrl }}"
-                                                data-action="click->pdf-download#download details-dropdown#close"
-                                            >
-                                                <span class="relative flex w-full items-center gap-2">
-                                                    <span class="flex items-center gap-2" data-pdf-download-target="label">
-                                                        {{ ux_icon('lucide:download', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                        {{ 'admin.tools.documents.recent.download'|trans }}
-                                                    </span>
-                                                    <span class="hidden absolute inset-0 flex items-center justify-center" data-pdf-download-target="spinner">
-                                                        <twig:Spinner />
-                                                    </span>
-                                                </span>
-                                            </a>
-                                            <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
-                                            <button
-                                                type="button"
-                                                data-action="live#action details-dropdown#close"
-                                                data-live-action-param="askDelete"
-                                                data-live-id-param="{{ req.id }}"
-                                                class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
-                                                data-testid="recent-request-delete"
-                                            >
-                                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                                {{ 'admin.tools.documents.recent.delete'|trans }}
-                                            </button>
-                                        </div>
-                                    </details>
+                                            {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        </a>
+                                        {% set pdfUrl = path('admin_tools_documents_request_pdf', {adminPrefix: adminPrefix, id: req.id}) %}
+                                        <a
+                                            href="{{ pdfUrl }}"
+                                            class="relative flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
+                                            aria-label="{{ 'admin.tools.documents.recent.download'|trans }}"
+                                            title="{{ 'admin.tools.documents.recent.download'|trans }}"
+                                            data-testid="recent-request-download"
+                                            data-controller="pdf-download"
+                                            data-pdf-download-url-value="{{ pdfUrl }}"
+                                            data-action="click->pdf-download#download"
+                                        >
+                                            <span class="flex items-center" data-pdf-download-target="label">
+                                                {{ ux_icon('lucide:download', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            </span>
+                                            <span class="hidden absolute inset-0 flex items-center justify-center rounded-lg bg-white/80" data-pdf-download-target="spinner">
+                                                <twig:Spinner class="size-3.5" />
+                                            </span>
+                                        </a>
+                                        <button
+                                            type="button"
+                                            data-action="live#action"
+                                            data-live-action-param="askDelete"
+                                            data-live-id-param="{{ req.id }}"
+                                            class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                            aria-label="{{ 'admin.tools.documents.recent.delete'|trans }}"
+                                            title="{{ 'admin.tools.documents.recent.delete'|trans }}"
+                                            data-testid="recent-request-delete"
+                                        >
+                                            {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

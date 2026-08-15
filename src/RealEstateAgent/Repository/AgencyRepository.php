@@ -72,11 +72,13 @@ class AgencyRepository extends ServiceEntityRepository
      */
     public function findSummaries(): array
     {
-        /** @var list<array{id: int, name: string, createdAt: \DateTimeImmutable, agentCount: int}> $rows */
+        /** @var list<array{id: int, name: string, brand: string|null, createdAt: \DateTimeImmutable, agentCount: int}> $rows */
         $rows = $this->createQueryBuilder('ag')
-            ->select('ag.id AS id', 'ag.name AS name', 'ag.createdAt AS createdAt', 'COUNT(a.id) AS agentCount')
+            ->select('ag.id AS id', 'ag.name AS name', 'b.name AS brand', 'ag.createdAt AS createdAt', 'COUNT(a.id) AS agentCount')
+            ->leftJoin('ag.brand', 'b')
             ->leftJoin(RealEstateAgent::class, 'a', 'WITH', 'a.agency = ag')
             ->groupBy('ag.id')
+            ->addGroupBy('b.name')
             ->getQuery()
             ->getResult();
 
@@ -87,8 +89,9 @@ class AgencyRepository extends ServiceEntityRepository
             static fn (array $r): AgencySummary => new AgencySummary(
                 id: (int) $r['id'],
                 name: (string) $r['name'],
+                brand: null !== $r['brand'] ? (string) $r['brand'] : null,
                 agentCount: (int) $r['agentCount'],
-                createdAt: $r['createdAt'] instanceof \DateTimeImmutable ? $r['createdAt'] : new \DateTimeImmutable(),
+                createdAt: $r['createdAt'],
             ),
             $rows,
         );

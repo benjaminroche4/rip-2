@@ -64,16 +64,4 @@ enum DossierStep: string
         };
     }
 
-    /**
-     * Status the dossier reaches once this step is validated. The last step
-     * of a phase carries it; steps with no bump return null.
-     */
-    public function reachedStatus(): ?DossierStatus
-    {
-        return match ($this) {
-            self::Search => DossierStatus::Searching,
-            self::Visit => DossierStatus::PropertyFound,
-            default => null,
-        };
-    }
 }

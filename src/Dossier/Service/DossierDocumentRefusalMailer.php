@@ -28,11 +28,12 @@ final readonly class DossierDocumentRefusalMailer
     ) {
     }
 
-    public function send(Dossier $dossier, DossierDocument $document): void
+    /** @return bool whether an email actually left (a code-bearing send re-arms the pairing code) */
+    public function send(Dossier $dossier, DossierDocument $document): bool
     {
         $recipient = $this->resolveRecipient($dossier, $document);
         if (null === $recipient) {
-            return;
+            return false;
         }
 
         $locale = $recipient->getLanguage()?->value ?? 'fr';
@@ -65,6 +66,8 @@ final readonly class DossierDocumentRefusalMailer
             ]);
 
         $this->mailer->send($email);
+
+        return true;
     }
 
     private function resolveRecipient(Dossier $dossier, DossierDocument $document): ?DossierPerson

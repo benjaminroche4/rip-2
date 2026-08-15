@@ -45,7 +45,7 @@
         other: fr ? 'Autres' : 'Other',
     },
     footerTag: fr ? 'Agence de Relocation pour Particuliers et Professionnels' : 'Relocation Agency for Individuals and Businesses',
-    footerAddress: '155 Rue du Faubourg Saint-Denis, 75010 Paris — France',
+    footerAddress: '155 Rue du Faubourg Saint-Denis, 75010 Paris, France',
 } %}
 <!doctype html>
 <html lang="{{ locale }}">
@@ -223,33 +223,20 @@
                     </div>
                     <hr class="sep">
                     <p class="muted" style="margin:0;padding:0 0 6pt;font-size:9pt">{{ t.docsForPerson }} :</p>
-                    {# Group the M2M docs by category (the collection order is
-                       insertion-based and doesn't match the form's category
-                       grouping). Iterate the categories in enum order so the
-                       PDF matches the form: Identity → Work → Housing → … #}
-                    {% set docsByCategory = {} %}
-                    {% for doc in person.documents %}
-                        {% set cat = doc.category ? doc.category.value : 'other' %}
-                        {% set bucket = docsByCategory[cat]|default([]) %}
-                        {% set bucket = bucket|merge([doc]) %}
-                        {% set docsByCategory = docsByCategory|merge({(cat): bucket}) %}
-                    {% endfor %}
-
-                    {% for category in ['identity', 'work', 'housing', 'financial', 'education', 'guarantee', 'other'] %}
-                        {% if docsByCategory[category]|default([]) is not empty %}
-                            <p class="doc-category">{{ t.category[category] }}</p>
-                            {# Pinned first, then alphabetical on the localised name. #}
-                            {% set sortedDocs = docsByCategory[category]|sort((a, b) => (b.pinned ? 1 : 0) <=> (a.pinned ? 1 : 0) ?: a.getName(locale) <=> b.getName(locale)) %}
-                            <ul class="doc-list">
-                                {% for doc in sortedDocs %}
-                                    <li>
-                                        <span class="doc-name">{{ doc.getName(locale) }}</span>
-                                        {% set desc = doc.getDescription(locale) %}
-                                        {% if desc %}<br><span class="doc-desc">{{ desc }}</span>{% endif %}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                    {# Localised DocumentView DTOs, grouped by category in
+                       enum order (Identity → Work → Housing → …) and sorted
+                       pinned-first by the renderer, so the PDF matches the
+                       form without touching the Document entity. #}
+                    {% for category, docs in docsByPerson[loop.index0]|default({}) %}
+                        <p class="doc-category">{{ t.category[category] }}</p>
+                        <ul class="doc-list">
+                            {% for doc in docs %}
+                                <li>
+                                    <span class="doc-name">{{ doc.name }}</span>
+                                    {% if doc.description %}<br><span class="doc-desc">{{ doc.description }}</span>{% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
                     {% endfor %}
                 </div>
             </div>

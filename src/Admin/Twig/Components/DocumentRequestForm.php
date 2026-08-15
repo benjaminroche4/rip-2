@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Admin\Twig\Components;
 
+use App\Admin\Domain\DocumentView;
 use App\Admin\Domain\HouseholdTypology;
 use App\Admin\Domain\PersonRole;
 use App\Admin\Domain\RequestLanguage;
@@ -16,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -46,6 +48,7 @@ use Symfony\UX\LiveComponent\LiveCollectionTrait;
 )]
 final class DocumentRequestForm extends AbstractController
 {
+    use ToolsSectionGuard;
     use DefaultActionTrait;
     use LiveCollectionTrait;
     use ComponentToolsTrait;
@@ -77,17 +80,24 @@ final class DocumentRequestForm extends AbstractController
         private readonly Security $security,
         private readonly DocumentRepository $documentRepository,
         private readonly DocumentRequestRepository $requestRepository,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
     /**
-     * @return array<int, \App\Admin\Entity\Document>
+     * Catalogue read models keyed by id, localised for the current request
+     * (the /_components route carries the {_locale} prefix, so re-renders
+     * keep the page's locale). The template never touches the entity.
+     *
+     * @return array<int, DocumentView>
      */
     public function getDocumentsById(): array
     {
+        $locale = $this->requestStack->getCurrentRequest()?->getLocale() ?? 'fr';
+
         $byId = [];
         foreach ($this->documentRepository->findBy([], ['nameFr' => 'ASC']) as $doc) {
-            $byId[$doc->getId()] = $doc;
+            $byId[(int) $doc->getId()] = DocumentView::fromEntity($doc, $locale);
         }
 
         return $byId;

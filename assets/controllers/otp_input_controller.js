@@ -1,101 +1,83 @@
 /* stimulusFetch: 'lazy' */
-import { Controller } from '@hotwired/stimulus'
+import { Controller } from '@hotwired/stimulus';
 
 /**
- * 6-box one-time-code input for the 2FA challenge. Digits auto-advance,
- * backspace walks back, pasting a full code fills every box, and the form
- * auto-submits as soon as the 6th digit lands. A toggle swaps to a plain
- * input for recovery codes (8 digits, no auto-submit).
+ * Segmented one-time-code input. Progressive enhancement over a real text
+ * input (the form field, kept for no-JS and submission): on connect the
+ * plain input is hidden and the boxes take over, mirroring every change
+ * back into it. Pasting a full code anywhere fills all boxes at once.
  *
- * Whatever the mode, the value ends up in the hidden `_auth_code` field the
- * firewall reads.
+ * Targets: input (the real form field), box (one per character).
+ * All box events are wired through data-action, nothing to clean up here.
  */
 export default class extends Controller {
-    static targets = ['digit', 'hidden', 'otpZone', 'recoveryZone', 'recoveryInput']
-
-    #submitted = false
+    static targets = ['input', 'box'];
 
     connect() {
-        this.digitTargets[0]?.focus()
+        this.inputTarget.classList.add('hidden');
+        this.element.querySelector('[data-otp-boxes]').classList.remove('hidden');
+        this.#fill(this.inputTarget.value);
     }
 
-    /* ---- OTP boxes ---- */
+    disconnect() {
+        // Restore the plain input so a Turbo cache snapshot stays usable.
+        this.inputTarget.classList.remove('hidden');
+        this.element.querySelector('[data-otp-boxes]')?.classList.add('hidden');
+    }
 
     input(event) {
-        const box = event.target
-        box.value = box.value.replace(/\D/g, '').slice(-1)
-        if (box.value !== '') {
-            const next = this.digitTargets[this.#indexOf(box) + 1]
-            next?.focus()
-            next?.select()
+        const box = event.target;
+        const value = this.#clean(box.value);
+        // Typing over a filled box keeps the last typed character.
+        box.value = value.slice(-1);
+        if (box.value && event.target !== this.boxTargets.at(-1)) {
+            this.boxTargets[this.boxTargets.indexOf(box) + 1].focus();
         }
-        this.#syncAndMaybeSubmit()
+        this.#sync();
     }
 
     keydown(event) {
-        const box = event.target
-        const index = this.#indexOf(box)
-        if (event.key === 'Backspace' && box.value === '' && index > 0) {
-            const previous = this.digitTargets[index - 1]
-            previous.focus()
-            previous.value = ''
-            this.#syncAndMaybeSubmit()
-            event.preventDefault()
-        } else if (event.key === 'ArrowLeft' && index > 0) {
-            this.digitTargets[index - 1].focus()
-            event.preventDefault()
-        } else if (event.key === 'ArrowRight' && index < this.digitTargets.length - 1) {
-            this.digitTargets[index + 1].focus()
-            event.preventDefault()
+        const index = this.boxTargets.indexOf(event.target);
+        if ('Backspace' === event.key && '' === event.target.value && index > 0) {
+            event.preventDefault();
+            const previous = this.boxTargets[index - 1];
+            previous.value = '';
+            previous.focus();
+            this.#sync();
+        } else if ('ArrowLeft' === event.key && index > 0) {
+            event.preventDefault();
+            this.boxTargets[index - 1].focus();
+        } else if ('ArrowRight' === event.key && index < this.boxTargets.length - 1) {
+            event.preventDefault();
+            this.boxTargets[index + 1].focus();
         }
     }
 
     paste(event) {
-        const digits = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '')
-        if (digits === '') return
-        event.preventDefault()
-        this.digitTargets.forEach((box, i) => { box.value = digits[i] ?? '' })
-        const focusIndex = Math.min(digits.length, this.digitTargets.length - 1)
-        this.digitTargets[focusIndex].focus()
-        this.#syncAndMaybeSubmit()
+        event.preventDefault();
+        this.#fill(event.clipboardData?.getData('text') ?? '');
     }
 
-    /* ---- recovery-code mode ---- */
-
-    showRecovery(event) {
-        event.preventDefault()
-        this.otpZoneTarget.classList.add('hidden')
-        this.recoveryZoneTarget.classList.remove('hidden')
-        this.hiddenTarget.value = ''
-        this.recoveryInputTarget.focus()
+    select(event) {
+        event.target.select();
     }
 
-    showOtp(event) {
-        event.preventDefault()
-        this.recoveryZoneTarget.classList.add('hidden')
-        this.otpZoneTarget.classList.remove('hidden')
-        this.hiddenTarget.value = ''
-        this.digitTargets.forEach((box) => { box.value = '' })
-        this.digitTargets[0]?.focus()
-    }
-
-    syncRecovery() {
-        this.hiddenTarget.value = this.recoveryInputTarget.value.trim()
-    }
-
-    /* ---- internals ---- */
-
-    #indexOf(box) {
-        return this.digitTargets.indexOf(box)
-    }
-
-    #syncAndMaybeSubmit() {
-        const code = this.digitTargets.map((box) => box.value).join('')
-        this.hiddenTarget.value = code
-        if (code.length === this.digitTargets.length && !this.#submitted) {
-            // Auto-submit on the last digit; the guard avoids double posts.
-            this.#submitted = true
-            this.element.requestSubmit()
+    #fill(raw) {
+        const code = this.#clean(raw).slice(0, this.boxTargets.length);
+        this.boxTargets.forEach((box, i) => {
+            box.value = code[i] ?? '';
+        });
+        this.#sync();
+        if (code) {
+            this.boxTargets[Math.min(code.length, this.boxTargets.length - 1)].focus();
         }
+    }
+
+    #clean(value) {
+        return value.replace(/[^a-z0-9]/gi, '').toUpperCase();
+    }
+
+    #sync() {
+        this.inputTarget.value = this.boxTargets.map((box) => box.value).join('');
     }
 }

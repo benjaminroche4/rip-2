@@ -132,6 +132,40 @@ final class ContactStatusControlTest extends KernelTestCase
         self::assertSame(NextStep::QuotePreparation, $this->em->find(Contact::class, $contact->getId())->getNextStep());
     }
 
+    public function testClearPendingRecallErasesTheStagedDateWithoutTouchingTheStoredOne(): void
+    {
+        $storedRecall = new \DateTimeImmutable('+3 days 10:00');
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress)
+            ->setNextStep(NextStep::Recontact)
+            ->setRecontactChannel(RecontactChannel::Email)
+            ->setRecallAt($storedRecall);
+        $this->seedUser('admin@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('admin@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        // Stage a draft date (as the datetime-local input would), then clear it.
+        $component->recallAt = '2030-01-01T10:00';
+        $component->dateMissing = true;
+        $component->clearPendingRecall();
+
+        self::assertSame('', $component->recallAt, 'The staged date is gone.');
+        self::assertFalse($component->dateMissing, 'The missing-date nag is dismissed with it.');
+
+        // Local clear only: nothing persisted until confirmStep().
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame(
+            $storedRecall->format('Y-m-d H:i'),
+            $reloaded->getRecallAt()?->format('Y-m-d H:i'),
+            'The stored recall must survive a draft clear.',
+        );
+        self::assertSame(NextStep::Recontact, $reloaded->getNextStep());
+    }
+
     private function persistContact(): Contact
     {
         $contact = (new Contact())

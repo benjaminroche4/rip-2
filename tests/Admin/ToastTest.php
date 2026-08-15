@@ -8,6 +8,7 @@ use App\Auth\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 
 /**
  * Success toasts of the back-office: the stack ships on every admin page and
@@ -68,6 +69,7 @@ final class ToastTest extends WebTestCase
         $this->client->request('GET', $this->profileUrl());
 
         $session = $this->client->getRequest()->getSession();
+        self::assertInstanceOf(FlashBagAwareSessionInterface::class, $session);
         $session->getFlashBag()->add('success', $messageKey);
         $session->save();
     }

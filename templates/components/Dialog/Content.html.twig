@@ -17,7 +17,7 @@
     {% if showCloseButton %}
         <button type="button" class="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary/80 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" data-action="click->dialog#close">
             <twig:ux:icon name="lucide:x" />
-            <span class="sr-only">Close</span>
+            <span class="sr-only">{{ 'a11y.close'|trans }}</span>
         </button>
     {% endif %}
 </dialog>

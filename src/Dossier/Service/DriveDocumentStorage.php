@@ -54,7 +54,7 @@ final readonly class DriveDocumentStorage implements DocumentStorage
         $fileId = $this->drive->uploadFile($name, $folderId, $bytes, $file->getMimeType() ?: 'application/octet-stream', array_filter([
             'dossierReference' => (string) $dossier->getReference(),
             'personEmail' => (string) $person->getEmail(),
-            'pieceType' => $document->getType()?->value ?? '',
+            'pieceType' => $document->getType()->value,
         ]));
         if (null === $fileId) {
             throw new \RuntimeException('Google Drive upload failed for dossier '.$dossier->getReference().'.');

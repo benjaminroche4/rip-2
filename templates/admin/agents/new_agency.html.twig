@@ -1,0 +1,22 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ 'admin.agencies.create.title'|trans }}{% endblock %}
+
+{% block head %}
+    {# Le formulaire vit dans un LiveComponent : un snapshot Turbo restauré
+       montrerait un état périmé au retour. #}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ 'admin.agencies.create.title'|trans }}"
+        :crumbs="[{label: 'admin.agents.title'|trans, url: path('admin_agents', {adminPrefix: adminPrefix})}]"
+    />
+{% endblock %}
+
+{% block body %}
+    <div data-testid="agency-new-page">
+        <twig:RealEstateAgent:AgencyCreate :adminPrefix="adminPrefix" />
+    </div>
+{% endblock %}

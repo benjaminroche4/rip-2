@@ -63,35 +63,25 @@
                     </div>
                     <div class="space-y-2 text-sm">
                         <p class="text-gray-600">{{ 'admin.contacts.leadQuality.channelLabel'|trans }}</p>
-                        <details
-                                class="relative inline-block"
-                                data-controller="details-dropdown"
-                                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                            >
-                                <summary class="flex w-44 cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
-                                    {% if contact and contact.recontactChannel %}
-                                        {{ ux_icon(contact.recontactChannel.icon, {class: 'size-3.5 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
-                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ contact.recontactChannel.labelKey|trans }}</span>
-                                    {% else %}
-                                        <span class="min-w-0 flex-1 truncate text-sm text-gray-500">{{ 'admin.contacts.leadQuality.channelLabel'|trans }}</span>
-                                    {% endif %}
-                                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-900', 'aria-hidden': 'true'}) }}
-                                </summary>
-                                <div class="absolute left-0 z-10 mt-2 w-44 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
-                                    {% for channel in this.channels %}
-                                        <button
-                                            type="button"
-                                            data-action="live#action details-dropdown#close"
-                                            data-live-action-param="setChannel"
-                                            data-live-channel-param="{{ channel.value }}"
-                                            class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ contact and contact.recontactChannel == channel ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                        >
-                                            {{ ux_icon(channel.icon, {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                            {{ channel.labelKey|trans }}
-                                        </button>
-                                    {% endfor %}
-                                </div>
-                            </details>
+                        {# Chips pill, mêmes que le planificateur de recontact
+                           (ContactStatusControl) : un clic persiste le canal. #}
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for channel in this.channels %}
+                                {% set picked = contact and contact.recontactChannel == channel %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseChannel"
+                                    data-live-channel-param="{{ channel.value }}"
+                                    aria-pressed="{{ picked ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                    data-testid="lead-quality-channel-chip"
+                                >
+                                    {{ ux_icon(channel.icon, {class: 'size-3.5 shrink-0 ' ~ (picked ? 'text-primary/70' : 'text-gray-400'), 'aria-hidden': 'true'}) }}
+                                    {{ channel.labelKey|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-2 text-sm">

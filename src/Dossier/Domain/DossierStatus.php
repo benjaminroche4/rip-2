@@ -5,44 +5,39 @@ declare(strict_types=1);
 namespace App\Dossier\Domain;
 
 /**
- * Dossier lifecycle, semi-automatic: the operator only picks between the
- * manual statuses (new / searching / property found); "awaiting documents"
- * and "closed" are derived from the dossier state and never stored.
+ * Dossier lifecycle, fully automatic: the status names the step currently
+ * pending (the one the staff has to work on), advanced and walked back by
+ * DossierStatusAdvancer as steps get validated or reopened. Once the visit
+ * step is validated (apartment found), the dossier is in "Finalisation";
+ * "closed" is derived from the closure timestamp and never stored.
  */
 enum DossierStatus: string
 {
-    case New = 'new';
-    case AwaitingDocuments = 'awaiting_documents';
-    case Searching = 'searching';
-    case PropertyFound = 'property_found';
+    case Persons = 'persons';
+    case Search = 'search';
+    case File = 'file';
+    case Visit = 'visit';
+    case Finalization = 'finalization';
     case Closed = 'closed';
 
-    /**
-     * The statuses an operator can pick, in pipeline order.
-     *
-     * @return list<self>
-     */
-    public static function manualCases(): array
+    /** Status displayed for a given pending step; null step = path walked. */
+    public static function fromPendingStep(?DossierStep $step): self
     {
-        return [self::New, self::Searching, self::PropertyFound];
-    }
-
-    public function isManual(): bool
-    {
-        return \in_array($this, self::manualCases(), true);
-    }
-
-    /**
-     * Effective status shown everywhere: closure wins, then incomplete
-     * pieces, then the operator's manual choice.
-     */
-    public static function effective(self $manual, bool $closed, bool $hasPendingDocuments): self
-    {
-        return match (true) {
-            $closed => self::Closed,
-            $hasPendingDocuments => self::AwaitingDocuments,
-            default => $manual,
+        return match ($step) {
+            DossierStep::Persons => self::Persons,
+            DossierStep::Search => self::Search,
+            DossierStep::File => self::File,
+            DossierStep::Visit => self::Visit,
+            // Le paiement clôt le parcours : dès que le bien est trouvé
+            // (visite validée), le dossier est en finalisation.
+            DossierStep::Payment, null => self::Finalization,
         };
+    }
+
+    /** Effective status shown everywhere: closure wins over the step. */
+    public static function effective(self $stored, bool $closed): self
+    {
+        return $closed ? self::Closed : $stored;
     }
 
     public function labelKey(): string
@@ -54,10 +49,11 @@ enum DossierStatus: string
     public function dotClass(): string
     {
         return match ($this) {
-            self::New => 'bg-blue-500',
-            self::AwaitingDocuments => 'bg-amber-500',
-            self::Searching => 'bg-emerald-500',
-            self::PropertyFound => 'bg-violet-500',
+            self::Persons => 'bg-blue-500',
+            self::Search => 'bg-emerald-500',
+            self::File => 'bg-amber-500',
+            self::Visit => 'bg-violet-500',
+            self::Finalization => 'bg-green-600',
             self::Closed => 'bg-gray-400',
         };
     }

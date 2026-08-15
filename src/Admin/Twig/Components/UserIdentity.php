@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -25,6 +26,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserIdentity', template: 'components/Admin/UserIdentity.html.twig')]
 final class UserIdentity
 {
+    use AdminSectionGuard;
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     private const NAME_MAX_LENGTH = 80;
@@ -53,6 +56,7 @@ final class UserIdentity
         private readonly Security $security,
         private readonly AvatarDownloader $avatarDownloader,
         private readonly LoggerInterface $securityLogger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -117,6 +121,7 @@ final class UserIdentity
         ]);
 
         $this->editing = false;
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.saved')]);
     }
 
     /** Best-effort: removes the stored file, then clears the reference. */
@@ -131,6 +136,7 @@ final class UserIdentity
             $user->setAvatarFilename(null);
             $this->em->flush();
         }
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.avatarReset')]);
     }
 
     private function prefill(): void

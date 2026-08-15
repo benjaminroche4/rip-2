@@ -10,6 +10,9 @@ namespace App\RealEstateAgent\Domain;
  */
 final readonly class AgentSummary
 {
+    /**
+     * @param list<AgentSpecialty> $specialties
+     */
     public function __construct(
         public int $id,
         public string $firstName,
@@ -17,6 +20,8 @@ final readonly class AgentSummary
         public ?string $agency,
         public ?string $email,
         public ?string $phone,
+        public array $specialties,
+        public ?AgencyPosition $position,
         public \DateTimeImmutable $createdAt,
     ) {
     }

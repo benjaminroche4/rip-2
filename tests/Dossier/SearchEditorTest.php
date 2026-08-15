@@ -118,17 +118,47 @@ final class SearchEditorTest extends KernelTestCase
         self::assertTrue($component->isComplete());
     }
 
-    public function testModulesComponentUnlocksOnceTheSearchIsComplete(): void
+    public function testValidateStepRequiresCompleteCriteria(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $editor = $this->mountEditor($dossier);
+        // Fixture misses stayDuration → incomplete : le bouton est masqué
+        // côté template, l'action doit rester un no-op côté serveur.
+        self::assertFalse($editor->isComplete());
+
+        $editor->validateStep();
+
+        self::assertFalse($editor->isStepValidated(), 'Incomplete search must not validate the step.');
+    }
+
+    public function testValidateStepUnlocksTheModulesComponent(): void
     {
         $dossier = $this->persistDossier(withSearch: true);
 
         $modules = $this->mountTwigComponent('Dossier:Modules', ['dossierId' => (int) $dossier->getId()]);
-        self::assertFalse($modules->isUnlocked(), 'stayDuration missing → still locked');
+        self::assertFalse($modules->isUnlocked(), 'Search step not validated yet → file module locked');
 
-        // The editor completes the search; the listener re-render on
-        // "dossier-search:changed" then reads the fresh completeness.
-        $this->mountEditor($dossier)->chooseStayDuration('long');
+        // The "Valider" button at the bottom of the search card stores the
+        // step on the dossier and thereby unlocks the file module. Validating
+        // requires complete criteria: fill the missing one first.
+        $editor = $this->mountEditor($dossier);
+        $editor->chooseStayDuration('long');
+        $editor->validateStep();
         self::assertTrue($modules->isUnlocked());
+    }
+
+    public function testReopenStepLocksTheModulesComponentAgain(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $editor = $this->mountEditor($dossier);
+        $editor->chooseStayDuration('long');
+        $editor->validateStep();
+
+        $modules = $this->mountTwigComponent('Dossier:Modules', ['dossierId' => (int) $dossier->getId()]);
+        self::assertTrue($modules->isUnlocked());
+
+        $editor->reopenStep();
+        self::assertFalse($modules->isUnlocked(), 'Reopened search step → file module locked again');
     }
 
     public function testPetsAndFlatshareToggleAndStayOptional(): void
@@ -570,6 +600,9 @@ final class SearchEditorTest extends KernelTestCase
             ->setReference('DS-000042')
             ->setPairingCode('ABE78L')
             ->setCreatedAt(new \DateTimeImmutable())
+            // The search card only opens once the staff validated the
+            // Personnes step (manual path validation).
+            ->addValidatedStep(\App\Dossier\Domain\DossierStep::Persons)
             ->addPerson($tenant);
         if ($withSearch) {
             $dossier->setSearch((new DossierSearch())

@@ -59,7 +59,6 @@ final class ModulesTest extends KernelTestCase
         $component->sendRequest();
 
         self::assertNull($component->pickerId, 'Modal closes after sending.');
-        self::assertSame('jean@modules-test.example', $component->lastSentTo);
         self::assertEmailCount(1);
         $email = $this->getMailerMessages()[0];
         self::assertSame('jean@modules-test.example', $email->getTo()[0]->getAddress());
@@ -122,6 +121,35 @@ final class ModulesTest extends KernelTestCase
         self::assertNull($component->pickerId, 'Locked module never opens the picker.');
     }
 
+    public function testLockedModuleIgnoresTheMutationActions(): void
+    {
+        // Une pièce existe, puis l'étape Recherche est rouverte : le module
+        // se reverrouille. Les mutations directes (endpoint /_components/)
+        // doivent alors rester des no-ops, pas seulement l'UI masquée.
+        $dossier = $this->persistDossier();
+        $document = (new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable('2026-08-01'))
+            ->setReceivedAt(new \DateTimeImmutable('2026-08-02'));
+        $dossier->getPersons()->first()->addDocument($document);
+        $this->em->flush();
+        $documentId = (int) $document->getId();
+
+        $component = $this->mountModules($dossier);
+        $dossier->removeValidatedStep(\App\Dossier\Domain\DossierStep::Search);
+        $this->em->flush();
+        self::assertFalse($component->isUnlocked());
+
+        $component->chooseStatus($documentId, 'validated');
+        $component->deletePiece($documentId);
+
+        $this->em->clear();
+        $reloaded = $this->em->find(DossierDocument::class, $documentId);
+        self::assertNotNull($reloaded, 'Locked module must not delete pieces.');
+        self::assertSame(DossierDocumentStatus::Received, $reloaded->getStatus(), 'Locked module must not change statuses.');
+    }
+
     public function testSetStatusDrivesTheReviewLifecycle(): void
     {
         $dossier = $this->persistDossier();
@@ -135,7 +163,7 @@ final class ModulesTest extends KernelTestCase
         $component = $this->mountModules($dossier);
 
         // Received stamps the deposit date.
-        $component->setStatus($documentId, 'received');
+        $component->chooseStatus($documentId, 'received');
         $this->em->clear();
         $document = $this->em->find(DossierDocument::class, $documentId);
         self::assertSame(DossierDocumentStatus::Received, $document->getStatus());
@@ -144,7 +172,7 @@ final class ModulesTest extends KernelTestCase
 
         // Validating keeps the deposit date. (Refusing goes through the
         // confirmation modal, covered by its own test.)
-        $component->setStatus($documentId, 'validated');
+        $component->chooseStatus($documentId, 'validated');
         $this->em->clear();
         $document = $this->em->find(DossierDocument::class, $documentId);
         self::assertSame(DossierDocumentStatus::Validated, $document->getStatus());
@@ -152,8 +180,8 @@ final class ModulesTest extends KernelTestCase
 
         // Back to requested clears the deposit date; an unknown status is
         // ignored (stale DOM can post anything).
-        $component->setStatus($documentId, 'requested');
-        $component->setStatus($documentId, 'not-a-status');
+        $component->chooseStatus($documentId, 'requested');
+        $component->chooseStatus($documentId, 'not-a-status');
         $this->em->clear();
         $document = $this->em->find(DossierDocument::class, $documentId);
         self::assertSame(DossierDocumentStatus::Requested, $document->getStatus());
@@ -281,7 +309,7 @@ final class ModulesTest extends KernelTestCase
         $component = $this->mountModules($dossier);
 
         // Choosing "refused" opens the modal, the status does not move yet.
-        $component->setStatus($documentId, 'refused');
+        $component->chooseStatus($documentId, 'refused');
         self::assertSame($documentId, $component->refusingId);
         $this->em->clear();
         self::assertSame(DossierDocumentStatus::Received, $this->em->find(DossierDocument::class, $documentId)->getStatus());
@@ -303,7 +331,7 @@ final class ModulesTest extends KernelTestCase
         self::assertStringContainsString('/fr/depot-de-pieces?code=MODUL1', (string) $email->getHtmlBody());
 
         // Any other status clears the refusal reason.
-        $component->setStatus($documentId, 'received');
+        $component->chooseStatus($documentId, 'received');
         $this->em->clear();
         self::assertNull($this->em->find(DossierDocument::class, $documentId)->getRefusalReason());
     }
@@ -353,15 +381,15 @@ final class ModulesTest extends KernelTestCase
         $this->em->flush();
         $component = $this->mountModules($dossier);
 
-        // The modal opens with the tenant preselected as recipient.
-        $component->askResend($tenant->getId());
-        self::assertSame($tenant->getId(), $component->resendingId);
+        // The modal opens with the pending tenant preselected as recipient.
+        $component->askResend();
+        self::assertTrue($component->resending);
         self::assertSame([(string) $tenant->getId()], $component->resendRecipientIds);
         self::assertEmailCount(0);
 
         $component->confirmResend();
 
-        self::assertNull($component->resendingId);
+        self::assertFalse($component->resending);
         self::assertEmailCount(1);
         $email = $this->getMailerMessages()[0];
         self::assertSame('jean@modules-test.example', $email->getTo()[0]->getAddress());
@@ -369,7 +397,6 @@ final class ModulesTest extends KernelTestCase
         // Only the piece still awaited, not the already deposited one.
         self::assertStringContainsString('identité', $html);
         self::assertStringNotContainsString('fiches de paie', $html);
-        self::assertSame('jean@modules-test.example', $component->lastSentTo);
 
         // Batched double-click: the second call is a silent no-op, never a
         // 404 on person(0).
@@ -390,9 +417,9 @@ final class ModulesTest extends KernelTestCase
         $component = $this->mountModules($dossier);
 
         // Everything deposited: the modal never opens, nothing is sent.
-        $component->askResend($tenant->getId());
+        $component->askResend();
 
-        self::assertNull($component->resendingId);
+        self::assertFalse($component->resending);
         self::assertEmailCount(0);
     }
 
@@ -431,8 +458,8 @@ final class ModulesTest extends KernelTestCase
         $component->sendRequest();
 
         $documentId = $tenant->getDocuments()->first()->getId();
-        $component->setStatus($documentId, 'received');
-        $component->setStatus($documentId, 'validated');
+        $component->chooseStatus($documentId, 'received');
+        $component->chooseStatus($documentId, 'validated');
 
         $kinds = array_map(
             static fn (\App\Dossier\Entity\DossierEvent $event): string => $event->getKind(),
@@ -514,13 +541,26 @@ final class ModulesTest extends KernelTestCase
     /** Valide l'étape Dossier : une pièce demandée, puis validée. */
     private function validateFileStep(Dossier $dossier): void
     {
-        $tenant = $dossier->getPersons()->first();
-        self::assertNotFalse($tenant);
-        $tenant->addDocument((new \App\Dossier\Entity\DossierDocument())
-            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
-            ->setStatus(DossierDocumentStatus::Validated)
-            ->setRequestedAt(new \DateTimeImmutable()));
+        $dossier->addValidatedStep(\App\Dossier\Domain\DossierStep::File);
         $this->em->flush();
+    }
+
+    public function testToggleModuleTracksTheUnfoldedCards(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountModules($dossier);
+        self::assertSame(['file', 'visit', 'payment'], $component->openModules, 'Every module starts unfolded.');
+
+        // Fold two cards: the server-side state mirrors the <details> DOM
+        // so the morph re-renders them folded.
+        $component->toggleModule('file');
+        self::assertSame(['visit', 'payment'], $component->openModules);
+        $component->toggleModule('visit');
+        self::assertSame(['payment'], $component->openModules);
+
+        // Toggling again unfolds only that card.
+        $component->toggleModule('file');
+        self::assertSame(['payment', 'file'], $component->openModules);
     }
 
     private function persistDossier(bool $completeSearch = true): Dossier
@@ -540,6 +580,11 @@ final class ModulesTest extends KernelTestCase
             ->addPerson($tenant);
 
         if ($completeSearch) {
+            // Manual path validation: Personnes and Recherche validated by
+            // the staff, so the file module is the one currently open.
+            $dossier
+                ->addValidatedStep(\App\Dossier\Domain\DossierStep::Persons)
+                ->addValidatedStep(\App\Dossier\Domain\DossierStep::Search);
             $dossier->setSearch((new DossierSearch())
                 ->setBudget(2000)
                 ->setAreas('1,2')
@@ -556,9 +601,163 @@ final class ModulesTest extends KernelTestCase
         return $dossier;
     }
 
+    public function testBackToRequestedStartsANewCycle(): void
+    {
+        // Cas mensuel (fiche de paie) : repasser la pièce en "Demandée"
+        // redate la demande et garde les fichiers déposés en historique.
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $document = (new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Payslips)
+            ->setStatus(DossierDocumentStatus::Validated)
+            ->setRequestedAt(new \DateTimeImmutable('2026-07-01'))
+            ->setReceivedAt(new \DateTimeImmutable('2026-07-03'));
+        $document->addFile((new DossierDocumentFile())
+            ->setStoredName('juillet.pdf')
+            ->setOriginalName('fiche-juillet.pdf')
+            ->setMimeType('application/pdf')
+            ->setSize(10)
+            ->setUploadedAt(new \DateTimeImmutable('2026-07-03')));
+        $tenant->addDocument($document);
+        $this->em->flush();
+        $documentId = (int) $document->getId();
+
+        $component = $this->mountModules($dossier);
+        $component->chooseStatus($documentId, 'requested');
+
+        $this->em->clear();
+        $fresh = $this->em->find(DossierDocument::class, $documentId);
+        self::assertSame(DossierDocumentStatus::Requested, $fresh->getStatus());
+        self::assertNull($fresh->getReceivedAt());
+        self::assertGreaterThan(new \DateTimeImmutable('2026-07-01'), $fresh->getRequestedAt(), 'The request is re-dated: new cycle.');
+        self::assertCount(1, $fresh->getFiles(), 'Previously deposited files stay as history.');
+    }
+
+    public function testDepositLockTogglesAndIsGuardedByThePadlock(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountModules($dossier);
+        self::assertFalse($component->isDepositLocked());
+
+        $component->toggleDepositLock();
+        $this->em->clear();
+        self::assertNotNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+
+        $component->toggleDepositLock();
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+
+        // Cadenas anti-missclick fermé : le verrou de dépôt ne bouge pas.
+        $component->fileLocked = true;
+        $component->toggleDepositLock();
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+    }
+
+    public function testDriveProvisionButtonHiddenWhenDriveIsOff(): void
+    {
+        // Env de test sans Drive : pas de bouton, action no-op.
+        $dossier = $this->persistDossier();
+        $component = $this->mountModules($dossier);
+
+        self::assertFalse($component->getCanProvisionDrive());
+        $component->provisionDrive();
+        self::assertNull($dossier->getDriveFolderId());
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        self::assertStringNotContainsString('module-file-provision-drive', $rendered);
+    }
+
     private function mountModules(Dossier $dossier): object
     {
-        return $this->mountTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        $component = $this->mountTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        // Cadenas anti-missclick ouvert pour les tests de mutation; le
+        // comportement verrouillé a son test dédié.
+        $component->fileLocked = false;
+
+        return $component;
+    }
+
+    public function testPadlockBlocksMutationsUntilUnlocked(): void
+    {
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+        $component = $this->mountTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+
+        // Verrouillé par défaut à chaque chargement.
+        self::assertTrue($component->fileLocked);
+        $component->openPicker($tenant->getId());
+        self::assertNull($component->pickerId, 'Locked padlock never opens the picker.');
+
+        $component->toggleFileLock();
+        self::assertFalse($component->fileLocked);
+        $component->openPicker($tenant->getId());
+        self::assertSame($tenant->getId(), $component->pickerId);
+    }
+
+    public function testItRenamesADepositedFileKeepingTheExtension(): void
+    {
+        [$component, $fileId] = $this->mountWithFile();
+
+        $component->editFileName($fileId);
+        self::assertSame($fileId, $component->renamingFileId);
+        self::assertSame('carte-identite', $component->renameDraft, 'The draft opens without the extension.');
+
+        $component->renameDraft = 'CNI Jean recto / verso';
+        $component->saveFileName($this->em, static::getContainer()->get(\App\Dossier\Service\DossierDocumentNamer::class));
+
+        self::assertNull($component->renamingFileId);
+        $this->em->clear();
+        // Renamed, extension preserved, hostile characters sanitized.
+        self::assertSame('CNI Jean recto verso.pdf', $this->em->find(DossierDocumentFile::class, $fileId)->getOriginalName());
+    }
+
+    public function testRenamingWithAnEmptyDraftKeepsTheName(): void
+    {
+        [$component, $fileId] = $this->mountWithFile();
+
+        $component->editFileName($fileId);
+        $component->renameDraft = '   ';
+        $component->saveFileName($this->em, static::getContainer()->get(\App\Dossier\Service\DossierDocumentNamer::class));
+
+        self::assertNull($component->renamingFileId, 'The editor closes without saving.');
+        $this->em->clear();
+        self::assertSame('carte-identite.pdf', $this->em->find(DossierDocumentFile::class, $fileId)->getOriginalName());
+    }
+
+    public function testPadlockBlocksTheRename(): void
+    {
+        [$component, $fileId] = $this->mountWithFile();
+
+        $component->editFileName($fileId);
+        $component->renameDraft = 'nouveau nom';
+        $component->fileLocked = true;
+        $component->saveFileName($this->em, static::getContainer()->get(\App\Dossier\Service\DossierDocumentNamer::class));
+
+        $this->em->clear();
+        self::assertSame('carte-identite.pdf', $this->em->find(DossierDocumentFile::class, $fileId)->getOriginalName());
+    }
+
+    /**
+     * @return array{0: object, 1: int}
+     */
+    private function mountWithFile(): array
+    {
+        $dossier = $this->persistDossier();
+        $document = (new DossierDocument())
+            ->setType(\App\Dossier\Domain\DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable('2026-08-01'));
+        $dossier->getPersons()->first()->addDocument($document);
+        $file = (new DossierDocumentFile())
+            ->setStoredName('stored.pdf')
+            ->setOriginalName('carte-identite.pdf')
+            ->setMimeType('application/pdf')
+            ->setSize(8)
+            ->setUploadedAt(new \DateTimeImmutable('2026-08-02'));
+        $document->addFile($file);
+        $this->em->flush();
+
+        return [$this->mountModules($dossier), (int) $file->getId()];
     }
 
     private function loginAsAdmin(): void

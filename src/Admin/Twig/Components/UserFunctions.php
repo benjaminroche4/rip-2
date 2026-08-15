@@ -24,6 +24,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserFunctions', template: 'components/Admin/UserFunctions.html.twig')]
 final class UserFunctions
 {
+    use AdminSectionGuard;
     use DefaultActionTrait;
 
     #[LiveProp]

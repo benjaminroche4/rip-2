@@ -3,52 +3,69 @@
    or a guarantor can deposit for the others. Same card language as the
    backoffice: rounded-3xl bordered shell, neutral-50 inner, white rows. #}
 <div id="deposit-documents" data-turbo="true" data-controller="file-preview confirm-dialog" data-action="keydown.esc@window->file-preview#close">
-    {% set progressPct = deposit.progress.total > 0 ? (100 * deposit.progress.validated / deposit.progress.total)|round : 0 %}
-    {% set contactIconClass = 'flex size-7 items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900' %}
-    {# En-tête : accueil + référence et formats en chips, anneau de
-       progression à droite, interlocuteur en rangée fine. #}
+    {% set depositedPct = deposit.progress.total > 0 ? (100 * deposit.progress.deposited / deposit.progress.total)|round : 0 %}
+    {% set validatedPct = deposit.progress.total > 0 ? (100 * deposit.progress.validated / deposit.progress.total)|round : 0 %}
+    {% set allValidated = deposit.progress.total > 0 and deposit.progress.validated == deposit.progress.total %}
+    {# En-tête : accueil, anneau de progression à droite, puis trois tuiles
+       label/valeur (dossier, format accepté, taille max), le langage de
+       cards du back-office. #}
     <section class="mb-6 rounded-3xl border border-neutral-200 bg-white p-2">
         <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
-            <div class="flex items-center justify-between gap-4 rounded-xl bg-white px-4 py-4">
+            {# Mobile : accueil et anneau empilés sur deux lignes, côte à
+               côte dès sm:. #}
+            <div class="flex flex-col gap-3 rounded-xl bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                 <div class="min-w-0">
                     <h1 class="text-xl font-semibold">{{ 'deposit.documents.title'|trans({'%firstName%': deposit.firstName}) }}</h1>
-                    <p class="mt-0.5 text-sm font-light text-pretty text-gray-600">{{ 'deposit.documents.text'|trans }}</p>
-                    <p class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
-                        <span class="inline-flex items-center rounded-full bg-neutral-100 px-2 py-0.5 font-medium text-gray-600 tabular-nums" data-testid="deposit-reference">{{ 'deposit.documents.reference'|trans({'%reference%': deposit.reference}) }}</span>
-                        {{ ux_icon('lucide:file-check-2', {'class': 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                        <span>{{ 'deposit.documents.formats.label'|trans }}</span>
-                        <span class="inline-flex items-center rounded-md bg-neutral-100 px-1.5 py-0.5 text-[0.6875rem] font-semibold tracking-wide text-gray-600">PDF</span>
-                        <span>{{ 'deposit.documents.formats.maxSize'|trans }}</span>
-                    </p>
+                    <p class="mt-0.5 max-w-md text-sm font-light text-pretty text-gray-600">{{ 'deposit.documents.text'|trans }}</p>
                 </div>
                 {% if deposit.progress.total > 0 %}
-                    <div class="relative shrink-0" data-testid="deposit-progress" role="progressbar" aria-valuemin="0" aria-valuemax="{{ deposit.progress.total }}" aria-valuenow="{{ deposit.progress.validated }}" aria-label="{{ 'deposit.progress.label'|trans }}">
-                        <svg viewBox="0 0 64 64" class="size-16 -rotate-90" aria-hidden="true">
+                    {# Anneau honnête : l'arc bleu reflète l'effort du locataire
+                       (pièces déposées), l'arc vert par-dessus les validées.
+                       Le centre compte les déposées, pas les validées. #}
+                    <div class="relative shrink-0" data-testid="deposit-progress" role="progressbar" aria-valuemin="0" aria-valuemax="{{ deposit.progress.total }}" aria-valuenow="{{ deposit.progress.deposited }}" aria-label="{{ 'deposit.progress.detail'|trans({'%deposited%': deposit.progress.deposited, '%validated%': deposit.progress.validated, '%total%': deposit.progress.total}) }}">
+                        <svg viewBox="0 0 64 64" class="size-14 -rotate-90 sm:size-16" aria-hidden="true">
                             <circle cx="32" cy="32" r="26" fill="none" stroke-width="6" class="stroke-neutral-100"></circle>
-                            <circle cx="32" cy="32" r="26" fill="none" stroke-width="6" stroke-linecap="round" class="stroke-green-500 transition-[stroke-dashoffset] duration-300 ease-out" stroke-dasharray="163.4" stroke-dashoffset="{{ (163.4 * (100 - progressPct) / 100)|round(1) }}"></circle>
+                            <circle cx="32" cy="32" r="26" fill="none" stroke-width="6" stroke-linecap="round" class="stroke-blue-400 transition-[stroke-dashoffset] duration-300 ease-out" stroke-dasharray="163.4" stroke-dashoffset="{{ (163.4 * (100 - depositedPct) / 100)|round(1) }}"></circle>
+                            <circle cx="32" cy="32" r="26" fill="none" stroke-width="6" stroke-linecap="round" class="stroke-green-500 transition-[stroke-dashoffset] duration-300 ease-out" stroke-dasharray="163.4" stroke-dashoffset="{{ (163.4 * (100 - validatedPct) / 100)|round(1) }}"></circle>
                         </svg>
-                        <p class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-900 tabular-nums">{{ deposit.progress.validated }}/{{ deposit.progress.total }}</p>
+                        <p class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-900 tabular-nums">{{ deposit.progress.deposited }}/{{ deposit.progress.total }}</p>
                     </div>
                 {% endif %}
             </div>
-            {% if deposit.manager %}
-                <div class="flex items-center gap-2.5 rounded-xl bg-white px-4 py-2.5" data-testid="deposit-manager">
-                    <twig:Avatar filename="{{ deposit.manager.avatarFilename }}" name="{{ deposit.manager.name }}" email="{{ deposit.manager.email }}" size="8" />
-                    <p class="min-w-0 flex-1 truncate text-xs text-gray-500">{{ 'deposit.manager.title'|trans }} · <span class="font-medium text-gray-900">{{ deposit.manager.name }}</span></p>
-                    <div class="flex shrink-0 items-center gap-1">
-                        {% if deposit.manager.phone %}
-                            <a href="tel:{{ deposit.manager.phone }}" class="{{ contactIconClass }}" aria-label="{{ 'deposit.manager.call'|trans }}" title="{{ 'deposit.manager.call'|trans }}">
-                                {{ ux_icon('lucide:phone', {'class': 'size-3.5', 'aria-hidden': 'true'}) }}
-                            </a>
-                        {% endif %}
-                        <a href="mailto:{{ deposit.manager.email }}" class="{{ contactIconClass }}" aria-label="{{ 'deposit.manager.write'|trans }}" title="{{ 'deposit.manager.write'|trans }}">
-                            {{ ux_icon('lucide:mail', {'class': 'size-3.5', 'aria-hidden': 'true'}) }}
-                        </a>
-                    </div>
+            <dl class="grid grid-cols-1 gap-1 sm:grid-cols-3">
+                <div class="rounded-xl bg-white px-4 py-3">
+                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'deposit.documents.referenceLabel'|trans }}</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-gray-900 tabular-nums" data-testid="deposit-reference">{{ deposit.reference }}</dd>
                 </div>
-            {% endif %}
+                <div class="rounded-xl bg-white px-4 py-3">
+                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'deposit.documents.formats.formatLabel'|trans }}</dt>
+                    <dd class="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-gray-900">
+                        {{ ux_icon('lucide:file-check-2', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                        PDF
+                    </dd>
+                </div>
+                <div class="rounded-xl bg-white px-4 py-3">
+                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'deposit.documents.formats.sizeLabel'|trans }}</dt>
+                    <dd class="mt-0.5 text-sm font-medium text-gray-900">{{ 'deposit.documents.formats.sizeValue'|trans }}</dd>
+                </div>
+            </dl>
         </div>
     </section>
+
+    {% if allValidated %}
+        {# État de fin : le parcours est terminé, on le dit clairement. #}
+        <section class="mb-6 rounded-3xl border border-green-200 bg-white p-2" data-testid="deposit-complete">
+            <div class="flex items-center gap-3 rounded-2xl bg-green-50 px-5 py-4">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-green-700" aria-hidden="true">
+                    {{ ux_icon('lucide:circle-check', {'class': 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+                </span>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-green-900">{{ 'deposit.documents.complete.title'|trans }}</p>
+                    <p class="mt-0.5 text-sm text-pretty text-green-800">{{ 'deposit.documents.complete.text'|trans }}</p>
+                </div>
+            </div>
+        </section>
+    {% endif %}
 
     {% if deposit.errorKey and deposit.errorDocumentId is null %}
         <div role="alert" aria-live="polite" class="mb-6 rounded-xl bg-red-50 p-3">
@@ -79,7 +96,22 @@
                     <ul role="list" class="flex flex-col gap-1">
                         {% for document in tenant.documents %}
                             {% set style = statusStyles[document.status] %}
-                            <li class="rounded-xl bg-white px-5 py-4" data-testid="deposit-document">
+                            <li
+                                class="rounded-xl bg-white px-5 py-4 transition-colors duration-100 ease-out"
+                                data-testid="deposit-document"
+                                {% if document.canUpload %}
+                                    {# Toute la card accepte le glisser-déposer d'un PDF. #}
+                                    data-controller="deposit-upload"
+                                    data-deposit-upload-drag-class="ring-2 ring-primary/40 bg-primary/5"
+                                    data-deposit-upload-uploading-label-value="{{ 'deposit.documents.uploading'|trans }}"
+                                    data-deposit-upload-uploading-many-label-value="{{ 'deposit.documents.uploadingMany'|trans }}"
+                                    data-deposit-upload-error-label-value="{{ 'deposit.documents.uploadFailed'|trans }}"
+                                    data-deposit-upload-drop-error-label-value="{{ 'deposit.documents.dropPdfOnly'|trans }}"
+                                    data-deposit-upload-too-large-label-value="{{ 'deposit.documents.dropTooLarge'|trans }}"
+                                    data-deposit-upload-uploaded-announce-value="{{ 'deposit.documents.uploadedAnnounce'|trans }}"
+                                    data-action="dragover->deposit-upload#dragOver dragenter->deposit-upload#dragEnter dragleave->deposit-upload#dragLeave drop->deposit-upload#drop dragover@window->deposit-upload#guardWindow drop@window->deposit-upload#guardWindow"
+                                {% endif %}
+                            >
                                 <div class="flex items-center justify-between gap-4">
                                     <div class="flex min-w-0 items-center gap-2.5">
                                         {{ ux_icon(style.icon, {'class': 'size-5 shrink-0 ' ~ style.iconClass, 'aria-hidden': 'true'}) }}
@@ -102,9 +134,7 @@
                                         <form action="{{ path('app_dossier_deposit_upload', {id: document.id}) }}"
                                               method="post"
                                               enctype="multipart/form-data"
-                                              data-controller="deposit-upload"
-                                              data-deposit-upload-uploading-label-value="{{ 'deposit.documents.uploading'|trans }}"
-                                              data-deposit-upload-error-label-value="{{ 'deposit.documents.uploadFailed'|trans }}"
+                                              data-deposit-upload-target="form"
                                               data-turbo="true"
                                               class="shrink-0">
                                             <input type="hidden" name="_token" value="{{ csrf_token('deposit_upload') }}">
@@ -114,25 +144,59 @@
                                                 <input type="file"
                                                        name="file"
                                                        accept="application/pdf"
+                                                       multiple
                                                        class="sr-only"
                                                        data-deposit-upload-target="input"
                                                        data-action="change->deposit-upload#start"
                                                        data-testid="deposit-file-input">
                                             </label>
-                                            <div data-deposit-upload-target="bar" hidden class="mt-1.5 h-1 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">
-                                                <div data-deposit-upload-target="fill" class="h-full w-(--progress) rounded-full bg-primary transition-[width] duration-150 ease-out" style="--progress: 0%"></div>
+                                            <div class="mt-1.5 flex items-center gap-1.5">
+                                                <div data-deposit-upload-target="bar" hidden class="h-1 flex-1 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">
+                                                    <div data-deposit-upload-target="fill" class="h-full w-(--progress) rounded-full bg-primary transition-[width] duration-150 ease-out" style="--progress: 0%"></div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    hidden
+                                                    data-deposit-upload-target="cancel"
+                                                    data-action="deposit-upload#cancel"
+                                                    aria-label="{{ 'deposit.documents.cancelUpload'|trans }}"
+                                                    title="{{ 'deposit.documents.cancelUpload'|trans }}"
+                                                    class="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                                    data-testid="deposit-upload-cancel"
+                                                >
+                                                    {{ ux_icon('lucide:x', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                </button>
                                             </div>
                                         </form>
                                     {% endif %}
                                 </div>
                                 {% if document.status == 'refused' %}
-                                    <p class="mt-1.5 text-xs text-red-600" data-testid="deposit-document-refused">
-                                        {{ 'deposit.documents.refusedHint'|trans }}
-                                        {%- if document.refusalReason %} {{ 'deposit.documents.refusedReason'|trans({'%reason%': document.refusalReason}) }}{% endif %}
-                                    </p>
+                                    {# Encart ambre doux, même vocabulaire que les alertes du
+                                       site : action attendue plutôt qu'erreur bloquante. #}
+                                    <div class="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3" data-testid="deposit-document-refused">
+                                        {{ ux_icon('lucide:triangle-alert', {class: 'mt-px size-4 shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
+                                        <div class="min-w-0 text-xs text-amber-900">
+                                            <p>{{ 'deposit.documents.refusedHint'|trans }}</p>
+                                            {% if document.refusalReason %}
+                                                <p class="mt-0.5 font-medium">{{ 'deposit.documents.refusedReason'|trans({'%reason%': document.refusalReason}) }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 {% endif %}
                                 {% if deposit.errorKey and deposit.errorDocumentId == document.id %}
                                     <p class="mt-1.5 text-sm text-red-600" role="alert">{{ deposit.errorKey|trans }}</p>
+                                {% endif %}
+                                {% if document.canUpload %}
+                                    {# Squelette de la future vignette : révélé pendant
+                                       l'envoi (avec la barre de progression), remplacé
+                                       par la vraie vignette au stream de réponse. #}
+                                    <div data-deposit-upload-target="skeleton" hidden class="mt-3 flex animate-pulse items-center gap-3 rounded-lg border border-neutral-200 bg-white px-3 py-2.5" aria-hidden="true" data-testid="deposit-upload-skeleton">
+                                        <span class="size-8 shrink-0 rounded-lg bg-neutral-100"></span>
+                                        <span class="flex min-w-0 flex-1 flex-col gap-1.5">
+                                            <span class="h-2.5 w-1/2 rounded-full bg-neutral-100"></span>
+                                            <span class="h-2 w-1/3 rounded-full bg-neutral-100"></span>
+                                        </span>
+                                    </div>
                                 {% endif %}
                                 {% if document.files is not empty %}
                                     {# Vignette bordée par fichier : tuile colorée selon le

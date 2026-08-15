@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Admin\Twig\Components;
 
-use App\Auth\Entity\User;
 use App\Contact\Domain\ContactNoteItem;
 use App\Contact\Repository\ContactNoteRepository;
 use App\Contact\Repository\ContactRepository;
 use App\Contact\Security\ContactNoteVoter;
+use App\Contact\Service\ContactNoteThreadAdapter;
+use App\Shared\Notes\NoteThreadService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -57,6 +58,8 @@ final class ContactNotes
         private readonly Security $security,
         private readonly \App\Contact\Repository\ContactEventRepository $events,
         private readonly TranslatorInterface $translator,
+        private readonly NoteThreadService $thread,
+        private readonly ContactNoteThreadAdapter $threadAdapter,
     ) {
     }
 
@@ -122,13 +125,13 @@ final class ContactNotes
             return;
         }
 
-        $user = $this->currentUser();
+        $author = $this->thread->currentAuthor();
         $this->notes->add(
             $contact,
             $text,
-            (int) $user->getId(),
-            $this->displayName($user),
-            $user->getAvatarFilename(),
+            $author->id,
+            $author->displayName,
+            $author->avatarFilename,
         );
         $this->newNote = '';
 
@@ -137,6 +140,7 @@ final class ContactNotes
         $this->dispatchBrowserEvent('contact-notes:count', [
             'count' => \count($this->notes->listForContact($this->contactId)),
         ]);
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteAdded')]);
     }
 
     #[LiveAction]
@@ -144,16 +148,13 @@ final class ContactNotes
     {
         $this->ensureAdmin();
 
-        $note = $this->notes->find($id);
-        if (null === $note || (int) $note->getContact()?->getId() !== $this->contactId) {
+        $text = $this->thread->beginEdit($this->threadAdapter, $id, $this->contactId);
+        if (null === $text) {
             return;
-        }
-        if (!$this->security->isGranted(ContactNoteVoter::EDIT, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can edit a note.');
         }
 
         $this->editingNoteId = $id;
-        $this->editingText = $note->getText();
+        $this->editingText = $text;
     }
 
     #[LiveAction]
@@ -169,16 +170,10 @@ final class ContactNotes
     {
         $this->ensureAdmin();
 
-        $note = null !== $this->editingNoteId ? $this->notes->find($this->editingNoteId) : null;
-        $text = trim($this->editingText);
-        if (null === $note || '' === $text) {
+        if (!$this->thread->saveEdit($this->threadAdapter, $this->editingNoteId, $this->editingText, $this->contactId)) {
             return;
         }
-        if (!$this->security->isGranted(ContactNoteVoter::EDIT, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can edit a note.');
-        }
 
-        $this->notes->updateText($note, $text);
         $this->editingNoteId = null;
         $this->editingText = '';
 
@@ -186,6 +181,7 @@ final class ContactNotes
         $this->dispatchBrowserEvent('contact-notes:count', [
             'count' => \count($this->notes->listForContact($this->contactId)),
         ]);
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteUpdated')]);
     }
 
     #[LiveAction]
@@ -193,15 +189,10 @@ final class ContactNotes
     {
         $this->ensureAdmin();
 
-        $note = $this->notes->find($id);
-        if (null === $note || (int) $note->getContact()?->getId() !== $this->contactId) {
+        if (!$this->thread->delete($this->threadAdapter, $id, $this->contactId)) {
             return;
         }
-        if (!$this->security->isGranted(ContactNoteVoter::DELETE, $note)) {
-            throw new AccessDeniedException('Only the author or an admin can delete a note.');
-        }
 
-        $this->notes->remove($note);
         if ($this->editingNoteId === $id) {
             $this->editingNoteId = null;
             $this->editingText = '';
@@ -210,23 +201,7 @@ final class ContactNotes
         $this->dispatchBrowserEvent('contact-notes:count', [
             'count' => \count($this->notes->listForContact($this->contactId)),
         ]);
-    }
-
-    private function currentUser(): User
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            throw new AccessDeniedException('Admin access required.');
-        }
-
-        return $user;
-    }
-
-    private function displayName(User $user): string
-    {
-        $fullName = trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? ''));
-
-        return '' !== $fullName ? $fullName : (string) $user->getEmail();
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteDeleted')]);
     }
 
     /**

@@ -143,7 +143,7 @@ final class ProfileTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(303);
         $this->client->followRedirect();
-        self::assertSelectorExists('[data-testid="profile-password-success"]');
+        self::assertSelectorExists('[data-testid="toasts"] [data-toast]');
 
         $this->assertStoredPasswordIs((int) $user->getId(), 'Nouveau-mdp-solide-2026!');
     }

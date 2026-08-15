@@ -102,7 +102,12 @@ final class DossierCreateTest extends KernelTestCase
         self::assertStringContainsString('role="dialog"', $rendered);
         self::assertStringContainsString('aria-modal="true"', $rendered);
         self::assertStringContainsString('aria-labelledby="dossier-create-title"', $rendered);
-        self::assertStringContainsString('data-controller="modal-focus modal-anim"', $rendered);
+        // Static modal, on purpose: the form's data-model on(change) re-renders
+        // the component while the modal is open, and a morph would strip the
+        // runtime data-entered attribute of modal-anim (invisible modal).
+        self::assertStringContainsString('data-controller="modal-focus"', $rendered);
+        self::assertStringNotContainsString('modal-anim', $rendered);
+        self::assertStringNotContainsString('data-entered', $rendered);
         // Anti double-submit guard on the create action.
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
     }

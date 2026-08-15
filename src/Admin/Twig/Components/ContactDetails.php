@@ -83,6 +83,7 @@ final class ContactDetails
         private readonly ContactRepository $repository,
         private readonly Security $security,
         private readonly \App\Contact\Service\VisioInvitationMailer $visioMailer,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -250,6 +251,7 @@ final class ContactDetails
         $this->editing = false;
         // Name/email may appear elsewhere on the page (header, follow-up).
         $this->emit('contacts:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.saved')]);
     }
 
     private function prefill(): void

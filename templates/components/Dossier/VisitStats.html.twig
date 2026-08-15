@@ -33,9 +33,11 @@
     class="grid grid-cols-3 divide-x divide-gray-950/10 bg-white {{ rounded == 'full' ? 'rounded-xl' : 'rounded-b-xl' }}"
     data-testid="dossier-card-stats"
 >
+    {# Le nom du responsable (donnée DB) est échappé (|e) dès la construction :
+       la valeur repasse par |raw à l'affichage. #}
     {% for stat in [
         manager
-            ? {value: manager.name ? manager.name|title : '-', avatar: manager.avatar, labelKey: 'admin.dossiers.card.managedBy', testid: 'dossier-card-manager'}
+            ? {value: manager.name ? (manager.name|title|e) : '-', avatar: manager.avatar, labelKey: 'admin.dossiers.card.managedBy', testid: 'dossier-card-manager'}
             : {value: upcoming, labelKey: 'admin.dossiers.card.stats.upcomingVisits', testid: 'dossier-card-upcoming-visits'},
         {value: '<span class="' ~ totalClass ~ '">' ~ total ~ '</span>', labelKey: 'admin.dossiers.card.stats.totalVisits', testid: 'dossier-card-total-visits'},
         {value: '<span class="' ~ rejectionClass ~ '">' ~ rejections ~ '</span><span class="text-xs font-normal text-gray-400">/3</span>', labelKey: 'admin.dossiers.card.stats.rejections', testid: 'dossier-card-rejections'},

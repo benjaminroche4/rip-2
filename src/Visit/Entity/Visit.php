@@ -83,7 +83,7 @@ class Visit
 
     /** Public reference shown in the admin ("VS-087526"). */
     #[ORM\Column(length: 9, unique: true)]
-    private ?string $reference = null;
+    private string $reference;
 
     /** Operator who booked the visit (autofilled at creation). */
     #[ORM\ManyToOne(targetEntity: \App\Auth\Entity\User::class)]

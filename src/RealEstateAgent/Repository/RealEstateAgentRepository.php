@@ -54,6 +54,8 @@ class RealEstateAgentRepository extends ServiceEntityRepository
                 agency: $agent->getAgency()?->getName(),
                 email: $agent->getEmail(),
                 phone: $agent->getPhone(),
+                specialties: $agent->getSpecialties(),
+                position: $agent->getPosition(),
                 createdAt: $agent->getCreatedAt() ?? new \DateTimeImmutable(),
             );
         }

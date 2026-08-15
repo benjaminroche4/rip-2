@@ -3,11 +3,266 @@
    verrouillé tant que l'étape précédente n'est pas validée (même calcul que
    la barre d'onglets). Composant live : se déverrouille dès les événements
    "dossier-search:changed" / "dossier-documents:changed". #}
+{# ── Briques de la liste des pièces (titre + gestes, date, refus, chips
+      de fichiers, pastille et badge de statut). #}
+{% macro pieceTitle(document, editingDescriptionId, descriptionDraft) %}
+    <div class="flex items-center gap-1.5">
+        <span class="text-sm font-medium text-gray-900">{{ document.typeLabelKey|trans }}</span>
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="editDescription"
+            data-live-key-param="{{ document.id }}"
+            title="{{ 'admin.dossiers.show.modules.file.pieceDescription.edit'|trans }}"
+            class="cursor-pointer rounded p-0.5 text-gray-300 transition duration-100 ease-out hover:text-gray-600 sm:opacity-0 sm:group-hover/piece:opacity-100 sm:focus-visible:opacity-100"
+            data-testid="module-file-description-edit"
+        >
+            {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+        </button>
+        {# Retirer la demande : la pièce disparaît aussi du dépôt client. #}
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="askDeletePiece"
+            data-live-key-param="{{ document.id }}"
+            title="{{ 'admin.dossiers.show.modules.file.deletePiece'|trans }}"
+            class="cursor-pointer rounded p-0.5 text-gray-300 transition duration-100 ease-out hover:text-red-600 sm:opacity-0 sm:group-hover/piece:opacity-100 sm:focus-visible:opacity-100"
+            data-testid="module-piece-delete"
+        >
+            {{ ux_icon('lucide:trash-2', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+        </button>
+    </div>
+    {% if editingDescriptionId == document.id %}
+        <div class="mt-1.5 flex items-center gap-1.5">
+            <input
+                type="text"
+                maxlength="500"
+                data-model="norender|descriptionDraft"
+                data-action="keydown.enter->live#action:prevent"
+                data-live-action-param="saveDescription"
+                value="{{ descriptionDraft }}"
+                placeholder="{{ 'admin.dossiers.show.modules.file.pieceDescription.placeholder'|trans }}"
+                class="w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                data-testid="module-file-description-input"
+            >
+            <button type="button" data-action="live#action" data-live-action-param="saveDescription" data-loading="action(saveDescription)|addAttribute(disabled)" class="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60" title="{{ 'admin.dossiers.show.persons.save'|trans }}" data-testid="module-file-description-save">
+                {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(saveDescription)|addClass(hidden)'}) }}
+                <twig:Spinner class="hidden size-3.5 shrink-0" data-loading="action(saveDescription)|removeClass(hidden)" />
+            </button>
+            <button type="button" data-action="live#action" data-live-action-param="cancelDescription" class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:text-gray-700" title="{{ 'admin.dossiers.create.cancel'|trans }}">
+                {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+            </button>
+        </div>
+    {% elseif document.description %}
+        <p class="mt-0.5 text-xs text-gray-500" data-testid="module-file-description">{{ document.description }}</p>
+    {% endif %}
+{% endmacro %}
+
+{% macro pieceDate(document) %}
+    {% if document.requestedAt %}
+        <p class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-gray-400 tabular-nums">
+            {{ 'admin.dossiers.show.modules.file.table.requestedAt'|trans }} {{ document.requestedAt|format_datetime(pattern='dd.MM.yyyy') }}
+            {# Ancienneté d'une demande toujours en attente : neutre, puis
+               ambre dès 5 jours, rouge dès 10 : une relance s'impose. #}
+            {% if document.status in ['requested', 'refused'] %}
+                {% set daysAgo = date(document.requestedAt).diff(date()).days %}
+                {% if daysAgo >= 1 %}
+                    {% set ageClass = daysAgo >= 10 ? 'bg-red-50 text-red-600' : (daysAgo >= 5 ? 'bg-amber-50 text-amber-700' : 'bg-neutral-100 text-gray-500') %}
+                    <span class="rounded-full px-2 py-0.5 text-[11px] font-medium {{ ageClass }}" data-testid="module-file-age">
+                        {{ 'admin.dossiers.show.modules.file.requestedAgo'|trans({'%count%': daysAgo}) }}
+                    </span>
+                {% endif %}
+            {% endif %}
+        </p>
+    {% endif %}
+{% endmacro %}
+
+{% macro pieceRefusal(document) %}
+    {% if document.status == 'refused' and document.refusalReason %}
+        <p class="mt-1 flex items-start gap-1.5 text-xs text-red-600" data-testid="module-file-refusal-reason">
+            {{ ux_icon('lucide:message-circle-x', {class: 'mt-px size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ document.refusalReason }}
+        </p>
+    {% endif %}
+{% endmacro %}
+
+{% macro pieceFileChips(document, adminPrefix, reference, renamingFileId = null, renameDraft = '') %}
+    {% if document.files is not empty %}
+        {# Une ligne par fichier : nom entier lisible (jamais tronqué),
+           taille et date en dessous, renommage au stylo, suppression à
+           droite. #}
+        <ul role="list" class="mt-2 flex flex-col gap-1">
+            {% for file in document.files %}
+                <li class="group/file flex items-center gap-2 rounded-lg bg-neutral-50 py-1.5 pr-1.5 pl-2.5" data-testid="module-file-uploaded">
+                    {{ ux_icon('lucide:paperclip', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    <div class="min-w-0 flex-1">
+                        {% if renamingFileId == file.id %}
+                            <div class="flex items-center gap-1.5">
+                                <input
+                                    type="text"
+                                    maxlength="200"
+                                    data-model="norender|renameDraft"
+                                    data-action="keydown.enter->live#action:prevent"
+                                    data-live-action-param="saveFileName"
+                                    value="{{ renameDraft }}"
+                                    aria-label="{{ 'admin.dossiers.show.modules.file.renameFile'|trans }}"
+                                    class="w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="module-file-rename-input"
+                                >
+                                <button type="button" data-action="live#action" data-live-action-param="saveFileName" data-loading="action(saveFileName)|addAttribute(disabled)" class="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60" title="{{ 'admin.dossiers.show.persons.save'|trans }}" data-testid="module-file-rename-save">
+                                    {{ ux_icon('lucide:check', {class: 'size-3 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(saveFileName)|addClass(hidden)'}) }}
+                                    <twig:Spinner class="hidden size-3 shrink-0" data-loading="action(saveFileName)|removeClass(hidden)" />
+                                </button>
+                                <button type="button" data-action="live#action" data-live-action-param="cancelFileName" class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:text-gray-700" title="{{ 'admin.dossiers.create.cancel'|trans }}">
+                                    {{ ux_icon('lucide:x', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="flex items-center gap-1.5">
+                                <a href="{{ path('admin_dossier_document_file', {adminPrefix: adminPrefix, reference: reference, id: file.id}) }}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="min-w-0 text-xs font-medium break-words text-gray-700 transition-colors duration-100 ease-out hover:text-gray-900"
+                                   data-action="file-preview#open"
+                                   data-file-preview-name="{{ document.typeLabelKey|trans }}"
+                                   data-file-preview-type="{{ file.mimeType }}"
+                                   data-testid="module-file-download">
+                                    {{ file.name }}
+                                </a>
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="editFileName"
+                                    data-live-key-param="{{ file.id }}"
+                                    title="{{ 'admin.dossiers.show.modules.file.renameFile'|trans }}"
+                                    class="shrink-0 cursor-pointer rounded p-0.5 text-gray-300 transition duration-100 ease-out hover:text-gray-600 sm:opacity-0 sm:group-hover/file:opacity-100 sm:focus-visible:opacity-100"
+                                    data-testid="module-file-rename"
+                                >
+                                    {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                </button>
+                            </div>
+                            <p class="text-[0.6875rem] text-gray-400 tabular-nums">
+                                {{ 'admin.dossiers.show.modules.file.sizeMb'|trans({'%size%': (file.size / 1000000)|number_format(1, ',', ' ')}) }}{% if file.uploadedAt %} · {{ file.uploadedAt|format_datetime(pattern='dd.MM.yyyy') }}{% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="askDeleteFile"
+                        data-live-key-param="{{ file.id }}"
+                        title="{{ 'admin.dossiers.show.modules.file.deleteFile'|trans }}"
+                        class="shrink-0 cursor-pointer rounded-full p-1 text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                        data-testid="module-file-delete"
+                    >
+                        {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{% macro pieceUpload(document, adminPrefix, reference) %}
+    {# Dépôt par le staff (pièce reçue en direct) : un geste, le POST part
+       au choix du fichier et Turbo suit la redirection. Sans adminPrefix
+       (montage hors requête, tests), pas d'URL générable : pas de bouton. #}
+    {% if adminPrefix %}
+    <form
+        action="{{ path('admin_dossier_document_upload', {adminPrefix: adminPrefix, reference: reference, id: document.id}) }}"
+        method="post"
+        enctype="multipart/form-data"
+        data-controller="auto-submit"
+        data-turbo="true"
+        class="mt-2"
+    >
+        <input type="hidden" name="_token" value="{{ csrf_token('admin_document_upload') }}">
+        <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-gray-950/10 py-1 pr-2.5 pl-1.5 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
+            {{ ux_icon('lucide:upload', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ 'admin.dossiers.show.modules.file.upload.button'|trans }}
+            <input
+                type="file"
+                name="file"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                class="sr-only"
+                data-action="change->auto-submit#submit"
+                data-file-drop-target="input"
+                data-testid="module-file-admin-upload"
+            >
+        </label>
+    </form>
+    {% endif %}
+{% endmacro %}
+
+{% macro pieceStateIcon(document) %}
+    {% set stateStyles = {
+        requested: {cls: 'bg-gray-100 text-gray-500', icon: 'lucide:clock'},
+        received: {cls: 'bg-blue-50 text-blue-600', icon: 'lucide:inbox'},
+        validated: {cls: 'bg-green-50 text-green-600', icon: 'lucide:check'},
+        refused: {cls: 'bg-red-50 text-red-600', icon: 'lucide:x'},
+    } %}
+    <span class="flex size-7 shrink-0 items-center justify-center rounded-full {{ stateStyles[document.status].cls }}" aria-hidden="true">
+        {{ ux_icon(stateStyles[document.status].icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+    </span>
+{% endmacro %}
+
+{% macro pieceStatus(document, locked = false) %}
+    {# Statut de vérification : badge dropdown (demandée, déposée, validée, refusée). #}
+    {% set statusStyles = {
+        requested: {badge: 'bg-gray-100 text-gray-500 hover:bg-gray-200', icon: 'lucide:clock'},
+        received: {badge: 'bg-blue-50 text-blue-700 hover:bg-blue-100', icon: 'lucide:inbox'},
+        validated: {badge: 'bg-green-50 text-green-700 hover:bg-green-100', icon: 'lucide:check'},
+        refused: {badge: 'bg-red-50 text-red-700 hover:bg-red-100', icon: 'lucide:x'},
+    } %}
+    {% if locked %}
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium {{ statusStyles[document.status].badge }}" data-testid="module-file-status">
+            {{ ux_icon(statusStyles[document.status].icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ document.statusLabelKey|trans }}
+        </span>
+    {% else %}
+    <details
+        class="relative inline-block text-left"
+        data-controller="details-dropdown"
+        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+    >
+        <summary
+            class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out [&::-webkit-details-marker]:hidden {{ statusStyles[document.status].badge }}"
+            data-testid="module-file-status"
+        >
+            {{ ux_icon(statusStyles[document.status].icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ document.statusLabelKey|trans }}
+            {{ ux_icon('lucide:chevron-down', {class: 'size-3 shrink-0 opacity-60', 'aria-hidden': 'true'}) }}
+        </summary>
+        <div class="absolute right-0 z-10 mt-2 w-48 rounded-xl border border-neutral-200 bg-white p-1 text-left shadow-lg">
+            {% for statusValue, style in statusStyles %}
+                <button
+                    type="button"
+                    data-action="live#action details-dropdown#close"
+                    data-live-action-param="chooseStatus"
+                    data-live-key-param="{{ document.id }}"
+                    data-live-status-param="{{ statusValue }}"
+                    class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors duration-100 ease-out {{ statusValue == document.status ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    data-testid="module-file-status-choice"
+                >
+                    {{ ux_icon(style.icon, {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                    <span class="min-w-0 flex-1 truncate">{{ ('admin.dossiers.show.modules.file.status.' ~ statusValue)|trans }}</span>
+                    {% if statusValue == document.status %}
+                        {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    {% endif %}
+                </button>
+            {% endfor %}
+        </div>
+    </details>
+    {% endif %}
+{% endmacro %}
+
+{% import _self as m %}
+
         <div {{ attributes.defaults({class: 'space-y-6'}) }} data-testid="dossier-show-modules">
     {% for module in [{key: 'file'}, {key: 'visit'}, {key: 'payment'}] %}
         {# data-tab-panel : visibilité pilotée par les onglets de la page
            (attribut rendu côté serveur, donc morph-proof). #}
-        <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-tab-panel="{{ module.key }}" data-testid="dossier-module-card">
+        <div data-tab-panel="{{ module.key }}" class="flex min-w-0 flex-col gap-3" data-testid="dossier-module-card">
+        <section class="rounded-3xl border border-neutral-200 bg-white p-2">
             {% set unlocked = this.isModuleUnlocked(module.key) %}
             {% if unlocked %}
                 {% set dossierVisits = module.key == 'visit' ? this.dossierVisits : null %}
@@ -33,6 +288,20 @@
                                         {{ 'admin.dossiers.show.modules.file.counter'|trans({'%deposited%': pieceCounts.deposited, '%total%': pieceCounts.total}) }}
                                     </span>
                                 {% endif %}
+                                {# Cadenas anti-missclick : verrouillé par défaut à
+                                   chaque chargement, comme la card Recherche. #}
+                                <button
+                                    type="button"
+                                    data-action="live#action:prevent:stop"
+                                    data-live-action-param="toggleFileLock"
+                                    class="flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors duration-100 ease-out {{ this.fileLocked ? 'border-neutral-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'border-primary/30 bg-primary/5 text-primary hover:bg-primary/10' }}"
+                                    aria-pressed="{{ this.fileLocked ? 'false' : 'true' }}"
+                                    aria-label="{{ (this.fileLocked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
+                                    title="{{ (this.fileLocked ? 'admin.dossiers.show.search.unlock' : 'admin.dossiers.show.search.lock')|trans }}"
+                                    data-testid="module-file-lock"
+                                >
+                                    {{ ux_icon(this.fileLocked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                </button>
                             {% elseif module.key == 'visit' and dossierVisits.upcoming|length > 0 %}
                                 <span class="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 tabular-nums" data-testid="module-visit-counter">
                                     {{ 'admin.dossiers.show.modules.visit.counter'|trans({'%count%': dossierVisits.upcoming|length}) }}
@@ -42,44 +311,35 @@
                         </div>
                     </summary>
                     {% if module.key == 'file' %}
-                        {# Un bloc par locataire : bouton de demande de pièces
-                           + tableau des pièces demandées et leur statut. #}
-                        {% if this.lastSentTo %}
-                            <p class="mt-1 flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-green-700" data-testid="module-file-sent">
-                                {{ ux_icon('lucide:mail-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                {{ 'admin.dossiers.show.modules.file.sent'|trans({'%email%': this.lastSentTo}) }}
-                            </p>
-                        {% endif %}
+                        {# Un bloc par locataire : avatar + compteur en tête,
+                           puis la liste aérée des pièces demandées. #}
+                        {# Verrouillé : seuls les contrôles sont désactivés
+                           (fieldset), le contenu reste lisible, sans voile. Le
+                           lien de dépôt et les téléchargements restent actifs. #}
+                        <fieldset {{ this.fileLocked ? 'disabled' }} class="contents">
                         <ul class="mt-1 flex flex-col gap-1" role="list">
                             {% for tenant in this.tenants %}
-                                <li class="bg-white px-5 py-4 first:rounded-t-xl last:rounded-b-xl" data-testid="module-file-tenant">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <p class="text-sm font-medium text-gray-900">{{ tenant.name }}</p>
+                                <li class="bg-white px-5 py-5 first:rounded-t-xl last:rounded-b-xl" data-testid="module-file-tenant">
+                                    {# En-tête locataire : avatar (initiale), nom et compteur de
+                                       pièces à gauche, gestes à droite. #}
+                                    <div class="flex flex-wrap items-center justify-between gap-3">
+                                        <div class="flex min-w-0 items-center gap-2.5">
+                                            <twig:Avatar name="{{ tenant.name }}" size="8" />
+                                            <div class="min-w-0">
+                                                <p class="truncate text-sm font-semibold text-gray-900">{{ tenant.name }}</p>
+                                                {% if tenant.documents is not empty %}
+                                                    {% set tenantDeposited = tenant.documents|filter(d => d.status in ['received', 'validated'])|length %}
+                                                    <p class="text-xs text-gray-400 tabular-nums">{{ 'admin.dossiers.show.modules.file.counter'|trans({'%deposited%': tenantDeposited, '%total%': tenant.documents|length}) }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                         <div class="flex shrink-0 items-center gap-2">
-                                            {# Relance : renvoie l'email pour les pièces encore
-                                               attendues (demandées ou refusées), sans repasser
-                                               par la modal de sélection. #}
-                                            {% set pendingPieces = tenant.documents|filter(d => d.status in ['requested', 'refused']) %}
-                                            {% if pendingPieces|length > 0 %}
-                                                <button
-                                                    type="button"
-                                                    data-action="live#action"
-                                                    data-live-action-param="askResend"
-                                                    data-live-key-param="{{ tenant.id }}"
-                                                    class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60"
-                                                    title="{{ 'admin.dossiers.show.modules.file.resendTitle'|trans }}"
-                                                    data-testid="module-file-resend"
-                                                >
-                                                    {{ ux_icon('lucide:bell-ring', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                    {{ 'admin.dossiers.show.modules.file.resend'|trans }}
-                                                </button>
-                                            {% endif %}
                                             <button
                                                 type="button"
                                                 data-action="live#action"
                                                 data-live-action-param="openPicker"
                                                 data-live-key-param="{{ tenant.id }}"
-                                                class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                                                class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60"
                                                 data-testid="module-file-request"
                                             >
                                                 {{ ux_icon('lucide:list-checks', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
@@ -88,168 +348,68 @@
                                         </div>
                                     </div>
                                     {% if tenant.documents is not empty %}
-                                        <table class="mt-3 w-full text-sm">
-                                            <thead>
-                                                <tr class="text-left text-xs text-gray-400">
-                                                    <th scope="col" class="pb-2 font-medium">{{ 'admin.dossiers.show.modules.file.table.piece'|trans }}</th>
-                                                    <th scope="col" class="pb-2 font-medium">{{ 'admin.dossiers.show.modules.file.table.requestedAt'|trans }}</th>
-                                                    <th scope="col" class="pb-2 text-right font-medium">{{ 'admin.dossiers.show.modules.file.table.status'|trans }}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="divide-y divide-gray-950/5">
-                                                {% for document in tenant.documents %}
-                                                    <tr data-testid="module-file-document">
-                                                        <td class="py-2 pr-4">
-                                                            <div class="flex items-center gap-1.5">
-                                                                <span class="font-medium text-gray-900">{{ document.typeLabelKey|trans }}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    data-action="live#action"
-                                                                    data-live-action-param="editDescription"
-                                                                    data-live-key-param="{{ document.id }}"
-                                                                    title="{{ 'admin.dossiers.show.modules.file.pieceDescription.edit'|trans }}"
-                                                                    class="cursor-pointer rounded p-0.5 text-gray-300 transition-colors duration-100 ease-out hover:text-gray-600"
-                                                                    data-testid="module-file-description-edit"
-                                                                >
-                                                                    {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-                                                                </button>
-                                                                {# Retirer la demande : la pièce disparaît aussi du dépôt client. #}
-                                                                <button
-                                                                    type="button"
-                                                                    data-action="live#action"
-                                                                    data-live-action-param="askDeletePiece"
-                                                                    data-live-key-param="{{ document.id }}"
-                                                                    title="{{ 'admin.dossiers.show.modules.file.deletePiece'|trans }}"
-                                                                    class="cursor-pointer rounded p-0.5 text-gray-300 transition-colors duration-100 ease-out hover:text-red-600"
-                                                                    data-testid="module-piece-delete"
-                                                                >
-                                                                    {{ ux_icon('lucide:trash-2', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-                                                                </button>
-                                                            </div>
-                                                            {% if this.editingDescriptionId == document.id %}
-                                                                <div class="mt-1.5 flex items-center gap-1.5">
-                                                                    <input
-                                                                        type="text"
-                                                                        maxlength="500"
-                                                                        data-model="norender|descriptionDraft"
-                                                                        data-action="keydown.enter->live#action:prevent"
-                                                                        data-live-action-param="saveDescription"
-                                                                        value="{{ this.descriptionDraft }}"
-                                                                        placeholder="{{ 'admin.dossiers.show.modules.file.pieceDescription.placeholder'|trans }}"
-                                                                        class="w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                                                        data-testid="module-file-description-input"
-                                                                    >
-                                                                    <button type="button" data-action="live#action" data-live-action-param="saveDescription" data-loading="action(saveDescription)|addAttribute(disabled)" class="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60" title="{{ 'admin.dossiers.show.persons.save'|trans }}" data-testid="module-file-description-save">
-                                                                        {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(saveDescription)|addClass(hidden)'}) }}
-                                                                        <twig:Spinner class="hidden size-3.5 shrink-0" data-loading="action(saveDescription)|removeClass(hidden)" />
-                                                                    </button>
-                                                                    <button type="button" data-action="live#action" data-live-action-param="cancelDescription" class="shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors duration-100 ease-out hover:text-gray-700" title="{{ 'admin.dossiers.create.cancel'|trans }}">
-                                                                        {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                                    </button>
-                                                                </div>
-                                                            {% elseif document.description %}
-                                                                <p class="mt-0.5 text-xs text-gray-500" data-testid="module-file-description">{{ document.description }}</p>
-                                                            {% endif %}
-                                                        </td>
-                                                        <td class="py-2 pr-4 text-gray-600 tabular-nums">{{ document.requestedAt ? document.requestedAt|format_datetime(pattern='dd.MM.yyyy') : '-' }}</td>
-                                                        <td class="py-2 text-right">
-                                                            {# Statut de vérification : badge dropdown (demandée,
-                                                               déposée, validée, refusée). #}
-                                                            {% set statusStyles = {
-                                                                requested: {badge: 'bg-gray-100 text-gray-500 hover:bg-gray-200', icon: 'lucide:clock'},
-                                                                received: {badge: 'bg-blue-50 text-blue-700 hover:bg-blue-100', icon: 'lucide:inbox'},
-                                                                validated: {badge: 'bg-green-50 text-green-700 hover:bg-green-100', icon: 'lucide:check'},
-                                                                refused: {badge: 'bg-red-50 text-red-700 hover:bg-red-100', icon: 'lucide:x'},
-                                                            } %}
-                                                            <details
-                                                                class="relative inline-block text-left"
-                                                                data-controller="details-dropdown"
-                                                                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                                                            >
-                                                                <summary
-                                                                    class="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out [&::-webkit-details-marker]:hidden {{ statusStyles[document.status].badge }}"
-                                                                    data-testid="module-file-status"
-                                                                >
-                                                                    {{ ux_icon(statusStyles[document.status].icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-                                                                    {{ document.statusLabelKey|trans }}
-                                                                    {{ ux_icon('lucide:chevron-down', {class: 'size-3 shrink-0 opacity-60', 'aria-hidden': 'true'}) }}
-                                                                </summary>
-                                                                <div class="absolute right-0 z-10 mt-2 w-48 rounded-xl border border-neutral-200 bg-white p-1 text-left shadow-lg">
-                                                                    {% for statusValue, style in statusStyles %}
-                                                                        <button
-                                                                            type="button"
-                                                                            data-action="live#action details-dropdown#close"
-                                                                            data-live-action-param="setStatus"
-                                                                            data-live-key-param="{{ document.id }}"
-                                                                            data-live-status-param="{{ statusValue }}"
-                                                                            class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors duration-100 ease-out {{ statusValue == document.status ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                                                            data-testid="module-file-status-choice"
-                                                                        >
-                                                                            {{ ux_icon(style.icon, {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                                            <span class="min-w-0 flex-1 truncate">{{ ('admin.dossiers.show.modules.file.status.' ~ statusValue)|trans }}</span>
-                                                                            {% if statusValue == document.status %}
-                                                                                {{ ux_icon('lucide:check', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                                                            {% endif %}
-                                                                        </button>
-                                                                    {% endfor %}
-                                                                </div>
-                                                            </details>
-                                                        </td>
-                                                    </tr>
-                                                    {% if document.status == 'refused' and document.refusalReason %}
-                                                        <tr class="border-t-0!">
-                                                            <td colspan="3" class="pb-2">
-                                                                <p class="text-xs text-red-600" data-testid="module-file-refusal-reason">{{ document.refusalReason }}</p>
-                                                            </td>
-                                                        </tr>
-                                                    {% endif %}
-                                                    {% if document.files is not empty %}
-                                                        <tr class="border-t-0!">
-                                                            <td colspan="3" class="pb-2">
-                                                                <ul class="space-y-1">
-                                                                    {% for file in document.files %}
-                                                                        <li class="flex items-center gap-2 text-xs text-gray-600" data-testid="module-file-uploaded">
-                                                                            {{ ux_icon('lucide:paperclip', {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                                            <a href="{{ path('admin_dossier_document_file', {adminPrefix: this.adminPrefix, reference: this.reference, id: file.id}) }}"
-                                                                               target="_blank" rel="noopener noreferrer"
-                                                                               class="truncate underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-900"
-                                                                               data-action="file-preview#open"
-                                                                               data-file-preview-name="{{ document.typeLabelKey|trans }}"
-                                                                               data-file-preview-type="{{ file.mimeType }}"
-                                                                               data-testid="module-file-download">
-                                                                                {{ file.name }}
-                                                                            </a>
-                                                                            <span class="shrink-0 text-gray-400 tabular-nums">{{ file.uploadedAt ? file.uploadedAt|format_datetime(pattern='dd.MM.yyyy HH:mm') : '' }}</span>
-                                                                            <button
-                                                                                type="button"
-                                                                                data-action="live#action"
-                                                                                data-live-action-param="askDeleteFile"
-                                                                                data-live-key-param="{{ file.id }}"
-                                                                                title="{{ 'admin.dossiers.show.modules.file.deleteFile'|trans }}"
-                                                                                class="ml-auto shrink-0 cursor-pointer rounded p-0.5 text-gray-400 transition-colors duration-100 ease-out hover:text-red-600"
-                                                                                data-testid="module-file-delete"
-                                                                            >
-                                                                                {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                                            </button>
-                                                                        </li>
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            </td>
-                                                        </tr>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                                    {# Mix "Pastille d'état" + "Bandes grises" (choix utilisateur,
+                                       août 2026) : une bande grise arrondie par pièce, pastille d'état
+                                       colorée en tête, badge de statut à droite, fichiers en chips
+                                       blanches. #}
+                                    <ul class="mt-3 space-y-1.5" role="list">
+                                        {% for document in tenant.documents %}
+                                            {# Toute la rangée accepte le glisser-déposer d'un fichier,
+                                               qui part par le formulaire d'upload existant. #}
+                                            <li
+                                                class="group/piece flex items-start gap-3 rounded-xl border border-gray-950/5 px-4 py-3 transition-colors duration-100 ease-out"
+                                                data-testid="module-file-document"
+                                                {% if this.adminPrefix %}
+                                                    data-controller="file-drop"
+                                                    data-file-drop-drag-class="border-primary/40 bg-primary/5"
+                                                    data-action="dragover->file-drop#dragOver dragenter->file-drop#dragEnter dragleave->file-drop#dragLeave drop->file-drop#drop dragover@window->file-drop#guardWindow drop@window->file-drop#guardWindow"
+                                                {% endif %}
+                                            >
+                                                {{ m.pieceStateIcon(document) }}
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div class="min-w-0">
+                                                            {{ m.pieceTitle(document, this.editingDescriptionId, this.descriptionDraft) }}
+                                                            {{ m.pieceDate(document) }}
+                                                        </div>
+                                                        <div class="shrink-0">{{ m.pieceStatus(document, this.fileLocked) }}</div>
+                                                    </div>
+                                                    {{ m.pieceRefusal(document) }}
+                                                    {{ m.pieceFileChips(document, this.adminPrefix, this.reference, this.renamingFileId, this.renameDraft) }}
+                                                    {{ m.pieceUpload(document, this.adminPrefix, this.reference) }}
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                        <p class="mt-3 text-xs text-gray-400">{{ 'admin.dossiers.show.modules.file.none'|trans }}</p>
                                     {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
+                        {# Création manuelle de l'arborescence Drive (dossier
+                           vide) : disparaît dès qu'elle existe. #}
+                        {% if this.canProvisionDrive %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="provisionDrive"
+                                data-loading="action(provisionDrive)|addAttribute(disabled)"
+                                class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-gray-950/10 bg-white/60 px-3 py-3 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60"
+                                data-testid="module-file-provision-drive"
+                            >
+                                <twig:Spinner class="hidden size-3.5 shrink-0" data-loading="action(provisionDrive)|removeClass(hidden)" />
+                                {{ ux_icon('lucide:folder-plus', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(provisionDrive)|addClass(hidden)'}) }}
+                                {{ 'admin.dossiers.show.modules.file.provisionDrive'|trans }}
+                            </button>
+                        {% endif %}
+                        </fieldset>
                         {# Lien public de dépôt, en bas de card : existe dès
                            qu'une demande de pièces a été envoyée. #}
                         {% set depositUrl = this.depositUrl %}
                         {% if depositUrl %}
                             <div
-                                class="mt-1 flex items-center justify-between gap-3 rounded-xl bg-white px-5 py-3"
+                                class="mt-1 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-5 py-4"
                                 data-controller="copy-link"
                                 data-copy-link-text-value="{{ depositUrl }}"
                                 data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}"
@@ -260,6 +420,60 @@
                                     <a href="{{ depositUrl }}" target="_blank" rel="noopener noreferrer" class="block truncate text-xs text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-900">{{ depositUrl }}</a>
                                 </div>
                                 <div class="flex shrink-0 items-center gap-2">
+                                    {# Verrou de l'espace de dépôt client : pause
+                                       temporaire, rien n'est purgé. Hors fieldset,
+                                       d'où le disabled cadenas. #}
+                                    {% set depositLocked = this.depositLocked %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="toggleDepositLock"
+                                        {{ this.fileLocked ? 'disabled' }}
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ depositLocked ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800' }}"
+                                        title="{{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.unlock' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}"
+                                        data-testid="module-file-deposit-lock"
+                                    >
+                                        {{ ux_icon(depositLocked ? 'lucide:shield-off' : 'lucide:shield', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.locked' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}
+                                    </button>
+                                    {# Une seule relance pour toute la card : chaque
+                                       locataire ayant des pièces en attente est
+                                       relancé (hors fieldset, d'où le disabled). #}
+                                    {% if this.hasPendingPieces() %}
+                                        <button
+                                            type="button"
+                                            data-action="live#action"
+                                            data-live-action-param="askResend"
+                                            {{ this.fileLocked ? 'disabled' }}
+                                            class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60"
+                                            title="{{ 'admin.dossiers.show.modules.file.resendTitle'|trans }}"
+                                            data-testid="module-file-resend"
+                                        >
+                                            {{ ux_icon('lucide:bell-ring', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ 'admin.dossiers.show.modules.file.resend'|trans }}
+                                        </button>
+                                    {% endif %}
+                                    {% if this.pairingCode %}
+                                        {# The code itself, copyable alone: handy when it is read
+                                           out or pasted without the full link. #}
+                                        <div
+                                            data-controller="copy-link"
+                                            data-copy-link-text-value="{{ this.pairingCode }}"
+                                            data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}"
+                                        >
+                                            <button
+                                                type="button"
+                                                data-action="copy-link#copy"
+                                                aria-label="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}"
+                                                title="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}"
+                                                class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-semibold tracking-widest text-gray-900 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                                                data-testid="module-file-deposit-code"
+                                            >
+                                                {{ ux_icon('lucide:key-round', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                <span data-copy-link-target="label" class="font-mono">{{ this.pairingCode }}</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
                                     <button
                                         type="button"
                                         data-action="copy-link#copy"
@@ -360,6 +574,20 @@
                 </div>
             {% endif %}
         </section>
+        {# Le pied "Valider l'étape" vit sous la card, hors coque (comme les
+           cards Personnes et Recherche). Le paiement est terminal : rien à
+           déverrouiller après. #}
+        {% if unlocked and module.key != 'payment' %}
+            <twig:Dossier:StepValidateFooter
+                :validated="this.isModuleValidated(module.key)"
+                :canReopen="this.canReopenModule(module.key)"
+                action="validateModule"
+                reopenAction="reopenModule"
+                module="{{ module.key }}"
+                :standalone="true"
+            />
+        {% endif %}
+        </div>
     {% endfor %}
 
     {# Modale de demande de pièces : étape 1 checkboxes des pièces, étape 2
@@ -369,7 +597,7 @@
         {% for tenant in this.tenants %}
             {% if tenant.id == this.pickerId %}{% set pickerTenant = tenant %}{% endif %}
         {% endfor %}
-        {% set checkboxClass = 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary' %}
+        {% set checkboxClass = 'peer size-4 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary disabled:cursor-not-allowed disabled:opacity-50' %}
         <div
             class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
             role="dialog"
@@ -404,14 +632,20 @@
                     <div class="space-y-5 rounded-xl bg-white px-5 py-4">
 
                         {% if this.pickerStep == 'select' %}
+                            {% set requestedTypes = this.pickerRequestedTypes %}
                             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="module-file-types">
                                 {% for type in this.documentTypes %}
-                                    <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                                    {# Pièce déjà demandée : cochée et grisée, on
+                                       ne la redemande pas. #}
+                                    {% set already = type.value in requestedTypes %}
+                                    <label class="flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-colors duration-100 ease-out {{ already
+                                        ? 'cursor-default border-neutral-200 bg-neutral-50 text-gray-400'
+                                        : 'cursor-pointer border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary' }}">
                                         <input
                                             type="checkbox"
                                             value="{{ type.value }}"
-                                            data-model="norender|selectedTypes[]"
-                                            {% if type.value in this.selectedTypes %}checked{% endif %}
+                                            {% if not already %}data-model="norender|selectedTypes[]"{% endif %}
+                                            {% if already %}checked disabled{% elseif type.value in this.selectedTypes %}checked{% endif %}
                                             class="{{ checkboxClass }}"
                                             data-testid="module-file-type-checkbox"
                                         >
@@ -502,7 +736,7 @@
     {% endif %}
 
     {# ── Modal de relance : choix de l'email qui reçoit le rappel. ─────── #}
-    {% if this.resendingId is not null %}
+    {% if this.resending %}
         <div
             class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
             role="dialog"
@@ -537,12 +771,14 @@
                         <div class="flex flex-col gap-2" role="group" data-testid="module-file-resend-recipients">
                             {% for recipient in this.recipients %}
                                 <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 transition-colors duration-100 ease-out hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5">
+                                    {# Même style de checkbox que la modale de
+                                       sélection des pièces. #}
                                     <input
                                         type="checkbox"
                                         value="{{ recipient.id }}"
                                         data-model="norender|resendRecipientIds[]"
                                         {% if recipient.id in this.resendRecipientIds %}checked{% endif %}
-                                        class="accent-primary"
+                                        class="peer size-4 shrink-0 inline-block align-middle accent-primary rounded-sm border border-gray-300 focus:outline focus:outline-2 focus:-outline-offset-2 focus:ring-primary/60 focus:outline-primary/80 checked:bg-primary checked:border-primary"
                                         data-testid="module-file-resend-recipient"
                                     >
                                     <span class="min-w-0">

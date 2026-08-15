@@ -28,6 +28,7 @@ use Symfony\UX\TwigComponent\Attribute\PostMount;
 #[AsLiveComponent(name: 'Dossier:DossierList', template: 'components/Dossier/DossierList.html.twig')]
 final class DossierList
 {
+    use DossiersSectionGuard;
     use DefaultActionTrait;
 
     /** Tabs above the list; "archived" holds the closed dossiers. */
@@ -148,10 +149,10 @@ final class DossierList
     {
         // "Clôturé" n'est plus un filtre : les dossiers clos vivent dans
         // l'onglet Archives, la colonne de gauche ne trierait que du vide.
-        return array_values(array_filter(
+        return array_filter(
             DossierStatus::cases(),
             static fn (DossierStatus $status): bool => DossierStatus::Closed !== $status,
-        ));
+        );
     }
 
     /**

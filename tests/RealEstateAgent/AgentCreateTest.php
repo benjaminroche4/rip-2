@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\RealEstateAgent;
 
 use App\Auth\Entity\User;
+use App\RealEstateAgent\Domain\AgencyPosition;
+use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Entity\Agency;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +18,7 @@ use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
 /**
  * RealEstateAgent:AgentCreate component behaviour: creation happy path with
- * optional fields, validation failures, and the modal markup contract.
+ * optional fields, validation failures, and the page-form markup contract.
  */
 final class AgentCreateTest extends KernelTestCase
 {
@@ -157,19 +159,27 @@ final class AgentCreateTest extends KernelTestCase
         self::assertSame(0, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
     }
 
-    public function testOpenModalMarkupIsAccessible(): void
+    public function testPageFormMarkupContract(): void
     {
         $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentCreate', [
             'adminPrefix' => self::PREFIX,
-            'open' => true,
         ]);
 
-        self::assertStringContainsString('role="dialog"', $rendered);
-        self::assertStringContainsString('aria-modal="true"', $rendered);
+        self::assertStringContainsString('data-testid="agent-create-form"', $rendered);
+        // Specialty chips (multi) and position chips (agency context, the
+        // default kind) with their toggle-off live action.
+        self::assertStringContainsString('data-testid="agent-create-specialties-block"', $rendered);
+        self::assertStringContainsString('data-testid="agent-create-specialty-location"', $rendered);
+        self::assertStringContainsString('data-testid="agent-create-position-block"', $rendered);
+        self::assertStringContainsString('data-live-action-param="togglePosition"', $rendered);
         self::assertStringContainsString('aria-labelledby="agent-create-title"', $rendered);
-        self::assertStringContainsString('data-controller="modal-focus modal-anim"', $rendered);
         // Anti double-submit guard on the create action.
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
+        // Cancel is a plain link back to the agents list, not a live action.
+        self::assertMatchesRegularExpression('~href="[^"]*/'.self::PREFIX.'/admin/(agents-immobiliers|real-estate-agents)"~', $rendered);
+        // The modal chrome is gone: the form is a full-page card.
+        self::assertStringNotContainsString('role="dialog"', $rendered);
+        self::assertStringNotContainsString('openModal', $rendered);
     }
 
     public function testAgencyKindRequiresTheAgencyName(): void
@@ -216,6 +226,97 @@ final class AgentCreateTest extends KernelTestCase
         self::assertNotNull($agent);
         self::assertNull($agent->getAgency());
         self::assertSame(0, (int) $this->em->getRepository(Agency::class)->count([]), 'No agency is created.');
+    }
+
+    public function testStoresMultipleSpecialtiesAndTheAgencyPosition(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'agency',
+            'agencyName' => 'Foncia Paris 11',
+            'position' => 'consultant_rental',
+            'specialties' => ['location', 'transaction'],
+            'email' => '',
+            'phone' => '',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+
+        $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
+        self::assertNotNull($agent);
+        self::assertSame(AgencyPosition::ConsultantRental, $agent->getPosition());
+        self::assertSame(
+            [AgentSpecialty::Location, AgentSpecialty::Transaction],
+            $agent->getSpecialties(),
+            'An agent can handle both rentals and sales.',
+        );
+    }
+
+    public function testSpecialtiesAndPositionAreOptional(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'agency',
+            'agencyName' => 'Foncia Paris 11',
+            'position' => '',
+            'specialties' => [],
+            'email' => '',
+            'phone' => '',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+
+        $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
+        self::assertNotNull($agent);
+        self::assertNull($agent->getPosition());
+        self::assertSame([], $agent->getSpecialties());
+    }
+
+    public function testIndependentKindDropsALeftoverPosition(): void
+    {
+        $component = $this->mountComponent();
+
+        // Picked a position, then switched the kind chip to independent:
+        // the position is out of context and must not be persisted.
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'independent',
+            'agencyName' => '',
+            'position' => 'manager',
+            'specialties' => ['location'],
+            'email' => '',
+            'phone' => '',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+
+        $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
+        self::assertNotNull($agent);
+        self::assertNull($agent->getPosition(), 'No position without an agency.');
+        self::assertSame([AgentSpecialty::Location], $agent->getSpecialties(), 'Specialties are kept: they are not agency-bound.');
+    }
+
+    public function testTogglePositionSelectsAndUnselects(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->togglePosition('manager');
+        self::assertSame('manager', $component->formValues['position']);
+
+        // A different chip replaces the current one (single-select)...
+        $component->togglePosition('assistant');
+        self::assertSame('assistant', $component->formValues['position']);
+
+        // ...and clicking the active chip clears it (toggle-off).
+        $component->togglePosition('assistant');
+        self::assertSame('', $component->formValues['position']);
     }
 
     private function createAction(object $component): ?RedirectResponse

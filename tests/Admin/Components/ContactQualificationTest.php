@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\LiveComponent\LiveResponder;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
@@ -410,7 +411,7 @@ final class ContactQualificationTest extends KernelTestCase
 
         $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
-        $component->setClosureReason('unreachable');
+        $component->chooseClosureReason('unreachable');
 
         $this->em->clear();
         self::assertSame(ClosureReason::Unreachable, $this->em->find(Contact::class, $contact->getId())->getClosureReason());
@@ -675,7 +676,7 @@ final class ContactQualificationTest extends KernelTestCase
         $component->confirmStep();
         self::assertEmailCount(1);
         $notice = self::getMailerMessage(0);
-        self::assertNotNull($notice);
+        self::assertInstanceOf(Email::class, $notice);
         self::assertEmailAddressContains($notice, 'To', (string) $contact->getEmail());
         // Channel-aware subject: who reaches out, how and when, readable
         // from the inbox list alone.
@@ -766,7 +767,7 @@ final class ContactQualificationTest extends KernelTestCase
 
         self::assertEmailCount(1);
         $notice = self::getMailerMessage(0);
-        self::assertNotNull($notice);
+        self::assertInstanceOf(Email::class, $notice);
         $firstName = (string) $admin->getFirstName();
         self::assertStringContainsString($firstName, (string) $notice->getSubject());
         self::assertStringContainsString('vous rappelle', (string) $notice->getSubject());
@@ -844,7 +845,7 @@ final class ContactQualificationTest extends KernelTestCase
         $component->setLiveResponder(new LiveResponder());
 
         $this->expectException(BadRequestHttpException::class);
-        $component->setClosureReason('nope');
+        $component->chooseClosureReason('nope');
     }
 
     public function testTerminalBannerShowsOnlyForClosedOrConverted(): void

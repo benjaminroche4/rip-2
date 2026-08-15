@@ -15,13 +15,14 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
-use Symfony\Bridge\Monolog\Attribute\WithMonologChannel;
+use Monolog\Attribute\WithMonologChannel;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
+use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
@@ -35,6 +36,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[WithMonologChannel('security')]
 final class TwoFactorSettings
 {
+    use StaffGuard;
+    use ComponentToolsTrait;
     use DefaultActionTrait;
 
     #[LiveProp]
@@ -79,6 +82,7 @@ final class TwoFactorSettings
         private readonly TotpAuthenticatorInterface $totpAuthenticator,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly LoggerInterface $logger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -187,6 +191,7 @@ final class TwoFactorSettings
         } catch (\Symfony\Component\HttpFoundation\Exception\SessionNotFoundException) {
         }
         $this->step = 'codes';
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.twoFactorEnabled')]);
     }
 
     #[LiveAction]
@@ -249,6 +254,7 @@ final class TwoFactorSettings
         $this->logger->warning('2FA disabled from the profile page.', ['user' => $user->getEmail()]);
 
         $this->reset();
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.twoFactorDisabled')]);
     }
 
     private function reset(): void
@@ -297,12 +303,12 @@ final class TwoFactorSettings
                 return true;
             }
 
-            public function getTotpAuthenticationUsername(): ?string
+            public function getTotpAuthenticationUsername(): string
             {
                 return $this->email;
             }
 
-            public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
+            public function getTotpAuthenticationConfiguration(): TotpConfigurationInterface
             {
                 return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, 30, 6);
             }

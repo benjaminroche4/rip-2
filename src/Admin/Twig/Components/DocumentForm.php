@@ -39,6 +39,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:DocumentForm', template: 'components/Admin/DocumentForm.html.twig')]
 final class DocumentForm extends AbstractController
 {
+    use ToolsSectionGuard;
     use DefaultActionTrait;
     use ComponentWithFormTrait;
     use ComponentToolsTrait;
@@ -49,6 +50,7 @@ final class DocumentForm extends AbstractController
     public function __construct(
         private readonly Security $security,
         private readonly DocumentRepository $repository,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -122,6 +124,7 @@ final class DocumentForm extends AbstractController
         // one we just persisted/updated.
         $this->document = new Document();
         $this->resetForm();
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.documentSaved')]);
     }
 
     // Part of the Outils section: ROLE_SECTION_TOOLS suffices (ROLE_ADMIN includes it).

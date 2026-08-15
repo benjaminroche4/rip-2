@@ -153,7 +153,7 @@ final class ContactToDossierTest extends WebTestCase
         $contact = $this->persistContact();
 
         // Legacy-style dossier: same primary email, no search, no notes.
-        $person = (new \App\Dossier\Entity\DossierPerson())
+        $person = (new DossierPerson())
             ->setRole(DossierPersonRole::TENANT)
             ->setFirstName('jane')->setLastName('Doe')
             ->setEmail('repro@example.com')

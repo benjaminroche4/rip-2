@@ -18,18 +18,20 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
- * "New agent" modal on the admin agents list: identity plus optional agency
- * and contact details. Redirects back to the list once created so the fresh
- * agent shows up in alphabetical order.
+ * "New agent" form on its dedicated admin page: identity plus optional
+ * agency and contact details. Redirects back to the list once created so
+ * the fresh agent shows up in alphabetical order.
  */
 #[AsLiveComponent(name: 'RealEstateAgent:AgentCreate', template: 'components/RealEstateAgent/AgentCreate.html.twig')]
 final class AgentCreate extends AbstractController
 {
+    use AgentsSectionGuard;
     use ComponentWithFormTrait;
     use DefaultActionTrait;
 
@@ -38,9 +40,6 @@ final class AgentCreate extends AbstractController
 
     #[LiveProp]
     public string $adminPrefix = '';
-
-    #[LiveProp]
-    public bool $open = false;
 
     public function __construct(
         private readonly Security $security,
@@ -70,18 +69,17 @@ final class AgentCreate extends AbstractController
         return $this->createForm(RealEstateAgentType::class, $this->agent ??= new RealEstateAgent());
     }
 
+    /**
+     * Single-select chips with toggle-off: clicking the active position
+     * chip clears it (a radio cannot untoggle itself natively).
+     */
     #[LiveAction]
-    public function openModal(): void
+    public function togglePosition(#[LiveArg] string $position): void
     {
         $this->ensureAdmin();
-        $this->open = true;
-    }
 
-    #[LiveAction]
-    public function closeModal(): void
-    {
-        $this->ensureAdmin();
-        $this->open = false;
+        $current = $this->formValues['position'] ?? '';
+        $this->formValues['position'] = $current === $position ? '' : $position;
     }
 
     #[LiveAction]
@@ -90,7 +88,7 @@ final class AgentCreate extends AbstractController
         $this->ensureAdmin();
 
         // Throws UnprocessableEntityHttpException on invalid input — the
-        // component re-renders with the field errors, modal stays open.
+        // component re-renders with the field errors, form stays in place.
         $this->submitForm();
 
         /** @var RealEstateAgent $agent */
@@ -109,9 +107,21 @@ final class AgentCreate extends AbstractController
         }
         $agent->setAgency('agency' === $kind ? $this->agencies->findOrCreate($agencyName) : null);
 
+        // The position only makes sense inside an agency: a leftover value
+        // picked before switching the kind chip to independent is dropped.
+        if ('agency' !== $kind) {
+            $agent->setPosition(null);
+        }
+
         $agent->setCreatedAt(new \DateTimeImmutable());
         $em->persist($agent);
         $em->flush();
+
+        try {
+            $this->addFlash('success', 'admin.toast.agentCreated');
+        } catch (\LogicException) {
+            // Sessionless context (component tests): no toast to queue.
+        }
 
         return $this->redirectToRoute('admin_agents', [
             'adminPrefix' => $this->adminPrefix,

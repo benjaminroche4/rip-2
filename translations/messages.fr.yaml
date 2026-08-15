@@ -1786,13 +1786,61 @@ a11y:
     skipToContent: Aller au contenu principal
     previous: Précédent
     next: Suivant
+    close: Fermer
 gallery:
     open: Agrandir la photo
     close: Fermer
     previous: Précédent
     next: Suivant
 admin:
+    toast:
+        dismiss: Fermer la notification
+        saved: Modifications enregistrées.
+        fileRenamed: Fichier renommé.
+        noteAdded: Note ajoutée.
+        noteUpdated: Note modifiée.
+        noteDeleted: Note supprimée.
+        stepValidated: Étape validée.
+        stepReopened: Étape rouverte.
+        statusUpdated: Statut mis à jour.
+        assigned: 'Assigné à %name%.'
+        unassigned: Assignation retirée.
+        personSaved: Personne enregistrée.
+        personRemoved: Personne retirée du dossier.
+        personPrimary: '%name% est maintenant le locataire principal.'
+        dossierClosed: Dossier clôturé.
+        dossierReopened: Dossier rouvert.
+        recapGenerated: Récap généré.
+        driveProvisioned: Dossier créé dans le Drive.
+        fileUploaded: Fichier ajouté à la pièce.
+        depositLocked: Espace de dépôt verrouillé.
+        depositUnlocked: Espace de dépôt déverrouillé.
+        pieceDeleted: Pièce retirée du dossier.
+        fileDeleted: Fichier supprimé.
+        pieceRefused: Pièce refusée, le locataire est prévenu.
+        descriptionSaved: Précision enregistrée.
+        ratingSaved: Évaluation enregistrée.
+        twoFactorEnabled: Double authentification activée.
+        twoFactorDisabled: Double authentification désactivée.
+        twoFactorReset: Double authentification réinitialisée.
+        accessGranted: Accès au back-office accordé.
+        accessRevoked: Accès au back-office révoqué.
+        adminGranted: Rôle administrateur accordé.
+        adminRevoked: Rôle administrateur retiré.
+        userSuspended: Compte suspendu.
+        userResumed: Compte réactivé.
+        userDeleted: Compte supprimé.
+        avatarReset: Photo de profil réinitialisée.
+        documentSaved: Document enregistré.
+        documentDeleted: Document supprimé.
+        requestDeleted: Demande supprimée.
+        visitPlanned: Visite planifiée.
+        dossierCreated: Dossier créé.
+        contactCreated: Lead créé.
+        agencyCreated: Agence créée.
+        agentCreated: Agent créé.
     meta:
+        titlePrefix: Admin
         description: Espace d'administration Relocation in Paris. Accès réservé à l'équipe.
     busyGuard:
         message: Une action est encore en cours. Si vous quittez la page maintenant, elle risque de ne pas être enregistrée.
@@ -1806,6 +1854,7 @@ admin:
         profile: Mon profil
         logout: Se déconnecter
         skipToContent: Aller au contenu principal
+        logoLabel: Relocation In Paris, accueil de l'admin
     breadcrumb:
         label: Fil d'Ariane
     accessDenied:
@@ -1833,6 +1882,9 @@ admin:
             close: Fermer
     dossiers:
         title: Dossiers
+        expiredPairing:
+            title: Code de dépôt expiré
+            hint: Le code de dépôt a expiré, renvoyez la demande de pièces pour le réactiver.
         creating:
             title: Votre dossier est en cours de création
             subtitle: Un instant, on prépare tout.
@@ -1852,12 +1904,13 @@ admin:
             description: Modifiez la recherche ou le filtre de statut pour retrouver vos dossiers.
         status:
             label: Statut
-            autoHint: Statut automatique, déduit de la clôture et des pièces en attente
+            autoHint: Statut automatique, il suit les étapes validées du dossier
             choice:
-                new: Nouveau
-                awaiting_documents: En attente de documents
-                searching: Recherche en cours
-                property_found: Bien trouvé
+                persons: Personnes
+                search: Recherche
+                file: Dossier
+                visit: Visite
+                finalization: Finalisation
                 closed: Clôturé
         list:
             viewMore: Voir le dossier
@@ -1878,15 +1931,19 @@ admin:
                 rejections: Refus
             managedBy: 'Géré par :'
             archived: Clôturé
-            closedIn: 'Clôturé en {0}moins d''un jour|{1}1 jour|]1,Inf[%count% jours'
+            duration: '{0}moins d''un jour|{1}1 jour|]1,Inf[%count% jours'
         show:
             unlock: Déverrouiller la modification
             lock: Verrouiller la modification
             reference: Référence
             persons:
                 edit: Modifier
-                save: Valider
+                save: Enregistrer
                 newTitle: Nouvelle personne
+                sections:
+                    identity: Identité et contact
+                    personal: Situation personnelle
+                    pro: Situation professionnelle
                 primaryLocked: Le locataire principal ne peut pas être retiré. Transférez d'abord le rôle à un autre locataire.
                 removeConfirm:
                     title: Supprimer cette personne ?
@@ -1921,6 +1978,7 @@ admin:
                 next: Dossier suivant
             timeline:
                 title: Récapitulatif
+                locked: Renseignez la date d'installation souhaitée dans la Recherche pour suivre l'avancement.
                 start: 'Début du dossier :'
                 moveIn: 'Installation souhaitée :'
                 onTrack: Dans les temps
@@ -1930,6 +1988,9 @@ admin:
                 daysLate: 'J+%count%'
             steps:
                 lockedHint: 'Validez l''étape %step% pour y accéder.'
+                validate: Valider l'étape
+                validatedNote: Étape validée
+                reopen: Rouvrir l'étape
                 persons:
                     label: Personnes
                     todo: Ajoutez au moins un locataire et désignez le contact principal.
@@ -1938,15 +1999,16 @@ admin:
                     todo: Complétez les critères de recherche.
                 file:
                     label: Dossier
-                    todo: Demandez les pièces justificatives et validez-les toutes.
+                    todo: Demandez les pièces justificatives et suivez leur dépôt.
                 visit:
                     label: Visite
-                    todo: Marquez au moins une visite comme réalisée.
+                    todo: Planifiez et suivez les visites du dossier.
                 payment:
                     label: Paiement
                     todo: Dernière étape du parcours.
             recap:
                 title: Récap IA du dossier
+                locked: Validez les étapes Personnes et Recherche pour débloquer le récap.
                 generate: Générer le récap
                 refresh: Actualiser
                 generating: Génération...
@@ -1974,8 +2036,7 @@ admin:
                     label: Équipements indispensables
                 title: Recherche
                 subtitle: Critères de recherche du locataire
-                toComplete: À compléter
-                complete: Recherche complète
+                validateBlocked: Complétez les critères pour valider l'étape.
                 section:
                     essentials: Budget & échéance
                     location: Localisation
@@ -2052,11 +2113,11 @@ admin:
                         gym: Sport
                         other: Autre
             followUp:
-                origin: Créé depuis la demande
+                origin: Créé depuis le lead
                 timeline: Chronologie
             requestDocuments: Demander des documents
             closure:
-                badge: Dossier clos
+                badge: Dossier clôturé
                 bannerTitle: Dossier clôturé
                 by: par %name%
                 closedAt: Clôturé le
@@ -2094,7 +2155,11 @@ admin:
                 managerAssigned: Dossier assigné à %name%
                 managerUnassigned: Dossier désassigné
                 dossierClosed: 'Dossier clôturé : %count% fichier(s) supprimé(s), lien de dépôt désactivé'
+                depositLocked: Espace de dépôt verrouillé
+                depositUnlocked: Espace de dépôt déverrouillé
                 dossierReopened: Dossier rouvert
+                stepValidated: 'Étape %step% validée'
+                stepReopened: 'Étape %step% rouverte'
                 searchUpdated: 'Recherche mise à jour, %field% : %value%'
                 searchCleared: Recherche mise à jour, %field% effacé
                 searchField:
@@ -2167,15 +2232,28 @@ admin:
                     depositLink:
                         label: Lien de dépôt à partager
                         copy: Copier
+                        copyCode: Copier le code d'appairage
                         copied: Copié !
                     error:
                         none: Sélectionnez au moins une pièce.
                         allRequested: Toutes ces pièces ont déjà été demandées.
                         noRecipient: Choisissez un destinataire.
+                    none: Aucune pièce demandée pour le moment.
+                    provisionDrive: Créer le dossier dans le Drive
+                    depositLock:
+                        lock: Verrouiller le dépôt
+                        locked: Dépôt verrouillé
+                        unlock: Déverrouiller le dépôt client
+                    sizeMb: '%size% Mo'
+                    renameFile: Renommer le fichier
+                    upload:
+                        button: Ajouter un fichier
+                        noFile: Aucun fichier reçu, réessayez.
+                        invalid: 'Fichier refusé : PDF ou image, 10 Mo maximum.'
+                        storage: 'Stockage indisponible, réessayez dans un instant.'
                     table:
-                        piece: Pièce
                         requestedAt: Demandée le
-                        status: Statut
+                    requestedAgo: 'Il y a %count% jour|Il y a %count% jours'
                     status:
                         requested: Demandée
                         received: Déposée
@@ -2342,7 +2420,7 @@ admin:
                     title: Aucun lead clôturé
                     hint: Les leads clôturés apparaîtront ici.
         sort:
-            recent: Plus récentes
+            recent: Plus récents
             recall: Rappel le plus proche
             rating: Meilleure note
             budget: Budget le plus élevé
@@ -2517,7 +2595,7 @@ admin:
                 email: Email
                 phone: Tél.
                 language: Langue
-            help: 'Demande :'
+            help: 'Lead :'
             created: Reçu le
             statusUpdated: Statut mis à jour
             recallAtText: Rappel le %date% à %time%
@@ -2575,6 +2653,7 @@ admin:
             title: 'Visite du %date% à %time%'
             detailsTitle: 'Détails de la visite'
             reference: Référence
+            durationMinutes: '%count% min'
         edit:
             title: Modifier la visite
         row:
@@ -2658,8 +2737,11 @@ admin:
                 placeholder: Choisir un dossier...
                 incomplete: Complétez la recherche de ce dossier pour pouvoir planifier une visite.
                 incompleteLink: Compléter la recherche
+                loading: Chargement du dossier...
+            recap:
+                title: Récapitulatif
             assignee:
-                none: 'Aucun agent de visite. Attribue la fonction "Agent de visite" dans la fiche utilisateur.'
+                none: 'Aucun agent de visite. Attribuez la fonction "Agent de visite" dans la fiche utilisateur.'
                 label: Effectuée par
                 placeholder: Choisir un membre de l'équipe
             agent:
@@ -2690,6 +2772,15 @@ admin:
             description: Modifiez la recherche pour retrouver vos agents.
         card:
             noAgency: Indépendant
+        specialty:
+            location: Location
+            transaction: Transaction
+        position:
+            assistant: Assistant
+            consultant_sale: Consultant vente
+            consultant_rental: Consultant location
+            partner: Associé
+            manager: Gérant
         create:
             button: Créer
             menuItem:
@@ -2712,6 +2803,11 @@ admin:
                 label: Agence
                 placeholder: Nom de l'agence...
                 help: Une agence déjà connue est réutilisée automatiquement.
+                notBlank: Le nom de l'agence est obligatoire.
+            specialties:
+                label: Spécialités
+            position:
+                label: Poste dans l'agence
             email:
                 label: Email
             phone:
@@ -2737,8 +2833,18 @@ admin:
             submitting: Création...
             name:
                 label: Nom de l'agence
-                placeholder: Foncia, Century 21...
+                placeholder: Foncia Paris 11, Century 21 Bastille...
                 exists: Cette agence existe déjà.
+            brand:
+                label: Enseigne
+                placeholder: Foncia, Century 21...
+                help: Une enseigne déjà connue est réutilisée automatiquement.
+            address:
+                label: Adresse
+            phone:
+                label: Téléphone
+            email:
+                label: Email
     tools:
         title: Outils
         documents:
@@ -2770,7 +2876,7 @@ admin:
                 persons:
                     title: Personnes du foyer
                     count: '%count%/%max% max'
-                    min: Renseigne au moins une personne.
+                    min: Renseignez au moins une personne.
                     max: Le foyer ne peut pas dépasser %limit% personnes.
                 person:
                     heading: 'Personne %number%'
@@ -2790,8 +2896,8 @@ admin:
                         length: Le nom doit faire entre 2 et 50 caractères.
                     documents:
                         label: Pièces demandées
-                        min: Sélectionne au moins une pièce pour cette personne.
-                        emptyCatalogue: 'Le catalogue est vide. Ajoute des documents depuis l''onglet Catalogue avant de créer une demande.'
+                        min: Sélectionnez au moins une pièce pour cette personne.
+                        emptyCatalogue: 'Le catalogue est vide. Ajoutez des documents depuis l''onglet Catalogue avant de créer une demande.'
                         checkAll: Tout cocher/décocher
                 typology:
                     two_tenants_two_guarantors: 2 locataires + 2 garants
@@ -2803,7 +2909,7 @@ admin:
                 note:
                     label: Note
                     help: Message libre pour le client (affiché dans le PDF). À rédiger dans la langue du client.
-                    placeholder: Ajoute un mot d'introduction, des consignes particulières, un rappel d'échéance...
+                    placeholder: Ajoutez un mot d'introduction, des consignes particulières, un rappel d'échéance...
                 driveLink:
                     label: Lien du drive
                     help: Lien sécurisé où le client déposera ses pièces. Sera inclus dans le PDF.
@@ -2838,7 +2944,7 @@ admin:
             list:
                 title: Catalogue des documents
                 subtitle: '{0}Aucun document enregistré|{1}1 document enregistré|]1,Inf[%count% documents enregistrés'
-                empty: Aucun document pour le moment. Crée le premier avec le bouton ci-dessus.
+                empty: Aucun document pour le moment. Créez le premier avec le bouton ci-dessus.
                 column:
                     name: Nom
                     category: Catégorie
@@ -2911,6 +3017,14 @@ admin:
                 download: Télécharger mes codes
                 warning: Conservez ces codes de récupération en lieu sûr, ils ne seront plus jamais affichés. Chacun ne fonctionne qu'une seule fois et permet de vous connecter si vous perdez votre téléphone.
                 done: J'ai mis mes codes de côté
+            pdf:
+                title: Codes de récupération
+                intro: Ces codes permettent de vous connecter au back-office si vous perdez l'accès à votre application d'authentification. Chaque code ne fonctionne qu'une seule fois.
+                warning: Conservez ce document en lieu sûr (coffre de mots de passe, tiroir fermé). Toute personne en sa possession peut contourner la double authentification de votre compte.
+                account: 'Compte :'
+                generatedAt: Généré le %date% à %time% (heure de Paris)
+                footerTag: Agence de Relocation pour Particuliers et Professionnels
+                footerAddress: 155 Rue du Faubourg Saint-Denis, 75010 Paris, France
             disable:
                 button: Désactiver
                 passwordHelp: Confirmez avec votre mot de passe pour désactiver la double authentification.
@@ -2918,7 +3032,7 @@ admin:
                 confirm: Désactiver la double authentification
                 cancel: Annuler
             error:
-                storage: L'envoi a échoué, réessaie dans un instant.
+                storage: L'envoi a échoué, réessayez dans un instant.
                 invalidCode: Ce code n'est pas valide. Vérifiez l'heure de votre téléphone et réessayez.
                 invalidPassword: Le mot de passe est incorrect.
         password:
@@ -2984,7 +3098,7 @@ admin:
             subtitle: Ce que ce membre peut prendre en charge. Seuls les membres cochés apparaissent dans les listes d'assignation correspondantes.
             closer:
                 label: Closer
-                description: Peut gérer des leads (prend en charge et qualifie les demandes entrantes)
+                description: Peut gérer des leads (prend en charge et qualifie les leads entrants)
             search_agent:
                 label: Agent de recherche
                 description: Peut gérer des dossiers (responsable de la recherche de biens pour un locataire)
@@ -3211,7 +3325,7 @@ listProperty:
         success:
             title: Merci, votre bien a bien été transmis.
             text: Notre équipe vous recontacte sous 24h ouvrées.
-            photosCount: "{0} Aucune photo|{1} 1 photo jointe|]1,Inf[ %count% photos jointes"
+            photosCount: "{0}Aucune photo|{1}1 photo jointe|]1,Inf[%count% photos jointes"
             emailRecap: "Le récapitulatif complet a été envoyé à %email%."
             cta: Découvrir notre gestion locative
         error:
@@ -3262,23 +3376,35 @@ deposit:
         code:
             label: Code du dossier
             placeholder: 'Code à 6 caractères'
+            charLabel: Caractère %position% du code
             hint: Le code figure dans l'email que vous avez reçu.
         submit: Accéder à mon dossier
         error:
             noMatch: Ces informations ne correspondent à aucun dossier. Vérifiez l'email et le code reçus.
+            depositLocked: Votre accès est momentanément verrouillé. Merci de réessayer plus tard ou de contacter votre conseiller.
             tooManyRequests: Trop de tentatives. Merci de patienter une minute avant de réessayer.
     documents:
         title: Bonjour %firstName%
+        nameJoin: et
         text: Déposez les pièces demandées ci-dessous, votre conseiller les vérifie au fur et à mesure.
         formats:
-            label: 'Format accepté :'
-            maxSize: 10 Mo max par fichier
-        reference: Dossier %reference%
+            formatLabel: Format accepté
+            sizeLabel: Taille maximale
+            sizeValue: 10 Mo par fichier
+        dropPdfOnly: Seuls les fichiers PDF sont acceptés.
+        complete:
+            title: Dossier complet
+            text: Toutes vos pièces sont validées, votre conseiller prend le relais.
+        referenceLabel: Votre dossier
         empty: Aucune pièce n'est attendue pour le moment.
         upload: Déposer
         uploadMore: Ajouter
         uploading: Envoi... %percent%
+        uploadingMany: Fichier %index%/%count%... %percent%
         uploadFailed: Échec de l'envoi, réessayez
+        dropTooLarge: 'Fichier trop lourd : 10 Mo max par fichier.'
+        cancelUpload: Annuler l'envoi
+        uploadedAnnounce: Fichiers envoyés, les statuts des pièces sont à jour.
         leave: Se déconnecter
         sizeMb: '%size% Mo'
         sizeKb: '%size% Ko'
@@ -3297,25 +3423,8 @@ deposit:
         error:
             noFile: Aucun fichier reçu. Merci de réessayer.
             locked: Cette pièce a été validée, son fichier ne peut plus être retiré.
-    manager:
-        title: Votre interlocuteur dédié
-        call: Appeler
-        write: Écrire
     progress:
-        label: Avancement de votre dossier
-    trust:
-        encrypted:
-            title: Connexion chiffrée
-            text: Vos documents transitent en HTTPS et sont stockés hors de tout accès public.
-        private:
-            title: Accès restreint
-            text: Seule l'équipe en charge de votre dossier peut consulter vos pièces.
-        retention:
-            title: Conservation limitée
-            text: Vos documents sont supprimés à la clôture de votre dossier.
-        hosting:
-            title: Hébergé en France
-            text: Vos données restent sur des serveurs situés en France.
+        detail: '%deposited% pièces déposées sur %total%, dont %validated% validées'
 
 twoFactor:
     challenge:

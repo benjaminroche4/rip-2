@@ -97,10 +97,10 @@ final class ContactStatusControlRenderTest extends KernelTestCase
         $live->call('change', ['status' => 'in_progress']);
         $live->call('pickStep', ['step' => 'quote_preparation']);
         $live->call('confirmStep');
-        fwrite(STDERR, 'LIVE after confirm: '.(str_contains((string) $live->render(), 'next-step-callout') ? 'CALLOUT OK' : 'CALLOUT ABSENT')."\n");
+        self::assertStringContainsString('next-step-callout', (string) $live->render(), 'Confirmed step renders the callout.');
 
         $live->call('change', ['status' => 'in_progress']);
-        fwrite(STDERR, 'LIVE re-change in_progress: '.(str_contains((string) $live->render(), 'next-step-callout') ? 'CALLOUT OK' : 'CALLOUT ABSENT')."\n");
+        self::assertStringContainsString('next-step-callout', (string) $live->render(), 'Re-selecting in progress keeps the confirmed step callout.');
 
         $live->call('change', ['status' => 'closed']);
         self::assertStringContainsString('contact-status-dropdown', (string) $live->render(), 'Closed state still renders the status selector.');

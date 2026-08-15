@@ -21,6 +21,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserList', template: 'components/Admin/UserList.html.twig')]
 final class UserList
 {
+    use AdminSectionGuard;
     use DefaultActionTrait;
 
     /**

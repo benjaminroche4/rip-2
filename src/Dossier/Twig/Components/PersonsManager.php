@@ -33,6 +33,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Dossier:PersonsManager', template: 'components/Dossier/PersonsManager.html.twig')]
 final class PersonsManager
 {
+    use DossiersSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -157,7 +158,51 @@ final class PersonsManager
         private readonly Security $security,
         private readonly DossierEventLogger $events,
         private readonly \App\Dossier\Service\DossierStatusAdvancer $advancer,
+        private readonly \App\Dossier\Service\DossierProgressCalculator $progressCalculator,
+        private readonly \App\Dossier\Service\DossierStepValidator $stepValidator,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
+    }
+
+    /** État validé de l'étape Personnes, pour le pied de card. */
+    public function isStepValidated(): bool
+    {
+        return $this->progressCalculator->forDossier($this->dossier())->isValidated(\App\Dossier\Domain\DossierStep::Persons);
+    }
+
+    /** "Rouvrir" uniquement tant que l'étape suivante n'est pas validée. */
+    public function getCanReopenStep(): bool
+    {
+        $progress = $this->progressCalculator->forDossier($this->dossier());
+
+        return $progress->isValidated(\App\Dossier\Domain\DossierStep::Persons)
+            && !$progress->isValidated(\App\Dossier\Domain\DossierStep::Search);
+    }
+
+    /** Bouton "Valider" en bas de la card : déverrouille l'étape Recherche. */
+    #[LiveAction]
+    public function validateStep(): void
+    {
+        $this->ensureAdmin();
+        if ($this->stepValidator->validate($this->dossier(), \App\Dossier\Domain\DossierStep::Persons)) {
+            // Enchaînement naturel : l'onglet suivant s'ouvre (l'URL est
+            // mise à jour avant le morph déclenché par progress:changed).
+            $this->dispatchBrowserEvent('dossier-step:validated', ['next' => \App\Dossier\Domain\DossierStep::Search->value]);
+            // La barre d'onglets et le panneau Recherche vivent dans le
+            // chrome de page : un morph Turbo les met à jour.
+            $this->dispatchBrowserEvent('dossier-progress:changed');
+            $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.stepValidated')]);
+        }
+    }
+
+    #[LiveAction]
+    public function reopenStep(): void
+    {
+        $this->ensureAdmin();
+        if ($this->stepValidator->reopen($this->dossier(), \App\Dossier\Domain\DossierStep::Persons)) {
+            $this->dispatchBrowserEvent('dossier-progress:changed');
+            $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.stepReopened')]);
+        }
     }
 
     public function mount(): void
@@ -437,6 +482,8 @@ final class PersonsManager
             $this->dispatchBrowserEvent('dossier-persons:changed');
         }
 
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.personSaved')]);
+
         // Explicit validate button (same flow as the lead identity card):
         // a successful save closes the inline form, add and edit alike.
         $this->resetDraft();
@@ -499,6 +546,7 @@ final class PersonsManager
         $this->emit('dossier-persons:changed');
         // Keep the Personnes tab count badge in sync (page-chrome morph).
         $this->dispatchBrowserEvent('dossier-persons:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.personRemoved')]);
         $this->resetDraft();
     }
 
@@ -517,10 +565,10 @@ final class PersonsManager
             $other->setPrimaryContact($other === $person);
         }
         $this->normalize($dossier);
-        $this->events->log($dossier, 'primary_changed', [
-            'name' => trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName())),
-        ]);
+        $name = trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName()));
+        $this->events->log($dossier, 'primary_changed', ['name' => $name]);
         $this->em->flush();
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.personPrimary', ['%name%' => $name])]);
     }
 
     /**

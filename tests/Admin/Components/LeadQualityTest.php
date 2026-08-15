@@ -79,7 +79,7 @@ final class LeadQualityTest extends KernelTestCase
 
         $component = $this->mountTwigComponent('Admin:LeadQuality', ['contactId' => (int) $contact->getId()]);
         $component->setLiveResponder(new LiveResponder());
-        $component->setChannel('whatsapp');
+        $component->chooseChannel('whatsapp');
 
         $this->em->clear();
         self::assertSame(RecontactChannel::Whatsapp, $this->em->find(Contact::class, $contact->getId())->getRecontactChannel());
@@ -95,7 +95,7 @@ final class LeadQualityTest extends KernelTestCase
         $component->setLiveResponder(new LiveResponder());
 
         $this->expectException(BadRequestHttpException::class);
-        $component->setChannel('pigeon');
+        $component->chooseChannel('pigeon');
     }
 
     public function testExistingNotePrefillsTheField(): void

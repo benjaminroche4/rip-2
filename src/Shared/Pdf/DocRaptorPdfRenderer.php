@@ -6,7 +6,7 @@ namespace App\Shared\Pdf;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Bridge\Monolog\Attribute\WithMonologChannel;
+use Monolog\Attribute\WithMonologChannel;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;

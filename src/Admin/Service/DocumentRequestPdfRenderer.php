@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Admin\Service;
 
+use App\Admin\Domain\DocumentCategory;
+use App\Admin\Domain\DocumentView;
 use App\Admin\Entity\DocumentRequest;
 use App\Shared\Pdf\PdfFormat;
 use App\Shared\Pdf\PdfOptions;
@@ -53,9 +55,46 @@ final readonly class DocumentRequestPdfRenderer
         return $this->twig->render('pdf/document_request.html.twig', [
             'request' => $request,
             'locale' => $locale,
+            'docsByPerson' => $this->docsByPerson($request, $locale),
             'translator' => $this->translator,
             'logoDataUri' => $this->logoDataUri(),
         ]);
+    }
+
+    /**
+     * Localised document read models, grouped per person (same iteration
+     * order as request.persons in the template) then by category in enum
+     * order (Identity → Work → …), pinned first then alphabetical inside a
+     * category. The template renders DTOs only, never the Document entity.
+     *
+     * @return list<array<string, list<DocumentView>>>
+     */
+    private function docsByPerson(DocumentRequest $request, string $locale): array
+    {
+        $result = [];
+        foreach ($request->getPersons() as $person) {
+            $byCategory = [];
+            foreach ($person->getDocuments() as $doc) {
+                $view = DocumentView::fromEntity($doc, $locale);
+                // Category is form-bound on the entity and can be null on
+                // drafts; fold those into OTHER instead of crashing the PDF.
+                $byCategory[($view->category ?? DocumentCategory::OTHER)->value][] = $view;
+            }
+
+            $ordered = [];
+            foreach (DocumentCategory::cases() as $category) {
+                if (!isset($byCategory[$category->value])) {
+                    continue;
+                }
+                $docs = $byCategory[$category->value];
+                usort($docs, static fn (DocumentView $a, DocumentView $b): int => [$b->pinned, $a->name] <=> [$a->pinned, $b->name]);
+                $ordered[$category->value] = $docs;
+            }
+
+            $result[] = $ordered;
+        }
+
+        return $result;
     }
 
     public function filename(DocumentRequest $request): string

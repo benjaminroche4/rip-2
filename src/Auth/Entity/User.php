@@ -421,7 +421,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
      */
     public function setPlainBackupCodes(array $plainCodes): static
     {
-        $this->backupCodes = array_values(array_map(self::hashBackupCode(...), $plainCodes));
+        $this->backupCodes = array_map(self::hashBackupCode(...), $plainCodes);
 
         return $this;
     }

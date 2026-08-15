@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Dossier\Controller;
 
 use App\Dossier\Domain\DossierDocumentStatus;
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierDocumentFile;
 use App\Dossier\Entity\DossierPerson;
 use App\Dossier\Form\DepositPairingType;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Service\DocumentStorage;
+use App\Dossier\Service\DossierDocumentNamer;
 use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -24,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints\File as FileConstraint;
@@ -42,6 +45,13 @@ final class DepositController extends AbstractController
 {
     private const SESSION_KEY = 'dossier_deposit';
 
+    /**
+     * Sliding expiry window of the pairing code, re-armed by every email
+     * embedding the code (dossier creation, document request, reminder,
+     * refusal). An expired code pairs exactly like an unknown one.
+     */
+    private const PAIRING_CODE_TTL = '-'.Dossier::PAIRING_CODE_TTL_DAYS.' days';
+
     public function __construct(
         private readonly DossierRepository $dossiers,
         private readonly EntityManagerInterface $em,
@@ -49,6 +59,7 @@ final class DepositController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly RateLimiterFactoryInterface $formDepositLimiter,
         private readonly DossierEventLogger $events,
+        private readonly DossierDocumentNamer $namer,
         #[Autowire(service: 'monolog.logger.security')]
         private readonly LoggerInterface $securityLogger,
     ) {
@@ -70,7 +81,7 @@ final class DepositController extends AbstractController
             ],
         ],
     )]
-    public function index(Request $request): Response
+    public function index(Request $request, #[MapQueryParameter] ?string $code = null): Response
     {
         [$dossier, $person] = $this->pairedAccess($request);
         if (null !== $dossier && null !== $person) {
@@ -93,13 +104,16 @@ final class DepositController extends AbstractController
             $match = $this->match(
                 (string) $form->get('email')->getData(),
                 (string) $form->get('code')->getData(),
+                $failureReason,
             );
 
             if (null === $match) {
                 // Generic message on purpose: never reveal whether the code
-                // exists or whether the email belongs to the dossier.
+                // exists, expired, or whether the email belongs to the
+                // dossier. The reason stays internal, for the audit log only.
                 $this->securityLogger->warning('Deposit pairing failed', [
                     'ip' => $request->getClientIp(),
+                    'reason' => $failureReason ?? 'unknown',
                 ]);
                 $form->addError(new FormError($this->translator->trans('deposit.pairing.error.noMatch')));
 
@@ -107,6 +121,18 @@ final class DepositController extends AbstractController
             }
 
             [$dossier, $person] = $match;
+            // Verrou temporaire posé par le staff : message dédié (pas de
+            // fuite sur le code : on ne l'affiche qu'après un appairage
+            // valide), aucune session créée.
+            if ($dossier->isDepositLocked()) {
+                $this->securityLogger->warning('Deposit pairing refused: locked dossier', [
+                    'dossier' => (string) $dossier->getReference(),
+                    'ip' => $request->getClientIp(),
+                ]);
+                $form->addError(new FormError($this->translator->trans('deposit.pairing.error.depositLocked')));
+
+                return $this->pairingErrorResponse($request, $form);
+            }
             // New privilege level: rotate the session id (fixation guard).
             $request->getSession()->migrate();
             $request->getSession()->set(self::SESSION_KEY, [
@@ -129,7 +155,7 @@ final class DepositController extends AbstractController
         return $this->uncacheable($this->render('public/dossier/deposit.html.twig', [
             'paired' => false,
             'pairingForm' => $form->createView(),
-            'prefilledCode' => $this->normalizeCode((string) $request->query->get('code')),
+            'prefilledCode' => $this->normalizeCode($code ?? ''),
         ]));
     }
 
@@ -186,7 +212,9 @@ final class DepositController extends AbstractController
             return $this->documentsResponse($request, $dossier, $person, $id, $message);
         }
 
-        $originalName = substr((string) $upload->getClientOriginalName(), 0, 255);
+        // Coherent display name ("Pièce d'identité - Jean Dupont.pdf")
+        // instead of the client's own file name.
+        $originalName = $this->namer->displayName($document, (string) ($upload->guessExtension() ?? 'pdf'));
         $mimeType = (string) ($upload->getMimeType() ?? 'application/octet-stream');
         $size = (int) $upload->getSize();
         try {
@@ -346,6 +374,11 @@ final class DepositController extends AbstractController
     }
 
     /**
+     * Deliberately does NOT check the pairing code's expiry: a session
+     * already paired stays valid, the sliding 90-day window only guards NEW
+     * pairings in match(). Kicking out a depositor mid-upload because the
+     * code aged out would only hurt; closure remains the hard cut-off.
+     *
      * @return array{0: Dossier|null, 1: DossierPerson|null}
      */
     private function pairedAccess(Request $request): array
@@ -356,7 +389,7 @@ final class DepositController extends AbstractController
         }
 
         $dossier = $this->dossiers->find((int) $grant['dossier']);
-        if (!$dossier instanceof Dossier || $dossier->isClosed()) {
+        if (!$dossier instanceof Dossier || $dossier->isClosed() || $dossier->isDepositLocked()) {
             return [null, null];
         }
 
@@ -370,10 +403,14 @@ final class DepositController extends AbstractController
     }
 
     /**
+     * @param 'unknown'|'expired'|null $failureReason internal audit-log detail,
+     *                                                never shown to the visitor
+     *
      * @return array{0: Dossier, 1: DossierPerson}|null
      */
-    private function match(string $email, string $code): ?array
+    private function match(string $email, string $code, ?string &$failureReason = null): ?array
     {
+        $failureReason = 'unknown';
         $code = $this->normalizeCode($code);
         $email = mb_strtolower(trim($email));
         if ('' === $code || '' === $email) {
@@ -386,8 +423,21 @@ final class DepositController extends AbstractController
             return null;
         }
 
+        // Sliding expiry window, re-armed by every email embedding the code:
+        // an expired (or never armed) code behaves exactly like an unknown
+        // one. Only NEW pairings are checked here — an already paired session
+        // (pairedAccess) deliberately survives the code's expiry.
+        $sentAt = $dossier->getPairingCodeSentAt();
+        if (null === $sentAt || $sentAt < $this->clock->now()->modify(self::PAIRING_CODE_TTL)) {
+            $failureReason = 'expired';
+
+            return null;
+        }
+
         foreach ($dossier->getPersons() as $person) {
             if (mb_strtolower(trim((string) $person->getEmail())) === $email) {
+                $failureReason = null;
+
                 return [$dossier, $person];
             }
         }
@@ -447,8 +497,7 @@ final class DepositController extends AbstractController
      * @return array{
      *     reference: string,
      *     firstName: string,
-     *     manager: array{name: string, email: string, phone: string}|null,
-     *     progress: array{validated: int, total: int},
+     *     progress: array{validated: int, deposited: int, total: int},
      *     tenants: list<array{name: string, documents: list<array<string, mixed>>}>,
      *     errorDocumentId: int|null,
      *     errorKey: string|null,
@@ -462,7 +511,16 @@ final class DepositController extends AbstractController
     ): array {
         $tenants = [];
         $validated = 0;
+        $deposited = 0;
         $total = 0;
+        // Urgency order: what still needs an action comes first, validated
+        // pieces sink to the bottom of each tenant list.
+        $urgency = [
+            DossierDocumentStatus::Refused->value => 0,
+            DossierDocumentStatus::Requested->value => 1,
+            DossierDocumentStatus::Received->value => 2,
+            DossierDocumentStatus::Validated->value => 3,
+        ];
         foreach ($dossier->getPersons() as $tenant) {
             $documents = [];
             foreach ($tenant->getDocuments() as $document) {
@@ -481,6 +539,11 @@ final class DepositController extends AbstractController
                 if (DossierDocumentStatus::Validated === $status) {
                     ++$validated;
                 }
+                // "Deposited" = the tenant already did their part (a file is
+                // in, awaiting review or validated): the honest progress.
+                if (\in_array($status, [DossierDocumentStatus::Received, DossierDocumentStatus::Validated], true)) {
+                    ++$deposited;
+                }
                 $documents[] = [
                     'id' => (int) $document->getId(),
                     'typeLabelKey' => $document->getType()?->labelKey() ?? '',
@@ -497,24 +560,32 @@ final class DepositController extends AbstractController
             if ([] === $documents) {
                 continue;
             }
+            usort($documents, static fn (array $a, array $b): int => $urgency[$a['status']] <=> $urgency[$b['status']]);
             $tenants[] = [
                 'name' => trim(trim((string) $tenant->getFirstName()).' '.trim((string) $tenant->getLastName())),
                 'documents' => $documents,
             ];
         }
 
-        $manager = $dossier->getManager();
+        // Greeting: every tenant first name ("Jean et Marie"), so a couple
+        // feels addressed together whoever paired. Falls back to the paired
+        // person (a guarantor or follow-up may pair on a dossier whose
+        // tenants have no usable first name).
+        $tenantFirstNames = [];
+        foreach ($dossier->getPersons() as $candidate) {
+            $firstName = trim((string) $candidate->getFirstName());
+            if (DossierPersonRole::TENANT === $candidate->getRole() && '' !== $firstName) {
+                $tenantFirstNames[] = $firstName;
+            }
+        }
+        if ([] === $tenantFirstNames) {
+            $tenantFirstNames = [trim((string) $person->getFirstName())];
+        }
 
         return [
             'reference' => (string) $dossier->getReference(),
-            'firstName' => trim((string) $person->getFirstName()),
-            'manager' => null !== $manager ? [
-                'name' => trim(trim((string) $manager->getFirstName()).' '.trim((string) $manager->getLastName())),
-                'email' => (string) $manager->getEmail(),
-                'phone' => (string) $manager->getPhoneNumber(),
-                'avatarFilename' => $manager->getAvatarFilename(),
-            ] : null,
-            'progress' => ['validated' => $validated, 'total' => $total],
+            'firstName' => implode(' '.$this->translator->trans('deposit.documents.nameJoin').' ', $tenantFirstNames),
+            'progress' => ['validated' => $validated, 'deposited' => $deposited, 'total' => $total],
             'tenants' => $tenants,
             'errorDocumentId' => $errorDocumentId,
             'errorKey' => $errorKey,

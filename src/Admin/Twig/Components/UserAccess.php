@@ -29,6 +29,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 #[AsLiveComponent(name: 'Admin:UserAccess', template: 'components/Admin/UserAccess.html.twig')]
 final class UserAccess
 {
+    use AdminSectionGuard;
     use ComponentToolsTrait;
     use DefaultActionTrait;
 
@@ -56,6 +57,7 @@ final class UserAccess
         private readonly EntityManagerInterface $em,
         private readonly Security $security,
         private readonly LoggerInterface $securityLogger,
+        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -119,6 +121,7 @@ final class UserAccess
         // La fiche montre/masque les cards staff (fonctions, activité) : on
         // la rafraîchit en Turbo, sans rechargement manuel.
         $this->dispatchBrowserEvent('user-access:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.accessGranted')]);
     }
 
     /** Turning it off strips everything: always confirmed by a modal. */
@@ -162,6 +165,7 @@ final class UserAccess
         $this->audit('back-office access revoked', $user);
 
         $this->dispatchBrowserEvent('user-access:changed');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.accessRevoked')]);
     }
 
     public function hasSection(string $section): bool

@@ -12,8 +12,8 @@ use App\Dossier\Repository\DossierRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\HeaderUtils;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 // Same security model as other admin controllers: access_control on the
@@ -99,8 +99,8 @@ final class ToolsController extends AbstractController
     )]
     public function documentsRequest(
         string $adminPrefix,
-        Request $httpRequest,
         DossierRepository $dossiers,
+        #[MapQueryParameter('dossier')] string $reference = '',
     ): Response {
         $this->ensureValidPrefix($adminPrefix);
 
@@ -110,7 +110,6 @@ final class ToolsController extends AbstractController
         $prefillPersons = [];
         $openDossiers = [];
         if ($this->isGranted('ROLE_SECTION_DOSSIERS')) {
-            $reference = (string) $httpRequest->query->get('dossier', '');
             if ('' !== $reference) {
                 $dossier = $dossiers->findOneBy(['reference' => $reference]);
                 foreach ($dossier?->getPersons() ?? [] as $person) {

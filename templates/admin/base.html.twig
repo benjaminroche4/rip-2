@@ -11,7 +11,7 @@
            Twig : |raw évite le double échappement ("&amp;" visible dans
            l'onglet) sans rien désécuriser. #}
         {% set pageTitle %}{% block title %}{% endblock %}{% endset %}
-        {% set fullTitle %}Admin{% if pageTitle|trim %} - {{ pageTitle|trim|raw }}{% endif %}{% endset %}
+        {% set fullTitle %}{{ 'admin.meta.titlePrefix'|trans }}{% if pageTitle|trim %} - {{ pageTitle|trim|raw }}{% endif %}{% endset %}
         <title>{{ fullTitle|raw }}</title>
 
         {# Description + OG/Twitter : jamais indexé (X-Robots-Tag + meta),
@@ -52,6 +52,7 @@
        est encore en vol (conversion, upload, sauvegarde live). #}
     <body
         class="min-h-dvh bg-neutral-50 text-gray-900 antialiased"
+        data-bo
         data-controller="bfcache-refresh busy-guard"
         data-busy-guard-message-value="{{ 'admin.busyGuard.message'|trans }}"
     >
@@ -65,7 +66,7 @@
                 aria-label="{{ 'admin.sidebar.label'|trans }}"
             >
                 <div class="flex shrink-0 items-center justify-between gap-2 px-5 py-5 group-data-collapsed/sidebar:flex-col group-data-collapsed/sidebar:gap-3 group-data-collapsed/sidebar:px-3">
-                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="Relocation In Paris — Admin" class="rounded-lg focus-visible:outline-2 focus-visible:outline-primary">
+                    <a href="{{ path('admin_dashboard', {adminPrefix: adminPrefix}) }}" aria-label="{{ 'admin.nav.logoLabel'|trans }}" class="rounded-lg focus-visible:outline-2 focus-visible:outline-primary">
                         <img
                             src="{{ asset('medias/logos/logo_red.svg') }}"
                             alt="Relocation In Paris"

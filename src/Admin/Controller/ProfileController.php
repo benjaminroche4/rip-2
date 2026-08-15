@@ -10,7 +10,7 @@ use App\Admin\Repository\UserActivityRepository;
 use App\Auth\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Bridge\Monolog\Attribute\WithMonologChannel;
+use Monolog\Attribute\WithMonologChannel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
@@ -102,7 +102,7 @@ final class ProfileController extends AbstractController
             $em->flush();
 
             $this->logger->info('Password changed from the profile page.', ['user' => $user->getEmail()]);
-            $this->addFlash('profile_password_success', 'admin.profile.password.success');
+            $this->addFlash('success', 'admin.profile.password.success');
 
             return $this->redirectToRoute('admin_profile', ['adminPrefix' => $adminPrefix], Response::HTTP_SEE_OTHER);
         }

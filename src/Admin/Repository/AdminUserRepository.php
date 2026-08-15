@@ -110,6 +110,13 @@ final readonly class AdminUserRepository
             // JSON list stored as text: match the quoted value.
             $qb->andWhere('u.staffFunctions LIKE :function')
                 ->setParameter('function', '%"'.$function->value.'"%');
+
+            // Assignables are matched on STORED roles (project rule, not the
+            // hierarchy): a user whose back-office access was revoked but who
+            // kept a residual staff function must not show up in dropdowns.
+            $qb->andWhere('u.roles LIKE :admin OR u.roles LIKE :section')
+                ->setParameter('admin', '%ROLE_ADMIN%')
+                ->setParameter('section', '%ROLE_SECTION_%');
         }
 
         if (null !== $limit) {

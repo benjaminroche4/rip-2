@@ -26,6 +26,25 @@ class Agency
     #[Assert\Length(max: 100, maxMessage: 'admin.agents.create.agency.length')]
     private ?string $name = null;
 
+    /** Brand the agency belongs to ("enseigne"); null = independent shop. */
+    #[ORM\ManyToOne(targetEntity: Brand::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Brand $brand = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255, maxMessage: 'admin.agencies.create.address.length')]
+    private ?string $address = null;
+
+    /** E.164 form, normalised client-side by the phone-input controller. */
+    #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\Length(max: 30, maxMessage: 'admin.agencies.create.phone.length')]
+    private ?string $phone = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    #[Assert\Email(message: 'admin.agencies.create.email.invalid')]
+    #[Assert\Length(max: 180, maxMessage: 'admin.agencies.create.email.length')]
+    private ?string $email = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -42,6 +61,54 @@ class Agency
     public function setName(?string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getBrand(): ?Brand
+    {
+        return $this->brand;
+    }
+
+    public function setBrand(?Brand $brand): static
+    {
+        $this->brand = $brand;
+
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = '' !== trim((string) $address) ? $address : null;
+
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = '' !== trim((string) $phone) ? $phone : null;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = '' !== trim((string) $email) ? $email : null;
 
         return $this;
     }
