@@ -44,6 +44,8 @@ final class AgentCreate extends AbstractController
     public function __construct(
         private readonly Security $security,
         private readonly AgencyRepository $agencies,
+        private readonly \Symfony\Component\HttpFoundation\RequestStack $requestStack,
+        private readonly \App\Auth\Service\AvatarDownloader $avatars,
     ) {
     }
 
@@ -116,6 +118,19 @@ final class AgentCreate extends AbstractController
         $agent->setCreatedAt(new \DateTimeImmutable());
         $em->persist($agent);
         $em->flush();
+
+        // Photo optionnelle, envoyée avec l'action (input file "photo") :
+        // normalisée WebP 256x256 et stockée sous agents/<id>/avatar/. Un
+        // fichier illisible n'empêche jamais la création (best-effort).
+        $upload = $this->requestStack->getCurrentRequest()?->files->get('photo');
+        if ($upload instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $bytes = (string) @file_get_contents($upload->getPathname());
+            $stored = '' !== $bytes ? $this->avatars->storeFromBytes($bytes, (string) $agent->getId(), 'agents', 'avatar') : null;
+            if (null !== $stored) {
+                $agent->setAvatarFilename($stored);
+                $em->flush();
+            }
+        }
 
         try {
             $this->addFlash('success', 'admin.toast.agentCreated');

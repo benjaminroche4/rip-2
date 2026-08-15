@@ -23,6 +23,7 @@ final readonly class AgentSummary
         public array $specialties,
         public ?AgencyPosition $position,
         public \DateTimeImmutable $createdAt,
+        public ?string $avatarFilename = null,
     ) {
     }
 

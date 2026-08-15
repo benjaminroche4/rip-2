@@ -654,6 +654,51 @@ final class ModulesTest extends KernelTestCase
         self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
     }
 
+    public function testLockingTheDepositGoesThroughTheConfirmationModal(): void
+    {
+        $dossier = $this->persistDossier();
+        $component = $this->mountModules($dossier);
+
+        // Asking opens the modal without locking anything yet.
+        $component->askDepositLock();
+        self::assertTrue($component->confirmingDepositLock);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+
+        // Cancelling leaves the deposit open.
+        $component->cancelDepositLock();
+        self::assertFalse($component->confirmingDepositLock);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+
+        // Confirming locks.
+        $component->askDepositLock();
+        $component->confirmDepositLock();
+        self::assertFalse($component->confirmingDepositLock);
+        $this->em->clear();
+        self::assertNotNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+
+        // Unlocking is direct: no modal, service restored in one click.
+        $component->askDepositLock();
+        self::assertFalse($component->confirmingDepositLock);
+        $this->em->clear();
+        self::assertNull($this->em->find(Dossier::class, $dossier->getId())->getDepositLockedAt());
+    }
+
+    public function testDepositLockedBannerShowsOnlyWhileLocked(): void
+    {
+        $dossier = $this->persistDossier();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        self::assertStringNotContainsString('dossier-deposit-locked-banner', $rendered);
+
+        $dossier->setDepositLockedAt(new \DateTimeImmutable('2026-08-10'));
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId()]);
+        self::assertStringContainsString('dossier-deposit-locked-banner', $rendered);
+    }
+
     public function testDriveProvisionButtonHiddenWhenDriveIsOff(): void
     {
         // Env de test sans Drive : pas de bouton, action no-op.

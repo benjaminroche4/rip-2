@@ -108,15 +108,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="user-admin-toggle-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelToggleAdmin"
             data-testid="user-admin-toggle-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelToggleAdmin"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -134,7 +134,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelToggleAdmin"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="user-admin-toggle-cancel"
@@ -143,7 +143,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmToggleAdmin"
                             data-loading="action(confirmToggleAdmin)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ targetIsAdmin ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90' }}"
@@ -166,15 +166,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="user-suspend-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelSuspend"
             data-testid="user-suspend-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelSuspend"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -192,7 +192,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelSuspend"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="user-suspend-cancel"
@@ -201,7 +201,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmSuspend"
                             data-loading="action(confirmSuspend)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
@@ -225,15 +225,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="user-two-factor-reset-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelResetTwoFactor"
             data-testid="user-two-factor-reset-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelResetTwoFactor"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -251,7 +251,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelResetTwoFactor"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="user-two-factor-reset-cancel"
@@ -260,7 +260,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmResetTwoFactor"
                             data-loading="action(confirmResetTwoFactor)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
@@ -283,15 +283,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="user-resume-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelResume"
             data-testid="user-resume-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelResume"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -309,7 +309,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelResume"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="user-resume-cancel"
@@ -318,7 +318,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmResume"
                             data-loading="action(confirmResume)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
@@ -341,15 +341,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="user-delete-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelDelete"
             data-testid="user-delete-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelDelete"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -367,7 +367,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelDelete"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="user-delete-cancel"

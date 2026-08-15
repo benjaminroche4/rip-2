@@ -549,7 +549,7 @@ parameters:
 		-
 			message: '#^Cannot call method upload\(\) on array\<array\<Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\>\|Symfony\\Component\\DomCrawler\\Field\\FormField\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: tests/Dossier/DepositTest.php
 
 		-

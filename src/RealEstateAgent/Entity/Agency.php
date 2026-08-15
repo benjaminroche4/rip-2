@@ -45,6 +45,10 @@ class Agency
     #[Assert\Length(max: 180, maxMessage: 'admin.agencies.create.email.length')]
     private ?string $email = null;
 
+    /** Logo (clé bucket agencies/<id>/logo/<uuid>.webp), servi par app_avatar. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $logoFilename = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -121,6 +125,18 @@ class Agency
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getLogoFilename(): ?string
+    {
+        return $this->logoFilename;
+    }
+
+    public function setLogoFilename(?string $logoFilename): static
+    {
+        $this->logoFilename = $logoFilename;
 
         return $this;
     }

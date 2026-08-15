@@ -21,13 +21,14 @@ final readonly class GcsAvatarStorage implements AvatarStorage
     ) {
     }
 
-    public function store(string $ownerRef, string $webpBytes): string
+    public function store(string $ownerRef, string $webpBytes, string $domain = 'users', string $type = 'avatar'): string
     {
         if (1 !== preg_match('/^[0-9A-Za-z]+$/', $ownerRef)) {
             throw new \RuntimeException('Illegal avatar owner ref.');
         }
+        LocalAvatarStorage::assertSegments($domain, $type);
 
-        $objectPath = 'users/'.$ownerRef.'/avatar/'.Uuid::v7()->toRfc4122().'.webp';
+        $objectPath = $domain.'/'.$ownerRef.'/'.$type.'/'.Uuid::v7()->toRfc4122().'.webp';
         $this->bucket->upload($webpBytes, [
             'name' => $objectPath,
             'metadata' => ['contentType' => 'image/webp'],

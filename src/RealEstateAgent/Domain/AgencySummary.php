@@ -18,6 +18,7 @@ final readonly class AgencySummary
         public ?string $brand,
         public int $agentCount,
         public \DateTimeImmutable $createdAt,
+        public ?string $logoFilename = null,
     ) {
     }
 }

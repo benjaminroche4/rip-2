@@ -350,6 +350,20 @@ final class SearchEditorTest extends KernelTestCase
         self::assertFalse($component->locked);
     }
 
+    public function testLockedBannerShowsOnlyWhileLocked(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+
+        $locked = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="search-locked-banner"', $locked, 'Locked by default: the unlock banner shows.');
+
+        $unlocked = (string) $this->renderTwigComponent('Dossier:Search', [
+            'dossierId' => (int) $dossier->getId(),
+            'locked' => false,
+        ]);
+        self::assertStringNotContainsString('data-testid="search-locked-banner"', $unlocked);
+    }
+
     public function testLeaseMismatchFlagsInconsistentDurations(): void
     {
         $dossier = $this->persistDossier(withSearch: true);

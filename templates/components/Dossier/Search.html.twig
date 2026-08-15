@@ -55,6 +55,24 @@
         {% set currentGuarantor = this.currentGuarantorType %}
         {% set currentEarlyMoveIn = this.currentEarlyMoveIn %}
         <div class="mt-1 flex flex-col gap-1">
+            {# Verrouillé : contenu grisé et désaturé + bandeau cliquable qui
+               déverrouille (hors fieldset, donc actif). Même traitement que le
+               module Dossier (module-file-locked-banner). #}
+            {% if this.locked %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="toggleLock"
+                    class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
+                    data-testid="search-locked-banner"
+                >
+                    {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.locked.notice'|trans }}
+                </button>
+            {% endif %}
+            {# Le wrapper reprend le flex gap du parent : le fieldset est en
+               display: contents, ses bandes blanches restent donc espacées. #}
+            <div class="flex flex-col gap-1 transition-[opacity,filter] duration-200 ease-out {{ this.locked ? 'opacity-70 saturate-50' : '' }}">
             {# Verrou anti-missclick, doublé de la garde d'étape : la recherche
                n'ouvre qu'une fois l'étape Personnes validée. #}
             <fieldset {% if this.locked or not this.stepOpen %}disabled{% endif %} class="contents">
@@ -862,6 +880,7 @@
                 </div>
             </div>
             </fieldset>
+            </div>
 
         </div>
     </details>

@@ -53,7 +53,7 @@ final readonly class AvatarDownloader
      * stores them under the owner's prefix. Returns the object path or null on failure (decode,
      * size, disk). Failures are logged, never thrown.
      */
-    public function storeFromBytes(string $bytes, string $ownerRef): ?string
+    public function storeFromBytes(string $bytes, string $ownerRef, string $domain = 'users', string $type = 'avatar'): ?string
     {
         if (\strlen($bytes) > self::MAX_BYTES) {
             $this->logger->warning('AvatarDownloader: payload too large', ['bytes' => \strlen($bytes)]);
@@ -67,7 +67,7 @@ final readonly class AvatarDownloader
         }
 
         try {
-            return $this->storage->store($ownerRef, $webp);
+            return $this->storage->store($ownerRef, $webp, $domain, $type);
         } catch (\Throwable $e) {
             $this->logger->error('AvatarDownloader: storage failed', ['error' => $e->getMessage()]);
 

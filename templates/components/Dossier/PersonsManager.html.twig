@@ -98,7 +98,10 @@
             data-action="live#action"
             data-live-action-param="toggleCard"
         >
-            <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.create.persons.title'|trans }}</h2>
+            <div class="min-w-0">
+                <h2 class="font-medium text-gray-900">{{ 'admin.dossiers.create.persons.title'|trans }}</h2>
+                <p class="mt-0.5 text-xs text-gray-500">{{ 'admin.dossiers.show.persons.subtitle'|trans }}</p>
+            </div>
             {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
         </summary>
 
@@ -441,8 +444,10 @@
                         {{ ui.pStar(person) }}
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
+                        {# Le locataire principal est nommé tel quel dans la
+                           chip; les autres gardent le libellé du rôle. #}
                         <span class="inline-flex items-center rounded-full bg-white px-2.5 py-0.5 text-xs font-medium {{ tenantRole ? 'text-primary' : 'text-amber-700' }}">
-                            {{ person.role.labelKey|trans }}
+                            {{ (person.primaryContact ? 'admin.dossiers.create.person.primaryTag' : person.role.labelKey)|trans }}
                         </span>
                         {{ headerActions }}
                     </div>
@@ -638,8 +643,8 @@
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="person-remove-title"
-                data-controller="modal-focus modal-anim"
-                data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+                data-controller="modal-focus modal-anim instant-exit"
+                data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
                 data-live-action-param="cancelRemove"
                 data-testid="person-remove-modal"
             >
@@ -647,7 +652,7 @@
                 <button
                     type="button"
                     class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                    data-action="modal-anim#out live#action"
+                    data-action="instant-exit#run live#action"
                     data-live-action-param="cancelRemove"
                     aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                     tabindex="-1"
@@ -665,7 +670,7 @@
                         <div class="flex items-center justify-end gap-4 p-3">
                             <button
                                 type="button"
-                                data-action="modal-anim#out live#action"
+                                data-action="instant-exit#run live#action"
                                 data-live-action-param="cancelRemove"
                                 class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                                 data-testid="person-remove-cancel"
@@ -674,7 +679,7 @@
                             </button>
                             <button
                                 type="button"
-                                data-action="modal-anim#out live#action"
+                                data-action="instant-exit#run live#action"
                                 data-live-action-param="removePerson"
                                 data-live-key-param="{{ this.confirmRemoveId }}"
                                 data-loading="action(removePerson)|addAttribute(disabled)"

@@ -36,7 +36,7 @@ final class AvatarController extends AbstractController
     #[Route(
         '/avatars/{path}',
         name: 'app_avatar',
-        requirements: ['path' => 'users/[0-9A-Za-z]+/avatar/[0-9a-f-]{36}\.webp'],
+        requirements: ['path' => '(users|agencies|agents)/[0-9A-Za-z]+/(avatar|logo)/[0-9a-f-]{36}\.webp'],
         methods: ['GET'],
     )]
     public function __invoke(string $path, Request $request): Response

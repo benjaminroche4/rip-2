@@ -162,6 +162,29 @@ final class VisitCrudAccessTest extends WebTestCase
         self::assertSame(1, (int) $this->em->getRepository(Visit::class)->count([]));
     }
 
+    public function testNewPagePreselectsTheDossierFromTheQueryReference(): void
+    {
+        $this->loginAs(['ROLE_ADMIN']);
+        $visit = $this->persistVisit();
+        $dossier = $visit->getDossier();
+
+        $crawler = $this->client->request(
+            'GET',
+            '/fr/'.$this->adminPrefix.'/admin/visites/nouvelle?dossier='.$dossier->getReference(),
+        );
+
+        self::assertResponseIsSuccessful();
+        // Le select natif du formulaire porte l'option du dossier, sélectionnée.
+        $selected = $crawler->filter('[data-testid="visit-form-dossier"] option[selected]');
+        self::assertCount(1, $selected);
+        self::assertSame((string) $dossier->getId(), $selected->attr('value'));
+
+        // Référence inconnue : la page s'ouvre simplement sans présélection.
+        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/nouvelle?dossier=DS-999999');
+        self::assertResponseIsSuccessful();
+        self::assertCount(0, $crawler->filter('[data-testid="visit-form-dossier"] option[selected]'));
+    }
+
     private function persistVisit(): Visit
     {
         $dossier = (new Dossier())

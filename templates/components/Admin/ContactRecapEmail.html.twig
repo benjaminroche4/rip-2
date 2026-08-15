@@ -22,8 +22,8 @@
     {% if this.state == 'modal' and contact %}
         <div
             class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
-            data-controller="modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="closeModal"
             data-testid="contact-recap-modal"
         >
@@ -31,7 +31,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="closeModal"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"

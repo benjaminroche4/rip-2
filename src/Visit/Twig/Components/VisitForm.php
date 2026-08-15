@@ -64,10 +64,18 @@ final class VisitForm extends AbstractController
     ) {
     }
 
-    public function mount(): void
+    public function mount(?int $dossierId = null): void
     {
         $this->ensureAdmin();
         $this->visit ??= new Visit();
+        // Arrivée depuis une fiche dossier ("Planifier une visite") : le
+        // dossier est présélectionné, le reste du formulaire s'ouvre direct.
+        if (null !== $dossierId && null === $this->visit->getDossier()) {
+            $dossier = $this->dossiers->find($dossierId);
+            if (null !== $dossier) {
+                $this->visit->setDossier($dossier);
+            }
+        }
     }
 
     protected function instantiateForm(): FormInterface

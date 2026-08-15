@@ -43,6 +43,8 @@ final class AgencyCreate extends AbstractController
     public string $adminPrefix = '';
 
     public function __construct(
+        private readonly \Symfony\Component\HttpFoundation\RequestStack $requestStack,
+        private readonly \App\Auth\Service\AvatarDownloader $avatars,
         private readonly Security $security,
         private readonly AgencyRepository $agencies,
         private readonly BrandRepository $brands,
@@ -102,6 +104,19 @@ final class AgencyCreate extends AbstractController
         $agency->setCreatedAt(new \DateTimeImmutable());
         $em->persist($agency);
         $em->flush();
+
+        // Logo optionnel, envoyé avec l'action (input file "logo") :
+        // normalisé WebP 256x256 et stocké sous agencies/<id>/logo/. Un
+        // fichier illisible n'empêche jamais la création (best-effort).
+        $upload = $this->requestStack->getCurrentRequest()?->files->get('logo');
+        if ($upload instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $bytes = (string) @file_get_contents($upload->getPathname());
+            $stored = '' !== $bytes ? $this->avatars->storeFromBytes($bytes, (string) $agency->getId(), 'agencies', 'logo') : null;
+            if (null !== $stored) {
+                $agency->setLogoFilename($stored);
+                $em->flush();
+            }
+        }
 
         try {
             $this->addFlash('success', 'admin.toast.agencyCreated');

@@ -17,6 +17,6 @@
 
 {% block body %}
     <div data-testid="visit-new-page">
-        <twig:Visit:VisitForm :adminPrefix="adminPrefix" />
+        <twig:Visit:VisitForm :adminPrefix="adminPrefix" :dossierId="preselectedDossierId ?? null" />
     </div>
 {% endblock %}

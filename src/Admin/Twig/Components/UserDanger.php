@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -324,10 +325,11 @@ final class UserDanger
 
         $this->em->remove($user);
         $this->em->flush();
-        try {
-            $this->requestStack->getSession()->getFlashBag()->add('success', 'admin.toast.userDeleted');
-        } catch (\LogicException) {
-            // Sessionless context (component tests): no toast to queue.
+        // Guarded: the component is also mounted from tests without session.
+        $request = $this->requestStack->getCurrentRequest();
+        $session = null !== $request && $request->hasSession() ? $request->getSession() : null;
+        if ($session instanceof FlashBagAwareSessionInterface) {
+            $session->getFlashBag()->add('success', 'admin.toast.userDeleted');
         }
 
         return new RedirectResponse($this->urlGenerator->generate('admin_users', ['adminPrefix' => $this->adminPrefix]));

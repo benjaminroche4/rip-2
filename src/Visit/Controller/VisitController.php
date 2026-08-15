@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
 // Same security model as other admin controllers: access_control on the
@@ -61,13 +62,25 @@ final class VisitController extends AbstractController
         name: 'visit_new',
         methods: ['GET'],
     )]
-    public function new(string $adminPrefix): Response
-    {
+    public function new(
+        string $adminPrefix,
+        #[MapQueryParameter] ?string $dossier = null,
+        ?\App\Dossier\Repository\DossierRepository $dossiers = null,
+    ): Response {
         $this->ensureValidPrefix($adminPrefix);
+
+        // "Planifier une visite" depuis une fiche dossier : la référence en
+        // query présélectionne le dossier dans le formulaire. Une référence
+        // inconnue est simplement ignorée.
+        $preselected = null;
+        if (null !== $dossier && null !== $dossiers && 1 === preg_match('/^DS-\d{6}$/', $dossier)) {
+            $preselected = $dossiers->findOneBy(['reference' => $dossier])?->getId();
+        }
 
         // The split form/summary screen lives in the Visit:VisitForm component.
         return $this->render('admin/visits/new.html.twig', [
             'adminPrefix' => $adminPrefix,
+            'preselectedDossierId' => $preselected,
         ]);
     }
 

@@ -164,6 +164,21 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertNull($this->em->find(Contact::class, $contact->getId())->getProjectMoveInAt());
     }
 
+    public function testLockedBannerShowsOnlyWhileLocked(): void
+    {
+        $contact = $this->persistContact();
+        $this->loginAsAdmin();
+
+        $locked = (string) $this->renderTwigComponent('Admin:ContactProject', ['contactId' => (int) $contact->getId()]);
+        self::assertStringContainsString('data-testid="contact-project-locked-banner"', $locked, 'Locked by default: the unlock banner shows.');
+
+        $unlocked = (string) $this->renderTwigComponent('Admin:ContactProject', [
+            'contactId' => (int) $contact->getId(),
+            'locked' => false,
+        ]);
+        self::assertStringNotContainsString('data-testid="contact-project-locked-banner"', $unlocked);
+    }
+
     public function testPropertyTypeChipTogglesAndPersists(): void
     {
         $contact = $this->persistContact();

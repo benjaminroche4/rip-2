@@ -264,4 +264,4 @@ deposit:
     documents:
         error:
             maxSize: 'The file exceeds 10 MB. Please send a lighter version.'
-            mimeType: 'Format not accepted. Only PDF is allowed.'
+            mimeType: 'Format not accepted. PDF or photo (JPG, PNG, WebP).'

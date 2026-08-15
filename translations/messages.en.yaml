@@ -1792,6 +1792,8 @@ gallery:
     previous: Previous
     next: Next
 admin:
+    locked:
+        notice: Locked, click to edit
     toast:
         dismiss: Dismiss the notification
         saved: Changes saved.
@@ -1936,6 +1938,7 @@ admin:
             lock: Lock editing
             reference: Reference
             persons:
+                subtitle: Tenants and follow-up requests of the file.
                 edit: Edit
                 save: Save
                 newTitle: New person
@@ -2139,6 +2142,7 @@ admin:
                 documentsResent: 'Reminder sent to %recipient% for the documents of %tenant%: %pieces%'
                 documentDeposited: 'Document deposited: %piece% (%tenant%), file %file%'
                 documentValidated: 'Document validated: %piece% (%tenant%)'
+                documentsCompleted: 'File complete: all documents validated, confirmation email sent'
                 documentRefused: 'Document refused: %piece% (%tenant%). Reason: %reason%'
                 documentRefusedNoReason: 'Document refused: %piece% (%tenant%)'
                 documentStatus: 'Status of %piece% (%tenant%) set to "%status%"'
@@ -2226,11 +2230,14 @@ admin:
                         reasonPlaceholder: 'E.g. unreadable document, a page is missing...'
                         confirm: Refuse and notify
                     pieceDescription:
-                        edit: Add a precision visible to the tenant
+                        add: Add a note
+                        edit: Add a note visible to the tenant
+                        editNote: Edit the note
                         placeholder: 'E.g. last 3 months, both sides...'
                     depositLink:
-                        label: Deposit link to share
-                        copy: Copy
+                        label: Tenant upload area
+                        copy: Copy the link
+                        codeLabel: 'Pairing code:'
                         copyCode: Copy the pairing code
                         copied: Copied!
                     error:
@@ -2243,6 +2250,11 @@ admin:
                         lock: Lock the deposit
                         locked: Deposit locked
                         unlock: Unlock the client deposit
+                        confirmTitle: Lock the upload area?
+                        confirmText: Tenants will no longer be able to open the upload page or send documents while the lock is on. Nothing is deleted, you can lift it at any time.
+                        confirmButton: Lock
+                        bannerTitle: Upload area locked
+                        bannerText: Tenants have been unable to send documents since %date%. Unlock the deposit from the File card to restore access.
                     sizeMb: '%size% MB'
                     renameFile: Rename the file
                     upload:
@@ -2280,6 +2292,11 @@ admin:
         create:
             button: New file
             title: Create a file
+            offer:
+                accompagne:
+                    hint: The client does the visits themselves, we handle everything else.
+                confie:
+                    hint: We handle everything, visits included. The client only validates.
             subtitle: 'Up to 2 tenants and 2 follow-up requests. The file name is generated from the tenants.'
             cancel: Cancel
             submit: Create the file
@@ -2786,6 +2803,8 @@ admin:
                 title: An agent
                 subtitle: Add an agent to the directory
             title: New real estate agent
+            photo:
+                label: Photo (optional)
             subtitle: Add a partner agent to the directory, with their agency and contact details.
             cancel: Cancel
             submit: Add agent
@@ -2826,6 +2845,8 @@ admin:
                 title: An agency
                 subtitle: Create a standalone agency
             title: New agency
+            logo:
+                label: Logo (optional)
             subtitle: Register a partner agency. You can attach agents to it later.
             cancel: Cancel
             submit: Create agency
@@ -3387,10 +3408,11 @@ deposit:
         nameJoin: and
         text: Upload the requested documents below, your advisor reviews them as they arrive.
         formats:
-            formatLabel: Accepted format
+            formatLabel: Accepted formats
+            formatValue: PDF or photo (JPG, PNG)
             sizeLabel: Maximum size
             sizeValue: 10 MB per file
-        dropPdfOnly: Only PDF files are accepted.
+        dropError: Only PDF files and photos (JPG, PNG, WebP) are accepted.
         complete:
             title: File complete
             text: All your documents are validated, your advisor takes it from here.
@@ -3398,6 +3420,7 @@ deposit:
         empty: No document is expected at the moment.
         upload: Upload
         uploadMore: Add
+        takePhoto: Take a photo
         uploading: Uploading... %percent%
         uploadingMany: File %index%/%count%... %percent%
         uploadFailed: Upload failed, please retry

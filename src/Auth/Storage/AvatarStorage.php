@@ -22,7 +22,11 @@ interface AvatarStorage
      *
      * @return string the full object path, e.g. users/<ulid>/avatar/<uuid>.webp
      */
-    public function store(string $ownerRef, string $webpBytes): string;
+    /**
+     * Stores normalized WebP bytes under {domain}/{ownerRef}/{type}/{uuid}.webp
+     * (bucket key convention). Defaults keep the historic user-avatar layout.
+     */
+    public function store(string $ownerRef, string $webpBytes, string $domain = 'users', string $type = 'avatar'): string;
 
     public function exists(string $path): bool;
 

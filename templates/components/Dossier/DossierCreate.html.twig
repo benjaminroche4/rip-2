@@ -60,23 +60,26 @@
     </div>
 {% endmacro %}
 
+{# Même geste étoile que la card Personnes du détail : le principal porte
+   l'étoile pleine dans le rond primaire, chaque autre locataire une étoile
+   grise cliquable qui transfère le tag en un clic. #}
 {% macro primaryControls(key, isTenant, isPrimary) %}
     {% if isPrimary %}
-        <span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary" data-testid="dossier-primary-tag">
-            {{ ux_icon('lucide:star', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-            {{ 'admin.dossiers.create.person.primaryTag'|trans }}
+        <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" title="{{ 'admin.dossiers.create.person.primaryTag'|trans }}" role="img" aria-label="{{ 'admin.dossiers.create.person.primaryTag'|trans }}" data-testid="dossier-primary-tag">
+            {{ ux_icon('lucide:star', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
         </span>
     {% elseif isTenant %}
         <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1 rounded-full border border-gray-950/10 px-2 py-0.5 text-[11px] font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-primary/40 hover:text-primary"
+            class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-gray-300 transition-colors duration-100 ease-out hover:bg-primary/5 hover:text-primary"
             data-action="live#action"
             data-live-action-param="choosePrimary"
             data-live-key-param="{{ key }}"
+            title="{{ 'admin.dossiers.create.person.makePrimary'|trans }}"
+            aria-label="{{ 'admin.dossiers.create.person.makePrimary'|trans }}"
             data-testid="dossier-primary-choose"
         >
-            {{ ux_icon('lucide:star', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-            {{ 'admin.dossiers.create.person.makePrimary'|trans }}
+            {{ ux_icon('lucide:star', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
         </button>
     {% endif %}
 {% endmacro %}
@@ -105,14 +108,17 @@
         {# Modale STATIQUE, sans animation d'entrée : le formulaire porte un
            data-model on(change) qui re-rend le composant modale ouverte — un
            modal-anim (attribut data-entered posé au runtime) serait effacé
-           par le morph et la modale deviendrait invisible. #}
+           par le morph et la modale deviendrait invisible. Fermeture sans
+           effet non plus, symétrique de l'ouverture (décision utilisateur) :
+           instant-exit masque la modale au clic même, le retrait réel
+           n'arrivant qu'au re-rendu live ~200 ms plus tard. #}
         <div
             class="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby="dossier-create-title"
-            data-controller="modal-focus"
-            data-action="keydown.esc@window->live#action"
+            data-controller="modal-focus instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="closeModal"
             data-testid="dossier-create-modal"
         >
@@ -120,7 +126,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="closeModal"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -139,6 +145,44 @@
                         <h2 id="dossier-create-title" class="text-lg font-semibold tracking-tight text-gray-900">{{ 'admin.dossiers.create.title'|trans }}</h2>
                         <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.dossiers.create.subtitle'|trans }}</p>
                     </div>
+
+                    {# ── Formule visée : chips toggle-off, optionnelle à la
+                          création (modifiable plus tard). ── #}
+                    <section class="px-3" data-testid="dossier-create-offer">
+                        <h3 class="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                            {{ 'admin.dossiers.card.package.label'|trans }}
+                        </h3>
+                        {# Deux cards sélectionnables (titre, prix, résumé) :
+                           résumé orienté staff (qui fait les visites), pas le
+                           texte marketing public; toggle-off en recliquant. #}
+                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            {% for offerValue in ['accompagne', 'confie'] %}
+                                {% set picked = this.offer == offerValue %}
+                                <button
+                                    type="button"
+                                    data-action="live#action"
+                                    data-live-action-param="chooseOffer"
+                                    data-live-offer-param="{{ offerValue }}"
+                                    aria-pressed="{{ picked ? 'true' : 'false' }}"
+                                    class="cursor-pointer rounded-xl border p-3.5 text-left transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5' : 'border-neutral-200 bg-white hover:border-gray-400' }}"
+                                    data-testid="dossier-create-offer-{{ offerValue }}"
+                                >
+                                    <span class="flex items-center justify-between gap-2">
+                                        <span class="flex items-center gap-1.5 text-sm font-medium {{ picked ? 'text-primary' : 'text-gray-900' }}">
+                                            {{ ux_icon('lucide:badge-check', {class: 'size-4 shrink-0 transition-colors duration-100 ease-out ' ~ (picked ? 'text-primary' : 'text-gray-400'), 'aria-hidden': 'true'}) }}
+                                            {{ ('contact.contactForm.offer.' ~ offerValue ~ '.title')|trans }}
+                                        </span>
+                                        <span class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums transition-colors duration-100 ease-out {{ picked ? 'bg-primary/10 text-primary' : 'bg-neutral-100 text-gray-600' }}">
+                                            {{ ('contact.contactForm.offer.' ~ offerValue ~ '.price')|trans }}
+                                        </span>
+                                    </span>
+                                    <span class="mt-1.5 block text-xs text-pretty text-gray-500">
+                                        {{ ('admin.dossiers.create.offer.' ~ offerValue ~ '.hint')|trans }}
+                                    </span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </section>
 
                     <section data-testid="dossier-create-persons">
                         <div class="mb-3 flex items-baseline justify-between gap-4 px-3">
@@ -267,7 +311,7 @@
                     <div class="flex items-center justify-end gap-4 p-3 pt-0">
                         <button
                             type="button"
-                            data-action="live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="closeModal"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="dossier-create-cancel"

@@ -12,7 +12,7 @@ import { renderStreamMessage } from '@hotwired/turbo';
  * replaces the #deposit-documents region, which would destroy this
  * controller (and the queue) mid-run, so only the LAST response is
  * rendered, once the whole queue is done. The batch is validated upfront
- * (PDF only, 10 MB per file, matching the server rules): one bad file
+ * (PDF or photo, 10 MB per file, matching the server rules): one bad file
  * rejects the batch with an instant, precise message instead of a wasted
  * upload. On network failure the form falls back to a native submit.
  */
@@ -31,6 +31,9 @@ export default class extends Controller {
     /* Mirrors the server-side Assert\File(maxSize: '10M') — suffix M is
        1000-based in Symfony. */
     static MAX_BYTES = 10_000_000;
+
+    /* Mirrors the server-side Assert\File(mimeTypes) list exactly. */
+    static ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 
     #xhr = null;
     #queue = [];
@@ -84,8 +87,11 @@ export default class extends Controller {
         }
     }
 
-    start() {
-        this.#enqueue([...(this.inputTarget.files ?? [])]);
+    /* Two file inputs share the target: the regular picker and the
+       mobile-only camera capture. The triggering input is read from the
+       change event; both are reset once the queue settles. */
+    start(event) {
+        this.#enqueue([...(event.target.files ?? [])]);
     }
 
     cancel() {
@@ -109,8 +115,8 @@ export default class extends Controller {
         // Upfront batch validation, mirroring the server rules: instant
         // feedback, nothing uploaded when one file is off.
         for (const file of files) {
-            // The hidden input's accept filter does not apply to drops.
-            if ('application/pdf' !== file.type) {
+            // The hidden inputs' accept filters do not apply to drops.
+            if (!this.constructor.ACCEPTED_TYPES.includes(file.type)) {
                 this.#reject(this.dropErrorLabelValue);
 
                 return;
@@ -192,7 +198,7 @@ export default class extends Controller {
                 announcer.textContent = announcement;
             }
         }
-        this.labelTarget.classList.remove('pointer-events-none', 'opacity-60');
+        this.labelTargets.forEach((label) => label.classList.remove('pointer-events-none', 'opacity-60'));
         if (this.hasSkeletonTarget) {
             this.skeletonTarget.hidden = true;
         }
@@ -202,7 +208,7 @@ export default class extends Controller {
         if (this.hasCancelTarget) {
             this.cancelTarget.hidden = true;
         }
-        this.inputTarget.value = '';
+        this.#resetInputs();
         if (this.#lastStream) {
             renderStreamMessage(this.#lastStream);
             this.#lastStream = null;
@@ -210,7 +216,7 @@ export default class extends Controller {
     }
 
     #begin() {
-        this.labelTarget.classList.add('pointer-events-none', 'opacity-60');
+        this.labelTargets.forEach((label) => label.classList.add('pointer-events-none', 'opacity-60'));
         if (this.hasSkeletonTarget) {
             this.skeletonTarget.hidden = false;
         }
@@ -228,7 +234,13 @@ export default class extends Controller {
             this.statusTarget.textContent = message;
         }
         // Same file re-picked must fire `change` again.
-        this.inputTarget.value = '';
+        this.#resetInputs();
+    }
+
+    #resetInputs() {
+        this.inputTargets.forEach((input) => {
+            input.value = '';
+        });
     }
 
     #progress(percent) {

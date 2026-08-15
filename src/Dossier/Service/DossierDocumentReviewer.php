@@ -8,6 +8,8 @@ use App\Dossier\Domain\DossierDocumentStatus;
 use App\Dossier\Domain\PersonName;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierDocument;
+use App\Dossier\Entity\DossierEvent;
+use App\Dossier\Repository\DossierEventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\ClockInterface;
 
@@ -22,7 +24,9 @@ final class DossierDocumentReviewer
         private readonly EntityManagerInterface $em,
         private readonly ClockInterface $clock,
         private readonly DossierDocumentRefusalMailer $refusalMailer,
+        private readonly DossierDocumentCompletionMailer $completionMailer,
         private readonly DossierEventLogger $events,
+        private readonly DossierEventRepository $eventRepository,
         private readonly DossierStatusAdvancer $advancer,
     ) {
     }
@@ -34,6 +38,8 @@ final class DossierDocumentReviewer
      */
     public function applyStatus(Dossier $dossier, DossierDocument $document, DossierDocumentStatus $status): void
     {
+        $becomesValidated = DossierDocumentStatus::Validated === $status
+            && DossierDocumentStatus::Validated !== $document->getStatus();
         $document->setStatus($status);
         $document->setRefusalReason(null);
         if (DossierDocumentStatus::Requested === $status) {
@@ -52,6 +58,75 @@ final class DossierDocumentReviewer
         ]);
         $this->em->flush();
         $this->advancer->advance($dossier);
+
+        if ($becomesValidated) {
+            $this->notifyCompletionWhenJustReached($dossier, $document);
+        }
+    }
+
+    /**
+     * Tells the tenant the file is complete when this validation is the one
+     * that completed it. Fires only on the transition (the last pending
+     * piece just flipped to validated) and once per request cycle: a
+     * validated piece bounced to received and validated again stays silent,
+     * a documents_requested newer than the last documents_completed opens a
+     * new cycle and re-arms the email. A mailer failure never breaks the
+     * validation, and nothing is logged when no email left.
+     */
+    private function notifyCompletionWhenJustReached(Dossier $dossier, DossierDocument $document): void
+    {
+        if ($dossier->hasPendingDocuments() || !$this->hasDocuments($dossier) || !$this->startsNewCompletionCycle($dossier)) {
+            return;
+        }
+
+        try {
+            if (!$this->completionMailer->send($dossier, $document)) {
+                return;
+            }
+        } catch (\Throwable) {
+            return;
+        }
+
+        // The completion email embeds the pairing code: a successful send
+        // re-arms its sliding 90-day expiry window on the deposit page.
+        $dossier->setPairingCodeSentAt($this->clock->now());
+        $this->events->log($dossier, 'documents_completed', [
+            'tenant' => PersonName::firstLast($document->getPerson()),
+        ]);
+        $this->em->flush();
+    }
+
+    private function hasDocuments(Dossier $dossier): bool
+    {
+        foreach ($dossier->getPersons() as $person) {
+            if (!$person->getDocuments()->isEmpty()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A completion email already covered this request cycle unless a new
+     * documents_requested was logged after the latest documents_completed.
+     */
+    private function startsNewCompletionCycle(Dossier $dossier): bool
+    {
+        $completed = $this->eventRepository->findLatestOfKind((int) $dossier->getId(), 'documents_completed');
+        if (null === $completed) {
+            return true;
+        }
+
+        $requested = $this->eventRepository->findLatestOfKind((int) $dossier->getId(), 'documents_requested');
+
+        return null !== $requested && $this->isAfter($requested, $completed);
+    }
+
+    private function isAfter(DossierEvent $event, DossierEvent $reference): bool
+    {
+        return $event->getCreatedAt() > $reference->getCreatedAt()
+            || ($event->getCreatedAt() == $reference->getCreatedAt() && $event->getId() > $reference->getId());
     }
 
     /**

@@ -76,6 +76,23 @@ final class DossierCreateTest extends KernelTestCase
         self::assertMatchesRegularExpression('/^[A-HJ-NP-Z2-9]{6}$/', (string) $dossier->getPairingCode());
     }
 
+    public function testChosenOfferIsPersistedAndToggles(): void
+    {
+        $component = $this->mountComponent();
+        $component->formValues['persons'][0] = $this->personValues('Jean', 'Dupont', 'jean@example.com', DossierPersonRole::TENANT, phone: '+33611223344');
+
+        $component->chooseOffer('confie');
+        // Toggle-off : recliquer la formule choisie l'enlève.
+        $component->chooseOffer('confie');
+        self::assertSame('', $component->offer);
+        $component->chooseOffer('accompagne');
+
+        $this->createAction($component);
+
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);
+        self::assertSame('accompagne', $dossier->getOffer());
+    }
+
     public function testMalformedPhoneIsRejected(): void
     {
         $component = $this->mountComponent();
@@ -105,9 +122,12 @@ final class DossierCreateTest extends KernelTestCase
         // Static modal, on purpose: the form's data-model on(change) re-renders
         // the component while the modal is open, and a morph would strip the
         // runtime data-entered attribute of modal-anim (invisible modal).
-        self::assertStringContainsString('data-controller="modal-focus"', $rendered);
+        self::assertStringContainsString('data-controller="modal-focus instant-exit"', $rendered);
         self::assertStringNotContainsString('modal-anim', $rendered);
         self::assertStringNotContainsString('data-entered', $rendered);
+        // Closing is async (live round trip): every close path hides the
+        // overlay synchronously so no frozen intermediate frame shows.
+        self::assertStringContainsString('data-action="instant-exit#run live#action"', $rendered);
         // Anti double-submit guard on the create action.
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
     }

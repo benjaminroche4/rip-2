@@ -41,7 +41,7 @@
                     <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'deposit.documents.formats.formatLabel'|trans }}</dt>
                     <dd class="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-gray-900">
                         {{ ux_icon('lucide:file-check-2', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                        PDF
+                        {{ 'deposit.documents.formats.formatValue'|trans }}
                     </dd>
                 </div>
                 <div class="rounded-xl bg-white px-4 py-3">
@@ -100,13 +100,13 @@
                                 class="rounded-xl bg-white px-5 py-4 transition-colors duration-100 ease-out"
                                 data-testid="deposit-document"
                                 {% if document.canUpload %}
-                                    {# Toute la card accepte le glisser-déposer d'un PDF. #}
+                                    {# Toute la card accepte le glisser-déposer d'un fichier. #}
                                     data-controller="deposit-upload"
                                     data-deposit-upload-drag-class="ring-2 ring-primary/40 bg-primary/5"
                                     data-deposit-upload-uploading-label-value="{{ 'deposit.documents.uploading'|trans }}"
                                     data-deposit-upload-uploading-many-label-value="{{ 'deposit.documents.uploadingMany'|trans }}"
                                     data-deposit-upload-error-label-value="{{ 'deposit.documents.uploadFailed'|trans }}"
-                                    data-deposit-upload-drop-error-label-value="{{ 'deposit.documents.dropPdfOnly'|trans }}"
+                                    data-deposit-upload-drop-error-label-value="{{ 'deposit.documents.dropError'|trans }}"
                                     data-deposit-upload-too-large-label-value="{{ 'deposit.documents.dropTooLarge'|trans }}"
                                     data-deposit-upload-uploaded-announce-value="{{ 'deposit.documents.uploadedAnnounce'|trans }}"
                                     data-action="dragover->deposit-upload#dragOver dragenter->deposit-upload#dragEnter dragleave->deposit-upload#dragLeave drop->deposit-upload#drop dragover@window->deposit-upload#guardWindow drop@window->deposit-upload#guardWindow"
@@ -118,7 +118,12 @@
                                         <div class="min-w-0">
                                             <p class="truncate text-sm font-medium text-gray-900">{{ document.typeLabelKey|trans }}</p>
                                             {% if document.description %}
-                                                <p class="mt-0.5 text-xs text-pretty text-gray-500" data-testid="deposit-document-description">{{ document.description }}</p>
+                                                {# Consigne du conseiller sur la pièce : mise en
+                                                   évidence douce pour ne pas être manquée. #}
+                                                <p class="mt-1 flex items-start gap-1.5 rounded-md bg-amber-50 px-2 py-1 text-xs text-pretty text-amber-900" data-testid="deposit-document-description">
+                                                    {{ ux_icon('lucide:sticky-note', {'class': 'mt-px size-3 shrink-0 text-amber-500', 'aria-hidden': 'true'}) }}
+                                                    {{ document.description }}
+                                                </p>
                                             {% endif %}
                                             <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 font-medium {{ style.badge }}" data-testid="deposit-document-status">{{ document.statusLabelKey|trans }}</span>
@@ -138,18 +143,38 @@
                                               data-turbo="true"
                                               class="shrink-0">
                                             <input type="hidden" name="_token" value="{{ csrf_token('deposit_upload') }}">
-                                            <label data-deposit-upload-target="label" class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out focus-within:outline focus-within:outline-2 focus-within:outline-primary {{ document.status == 'refused' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-primary/40 hover:bg-primary/5 hover:text-primary' }}">
-                                                {{ ux_icon('lucide:upload', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                <span data-deposit-upload-target="status">{{ (document.files is empty or document.status == 'refused' ? 'deposit.documents.upload' : 'deposit.documents.uploadMore')|trans }}</span>
-                                                <input type="file"
-                                                       name="file"
-                                                       accept="application/pdf"
-                                                       multiple
-                                                       class="sr-only"
-                                                       data-deposit-upload-target="input"
-                                                       data-action="change->deposit-upload#start"
-                                                       data-testid="deposit-file-input">
-                                            </label>
+                                            {% set uploadButtonClasses = 'cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out focus-within:outline focus-within:outline-2 focus-within:outline-primary ' ~ (document.status == 'refused' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-primary/40 hover:bg-primary/5 hover:text-primary') %}
+                                            <div class="flex flex-col items-stretch gap-1.5">
+                                                <label data-deposit-upload-target="label" class="inline-flex justify-center sm:justify-start {{ uploadButtonClasses }}">
+                                                    {{ ux_icon('lucide:upload', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                    <span data-deposit-upload-target="status">{{ (document.files is empty or document.status == 'refused' ? 'deposit.documents.upload' : 'deposit.documents.uploadMore')|trans }}</span>
+                                                    <input type="file"
+                                                           name="file"
+                                                           accept="application/pdf,image/jpeg,image/png,image/webp"
+                                                           multiple
+                                                           class="sr-only"
+                                                           data-deposit-upload-target="input"
+                                                           data-action="change->deposit-upload#start"
+                                                           data-testid="deposit-file-input">
+                                                </label>
+                                                {# Mobile : la caméra du téléphone directement, la photo
+                                                   est stockée telle quelle (pas de conversion). #}
+                                                <label data-deposit-upload-target="label" class="flex justify-center sm:hidden {{ uploadButtonClasses }}">
+                                                    {{ ux_icon('lucide:camera', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                    <span>{{ 'deposit.documents.takePhoto'|trans }}</span>
+                                                    {# Volontairement sans name : l'envoi passe par le XHR
+                                                       du controller (FormData.set('file', ...)); un name
+                                                       dupliqué écraserait le fichier de l'autre input sur
+                                                       le fallback natif. #}
+                                                    <input type="file"
+                                                           accept="image/*"
+                                                           capture="environment"
+                                                           class="sr-only"
+                                                           data-deposit-upload-target="input"
+                                                           data-action="change->deposit-upload#start"
+                                                           data-testid="deposit-photo-input">
+                                                </label>
+                                            </div>
                                             <div class="mt-1.5 flex items-center gap-1.5">
                                                 <div data-deposit-upload-target="bar" hidden class="h-1 flex-1 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">
                                                     <div data-deposit-upload-target="fill" class="h-full w-(--progress) rounded-full bg-primary transition-[width] duration-150 ease-out" style="--progress: 0%"></div>

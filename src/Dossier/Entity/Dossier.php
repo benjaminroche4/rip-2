@@ -109,6 +109,13 @@ class Dossier
     private ?string $sourceContactReference = null;
 
     /**
+     * Formule choisie ("accompagne" | "confie") : copiée du contact à la
+     * conversion, choisie à la main sur un dossier créé de zéro.
+     */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $offer = null;
+
+    /**
      * Staff member in charge of the dossier ("responsable de dossier").
      * Optional; survives the user's deletion as an unassigned dossier.
      */
@@ -507,6 +514,18 @@ class Dossier
                 $person->setDossier(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOffer(): ?string
+    {
+        return $this->offer;
+    }
+
+    public function setOffer(?string $offer): static
+    {
+        $this->offer = $offer;
 
         return $this;
     }

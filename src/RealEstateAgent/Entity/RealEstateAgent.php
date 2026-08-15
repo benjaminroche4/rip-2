@@ -49,6 +49,10 @@ class RealEstateAgent
     #[Assert\Length(max: 30, maxMessage: 'admin.agents.create.phone.length')]
     private ?string $phone = null;
 
+    /** Photo (clé bucket agents/<id>/avatar/<uuid>.webp), servie par app_avatar. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avatarFilename = null;
+
     /**
      * Deal types the agent handles (an agent can do both), stored as the
      * enum backing values; null = not filled in.
@@ -172,6 +176,18 @@ class RealEstateAgent
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getAvatarFilename(): ?string
+    {
+        return $this->avatarFilename;
+    }
+
+    public function setAvatarFilename(?string $avatarFilename): static
+    {
+        $this->avatarFilename = $avatarFilename;
 
         return $this;
     }

@@ -22,9 +22,10 @@ final readonly class LocalAvatarStorage implements AvatarStorage
     ) {
     }
 
-    public function store(string $ownerRef, string $webpBytes): string
+    public function store(string $ownerRef, string $webpBytes, string $domain = 'users', string $type = 'avatar'): string
     {
-        $objectPath = 'users/'.$this->safeRef($ownerRef).'/avatar/'.Uuid::v7()->toRfc4122().'.webp';
+        self::assertSegments($domain, $type);
+        $objectPath = $domain.'/'.$this->safeRef($ownerRef).'/'.$type.'/'.Uuid::v7()->toRfc4122().'.webp';
         $fullPath = $this->baseDir.'/'.$objectPath;
 
         $dir = \dirname($fullPath);
@@ -73,6 +74,14 @@ final readonly class LocalAvatarStorage implements AvatarStorage
         }
 
         return $this->baseDir.'/'.$path;
+    }
+
+    /** Liste blanche des segments : la clé bucket reste maîtrisée. */
+    public static function assertSegments(string $domain, string $type): void
+    {
+        if (!\in_array($domain, ['users', 'agencies', 'agents'], true) || !\in_array($type, ['avatar', 'logo'], true)) {
+            throw new \RuntimeException('Illegal avatar storage segment.');
+        }
     }
 
     private function safeRef(string $ownerRef): string

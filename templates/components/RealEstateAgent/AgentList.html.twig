@@ -75,9 +75,14 @@
                     <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
                         {% for agency in agencies %}
                             <li class="flex items-center gap-3 rounded-xl bg-white px-5 py-4" data-testid="agency-row">
-                                <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
-                                    {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                </span>
+                                {# Logo si l'agence en a un, sinon la pastille bâtiment. #}
+                                {% if agency.logoFilename %}
+                                    <twig:Avatar filename="{{ agency.logoFilename }}" name="{{ agency.name }}" size="9" />
+                                {% else %}
+                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
+                                        {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                                    </span>
+                                {% endif %}
                                 <div class="min-w-0 flex-1">
                                     <div class="flex min-w-0 items-center gap-2">
                                         <p class="truncate text-sm font-medium text-gray-900">{{ agency.name }}</p>
@@ -119,7 +124,7 @@
                             <li class="rounded-xl bg-white px-5 py-4" data-testid="agent-row">
                                 <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
                                     <div class="flex min-w-0 items-center gap-3 sm:flex-1">
-                                        <twig:Avatar name="{{ agent.fullName }}" size="9" />
+                                        <twig:Avatar filename="{{ agent.avatarFilename }}" name="{{ agent.fullName }}" size="9" />
                                         <div class="min-w-0">
                                             <div class="flex min-w-0 items-center gap-2">
                                                 <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>

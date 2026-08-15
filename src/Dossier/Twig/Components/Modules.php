@@ -136,6 +136,10 @@ final class Modules
     #[LiveProp(writable: true)]
     public string $descriptionDraft = '';
 
+    /** True while the deposit-lock confirmation modal is open. */
+    #[LiveProp]
+    public bool $confirmingDepositLock = false;
+
     /** File id whose display name is being edited inline, or null. */
     #[LiveProp]
     public ?int $renamingFileId = null;
@@ -266,11 +270,54 @@ final class Modules
         return $this->dossier()->isDepositLocked();
     }
 
+    /** Date de pose du verrou, pour le bandeau d'alerte. */
+    public function getDepositLockedAt(): ?\DateTimeImmutable
+    {
+        return $this->dossier()->getDepositLockedAt();
+    }
+
     /**
      * Verrouille / déverrouille l'espace de dépôt public du dossier : le
      * client qui s'identifie voit "accès verrouillé, réessayez plus tard".
      * Rien n'est purgé : c'est une pause, pas une clôture.
      */
+    /**
+     * Entry point of the deposit-lock button: locking asks for confirmation
+     * (the tenants lose access), unlocking restores service directly.
+     */
+    #[LiveAction]
+    public function askDepositLock(): void
+    {
+        $this->ensureAdmin();
+        if (!$this->isFileMutable()) {
+            return;
+        }
+        if ($this->dossier()->isDepositLocked()) {
+            $this->toggleDepositLock();
+
+            return;
+        }
+        $this->confirmingDepositLock = true;
+    }
+
+    #[LiveAction]
+    public function cancelDepositLock(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmingDepositLock = false;
+    }
+
+    #[LiveAction]
+    public function confirmDepositLock(): void
+    {
+        $this->ensureAdmin();
+        $this->confirmingDepositLock = false;
+        if (!$this->isFileMutable() || $this->dossier()->isDepositLocked()) {
+            return;
+        }
+        $this->toggleDepositLock();
+    }
+
     #[LiveAction]
     public function toggleDepositLock(): void
     {

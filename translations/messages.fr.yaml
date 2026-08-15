@@ -1793,6 +1793,8 @@ gallery:
     previous: Précédent
     next: Suivant
 admin:
+    locked:
+        notice: Verrouillé, cliquez pour modifier
     toast:
         dismiss: Fermer la notification
         saved: Modifications enregistrées.
@@ -1937,6 +1939,7 @@ admin:
             lock: Verrouiller la modification
             reference: Référence
             persons:
+                subtitle: Locataires et demandes de suivi du dossier.
                 edit: Modifier
                 save: Enregistrer
                 newTitle: Nouvelle personne
@@ -2140,6 +2143,7 @@ admin:
                 documentsResent: 'Relance envoyée à %recipient% pour les pièces de %tenant% : %pieces%'
                 documentDeposited: 'Pièce déposée : %piece% (%tenant%), fichier %file%'
                 documentValidated: 'Pièce validée : %piece% (%tenant%)'
+                documentsCompleted: 'Dossier complet : toutes les pièces sont validées, email de confirmation envoyé'
                 documentRefused: 'Pièce refusée : %piece% (%tenant%). Motif : %reason%'
                 documentRefusedNoReason: 'Pièce refusée : %piece% (%tenant%)'
                 documentStatus: 'Statut de la pièce %piece% (%tenant%) passé à "%status%"'
@@ -2227,11 +2231,14 @@ admin:
                         reasonPlaceholder: 'Ex : document illisible, il manque une page...'
                         confirm: Refuser et prévenir
                     pieceDescription:
-                        edit: Ajouter une précision visible par le locataire
+                        add: Ajouter une note
+                        edit: Ajouter une note visible par le locataire
+                        editNote: Modifier la note
                         placeholder: 'Ex : les 3 derniers mois, recto-verso...'
                     depositLink:
-                        label: Lien de dépôt à partager
-                        copy: Copier
+                        label: Espace de dépôt locataire
+                        copy: Copier le lien
+                        codeLabel: 'Code d''appairage :'
                         copyCode: Copier le code d'appairage
                         copied: Copié !
                     error:
@@ -2244,6 +2251,11 @@ admin:
                         lock: Verrouiller le dépôt
                         locked: Dépôt verrouillé
                         unlock: Déverrouiller le dépôt client
+                        confirmTitle: Verrouiller l'espace de dépôt ?
+                        confirmText: Les locataires ne pourront plus ouvrir la page de dépôt ni envoyer de pièces tant que le verrou est posé. Rien n'est supprimé, vous pourrez le lever à tout moment.
+                        confirmButton: Verrouiller
+                        bannerTitle: Espace de dépôt verrouillé
+                        bannerText: Les locataires ne peuvent plus envoyer de pièces depuis le %date%. Déverrouillez le dépôt depuis la carte Dossier pour rétablir l'accès.
                     sizeMb: '%size% Mo'
                     renameFile: Renommer le fichier
                     upload:
@@ -2281,6 +2293,11 @@ admin:
         create:
             button: Nouveau dossier
             title: Créer un dossier
+            offer:
+                accompagne:
+                    hint: Le client fait les visites lui-même, nous gérons tout le reste.
+                confie:
+                    hint: Nous faisons tout, visites comprises. Le client valide seulement.
             subtitle: 'Jusqu''à 2 locataires et 2 demandes de suivi. Le nom du dossier est généré depuis les locataires.'
             cancel: Annuler
             submit: Créer le dossier
@@ -2787,6 +2804,8 @@ admin:
                 title: Un agent
                 subtitle: Ajouter un agent à l'annuaire
             title: Nouvel agent immobilier
+            photo:
+                label: Photo (optionnelle)
             subtitle: Ajoutez un agent partenaire à l'annuaire, avec son agence et ses coordonnées.
             cancel: Annuler
             submit: Ajouter l'agent
@@ -2827,6 +2846,8 @@ admin:
                 title: Une agence
                 subtitle: Créer une agence seule
             title: Nouvelle agence
+            logo:
+                label: Logo (optionnel)
             subtitle: Enregistrez une agence partenaire. Vous pourrez y rattacher des agents ensuite.
             cancel: Annuler
             submit: Créer l'agence
@@ -3388,10 +3409,11 @@ deposit:
         nameJoin: et
         text: Déposez les pièces demandées ci-dessous, votre conseiller les vérifie au fur et à mesure.
         formats:
-            formatLabel: Format accepté
+            formatLabel: Formats acceptés
+            formatValue: PDF ou photo (JPG, PNG)
             sizeLabel: Taille maximale
             sizeValue: 10 Mo par fichier
-        dropPdfOnly: Seuls les fichiers PDF sont acceptés.
+        dropError: Seuls les PDF et photos (JPG, PNG, WebP) sont acceptés.
         complete:
             title: Dossier complet
             text: Toutes vos pièces sont validées, votre conseiller prend le relais.
@@ -3399,6 +3421,7 @@ deposit:
         empty: Aucune pièce n'est attendue pour le moment.
         upload: Déposer
         uploadMore: Ajouter
+        takePhoto: Prendre une photo
         uploading: Envoi... %percent%
         uploadingMany: Fichier %index%/%count%... %percent%
         uploadFailed: Échec de l'envoi, réessayez

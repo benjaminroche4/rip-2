@@ -223,6 +223,38 @@ final class DepositTest extends WebTestCase
         self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
     }
 
+    public function testUploadAcceptsAPhotographedDocument(): void
+    {
+        $this->persistDossier();
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $crawler = $this->client->followRedirect();
+
+        $form = $crawler->filter('[data-testid="deposit-document"]')->first()->filter('form')->form();
+        $form['file']->upload($this->makeJpeg());
+        $this->client->submit($form, [], ['HTTP_ACCEPT' => self::TURBO_ACCEPT]);
+
+        self::assertResponseStatusCodeSame(200);
+        self::assertStringContainsString(
+            '<turbo-stream action="replace" target="deposit-documents">',
+            (string) $this->client->getResponse()->getContent(),
+        );
+
+        $this->em->clear();
+        /** @var Dossier $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $document = $dossier->getPersons()->first()->getDocuments()->first();
+        self::assertSame(DossierDocumentStatus::Received, $document->getStatus());
+        self::assertCount(1, $document->getFiles());
+
+        /** @var DossierDocumentFile $file */
+        $file = $document->getFiles()->first();
+        // The photo is stored as-is (no server-side conversion), and the
+        // display name keeps the real extension via guessExtension().
+        self::assertSame('image/jpeg', $file->getMimeType());
+        self::assertSame("Pièce d'identité - Jean Dupont.jpg", $file->getOriginalName());
+        self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
+    }
+
     public function testUploadRejectsUnsupportedFileTypes(): void
     {
         $this->persistDossier();
@@ -236,6 +268,10 @@ final class DepositTest extends WebTestCase
         $this->client->submit($form, [], ['HTTP_ACCEPT' => self::TURBO_ACCEPT]);
 
         self::assertResponseStatusCodeSame(200);
+        self::assertStringContainsString(
+            'Format non accepté. PDF ou photo (JPG, PNG, WebP).',
+            (string) $this->client->getResponse()->getContent(),
+        );
 
         $this->em->clear();
         /** @var Dossier $dossier */
@@ -603,6 +639,21 @@ final class DepositTest extends WebTestCase
         // The crawler needs the display name: rename so the client original
         // name is deterministic.
         $named = \dirname($path).'/piece.pdf';
+        copy($path, $named);
+
+        return $named;
+    }
+
+    /** Real JPEG bytes so the server-side mime sniffing sees image/jpeg. */
+    private function makeJpeg(): string
+    {
+        $image = imagecreatetruecolor(8, 8);
+        $path = tempnam(sys_get_temp_dir(), 'deposit').'.jpg';
+        imagejpeg($image, $path);
+        imagedestroy($image);
+
+        // Deterministic client-side original name, like makePdf().
+        $named = \dirname($path).'/photo.jpg';
         copy($path, $named);
 
         return $named;

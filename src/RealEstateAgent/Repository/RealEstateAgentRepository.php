@@ -57,6 +57,7 @@ class RealEstateAgentRepository extends ServiceEntityRepository
                 specialties: $agent->getSpecialties(),
                 position: $agent->getPosition(),
                 createdAt: $agent->getCreatedAt() ?? new \DateTimeImmutable(),
+                avatarFilename: $agent->getAvatarFilename(),
             );
         }
 

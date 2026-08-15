@@ -6,7 +6,7 @@
 {%- set _initial = (name|default('') ?: email|default(''))|first|upper -%}
 {# Ne rend l'image que si le chemin suit la convention users/<ulid>/avatar/<uuid>.webp :
    un ancien nom plat (avant migration) retombe proprement sur l'initiale. #}
-{%- set _hasAvatar = filename and filename matches '#^users/[0-9A-Za-z]+/avatar/[0-9a-f-]{36}\.webp$#' -%}
+{%- set _hasAvatar = filename and filename matches '#^(users|agencies|agents)/[0-9A-Za-z]+/(avatar|logo)/[0-9a-f-]{36}\.webp$#' -%}
 {%- set _textClass = {
     5: 'text-[10px]',
     6: 'text-[11px]',

@@ -8,17 +8,6 @@
 {% macro pieceTitle(document, editingDescriptionId, descriptionDraft) %}
     <div class="flex items-center gap-1.5">
         <span class="text-sm font-medium text-gray-900">{{ document.typeLabelKey|trans }}</span>
-        <button
-            type="button"
-            data-action="live#action"
-            data-live-action-param="editDescription"
-            data-live-key-param="{{ document.id }}"
-            title="{{ 'admin.dossiers.show.modules.file.pieceDescription.edit'|trans }}"
-            class="cursor-pointer rounded p-0.5 text-gray-300 transition duration-100 ease-out hover:text-gray-600 sm:opacity-0 sm:group-hover/piece:opacity-100 sm:focus-visible:opacity-100"
-            data-testid="module-file-description-edit"
-        >
-            {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-        </button>
         {# Retirer la demande : la pièce disparaît aussi du dépôt client. #}
         <button
             type="button"
@@ -54,7 +43,36 @@
             </button>
         </div>
     {% elseif document.description %}
-        <p class="mt-0.5 text-xs text-gray-500" data-testid="module-file-description">{{ document.description }}</p>
+        {# Note existante : le stylo d'édition vit sur la note elle-même. #}
+        <p class="group/note mt-0.5 flex items-center gap-1 text-xs text-gray-500" data-testid="module-file-description">
+            {{ ux_icon('lucide:sticky-note', {class: 'size-3 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+            {{ document.description }}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="editDescription"
+                data-live-key-param="{{ document.id }}"
+                title="{{ 'admin.dossiers.show.modules.file.pieceDescription.editNote'|trans }}"
+                class="shrink-0 cursor-pointer rounded p-0.5 text-gray-300 transition duration-100 ease-out hover:text-gray-600 sm:opacity-0 sm:group-hover/note:opacity-100 sm:focus-visible:opacity-100"
+                data-testid="module-file-description-edit"
+            >
+                {{ ux_icon('lucide:pencil', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+            </button>
+        </p>
+    {% else %}
+        {# Pas encore de note : affordance explicite, toujours visible. #}
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="editDescription"
+            data-live-key-param="{{ document.id }}"
+            title="{{ 'admin.dossiers.show.modules.file.pieceDescription.edit'|trans }}"
+            class="mt-0.5 flex cursor-pointer items-center gap-1 text-[0.6875rem] text-gray-400 transition-colors duration-100 ease-out hover:text-gray-600"
+            data-testid="module-file-description-edit"
+        >
+            {{ ux_icon('lucide:sticky-note', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+            {{ 'admin.dossiers.show.modules.file.pieceDescription.add'|trans }}
+        </button>
     {% endif %}
 {% endmacro %}
 
@@ -258,6 +276,29 @@
 {% import _self as m %}
 
         <div {{ attributes.defaults({class: 'space-y-6'}) }} data-testid="dossier-show-modules">
+    {# Dépôt client verrouillé : bandeau d'alerte sous les onglets, au-dessus
+       des cards (même famille visuelle que le bandeau de clôture, en ambré
+       car l'état est réversible). Live : suit le toggle du verrou. #}
+    {% if this.isDepositLocked %}
+        <div
+            class="flex items-center gap-4 rounded-2xl border border-amber-300 bg-linear-to-r from-amber-100/80 to-amber-50/40 px-5 py-4 shadow-sm"
+            role="status"
+            data-testid="dossier-deposit-locked-banner"
+        >
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-amber-600 shadow-sm">
+                {{ ux_icon('lucide:shield-off', {class: 'size-5', 'aria-hidden': 'true'}) }}
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold text-gray-900">{{ 'admin.dossiers.show.modules.file.depositLock.bannerTitle'|trans }}</p>
+                <p class="mt-0.5 text-sm leading-5 text-gray-600">
+                    {%- set depositLockedAt = this.depositLockedAt -%}
+                    {%- if depositLockedAt -%}
+                        {{ 'admin.dossiers.show.modules.file.depositLock.bannerText'|trans({'%date%': depositLockedAt|format_date('medium')}) }}
+                    {%- endif -%}
+                </p>
+            </div>
+        </div>
+    {% endif %}
     {% for module in [{key: 'file'}, {key: 'visit'}, {key: 'payment'}] %}
         {# data-tab-panel : visibilité pilotée par les onglets de la page
            (attribut rendu côté serveur, donc morph-proof). #}
@@ -313,9 +354,9 @@
                     {% if module.key == 'file' %}
                         {# Un bloc par locataire : avatar + compteur en tête,
                            puis la liste aérée des pièces demandées. #}
-                        {# Verrouillé : seuls les contrôles sont désactivés
-                           (fieldset), le contenu reste lisible, sans voile. Le
+                        {# Verrouillé : contrôles désactivés (fieldset); le
                            lien de dépôt et les téléchargements restent actifs. #}
+                        {% set fileBody %}
                         <fieldset {{ this.fileLocked ? 'disabled' }} class="contents">
                         <ul class="mt-1 flex flex-col gap-1" role="list">
                             {% for tenant in this.tenants %}
@@ -404,96 +445,109 @@
                             </button>
                         {% endif %}
                         </fieldset>
-                        {# Lien public de dépôt, en bas de card : existe dès
-                           qu'une demande de pièces a été envoyée. #}
-                        {% set depositUrl = this.depositUrl %}
-                        {% if depositUrl %}
-                            <div
-                                class="mt-1 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-5 py-4"
-                                data-controller="copy-link"
-                                data-copy-link-text-value="{{ depositUrl }}"
-                                data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}"
-                                data-testid="module-file-deposit-link"
+                        {% endset %}
+                        {# Verrouillé : contenu grisé et désaturé + bandeau
+                           cliquable qui déverrouille (hors fieldset, donc
+                           actif). Tout reprend ses couleurs à l'ouverture. #}
+                        {% if this.fileLocked %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="toggleFileLock"
+                                class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
+                                data-testid="module-file-locked-banner"
                             >
-                                <div class="min-w-0">
-                                    <p class="text-xs font-medium text-gray-900">{{ 'admin.dossiers.show.modules.file.depositLink.label'|trans }}</p>
-                                    <a href="{{ depositUrl }}" target="_blank" rel="noopener noreferrer" class="block truncate text-xs text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-900">{{ depositUrl }}</a>
-                                </div>
-                                <div class="flex shrink-0 items-center gap-2">
-                                    {# Verrou de l'espace de dépôt client : pause
-                                       temporaire, rien n'est purgé. Hors fieldset,
-                                       d'où le disabled cadenas. #}
-                                    {% set depositLocked = this.depositLocked %}
-                                    <button
-                                        type="button"
-                                        data-action="live#action"
-                                        data-live-action-param="toggleDepositLock"
-                                        {{ this.fileLocked ? 'disabled' }}
-                                        class="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ depositLocked ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800' }}"
-                                        title="{{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.unlock' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}"
-                                        data-testid="module-file-deposit-lock"
-                                    >
-                                        {{ ux_icon(depositLocked ? 'lucide:shield-off' : 'lucide:shield', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.locked' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}
-                                    </button>
-                                    {# Une seule relance pour toute la card : chaque
-                                       locataire ayant des pièces en attente est
-                                       relancé (hors fieldset, d'où le disabled). #}
-                                    {% if this.hasPendingPieces() %}
-                                        <button
-                                            type="button"
-                                            data-action="live#action"
-                                            data-live-action-param="askResend"
-                                            {{ this.fileLocked ? 'disabled' }}
-                                            class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60"
-                                            title="{{ 'admin.dossiers.show.modules.file.resendTitle'|trans }}"
-                                            data-testid="module-file-resend"
-                                        >
-                                            {{ ux_icon('lucide:bell-ring', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                            {{ 'admin.dossiers.show.modules.file.resend'|trans }}
+                                {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.locked.notice'|trans }}
+                            </button>
+                        {% endif %}
+                        <div class="transition-[opacity,filter] duration-200 ease-out {{ this.fileLocked ? 'opacity-70 saturate-50' : '' }}">
+                            {{ fileBody }}
+                        </div>
+                        {# Pied de card : briques factorisées, agencées par la
+                           variante retenue ci-dessous. #}
+                        {% set depositUrl = this.depositUrl %}
+                        {% set depositLocked = this.depositLocked %}
+                        {% set btnGhost = 'flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:cursor-default disabled:opacity-60' %}
+                        {% set actionCopyLink %}
+                            <button type="button" data-action="copy-link#copy" class="{{ btnGhost }}" data-testid="module-file-deposit-copy">
+                                {{ ux_icon('lucide:copy', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                <span data-copy-link-target="label">{{ 'admin.dossiers.show.modules.file.depositLink.copy'|trans }}</span>
+                            </button>
+                        {% endset %}
+                        {% set actionResend %}
+                            {% if this.hasPendingPieces() %}
+                                <button type="button" data-action="live#action" data-live-action-param="askResend" {{ this.fileLocked ? 'disabled' }} class="{{ btnGhost }}" title="{{ 'admin.dossiers.show.modules.file.resendTitle'|trans }}" data-testid="module-file-resend">
+                                    {{ ux_icon('lucide:bell-ring', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.show.modules.file.resend'|trans }}
+                                </button>
+                            {% endif %}
+                        {% endset %}
+                        {% set actionDepositLock %}
+                            <button type="button" data-action="live#action" data-live-action-param="askDepositLock" {{ this.fileLocked ? 'disabled' }} class="flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-100 ease-out disabled:cursor-default disabled:opacity-60 {{ depositLocked ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100' : 'border-neutral-200 bg-white text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800' }}" title="{{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.unlock' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}" data-testid="module-file-deposit-lock">
+                                {{ ux_icon(depositLocked ? 'lucide:shield-off' : 'lucide:shield', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ (depositLocked ? 'admin.dossiers.show.modules.file.depositLock.locked' : 'admin.dossiers.show.modules.file.depositLock.lock')|trans }}
+                            </button>
+                        {% endset %}
+                        {% set actionZip %}
+                            {% if this.hasDepositedFiles %}
+                                {% set zipUrl = path('admin_dossier_documents_zip', {adminPrefix: this.adminPrefix, reference: this.reference}) %}
+                                {# Téléchargement natif (nom et intégrité garantis par
+                                   le serveur) : le spinner ne fait que signaler la
+                                   préparation du zip. #}
+                                <a
+                                    href="{{ zipUrl }}"
+                                    class="{{ btnGhost }}"
+                                    data-controller="download-feedback"
+                                    data-action="click->download-feedback#start"
+                                    data-testid="module-file-zip"
+                                >
+                                    <span class="relative flex shrink-0 items-center">
+                                        <span data-download-feedback-target="label" class="flex items-center">{{ ux_icon('lucide:folder-archive', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}</span>
+                                        <twig:Spinner class="absolute inset-0 m-auto hidden size-3.5" data-download-feedback-target="spinner" />
+                                    </span>
+                                    {{ 'admin.dossiers.show.modules.file.downloadZip'|trans }}
+                                </a>
+                            {% endif %}
+                        {% endset %}
+                        {% set codeInline %}
+                            {% if this.pairingCode %}
+                                <p class="flex items-center gap-1.5 text-xs text-gray-500" data-testid="module-file-deposit-code">
+                                    {{ ux_icon('lucide:key-round', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.dossiers.show.modules.file.depositLink.codeLabel'|trans }}
+                                    <span class="font-mono text-sm font-semibold tracking-widest text-gray-900">{{ this.pairingCode }}</span>
+                                    <span data-controller="copy-link" data-copy-link-text-value="{{ this.pairingCode }}" data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}" class="contents">
+                                        <button type="button" data-action="copy-link#copy" aria-label="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}" title="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}" class="cursor-pointer rounded p-0.5 text-gray-300 transition-colors duration-100 ease-out hover:text-gray-600">
+                                            {{ ux_icon('lucide:copy', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
                                         </button>
-                                    {% endif %}
-                                    {% if this.pairingCode %}
-                                        {# The code itself, copyable alone: handy when it is read
-                                           out or pasted without the full link. #}
-                                        <div
-                                            data-controller="copy-link"
-                                            data-copy-link-text-value="{{ this.pairingCode }}"
-                                            data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}"
-                                        >
-                                            <button
-                                                type="button"
-                                                data-action="copy-link#copy"
-                                                aria-label="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}"
-                                                title="{{ 'admin.dossiers.show.modules.file.depositLink.copyCode'|trans }}"
-                                                class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-semibold tracking-widest text-gray-900 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                                                data-testid="module-file-deposit-code"
-                                            >
-                                                {{ ux_icon('lucide:key-round', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                <span data-copy-link-target="label" class="font-mono">{{ this.pairingCode }}</span>
-                                            </button>
-                                        </div>
-                                    {% endif %}
-                                    <button
-                                        type="button"
-                                        data-action="copy-link#copy"
-                                        class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                                        data-testid="module-file-deposit-copy"
-                                    >
-                                        {{ ux_icon('lucide:copy', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                        <span data-copy-link-target="label">{{ 'admin.dossiers.show.modules.file.depositLink.copy'|trans }}</span>
-                                    </button>
-                                    {% if this.hasDepositedFiles %}
-                                        <a href="{{ path('admin_dossier_documents_zip', {adminPrefix: this.adminPrefix, reference: this.reference}) }}"
-                                           class="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                                           data-testid="module-file-zip"
-                                        >
-                                            {{ ux_icon('lucide:folder-archive', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                            {{ 'admin.dossiers.show.modules.file.downloadZip'|trans }}
-                                        </a>
-                                    {% endif %}
+                                    </span>
+                                </p>
+                            {% endif %}
+                        {% endset %}
+                        {% if depositUrl %}
+                        {# Pied « Tuiles » : lien et code en tuiles label/valeur
+                           (même langage que l'en-tête de la page de dépôt),
+                           actions regroupées dans une tuile pleine largeur. #}
+                        <div class="mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2" data-controller="copy-link" data-copy-link-text-value="{{ depositUrl }}" data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}" data-testid="module-file-deposit-link">
+                            <div class="rounded-xl bg-white px-4 py-3">
+                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.label'|trans }}</p>
+                                <a href="{{ depositUrl }}" target="_blank" rel="noopener noreferrer" class="mt-0.5 block truncate text-xs text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-900">{{ depositUrl }}</a>
+                            </div>
+                            <div class="rounded-xl bg-white px-4 py-3">
+                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.codeLabel'|trans|trim(':') }}</p>
+                                <div class="mt-0.5">{{ codeInline }}</div>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white px-4 py-3 sm:col-span-2">
+                                {# Gestes secondaires à gauche, actions du quotidien
+                                   mises en évidence à droite. #}
+                                <div class="flex flex-wrap items-center gap-2">
+                                    {{ actionCopyLink }}{{ actionDepositLock }}
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    {{ actionResend }}{{ actionZip }}
                                 </div>
                             </div>
+                        </div>
                         {% endif %}
                         <twig:FilePreview />
                     {% elseif module.key == 'visit' %}
@@ -537,7 +591,7 @@
                         {% if canOpenVisit %}
                             <div class="mt-1 flex justify-end rounded-xl bg-white px-5 py-3">
                                 <a
-                                    href="{{ path('admin_visit_new', {adminPrefix: this.adminPrefix}) }}"
+                                    href="{{ path('admin_visit_new', {adminPrefix: this.adminPrefix, dossier: this.reference}) }}"
                                     class="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                                     data-testid="module-visit-plan"
                                 >
@@ -603,8 +657,8 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="module-file-picker-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="closePicker"
             data-testid="module-file-picker"
         >
@@ -612,7 +666,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="closePicker"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -690,7 +744,7 @@
                         {% if this.pickerStep == 'select' %}
                             <button
                                 type="button"
-                                data-action="live#action"
+                                data-action="instant-exit#run live#action"
                                 data-live-action-param="closePicker"
                                 class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             >
@@ -742,8 +796,8 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="module-file-resend-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelResend"
             data-testid="module-file-resend-modal"
         >
@@ -751,7 +805,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelResend"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -795,7 +849,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelResend"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="module-file-resend-cancel"
@@ -804,7 +858,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmResend"
                             data-loading="action(confirmResend)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
@@ -827,15 +881,15 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="module-piece-delete-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelDeletePiece"
             data-testid="module-piece-delete-modal"
         >
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelDeletePiece"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -853,7 +907,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelDeletePiece"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="module-piece-delete-cancel"
@@ -862,7 +916,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="deletePiece"
                             data-live-key-param="{{ this.confirmDeletePieceId }}"
                             data-loading="action(deletePiece)|addAttribute(disabled)"
@@ -879,6 +933,65 @@
         </div>
     {% endif %}
 
+    {# ── Modal de confirmation du verrouillage de l'espace de dépôt. ───── #}
+    {% if this.confirmingDepositLock %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="module-file-deposit-lock-title"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
+            data-live-action-param="cancelDepositLock"
+            data-testid="module-file-deposit-lock-modal"
+        >
+            {# Clic en dehors de la carte = fermeture. #}
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="instant-exit#run live#action"
+                data-live-action-param="cancelDepositLock"
+                aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <div class="p-3">
+                        <h2 id="module-file-deposit-lock-title" class="text-lg font-semibold tracking-tight text-gray-900">
+                            {{ 'admin.dossiers.show.modules.file.depositLock.confirmTitle'|trans }}
+                        </h2>
+                        <p class="mt-1 text-sm text-pretty text-gray-500">
+                            {{ 'admin.dossiers.show.modules.file.depositLock.confirmText'|trans }}
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 p-3">
+                        <button
+                            type="button"
+                            data-action="instant-exit#run live#action"
+                            data-live-action-param="cancelDepositLock"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="module-file-deposit-lock-cancel"
+                        >
+                            {{ 'admin.dossiers.create.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="instant-exit#run live#action"
+                            data-live-action-param="confirmDepositLock"
+                            data-loading="action(confirmDepositLock)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-amber-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="module-file-deposit-lock-confirm"
+                        >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(confirmDepositLock)|removeClass(hidden)" />
+                            {{ ux_icon('lucide:shield', {class: 'size-4 shrink-0', 'aria-hidden': 'true', 'data-loading': 'action(confirmDepositLock)|addClass(hidden)'}) }}
+                            {{ 'admin.dossiers.show.modules.file.depositLock.confirmButton'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     {# ── Modal de confirmation de suppression d'un fichier déposé. ─────── #}
     {% if this.confirmDeleteFileId is not null %}
         <div
@@ -886,8 +999,8 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="module-file-delete-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelDeleteFile"
             data-testid="module-file-delete-modal"
         >
@@ -895,7 +1008,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelDeleteFile"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -913,7 +1026,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelDeleteFile"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="module-file-delete-cancel"
@@ -922,7 +1035,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="deleteFile"
                             data-live-key-param="{{ this.confirmDeleteFileId }}"
                             data-loading="action(deleteFile)|addAttribute(disabled)"
@@ -946,8 +1059,8 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="module-file-refusal-title"
-            data-controller="modal-focus modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="cancelRefusal"
             data-testid="module-file-refusal"
         >
@@ -955,7 +1068,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="cancelRefusal"
                 aria-label="{{ 'admin.dossiers.create.cancel'|trans }}"
                 tabindex="-1"
@@ -987,7 +1100,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="cancelRefusal"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="module-file-refusal-cancel"
@@ -996,7 +1109,7 @@
                         </button>
                         <button
                             type="button"
-                            data-action="modal-anim#out live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="confirmRefusal"
                             data-loading="action(confirmRefusal)|addAttribute(disabled)"
                             class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"

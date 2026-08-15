@@ -51,6 +51,9 @@ final class ContactDossierConverter
             if (null === $existing->getSourceContactReference()) {
                 $existing->setSourceContactReference($contact->getReference());
             }
+            if (null === $existing->getOffer()) {
+                $existing->setOffer($contact->getOffer());
+            }
             $this->em->flush();
 
             return $existing;
@@ -77,7 +80,8 @@ final class ContactDossierConverter
             ->setCreatedAt(new \DateTimeImmutable())
             ->addPerson($person)
             ->setSearch($this->buildSearch($contact))
-            ->setSourceContactReference($contact->getReference());
+            ->setSourceContactReference($contact->getReference())
+            ->setOffer($contact->getOffer());
 
         $this->copyNotes($contact, $dossier);
 

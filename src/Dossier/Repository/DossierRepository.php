@@ -107,7 +107,7 @@ class DossierRepository extends ServiceEntityRepository
             managerId: null !== $manager ? (int) $manager->getId() : null,
             managerName: $managerName,
             managerAvatarFilename: $manager?->getAvatarFilename(),
-            offer: $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
+            offer: $dossier->getOffer() ?? $offersByContactReference[$dossier->getSourceContactReference()] ?? null,
             moveInAt: $moveInAt,
             timeline: null !== $moveInAt ? MoveInTimeline::fromDates($createdAt, $moveInAt, $now) : null,
             searchComplete: $dossier->getSearch()?->isComplete() ?? false,

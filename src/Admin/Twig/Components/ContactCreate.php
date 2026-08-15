@@ -212,13 +212,7 @@ final class ContactCreate
         $request = $this->requestStack->getCurrentRequest();
         $session = null !== $request && $request->hasSession() ? $request->getSession() : null;
         if ($session instanceof FlashBagAwareSessionInterface) {
-            $session->getFlashBag()->add('success', 'admin.contacts.create.success');
-        }
-
-        try {
-            $this->requestStack->getSession()->getFlashBag()->add('success', 'admin.toast.contactCreated');
-        } catch (\LogicException) {
-            // Sessionless context (component tests): no toast to queue.
+            $session->getFlashBag()->add('success', 'admin.toast.contactCreated');
         }
 
         return new RedirectResponse($this->urlGenerator->generate('admin_contact_show', [

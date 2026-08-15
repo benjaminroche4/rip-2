@@ -105,6 +105,24 @@ final class VisitDetailsTest extends KernelTestCase
         self::assertArrayHasKey('scheduledAt', $component->errors);
     }
 
+    public function testLockedBannerShowsOnlyWhileLocked(): void
+    {
+        $visit = $this->persistVisit();
+
+        $locked = (string) $this->renderTwigComponent('Visit:VisitDetails', [
+            'visitId' => (int) $visit->getId(),
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+        self::assertStringContainsString('data-testid="visit-locked-banner"', $locked, 'Locked by default: the unlock banner shows.');
+
+        $unlocked = (string) $this->renderTwigComponent('Visit:VisitDetails', [
+            'visitId' => (int) $visit->getId(),
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+            'locked' => false,
+        ]);
+        self::assertStringNotContainsString('data-testid="visit-locked-banner"', $unlocked);
+    }
+
     public function testRelockingDropsTheDraft(): void
     {
         $visit = $this->persistVisit();

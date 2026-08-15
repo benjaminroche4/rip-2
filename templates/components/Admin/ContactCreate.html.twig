@@ -59,8 +59,8 @@
         {% set inputClass = 'w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none' %}
         <div
             class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
-            data-controller="modal-anim"
-            data-action="keydown.esc@window->modal-anim#out keydown.esc@window->live#action"
+            data-controller="modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
             data-live-action-param="closeModal"
             data-testid="contact-create-modal"
         >
@@ -68,7 +68,7 @@
             <button
                 type="button"
                 class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
-                data-action="modal-anim#out live#action"
+                data-action="instant-exit#run live#action"
                 data-live-action-param="closeModal"
                 aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
                 tabindex="-1"
@@ -163,7 +163,7 @@
                     <div class="flex items-center justify-end gap-4 p-3">
                         <button
                             type="button"
-                            data-action="live#action"
+                            data-action="instant-exit#run live#action"
                             data-live-action-param="closeModal"
                             class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                             data-testid="contact-create-cancel"

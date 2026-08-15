@@ -57,6 +57,10 @@ final class DossierCreate extends AbstractController
     #[LiveProp]
     public int $primaryKey = 0;
 
+    /** Formule visée ('' = pas encore choisie) : accompagne | confie. */
+    #[LiveProp]
+    public string $offer = '';
+
     public function __construct(
         private readonly Security $security,
         private readonly RequestStack $requestStack,
@@ -67,6 +71,17 @@ final class DossierCreate extends AbstractController
     {
         $this->ensureAdmin();
         $this->dossier ??= $this->buildEmptyDossier();
+    }
+
+    /** Chips de formule, toggle-off (recliquer la formule choisie l'enlève). */
+    #[LiveAction]
+    public function chooseOffer(#[LiveArg] string $offer): void
+    {
+        $this->ensureAdmin();
+        if (!\in_array($offer, ['accompagne', 'confie'], true)) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(\sprintf('Unknown offer "%s".', $offer));
+        }
+        $this->offer = $this->offer === $offer ? '' : $offer;
     }
 
     protected function instantiateForm(): FormInterface
@@ -170,6 +185,7 @@ final class DossierCreate extends AbstractController
 
         /** @var Dossier $draft */
         $draft = $this->getForm()->getData();
+        $draft->setOffer('' !== $this->offer ? $this->offer : null);
 
         // Tag the primary tenant. Validation guarantees at least one tenant,
         // so the effective key always resolves here. The phone arrives in
