@@ -46,10 +46,18 @@ framework:
             limit: 5
             interval: '15 minutes'
         # Brute-force guard on the dossier deposit pairing form (email +
-        # pairing code) and its uploads.
+        # pairing code). Pairing only: the paired-session mutations have
+        # their own, more permissive limiter below.
         form_deposit:
             policy: fixed_window
             limit: 5
+            interval: '1 minute'
+        # Paired deposit mutations (upload, file delete, leave). Higher cap:
+        # a multi-file upload sends one POST per file, and a family behind
+        # one NAT must not starve each other; 30/min still caps abuse.
+        form_deposit_upload:
+            policy: fixed_window
+            limit: 30
             interval: '1 minute'
         # Admin mutations: ROLE_ADMIN is already required, but a per-IP
         # limiter caps damage if an admin session gets hijacked. Keeps
@@ -104,6 +112,8 @@ when@test:
             form_listing:
                 limit: 1000
             form_deposit:
+                limit: 1000
+            form_deposit_upload:
                 limit: 1000
             two_factor_attempts:
                 limit: 1000

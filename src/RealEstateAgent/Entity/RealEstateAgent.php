@@ -25,6 +25,14 @@ class RealEstateAgent
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * Public reference shown in the admin ("AG-082820"), random like the
+     * other site references (never sequential); the unique index guards the
+     * negligible collision race.
+     */
+    #[ORM\Column(length: 9, unique: true, nullable: true)]
+    private ?string $reference = null;
+
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'admin.agents.create.firstName.notBlank')]
     #[Assert\Length(max: 50, maxMessage: 'admin.agents.create.firstName.length')]
@@ -76,6 +84,22 @@ class RealEstateAgent
     #[ORM\Column(length: 30, nullable: true, enumType: AgencyPosition::class)]
     private ?AgencyPosition $position = null;
 
+    /** Adresse de l'agent; only meaningful for independent agents. */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255, maxMessage: 'admin.agencies.create.address.length')]
+    private ?string $address = null;
+
+    /** Quartiers favoris (codes ParisDistricts en CSV, ex. "11e,12e,94"). */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $areas = null;
+
+    /** Coordonnées de l'adresse (Places à la saisie, géocodage en repli). */
+    #[ORM\Column(nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $longitude = null;
+
     /** Team-only free note about the agent (never shown publicly). */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 2000, maxMessage: 'admin.agents.create.note.length')]
@@ -107,6 +131,30 @@ class RealEstateAgent
     /** Null = active; a deactivated agent leaves the pickers but keeps the directory entry and history. */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deactivatedAt = null;
+
+    /** Favori d'équipe (partagé par tout le staff) : null = pas favori. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $favoritedAt = null;
+
+    /** Dernier envoi de l'email de présentation (trace anti-doublon). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $introEmailSentAt = null;
+
+    public function __construct()
+    {
+        $this->regenerateReference();
+    }
+
+    /** Re-tire une référence aléatoire (collision détectée avant insertion). */
+    public function regenerateReference(): void
+    {
+        $this->reference = 'AG-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    public function getReference(): string
+    {
+        return (string) $this->reference;
+    }
 
     public function getId(): ?int
     {
@@ -229,6 +277,54 @@ class RealEstateAgent
         return $this;
     }
 
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = '' !== trim((string) $address) ? $address : null;
+
+        return $this;
+    }
+
+    public function getAreas(): ?string
+    {
+        return $this->areas;
+    }
+
+    public function setAreas(?string $areas): static
+    {
+        $this->areas = $areas;
+
+        return $this;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): static
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): static
+    {
+        $this->longitude = $longitude;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -239,6 +335,35 @@ class RealEstateAgent
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function getIntroEmailSentAt(): ?\DateTimeImmutable
+    {
+        return $this->introEmailSentAt;
+    }
+
+    public function setIntroEmailSentAt(?\DateTimeImmutable $introEmailSentAt): static
+    {
+        $this->introEmailSentAt = $introEmailSentAt;
+
+        return $this;
+    }
+
+    public function getFavoritedAt(): ?\DateTimeImmutable
+    {
+        return $this->favoritedAt;
+    }
+
+    public function setFavoritedAt(?\DateTimeImmutable $favoritedAt): static
+    {
+        $this->favoritedAt = $favoritedAt;
+
+        return $this;
+    }
+
+    public function isFavorite(): bool
+    {
+        return null !== $this->favoritedAt;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable

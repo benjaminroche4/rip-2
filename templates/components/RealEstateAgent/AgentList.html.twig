@@ -15,7 +15,9 @@
         <div class="flex min-w-0 flex-wrap items-center gap-2">
             <p class="truncate font-medium text-gray-900">{{ agent.fullName|title }}</p>
             {% if not agent.active %}
-                <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agent-inactive">{{ 'admin.agents.status.inactive'|trans }}</span>
+                {# Badge appuyé (ambre) : la card désactivée est grisée en bloc, un
+                   badge gris s'y noierait. #}
+                <span class="shrink-0 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700" data-testid="agent-inactive">{{ 'admin.agents.status.inactive'|trans }}</span>
             {% endif %}
             {{ _self.chips(agent) }}
         </div>
@@ -70,11 +72,16 @@
     {% if agent.agencyId %}
         {# Le chip agence est un raccourci vers sa fiche. #}
         <a
-            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, id: agent.agencyId}) }}"
+            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, reference: agent.agencyReference}) }}"
             class="group/agency relative z-10 flex min-w-0 shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5"
             data-testid="agent-agency"
         >
-            {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0 text-gray-400 transition-colors duration-100 ease-out group-hover/agency:text-primary', 'aria-hidden': 'true'}) }}
+            {# Logo de l'agence quand elle en a un, icône générique sinon. #}
+            {% if agent.agencyLogo %}
+                <twig:Avatar filename="{{ agent.agencyLogo }}" name="{{ agent.agency }}" size="5" class="-my-0.5 rounded-md" />
+            {% else %}
+                {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0 text-gray-400 transition-colors duration-100 ease-out group-hover/agency:text-primary', 'aria-hidden': 'true'}) }}
+            {% endif %}
             <span class="truncate text-sm font-medium text-gray-900 transition-colors duration-100 ease-out group-hover/agency:text-primary">{{ agent.agency }}</span>
         </a>
     {% else %}
@@ -89,7 +96,9 @@
 
 {% macro agencyNameBadges(agency) %}
     {% if not agency.active %}
-        <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agency-inactive">{{ 'admin.agencies.status.inactive'|trans }}</span>
+        {# Badge appuyé (ambre) : même raison que le badge agent, la card
+           désactivée est grisée en bloc. #}
+        <span class="shrink-0 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700" data-testid="agency-inactive">{{ 'admin.agencies.status.inactive'|trans }}</span>
     {% endif %}
     {% if agency.brand %}
         <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-brand">{{ agency.brand }}</span>
@@ -110,17 +119,13 @@
     {% endif %}
 {% endmacro %}
 
-{% macro colWebsite(agency) %}
+{% macro colAreas(agency) %}
     <div class="min-w-0 space-y-2 text-sm sm:flex-1">
-        <p class="text-gray-600">{{ 'admin.agencies.create.website.label'|trans }}</p>
-        {% if agency.website %}
-            <a
-                href="{{ agency.website }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="relative z-10 block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary"
-                data-testid="agency-website"
-            >{{ agency.website }}</a>
+        <p class="text-gray-600">{{ 'admin.agencies.show.areas'|trans }}</p>
+        {% if agency.allAreas %}
+            <p class="truncate font-medium text-gray-900" data-testid="agency-areas">{{ 'admin.contacts.project.allAreas'|trans }}</p>
+        {% elseif agency.areaLabels is not empty %}
+            <p class="truncate font-medium text-gray-900" title="{{ agency.areaLabels|join(', ') }}" data-testid="agency-areas">{{ agency.areaLabels|join(', ') }}</p>
         {% else %}
             <p class="font-medium text-gray-400">-</p>
         {% endif %}
@@ -156,7 +161,7 @@
         <twig:Button
             as="a"
             size="sm"
-            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, id: agency.id}) }}"
+            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, reference: agency.reference}) }}"
             class="px-10"
             data-testid="agency-row-link"
         >
@@ -187,7 +192,7 @@
 
             <div class="mt-4 flex flex-col gap-1.5" role="tablist" data-testid="agents-view-toggle">
                 {% for viewKey in ['agents', 'agencies'] %}
-                    {% set isActive = agenciesView == (viewKey == 'agencies') %}
+                    {% set isActive = this.view == viewKey %}
                     <button
                         type="button"
                         role="tab"
@@ -198,36 +203,205 @@
                         class="flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-2 text-left text-sm font-medium transition-colors duration-100 ease-out {{ isActive ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
                         data-testid="agents-view-{{ viewKey }}"
                     >
-                        {{ ux_icon(viewKey == 'agents' ? 'lucide:user' : 'lucide:building-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ ux_icon({agents: 'lucide:user', agencies: 'lucide:building-2'}[viewKey], {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                         {{ ('admin.agents.view.' ~ viewKey)|trans }}
-                        <span class="ml-auto text-xs {{ isActive ? 'text-primary/60' : 'text-gray-400' }} tabular-nums">{{ viewKey == 'agents' ? this.agentTotal : this.agencyTotal }}</span>
+                        <span class="ml-auto text-xs {{ isActive ? 'text-primary/60' : 'text-gray-400' }} tabular-nums">{{ {agents: this.agentTotal, agencies: this.agencyTotal}[viewKey] }}</span>
                     </button>
                 {% endfor %}
             </div>
         </aside>
 
         <div class="max-lg:mt-6">
+            {# Tous / Favoris : même pastille glissante que la portée des
+               dossiers, partagée par les deux vues (favoris agents ou agences
+               selon la vue active). Côté agents s'ajoutent à gauche les
+               filtres discrets spécialité + quartier; côté agences,
+               l'affichage Liste / Carte. #}
+            <div class="mb-4 flex flex-wrap items-center gap-3 {{ agenciesView ? 'justify-end' : 'justify-between' }}">
+                {% if not agenciesView %}
+                    {% set activeSpecialty = this.activeSpecialty %}
+                    {% set activeArea = this.activeArea %}
+                    <div class="flex flex-wrap items-center gap-2" data-testid="agents-filters">
+                        {# Chips pill spécialité : single avec toggle-off. #}
+                        {% for specialty in this.specialtyOptions %}
+                            {% set specActive = activeSpecialty == specialty.value %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="toggleSpecialty"
+                                data-live-specialty-param="{{ specialty.value }}"
+                                aria-pressed="{{ specActive ? 'true' : 'false' }}"
+                                class="cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-100 ease-out {{ specActive ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                data-testid="agents-filter-{{ specialty.value }}"
+                            >{{ specialty.labelKey|trans }}</button>
+                        {% endfor %}
+                        {# Dropdown quartier compact : summary en chip pill,
+                           panel scrollable des arrondissements + petite
+                           couronne, « Tous les quartiers » en tête pour
+                           effacer. #}
+                        <details
+                            class="relative"
+                            data-controller="details-dropdown"
+                            data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                            data-testid="agents-filter-area"
+                        >
+                            <summary class="flex cursor-pointer list-none items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-100 ease-out [&::-webkit-details-marker]:hidden {{ activeArea != '' ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}">
+                                {{ ux_icon('lucide:map-pin', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                <span class="whitespace-nowrap">{{ activeArea != '' ? this.areaOptions[activeArea] : 'admin.agents.filter.area'|trans }}</span>
+                                {{ ux_icon('lucide:chevron-down', {class: 'size-3.5 shrink-0 opacity-60', 'aria-hidden': 'true'}) }}
+                            </summary>
+                            <div class="absolute left-0 z-10 mt-2 max-h-72 w-56 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                <button
+                                    type="button"
+                                    data-action="live#action click->details-dropdown#close"
+                                    data-live-action-param="chooseArea"
+                                    data-live-area-param=""
+                                    class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors duration-100 ease-out {{ activeArea == '' ? 'text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                    data-testid="agents-filter-area-option-all"
+                                >
+                                    {{ 'admin.agents.filter.allAreas'|trans }}
+                                    {% if activeArea == '' %}
+                                        {{ ux_icon('lucide:check', {class: 'ml-auto size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {% endif %}
+                                </button>
+                                {% for code, label in this.areaOptions %}
+                                    <button
+                                        type="button"
+                                        data-action="live#action click->details-dropdown#close"
+                                        data-live-action-param="chooseArea"
+                                        data-live-area-param="{{ code }}"
+                                        class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors duration-100 ease-out {{ activeArea == code ? 'text-primary' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                        data-testid="agents-filter-area-option-{{ code }}"
+                                    >
+                                        {{ label }}
+                                        {% if activeArea == code %}
+                                            {{ ux_icon('lucide:check', {class: 'ml-auto size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {% endif %}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </div>
+                {% endif %}
+                {% if agenciesView %}
+                    <div
+                        class="inline-flex rounded-2xl border border-neutral-200 bg-white p-1.5"
+                        data-controller="tabs"
+                        data-tabs
+                        data-active-tab="{{ this.display }}"
+                        data-tabs-active-class="text-primary"
+                        data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                        data-testid="agencies-display"
+                    >
+                        <div class="isolate relative flex items-stretch" role="tablist" aria-label="{{ 'admin.agencies.display.label'|trans }}" data-action="mouseleave->tabs#resetIndicator">
+                            <span
+                                data-tabs-target="indicator"
+                                class="absolute top-0 left-0 z-0 rounded-lg bg-neutral-100 transition-[transform,width,height] duration-200 ease-out will-change-transform motion-reduce:transition-none"
+                                aria-hidden="true"
+                                hidden
+                            ></span>
+                            {% for displayKey in ['list', 'map'] %}
+                                {% if not loop.first %}
+                                    <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
+                                {% endif %}
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    aria-selected="{{ this.display == displayKey ? 'true' : 'false' }}"
+                                    data-tabs-target="tab"
+                                    data-tabs-key="{{ displayKey }}"
+                                    data-action="live#action mouseenter->tabs#hoverIndicator"
+                                    data-live-action-param="chooseDisplay"
+                                    data-live-display-param="{{ displayKey }}"
+                                    class="relative z-10 flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ this.display == displayKey ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                                    data-testid="agencies-display-{{ displayKey }}"
+                                >
+                                    {{ ux_icon({list: 'lucide:list', map: 'lucide:map'}[displayKey], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ ('admin.agencies.display.' ~ displayKey)|trans }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                <div
+                    class="inline-flex rounded-2xl border border-neutral-200 bg-white p-1.5"
+                    data-controller="tabs"
+                    data-tabs
+                    data-active-tab="{{ this.tab }}"
+                    data-tabs-active-class="text-primary"
+                    data-tabs-inactive-class="text-gray-600 hover:text-gray-900"
+                    data-testid="agents-tab"
+                >
+                    <div class="isolate relative flex items-stretch" role="tablist" aria-label="{{ 'admin.agents.tab.label'|trans }}" data-action="mouseleave->tabs#resetIndicator">
+                        <span
+                            data-tabs-target="indicator"
+                            class="absolute top-0 left-0 z-0 rounded-lg bg-neutral-100 transition-[transform,width,height] duration-200 ease-out will-change-transform motion-reduce:transition-none"
+                            aria-hidden="true"
+                            hidden
+                        ></span>
+                        {% for tabKey in ['all', 'favorites'] %}
+                            {% if not loop.first %}
+                                <span class="z-0 my-2 w-px shrink-0 bg-gray-950/10" aria-hidden="true"></span>
+                            {% endif %}
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected="{{ this.tab == tabKey ? 'true' : 'false' }}"
+                                data-tabs-target="tab"
+                                data-tabs-key="{{ tabKey }}"
+                                data-action="live#action mouseenter->tabs#hoverIndicator"
+                                data-live-action-param="chooseTab"
+                                data-live-tab-param="{{ tabKey }}"
+                                class="relative z-10 flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-100 ease-out {{ this.tab == tabKey ? 'text-primary' : 'text-gray-600 hover:text-gray-900' }}"
+                                data-testid="agents-tab-{{ tabKey }}"
+                            >
+                                {% if tabKey == 'favorites' %}
+                                    {{ ux_icon('lucide:heart', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {% endif %}
+                                {{ ('admin.agents.tab.' ~ tabKey)|trans }}
+                                {% if tabKey == 'favorites' %}
+                                    <span class="inline-flex min-w-5 items-center justify-center rounded-full border border-neutral-200 bg-white px-1.5 py-0.5 text-[11px] leading-none font-semibold text-gray-600 tabular-nums">{{ this.favoriteTotal }}</span>
+                                {% endif %}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         {% if agenciesView %}
+            {% if this.isMapDisplay %}
+                {# Carte des agences actives géocodées (mêmes filtres que la
+                   liste). data-live-ignore : un morph détruirait la carte;
+                   l'id porte la clé des filtres pour que la zone soit
+                   remplacée en bloc (et la carte reconstruite) quand la
+                   recherche ou l'onglet change. #}
+                <div data-live-ignore id="agencies-map-{{ this.mapKey }}" data-testid="agencies-map">
+                    {{ ux_map(this.agenciesMap, {
+                        style: 'height: 480px; width: 100%;',
+                        class: 'overflow-hidden rounded-xl border border-neutral-200',
+                    }) }}
+                </div>
+            {% else %}
             {% set agencies = this.agencies %}
             {% if agencies is empty %}
+                {% set agencyFavoritesEmpty = this.isFavoritesTab and this.search|trim == '' %}
                 <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="agencies-empty">
                     <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
                         <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                            {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : 'lucide:building-2', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                            {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : (agencyFavoritesEmpty ? 'lucide:heart' : 'lucide:building-2'), {class: 'size-6', 'aria-hidden': 'true'}) }}
                         </div>
                         <div class="space-y-1">
                             <h2 class="text-sm font-medium text-gray-700">
-                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.title' : 'admin.agencies.empty.title')|trans }}
+                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.title' : (agencyFavoritesEmpty ? 'admin.agencies.emptyFavorites.title' : 'admin.agencies.empty.title'))|trans }}
                             </h2>
                             <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
-                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.description' : 'admin.agencies.empty.description')|trans }}
+                                {{ (this.search|trim != '' ? 'admin.agencies.emptyFiltered.description' : (agencyFavoritesEmpty ? 'admin.agencies.emptyFavorites.description' : 'admin.agencies.empty.description'))|trans }}
                             </p>
                         </div>
                     </div>
                 </section>
             {% else %}
-                {# Card agence : famille des cards Dossier/Agents, signatures
-                   propres aux agences (logo carré, compteur d'agents en tuile). #}
+                {# Card agence : famille des cards Dossier/Agents, signature
+                   agence (logo carré, compteur d'agents en tuile teintée). #}
                 <div class="space-y-4">
                     {% for agency in agencies %}
                         <article class="rounded-3xl border border-neutral-200 bg-white p-2 {{ agency.active ? '' : 'opacity-60' }}" data-testid="agency-row">
@@ -240,14 +414,28 @@
                                             {{ _self.agencyNameBadges(agency) }}
                                         </div>
                                     </div>
+                                    {# Cœur favori d'équipe : même bascule que sur la card agent. #}
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="toggleAgencyFavorite"
+                                        data-live-id-param="{{ agency.id }}"
+                                        aria-pressed="{{ agency.favorite ? 'true' : 'false' }}"
+                                        aria-label="{{ (agency.favorite ? 'admin.agents.favorite.remove' : 'admin.agents.favorite.add')|trans }}"
+                                        title="{{ (agency.favorite ? 'admin.agents.favorite.remove' : 'admin.agents.favorite.add')|trans }}"
+                                        class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors duration-100 ease-out {{ agency.favorite ? 'border-red-200 bg-red-50 text-red-500 hover:border-red-300' : 'border-neutral-200 bg-white text-gray-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500' }}"
+                                        data-testid="agency-favorite-toggle"
+                                    >
+                                        {{ ux_icon('lucide:heart', {class: 'size-4 shrink-0' ~ (agency.favorite ? ' fill-current' : ''), 'aria-hidden': 'true'}) }}
+                                    </button>
                                 </div>
-                                <div class="flex flex-col gap-y-4 {{ agency.note ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
-                                    <div class="min-w-0 space-y-1 text-sm sm:flex-1">
-                                        <p class="text-2xl font-semibold text-gray-900 tabular-nums" data-testid="agency-agent-count">{{ agency.agentCount }}</p>
-                                        <p class="text-xs text-gray-600">{{ 'admin.agencies.show.agentsTitle'|trans }}</p>
+                                <div class="flex flex-col gap-y-4 {{ agency.note ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4 sm:flex-row sm:items-center sm:gap-x-6">
+                                    {# Compteur d'agents rattachés en tuile teintée. #}
+                                    <div class="shrink-0 rounded-lg bg-primary/5 px-4 py-2.5 text-center">
+                                        <p class="text-xl font-semibold text-primary tabular-nums" data-testid="agency-agent-count">{{ agency.agentCount }}</p>
+                                        <p class="text-[11px] font-medium text-primary/70">{{ 'admin.agencies.show.agentsTitle'|trans }}</p>
                                     </div>
-                                    {{ _self.divider() }}
-                                    {{ _self.colWebsite(agency) }}
+                                    {{ _self.colAreas(agency) }}
                                     {{ _self.divider() }}
                                     {{ _self.colBrand(agency) }}
                                 </div>
@@ -258,20 +446,26 @@
                     {% endfor %}
                 </div>
             {% endif %}
+            {% endif %}
         {% else %}
             {% set agents = this.agents %}
             {% if agents is empty %}
+                {# « Filtré » couvre la recherche mais aussi les filtres
+                   spécialité / quartier : un filtre actif sans résultat
+                   affiche le même état vide que la recherche. #}
+                {% set filtered = this.isFiltered %}
+                {% set favoritesEmpty = this.isFavoritesTab and not filtered %}
                 <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="agents-empty">
                     <div class="flex flex-col items-center justify-center gap-3 rounded-xl px-4 py-16 text-center">
                         <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                            {{ ux_icon(this.search|trim != '' ? 'lucide:search-x' : 'lucide:briefcase', {class: 'size-6', 'aria-hidden': 'true'}) }}
+                            {{ ux_icon(filtered ? 'lucide:search-x' : (favoritesEmpty ? 'lucide:heart' : 'lucide:briefcase'), {class: 'size-6', 'aria-hidden': 'true'}) }}
                         </div>
                         <div class="space-y-1">
                             <h2 class="text-sm font-medium text-gray-700">
-                                {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.title' : 'admin.agents.empty.title')|trans }}
+                                {{ (filtered ? 'admin.agents.emptyFiltered.title' : (favoritesEmpty ? 'admin.agents.emptyFavorites.title' : 'admin.agents.empty.title'))|trans }}
                             </h2>
                             <p class="max-w-[40ch] text-xs text-pretty text-gray-400">
-                                {{ (this.search|trim != '' ? 'admin.agents.emptyFiltered.description' : 'admin.agents.empty.description')|trans }}
+                                {{ (filtered ? 'admin.agents.emptyFiltered.description' : (favoritesEmpty ? 'admin.agents.emptyFavorites.description' : 'admin.agents.empty.description'))|trans }}
                             </p>
                         </div>
                     </div>
@@ -283,7 +477,23 @@
                             <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
                                 <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-3">
                                     {{ _self.identity(agent) }}
-                                    {{ _self.agencyBadge(agent, this.adminPrefix) }}
+                                    <div class="flex shrink-0 items-center gap-2">
+                                        {# Cœur favori d'équipe : bascule immédiate, la liste se re-rend. #}
+                                        <button
+                                            type="button"
+                                            data-action="live#action"
+                                            data-live-action-param="toggleFavorite"
+                                            data-live-id-param="{{ agent.id }}"
+                                            aria-pressed="{{ agent.favorite ? 'true' : 'false' }}"
+                                            aria-label="{{ (agent.favorite ? 'admin.agents.favorite.remove' : 'admin.agents.favorite.add')|trans }}"
+                                            title="{{ (agent.favorite ? 'admin.agents.favorite.remove' : 'admin.agents.favorite.add')|trans }}"
+                                            class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors duration-100 ease-out {{ agent.favorite ? 'border-red-200 bg-red-50 text-red-500 hover:border-red-300' : 'border-neutral-200 bg-white text-gray-400 hover:border-red-200 hover:bg-red-50 hover:text-red-500' }}"
+                                            data-testid="agent-favorite-toggle"
+                                        >
+                                            {{ ux_icon('lucide:heart', {class: 'size-4 shrink-0' ~ (agent.favorite ? ' fill-current' : ''), 'aria-hidden': 'true'}) }}
+                                        </button>
+                                        {{ _self.agencyBadge(agent, this.adminPrefix) }}
+                                    </div>
                                 </div>
                                 <div class="flex flex-col gap-y-4 {{ agent.note ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
                                     {{ _self.colEmail(agent) }}
@@ -313,7 +523,7 @@
                                     <twig:Button
                                         as="a"
                                         size="sm"
-                                        href="{{ path('admin_agent_show', {adminPrefix: this.adminPrefix, id: agent.id}) }}"
+                                        href="{{ path('admin_agent_show', {adminPrefix: this.adminPrefix, reference: agent.reference}) }}"
                                         class="px-10"
                                         data-testid="agent-row-link"
                                     >
@@ -329,8 +539,9 @@
         </div>
     </div>
 
-    {# Pagination "Voir plus" : la page grandit par 25, le reste est en base. #}
-    {% if this.hiddenCount > 0 %}
+    {# Pagination "Voir plus" : la page grandit par 25, le reste est en base.
+       Sans objet en mode carte (tous les markers filtrés sont déjà posés). #}
+    {% if this.hiddenCount > 0 and not this.isMapDisplay %}
         <div class="mt-6 flex justify-center">
             <twig:Button
                 variant="outline"

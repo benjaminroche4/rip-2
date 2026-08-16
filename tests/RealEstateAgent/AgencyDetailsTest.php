@@ -91,12 +91,31 @@ final class AgencyDetailsTest extends KernelTestCase
         self::assertSame([], $component->errors);
     }
 
+    public function testSaveRejectsTooLongAndInvalidPhoneInputs(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11');
+
+        $component = $this->mount((int) $agency->getId());
+        $component->startEditing();
+        $component->name = str_repeat('a', 101);
+        $component->phone = 'pas-un-numero';
+        $component->saveDetails($this->em, self::getContainer()->get(TranslatorInterface::class));
+
+        // Refusé avec des erreurs de champ, jamais un "Data too long" SQL.
+        self::assertTrue($component->editing);
+        self::assertSame('admin.contacts.edit.tooLong', $component->errors['name'] ?? null);
+        self::assertSame('admin.contacts.edit.invalidPhone', $component->errors['phone'] ?? null);
+        $this->em->clear();
+        self::assertSame('Foncia Paris 11', $this->em->find(Agency::class, $agency->getId())->getName());
+    }
+
     public function testDeleteLeavesItsAgentsAsIndependent(): void
     {
         $agency = $this->persistAgency('Foncia Paris 11');
         $agent = (new RealEstateAgent())
             ->setFirstName('Jean')->setLastName('Martin')
             ->setAgency($agency)
+            ->setPosition(\App\RealEstateAgent\Domain\AgencyPosition::Manager)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($agent);
         $this->em->flush();
@@ -112,6 +131,8 @@ final class AgencyDetailsTest extends KernelTestCase
         $savedAgent = $this->em->find(RealEstateAgent::class, $agent->getId());
         self::assertNotNull($savedAgent, 'The agent must survive the agency deletion.');
         self::assertNull($savedAgent->getAgency());
+        // Un indépendant ne garde jamais de poste (même règle qu'à l'édition).
+        self::assertNull($savedAgent->getPosition());
     }
 
     public function testSectionStaffCannotDelete(): void
@@ -135,6 +156,55 @@ final class AgencyDetailsTest extends KernelTestCase
 
         $this->expectException(\Symfony\Component\Security\Core\Exception\AccessDeniedException::class);
         $component->askDelete();
+    }
+
+    public function testSaveWhitelistsFavoriteAreas(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11');
+
+        $component = $this->mount((int) $agency->getId());
+        $component->startEditing();
+        $component->areas = '11e, 12e,bogus,94';
+        $component->saveDetails($this->em, self::getContainer()->get(TranslatorInterface::class));
+
+        self::assertFalse($component->editing);
+        $this->em->clear();
+        self::assertSame('11e,12e,94', $this->em->find(Agency::class, $agency->getId())->getAreas());
+    }
+
+    public function testPlacesSelectionCoordinatesArePersisted(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11');
+
+        $component = $this->mount((int) $agency->getId());
+        $component->startEditing();
+        $component->address = '5 rue du Faubourg, 75012 Paris';
+        $component->chooseAddressLocation(48.8461, 2.3897);
+        $component->saveDetails($this->em, self::getContainer()->get(TranslatorInterface::class));
+
+        $this->em->clear();
+        $saved = $this->em->find(Agency::class, $agency->getId());
+        self::assertSame(48.8461, $saved->getLatitude());
+        self::assertSame(2.3897, $saved->getLongitude());
+    }
+
+    public function testClearingTheAddressClearsCoordinates(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11')
+            ->setAddress('5 rue du Faubourg, 75012 Paris')
+            ->setLatitude(48.8461)->setLongitude(2.3897);
+        $this->em->flush();
+
+        $component = $this->mount((int) $agency->getId());
+        $component->startEditing();
+        $component->address = '';
+        $component->saveDetails($this->em, self::getContainer()->get(TranslatorInterface::class));
+
+        $this->em->clear();
+        $saved = $this->em->find(Agency::class, $agency->getId());
+        self::assertNull($saved->getAddress());
+        self::assertNull($saved->getLatitude());
+        self::assertNull($saved->getLongitude());
     }
 
     private function mount(int $agencyId): AgencyDetails

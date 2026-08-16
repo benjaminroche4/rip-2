@@ -150,6 +150,56 @@ final class AgentListTest extends KernelTestCase
         self::assertStringContainsString('Réactif sur WhatsApp, préfère le matin.', $rendered);
     }
 
+    public function testAgentsListRendersTheAllFavoritesTabAndLegacyFavoritesUrlFallsBack(): void
+    {
+        $this->persistAgent('Jean', 'Martin');
+        $this->loginAsAdmin();
+
+        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        // Segmented Tous / Favoris control above the agents list, like the
+        // dossier scope; favorites is no longer a sidebar view.
+        self::assertStringContainsString('data-testid="agents-tab-all"', $rendered);
+        self::assertStringContainsString('data-testid="agents-tab-favorites"', $rendered);
+        self::assertStringNotContainsString('data-testid="agents-view-favorites"', $rendered);
+
+        // Legacy ?view=favorites URLs land on the agents view, favorites tab.
+        $component = $this->mountList();
+        $component->view = 'favorites';
+        $component->mount();
+        self::assertSame('agents', $component->view);
+        self::assertTrue($component->isFavoritesTab());
+    }
+
+    public function testFavoriteToggleIsSharedAndFiltersTheFavoritesView(): void
+    {
+        $fav = $this->persistAgent('Jean', 'Martin');
+        $favId = (int) $fav->getId();
+        $this->persistAgent('Paul', 'Durand');
+        $this->loginAsAdmin();
+
+        $component = $this->mountList();
+        $component->toggleFavorite($favId, $this->em);
+
+        // Global flag persisted in DB: the same favorites for the whole team.
+        $this->em->clear();
+        self::assertNotNull($this->em->find(RealEstateAgent::class, $favId)->getFavoritedAt());
+
+        $component->chooseTab('favorites');
+        $agents = $component->getAgents();
+        self::assertCount(1, $agents);
+        self::assertSame('Jean', $agents[0]->firstName);
+        self::assertTrue($agents[0]->favorite);
+        self::assertSame(1, $component->getFavoriteTotal());
+
+        // Toggle-off: the heart removes the agent from the favorites.
+        $component->toggleFavorite($favId, $this->em);
+        $this->em->clear();
+        self::assertNull($this->em->find(RealEstateAgent::class, $favId)->getFavoritedAt());
+    }
+
     public function testEditedAgentShowsItsLastEditDateInsteadOfTheCreationDate(): void
     {
         $edited = $this->persistAgent('Jean', 'Martin');

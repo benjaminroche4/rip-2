@@ -26,33 +26,62 @@
                     {{ 'admin.agencies.show.agentsTitle'|trans }}
                 </h3>
                 {% if agents is empty %}
-                    <p class="rounded-xl px-3 pt-1 pb-4 text-sm text-gray-500" data-testid="agency-agents-empty">
-                        {{ 'admin.agencies.show.empty'|trans }}
-                    </p>
+                    {# État vide au langage commun (liste dossiers, visites
+                       agent) : zone pointillée, pastille, titre + sous-texte. #}
+                    <div class="rounded-xl border border-dashed border-gray-950/10 bg-white/60" data-testid="agency-agents-empty">
+                        <div class="flex flex-col items-center justify-center gap-2.5 px-4 py-10 text-center">
+                            <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                                {{ ux_icon('lucide:briefcase', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                            </div>
+                            <div class="space-y-0.5">
+                                <p class="text-sm font-medium text-gray-700">{{ 'admin.agencies.show.empty.title'|trans }}</p>
+                                <p class="max-w-[38ch] text-xs text-pretty text-gray-400">{{ 'admin.agencies.show.empty.text'|trans }}</p>
+                            </div>
+                        </div>
+                    </div>
                 {% else %}
+                    {# Ligne fiche condensée : identité à gauche, paires
+                       label/valeur (poste, téléphone, email) au langage des
+                       cards de fiche. #}
                     <ul class="flex flex-col gap-1" role="list">
                         {% for agent in agents %}
                             <li class="rounded-xl bg-white {{ agent.active ? '' : 'opacity-60' }}" data-testid="agency-agent-row">
                                 <a
-                                    href="{{ path('admin_agent_show', {adminPrefix: adminPrefix, id: agent.id}) }}"
-                                    class="flex items-center gap-3 rounded-xl px-5 py-4 transition-colors duration-100 ease-out hover:bg-gray-50"
+                                    href="{{ path('admin_agent_show', {adminPrefix: adminPrefix, reference: agent.reference}) }}"
+                                    class="flex flex-col gap-4 rounded-xl p-5 transition-colors duration-100 ease-out hover:bg-gray-50 sm:flex-row sm:items-center"
                                 >
-                                    <twig:Avatar filename="{{ agent.avatarFilename }}" name="{{ agent.fullName }}" size="8" />
-                                    <span class="min-w-0 flex-1">
-                                        <span class="flex min-w-0 items-center gap-2">
-                                            <span class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</span>
+                                    <span class="flex min-w-0 items-center gap-3 sm:w-56 sm:shrink-0">
+                                        <twig:Avatar filename="{{ agent.avatarFilename }}" name="{{ agent.fullName }}" size="8" />
+                                        <span class="min-w-0">
+                                            <span class="block truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</span>
                                             {% if not agent.active %}
-                                                <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agency-agent-inactive">{{ 'admin.agents.status.inactive'|trans }}</span>
+                                                <span class="text-xs text-gray-400" data-testid="agency-agent-inactive">{{ 'admin.agents.status.inactive'|trans }}</span>
                                             {% endif %}
-                                            {% for specialty in agent.specialties %}
-                                                <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">{{ specialty.labelKey|trans }}</span>
-                                            {% endfor %}
                                         </span>
-                                        {% if agent.position %}
-                                            <span class="block truncate text-xs text-gray-500">{{ agent.position.labelKey|trans }}</span>
-                                        {% endif %}
                                     </span>
-                                    {{ ux_icon('lucide:chevron-right', {class: 'size-4 shrink-0 text-gray-300', 'aria-hidden': 'true'}) }}
+                                    <span class="grid min-w-0 flex-1 gap-3 text-sm sm:grid-cols-3">
+                                        <span class="min-w-0">
+                                            <span class="block text-xs text-gray-600">{{ 'admin.agents.create.position.label'|trans }}</span>
+                                            <span class="block truncate font-medium {{ agent.position ? 'text-gray-900' : 'text-gray-400' }}">{{ agent.position ? agent.position.labelKey|trans : '-' }}</span>
+                                        </span>
+                                        <span class="min-w-0">
+                                            <span class="block text-xs text-gray-600">{{ 'admin.agents.create.phone.label'|trans }}</span>
+                                            {% if agent.phone %}
+                                                {% set phoneCountry = agent.phone|phone_country %}
+                                                <span class="flex items-center gap-1.5 font-medium text-gray-900">
+                                                    {% if phoneCountry %}{{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-3.5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}{% endif %}
+                                                    <span class="truncate">{{ agent.phone|phone_format }}</span>
+                                                </span>
+                                            {% else %}
+                                                <span class="block font-medium text-gray-400">-</span>
+                                            {% endif %}
+                                        </span>
+                                        <span class="min-w-0">
+                                            <span class="block text-xs text-gray-600">{{ 'admin.agents.create.email.label'|trans }}</span>
+                                            <span class="block truncate font-medium {{ agent.email ? 'text-gray-900' : 'text-gray-400' }}">{{ agent.email ?? '-' }}</span>
+                                        </span>
+                                    </span>
+                                    {{ ux_icon('lucide:chevron-right', {class: 'hidden size-4 shrink-0 text-gray-300 sm:block', 'aria-hidden': 'true'}) }}
                                 </a>
                             </li>
                         {% endfor %}

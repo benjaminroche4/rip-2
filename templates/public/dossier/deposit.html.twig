@@ -10,18 +10,18 @@
 {% block description %}{{ 'deposit.meta.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_dossier_deposit') }}{% endblock %}
 
-{# Référencée (footer Support, sitemap en priorité basse) : on lève le
-   noindex par défaut de base_auth. Les routes localisées diffèrent, les
-   alternates sont explicites. #}
-{% block meta_robots %}<meta name="robots" content="index, follow">{% endblock %}
+{# Page utilitaire d'accès privé : aucun intérêt SEO, et une URL avec code
+   collée quelque part ne doit jamais finir indexée. #}
+{% block meta_robots %}<meta name="robots" content="noindex, nofollow">{% endblock %}
 {% block hreflang %}
     <link rel="alternate" hreflang="fr" href="{{ url('app_dossier_deposit', {_locale: 'fr'}) }}" />
     <link rel="alternate" hreflang="en" href="{{ url('app_dossier_deposit', {_locale: 'en'}) }}" />
     <link rel="alternate" hreflang="x-default" href="{{ url('app_dossier_deposit', {_locale: 'fr'}) }}" />
 {% endblock %}
 
-{# Switch de langue du header du site : conserve le code pré-rempli. #}
-{% macro langSwitch(codeParam) %}
+{# Switch de langue du header du site. Le code pré-rempli vit en session
+   (jamais en query string : il fuiterait vers analytics/historique). #}
+{% macro langSwitch() %}
     <twig:Button
         variant="outline"
         popovertarget="deposit-lang"
@@ -40,7 +40,7 @@
         <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
             {% for locale in ['fr', 'en'] %}
                 <a
-                    href="{{ path('app_dossier_deposit', {_locale: locale}|merge(codeParam)) }}"
+                    href="{{ path('app_dossier_deposit', {_locale: locale}) }}"
                     hreflang="{{ locale }}"
                     lang="{{ locale }}"
                     class="{% if app.request.locale == locale %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
@@ -56,7 +56,6 @@
 {% endmacro %}
 
 {% import _self as shell %}
-{% set codeParam = app.request.query.get('code') ? {code: app.request.query.get('code')} : {} %}
 
 {% block body %}
     {% if paired %}
@@ -76,7 +75,7 @@
                         />
                     </a>
                     <div data-testid="deposit-locale-switch">
-                        {{ shell.langSwitch(codeParam) }}
+                        {{ shell.langSwitch() }}
                     </div>
                 </div>
 
@@ -113,7 +112,7 @@
                         />
                     </a>
                     <div data-testid="deposit-locale-switch">
-                        {{ shell.langSwitch(codeParam) }}
+                        {{ shell.langSwitch() }}
                     </div>
                 </div>
             </div>

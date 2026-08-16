@@ -133,7 +133,7 @@ final class AgencyDetails extends AbstractController
 
     public function getAgentCount(): int
     {
-        return \count($this->agents->findSummariesByAgency($this->agencyId));
+        return $this->agents->countByAgency($this->agencyId);
     }
 
     #[LiveAction]
@@ -181,6 +181,29 @@ final class AgencyDetails extends AbstractController
         if ('' !== $website && (false === filter_var($website, \FILTER_VALIDATE_URL) || !str_contains((string) parse_url($website, \PHP_URL_HOST), '.'))) {
             $this->errors['website'] = 'admin.agencies.create.website.invalid';
         }
+        // Longueurs des colonnes : le formulaire de création valide via les
+        // contraintes de l'entité, l'édition inline doit refuser avant le
+        // "Data too long" SQL (500 sans message sinon).
+        foreach ([
+            'name' => [$this->name, 100],
+            'brandName' => [$this->brandName, 100],
+            'email' => [$this->email, 180],
+            'address' => [$this->address, 255],
+            'website' => [$website, 255],
+            'note' => [$this->note, 2000],
+        ] as $field => [$value, $max]) {
+            if (mb_strlen(trim($value)) > $max) {
+                $this->errors[$field] = 'admin.contacts.edit.tooLong';
+            }
+        }
+        // Téléphone normalisé E.164 côté serveur (même canon que les leads).
+        $phone = null;
+        if ('' !== trim($this->phone)) {
+            $phone = \App\Shared\Phone\PhoneNumberNormalizer::toE164($this->phone);
+            if (null === $phone) {
+                $this->errors['phone'] = 'admin.contacts.edit.invalidPhone';
+            }
+        }
         if ([] !== $this->errors) {
             return;
         }
@@ -216,11 +239,14 @@ final class AgencyDetails extends AbstractController
             ->setAreas($areas)
             ->setLatitude($lat)
             ->setLongitude($lng)
-            ->setPhone('' !== trim($this->phone) ? trim($this->phone) : null)
+            ->setPhone($phone)
             ->setEmail('' !== trim($this->email) ? trim($this->email) : null)
             ->setWebsite($this->website)
             ->setSpecialties(array_map(AgentSpecialty::from(...), $this->specialties))
-            ->setNote('' !== trim($this->note) ? trim($this->note) : null);
+            ->setNote('' !== trim($this->note) ? trim($this->note) : null)
+            ->setUpdatedAt(new \DateTimeImmutable())
+            ->setUpdatedByName($this->currentStaffName())
+            ->setUpdatedByAvatar($this->currentStaffAvatar());
 
         // Nouveau logo éventuel (FormData du bouton "files|saveDetails"),
         // normalisé WebP 256x256; l'ancien fichier est purgé du bucket.
@@ -314,6 +340,18 @@ final class AgencyDetails extends AbstractController
         $this->dispatchBrowserEvent('toast:show', ['message' => $translator->trans('admin.toast.saved')]);
     }
 
+    /** Favori d'équipe (global) : bascule le cœur du header, la fiche se re-rend. */
+    #[LiveAction]
+    public function toggleFavorite(EntityManagerInterface $em): void
+    {
+        $this->ensureAdmin();
+
+        $agency = $this->agencies->find($this->agencyId)
+            ?? throw new NotFoundHttpException('Unknown agency.');
+        $agency->setFavoritedAt($agency->isFavorite() ? null : new \DateTimeImmutable());
+        $em->flush();
+    }
+
     #[LiveAction]
     public function askDelete(): void
     {
@@ -354,11 +392,15 @@ final class AgencyDetails extends AbstractController
         $this->securityLogger->warning('Agency profile deleted from the back office.', [
             'agencyId' => $agency->getId(),
             'agencyName' => $agency->getName(),
-            'agentCount' => \count($this->agents->findSummariesByAgency((int) $agency->getId())),
+            'agentCount' => $this->agents->countByAgency((int) $agency->getId()),
             'by' => $this->security->getUser()?->getUserIdentifier(),
         ]);
 
-        // Its agents keep existing as independent (SET NULL foreign key).
+        // Its agents keep existing as independent (SET NULL foreign key), and
+        // an independent agent never keeps a position (same rule as the edit).
+        foreach ($this->agents->findBy(['agency' => $agency]) as $attached) {
+            $attached->setPosition(null);
+        }
         $em->remove($agency);
         $em->flush();
 
@@ -390,12 +432,20 @@ final class AgencyDetails extends AbstractController
         $this->addressLng = $agency->longitude;
     }
 
+    /** Re-rendu des chips après une sélection sur la carte (rien n'est persisté). */
+    #[LiveAction]
+    public function syncAreas(): void
+    {
+        $this->ensureAdmin();
+    }
+
     /** Sélection Places sur le champ adresse : coordonnées immédiates. */
     #[LiveAction]
     public function chooseAddressLocation(#[LiveArg] ?float $lat = null, #[LiveArg] ?float $lng = null): void
     {
         $this->ensureAdmin();
-        if (null !== $lat && null !== $lng) {
+        // Bornes WGS84 : des coordonnées client hors plage sont ignorées.
+        if (null !== $lat && null !== $lng && $lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
             $this->addressLat = $lat;
             $this->addressLng = $lng;
         }
@@ -414,26 +464,6 @@ final class AgencyDetails extends AbstractController
                 fullscreenControl: false,
                 zoomControl: false,
             ));
-    }
-
-    /** Mini-carte de l'adresse en lecture (comme "Proposer un bien"). */
-    public function getAddressMap(): ?\Symfony\UX\Map\Map
-    {
-        $agency = $this->getAgency();
-        if (null === $agency?->latitude || null === $agency->longitude) {
-            return null;
-        }
-        $point = new \Symfony\UX\Map\Point($agency->latitude, $agency->longitude);
-
-        return (new \Symfony\UX\Map\Map('default'))
-            ->center($point)
-            ->zoom(15)
-            ->options(new \Symfony\UX\Map\Bridge\Google\GoogleOptions(
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-            ))
-            ->addMarker(new \Symfony\UX\Map\Marker(position: $point));
     }
 
     /**
@@ -457,5 +487,25 @@ final class AgencyDetails extends AbstractController
         if (!$this->security->isGranted('ROLE_SECTION_AGENTS')) {
             throw new AccessDeniedException('Admin access required.');
         }
+    }
+
+    /** Instantané du staff courant (nom, sinon email) pour la traçabilité. */
+    private function currentStaffName(): ?string
+    {
+        $user = $this->security->getUser();
+        if (!$user instanceof \App\Auth\Entity\User) {
+            return null;
+        }
+        $fullName = trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? ''));
+
+        return '' !== $fullName ? $fullName : (string) $user->getEmail();
+    }
+
+    /** Instantané de la photo de profil du staff courant. */
+    private function currentStaffAvatar(): ?string
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof \App\Auth\Entity\User ? $user->getAvatarFilename() : null;
     }
 }

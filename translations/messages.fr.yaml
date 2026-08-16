@@ -2137,8 +2137,8 @@ admin:
             requestDocuments: Demander des documents
             closure:
                 badge: Dossier clôturé
-                bannerTitle: Dossier clôturé
                 by: par %name%
+                bannerTitle: Dossier clôturé
                 closedAt: Clôturé le
                 close: Clôturer le dossier
                 reopen: Rouvrir
@@ -2499,6 +2499,8 @@ admin:
             title: Modifier les informations
             required: Ce champ est obligatoire.
             invalidEmail: Adresse email invalide.
+            invalidPhone: Numéro de téléphone invalide.
+            tooLong: Texte trop long.
             noOffer: Aucune formule
         nextStep:
             visioOverdue:
@@ -2807,15 +2809,29 @@ admin:
         view:
             agents: Agents
             agencies: Agences
+        tab:
+            label: Filtrer les agents
+            all: Tous
+            favorites: Favoris
+        filter:
+            area: Quartier
+            allAreas: Tous les quartiers
+        favorite:
+            add: Ajouter aux favoris
+            remove: Retirer des favoris
+        emptyFavorites:
+            title: Aucun favori pour le moment
+            description: Ajoutez un agent aux favoris avec le cœur sur sa card ou sa fiche.
         empty:
             title: Aucun agent pour le moment
             description: Ajoutez votre premier agent immobilier avec le bouton ci-dessus.
         emptyFiltered:
             title: Aucun agent ne correspond
-            description: Modifiez la recherche pour retrouver vos agents.
+            description: Modifiez la recherche ou les filtres pour retrouver vos agents.
         card:
             noAgency: Indépendant
-            open: Voir la fiche agent
+            open: Voir la fiche
+            updatedAt: Modifié le
         status:
             active: Actif
             inactive: Inactif
@@ -2829,13 +2845,11 @@ admin:
         deactivated:
             title: Agent désactivé
             text: Il n'apparaît plus dans les sélections. Réactivez-le pour le remettre en circulation.
-            updatedAt: Modifié le
         show:
             addedAt: Ajouté le
             audit:
                 createdAt: Créée le
                 updatedAt: Modifiée le
-                by: par %name%
             visits:
                 title: Visites
                 stats:
@@ -2849,6 +2863,15 @@ admin:
                 empty:
                     title: Aucune visite pour le moment
                     text: Les visites planifiées ou réalisées avec cet agent apparaîtront ici.
+        introEmail:
+            menuItem: Envoyer un email
+            sent: Email envoyé à l'agent.
+            modal:
+                title: Envoyer l'email de présentation ?
+                alreadySent: Déjà envoyé le %date%.
+                text: "L'email sera envoyé à %email% : ajout à notre annuaire de partenaires, informations enregistrées et nos coordonnées."
+                confirm: Envoyer l'email
+                sending: Envoi...
         delete:
             button: Supprimer l'agent
             title: Supprimer cet agent ?
@@ -2874,6 +2897,9 @@ admin:
             partner: Associé
             manager: Gérant
         create:
+            duplicate:
+                email: 'Un agent avec cet email existe déjà : %name%.'
+                phone: 'Un agent avec ce numéro existe déjà : %name%.'
             button: Créer
             menuItem:
                 title: Un agent
@@ -2900,9 +2926,10 @@ admin:
                 independent: En indépendant
             agency:
                 label: Agence
-                placeholder: Nom de l'agence...
-                help: Une agence déjà connue est réutilisée automatiquement.
-                notBlank: Le nom de l'agence est obligatoire.
+                placeholder: Sélectionner une agence...
+                searchPlaceholder: Rechercher une agence...
+                noMatch: Aucune agence ne correspond.
+                notBlank: Sélectionnez une agence.
             specialties:
                 label: Spécialités
             position:
@@ -2928,9 +2955,16 @@ admin:
         emptyFiltered:
             title: Aucune agence ne correspond
             description: Modifiez la recherche pour retrouver vos agences.
+        emptyFavorites:
+            title: Aucun favori pour le moment
+            description: Ajoutez une agence aux favoris avec le cœur sur sa card ou sa fiche.
+        display:
+            label: Affichage
+            list: Liste
+            map: Carte
         card:
             agentCount: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
-            open: Voir la fiche agence
+            open: Voir la fiche
             website: Ouvrir le site web
         status:
             active: Active
@@ -2947,8 +2981,14 @@ admin:
             button: Réactiver l'agence
         show:
             createdAt: Créée le
+            areas: Quartiers favoris
+            audit:
+                createdAt: Créée le
+                updatedAt: Modifiée le
             agentsTitle: Agents rattachés
-            empty: Aucun agent rattaché pour le moment.
+            empty:
+                title: Aucun agent rattaché pour le moment
+                text: Les agents créés avec cette agence apparaîtront ici.
         delete:
             button: Supprimer l'agence
             title: Supprimer cette agence ?
@@ -2961,6 +3001,7 @@ admin:
             title: Nouvelle agence
             logo:
                 label: Logo
+                choose: Choisir un logo
             subtitle: Enregistrez une agence partenaire. Vous pourrez y rattacher des agents ensuite.
             cancel: Annuler
             submit: Créer l'agence
@@ -3569,7 +3610,8 @@ deposit:
             refused: Refusée
         error:
             noFile: Aucun fichier reçu. Merci de réessayer.
-            locked: Cette pièce a été validée, son fichier ne peut plus être retiré.
+            locked: Cette pièce a été validée, elle ne peut plus être modifiée.
+            tooManyRequests: Trop d'envois en peu de temps. Merci de patienter une minute avant de réessayer.
     progress:
         detail: '%deposited% pièces déposées sur %total%, dont %validated% validées'
 

@@ -173,6 +173,35 @@ final class DossierDocumentFileAccessTest extends WebTestCase
         self::assertStringStartsWith('PK', (string) $content);
     }
 
+    public function testZipEntriesKeepTheirExtensionWhenStoredNameHasNone(): void
+    {
+        // Drive mode stores a Google Drive file id (no extension) as the
+        // stored name: the entry extension must come from the original name.
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $document = $dossier->getPersons()->first()->getDocuments()->first();
+        $file = $document->getFiles()->first();
+        $file->setStoredName('1AbCdriveFileId');
+        $this->em->flush();
+        file_put_contents($this->storageDir.'/DS-000042/documents/1AbCdriveFileId', '%PDF-1.4');
+
+        $this->loginAsAdmin();
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/dossiers/DS-000042/pieces.zip');
+        self::assertResponseIsSuccessful();
+
+        $tmp = tempnam(sys_get_temp_dir(), 'zip-assert');
+        file_put_contents($tmp, (string) $this->client->getInternalResponse()->getContent());
+        $zip = new \ZipArchive();
+        self::assertTrue($zip->open($tmp));
+        $names = [];
+        for ($i = 0; $i < $zip->numFiles; ++$i) {
+            $names[] = (string) $zip->getNameIndex($i);
+        }
+        $zip->close();
+        @unlink($tmp);
+
+        self::assertSame(["Dupont Jean/Pièce d'identité.pdf"], $names);
+    }
+
     public function testZipRequiresAuthentication(): void
     {
         $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/dossiers/DS-000042/pieces.zip');

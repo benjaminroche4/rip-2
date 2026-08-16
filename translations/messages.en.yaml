@@ -2135,8 +2135,8 @@ admin:
             requestDocuments: Request documents
             closure:
                 badge: File closed
-                bannerTitle: File closed
                 by: by %name%
+                bannerTitle: File closed
                 closedAt: Closed on
                 close: Close the file
                 reopen: Reopen
@@ -2497,6 +2497,8 @@ admin:
             title: Edit the details
             required: This field is required.
             invalidEmail: Invalid email address.
+            invalidPhone: Invalid phone number.
+            tooLong: Text too long.
             noOffer: No package
         nextStep:
             visioOverdue:
@@ -2805,15 +2807,29 @@ admin:
         view:
             agents: Agents
             agencies: Agencies
+        tab:
+            label: Filter agents
+            all: All
+            favorites: Favorites
+        filter:
+            area: District
+            allAreas: All districts
+        favorite:
+            add: Add to favorites
+            remove: Remove from favorites
+        emptyFavorites:
+            title: No favorites yet
+            description: Add an agent to the favorites with the heart on its card or profile.
         empty:
             title: No agents yet
             description: Add your first real estate agent with the button above.
         emptyFiltered:
             title: No matching agent
-            description: Adjust the search to find your agents.
+            description: Adjust the search or the filters to find your agents.
         card:
             noAgency: Independent
-            open: View the agent
+            open: View the profile
+            updatedAt: Updated on
         status:
             active: Active
             inactive: Inactive
@@ -2827,13 +2843,11 @@ admin:
         deactivated:
             title: Agent deactivated
             text: This agent no longer appears in the pickers. Reactivate the profile to make it available again.
-            updatedAt: Updated on
         show:
             addedAt: Added on
             audit:
                 createdAt: Created on
                 updatedAt: Updated on
-                by: by %name%
             visits:
                 title: Visits
                 stats:
@@ -2847,6 +2861,15 @@ admin:
                 empty:
                     title: No visits yet
                     text: Visits planned or carried out with this agent will show up here.
+        introEmail:
+            menuItem: Send an email
+            sent: Email sent to the agent.
+            modal:
+                alreadySent: Already sent on %date%.
+                title: Send the introduction email?
+                text: "The email will be sent to %email%: added to our partner directory, the information we hold, and our contact details."
+                confirm: Send the email
+                sending: Sending...
         delete:
             button: Delete the agent
             title: Delete this agent?
@@ -2872,6 +2895,9 @@ admin:
             partner: Partner
             manager: Manager
         create:
+            duplicate:
+                email: 'An agent with this email already exists: %name%.'
+                phone: 'An agent with this phone number already exists: %name%.'
             button: Create
             menuItem:
                 title: An agent
@@ -2898,9 +2924,10 @@ admin:
                 independent: Independently
             agency:
                 label: Agency
-                placeholder: Agency name...
-                help: A known agency is reused automatically.
-                notBlank: The agency name is required.
+                placeholder: Select an agency...
+                notBlank: Select an agency.
+                searchPlaceholder: Search for an agency...
+                noMatch: No agency matches.
             specialties:
                 label: Specialties
             position:
@@ -2926,9 +2953,16 @@ admin:
         emptyFiltered:
             title: No matching agency
             description: Adjust the search to find your agencies.
+        emptyFavorites:
+            title: No favorites yet
+            description: Add an agency to the favorites with the heart on its card or profile.
+        display:
+            label: Display
+            list: List
+            map: Map
         card:
             agentCount: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
-            open: View the agency
+            open: View the profile
             website: Open the website
         status:
             active: Active
@@ -2945,8 +2979,14 @@ admin:
             button: Reactivate the agency
         show:
             createdAt: Created on
+            areas: Favourite districts
+            audit:
+                createdAt: Created on
+                updatedAt: Updated on
             agentsTitle: Agency agents
-            empty: No agents attached yet.
+            empty:
+                title: No agents attached yet
+                text: Agents created with this agency will show up here.
         delete:
             button: Delete the agency
             title: Delete this agency?
@@ -2959,6 +2999,7 @@ admin:
             title: New agency
             logo:
                 label: Logo
+                choose: Choose a logo
             subtitle: Register a partner agency. You can attach agents to it later.
             cancel: Cancel
             submit: Create agency
@@ -3567,7 +3608,8 @@ deposit:
             refused: Refused
         error:
             noFile: No file received. Please try again.
-            locked: This piece has been validated, its file can no longer be removed.
+            locked: This piece has been validated and can no longer be changed.
+            tooManyRequests: Too many uploads in a short time. Please wait a minute and try again.
     progress:
         detail: '%deposited% of %total% documents uploaded, %validated% validated'
 

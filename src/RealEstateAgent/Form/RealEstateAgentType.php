@@ -17,7 +17,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * "New agent" modal form: identity plus optional agency and contact details.
@@ -49,17 +48,6 @@ class RealEstateAgentType extends AbstractType
                     'admin.agents.create.kind.independent' => 'independent',
                 ],
             ])
-            // Unmapped free-text: AgentCreate resolves it to an Agency
-            // entity (find-or-create, case-insensitive) when kind = agency.
-            ->add('agencyName', TextType::class, [
-                'label' => 'admin.agents.create.agency.label',
-                'required' => false,
-                'mapped' => false,
-                'constraints' => [
-                    new Assert\Length(max: 100, maxMessage: 'admin.agents.create.agency.length'),
-                ],
-                'attr' => ['maxlength' => 100, 'autocomplete' => 'off'],
-            ])
             // Only meaningful (and only shown) for agency agents; the
             // component resets it to null for an independent agent.
             ->add('position', EnumType::class, [
@@ -70,6 +58,14 @@ class RealEstateAgentType extends AbstractType
                 'multiple' => false,
                 'placeholder' => false,
                 'choice_label' => static fn (AgencyPosition $position): string => $position->labelKey(),
+            ])
+            // Only meaningful (and only shown) for independent agents; the
+            // component resets it to null for an agency agent. Free text
+            // helped by the Places autocomplete, like the agency form.
+            ->add('address', TextType::class, [
+                'label' => 'admin.agencies.create.address.label',
+                'required' => false,
+                'attr' => ['maxlength' => 255, 'autocomplete' => 'off'],
             ])
             // Checkboxes rendered as chips: an agent can do both.
             ->add('specialties', EnumType::class, [

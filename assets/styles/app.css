@@ -553,7 +553,7 @@ details.details-animated[open]::details-content {
 
 /* ── BO : indicateur de chargement global des LiveComponents ──────────────
    live_controller pose l'attribut `busy` sur le root du composant pendant
-   chaque requête (action comme autosave) : petit anneau en haut à droite du
+   chaque requête (action comme autosave) : anneau centré sur le
    composant, sans rien câbler composant par composant. Le fondu retardé de
    300 ms évite le clignotement sur les requêtes rapides (autosave au
    clavier). Exclusions : roots en `display: contents` (pas de boîte, le
@@ -600,8 +600,10 @@ body[data-bo] [data-live-name-value][busy]:not(.contents):not([data-busy-quiet])
 body[data-bo] [data-live-name-value][busy]:not(.contents):not([data-busy-quiet])::after {
     content: '';
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    /* Centré sur le composant (inset + margin auto : le transform reste
+       libre pour l'animation de rotation). */
+    inset: 0;
+    margin: auto;
     /* Juste au-dessus du voile ::before (z 1), mais sous tout overlay réel
        (dropdowns z-10, modales z-50) : l'anneau ne doit jamais flotter sur
        une modale ouverte. */

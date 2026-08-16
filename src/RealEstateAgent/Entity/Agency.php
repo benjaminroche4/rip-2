@@ -23,6 +23,14 @@ class Agency
     #[ORM\Column]
     private ?int $id = null;
 
+    /**
+     * Public reference shown in the admin ("AY-082820"), random like the
+     * other site references (never sequential); the unique index guards the
+     * negligible collision race.
+     */
+    #[ORM\Column(length: 9, unique: true, nullable: true)]
+    private ?string $reference = null;
+
     #[ORM\Column(length: 100, unique: true)]
     #[Assert\NotBlank(message: 'admin.agents.create.agency.notBlank')]
     #[Assert\Length(max: 100, maxMessage: 'admin.agents.create.agency.length')]
@@ -86,8 +94,108 @@ class Agency
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deactivatedAt = null;
 
+    /** Favori d'équipe (partagé par tout le staff) : null = pas favori. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $favoritedAt = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    /** Null = jamais modifiée depuis sa création. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    /** Snapshot du créateur de la fiche (nom, sinon email) : survit à la suppression du compte staff. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $createdByName = null;
+
+    /** Snapshot de la photo de profil du créateur (clé objet avatar). */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $createdByAvatar = null;
+
+    /** Snapshot du dernier modificateur de la fiche. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $updatedByName = null;
+
+    /** Snapshot de la photo de profil du dernier modificateur. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $updatedByAvatar = null;
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCreatedByName(): ?string
+    {
+        return $this->createdByName;
+    }
+
+    public function setCreatedByName(?string $createdByName): static
+    {
+        $this->createdByName = $createdByName;
+
+        return $this;
+    }
+
+    public function getCreatedByAvatar(): ?string
+    {
+        return $this->createdByAvatar;
+    }
+
+    public function setCreatedByAvatar(?string $createdByAvatar): static
+    {
+        $this->createdByAvatar = $createdByAvatar;
+
+        return $this;
+    }
+
+    public function getUpdatedByName(): ?string
+    {
+        return $this->updatedByName;
+    }
+
+    public function setUpdatedByName(?string $updatedByName): static
+    {
+        $this->updatedByName = $updatedByName;
+
+        return $this;
+    }
+
+    public function getUpdatedByAvatar(): ?string
+    {
+        return $this->updatedByAvatar;
+    }
+
+    public function setUpdatedByAvatar(?string $updatedByAvatar): static
+    {
+        $this->updatedByAvatar = $updatedByAvatar;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->regenerateReference();
+    }
+
+    /** Re-tire une référence aléatoire (collision détectée avant insertion). */
+    public function regenerateReference(): void
+    {
+        $this->reference = 'AY-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    public function getReference(): string
+    {
+        return (string) $this->reference;
+    }
 
     public function getId(): ?int
     {
@@ -232,6 +340,23 @@ class Agency
     public function isActive(): bool
     {
         return null === $this->deactivatedAt;
+    }
+
+    public function getFavoritedAt(): ?\DateTimeImmutable
+    {
+        return $this->favoritedAt;
+    }
+
+    public function setFavoritedAt(?\DateTimeImmutable $favoritedAt): static
+    {
+        $this->favoritedAt = $favoritedAt;
+
+        return $this;
+    }
+
+    public function isFavorite(): bool
+    {
+        return null !== $this->favoritedAt;
     }
 
     public function getLogoFilename(): ?string

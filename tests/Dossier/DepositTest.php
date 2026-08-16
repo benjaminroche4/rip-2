@@ -54,8 +54,9 @@ final class DepositTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('#deposit-pairing');
         self::assertSelectorExists('form[name="deposit_pairing"]');
-        // Référencée volontairement (footer + sitemap en priorité basse).
-        self::assertSelectorExists('meta[name="robots"][content="index, follow"]');
+        // Page d'accès privée : jamais indexée (une URL avec code collée
+        // quelque part ne doit pas finir dans un moteur).
+        self::assertSelectorExists('meta[name="robots"][content="noindex, nofollow"]');
         $response = $this->client->getResponse();
         self::assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         self::assertSame('no-cache', $response->headers->get('X-LiteSpeed-Cache-Control'));
@@ -63,8 +64,12 @@ final class DepositTest extends WebTestCase
 
     public function testPairingCodeIsPrefilledFromTheEmailedLink(): void
     {
-        $crawler = $this->client->request('GET', '/fr/depot-de-pieces?code=abe78l');
+        // Le ?code= du lien email est consommé en session puis retiré de
+        // l'URL (303) : il ne doit jamais atteindre analytics ni l'historique.
+        $this->client->request('GET', '/fr/depot-de-pieces?code=abe78l');
+        self::assertResponseRedirects('/fr/depot-de-pieces', 303);
 
+        $crawler = $this->client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertSame('ABE78L', $crawler->filter('form[name="deposit_pairing"] input[name="deposit_pairing[code]"]')->attr('value'));
     }
@@ -492,6 +497,171 @@ final class DepositTest extends WebTestCase
         self::assertSame(DossierDocumentStatus::Validated, $fresh->getStatus());
     }
 
+    public function testValidatedPieceRefusesANewUpload(): void
+    {
+        // Le verrou "validé = figé" doit tenir côté serveur : re-déposer un
+        // fichier ferait retomber la pièce en "Reçue" et rouvrirait la
+        // corbeille sur le fichier validé d'origine.
+        $this->persistDossier();
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $crawler = $this->client->followRedirect();
+
+        $form = $crawler->filter('[data-testid="deposit-document"]')->first()->filter('form')->form();
+        $form['file']->upload($this->makePdf());
+        $this->client->submit($form);
+
+        $this->em->clear();
+        /** @var Dossier $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $validated = $dossier->getPersons()->first()->getDocuments()->first();
+        $validated->setStatus(DossierDocumentStatus::Validated);
+        $this->em->flush();
+        $validatedId = (int) $validated->getId();
+        $receivedAt = $validated->getReceivedAt();
+
+        // Token emprunté au formulaire d'upload de l'autre pièce (il est
+        // global au dossier), POST direct sur la pièce validée.
+        $crawler = $this->client->request('GET', '/fr/depot-de-pieces');
+        $token = (string) $this->visibleRegion($crawler)->filter('[data-testid="deposit-document"] input[name="_token"]')->first()->attr('value');
+        $this->client->request(
+            'POST',
+            '/fr/depot-de-pieces/'.$validatedId,
+            ['_token' => $token],
+            ['file' => new \Symfony\Component\HttpFoundation\File\UploadedFile($this->makePdf(), 'sneaky.pdf', 'application/pdf', null, true)],
+            ['HTTP_ACCEPT' => self::TURBO_ACCEPT],
+        );
+        self::assertResponseStatusCodeSame(200);
+        self::assertStringContainsString(
+            'Cette pièce a été validée, elle ne peut plus être modifiée.',
+            (string) $this->client->getResponse()->getContent(),
+        );
+
+        $this->em->clear();
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $fresh = $dossier->getPersons()->first()->getDocuments()->first();
+        self::assertSame(DossierDocumentStatus::Validated, $fresh->getStatus(), 'A validated piece must never fall back to received.');
+        self::assertCount(1, $fresh->getFiles());
+        self::assertEquals($receivedAt, $fresh->getReceivedAt());
+    }
+
+    public function testUploadAndDeleteRefuseAnInvalidCsrfToken(): void
+    {
+        $this->persistDossier();
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $crawler = $this->client->followRedirect();
+
+        $form = $crawler->filter('[data-testid="deposit-document"]')->first()->filter('form')->form();
+        $form['file']->upload($this->makePdf());
+        $this->client->submit($form);
+
+        $this->em->clear();
+        /** @var Dossier $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $document = $dossier->getPersons()->first()->getDocuments()->first();
+        $documentId = (int) $document->getId();
+        $fileId = (int) $document->getFiles()->first()->getId();
+
+        $this->client->request(
+            'POST',
+            '/fr/depot-de-pieces/'.$documentId,
+            ['_token' => 'forged'],
+            ['file' => new \Symfony\Component\HttpFoundation\File\UploadedFile($this->makePdf(), 'x.pdf', 'application/pdf', null, true)],
+        );
+        self::assertGreaterThanOrEqual(300, $this->client->getResponse()->getStatusCode());
+
+        $this->client->request('POST', '/fr/depot-de-pieces/fichier/'.$fileId.'/suppression', ['_token' => 'forged']);
+        self::assertGreaterThanOrEqual(300, $this->client->getResponse()->getStatusCode());
+
+        $this->em->clear();
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
+        $fresh = $dossier->getPersons()->first()->getDocuments()->first();
+        self::assertCount(1, $fresh->getFiles(), 'A forged token must neither add nor remove a file.');
+    }
+
+    public function testViewAndDeleteRefuseAFileFromAnotherDossier(): void
+    {
+        $this->persistDossier();
+
+        // Un second dossier avec un fichier déjà déposé.
+        $otherTenant = (new DossierPerson())
+            ->setRole(DossierPersonRole::TENANT)
+            ->setFirstName('Paul')->setLastName('Martin')
+            ->setEmail('paul.martin@example.com')
+            ->setPrimaryContact(true);
+        $otherDocument = (new DossierDocument())
+            ->setType(DossierDocumentType::Identity)
+            ->setStatus(DossierDocumentStatus::Received)
+            ->setRequestedAt(new \DateTimeImmutable())
+            ->setReceivedAt(new \DateTimeImmutable());
+        $otherFile = (new DossierDocumentFile())
+            ->setStoredName('foreign-file.pdf')
+            ->setOriginalName('foreign.pdf')
+            ->setMimeType('application/pdf')
+            ->setSize(8)
+            ->setUploadedAt(new \DateTimeImmutable());
+        $otherDocument->addFile($otherFile);
+        $otherTenant->addDocument($otherDocument);
+        $other = (new Dossier())
+            ->setName('Famille Martin')
+            ->setReference('DS-000043')
+            ->setPairingCode('QQQ11Q')
+            ->setPairingCodeSentAt(new \DateTimeImmutable())
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->addPerson($otherTenant);
+        $this->em->persist($other);
+        $this->em->flush();
+        @mkdir($this->storageDir.'/DS-000043/documents', 0777, true);
+        file_put_contents($this->storageDir.'/DS-000043/documents/foreign-file.pdf', '%PDF-1.4');
+        $foreignFileId = (int) $otherFile->getId();
+
+        // Appairé sur DS-000042 (avec un fichier à soi pour obtenir un vrai
+        // token de suppression), on vise le fichier de DS-000043.
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $crawler = $this->client->followRedirect();
+        $form = $crawler->filter('[data-testid="deposit-document"]')->first()->filter('form')->form();
+        $form['file']->upload($this->makePdf());
+        $this->client->submit($form);
+        $crawler = $this->client->request('GET', '/fr/depot-de-pieces');
+
+        $this->client->request('GET', '/fr/depot-de-pieces/fichier/'.$foreignFileId);
+        self::assertResponseStatusCodeSame(404);
+
+        $this->client->request('POST', '/fr/depot-de-pieces/fichier/'.$foreignFileId.'/suppression', ['_token' => $this->deleteToken($crawler)]);
+        self::assertResponseStatusCodeSame(404);
+
+        $this->em->clear();
+        $freshOther = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000043']);
+        self::assertCount(1, $freshOther->getPersons()->first()->getDocuments()->first()->getFiles());
+    }
+
+    public function testPairedSessionGrantExpiresAfterSevenDays(): void
+    {
+        $this->persistDossier();
+        $this->client->disableReboot();
+        $clock = new \Symfony\Component\Clock\MockClock('now');
+        self::getContainer()->set('clock', $clock);
+
+        $this->pair('jean.dupont@example.com', 'ABE78L');
+        $this->client->followRedirect();
+        self::assertSelectorExists('#deposit-documents');
+
+        // Huit jours plus tard, le grant est périmé : retour à l'appairage
+        // (un poste partagé ne doit pas rester appairé indéfiniment).
+        $clock->modify('+8 days');
+        $this->client->request('GET', '/fr/depot-de-pieces');
+        self::assertSelectorExists('form[name="deposit_pairing"]');
+    }
+
+    /** Un token deposit_delete valide, emprunté à n'importe quel formulaire de suppression de la page. */
+    private function deleteToken(\Symfony\Component\DomCrawler\Crawler $crawler): string
+    {
+        $nodes = $this->visibleRegion($crawler)->filter('[data-testid="deposit-file-delete"]');
+
+        return $nodes->count() > 0
+            ? (string) $nodes->closest('form')->filter('input[name="_token"]')->attr('value')
+            : 'no-delete-form-on-page';
+    }
+
     public function testClosedDossierIsRefusedLikeAnUnknownCode(): void
     {
         $this->persistDossier();
@@ -586,12 +756,18 @@ final class DepositTest extends WebTestCase
 
     public function testLocaleSwitchKeepsThePrefilledCode(): void
     {
-        $crawler = $this->client->request('GET', '/fr/depot-de-pieces?code=ABE78L');
+        $this->client->request('GET', '/fr/depot-de-pieces?code=ABE78L');
+        $crawler = $this->client->followRedirect();
 
-        self::assertResponseIsSuccessful();
+        // Les liens de langue ne portent plus le code (fuite analytics) :
+        // le préremplissage vit en session et survit au changement de langue.
         $links = $crawler->filter('[data-testid="deposit-locale-switch"] a')->each(static fn ($node) => $node->attr('href'));
-        self::assertContains('/en/document-upload?code=ABE78L', $links);
-        self::assertContains('/fr/depot-de-pieces?code=ABE78L', $links);
+        self::assertContains('/en/document-upload', $links);
+        self::assertContains('/fr/depot-de-pieces', $links);
+
+        $crawler = $this->client->request('GET', '/en/document-upload');
+        self::assertResponseIsSuccessful();
+        self::assertSame('ABE78L', $crawler->filter('form[name="deposit_pairing"] input[name="deposit_pairing[code]"]')->attr('value'));
     }
 
     /**

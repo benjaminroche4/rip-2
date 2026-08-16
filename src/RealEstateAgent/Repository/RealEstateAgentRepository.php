@@ -26,7 +26,7 @@ class RealEstateAgentRepository extends ServiceEntityRepository
      *
      * @return list<AgentSummary>
      */
-    public function findPagedSummaries(string $search, int $limit): array
+    public function findPagedSummaries(string $search, int $limit, bool $favoritesOnly = false, ?string $specialty = null, ?string $area = null): array
     {
         $qb = $this->createQueryBuilder('a')
             ->leftJoin('a.agency', 'ag')
@@ -34,7 +34,11 @@ class RealEstateAgentRepository extends ServiceEntityRepository
             ->orderBy('a.lastName', 'ASC')
             ->addOrderBy('a.firstName', 'ASC')
             ->setMaxResults($limit);
+        if ($favoritesOnly) {
+            $qb->andWhere('a.favoritedAt IS NOT NULL');
+        }
         $this->applySearch($qb, $search);
+        $this->applyDirectoryFilters($qb, $specialty, $area);
 
         /** @var list<RealEstateAgent> $agents */
         $agents = $qb->getQuery()->getResult();
@@ -42,15 +46,42 @@ class RealEstateAgentRepository extends ServiceEntityRepository
         return array_map($this->toSummary(...), $agents);
     }
 
-    /** Nombre de lignes après recherche ('' = tout l'annuaire). */
-    public function countFiltered(string $search = ''): int
+    /** Nombre de lignes après recherche et filtres ('' / null = tout l'annuaire). */
+    public function countFiltered(string $search = '', bool $favoritesOnly = false, ?string $specialty = null, ?string $area = null): int
     {
         $qb = $this->createQueryBuilder('a')
             ->select('COUNT(a.id)')
             ->leftJoin('a.agency', 'ag');
+        if ($favoritesOnly) {
+            $qb->andWhere('a.favoritedAt IS NOT NULL');
+        }
         $this->applySearch($qb, $search);
+        $this->applyDirectoryFilters($qb, $specialty, $area);
 
         return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Filtres discrets de l'annuaire, whitelistés en amont (valeur d'enum
+     * AgentSpecialty / code ParisDistricts).
+     *
+     * - Spécialité : la colonne JSON stocke les backing values, le guillemet
+     *   dans le motif évite tout faux positif de sous-chaîne.
+     * - Quartier : l'agent matche par son propre CSV ou celui de son agence
+     *   (les agents en agence héritent du secteur de l'agence). Les codes ne
+     *   sont pas préfixe-safe ('1e' est un préfixe de '11e'), donc le CSV est
+     *   borné de virgules avant le LIKE.
+     */
+    private function applyDirectoryFilters(\Doctrine\ORM\QueryBuilder $qb, ?string $specialty, ?string $area): void
+    {
+        if (null !== $specialty && '' !== $specialty) {
+            $qb->andWhere('a.specialties LIKE :specialty')
+                ->setParameter('specialty', '%"'.$specialty.'"%');
+        }
+        if (null !== $area && '' !== $area) {
+            $qb->andWhere("CONCAT(',', COALESCE(a.areas, ''), ',') LIKE :area OR CONCAT(',', COALESCE(ag.areas, ''), ',') LIKE :area")
+                ->setParameter('area', '%,'.$area.',%');
+        }
     }
 
     private function applySearch(\Doctrine\ORM\QueryBuilder $qb, string $search): void
@@ -101,16 +132,50 @@ class RealEstateAgentRepository extends ServiceEntityRepository
         return $this->mapSummaries($agents);
     }
 
+    /** Fiche par référence publique (AG-xxxxxx), utilisée par l'URL admin. */
+    public function findDetailByReference(string $reference): ?AgentDetail
+    {
+        return $this->findDetailMatching('a.reference = :value', $reference);
+    }
+
     /**
      * Read model for the agent detail page.
      */
     public function findDetail(int $id): ?AgentDetail
     {
+        return $this->findDetailMatching('a.id = :value', $id);
+    }
+
+    /**
+     * Référence aléatoire : re-tire tant qu'elle existe déjà (le paradoxe des
+     * anniversaires rend la collision plausible bien avant le million de
+     * fiches; l'index unique reste le filet pour la course résiduelle).
+     */
+    public function ensureUniqueReference(RealEstateAgent $agent): void
+    {
+        for ($i = 0; $i < 5 && $this->count(['reference' => $agent->getReference()]) > 0; ++$i) {
+            $agent->regenerateReference();
+        }
+    }
+
+    /** Agents rattachés à une agence, sans hydrater les lignes. */
+    public function countByAgency(int $agencyId): int
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->where('a.agency = :agencyId')
+            ->setParameter('agencyId', $agencyId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    private function findDetailMatching(string $where, int|string $value): ?AgentDetail
+    {
         $agent = $this->createQueryBuilder('a')
             ->leftJoin('a.agency', 'ag')
             ->addSelect('ag')
-            ->where('a.id = :id')
-            ->setParameter('id', $id)
+            ->where($where)
+            ->setParameter('value', $value)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$agent instanceof RealEstateAgent) {
@@ -135,7 +200,47 @@ class RealEstateAgentRepository extends ServiceEntityRepository
             updatedAt: $agent->getUpdatedAt(),
             updatedByName: $agent->getUpdatedByName(),
             professionalCards: $agent->getProfessionalCards(),
+            createdByAvatar: $agent->getCreatedByAvatar(),
+            reference: $agent->getReference(),
+            updatedByAvatar: $agent->getUpdatedByAvatar(),
+            address: $agent->getAddress(),
+            areas: $agent->getAreas(),
+            latitude: $agent->getLatitude(),
+            longitude: $agent->getLongitude(),
+            favorite: $agent->isFavorite(),
+            agencyReference: $agent->getAgency()?->getReference(),
+            introEmailSentAt: $agent->getIntroEmailSentAt(),
         );
+    }
+
+    /**
+     * Doublon probable à la création : même email (insensible à la casse)
+     * ou même téléphone (E.164). Première fiche correspondante, fiches
+     * désactivées comprises (un doublon dormant reste un doublon).
+     */
+    public function findPotentialDuplicate(?string $email, ?string $phone): ?RealEstateAgent
+    {
+        $email = trim((string) $email);
+        $phone = trim((string) $phone);
+        if ('' === $email && '' === $phone) {
+            return null;
+        }
+
+        $qb = $this->createQueryBuilder('a')->setMaxResults(1);
+        $conditions = [];
+        if ('' !== $email) {
+            $conditions[] = 'LOWER(a.email) = LOWER(:email)';
+            $qb->setParameter('email', $email);
+        }
+        if ('' !== $phone) {
+            $conditions[] = 'a.phone = :phone';
+            $qb->setParameter('phone', $phone);
+        }
+        $qb->where(implode(' OR ', $conditions));
+
+        $match = $qb->getQuery()->getResult()[0] ?? null;
+
+        return $match instanceof RealEstateAgent ? $match : null;
     }
 
     /**
@@ -193,6 +298,10 @@ class RealEstateAgentRepository extends ServiceEntityRepository
             note: $agent->getNote(),
             active: $agent->isActive(),
             updatedAt: $agent->getUpdatedAt(),
+            favorite: $agent->isFavorite(),
+            agencyLogo: $agent->getAgency()?->getLogoFilename(),
+            reference: $agent->getReference(),
+            agencyReference: $agent->getAgency()?->getReference(),
         );
     }
 }

@@ -28,6 +28,14 @@ final readonly class AgencyDetail
         public ?string $areas = null,
         public ?float $latitude = null,
         public ?float $longitude = null,
+        public ?string $createdByName = null,
+        public ?string $createdByAvatar = null,
+        public ?\DateTimeImmutable $updatedAt = null,
+        public ?string $updatedByName = null,
+        public ?string $updatedByAvatar = null,
+        public string $reference = '',
+        /** Favori d'équipe (partagé par tout le staff). */
+        public bool $favorite = false,
     ) {
     }
 }

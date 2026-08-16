@@ -122,7 +122,15 @@
                     {% macro navItems(items, currentRoute, adminPrefix) %}
                         {% for item in items %}
                             {% if is_granted(item.role) %}
-                                {% set isActive = currentRoute == item.route or currentRoute starts with item.route ~ '_' %}
+                                {# Le lien reste sélectionné sur tout le fil
+                                   d'Ariane de sa section : les fiches détail
+                                   ont des routes au singulier (admin_agency_show
+                                   sous Agents immobiliers), d'où les préfixes
+                                   de correspondance explicites. #}
+                                {% set isActive = false %}
+                                {% for prefix in item.match|default([item.route]) %}
+                                    {% set isActive = isActive or currentRoute == prefix or currentRoute starts with prefix ~ '_' %}
+                                {% endfor %}
                                 <li>
                                     <a
                                         href="{{ path(item.route, {adminPrefix: adminPrefix}) }}"
@@ -155,10 +163,10 @@
                         </p>
                         <ul class="space-y-0.5" role="list">
                             {{ _self.navItems([
-                                {route: 'admin_contacts', icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_SECTION_CONTACTS', recentContactsBadge: true},
-                                {route: 'admin_dossiers', icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_SECTION_DOSSIERS', openDossiersBadge: true},
-                                {route: 'admin_visits', icon: 'lucide:calendar-check', label: 'admin.nav.visits', role: 'ROLE_SECTION_VISITS', todayVisitsBadge: true},
-                                {route: 'admin_agents', icon: 'lucide:briefcase', label: 'admin.nav.agents', role: 'ROLE_SECTION_AGENTS'},
+                                {route: 'admin_contacts', match: ['admin_contacts', 'admin_contact'], icon: 'lucide:inbox', label: 'admin.nav.contacts', role: 'ROLE_SECTION_CONTACTS', recentContactsBadge: true},
+                                {route: 'admin_dossiers', match: ['admin_dossiers', 'admin_dossier'], icon: 'lucide:folder-open', label: 'admin.nav.dossiers', role: 'ROLE_SECTION_DOSSIERS', openDossiersBadge: true},
+                                {route: 'admin_visits', match: ['admin_visits', 'admin_visit'], icon: 'lucide:calendar-check', label: 'admin.nav.visits', role: 'ROLE_SECTION_VISITS', todayVisitsBadge: true},
+                                {route: 'admin_agents', match: ['admin_agents', 'admin_agent', 'admin_agency'], icon: 'lucide:briefcase', label: 'admin.nav.agents', role: 'ROLE_SECTION_AGENTS'},
                                 {route: 'admin_tools', icon: 'lucide:layout-grid', label: 'admin.nav.tools', role: 'ROLE_SECTION_TOOLS'},
                             ], currentRoute, adminPrefix) }}
                         </ul>
@@ -172,7 +180,7 @@
                             </p>
                             <ul class="space-y-0.5" role="list">
                                 {{ _self.navItems([
-                                    {route: 'admin_users', icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
+                                    {route: 'admin_users', match: ['admin_users', 'admin_user'], icon: 'lucide:users', label: 'admin.nav.users', role: 'ROLE_ADMIN'},
                                 ], currentRoute, adminPrefix) }}
                             </ul>
                         </div>

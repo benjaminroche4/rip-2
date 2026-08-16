@@ -20,7 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  *   2. anonymous on the real path → login redirect
  *   3. staff without ROLE_SECTION_AGENTS → 403
  *   4. staff with the section role → 200, identity + contact rendered
- *   5. unknown id → 404, list rows link to the pages
+ *   5. unknown reference → 404, list rows link to the pages
  */
 final class ShowPagesAccessTest extends WebTestCase
 {
@@ -48,7 +48,7 @@ final class ShowPagesAccessTest extends WebTestCase
     {
         $agent = $this->persistAgent('Jean', 'Martin');
 
-        foreach (['/agents-immobiliers/'.$agent->getId(), '/agents-immobiliers/agences/'.$agent->getAgency()->getId()] as $path) {
+        foreach (['/agents-immobiliers/'.$agent->getReference(), '/agents-immobiliers/agences/'.$agent->getAgency()->getReference()] as $path) {
             $this->client->request('GET', '/fr/00000000000000000000000000000000/admin'.$path);
             self::assertResponseStatusCodeSame(404);
         }
@@ -58,7 +58,7 @@ final class ShowPagesAccessTest extends WebTestCase
     {
         $agent = $this->persistAgent('Jean', 'Martin');
 
-        $this->client->request('GET', $this->agentUrl((int) $agent->getId()));
+        $this->client->request('GET', $this->agentUrl($agent->getReference()));
         self::assertResponseRedirects();
         self::assertStringContainsString('/connexion', (string) $this->client->getResponse()->headers->get('Location'));
     }
@@ -68,10 +68,10 @@ final class ShowPagesAccessTest extends WebTestCase
         $agent = $this->persistAgent('Jean', 'Martin');
         $this->loginWithRoles(['ROLE_SECTION_CONTACTS']);
 
-        $this->client->request('GET', $this->agentUrl((int) $agent->getId()));
+        $this->client->request('GET', $this->agentUrl($agent->getReference()));
         self::assertResponseStatusCodeSame(403);
 
-        $this->client->request('GET', $this->agencyUrl((int) $agent->getAgency()->getId()));
+        $this->client->request('GET', $this->agencyUrl($agent->getAgency()->getReference()));
         self::assertResponseStatusCodeSame(403);
     }
 
@@ -88,7 +88,7 @@ final class ShowPagesAccessTest extends WebTestCase
         );
         $this->loginWithRoles(['ROLE_SECTION_AGENTS']);
 
-        $crawler = $this->client->request('GET', $this->agentUrl((int) $agent->getId()));
+        $crawler = $this->client->request('GET', $this->agentUrl($agent->getReference()));
         self::assertResponseIsSuccessful();
 
         $page = $crawler->filter('[data-testid="agent-show-page"]')->text();
@@ -100,7 +100,7 @@ final class ShowPagesAccessTest extends WebTestCase
         self::assertStringContainsString('Réactif sur WhatsApp.', $page);
         // The agency pair links to the agency page.
         $href = (string) $crawler->filter('[data-testid="agent-show-agency-link"]')->attr('href');
-        self::assertStringContainsString('/agents-immobiliers/agences/'.$agent->getAgency()->getId(), $href);
+        self::assertStringContainsString('/agents-immobiliers/agences/'.$agent->getAgency()->getReference(), $href);
     }
 
     public function testAgencyPageRendersIdentityAndItsAgents(): void
@@ -111,7 +111,7 @@ final class ShowPagesAccessTest extends WebTestCase
         $this->em->flush();
         $this->loginWithRoles(['ROLE_SECTION_AGENTS']);
 
-        $crawler = $this->client->request('GET', $this->agencyUrl((int) $agency->getId()));
+        $crawler = $this->client->request('GET', $this->agencyUrl($agency->getReference()));
         self::assertResponseIsSuccessful();
 
         $page = $crawler->filter('[data-testid="agency-show-page"]')->text();
@@ -121,7 +121,7 @@ final class ShowPagesAccessTest extends WebTestCase
         self::assertStringContainsString('Jean Martin', $page);
         // The agent row links back to the agent page.
         $href = (string) $crawler->filter('[data-testid="agency-agent-row"] a')->attr('href');
-        self::assertStringContainsString('/agents-immobiliers/'.$agent->getId(), $href);
+        self::assertStringContainsString('/agents-immobiliers/'.$agent->getReference(), $href);
     }
 
     public function testAgencyPageWithoutAgentsShowsTheEmptyMessage(): void
@@ -131,19 +131,19 @@ final class ShowPagesAccessTest extends WebTestCase
         $this->em->flush();
         $this->loginWithRoles(['ROLE_SECTION_AGENTS']);
 
-        $this->client->request('GET', $this->agencyUrl((int) $agency->getId()));
+        $this->client->request('GET', $this->agencyUrl($agency->getReference()));
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('[data-testid="agency-agents-empty"]');
     }
 
-    public function testUnknownIdsReturn404(): void
+    public function testUnknownReferencesReturn404(): void
     {
         $this->loginWithRoles(['ROLE_SECTION_AGENTS']);
 
-        $this->client->request('GET', $this->agentUrl(999999));
+        $this->client->request('GET', $this->agentUrl('AG-999999'));
         self::assertResponseStatusCodeSame(404);
 
-        $this->client->request('GET', $this->agencyUrl(999999));
+        $this->client->request('GET', $this->agencyUrl('AY-999999'));
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -156,17 +156,33 @@ final class ShowPagesAccessTest extends WebTestCase
         self::assertResponseIsSuccessful();
 
         $agentHref = (string) $crawler->filter('[data-testid="agent-row-link"]')->attr('href');
-        self::assertStringContainsString('/agents-immobiliers/'.$agent->getId(), $agentHref);
+        self::assertStringContainsString('/agents-immobiliers/'.$agent->getReference(), $agentHref);
     }
 
-    private function agentUrl(int $id): string
+    private function agentUrl(string $reference): string
     {
-        return '/fr/'.$this->adminPrefix.'/admin/agents-immobiliers/'.$id;
+        return '/fr/'.$this->adminPrefix.'/admin/agents-immobiliers/'.$reference;
     }
 
-    private function agencyUrl(int $id): string
+    public function testSidebarKeepsItsSectionLinkSelectedOnDetailPages(): void
     {
-        return '/fr/'.$this->adminPrefix.'/admin/agents-immobiliers/agences/'.$id;
+        $agent = $this->persistAgent('Jean', 'Martin');
+        $this->loginWithRoles(['ROLE_SECTION_AGENTS']);
+
+        // Detail routes are singular (admin_agency_show, admin_agent_show):
+        // the sidebar entry of the section must stay highlighted on them.
+        foreach ([$this->agencyUrl($agent->getAgency()->getReference()), $this->agentUrl($agent->getReference())] as $url) {
+            $crawler = $this->client->request('GET', $url);
+            self::assertResponseIsSuccessful();
+            $active = $crawler->filter('nav a[aria-current="page"]');
+            self::assertCount(1, $active);
+            self::assertStringContainsString('/agents-immobiliers', (string) $active->attr('href'));
+        }
+    }
+
+    private function agencyUrl(string $reference): string
+    {
+        return '/fr/'.$this->adminPrefix.'/admin/agents-immobiliers/agences/'.$reference;
     }
 
     /**

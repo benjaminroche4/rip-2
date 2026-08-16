@@ -89,18 +89,19 @@ final class AgentController extends AbstractController
 
     #[Route(
         path: [
-            'fr' => '/agents-immobiliers/{id}',
-            'en' => '/real-estate-agents/{id}',
+            'fr' => '/agents-immobiliers/{reference}',
+            'en' => '/real-estate-agents/{reference}',
         ],
         name: 'agent_show',
-        requirements: ['id' => '\d+'],
+        // Référence publique (jamais l'id auto-incrémenté, non devinable).
+        requirements: ['reference' => 'AG-\d{6}'],
         methods: ['GET'],
     )]
-    public function showAgent(string $adminPrefix, int $id, RealEstateAgentRepository $agents): Response
+    public function showAgent(string $adminPrefix, string $reference, RealEstateAgentRepository $agents): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        $agent = $agents->findDetail($id);
+        $agent = $agents->findDetailByReference($reference);
         if (null === $agent) {
             throw $this->createNotFoundException();
         }
@@ -113,18 +114,19 @@ final class AgentController extends AbstractController
 
     #[Route(
         path: [
-            'fr' => '/agents-immobiliers/agences/{id}',
-            'en' => '/real-estate-agents/agencies/{id}',
+            'fr' => '/agents-immobiliers/agences/{reference}',
+            'en' => '/real-estate-agents/agencies/{reference}',
         ],
         name: 'agency_show',
-        requirements: ['id' => '\d+'],
+        // Référence publique (jamais l'id auto-incrémenté, non devinable).
+        requirements: ['reference' => 'AY-\d{6}'],
         methods: ['GET'],
     )]
-    public function showAgency(string $adminPrefix, int $id, AgencyRepository $agencies, RealEstateAgentRepository $agents): Response
+    public function showAgency(string $adminPrefix, string $reference, AgencyRepository $agencies, RealEstateAgentRepository $agents): Response
     {
         $this->ensureValidPrefix($adminPrefix);
 
-        $agency = $agencies->findDetail($id);
+        $agency = $agencies->findDetailByReference($reference);
         if (null === $agency) {
             throw $this->createNotFoundException();
         }

@@ -26,6 +26,13 @@ final readonly class AgencySummary
         public array $specialties = [],
         public ?string $note = null,
         public bool $active = true,
+        /** @var list<string> libellés des quartiers favoris, prêts à afficher */
+        public array $areaLabels = [],
+        public bool $allAreas = false,
+        /** Référence publique (AY-xxxxxx), utilisée dans les URLs admin. */
+        public string $reference = '',
+        /** Favori d'équipe (partagé par tout le staff). */
+        public bool $favorite = false,
     ) {
     }
 }

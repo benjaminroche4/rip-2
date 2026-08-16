@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace App\RealEstateAgent\Twig\Components;
 
+use App\Contact\Domain\ParisDistricts;
 use App\RealEstateAgent\Domain\AgencySummary;
+use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Domain\AgentSummary;
 use App\RealEstateAgent\Repository\AgencyRepository;
 use App\RealEstateAgent\Repository\RealEstateAgentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\Map\Bridge\Google\GoogleOptions;
+use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
+use Symfony\UX\Map\InfoWindow;
+use Symfony\UX\Map\Map;
+use Symfony\UX\Map\Marker;
+use Symfony\UX\Map\Point;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -30,34 +41,66 @@ final class AgentList
 
     private const VIEWS = ['agents', 'agencies'];
 
+    private const TABS = ['all', 'favorites'];
+
+    private const DISPLAYS = ['list', 'map'];
+
     /** Secret admin URL prefix, needed to build links inside the component. */
     #[LiveProp]
     public string $adminPrefix = '';
 
     /** Free-text search. Debounced client-side, mirrored in the URL. */
-    #[LiveProp(writable: true, url: true)]
+    #[LiveProp(writable: true, url: true, onUpdated: 'onSearchUpdated')]
     public string $search = '';
 
     /** Active view: 'agents' (default) or 'agencies'. Mirrored in the URL. */
     #[LiveProp(writable: true, url: true)]
     public string $view = 'agents';
 
-    /** @var list<AgentSummary>|null */
-    private ?array $agentCache = null;
+    /** Onglet des deux vues : 'all' ou 'favorites', comme la portée dossiers. */
+    #[LiveProp(writable: true, url: true)]
+    public string $tab = 'all';
 
-    /** @var list<AgencySummary>|null */
-    private ?array $agencyCache = null;
+    /** Affichage de la vue agences : 'list' (défaut) ou 'map'. Mirroré dans l'URL. */
+    #[LiveProp(writable: true, url: true)]
+    public string $display = 'list';
+
+    /**
+     * Filtre spécialité de la vue agents ('' = toutes). Writable + url : une
+     * valeur inconnue arrivée par l'URL est neutralisée à la lecture
+     * (getActiveSpecialty), jamais passée telle quelle à la requête.
+     */
+    #[LiveProp(writable: true, url: true, onUpdated: 'onFiltersUpdated')]
+    public string $specialty = '';
+
+    /** Filtre quartier de la vue agents ('' = tous), même neutralisation à la lecture. */
+    #[LiveProp(writable: true, url: true, onUpdated: 'onFiltersUpdated')]
+    public string $area = '';
+
+    /** Lignes visibles : la page grandit par "Voir plus", jamais tout d'un coup. */
+    #[LiveProp]
+    public int $limit = self::PAGE;
+
+    private const PAGE = 25;
 
     public function __construct(
         private readonly RealEstateAgentRepository $repository,
         private readonly AgencyRepository $agencies,
         private readonly Security $security,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
     public function mount(): void
     {
         $this->ensureAdmin();
+        // Ancienne URL ?view=favorites (ex-entrée du switcher) : retombe sur
+        // la vue agents avec l'onglet Favoris.
+        if ('favorites' === $this->view) {
+            $this->view = 'agents';
+            $this->tab = 'favorites';
+        }
     }
 
     #[LiveAction]
@@ -68,6 +111,136 @@ final class AgentList
             throw new NotFoundHttpException('Unknown view.');
         }
         $this->view = $view;
+        $this->limit = self::PAGE;
+    }
+
+    /** Onglet Tous / Favoris, partagé par les deux vues. */
+    #[LiveAction]
+    public function chooseTab(#[LiveArg] string $tab): void
+    {
+        $this->ensureAdmin();
+        if (!\in_array($tab, self::TABS, true)) {
+            throw new NotFoundHttpException('Unknown tab.');
+        }
+        $this->tab = $tab;
+        $this->limit = self::PAGE;
+    }
+
+    /** Affichage Liste / Carte de la vue agences. */
+    #[LiveAction]
+    public function chooseDisplay(#[LiveArg] string $display): void
+    {
+        $this->ensureAdmin();
+        if (!\in_array($display, self::DISPLAYS, true)) {
+            throw new NotFoundHttpException('Unknown display.');
+        }
+        $this->display = $display;
+    }
+
+    /** Favori d'équipe (global) : bascule le cœur depuis la card, la liste se re-rend. */
+    #[LiveAction]
+    public function toggleFavorite(#[LiveArg] int $id, EntityManagerInterface $em): void
+    {
+        $this->ensureAdmin();
+
+        $agent = $this->repository->find($id)
+            ?? throw new NotFoundHttpException('Unknown agent.');
+        $agent->setFavoritedAt($agent->isFavorite() ? null : new \DateTimeImmutable());
+        $em->flush();
+    }
+
+    /** Favori d'équipe côté agences : même bascule que le cœur des agents. */
+    #[LiveAction]
+    public function toggleAgencyFavorite(#[LiveArg] int $id, EntityManagerInterface $em): void
+    {
+        $this->ensureAdmin();
+
+        $agency = $this->agencies->find($id)
+            ?? throw new NotFoundHttpException('Unknown agency.');
+        $agency->setFavoritedAt($agency->isFavorite() ? null : new \DateTimeImmutable());
+        $em->flush();
+    }
+
+    /** Chip spécialité : single avec toggle-off (recliquer désélectionne). */
+    #[LiveAction]
+    public function toggleSpecialty(#[LiveArg] string $specialty): void
+    {
+        $this->ensureAdmin();
+        if (null === AgentSpecialty::tryFrom($specialty)) {
+            throw new NotFoundHttpException('Unknown specialty.');
+        }
+        $this->specialty = $this->specialty === $specialty ? '' : $specialty;
+        $this->limit = self::PAGE;
+    }
+
+    /** Dropdown quartier : '' efface le filtre, recliquer l'actif aussi. */
+    #[LiveAction]
+    public function chooseArea(#[LiveArg] string $area): void
+    {
+        $this->ensureAdmin();
+        if ('' !== $area && !isset(ParisDistricts::LABELS[$area])) {
+            throw new NotFoundHttpException('Unknown area.');
+        }
+        $this->area = $this->area === $area ? '' : $area;
+        $this->limit = self::PAGE;
+    }
+
+    #[LiveAction]
+    public function more(): void
+    {
+        $this->ensureAdmin();
+        $this->limit += self::PAGE;
+    }
+
+    /** Nouvelle recherche = nouvelle première page. */
+    public function onSearchUpdated(): void
+    {
+        $this->limit = self::PAGE;
+    }
+
+    /** Nouveau filtre = nouvelle première page (prop écrite via data-model ou URL). */
+    public function onFiltersUpdated(): void
+    {
+        $this->limit = self::PAGE;
+    }
+
+    /** Spécialité effective : une valeur d'URL inconnue retombe sur '' (tous). */
+    public function getActiveSpecialty(): string
+    {
+        return null !== AgentSpecialty::tryFrom($this->specialty) ? $this->specialty : '';
+    }
+
+    /** Quartier effectif : un code d'URL inconnu retombe sur '' (tous). */
+    public function getActiveArea(): string
+    {
+        return isset(ParisDistricts::LABELS[$this->area]) ? $this->area : '';
+    }
+
+    /**
+     * @return list<AgentSpecialty>
+     */
+    public function getSpecialtyOptions(): array
+    {
+        return AgentSpecialty::cases();
+    }
+
+    /**
+     * Code => libellé. PHP convertit les clés numériques ('92', '93', '94')
+     * en int, d'où le type de clé mixte.
+     *
+     * @return array<int|string, string>
+     */
+    public function getAreaOptions(): array
+    {
+        return ParisDistricts::LABELS;
+    }
+
+    /** Recherche ou filtre actif : pilote l'état vide « filtré » de la vue agents. */
+    public function isFiltered(): bool
+    {
+        return '' !== trim($this->search)
+            || '' !== $this->getActiveSpecialty()
+            || '' !== $this->getActiveArea();
     }
 
     public function isAgenciesView(): bool
@@ -75,22 +248,59 @@ final class AgentList
         return 'agencies' === $this->view;
     }
 
+    public function isFavoritesTab(): bool
+    {
+        return 'favorites' === $this->tab;
+    }
+
+    public function isMapDisplay(): bool
+    {
+        return $this->isAgenciesView() && 'map' === $this->display;
+    }
+
+    /** Total des favoris de la vue active (non filtré), pour le libellé de l'onglet. */
+    public function getFavoriteTotal(): int
+    {
+        return $this->isAgenciesView()
+            ? $this->countCache['agency-favorites'][''] ??= $this->agencies->countFiltered(favoritesOnly: true)
+            : $this->countCache['favorites'][''] ??= $this->repository->countFiltered(favoritesOnly: true);
+    }
+
     /** Total agents in the directory (unfiltered), for the toggle label. */
     public function getAgentTotal(): int
     {
-        return \count($this->agentSummaries());
+        return $this->countCache['agents'][''] ??= $this->repository->countFiltered();
     }
 
     /** Total agencies in the directory (unfiltered), for the toggle label. */
     public function getAgencyTotal(): int
     {
-        return \count($this->agencySummaries());
+        return $this->countCache['agencies'][''] ??= $this->agencies->countFiltered();
     }
 
-    /** Rows in the active view after the search filter, for the count line. */
+    /** Rows in the active view after the search and filters, for the count line. */
     public function getTotalCount(): int
     {
-        return $this->isAgenciesView() ? \count($this->getAgencies()) : \count($this->getAgents());
+        $needle = trim($this->search);
+        if ($this->isAgenciesView()) {
+            // La vue agences ignore les filtres spécialité / quartier.
+            return $this->isFavoritesTab()
+                ? $this->countCache['agency-favorites'][$needle] ??= $this->agencies->countFiltered($needle, favoritesOnly: true)
+                : $this->countCache['agencies'][$needle] ??= $this->agencies->countFiltered($needle);
+        }
+
+        [$specialty, $area] = [$this->getActiveSpecialty(), $this->getActiveArea()];
+        $key = $needle.'|'.$specialty.'|'.$area;
+
+        return $this->isFavoritesTab()
+            ? $this->countCache['favorites'][$key] ??= $this->repository->countFiltered($needle, favoritesOnly: true, specialty: $specialty ?: null, area: $area ?: null)
+            : $this->countCache['agents'][$key] ??= $this->repository->countFiltered($needle, specialty: $specialty ?: null, area: $area ?: null);
+    }
+
+    /** Lignes filtrées restantes derrière le "Voir plus". */
+    public function getHiddenCount(): int
+    {
+        return max(0, $this->getTotalCount() - $this->limit);
     }
 
     /**
@@ -98,18 +308,13 @@ final class AgentList
      */
     public function getAgents(): array
     {
-        $needle = trim($this->search);
-        if ('' === $needle) {
-            return $this->agentSummaries();
-        }
-
-        return array_values(array_filter(
-            $this->agentSummaries(),
-            static fn (AgentSummary $agent): bool => false !== mb_stripos($agent->fullName(), $needle)
-                || (null !== $agent->agency && false !== mb_stripos($agent->agency, $needle))
-                || (null !== $agent->email && false !== mb_stripos($agent->email, $needle))
-                || (null !== $agent->phone && false !== mb_stripos($agent->phone, $needle)),
-        ));
+        return $this->repository->findPagedSummaries(
+            trim($this->search),
+            $this->limit,
+            $this->isFavoritesTab(),
+            $this->getActiveSpecialty() ?: null,
+            $this->getActiveArea() ?: null,
+        );
     }
 
     /**
@@ -117,33 +322,62 @@ final class AgentList
      */
     public function getAgencies(): array
     {
-        $needle = trim($this->search);
-        if ('' === $needle) {
-            return $this->agencySummaries();
+        return $this->agencies->findPagedSummaries(trim($this->search), $this->limit, $this->isFavoritesTab());
+    }
+
+    /**
+     * Carte de la vue agences : mêmes options que la carte de la fiche
+     * agence, un marker par agence active géocodée. Les markers suivent la
+     * recherche et l'onglet favoris (mêmes filtres que la liste).
+     */
+    public function getAgenciesMap(): Map
+    {
+        $map = (new Map('default'))
+            ->center(new Point(48.8566, 2.3522))
+            ->zoom(11.2)
+            ->options(new GoogleOptions(
+                gestureHandling: GestureHandling::COOPERATIVE,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                zoomControl: false,
+            ));
+
+        foreach ($this->agencies->findMapMarkers(trim($this->search), $this->isFavoritesTab()) as $row) {
+            $link = $this->urlGenerator->generate('admin_agency_show', [
+                'adminPrefix' => $this->adminPrefix,
+                'reference' => $row['reference'],
+            ]);
+            // Contenu maîtrisé : nom et adresse échappés, lien path() vers la fiche.
+            $content = null !== $row['address'] ? '<p>'.htmlspecialchars($row['address']).'</p>' : '';
+            $content .= '<p><a href="'.htmlspecialchars($link).'">'.htmlspecialchars($this->translator->trans('admin.agencies.card.open')).'</a></p>';
+            $map->addMarker(new Marker(
+                position: new Point($row['latitude'], $row['longitude']),
+                title: $row['name'],
+                infoWindow: new InfoWindow(
+                    headerContent: htmlspecialchars($row['name']),
+                    content: $content,
+                ),
+                id: (string) $row['id'],
+            ));
         }
 
-        return array_values(array_filter(
-            $this->agencySummaries(),
-            static fn (AgencySummary $agency): bool => false !== mb_stripos($agency->name, $needle)
-                || (null !== $agency->brand && false !== mb_stripos($agency->brand, $needle)),
-        ));
+        return $map;
     }
 
     /**
-     * @return list<AgentSummary>
+     * Clé du wrapper data-live-ignore de la carte : elle change avec les
+     * filtres, donc le morph remplace la zone entière et la carte se
+     * reconstruit avec les markers à jour (une zone ignorée ne se met
+     * jamais à jour en place).
      */
-    private function agentSummaries(): array
+    public function getMapKey(): string
     {
-        return $this->agentCache ??= $this->repository->findSummaries();
+        return substr(md5(trim($this->search).'|'.$this->tab), 0, 8);
     }
 
-    /**
-     * @return list<AgencySummary>
-     */
-    private function agencySummaries(): array
-    {
-        return $this->agencyCache ??= $this->agencies->findSummaries();
-    }
+    /** @var array<string, array<string, int>> */
+    private array $countCache = [];
 
     private function ensureAdmin(): void
     {

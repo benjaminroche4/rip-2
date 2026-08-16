@@ -48,6 +48,7 @@ final class AgencyCreate extends AbstractController
         private readonly Security $security,
         private readonly AgencyRepository $agencies,
         private readonly BrandRepository $brands,
+        private readonly \Doctrine\Persistence\ManagerRegistry $managerRegistry,
     ) {
     }
 
@@ -102,8 +103,43 @@ final class AgencyCreate extends AbstractController
 
         $agency->setName($name);
         $agency->setCreatedAt(new \DateTimeImmutable());
+
+        // Téléphone normalisé E.164 côté serveur (même canon que les leads);
+        // un numéro invalide est refusé avec une erreur de champ.
+        if (null !== $agency->getPhone()) {
+            $e164 = \App\Shared\Phone\PhoneNumberNormalizer::toE164($agency->getPhone());
+            if (null === $e164) {
+                $this->getForm()->get('phone')->addError(
+                    new FormError($translator->trans('admin.contacts.edit.invalidPhone')),
+                );
+                throw new UnprocessableEntityHttpException('Invalid phone number.');
+            }
+            $agency->setPhone($e164);
+        }
+        // Instantané du créateur (nom + photo de profil) : traçabilité de
+        // fiche, robuste même si le compte staff disparaît.
+        $creator = $this->security->getUser();
+        if ($creator instanceof \App\Auth\Entity\User) {
+            $fullName = trim(($creator->getFirstName() ?? '').' '.($creator->getLastName() ?? ''));
+            $agency->setCreatedByName('' !== $fullName ? $fullName : (string) $creator->getEmail());
+            $agency->setCreatedByAvatar($creator->getAvatarFilename());
+        }
+        // Référence aléatoire : re-tirée si elle existe déjà (sinon l'index
+        // unique transformerait la collision en 500 à la création).
+        $this->agencies->ensureUniqueReference($agency);
         $em->persist($agency);
-        $em->flush();
+        try {
+            $em->flush();
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
+            // Course entre deux créations simultanées du même nom : l'index
+            // unique tranche; même erreur de champ que le pré-contrôle (le
+            // manager fermé par l'exception est réinitialisé pour le re-rendu).
+            $this->managerRegistry->resetManager();
+            $this->getForm()->get('name')->addError(
+                new FormError($translator->trans('admin.agencies.create.name.exists')),
+            );
+            throw new UnprocessableEntityHttpException('An agency with this name already exists.');
+        }
 
         // Logo optionnel, envoyé avec l'action (input file "logo") :
         // normalisé WebP 256x256 et stocké sous agencies/<id>/logo/. Un

@@ -31,6 +31,18 @@ final readonly class AgentDetail
         public ?\DateTimeImmutable $updatedAt = null,
         public ?string $updatedByName = null,
         public array $professionalCards = [],
+        public ?string $createdByAvatar = null,
+        public ?string $updatedByAvatar = null,
+        public string $reference = '',
+        public ?string $address = null,
+        public ?string $areas = null,
+        public ?float $latitude = null,
+        public ?float $longitude = null,
+        public bool $favorite = false,
+        /** Référence publique de l'agence (AY-xxxxxx), pour le lien vers sa fiche. */
+        public ?string $agencyReference = null,
+        /** Dernier envoi de l'email de présentation (null = jamais envoyé). */
+        public ?\DateTimeImmutable $introEmailSentAt = null,
     ) {
     }
 

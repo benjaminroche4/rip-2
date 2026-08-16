@@ -15,7 +15,6 @@ use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierDocumentNamer;
 use App\Dossier\Service\DossierEventLogger;
 use Doctrine\ORM\EntityManagerInterface;
-use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockInterface;
@@ -52,12 +51,24 @@ final class DepositController extends AbstractController
      */
     private const PAIRING_CODE_TTL = '-'.Dossier::PAIRING_CODE_TTL_DAYS.' days';
 
+    /**
+     * Hard expiry of a paired session grant. Generous on purpose (a deposit
+     * spread over several evenings must survive), but a pairing done on a
+     * shared computer cannot stay valid forever.
+     */
+    private const SESSION_GRANT_TTL = '-7 days';
+
+    /** One-shot session slot carrying the ?code= of an email link across
+        the redirect that strips it from the URL (keeps it out of analytics). */
+    private const PREFILL_KEY = 'dossier_deposit_prefill';
+
     public function __construct(
         private readonly DossierRepository $dossiers,
         private readonly EntityManagerInterface $em,
         private readonly ClockInterface $clock,
         private readonly TranslatorInterface $translator,
         private readonly RateLimiterFactoryInterface $formDepositLimiter,
+        private readonly RateLimiterFactoryInterface $formDepositUploadLimiter,
         private readonly DossierEventLogger $events,
         private readonly DossierDocumentNamer $namer,
         #[Autowire(service: 'monolog.logger.security')]
@@ -72,17 +83,21 @@ final class DepositController extends AbstractController
         ],
         name: 'app_dossier_deposit',
         methods: ['GET', 'POST'],
-        options: [
-            // Référencée volontairement très bas : page utilitaire, pas
-            // une page d'acquisition.
-            'sitemap' => [
-                'priority' => 0.1,
-                'changefreq' => UrlConcrete::CHANGEFREQ_YEARLY,
-            ],
-        ],
+        // Volontairement hors sitemap (et noindex) : page d'accès privée,
+        // les seuls liens légitimes arrivent par email.
     )]
     public function index(Request $request, #[MapQueryParameter] ?string $code = null): Response
     {
+        // The email links carry the pairing code in the query string. Strip
+        // it immediately (303 to the clean URL, code parked in session):
+        // otherwise the secret leaks to analytics (page_location), browser
+        // history sync and any crawler that finds a pasted link.
+        if (null !== $code && '' !== $this->normalizeCode($code)) {
+            $request->getSession()->set(self::PREFILL_KEY, $this->normalizeCode($code));
+
+            return $this->redirectToRoute('app_dossier_deposit', status: Response::HTTP_SEE_OTHER);
+        }
+
         [$dossier, $person] = $this->pairedAccess($request);
         if (null !== $dossier && null !== $person) {
             return $this->uncacheable($this->render('public/dossier/deposit.html.twig', [
@@ -135,9 +150,11 @@ final class DepositController extends AbstractController
             }
             // New privilege level: rotate the session id (fixation guard).
             $request->getSession()->migrate();
+            $request->getSession()->remove(self::PREFILL_KEY);
             $request->getSession()->set(self::SESSION_KEY, [
                 'dossier' => (int) $dossier->getId(),
                 'person' => (int) $person->getId(),
+                'paired_at' => $this->clock->now()->getTimestamp(),
             ]);
             $this->securityLogger->info('Deposit pairing succeeded', [
                 'dossier' => (string) $dossier->getReference(),
@@ -152,10 +169,14 @@ final class DepositController extends AbstractController
             return $this->pairingErrorResponse($request, $form);
         }
 
+        // Kept in session (not one-shot) so a locale switch or a page reload
+        // does not lose the prefill; cleared once the pairing succeeds.
+        $prefill = (string) $request->getSession()->get(self::PREFILL_KEY, '');
+
         return $this->uncacheable($this->render('public/dossier/deposit.html.twig', [
             'paired' => false,
             'pairingForm' => $form->createView(),
-            'prefilledCode' => $this->normalizeCode($code ?? ''),
+            'prefilledCode' => $prefill,
         ]));
     }
 
@@ -179,8 +200,8 @@ final class DepositController extends AbstractController
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
-        if (!$this->formDepositLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
-            return $this->documentsResponse($request, $dossier, $person, $id, 'deposit.pairing.error.tooManyRequests');
+        if (!$this->formDepositUploadLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+            return $this->documentsResponse($request, $dossier, $person, $id, 'deposit.documents.error.tooManyRequests');
         }
 
         $document = null;
@@ -193,6 +214,13 @@ final class DepositController extends AbstractController
         }
         if (null === $document) {
             throw $this->createNotFoundException('Document not found on this dossier.');
+        }
+
+        // Validated = frozen. The template already hides the input, but the
+        // rule must hold server-side: re-uploading would silently demote the
+        // piece to "received" and unlock the delete of the validated file.
+        if (false === $document->getStatus()?->acceptsUpload()) {
+            return $this->documentsResponse($request, $dossier, $person, $id, 'deposit.documents.error.locked');
         }
 
         $upload = $request->files->get('file');
@@ -274,6 +302,15 @@ final class DepositController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+        // Mirror of the admin-side audit: a hijacked paired session must
+        // leave a trace of what it read.
+        $this->securityLogger->info('Deposit document viewed', [
+            'dossier' => (string) $dossier->getReference(),
+            'file' => (int) $file->getId(),
+            'person' => (int) $person->getId(),
+            'ip' => $request->getClientIp(),
+        ]);
+
         // Streamed from storage (disk or GCS bucket): the file is never
         // exposed by URL, only through this authenticated pass-through.
         $response = new StreamedResponse(static function () use ($storage, $dossier, $file): void {
@@ -316,6 +353,10 @@ final class DepositController extends AbstractController
             throw $this->createAccessDeniedException('Invalid CSRF token.');
         }
 
+        if (!$this->formDepositUploadLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+            return $this->documentsResponse($request, $dossier, $person, null, 'deposit.documents.error.tooManyRequests');
+        }
+
         $file = $this->fileOfDossier($dossier, $id);
         $document = $file->getDocument();
 
@@ -323,7 +364,6 @@ final class DepositController extends AbstractController
             return $this->documentsResponse($request, $dossier, $person, (int) $document->getId(), 'deposit.documents.error.locked');
         }
 
-        $storage->delete($dossier, $file);
         $fileName = (string) $file->getOriginalName();
         $document?->removeFile($file);
         if (null !== $document && $document->getFiles()->isEmpty()) {
@@ -334,7 +374,18 @@ final class DepositController extends AbstractController
             'piece' => $document?->getType()?->labelKey() ?? '',
             'file' => $fileName,
         ], authorName: trim(trim((string) $person->getFirstName()).' '.trim((string) $person->getLastName())));
+        // DB first: a storage hiccup after the flush leaves at worst an
+        // orphan blob (cleaned by retention), never a DB row pointing at a
+        // vanished file.
         $this->em->flush();
+        try {
+            $storage->delete($dossier, $file);
+        } catch (\Throwable $e) {
+            $this->securityLogger->warning('Deposit file blob deletion failed: '.$e->getMessage(), [
+                'dossier' => (string) $dossier->getReference(),
+                'file' => $id,
+            ]);
+        }
 
         return $this->documentsResponse($request, $dossier, $person, null, null);
     }
@@ -352,6 +403,10 @@ final class DepositController extends AbstractController
     {
         if (!$this->isCsrfTokenValid('deposit_leave', (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
+        if (!$this->formDepositUploadLimiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+            return $this->redirectToRoute('app_dossier_deposit', status: Response::HTTP_SEE_OTHER);
         }
 
         $request->getSession()->remove(self::SESSION_KEY);
@@ -387,6 +442,16 @@ final class DepositController extends AbstractController
     {
         $grant = $request->getSession()->get(self::SESSION_KEY);
         if (!\is_array($grant) || !isset($grant['dossier'], $grant['person'])) {
+            return [null, null];
+        }
+
+        // Grants issued before the timestamp existed, or older than the TTL,
+        // force a fresh pairing: a shared computer must not stay paired
+        // forever, and 7 days never cuts a deposit session mid-flight.
+        $pairedAt = (int) ($grant['paired_at'] ?? 0);
+        if ($pairedAt < $this->clock->now()->modify(self::SESSION_GRANT_TTL)->getTimestamp()) {
+            $request->getSession()->remove(self::SESSION_KEY);
+
             return [null, null];
         }
 

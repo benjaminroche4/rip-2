@@ -28,6 +28,12 @@ final readonly class AgentSummary
         public ?string $note = null,
         public bool $active = true,
         public ?\DateTimeImmutable $updatedAt = null,
+        public bool $favorite = false,
+        /** Logo de l'agence (clé objet), affiché dans le chip agence de la card. */
+        public ?string $agencyLogo = null,
+        /** Références publiques (AG-/AY-), utilisées dans les URLs admin. */
+        public string $reference = '',
+        public ?string $agencyReference = null,
     ) {
     }
 

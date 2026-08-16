@@ -124,35 +124,77 @@
                         </div>
                         {% if form.kind.vars.value == 'agency' %}
                             <div class="sm:col-span-2" data-testid="agent-create-agency-block">
-                                {# Autocomplétion sur les agences existantes : un nom
-                                   connu réutilise l'agence, un nouveau la crée. #}
-                                <twig:Label for="{{ form.agencyName.vars.id }}" class="text-gray-600">
+                                {# Sélection d'une agence existante uniquement : la
+                                   création d'agence a sa page dédiée, liée en pied
+                                   de panel. Le re-rendu live referme le <details>
+                                   (l'attribut open n'est jamais dans le markup). #}
+                                <p id="agent-create-agency-label" class="text-sm text-gray-600">
                                     {{ 'admin.agents.create.agency.label'|trans }}
                                     <span class="text-red-600" aria-hidden="true">*</span>
-                                </twig:Label>
-                                <div class="mt-1.5">
-                                    <input
-                                        type="text"
-                                        id="{{ form.agencyName.vars.id }}"
-                                        name="{{ form.agencyName.vars.full_name }}"
-                                        value="{{ form.agencyName.vars.value }}"
-                                        maxlength="100"
-                                        list="agent-create-agency-options"
-                                        placeholder="{{ 'admin.agents.create.agency.placeholder'|trans }}"
-                                        aria-invalid="{{ form.agencyName.vars.errors|length > 0 ? 'true' : 'false' }}"
-                                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                        data-testid="agent-create-agency"
+                                </p>
+                                {% set selectedAgency = this.selectedAgency %}
+                                <details
+                                    class="relative mt-1.5"
+                                    data-controller="details-dropdown dropdown-filter"
+                                    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                                    data-testid="agent-create-agency"
+                                >
+                                    <summary
+                                        class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
+                                        aria-labelledby="agent-create-agency-label"
+                                        aria-invalid="{{ this.agencyError ? 'true' : 'false' }}"
                                     >
-                                    <datalist id="agent-create-agency-options">
-                                        {% for name in this.agencyNames %}
-                                            <option value="{{ name }}"></option>
+                                        {% if selectedAgency %}
+                                            <twig:Avatar filename="{{ selectedAgency.logoFilename }}" name="{{ selectedAgency.name }}" size="6" />
+                                            <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ selectedAgency.name }}</span>
+                                        {% else %}
+                                            <span class="min-w-0 flex-1 truncate text-sm text-gray-400">{{ 'admin.agents.create.agency.placeholder'|trans }}</span>
+                                        {% endif %}
+                                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                    </summary>
+                                    <div class="absolute right-0 left-0 z-10 mt-2 max-h-72 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                                        {# Recherche locale : filtre la liste sans requête. #}
+                                        <div class="relative p-1">
+                                            {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-gray-400', 'aria-hidden': 'true'}) }}
+                                            <input
+                                                type="search"
+                                                data-dropdown-filter-target="input"
+                                                data-action="input->dropdown-filter#filter"
+                                                placeholder="{{ 'admin.agents.create.agency.searchPlaceholder'|trans }}"
+                                                aria-label="{{ 'admin.agents.create.agency.searchPlaceholder'|trans }}"
+                                                class="w-full rounded-lg bg-neutral-50 py-2 pr-3 pl-8 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:bg-neutral-100/70 focus:outline-none"
+                                                data-testid="agent-create-agency-search"
+                                            >
+                                        </div>
+                                        {% for option in this.agencyOptions %}
+                                            <button
+                                                type="button"
+                                                data-action="live#action details-dropdown#close"
+                                                data-live-action-param="chooseAgency"
+                                                data-live-id-param="{{ option.id }}"
+                                                class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors duration-100 ease-out {{ option.id == this.agencyId ? 'bg-neutral-100' : 'hover:bg-gray-50' }}"
+                                                data-dropdown-filter-target="item"
+                                                data-dropdown-filter-text="{{ option.name }} {{ option.brand }} {{ option.address }}"
+                                                data-testid="agent-create-agency-option-{{ option.id }}"
+                                            >
+                                                <twig:Avatar filename="{{ option.logoFilename }}" name="{{ option.name }}" size="8" />
+                                                <span class="min-w-0 flex-1">
+                                                    <span class="block truncate text-sm font-medium text-gray-900">{{ option.name }}</span>
+                                                    <span class="block truncate text-xs text-gray-500">{{ option.address ?? '-' }}</span>
+                                                </span>
+                                                {% if option.id == this.agencyId %}
+                                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                                {% endif %}
+                                            </button>
                                         {% endfor %}
-                                    </datalist>
-                                    <p class="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-400">{{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }} {{ 'admin.agents.create.agency.help'|trans }}</p>
-                                    {% for error in form.agencyName.vars.errors %}
-                                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
-                                    {% endfor %}
-                                </div>
+                                        <p class="px-3 py-2 text-sm text-gray-400" data-dropdown-filter-target="empty" {{ this.agencyOptions is not empty ? 'hidden' }} data-testid="agent-create-agency-empty">
+                                            {{ 'admin.agents.create.agency.noMatch'|trans }}
+                                        </p>
+                                    </div>
+                                </details>
+                                {% if this.agencyError %}
+                                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ 'admin.agents.create.agency.notBlank'|trans }}</p>
+                                {% endif %}
                             </div>
                             {# Poste dans l'agence : chips single avec toggle-off
                                (recliquer le chip actif le désélectionne via la
@@ -183,6 +225,145 @@
                                     <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                                 {% endfor %}
                             </div>
+                        {% else %}
+                            {# Indépendant : adresse et quartiers favoris de
+                               l'agent, mêmes widgets que la fiche agence.
+                               Masqués côté agence : l'adresse est celle de
+                               l'agence. #}
+                            <div class="sm:col-span-2" data-testid="agent-create-address-block">
+                                <twig:Label for="{{ form.address.vars.id }}" class="text-gray-600">
+                                    {{ 'admin.agencies.create.address.label'|trans }}
+                                </twig:Label>
+                                {# Autocomplétion Places (API legacy, dropdown
+                                   custom) : la sélection pose les coordonnées via
+                                   chooseAddressLocation, une adresse tapée à la
+                                   main retombe sur le géocodage serveur. #}
+                                <div
+                                    class="relative mt-1.5"
+                                    data-controller="places-autocomplete"
+                                    data-places-autocomplete-paris-only-value="false"
+                                    data-places-autocomplete-idf-only-value="true"
+                                    data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}"
+                                >
+                                    <input
+                                        type="text"
+                                        id="{{ form.address.vars.id }}"
+                                        name="{{ form.address.vars.full_name }}"
+                                        value="{{ form.address.vars.value }}"
+                                        maxlength="255"
+                                        aria-invalid="{{ form.address.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                        data-places-autocomplete-target="input"
+                                        data-action="input->places-autocomplete#search keydown->places-autocomplete#navigate"
+                                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                        data-testid="agent-create-address"
+                                    >
+                                    <ul
+                                        data-places-autocomplete-target="results"
+                                        role="listbox"
+                                        class="absolute top-full right-0 left-0 z-50 mt-2 hidden max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl shadow-gray-500/10"
+                                    ></ul>
+                                    {# Relais sélection Places -> LiveAction (coordonnées). #}
+                                    <span
+                                        class="hidden"
+                                        data-places-autocomplete-target="trigger"
+                                        data-action="places-autocomplete:select->live#action"
+                                        data-live-action-param="chooseAddressLocation"
+                                        aria-hidden="true"
+                                    ></span>
+                                </div>
+                                {% for error in form.address.vars.errors %}
+                                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                {% endfor %}
+                            </div>
+                            {# Quartiers favoris : même carte cliquable que la
+                               fiche agence; la sélection ne se persiste qu'avec
+                               la création. #}
+                            <div class="sm:col-span-2" data-testid="agent-create-areas-block">
+                                <div class="min-w-0 space-y-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <p class="text-sm text-gray-600">{{ 'admin.agencies.show.areas'|trans }}</p>
+                                        <button
+                                            type="button"
+                                            data-action="district-picker#toggleAll"
+                                            class="flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors duration-100 ease-out {{ this.allArrondissementsSelected ? 'border-primary/40 bg-primary/5 text-primary hover:border-primary/60 hover:bg-primary/10' : 'border-neutral-200 text-gray-600 hover:border-neutral-300 hover:text-gray-900' }}"
+                                            data-testid="agent-create-areas-select-all"
+                                        >
+                                            {{ 'admin.contacts.project.allAreas'|trans }}
+                                        </button>
+                                    </div>
+                                    {# data-live-ignore : la carte ne doit jamais être
+                                       touchée par les re-rendus live (un morph la
+                                       détruirait -> écran blanc). #}
+                                    <div data-live-ignore>
+                                        <div class="relative" data-district-picker-target="frame">
+                                            {{ ux_map(this.map, {
+                                                style: 'height: 260px; width: 100%;',
+                                                class: 'overflow-hidden rounded-xl border border-neutral-200',
+                                                'data-district-picker-target': 'map',
+                                            }) }}
+                                            <span
+                                                role="button"
+                                                tabindex="0"
+                                                data-action="click->district-picker#expand keydown.enter->district-picker#expand keydown.space->district-picker#expand:prevent"
+                                                class="absolute top-2 right-2 z-10 flex size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                                                data-district-picker-target="expandButton"
+                                                aria-label="{{ 'admin.contacts.project.expandMap'|trans }}"
+                                                title="{{ 'admin.contacts.project.expandMap'|trans }}"
+                                                data-testid="agent-create-map-expand"
+                                            >
+                                                {{ ux_icon('lucide:maximize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            </span>
+                                            <span
+                                                role="button"
+                                                tabindex="0"
+                                                data-action="click->district-picker#collapse keydown.enter->district-picker#collapse keydown.space->district-picker#collapse:prevent"
+                                                class="absolute top-2 right-2 z-10 hidden size-8 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white/95 text-gray-600 shadow-sm transition-colors duration-100 ease-out hover:bg-white hover:text-gray-900"
+                                                data-district-picker-target="collapseButton"
+                                                aria-label="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                                                title="{{ 'admin.contacts.project.collapseMap'|trans }}"
+                                                data-testid="agent-create-map-collapse"
+                                            >
+                                                {{ ux_icon('lucide:minimize-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="pointer-events-auto fixed inset-0 z-40 hidden bg-gray-950/40 backdrop-blur-[1px]"
+                                            data-district-picker-target="backdrop"
+                                            data-action="click->district-picker#collapse"
+                                            aria-hidden="true"
+                                        ></div>
+                                    </div>
+                                    {# syncAreas ne fait que re-rendre les chips :
+                                       la persistance attend la création. #}
+                                    <input
+                                        type="hidden"
+                                        data-district-picker-target="input"
+                                        data-model="norender|areas"
+                                        data-action="change->live#action"
+                                        data-live-action-param="syncAreas"
+                                        value="{{ this.areas }}"
+                                    >
+                                    {% set areaChips = this.areaChips %}
+                                    {% if areaChips is not empty %}
+                                        <div class="flex flex-wrap gap-1.5 pt-1" data-testid="agent-create-area-chips">
+                                            {% for chip in areaChips %}
+                                                <button
+                                                    type="button"
+                                                    data-action="district-picker#remove"
+                                                    data-district-picker-code-param="{{ chip.code }}"
+                                                    class="animate-slide-in flex cursor-pointer items-center gap-1.5 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors duration-100 ease-out hover:border-primary/60 hover:bg-primary/10"
+                                                    aria-label="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                                    title="{{ 'admin.contacts.project.removeArea'|trans({'%area%': chip.label}) }}"
+                                                    data-testid="agent-create-area-chip-remove"
+                                                >
+                                                    {{ ux_icon('lucide:map-pin', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                                    {{ chip.label }}
+                                                </button>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -210,6 +391,29 @@
                             {% endfor %}
                         </div>
                         {% for error in form.specialties.vars.errors %}
+                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                        {% endfor %}
+                        {# Cartes professionnelles loi Hoguet : mêmes chips
+                           multi toggle-off, nature de la carte en retrait. #}
+                        <p id="{{ form.professionalCards.vars.id }}-label" class="mt-4 text-sm text-gray-600">{{ 'admin.agents.professionalCard.label'|trans }}</p>
+                        <div role="group" aria-labelledby="{{ form.professionalCards.vars.id }}-label" class="mt-2 flex flex-wrap gap-2">
+                            {% for choice in form.professionalCards.children %}
+                                <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                                    <input
+                                        type="checkbox"
+                                        id="{{ choice.vars.id }}"
+                                        name="{{ choice.vars.full_name }}"
+                                        value="{{ choice.vars.value }}"
+                                        {% if choice.vars.checked %}checked{% endif %}
+                                        class="sr-only"
+                                        data-testid="agent-create-card-{{ choice.vars.value }}"
+                                    />
+                                    {{ choice.vars.label|trans }}
+                                    <span class="text-xs font-light opacity-70">({{ ('admin.agents.professionalCard.hint.' ~ choice.vars.value)|trans }})</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.professionalCards.vars.errors %}
                             <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                         {% endfor %}
                     </div>
@@ -251,6 +455,24 @@
                         </div>
                         {{ ui.input(form.email, 'admin.agents.create.email.label', 'email', false) }}
                     </div>
+                    {# Garde-fou anti-doublons, non bloquant : le formulaire
+                       re-rend au change, la bande apparaît dès qu'un email ou
+                       un numéro correspond à une fiche existante. #}
+                    {% set duplicate = this.duplicate %}
+                    {% if duplicate %}
+                        <div class="mt-3 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800" data-testid="agent-create-duplicate">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            <span class="min-w-0 flex-1 text-pretty">{{ ('admin.agents.create.duplicate.' ~ duplicate.field)|trans({'%name%': duplicate.name|title}) }}</span>
+                            <a
+                                href="{{ path('admin_agent_show', {adminPrefix: adminPrefix, reference: duplicate.reference}) }}"
+                                target="_blank"
+                                class="shrink-0 font-medium underline underline-offset-2 transition-colors duration-100 hover:text-amber-950"
+                                data-testid="agent-create-duplicate-link"
+                            >
+                                {{ 'admin.agents.card.open'|trans }}
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
 
                 {# Note interne : texte libre réservé à l'équipe. Le micro-titre

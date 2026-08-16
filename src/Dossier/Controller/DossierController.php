@@ -387,7 +387,13 @@ final class DossierController extends AbstractController
                     if (!$storage->exists($dossier, $file)) {
                         continue;
                     }
-                    $extension = pathinfo((string) $file->getStoredName(), \PATHINFO_EXTENSION);
+                    // The original name carries the real extension; the stored
+                    // name is a Drive file id in drive mode (no extension at
+                    // all), which used to produce unopenable entries.
+                    $extension = strtolower(pathinfo((string) $file->getOriginalName(), \PATHINFO_EXTENSION));
+                    if ('' === $extension) {
+                        $extension = strtolower(pathinfo((string) $file->getStoredName(), \PATHINFO_EXTENSION));
+                    }
                     $suffix = $document->getFiles()->count() > 1 ? '-'.($index + 1) : '';
                     $entries[$personDir.'/'.$label.$suffix.('' !== $extension ? '.'.$extension : '')] = $file;
                 }

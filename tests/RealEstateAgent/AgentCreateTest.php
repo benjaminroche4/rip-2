@@ -40,13 +40,14 @@ final class AgentCreateTest extends KernelTestCase
 
     public function testCreatesAnAgentAndRedirectsToTheList(): void
     {
+        $agency = $this->persistAgency('Foncia Paris 11');
         $component = $this->mountComponent();
+        $component->agencyId = (int) $agency->getId();
 
         $component->formValues = [
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'agency',
-            'agencyName' => 'Foncia Paris 11',
             'email' => 'jean@foncia.fr',
             'phone' => '+33611223344',
         ];
@@ -73,7 +74,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => '',
             'phone' => '',
         ];
@@ -89,28 +89,33 @@ final class AgentCreateTest extends KernelTestCase
         self::assertSame(0, (int) $this->em->getRepository(Agency::class)->count([]));
     }
 
-    public function testTwoAgentsWithTheSameAgencyNameShareOneAgency(): void
+    public function testChooseAgencySelectsAnActiveAgency(): void
     {
-        foreach ([['Jean', 'Martin', 'Foncia Paris 11'], ['Paul', 'Durand', 'foncia paris 11']] as [$first, $last, $agency]) {
-            $component = $this->mountComponent();
-            $component->formValues = [
-                'firstName' => $first,
-                'lastName' => $last,
-                'kind' => 'agency',
-                'agencyName' => $agency,
-                'email' => '',
-                'phone' => '',
-            ];
-            self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
-        }
+        $agency = $this->persistAgency('Foncia Paris 11');
+        $component = $this->mountComponent();
 
-        // Case-insensitive reuse: one agency row, both agents linked to it.
-        self::assertSame(1, (int) $this->em->getRepository(Agency::class)->count([]));
-        $martin = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
-        $durand = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Durand']);
-        self::assertNotNull($martin?->getAgency());
-        self::assertSame($martin->getAgency()?->getId(), $durand?->getAgency()?->getId());
-        self::assertSame('Foncia Paris 11', $durand?->getAgency()?->getName(), 'The first spelling wins.');
+        $component->chooseAgency((int) $agency->getId());
+
+        self::assertSame((int) $agency->getId(), $component->agencyId);
+        self::assertFalse($component->agencyError);
+        self::assertSame('Foncia Paris 11', $component->getSelectedAgency()?->name);
+    }
+
+    public function testChooseAgencyRejectsAnUnknownId(): void
+    {
+        $component = $this->mountComponent();
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+        $component->chooseAgency(999999);
+    }
+
+    public function testChooseAgencyRejectsADeactivatedAgency(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11', active: false);
+        $component = $this->mountComponent();
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+        $component->chooseAgency((int) $agency->getId());
     }
 
     public function testBlankNameBlocksCreation(): void
@@ -121,7 +126,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => '',
             'lastName' => '',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => '',
             'phone' => '',
         ];
@@ -144,7 +148,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => 'not-an-email',
             'phone' => '',
         ];
@@ -176,6 +179,11 @@ final class AgentCreateTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agent-create-specialty-location"', $rendered);
         self::assertStringContainsString('data-testid="agent-create-position-block"', $rendered);
         self::assertStringContainsString('data-live-action-param="togglePosition"', $rendered);
+        // Agency picker: custom details dropdown (selection only) with an
+        // inline search filter.
+        self::assertStringContainsString('data-testid="agent-create-agency"', $rendered);
+        self::assertStringContainsString('data-testid="agent-create-agency-search"', $rendered);
+        self::assertStringNotContainsString('<datalist', $rendered);
         self::assertStringContainsString('aria-labelledby="agent-create-title"', $rendered);
         // Anti double-submit guard on the create action.
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
@@ -186,7 +194,7 @@ final class AgentCreateTest extends KernelTestCase
         self::assertStringNotContainsString('openModal', $rendered);
     }
 
-    public function testAgencyKindRequiresTheAgencyName(): void
+    public function testAgencyKindWithoutASelectionSetsTheAgencyError(): void
     {
         $component = $this->mountComponent();
 
@@ -194,7 +202,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'agency',
-            'agencyName' => '   ',
             'email' => '',
             'phone' => '',
         ];
@@ -206,20 +213,71 @@ final class AgentCreateTest extends KernelTestCase
             self::assertSame(422, $e->getStatusCode());
         }
 
+        self::assertTrue($component->agencyError, 'The dropdown error message must show.');
         self::assertSame(0, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
         self::assertSame(0, (int) $this->em->getRepository(Agency::class)->count([]));
     }
 
-    public function testIndependentKindIgnoresALeftoverAgencyName(): void
+    public function testAgencyKindRejectsAnUnknownAgencyId(): void
     {
         $component = $this->mountComponent();
+        $component->agencyId = 999999;
 
-        // Typed an agency name, then switched the chip back to independent.
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'agency',
+            'email' => '',
+            'phone' => '',
+        ];
+
+        try {
+            $this->createAction($component);
+            self::fail('Expected an unprocessable-entity exception.');
+        } catch (HttpExceptionInterface $e) {
+            self::assertSame(422, $e->getStatusCode());
+        }
+
+        self::assertTrue($component->agencyError);
+        self::assertSame(0, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
+    }
+
+    public function testAgencyKindRejectsADeactivatedAgency(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11', active: false);
+        $component = $this->mountComponent();
+        $component->agencyId = (int) $agency->getId();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'agency',
+            'email' => '',
+            'phone' => '',
+        ];
+
+        try {
+            $this->createAction($component);
+            self::fail('Expected an unprocessable-entity exception.');
+        } catch (HttpExceptionInterface $e) {
+            self::assertSame(422, $e->getStatusCode());
+        }
+
+        self::assertTrue($component->agencyError);
+        self::assertSame(0, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
+    }
+
+    public function testIndependentKindIgnoresALeftoverAgencySelection(): void
+    {
+        $agency = $this->persistAgency('Foncia Paris 11');
+        $component = $this->mountComponent();
+
+        // Picked an agency, then switched the chip back to independent.
+        $component->agencyId = (int) $agency->getId();
         $component->formValues = [
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => 'Foncia Paris 11',
             'email' => '',
             'phone' => '',
         ];
@@ -229,20 +287,42 @@ final class AgentCreateTest extends KernelTestCase
         $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
         self::assertNotNull($agent);
         self::assertNull($agent->getAgency());
-        self::assertSame(0, (int) $this->em->getRepository(Agency::class)->count([]), 'No agency is created.');
+    }
+
+    public function testDropdownListsActiveAgenciesWithAddressAndExcludesDeactivatedOnes(): void
+    {
+        $this->persistAgency('Foncia Paris 11', address: '12 rue de la Roquette, 75011 Paris');
+        $this->persistAgency('Orpi Bastille');
+        $this->persistAgency('Guy Hoquet Nation', active: false);
+
+        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentCreate', [
+            'adminPrefix' => self::PREFIX,
+        ]);
+
+        // Each option is a live#action button on chooseAgency.
+        self::assertStringContainsString('data-live-action-param="chooseAgency"', $rendered);
+        self::assertStringContainsString('Foncia Paris 11', $rendered);
+        self::assertStringContainsString('12 rue de la Roquette, 75011 Paris', $rendered);
+        // No address = a plain dash on the second line.
+        self::assertStringContainsString('Orpi Bastille', $rendered);
+        self::assertStringContainsString('>-</span>', $rendered);
+        // A deactivated agency must not be selectable anymore.
+        self::assertStringNotContainsString('Guy Hoquet Nation', $rendered);
     }
 
     public function testStoresMultipleSpecialtiesAndTheAgencyPosition(): void
     {
+        $agency = $this->persistAgency('Foncia Paris 11');
         $component = $this->mountComponent();
+        $component->agencyId = (int) $agency->getId();
 
         $component->formValues = [
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'agency',
-            'agencyName' => 'Foncia Paris 11',
             'position' => 'consultant_rental',
             'specialties' => ['location', 'transaction'],
+            'professionalCards' => ['t', 'g'],
             'email' => '',
             'phone' => '',
         ];
@@ -257,17 +337,23 @@ final class AgentCreateTest extends KernelTestCase
             $agent->getSpecialties(),
             'An agent can handle both rentals and sales.',
         );
+        self::assertSame(
+            [\App\RealEstateAgent\Domain\ProfessionalCard::Transaction, \App\RealEstateAgent\Domain\ProfessionalCard::Gestion],
+            $agent->getProfessionalCards(),
+            'Cartes loi Hoguet stored alongside the specialties.',
+        );
     }
 
     public function testSpecialtiesAndPositionAreOptional(): void
     {
+        $agency = $this->persistAgency('Foncia Paris 11');
         $component = $this->mountComponent();
+        $component->agencyId = (int) $agency->getId();
 
         $component->formValues = [
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'agency',
-            'agencyName' => 'Foncia Paris 11',
             'position' => '',
             'specialties' => [],
             'email' => '',
@@ -292,7 +378,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'position' => 'manager',
             'specialties' => ['location'],
             'email' => '',
@@ -315,7 +400,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => '',
             'phone' => '',
             'note' => 'Réactif sur WhatsApp, préfère les visites le matin.',
@@ -335,7 +419,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => '',
             'phone' => '',
             'note' => '   ',
@@ -355,7 +438,6 @@ final class AgentCreateTest extends KernelTestCase
             'firstName' => 'Jean',
             'lastName' => 'Martin',
             'kind' => 'independent',
-            'agencyName' => '',
             'email' => '',
             'phone' => '',
             'note' => str_repeat('a', 2001),
@@ -387,9 +469,88 @@ final class AgentCreateTest extends KernelTestCase
         self::assertSame('', $component->formValues['position']);
     }
 
+    public function testDuplicateWarningMatchesAnExistingEmailCaseInsensitively(): void
+    {
+        $existing = (new RealEstateAgent())
+            ->setFirstName('Jean')->setLastName('Martin')
+            ->setEmail('jean.martin@orpi.fr')->setPhone('+33611111111');
+        $existing->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($existing);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        $component->formValues['email'] = 'JEAN.MARTIN@orpi.fr';
+        $component->formValues['phone'] = '';
+
+        $duplicate = $component->getDuplicate();
+        self::assertNotNull($duplicate, 'The warning must surface the existing profile.');
+        self::assertSame('Jean Martin', $duplicate['name']);
+        self::assertSame('email', $duplicate['field']);
+        self::assertSame($existing->getReference(), $duplicate['reference']);
+    }
+
+    public function testDuplicateWarningMatchesAnExistingPhoneAndStaysQuietOtherwise(): void
+    {
+        $existing = (new RealEstateAgent())
+            ->setFirstName('Jean')->setLastName('Martin')
+            ->setEmail('jean.martin@orpi.fr')->setPhone('+33611111111');
+        $existing->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($existing);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        $component->formValues['email'] = 'autre@exemple.fr';
+        $component->formValues['phone'] = '+33611111111';
+        self::assertSame('phone', $component->getDuplicate()['field'] ?? null);
+
+        // Unique coordinates: no band, and empty fields never match anything.
+        $component->formValues['phone'] = '+33622222222';
+        self::assertNull($component->getDuplicate());
+        $component->formValues['email'] = '';
+        $component->formValues['phone'] = '';
+        self::assertNull($component->getDuplicate());
+    }
+
+    public function testDuplicateWarningDoesNotBlockCreation(): void
+    {
+        $existing = (new RealEstateAgent())
+            ->setFirstName('Jean')->setLastName('Martin')
+            ->setEmail('jean.martin@orpi.fr');
+        $existing->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($existing);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        $component->formValues = [
+            'firstName' => 'Jeanne',
+            'lastName' => 'Marchand',
+            'kind' => 'independent',
+            'email' => 'jean.martin@orpi.fr',
+            'phone' => '',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+        self::assertSame(2, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
+    }
+
     private function createAction(object $component): ?RedirectResponse
     {
-        return $component->create($this->em, self::getContainer()->get('translator'));
+        return $component->create($this->em, self::getContainer()->get(\Symfony\Contracts\Translation\TranslatorInterface::class));
+    }
+
+    private function persistAgency(string $name, ?string $address = null, bool $active = true): Agency
+    {
+        $agency = (new Agency())
+            ->setName($name)
+            ->setAddress($address)
+            ->setCreatedAt(new \DateTimeImmutable());
+        if (!$active) {
+            $agency->setDeactivatedAt(new \DateTimeImmutable());
+        }
+        $this->em->persist($agency);
+        $this->em->flush();
+
+        return $agency;
     }
 
     private function mountComponent(): object

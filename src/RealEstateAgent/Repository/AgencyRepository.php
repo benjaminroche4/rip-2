@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\RealEstateAgent\Repository;
 
 use App\RealEstateAgent\Domain\AgencyDetail;
+use App\RealEstateAgent\Domain\AgencyPickerOption;
 use App\RealEstateAgent\Domain\AgencySummary;
 use App\RealEstateAgent\Domain\AgentSpecialty;
 use App\RealEstateAgent\Entity\Agency;
@@ -44,9 +45,22 @@ class AgencyRepository extends ServiceEntityRepository
         $agency = (new Agency())
             ->setName($name)
             ->setCreatedAt(new \DateTimeImmutable());
+        $this->ensureUniqueReference($agency);
         $this->getEntityManager()->persist($agency);
 
         return $agency;
+    }
+
+    /**
+     * Référence aléatoire : re-tire tant qu'elle existe déjà (le paradoxe des
+     * anniversaires rend la collision plausible bien avant le million de
+     * fiches; l'index unique reste le filet pour la course résiduelle).
+     */
+    public function ensureUniqueReference(Agency $agency): void
+    {
+        for ($i = 0; $i < 5 && $this->count(['reference' => $agency->getReference()]) > 0; ++$i) {
+            $agency->regenerateReference();
+        }
     }
 
     /**
@@ -83,10 +97,10 @@ class AgencyRepository extends ServiceEntityRepository
      *
      * @return list<AgencySummary>
      */
-    public function findPagedSummaries(string $search, ?int $limit): array
+    public function findPagedSummaries(string $search, ?int $limit, bool $favoritesOnly = false): array
     {
         $qb = $this->createQueryBuilder('ag')
-            ->select('ag.id AS id', 'ag.name AS name', 'b.name AS brand', 'ag.createdAt AS createdAt', 'ag.logoFilename AS logoFilename', 'ag.website AS website', 'ag.specialties AS specialties', 'ag.note AS note', 'ag.deactivatedAt AS deactivatedAt', 'COUNT(a.id) AS agentCount')
+            ->select('ag.id AS id', 'ag.name AS name', 'b.name AS brand', 'ag.createdAt AS createdAt', 'ag.logoFilename AS logoFilename', 'ag.website AS website', 'ag.specialties AS specialties', 'ag.note AS note', 'ag.deactivatedAt AS deactivatedAt', 'ag.areas AS areas', 'ag.reference AS reference', 'ag.favoritedAt AS favoritedAt', 'COUNT(a.id) AS agentCount')
             ->leftJoin('ag.brand', 'b')
             ->leftJoin(RealEstateAgent::class, 'a', 'WITH', 'a.agency = ag')
             ->groupBy('ag.id')
@@ -95,7 +109,10 @@ class AgencyRepository extends ServiceEntityRepository
             ->orderBy('ag.name', 'ASC')
             ->setMaxResults($limit);
         $this->applySearch($qb, $search);
-        /** @var list<array{id: int, name: string, brand: string|null, createdAt: \DateTimeImmutable, logoFilename: string|null, website: string|null, specialties: list<string>|null, note: string|null, deactivatedAt: \DateTimeImmutable|null, agentCount: int}> $rows */
+        if ($favoritesOnly) {
+            $qb->andWhere('ag.favoritedAt IS NOT NULL');
+        }
+        /** @var list<array{id: int, name: string, brand: string|null, createdAt: \DateTimeImmutable, logoFilename: string|null, website: string|null, specialties: list<string>|null, note: string|null, deactivatedAt: \DateTimeImmutable|null, areas: string|null, reference: string|null, favoritedAt: \DateTimeImmutable|null, agentCount: int}> $rows */
         $rows = $qb->getQuery()->getResult();
 
         return array_map(
@@ -108,8 +125,15 @@ class AgencyRepository extends ServiceEntityRepository
                 logoFilename: null !== $r['logoFilename'] ? (string) $r['logoFilename'] : null,
                 website: null !== $r['website'] ? (string) $r['website'] : null,
                 specialties: array_map(AgentSpecialty::from(...), $r['specialties'] ?? []),
+                areaLabels: array_map(
+                    static fn (string $code): string => \App\Contact\Domain\ParisDistricts::LABELS[$code] ?? $code,
+                    array_values(array_filter(array_map(trim(...), explode(',', (string) ($r['areas'] ?? ''))))),
+                ),
+                allAreas: \App\Contact\Domain\ParisDistricts::allArrondissementsSelected((string) ($r['areas'] ?? '')),
                 note: null !== $r['note'] ? (string) $r['note'] : null,
                 active: null === $r['deactivatedAt'],
+                reference: (string) ($r['reference'] ?? ''),
+                favorite: null !== $r['favoritedAt'],
             ),
             $rows,
         );
@@ -136,15 +160,55 @@ class AgencyRepository extends ServiceEntityRepository
     }
 
     /**
+     * Options for the agency picker on the "new agent" form: active agencies
+     * only, alphabetical, one array query (no full entity hydration).
+     *
+     * @return list<AgencyPickerOption>
+     */
+    public function findPickerOptions(): array
+    {
+        /** @var list<array{id: int, name: string, logoFilename: string|null, address: string|null, brand: string|null}> $rows */
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.id', 'a.name', 'a.logoFilename', 'a.address', 'b.name AS brand')
+            ->leftJoin('a.brand', 'b')
+            ->where('a.deactivatedAt IS NULL')
+            ->orderBy('a.name', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn (array $r): AgencyPickerOption => new AgencyPickerOption(
+                id: (int) $r['id'],
+                name: (string) $r['name'],
+                logoFilename: null !== $r['logoFilename'] ? (string) $r['logoFilename'] : null,
+                address: null !== $r['address'] ? (string) $r['address'] : null,
+                brand: null !== $r['brand'] ? (string) $r['brand'] : null,
+            ),
+            $rows,
+        );
+    }
+
+    /** Fiche par référence publique (AY-xxxxxx), utilisée par l'URL admin. */
+    public function findDetailByReference(string $reference): ?AgencyDetail
+    {
+        return $this->findDetailMatching('ag.reference = :value', $reference);
+    }
+
+    /**
      * Read model for the agency detail page.
      */
     public function findDetail(int $id): ?AgencyDetail
     {
+        return $this->findDetailMatching('ag.id = :value', $id);
+    }
+
+    private function findDetailMatching(string $where, int|string $value): ?AgencyDetail
+    {
         $agency = $this->createQueryBuilder('ag')
             ->leftJoin('ag.brand', 'b')
             ->addSelect('b')
-            ->where('ag.id = :id')
-            ->setParameter('id', $id)
+            ->where($where)
+            ->setParameter('value', $value)
             ->getQuery()
             ->getOneOrNullResult();
         if (!$agency instanceof Agency) {
@@ -167,18 +231,65 @@ class AgencyRepository extends ServiceEntityRepository
             areas: $agency->getAreas(),
             latitude: $agency->getLatitude(),
             longitude: $agency->getLongitude(),
+            reference: $agency->getReference(),
+            createdByName: $agency->getCreatedByName(),
+            createdByAvatar: $agency->getCreatedByAvatar(),
+            updatedAt: $agency->getUpdatedAt(),
+            updatedByName: $agency->getUpdatedByName(),
+            updatedByAvatar: $agency->getUpdatedByAvatar(),
+            favorite: $agency->isFavorite(),
         );
     }
 
-    /** Nombre d'agences après recherche ('' = toutes). */
-    public function countFiltered(string $search = ''): int
+    /** Nombre d'agences après recherche ('' = toutes), favoris seuls en option. */
+    public function countFiltered(string $search = '', bool $favoritesOnly = false): int
     {
         $qb = $this->createQueryBuilder('ag')
             ->select('COUNT(DISTINCT ag.id)')
             ->leftJoin('ag.brand', 'b');
         $this->applySearch($qb, $search);
+        if ($favoritesOnly) {
+            $qb->andWhere('ag.favoritedAt IS NOT NULL');
+        }
 
         return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Rows for the map display of the agencies view: active geocoded agencies
+     * only, filtered like the list (search + favorites) so both displays show
+     * the same directory slice.
+     *
+     * @return list<array{id: int, name: string, address: string|null, latitude: float, longitude: float, reference: string}>
+     */
+    public function findMapMarkers(string $search = '', bool $favoritesOnly = false): array
+    {
+        $qb = $this->createQueryBuilder('ag')
+            ->select('ag.id AS id', 'ag.name AS name', 'ag.address AS address', 'ag.latitude AS latitude', 'ag.longitude AS longitude', 'ag.reference AS reference')
+            ->leftJoin('ag.brand', 'b')
+            ->where('ag.deactivatedAt IS NULL')
+            ->andWhere('ag.latitude IS NOT NULL')
+            ->andWhere('ag.longitude IS NOT NULL')
+            ->orderBy('ag.name', 'ASC');
+        $this->applySearch($qb, $search);
+        if ($favoritesOnly) {
+            $qb->andWhere('ag.favoritedAt IS NOT NULL');
+        }
+
+        /** @var list<array{id: int, name: string, address: string|null, latitude: float, longitude: float, reference: string|null}> $rows */
+        $rows = $qb->getQuery()->getArrayResult();
+
+        return array_map(
+            static fn (array $r): array => [
+                'id' => (int) $r['id'],
+                'name' => (string) $r['name'],
+                'address' => null !== $r['address'] ? (string) $r['address'] : null,
+                'latitude' => (float) $r['latitude'],
+                'longitude' => (float) $r['longitude'],
+                'reference' => (string) ($r['reference'] ?? ''),
+            ],
+            $rows,
+        );
     }
 
     private function applySearch(\Doctrine\ORM\QueryBuilder $qb, string $search): void
