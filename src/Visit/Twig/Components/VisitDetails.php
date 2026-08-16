@@ -121,7 +121,8 @@ final class VisitDetails
 
                 return ['id' => (int) $agent->getId(), 'name' => null !== $agency ? $name.' ('.$agency.')' : $name];
             },
-            $this->agents->findBy([], ['lastName' => 'ASC', 'firstName' => 'ASC']),
+            // Deactivated agents leave the picker (the directory keeps them).
+            $this->agents->findActiveOrdered(),
         );
     }
 

@@ -57,7 +57,9 @@ class VisitType extends AbstractType
                 'label' => 'admin.visits.create.agent.label',
                 'placeholder' => 'admin.visits.create.agent.placeholder',
                 'required' => false,
+                // Deactivated agents leave the picker (the directory keeps them).
                 'query_builder' => static fn (RealEstateAgentRepository $r) => $r->createQueryBuilder('a')
+                    ->where('a.deactivatedAt IS NULL')
                     ->orderBy('a.lastName', 'ASC')
                     ->addOrderBy('a.firstName', 'ASC'),
                 'choice_label' => static function (RealEstateAgent $a): string {

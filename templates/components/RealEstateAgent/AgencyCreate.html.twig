@@ -35,9 +35,9 @@
 
 <div {{ attributes }} data-testid="agency-create">
     <form
-        class="w-full max-w-2xl rounded-3xl border border-neutral-200 bg-white p-2"
+        class="mx-auto w-full max-w-2xl rounded-3xl border border-neutral-200 bg-white p-2"
         data-action="live#action:prevent"
-        data-live-action-param="create"
+        data-live-action-param="files|create"
         data-model="on(change)|*"
         novalidate
         autocomplete="off"
@@ -51,108 +51,223 @@
             </div>
 
             <div class="rounded-xl bg-white px-4 py-4">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="min-w-0">
-                        <twig:Label for="{{ form.name.vars.id }}" class="text-gray-600">
-                            {{ 'admin.agencies.create.name.label'|trans }}
-                            <span class="text-red-600" aria-hidden="true">*</span>
-                        </twig:Label>
-                        <div class="mt-1.5">
-                            <input
-                                type="text"
-                                id="{{ form.name.vars.id }}"
-                                name="{{ form.name.vars.full_name }}"
-                                value="{{ form.name.vars.value }}"
-                                maxlength="100"
-                                required
-                                placeholder="{{ 'admin.agencies.create.name.placeholder'|trans }}"
-                                aria-invalid="{{ form.name.vars.errors|length > 0 ? 'true' : 'false' }}"
-                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                data-testid="agency-create-name"
-                            >
-                            {% for error in form.name.vars.errors %}
-                                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="min-w-0">
-                        {# Autocomplétion sur les enseignes existantes : un nom
-                           connu réutilise l'enseigne, un nouveau la crée. #}
-                        <twig:Label for="{{ form.brandName.vars.id }}" class="text-gray-600">
-                            {{ 'admin.agencies.create.brand.label'|trans }}
-                        </twig:Label>
-                        <div class="mt-1.5">
-                            <input
-                                type="text"
-                                id="{{ form.brandName.vars.id }}"
-                                name="{{ form.brandName.vars.full_name }}"
-                                value="{{ form.brandName.vars.value }}"
-                                maxlength="100"
-                                list="agency-create-brand-options"
-                                placeholder="{{ 'admin.agencies.create.brand.placeholder'|trans }}"
-                                aria-invalid="{{ form.brandName.vars.errors|length > 0 ? 'true' : 'false' }}"
-                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                data-testid="agency-create-brand"
-                            >
-                            <datalist id="agency-create-brand-options">
-                                {% for name in this.brandNames %}
-                                    <option value="{{ name }}"></option>
+                {# Identité : nom, enseigne et logo de l'agence. #}
+                <div>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
+                    <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="min-w-0">
+                            <twig:Label for="{{ form.name.vars.id }}" class="text-gray-600">
+                                {{ 'admin.agencies.create.name.label'|trans }}
+                                <span class="text-red-600" aria-hidden="true">*</span>
+                            </twig:Label>
+                            <div class="mt-1.5">
+                                <input
+                                    type="text"
+                                    id="{{ form.name.vars.id }}"
+                                    name="{{ form.name.vars.full_name }}"
+                                    value="{{ form.name.vars.value }}"
+                                    maxlength="100"
+                                    required
+                                    placeholder="{{ 'admin.agencies.create.name.placeholder'|trans }}"
+                                    aria-invalid="{{ form.name.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="agency-create-name"
+                                >
+                                {% for error in form.name.vars.errors %}
+                                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                                 {% endfor %}
-                            </datalist>
-                            <p class="mt-1.5 text-xs text-gray-400">{{ 'admin.agencies.create.brand.help'|trans }}</p>
-                            {% for error in form.brandName.vars.errors %}
-                                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
-                            {% endfor %}
+                            </div>
                         </div>
-                    </div>
-                    <div class="sm:col-span-2">
-                        {{ ui.input(form.address, 'admin.agencies.create.address.label', 'text', false, 'agency-create-address') }}
-                    </div>
-                    {{ ui.input(form.email, 'admin.agencies.create.email.label', 'email', false, 'agency-create-email') }}
-                    <div class="min-w-0">
-                        <twig:Label for="{{ form.phone.vars.id }}" class="text-gray-600">
-                            {{ 'admin.agencies.create.phone.label'|trans }}
-                        </twig:Label>
-                        {# Same intl-tel-input widget as the agent form.
-                           data-live-ignore: the widget builds its own DOM around
-                           the input — morphing must leave the zone alone (the
-                           value still syncs to the model via the change event). #}
-                        <div
-                            class="mt-1.5"
-                            data-live-ignore
-                            data-controller="phone-input"
-                            data-phone-input-initial-country-value="fr"
-                            data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
-                        >
+                        <div class="min-w-0">
+                            {# Autocomplétion sur les enseignes existantes : un nom
+                               connu réutilise l'enseigne, un nouveau la crée. #}
+                            <twig:Label for="{{ form.brandName.vars.id }}" class="text-gray-600">
+                                {{ 'admin.agencies.create.brand.label'|trans }}
+                            </twig:Label>
+                            <div class="mt-1.5">
+                                <input
+                                    type="text"
+                                    id="{{ form.brandName.vars.id }}"
+                                    name="{{ form.brandName.vars.full_name }}"
+                                    value="{{ form.brandName.vars.value }}"
+                                    maxlength="100"
+                                    list="agency-create-brand-options"
+                                    placeholder="{{ 'admin.agencies.create.brand.placeholder'|trans }}"
+                                    aria-invalid="{{ form.brandName.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="agency-create-brand"
+                                >
+                                <datalist id="agency-create-brand-options">
+                                    {% for name in this.brandNames %}
+                                        <option value="{{ name }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                                <p class="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-400">{{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }} {{ 'admin.agencies.create.brand.help'|trans }}</p>
+                                {% for error in form.brandName.vars.errors %}
+                                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="min-w-0">
+                            <twig:Label for="agency-create-logo" class="text-gray-600">
+                                {{ 'admin.agencies.create.logo.label'|trans }}
+                            </twig:Label>
+                            {# Fichier envoyé avec l'action create (FormData du live
+                               controller), normalisé WebP 256x256 côté serveur. #}
                             <input
-                                type="tel"
-                                id="{{ form.phone.vars.id }}"
-                                name="{{ form.phone.vars.full_name }}"
-                                value="{{ form.phone.vars.value }}"
-                                maxlength="30"
-                                placeholder="6 12 34 56 78"
-                                data-phone-input-target="input"
-                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                type="file"
+                                id="agency-create-logo"
+                                name="logo"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                class="mt-1.5 w-full cursor-pointer rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-500 transition-colors duration-100 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-neutral-100 file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-gray-700 hover:file:bg-neutral-200 focus:border-gray-400 focus:outline-none"
+                                data-testid="agency-create-logo"
                             >
                         </div>
-                        {% for error in form.phone.vars.errors %}
+                    </div>
+                </div>
+
+                {# Adresse : champ texte libre aidé par l'autocomplétion Google
+                   Places (même câblage que le formulaire d'estimation : API
+                   legacy AutocompleteService + dropdown custom Tailwind). La
+                   valeur soumise reste le texte du champ, choisi ou saisi. Le
+                   micro-titre de section sert de libellé au champ. #}
+                <div class="mt-4 border-t border-gray-950/5 pt-4">
+                    <h3 id="agency-create-address-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
+                    <div class="mt-3">
+                        <div class="relative" data-controller="places-autocomplete" data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}">
+                            <input
+                                type="text"
+                                id="{{ form.address.vars.id }}"
+                                name="{{ form.address.vars.full_name }}"
+                                value="{{ form.address.vars.value }}"
+                                maxlength="255"
+                                aria-labelledby="agency-create-address-label"
+                                aria-invalid="{{ form.address.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                data-places-autocomplete-target="input"
+                                data-action="input->places-autocomplete#search keydown->places-autocomplete#navigate"
+                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                data-testid="agency-create-address"
+                            >
+                            {# Dropdown de suggestions custom (rempli par le controller). #}
+                            <ul data-places-autocomplete-target="results" role="listbox"
+                                class="hidden absolute left-0 right-0 top-full mt-2 z-50 max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl shadow-gray-500/10 p-1"></ul>
+                        </div>
+                        {% for error in form.address.vars.errors %}
                             <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                         {% endfor %}
                     </div>
-                    <div class="min-w-0">
-                        <twig:Label for="agency-create-logo" class="text-gray-600">
-                            {{ 'admin.agencies.create.logo.label'|trans }}
-                        </twig:Label>
-                        {# Fichier envoyé avec l'action create (FormData du live
-                           controller), normalisé WebP 256x256 côté serveur. #}
-                        <input
-                            type="file"
-                            id="agency-create-logo"
-                            name="logo"
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            class="mt-1.5 w-full cursor-pointer rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-500 transition-colors duration-100 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-neutral-100 file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-gray-700 hover:file:bg-neutral-200 focus:border-gray-400 focus:outline-none"
-                            data-testid="agency-create-logo"
-                        >
+                </div>
+
+                {# Spécialités : chips multi (cases à cocher stylées), une
+                   agence peut faire location et transaction. Le micro-titre de
+                   section sert de libellé au groupe (pas de doublon). #}
+                <div class="mt-4 border-t border-gray-950/5 pt-4">
+                    <div data-testid="agency-create-specialties-block">
+                        <h3 id="{{ form.specialties.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                        <div role="group" aria-labelledby="{{ form.specialties.vars.id }}-label" class="mt-3 flex flex-wrap gap-2">
+                            {% for choice in form.specialties.children %}
+                                <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
+                                    <input
+                                        type="checkbox"
+                                        id="{{ choice.vars.id }}"
+                                        name="{{ choice.vars.full_name }}"
+                                        value="{{ choice.vars.value }}"
+                                        {% if choice.vars.checked %}checked{% endif %}
+                                        class="sr-only"
+                                        data-testid="agency-create-specialty-{{ choice.vars.value }}"
+                                    />
+                                    {{ choice.vars.label|trans }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.specialties.vars.errors %}
+                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Coordonnées : téléphone, email et site web de l'agence. #}
+                <div class="mt-4 border-t border-gray-950/5 pt-4">
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
+                    <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="min-w-0">
+                            <twig:Label for="{{ form.phone.vars.id }}" class="text-gray-600">
+                                {{ 'admin.agencies.create.phone.label'|trans }}
+                            </twig:Label>
+                            {# Same intl-tel-input widget as the agent form.
+                               data-live-ignore: the widget builds its own DOM around
+                               the input — morphing must leave the zone alone (the
+                               value still syncs to the model via the change event). #}
+                            <div
+                                class="mt-1.5"
+                                data-live-ignore
+                                data-controller="phone-input"
+                                data-phone-input-initial-country-value="fr"
+                                data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
+                            >
+                                <input
+                                    type="tel"
+                                    id="{{ form.phone.vars.id }}"
+                                    name="{{ form.phone.vars.full_name }}"
+                                    value="{{ form.phone.vars.value }}"
+                                    maxlength="30"
+                                    placeholder="6 12 34 56 78"
+                                    data-phone-input-target="input"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                >
+                            </div>
+                            {% for error in form.phone.vars.errors %}
+                                <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                        {{ ui.input(form.email, 'admin.agencies.create.email.label', 'email', false, 'agency-create-email') }}
+                        <div class="min-w-0 sm:col-span-2">
+                            <twig:Label for="{{ form.website.vars.id }}" class="text-gray-600">
+                                {{ 'admin.agencies.create.website.label'|trans }}
+                            </twig:Label>
+                            <div class="mt-1.5">
+                                {# Texte libre normalisé côté serveur : https:// est
+                                   préfixé automatiquement si le protocole manque. #}
+                                <input
+                                    type="text"
+                                    id="{{ form.website.vars.id }}"
+                                    name="{{ form.website.vars.full_name }}"
+                                    value="{{ form.website.vars.value }}"
+                                    maxlength="255"
+                                    inputmode="url"
+                                    placeholder="{{ 'admin.agencies.create.website.placeholder'|trans }}"
+                                    aria-invalid="{{ form.website.vars.errors|length > 0 ? 'true' : 'false' }}"
+                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                    data-testid="agency-create-website"
+                                >
+                                {% for error in form.website.vars.errors %}
+                                    <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Note interne : texte libre réservé à l'équipe. Le micro-titre
+                   de section sert de libellé au champ. #}
+                <div class="mt-4 border-t border-gray-950/5 pt-4">
+                    <h3 id="{{ form.note.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                    <div class="mt-3">
+                        <textarea
+                            id="{{ form.note.vars.id }}"
+                            name="{{ form.note.vars.full_name }}"
+                            rows="3"
+                            maxlength="2000"
+                            placeholder="{{ 'admin.agencies.create.note.placeholder'|trans }}"
+                            aria-labelledby="{{ form.note.vars.id }}-label"
+                            aria-invalid="{{ form.note.vars.errors|length > 0 ? 'true' : 'false' }}"
+                            class="w-full resize-y rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            data-testid="agency-create-note"
+                        >{{ form.note.vars.value }}</textarea>
+                        <p class="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-400">{{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }} {{ 'admin.agencies.create.note.help'|trans }}</p>
+                        {% for error in form.note.vars.errors %}
+                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

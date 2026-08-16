@@ -174,8 +174,10 @@ header:
             fr: Français
             en: English
     logo:
+        ariaLabel: Back to home - Relocation In Paris
         alt: Relocation In Paris logo, relocation agency in Paris.
     menu:
+        mobile: Mobile menu
         findAccommodation: Property search
         propertyManagement: Management & services
         aboutUs: About
@@ -192,6 +194,8 @@ header:
             text: Easily house your employees in Paris with our all-inclusive service.
         contactExpert: Talk to an expert
         blog: Blog
+    nav:
+        ariaLabel: Main navigation
     cta:
         title: Get a callback
         whatsapp:
@@ -483,6 +487,8 @@ home:
             title: Smooth transition
             text: Every step handled for you.
     services:
+        prev: Previous service
+        next: Next service
         title: The essentials, nothing more
         subTitle: Paris, differently
         text: Access the best properties before anyone else, from wherever you are.
@@ -1797,6 +1803,8 @@ admin:
     toast:
         dismiss: Dismiss the notification
         saved: Changes saved.
+        agentDeleted: Agent deleted.
+        agencyDeleted: Agency deleted.
         fileRenamed: File renamed.
         noteAdded: Note added.
         noteUpdated: Note updated.
@@ -1913,6 +1921,12 @@ admin:
                 visit: Visit
                 finalization: Finalization
                 closed: Closed
+                # Legacy statuses (pre-August 2026 workflow): never emitted
+                # anymore, but stored history events keep the full key. Do not remove.
+                new: New
+                awaiting_documents: Awaiting documents
+                searching: Search in progress
+                property_found: Property found
         list:
             viewMore: View the file
         card:
@@ -2115,7 +2129,8 @@ admin:
                         gym: Gym
                         other: Other
             followUp:
-                origin: Created from the request
+                origin: Created from the lead
+                offer: Package
                 timeline: Timeline
             requestDocuments: Request documents
             closure:
@@ -2127,7 +2142,7 @@ admin:
                 reopen: Reopen
                 modal:
                     title: Close this file?
-                    text: The deposited files will be permanently deleted, the deposit link will be disabled and the deposit page will refuse this file. You can reopen the file later, but the files will not be restored.
+                    text: The file will move to the archives and the client upload area will be disabled. Nothing is deleted, and you can reopen the file at any time.
                     confirm: Close
             deletion:
                 delete: Delete the file
@@ -2157,7 +2172,7 @@ admin:
                 primaryChanged: '%name% becomes the primary tenant'
                 managerAssigned: File assigned to %name%
                 managerUnassigned: File unassigned
-                dossierClosed: 'File closed: %count% file(s) deleted, deposit link disabled'
+                dossierClosed: 'File closed, deposit link disabled'
                 depositLocked: Deposit space locked
                 depositUnlocked: Deposit space unlocked
                 dossierReopened: File reopened
@@ -2293,6 +2308,7 @@ admin:
             button: New file
             title: Create a file
             offer:
+                required: Pick a package.
                 accompagne:
                     hint: The client does the visits themselves, we handle everything else.
                 confie:
@@ -2381,8 +2397,9 @@ admin:
             toDossier: Convert to file
             viewDossier: 'View the file (%reference%)'
             toDossierModal:
+                chooseOffer: 'No package on the request: pick the file''s package.'
                 title: Convert to file
-                description: 'The file centralises %name%''s relocation: household members, property search, visits and payments. The contact becomes the file''s primary tenant. If a file already exists with this email, you will be redirected to it.'
+                description: '%name% becomes the file''s primary tenant.'
                 cancel: Cancel
                 confirm: Create the file
             closureLabel: Closure reason
@@ -2390,6 +2407,11 @@ admin:
             closedTitle: Lead closed
             convertedTitle: Lead converted to client
             terminalSince: since %date%
+            linkedDossiers:
+                createdTitle: File created from this lead
+                othersAlso: '{1}This email also appears in 1 other file:|]1,Inf[This email also appears in %count% other files:'
+                othersTitle: '{1}This address appears in 1 file|]1,Inf[This address appears in %count% files'
+                closedBadge: Closed
             prev: Previous lead
             next: Next lead
             field:
@@ -2562,6 +2584,7 @@ admin:
             visio_cancelled: Video call cancelled
             title: History
             status: 'Status changed to %status%'
+            reason: 'Closure reason: %reason%'
             recap_email: Recap sent by email
             recap_email_payment: Recap + payment link sent by email
         drawer:
@@ -2774,6 +2797,8 @@ admin:
                 label: Property address
                 placeholder: 12 rue de la Roquette, 75011 Paris
     agents:
+        list:
+            loadMore: '{1}Show 1 more|]1,Inf[Show the next %count%'
         title: Real estate agents
         searchPlaceholder: Search for an agent...
         count: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
@@ -2788,9 +2813,58 @@ admin:
             description: Adjust the search to find your agents.
         card:
             noAgency: Independent
+            open: View the agent
+        status:
+            active: Active
+            inactive: Inactive
+        deactivate:
+            button: Deactivate the agent
+            title: Deactivate this agent?
+            text: 'The agent will no longer appear in the pickers (visits, attachments). The profile and its history are kept.'
+            confirm: Deactivate
+        reactivate:
+            button: Reactivate the agent
+        deactivated:
+            title: Agent deactivated
+            text: This agent no longer appears in the pickers. Reactivate the profile to make it available again.
+            updatedAt: Updated on
+        show:
+            addedAt: Added on
+            audit:
+                createdAt: Created on
+                updatedAt: Updated on
+                by: by %name%
+            visits:
+                title: Visits
+                stats:
+                    upcoming: Upcoming
+                    total: Total
+                    last: Last visit
+                    dossiers: Files involved
+                count: '{0}No visits|{1}1 visit|]1,Inf[%count% visits'
+                upcoming: Upcoming
+                past: Past
+                empty:
+                    title: No visits yet
+                    text: Visits planned or carried out with this agent will show up here.
+        delete:
+            button: Delete the agent
+            title: Delete this agent?
+            text: '%name% will be removed from the directory, along with their contact details and internal note. This action is permanent.'
+            confirm: Delete
         specialty:
             location: Rental
             transaction: Sales
+        professionalCard:
+            label: Professional cards
+            choice:
+                t: T card
+                g: G card
+                s: S card
+            hint:
+                t: transactions
+                g: property management
+                s: co-ownership management
         position:
             assistant: Assistant
             consultant_sale: Sales consultant
@@ -2805,6 +2879,11 @@ admin:
             title: New real estate agent
             photo:
                 label: Photo (optional)
+                choose: Choose a photo
+                none: No file chosen
+                add: Add a photo
+                formats: JPG, PNG or WebP
+                drop: Click or drop a photo
             subtitle: Add a partner agent to the directory, with their agency and contact details.
             cancel: Cancel
             submit: Add agent
@@ -2830,6 +2909,15 @@ admin:
                 label: Email
             phone:
                 label: Phone
+            note:
+                label: Internal note
+                placeholder: Responsive on WhatsApp, prefers morning visits...
+                help: Visible only to the team.
+            section:
+                identity: Identity
+                agency: Agency
+                specialties: Specialties
+                contact: Contact details
     agencies:
         count: '{0}No agencies|{1}1 agency|]1,Inf[%count% agencies'
         empty:
@@ -2840,13 +2928,37 @@ admin:
             description: Adjust the search to find your agencies.
         card:
             agentCount: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
+            open: View the agency
+            website: Open the website
+        status:
+            active: Active
+            inactive: Inactive
+        deactivated:
+            title: Agency deactivated
+            text: This agency no longer appears in the pickers. Reactivate it to make it available again.
+        deactivate:
+            button: Deactivate the agency
+            title: Deactivate this agency?
+            text: The agency will no longer appear in the pickers. Its agents and its history are kept.
+            confirm: Deactivate
+        reactivate:
+            button: Reactivate the agency
+        show:
+            createdAt: Created on
+            agentsTitle: Agency agents
+            empty: No agents attached yet.
+        delete:
+            button: Delete the agency
+            title: Delete this agency?
+            text: '%name% will be removed from the directory. Its agents stay registered and become independent. This action is permanent.'
+            confirm: Delete
         create:
             menuItem:
                 title: An agency
                 subtitle: Create a standalone agency
             title: New agency
             logo:
-                label: Logo (optional)
+                label: Logo
             subtitle: Register a partner agency. You can attach agents to it later.
             cancel: Cancel
             submit: Create agency
@@ -2865,6 +2977,17 @@ admin:
                 label: Phone
             email:
                 label: Email
+            website:
+                label: Website
+                placeholder: www.agency.com
+            note:
+                label: Internal note
+                placeholder: Require a complete file before any visit, negotiable commission...
+                help: Visible only to the team.
+            section:
+                identity: Identity
+                address: Address
+                contact: Contact details
     tools:
         title: Tools
         documents:
@@ -3464,3 +3587,10 @@ twoFactor:
         submit: Verify
         error:
             title: Verification failed
+
+propertyEstimation:
+    form:
+        success:
+            title: Your estimation request has been sent. We will get back to you shortly.
+        error:
+            tooManyRequests: Too many requests sent. Please try again in a few minutes.

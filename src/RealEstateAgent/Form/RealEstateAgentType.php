@@ -6,12 +6,14 @@ namespace App\RealEstateAgent\Form;
 
 use App\RealEstateAgent\Domain\AgencyPosition;
 use App\RealEstateAgent\Domain\AgentSpecialty;
+use App\RealEstateAgent\Domain\ProfessionalCard;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -78,6 +80,15 @@ class RealEstateAgentType extends AbstractType
                 'multiple' => true,
                 'choice_label' => static fn (AgentSpecialty $specialty): string => $specialty->labelKey(),
             ])
+            // Cartes loi Hoguet (T, G, S) : mêmes chips multi que les spécialités.
+            ->add('professionalCards', EnumType::class, [
+                'label' => 'admin.agents.professionalCard.label',
+                'class' => ProfessionalCard::class,
+                'required' => false,
+                'expanded' => true,
+                'multiple' => true,
+                'choice_label' => static fn (ProfessionalCard $card): string => $card->labelKey(),
+            ])
             ->add('email', EmailType::class, [
                 'label' => 'admin.agents.create.email.label',
                 'required' => false,
@@ -87,6 +98,12 @@ class RealEstateAgentType extends AbstractType
                 'label' => 'admin.agents.create.phone.label',
                 'required' => false,
                 'attr' => ['maxlength' => 30, 'autocomplete' => 'off', 'placeholder' => '6 12 34 56 78'],
+            ])
+            // Team-only free note, never shown outside the back office.
+            ->add('note', TextareaType::class, [
+                'label' => 'admin.agents.create.note.label',
+                'required' => false,
+                'attr' => ['maxlength' => 2000, 'autocomplete' => 'off', 'placeholder' => 'admin.agents.create.note.placeholder'],
             ])
         ;
     }

@@ -166,6 +166,10 @@ final class AgentCreateTest extends KernelTestCase
         ]);
 
         self::assertStringContainsString('data-testid="agent-create-form"', $rendered);
+        // The form is split into titled sections separated by dividers.
+        self::assertSame(4, substr_count($rendered, 'border-t border-gray-950/5'), 'Identity | agency | specialties | contact | note: four dividers.');
+        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-400 uppercase'), 'Five section micro-titles.');
+        self::assertStringContainsString('data-testid="agent-create-note"', $rendered);
         // Specialty chips (multi) and position chips (agency context, the
         // default kind) with their toggle-off live action.
         self::assertStringContainsString('data-testid="agent-create-specialties-block"', $rendered);
@@ -301,6 +305,70 @@ final class AgentCreateTest extends KernelTestCase
         self::assertNotNull($agent);
         self::assertNull($agent->getPosition(), 'No position without an agency.');
         self::assertSame([AgentSpecialty::Location], $agent->getSpecialties(), 'Specialties are kept: they are not agency-bound.');
+    }
+
+    public function testStoresTheInternalNote(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'independent',
+            'agencyName' => '',
+            'email' => '',
+            'phone' => '',
+            'note' => 'Réactif sur WhatsApp, préfère les visites le matin.',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+
+        $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
+        self::assertSame('Réactif sur WhatsApp, préfère les visites le matin.', $agent?->getNote());
+    }
+
+    public function testABlankNoteIsStoredAsNull(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'independent',
+            'agencyName' => '',
+            'email' => '',
+            'phone' => '',
+            'note' => '   ',
+        ];
+
+        self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
+
+        $agent = $this->em->getRepository(RealEstateAgent::class)->findOneBy(['lastName' => 'Martin']);
+        self::assertNull($agent?->getNote());
+    }
+
+    public function testANoteOverTwoThousandCharactersBlocksCreation(): void
+    {
+        $component = $this->mountComponent();
+
+        $component->formValues = [
+            'firstName' => 'Jean',
+            'lastName' => 'Martin',
+            'kind' => 'independent',
+            'agencyName' => '',
+            'email' => '',
+            'phone' => '',
+            'note' => str_repeat('a', 2001),
+        ];
+
+        try {
+            $this->createAction($component);
+            self::fail('Expected an unprocessable-entity exception.');
+        } catch (HttpExceptionInterface $e) {
+            self::assertSame(422, $e->getStatusCode());
+        }
+
+        self::assertSame(0, (int) $this->em->getRepository(RealEstateAgent::class)->count([]));
     }
 
     public function testTogglePositionSelectsAndUnselects(): void

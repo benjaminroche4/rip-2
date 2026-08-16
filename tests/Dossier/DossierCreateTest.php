@@ -76,21 +76,27 @@ final class DossierCreateTest extends KernelTestCase
         self::assertMatchesRegularExpression('/^[A-HJ-NP-Z2-9]{6}$/', (string) $dossier->getPairingCode());
     }
 
-    public function testChosenOfferIsPersistedAndToggles(): void
+    public function testOfferIsRequiredAndPersisted(): void
     {
         $component = $this->mountComponent();
         $component->formValues['persons'][0] = $this->personValues('Jean', 'Dupont', 'jean@example.com', DossierPersonRole::TENANT, phone: '+33611223344');
 
-        $component->chooseOffer('confie');
-        // Toggle-off : recliquer la formule choisie l'enlève.
-        $component->chooseOffer('confie');
-        self::assertSame('', $component->offer);
-        $component->chooseOffer('accompagne');
+        // Sans formule : la création est refusée, le flag d'erreur s'affiche.
+        try {
+            $component->create($this->em, new DossierNumberGenerator($this->em->getRepository(Dossier::class)), self::getContainer()->get(DossierDriveProvisioner::class));
+            self::fail('Expected an unprocessable-entity exception.');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            self::assertSame(422, $e->getStatusCode());
+        }
+        self::assertTrue($component->offerMissing);
+        self::assertNull($this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']));
 
+        $component->chooseOffer('confie');
+        self::assertFalse($component->offerMissing);
         $this->createAction($component);
 
         $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);
-        self::assertSame('accompagne', $dossier->getOffer());
+        self::assertSame('confie', $dossier->getOffer());
     }
 
     public function testMalformedPhoneIsRejected(): void
@@ -299,6 +305,12 @@ final class DossierCreateTest extends KernelTestCase
     {
         /** @var \App\Dossier\Repository\DossierRepository $repository */
         $repository = $this->em->getRepository(Dossier::class);
+
+        // La formule est obligatoire : les tests qui valident d'autres
+        // comportements en choisissent une par défaut.
+        if ('' === $component->offer) {
+            $component->chooseOffer('accompagne');
+        }
 
         return $component->create($this->em, new DossierNumberGenerator($repository), self::getContainer()->get(DossierDriveProvisioner::class));
     }

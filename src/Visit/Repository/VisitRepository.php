@@ -167,6 +167,30 @@ class VisitRepository extends ServiceEntityRepository
     }
 
     /**
+     * Visits carried out with a given directory agent (the "agent
+     * immobilier" picked on the visit), chronological; the agent detail
+     * page splits them into upcoming and past.
+     *
+     * @return list<VisitSummary>
+     */
+    public function findByRealEstateAgentSummaries(int $agentId): array
+    {
+        /** @var list<Visit> $visits */
+        $visits = $this->createQueryBuilder('v')
+            ->leftJoin('v.dossier', 'd')->addSelect('d')
+            ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('v.assignee', 'u')->addSelect('u')
+            ->leftJoin('v.bookedBy', 'b')->addSelect('b')
+            ->where('a.id = :agent')
+            ->setParameter('agent', $agentId)
+            ->orderBy('v.scheduledAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map($this->toSummary(...), $visits);
+    }
+
+    /**
      * Read model for the visits page: every visit from the start of the given
      * day (Europe/Paris) onwards, chronological.
      *

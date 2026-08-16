@@ -190,6 +190,24 @@ final class DossierController extends AbstractController
         $contact = $em->getRepository(Contact::class)->findOneBy(['reference' => $reference])
             ?? throw $this->createNotFoundException();
 
+        // Formule choisie dans la modale quand le lead n'en portait pas :
+        // posée sur le contact avant conversion, le converter la copie sur
+        // le dossier (et les deux fiches restent alignées). Un dossier porte
+        // toujours une formule : sans elle, la conversion est refusée (les
+        // radios required couvrent le navigateur, ceci couvre le reste).
+        $offer = (string) $request->request->get('offer', '');
+        if (null === $contact->getOffer() && \in_array($offer, ['accompagne', 'confie'], true)) {
+            $contact->setOffer($offer);
+        }
+        if (null === $contact->getOffer()) {
+            $this->addFlash('error', 'admin.dossiers.create.offer.required');
+
+            return $this->redirectToRoute('admin_contact_show', [
+                'adminPrefix' => $adminPrefix,
+                'reference' => $contact->getReference(),
+            ], Response::HTTP_SEE_OTHER);
+        }
+
         $dossier = $converter->convert($contact);
 
         return $this->redirectToRoute('admin_dossier_show', [

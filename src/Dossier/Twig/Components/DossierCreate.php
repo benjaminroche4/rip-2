@@ -61,6 +61,10 @@ final class DossierCreate extends AbstractController
     #[LiveProp]
     public string $offer = '';
 
+    /** Erreur "formule obligatoire", levée au submit sans choix. */
+    #[LiveProp]
+    public bool $offerMissing = false;
+
     public function __construct(
         private readonly Security $security,
         private readonly RequestStack $requestStack,
@@ -73,7 +77,7 @@ final class DossierCreate extends AbstractController
         $this->dossier ??= $this->buildEmptyDossier();
     }
 
-    /** Chips de formule, toggle-off (recliquer la formule choisie l'enlève). */
+    /** Cards de formule : choix obligatoire, cliquer l'autre change. */
     #[LiveAction]
     public function chooseOffer(#[LiveArg] string $offer): void
     {
@@ -81,7 +85,8 @@ final class DossierCreate extends AbstractController
         if (!\in_array($offer, ['accompagne', 'confie'], true)) {
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(\sprintf('Unknown offer "%s".', $offer));
         }
-        $this->offer = $this->offer === $offer ? '' : $offer;
+        $this->offer = $offer;
+        $this->offerMissing = false;
     }
 
     protected function instantiateForm(): FormInterface
@@ -174,6 +179,10 @@ final class DossierCreate extends AbstractController
     {
         $this->ensureAdmin();
 
+        // Un dossier porte toujours une formule : le flag s'affiche avec
+        // les éventuelles erreurs de personnes du même submit.
+        $this->offerMissing = '' === $this->offer;
+
         // The name is derived, not typed: set it on the draft BEFORE the
         // submit so its NotBlank constraint passes (name is not a form field,
         // the submit leaves it untouched).
@@ -183,9 +192,13 @@ final class DossierCreate extends AbstractController
         // component re-renders with the field errors, modal stays open.
         $this->submitForm();
 
+        if ($this->offerMissing) {
+            throw new \Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException('An offer is required.');
+        }
+
         /** @var Dossier $draft */
         $draft = $this->getForm()->getData();
-        $draft->setOffer('' !== $this->offer ? $this->offer : null);
+        $draft->setOffer($this->offer);
 
         // Tag the primary tenant. Validation guarantees at least one tenant,
         // so the effective key always resolves here. The phone arrives in

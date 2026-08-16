@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\RealEstateAgent\Controller;
 
+use App\RealEstateAgent\Repository\AgencyRepository;
+use App\RealEstateAgent\Repository\RealEstateAgentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -82,6 +84,55 @@ final class AgentController extends AbstractController
         // The form itself lives in the RealEstateAgent:AgencyCreate live component.
         return $this->render('admin/agents/new_agency.html.twig', [
             'adminPrefix' => $adminPrefix,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/agents-immobiliers/{id}',
+            'en' => '/real-estate-agents/{id}',
+        ],
+        name: 'agent_show',
+        requirements: ['id' => '\d+'],
+        methods: ['GET'],
+    )]
+    public function showAgent(string $adminPrefix, int $id, RealEstateAgentRepository $agents): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        $agent = $agents->findDetail($id);
+        if (null === $agent) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('admin/agents/show_agent.html.twig', [
+            'adminPrefix' => $adminPrefix,
+            'agent' => $agent,
+        ]);
+    }
+
+    #[Route(
+        path: [
+            'fr' => '/agents-immobiliers/agences/{id}',
+            'en' => '/real-estate-agents/agencies/{id}',
+        ],
+        name: 'agency_show',
+        requirements: ['id' => '\d+'],
+        methods: ['GET'],
+    )]
+    public function showAgency(string $adminPrefix, int $id, AgencyRepository $agencies, RealEstateAgentRepository $agents): Response
+    {
+        $this->ensureValidPrefix($adminPrefix);
+
+        $agency = $agencies->findDetail($id);
+        if (null === $agency) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('admin/agents/show_agency.html.twig', [
+            'adminPrefix' => $adminPrefix,
+            'agency' => $agency,
+            'agents' => $agents->findSummariesByAgency($agency->id),
         ]);
     }
 

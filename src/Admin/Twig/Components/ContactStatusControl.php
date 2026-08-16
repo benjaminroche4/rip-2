@@ -164,6 +164,9 @@ final class ContactStatusControl
         $this->repository->saveClosureReason($this->contactId, $case, $fullName, $avatar);
         // The terminal banner and the follow-up thread show the reason live.
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
     }
 
     public function getPendingCase(): ?NextStep
@@ -336,6 +339,9 @@ final class ContactStatusControl
 
         $this->editingStep = false;
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
     }
 
     /**
@@ -366,6 +372,9 @@ final class ContactStatusControl
         $this->editingStep = true;
 
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
     }
 
     /**
@@ -392,6 +401,9 @@ final class ContactStatusControl
         $this->editingStep = true;
 
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
     }
 
     /**
@@ -439,6 +451,9 @@ final class ContactStatusControl
         $this->editingStep = true;
 
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
     }
 
     #[LiveAction]
@@ -490,6 +505,9 @@ final class ContactStatusControl
         $this->recallAt = '';
         $this->dateMissing = false;
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
         $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.statusUpdated')]);
     }
 
@@ -565,6 +583,9 @@ final class ContactStatusControl
         }
 
         $this->emit('contacts:changed');
+        // Les bandeaux (terminal / dossiers liés) vivent dans le chrome de
+        // page : un morph Turbo recalcule leur priorité.
+        $this->dispatchBrowserEvent('contact-status:changed');
         $this->dispatchBrowserEvent('toast:show', ['message' => null !== $user
             ? $this->translator->trans('admin.toast.assigned', ['%name%' => trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail()])
             : $this->translator->trans('admin.toast.unassigned'),

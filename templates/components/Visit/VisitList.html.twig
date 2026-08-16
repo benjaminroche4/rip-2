@@ -12,7 +12,7 @@
     {# Une visite déjà passée s'estompe : la prochaine ressort. #}
     {% set isPast = visit.scheduledAt|date('U') < 'now'|date('U') or visit.status.value in ['cancelled', 'no_show'] %}
     <li
-        class="group/row relative rounded-xl bg-white px-4 py-3 transition-[opacity,background-color] duration-100 hover:bg-gray-50/60 {{ isPast ? 'opacity-55 hover:opacity-100' }}"
+        class="group/row isolate relative rounded-xl bg-white px-4 py-3 transition-[opacity,background-color] duration-100 hover:bg-gray-50/60 {{ isPast ? 'opacity-55 hover:opacity-100' }}"
         data-controller="visit-hover"
         data-visit-hover-id-value="{{ visit.id }}"
         data-action="mouseenter->visit-hover#enter mouseleave->visit-hover#leave visit-pin:hover@window->visit-hover#pinEnter visit-pin:leave@window->visit-hover#pinLeave visit-pin:select@window->visit-hover#pinSelect"

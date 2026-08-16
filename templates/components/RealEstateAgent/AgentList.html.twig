@@ -1,41 +1,178 @@
+{# Card agent, même famille que les cards Dossier/Leads : coque blanche
+   rounded-3xl > puits gris > bandes blanches (colonnes label/valeur avec
+   séparateurs en dégradé), note interne en bande dédiée, footer avec la
+   date d'ajout et le bouton vers la fiche. #}
+
+{% macro chips(agent) %}
+    {% for specialty in agent.specialties %}
+        <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agent-specialty">{{ specialty.labelKey|trans }}</span>
+    {% endfor %}
+{% endmacro %}
+
+{% macro identity(agent) %}
+    <div class="flex min-w-0 items-center gap-3">
+        <twig:Avatar filename="{{ agent.avatarFilename }}" name="{{ agent.fullName }}" size="9" />
+        <div class="flex min-w-0 flex-wrap items-center gap-2">
+            <p class="truncate font-medium text-gray-900">{{ agent.fullName|title }}</p>
+            {% if not agent.active %}
+                <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agent-inactive">{{ 'admin.agents.status.inactive'|trans }}</span>
+            {% endif %}
+            {{ _self.chips(agent) }}
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro divider() %}
+    <div class="hidden w-px self-stretch bg-linear-to-b from-transparent via-gray-950/10 to-transparent sm:block" aria-hidden="true"></div>
+{% endmacro %}
+
+{% macro colEmail(agent) %}
+    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
+        <p class="text-gray-600">{{ 'admin.agents.create.email.label'|trans }}</p>
+        {% if agent.email %}
+            <a href="mailto:{{ agent.email }}" class="block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary" data-testid="agent-email">{{ agent.email }}</a>
+        {% else %}
+            <p class="font-medium text-gray-400">-</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro colPhone(agent) %}
+    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
+        <p class="text-gray-600">{{ 'admin.agents.create.phone.label'|trans }}</p>
+        {% if agent.phone %}
+            {# Même affichage que la fiche lead : drapeau + numéro formaté. #}
+            {% set phoneCountry = agent.phone|phone_country %}
+            <a href="tel:{{ agent.phone }}" class="flex min-w-0 items-center gap-2 font-medium text-gray-900 transition-colors duration-100 hover:text-primary" data-testid="agent-phone">
+                {% if phoneCountry %}
+                    {{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                {% endif %}
+                <span class="truncate">{{ agent.phone|phone_format }}</span>
+            </a>
+        {% else %}
+            <p class="font-medium text-gray-400">-</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro colPosition(agent) %}
+    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
+        <p class="text-gray-600">{{ 'admin.agents.create.position.label'|trans }}</p>
+        {% if agent.position %}
+            <p class="truncate font-medium text-gray-900" data-testid="agent-position">{{ agent.position.labelKey|trans }}</p>
+        {% else %}
+            <p class="font-medium text-gray-400">-</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro agencyBadge(agent, adminPrefix) %}
+    {% if agent.agencyId %}
+        {# Le chip agence est un raccourci vers sa fiche. #}
+        <a
+            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, id: agent.agencyId}) }}"
+            class="group/agency relative z-10 flex min-w-0 shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5"
+            data-testid="agent-agency"
+        >
+            {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0 text-gray-400 transition-colors duration-100 ease-out group-hover/agency:text-primary', 'aria-hidden': 'true'}) }}
+            <span class="truncate text-sm font-medium text-gray-900 transition-colors duration-100 ease-out group-hover/agency:text-primary">{{ agent.agency }}</span>
+        </a>
+    {% else %}
+        <span class="flex min-w-0 shrink-0 items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-1.5" data-testid="agent-agency">
+            {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+            <span class="truncate text-sm font-medium text-gray-900">{{ 'admin.agents.card.noAgency'|trans }}</span>
+        </span>
+    {% endif %}
+{% endmacro %}
+
+{# ---- Macros card agence (même famille, signature visuelle distincte). ---- #}
+
+{% macro agencyNameBadges(agency) %}
+    {% if not agency.active %}
+        <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agency-inactive">{{ 'admin.agencies.status.inactive'|trans }}</span>
+    {% endif %}
+    {% if agency.brand %}
+        <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-brand">{{ agency.brand }}</span>
+    {% endif %}
+    {% for specialty in agency.specialties %}
+        <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-specialty">{{ specialty.labelKey|trans }}</span>
+    {% endfor %}
+{% endmacro %}
+
+{# Logo carré : la signature qui distingue une agence d'un agent (rond). #}
+{% macro agencyLogo(agency) %}
+    {% if agency.logoFilename %}
+        <twig:Avatar filename="{{ agency.logoFilename }}" name="{{ agency.name }}" size="9" class="rounded-xl" />
+    {% else %}
+        <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
+            {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        </span>
+    {% endif %}
+{% endmacro %}
+
+{% macro colWebsite(agency) %}
+    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
+        <p class="text-gray-600">{{ 'admin.agencies.create.website.label'|trans }}</p>
+        {% if agency.website %}
+            <a
+                href="{{ agency.website }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative z-10 block truncate font-medium text-gray-900 transition-colors duration-100 hover:text-primary"
+                data-testid="agency-website"
+            >{{ agency.website }}</a>
+        {% else %}
+            <p class="font-medium text-gray-400">-</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro colBrand(agency) %}
+    <div class="min-w-0 space-y-2 text-sm sm:flex-1">
+        <p class="text-gray-600">{{ 'admin.agencies.create.brand.label'|trans }}</p>
+        {% if agency.brand %}
+            <p class="truncate font-medium text-gray-900">{{ agency.brand }}</p>
+        {% else %}
+            <p class="font-medium text-gray-400">-</p>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro agencyNoteBand(agency) %}
+    {% if agency.note %}
+        <div class="rounded-b-xl bg-white px-5 py-4" data-testid="agency-note">
+            <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</p>
+            <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-pretty text-gray-900">{{ agency.note }}</p>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{% macro agencyFooter(agency, adminPrefix) %}
+    <div class="mt-1 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-1 pb-1">
+        <p class="flex items-center gap-1 pl-1 text-xs text-gray-900">
+            <span class="opacity-50">{{ 'admin.agencies.show.createdAt'|trans }}</span>
+            <span class="tabular-nums">{{ agency.createdAt|format_date('medium') }}</span>
+        </p>
+        <twig:Button
+            as="a"
+            size="sm"
+            href="{{ path('admin_agency_show', {adminPrefix: adminPrefix, id: agency.id}) }}"
+            class="px-10"
+            data-testid="agency-row-link"
+        >
+            {{ 'admin.agencies.card.open'|trans }}
+        </twig:Button>
+    </div>
+{% endmacro %}
+
 <div {{ attributes }} data-testid="agents-list-component">
     {% set agenciesView = this.isAgenciesView %}
 
-    <div class="mx-auto max-w-4xl">
-        {# Toggle agents / agences : chips pill, même vocabulaire que le BO. #}
-        <div class="mb-4 flex flex-wrap items-center gap-2" role="tablist" data-testid="agents-view-toggle">
-            <button
-                type="button"
-                role="tab"
-                aria-selected="{{ agenciesView ? 'false' : 'true' }}"
-                data-action="live#action"
-                data-live-action-param="chooseView"
-                data-live-view-param="agents"
-                class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ agenciesView ? 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' : 'border-primary/40 bg-primary/5 text-primary' }}"
-                data-testid="agents-view-agents"
-            >
-                {{ ux_icon('lucide:user', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                {{ 'admin.agents.view.agents'|trans }}
-                <span class="tabular-nums opacity-60">{{ this.agentTotal }}</span>
-            </button>
-            <button
-                type="button"
-                role="tab"
-                aria-selected="{{ agenciesView ? 'true' : 'false' }}"
-                data-action="live#action"
-                data-live-action-param="chooseView"
-                data-live-view-param="agencies"
-                class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ agenciesView ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
-                data-testid="agents-view-agencies"
-            >
-                {{ ux_icon('lucide:building-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                {{ 'admin.agents.view.agencies'|trans }}
-                <span class="tabular-nums opacity-60">{{ this.agencyTotal }}</span>
-            </button>
-        </div>
-
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div class="relative w-full max-w-xs">
+    {# Même gabarit que la liste des dossiers : colonne de filtres sticky à
+       gauche (recherche + vues avec compteurs), contenu à droite. #}
+    <div class="lg:grid lg:grid-cols-[15rem_1fr] lg:items-start lg:gap-6">
+        <aside class="lg:sticky lg:top-6">
+            <div class="relative">
                 {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400', 'aria-hidden': 'true'}) }}
                 <input
                     type="search"
@@ -47,11 +184,29 @@
                     data-testid="agents-search"
                 >
             </div>
-            <p class="text-xs text-gray-500 tabular-nums" data-testid="agents-count">
-                {{ (agenciesView ? 'admin.agencies.count' : 'admin.agents.count')|trans({'%count%': this.totalCount}) }}
-            </p>
-        </div>
 
+            <div class="mt-4 flex flex-col gap-1.5" role="tablist" data-testid="agents-view-toggle">
+                {% for viewKey in ['agents', 'agencies'] %}
+                    {% set isActive = agenciesView == (viewKey == 'agencies') %}
+                    <button
+                        type="button"
+                        role="tab"
+                        aria-selected="{{ isActive ? 'true' : 'false' }}"
+                        data-action="live#action"
+                        data-live-action-param="chooseView"
+                        data-live-view-param="{{ viewKey }}"
+                        class="flex cursor-pointer items-center gap-2 rounded-xl border px-3.5 py-2 text-left text-sm font-medium transition-colors duration-100 ease-out {{ isActive ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                        data-testid="agents-view-{{ viewKey }}"
+                    >
+                        {{ ux_icon(viewKey == 'agents' ? 'lucide:user' : 'lucide:building-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        {{ ('admin.agents.view.' ~ viewKey)|trans }}
+                        <span class="ml-auto text-xs {{ isActive ? 'text-primary/60' : 'text-gray-400' }} tabular-nums">{{ viewKey == 'agents' ? this.agentTotal : this.agencyTotal }}</span>
+                    </button>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <div class="max-lg:mt-6">
         {% if agenciesView %}
             {% set agencies = this.agencies %}
             {% if agencies is empty %}
@@ -71,32 +226,36 @@
                     </div>
                 </section>
             {% else %}
-                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agencies-list">
-                    <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
-                        {% for agency in agencies %}
-                            <li class="flex items-center gap-3 rounded-xl bg-white px-5 py-4" data-testid="agency-row">
-                                {# Logo si l'agence en a un, sinon la pastille bâtiment. #}
-                                {% if agency.logoFilename %}
-                                    <twig:Avatar filename="{{ agency.logoFilename }}" name="{{ agency.name }}" size="9" />
-                                {% else %}
-                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
-                                        {{ ux_icon('lucide:building-2', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                                    </span>
-                                {% endif %}
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex min-w-0 items-center gap-2">
-                                        <p class="truncate text-sm font-medium text-gray-900">{{ agency.name }}</p>
-                                        {% if agency.brand %}
-                                            <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-brand">{{ agency.brand }}</span>
-                                        {% endif %}
+                {# Card agence : famille des cards Dossier/Agents, signatures
+                   propres aux agences (logo carré, compteur d'agents en tuile). #}
+                <div class="space-y-4">
+                    {% for agency in agencies %}
+                        <article class="rounded-3xl border border-neutral-200 bg-white p-2 {{ agency.active ? '' : 'opacity-60' }}" data-testid="agency-row">
+                            <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+                                <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-3">
+                                    <div class="flex min-w-0 items-center gap-3">
+                                        {{ _self.agencyLogo(agency) }}
+                                        <div class="flex min-w-0 flex-wrap items-center gap-2">
+                                            <p class="truncate font-medium text-gray-900">{{ agency.name }}</p>
+                                            {{ _self.agencyNameBadges(agency) }}
+                                        </div>
                                     </div>
-                                    <p class="truncate text-xs text-gray-500" data-testid="agency-agent-count">
-                                        {{ 'admin.agencies.card.agentCount'|trans({'%count%': agency.agentCount}) }}
-                                    </p>
                                 </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                                <div class="flex flex-col gap-y-4 {{ agency.note ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
+                                    <div class="min-w-0 space-y-1 text-sm sm:flex-1">
+                                        <p class="text-2xl font-semibold text-gray-900 tabular-nums" data-testid="agency-agent-count">{{ agency.agentCount }}</p>
+                                        <p class="text-xs text-gray-600">{{ 'admin.agencies.show.agentsTitle'|trans }}</p>
+                                    </div>
+                                    {{ _self.divider() }}
+                                    {{ _self.colWebsite(agency) }}
+                                    {{ _self.divider() }}
+                                    {{ _self.colBrand(agency) }}
+                                </div>
+                                {{ _self.agencyNoteBand(agency) }}
+                                {{ _self.agencyFooter(agency, this.adminPrefix) }}
+                            </div>
+                        </article>
+                    {% endfor %}
                 </div>
             {% endif %}
         {% else %}
@@ -118,53 +277,76 @@
                     </div>
                 </section>
             {% else %}
-                <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agents-list">
-                    <ul class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2" role="list">
-                        {% for agent in agents %}
-                            <li class="rounded-xl bg-white px-5 py-4" data-testid="agent-row">
-                                <div class="flex flex-col gap-y-3 sm:flex-row sm:items-center sm:gap-x-6">
-                                    <div class="flex min-w-0 items-center gap-3 sm:flex-1">
-                                        <twig:Avatar filename="{{ agent.avatarFilename }}" name="{{ agent.fullName }}" size="9" />
-                                        <div class="min-w-0">
-                                            <div class="flex min-w-0 items-center gap-2">
-                                                <p class="truncate text-sm font-medium text-gray-900">{{ agent.fullName|title }}</p>
-                                                {% for specialty in agent.specialties %}
-                                                    <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agent-specialty">{{ specialty.labelKey|trans }}</span>
-                                                {% endfor %}
-                                            </div>
-                                            <p class="truncate text-xs text-gray-500" data-testid="agent-agency">
-                                                {{ agent.agency ?: 'admin.agents.card.noAgency'|trans }}{% if agent.position %} &middot; <span data-testid="agent-position">{{ agent.position.labelKey|trans }}</span>{% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex min-w-0 flex-wrap items-center gap-x-6 gap-y-1 text-sm sm:justify-end">
-                                        {% if agent.email %}
-                                            <a
-                                                href="mailto:{{ agent.email }}"
-                                                class="flex min-w-0 items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
-                                                data-testid="agent-email"
-                                            >
-                                                {{ ux_icon('lucide:mail', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                <span class="truncate">{{ agent.email }}</span>
-                                            </a>
-                                        {% endif %}
-                                        {% if agent.phone %}
-                                            <a
-                                                href="tel:{{ agent.phone }}"
-                                                class="flex items-center gap-1.5 text-gray-600 transition-colors duration-100 ease-out hover:text-gray-900"
-                                                data-testid="agent-phone"
-                                            >
-                                                {{ ux_icon('lucide:phone', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                                <span class="tabular-nums">{{ agent.phone }}</span>
-                                            </a>
-                                        {% endif %}
-                                    </div>
+                <div class="space-y-4" data-testid="agents-list">
+                    {% for agent in agents %}
+                        <article class="rounded-3xl border border-neutral-200 bg-white p-2 {{ agent.active ? '' : 'opacity-60' }}" data-testid="agent-row">
+                            <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+                                <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-3">
+                                    {{ _self.identity(agent) }}
+                                    {{ _self.agencyBadge(agent, this.adminPrefix) }}
                                 </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                                <div class="flex flex-col gap-y-4 {{ agent.note ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4 sm:flex-row sm:items-stretch sm:gap-x-6">
+                                    {{ _self.colEmail(agent) }}
+                                    {{ _self.divider() }}
+                                    {{ _self.colPhone(agent) }}
+                                    {{ _self.divider() }}
+                                    {{ _self.colPosition(agent) }}
+                                </div>
+                                {% if agent.note %}
+                                    {# Note interne en bande dédiée, comme le message d'un lead. #}
+                                    <div class="rounded-b-xl bg-white px-5 py-4" data-testid="agent-note">
+                                        <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.note.label'|trans }}</p>
+                                        <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-pretty text-gray-900">{{ agent.note }}</p>
+                                    </div>
+                                {% endif %}
+                                <div class="mt-1 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-1 pb-1">
+                                    {# Une fiche éditée affiche sa dernière modification, sinon sa création. #}
+                                    <p class="flex items-center gap-1 pl-1 text-xs text-gray-900">
+                                        {% if agent.updatedAt %}
+                                            <span class="opacity-50">{{ 'admin.agents.card.updatedAt'|trans }}</span>
+                                            <span class="tabular-nums" data-testid="agent-updated-at">{{ agent.updatedAt|format_date('medium') }}</span>
+                                        {% else %}
+                                            <span class="opacity-50">{{ 'admin.agents.show.addedAt'|trans }}</span>
+                                            <span class="tabular-nums">{{ agent.createdAt|format_date('medium') }}</span>
+                                        {% endif %}
+                                    </p>
+                                    <twig:Button
+                                        as="a"
+                                        size="sm"
+                                        href="{{ path('admin_agent_show', {adminPrefix: this.adminPrefix, id: agent.id}) }}"
+                                        class="px-10"
+                                        data-testid="agent-row-link"
+                                    >
+                                        {{ 'admin.agents.card.open'|trans }}
+                                    </twig:Button>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
                 </div>
             {% endif %}
         {% endif %}
+        </div>
     </div>
+
+    {# Pagination "Voir plus" : la page grandit par 25, le reste est en base. #}
+    {% if this.hiddenCount > 0 %}
+        <div class="mt-6 flex justify-center">
+            <twig:Button
+                variant="outline"
+                data-action="live#action"
+                data-live-action-param="more"
+                data-testid="agents-load-more"
+            >
+                <span data-loading="action(more)|addClass(hidden)" class="contents">
+                    {{ ux_icon('lucide:plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                    <span class="whitespace-nowrap">{{ 'admin.agents.list.loadMore'|trans({'%count%': this.hiddenCount}) }}</span>
+                </span>
+                <span data-loading="action(more)|removeClass(hidden)" class="hidden flex items-center gap-x-2 whitespace-nowrap">
+                    <twig:Spinner class="inline" />
+                    {{ 'admin.contacts.button.loading'|trans }}
+                </span>
+            </twig:Button>
+        </div>
+    {% endif %}
 </div>

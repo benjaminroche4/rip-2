@@ -63,7 +63,9 @@ final readonly class GcsAvatarStorage implements AvatarStorage
 
     private function guard(string $path): string
     {
-        if (1 !== preg_match('#^users/[0-9A-Za-z]+/avatar/[0-9a-f-]{36}\.webp$#', $path)) {
+        // Same shapes as AvatarController's route requirement: user avatars,
+        // agency logos, agent photos.
+        if (1 !== preg_match('#^(users|agencies|agents)/[0-9A-Za-z]+/(avatar|logo)/[0-9a-f-]{36}\.webp$#', $path)) {
             throw new \RuntimeException('Illegal avatar path: '.$path);
         }
 

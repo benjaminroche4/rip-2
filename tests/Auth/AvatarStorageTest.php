@@ -56,6 +56,23 @@ final class AvatarStorageTest extends TestCase
         self::assertFalse($storage->exists($path));
     }
 
+    public function testLocalReadsBackAgentPhotosAndAgencyLogos(): void
+    {
+        // Régression : le garde de lecture n'acceptait que users/.../avatar
+        // et servait une image vide pour les photos d'agents et logos
+        // d'agences pourtant bien stockés.
+        $storage = new LocalAvatarStorage($this->dir, new NullLogger());
+
+        foreach ([['12', 'agents', 'avatar'], ['7', 'agencies', 'logo']] as [$ref, $domain, $type]) {
+            $path = $storage->store($ref, 'fake-webp-bytes', $domain, $type);
+            self::assertMatchesRegularExpression('#^'.$domain.'/'.$ref.'/'.$type.'/[0-9a-f-]{36}\.webp$#', $path);
+            self::assertTrue($storage->exists($path), $path.' must be readable back');
+            $stream = $storage->readStream($path);
+            self::assertSame('fake-webp-bytes', stream_get_contents($stream));
+            fclose($stream);
+        }
+    }
+
     public function testLocalRejectsAPathTraversalAttempt(): void
     {
         $storage = new LocalAvatarStorage($this->dir, new NullLogger());

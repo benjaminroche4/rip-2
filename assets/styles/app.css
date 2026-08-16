@@ -572,14 +572,28 @@ body[data-bo] [data-live-name-value][busy] {
 /* La section qui recharge s'estompe (après le même délai anti-clignotement) :
    avec l'anneau, la zone se lit comme "en cours de rechargement". Pas de
    pointer-events-none : on doit pouvoir continuer à taper pendant un
-   autosave. */
-body[data-bo] [data-live-name-value][busy]:not(.contents):not([data-busy-quiet]) {
+   autosave.
+   IMPORTANT : l'estompage est un voile blanc en ::before, PAS une opacité
+   sur le root. Une animation d'opacité crée un contexte d'empilement sur le
+   composant pendant toute la requête (délai compris) : ses overlays fixed
+   z-50 (modales) et ses dropdowns z-10 tomberaient alors sous les cards
+   `relative` voisines le temps de l'aller-retour serveur. Le voile reste à
+   z-index 1 pour passer sous les dropdowns ouverts. */
+body[data-bo] [data-live-name-value][busy]:not(.contents):not([data-busy-quiet])::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: rgb(255 255 255 / 0.5);
+    opacity: 0;
     animation: live-busy-dim 0.2s ease-out 0.3s forwards;
 }
 
 @keyframes live-busy-dim {
     to {
-        opacity: 0.55;
+        opacity: 1;
     }
 }
 
@@ -588,7 +602,10 @@ body[data-bo] [data-live-name-value][busy]:not(.contents):not([data-busy-quiet])
     position: absolute;
     top: 1rem;
     right: 1rem;
-    z-index: 20;
+    /* Juste au-dessus du voile ::before (z 1), mais sous tout overlay réel
+       (dropdowns z-10, modales z-50) : l'anneau ne doit jamais flotter sur
+       une modale ouverte. */
+    z-index: 2;
     width: 1.125rem;
     height: 1.125rem;
     pointer-events: none;

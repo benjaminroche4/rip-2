@@ -10,7 +10,9 @@ use App\Dossier\Domain\DossierDetails;
 use App\Dossier\Domain\DossierPersonView;
 use App\Dossier\Domain\DossierSearchView;
 use App\Dossier\Domain\DossierSummary;
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Domain\ExpiredPairingCodeAlert;
+use App\Dossier\Domain\LinkedDossierSummary;
 use App\Dossier\Domain\MoveInTimeline;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierEvent;
@@ -277,6 +279,54 @@ class DossierRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * Every dossier carrying this email on one of its persons, feeding the
+     * "linked dossiers" banner of the lead page. One scalar query, no N+1,
+     * case-insensitive on the email; a dossier whose two persons would share
+     * the email only appears once (first person in display order wins).
+     * Converted-from-this-lead first, then newest first.
+     *
+     * @return list<LinkedDossierSummary>
+     */
+    public function findByPersonEmail(string $email, ?string $contactReference = null): array
+    {
+        $email = trim($email);
+        if ('' === $email) {
+            return [];
+        }
+
+        /** @var list<array{reference: string, name: string, role: DossierPersonRole|string, closedAt: \DateTimeImmutable|null, sourceContactReference: string|null}> $rows */
+        $rows = $this->createQueryBuilder('d')
+            ->select('d.reference', 'd.name', 'p.role', 'd.closedAt', 'd.sourceContactReference')
+            ->join('d.persons', 'p')
+            ->where('LOWER(p.email) = LOWER(:email)')
+            ->setParameter('email', $email)
+            ->orderBy('d.createdAt', 'DESC')
+            ->addOrderBy('p.position', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $summaries = [];
+        foreach ($rows as $row) {
+            if (isset($summaries[$row['reference']])) {
+                continue;
+            }
+
+            $summaries[$row['reference']] = new LinkedDossierSummary(
+                reference: $row['reference'],
+                name: $row['name'],
+                personRole: $row['role'] instanceof DossierPersonRole ? $row['role'] : DossierPersonRole::from($row['role']),
+                closed: null !== $row['closedAt'],
+                fromThisContact: null !== $contactReference && $row['sourceContactReference'] === $contactReference,
+            );
+        }
+
+        // The dossier born from this lead is the headline entry of the banner.
+        usort($summaries, static fn (LinkedDossierSummary $a, LinkedDossierSummary $b): int => $b->fromThisContact <=> $a->fromThisContact);
+
+        return $summaries;
     }
 
     /**

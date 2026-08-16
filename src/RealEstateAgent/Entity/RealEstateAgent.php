@@ -6,6 +6,7 @@ namespace App\RealEstateAgent\Entity;
 
 use App\RealEstateAgent\Domain\AgencyPosition;
 use App\RealEstateAgent\Domain\AgentSpecialty;
+use App\RealEstateAgent\Domain\ProfessionalCard;
 use App\RealEstateAgent\Repository\RealEstateAgentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -62,12 +63,50 @@ class RealEstateAgent
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $specialties = null;
 
+    /**
+     * Cartes professionnelles loi Hoguet (T, G, S) held by the agent,
+     * stored as the enum backing values; null = not filled in.
+     *
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $professionalCards = null;
+
     /** Job inside the agency; only meaningful for agency agents. */
     #[ORM\Column(length: 30, nullable: true, enumType: AgencyPosition::class)]
     private ?AgencyPosition $position = null;
 
+    /** Team-only free note about the agent (never shown publicly). */
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 2000, maxMessage: 'admin.agents.create.note.length')]
+    private ?string $note = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    /** Null = never edited since creation; set on each edit of the profile. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    /** Snapshot du créateur de la fiche (nom, sinon email) : survit à la suppression du compte staff. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $createdByName = null;
+
+    /** Snapshot de la photo de profil du créateur (clé objet avatar). */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $createdByAvatar = null;
+
+    /** Snapshot du dernier modificateur de la fiche. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $updatedByName = null;
+
+    /** Snapshot de la photo de profil du dernier modificateur. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $updatedByAvatar = null;
+
+    /** Null = active; a deactivated agent leaves the pickers but keeps the directory entry and history. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deactivatedAt = null;
 
     public function getId(): ?int
     {
@@ -156,6 +195,28 @@ class RealEstateAgent
         return $this;
     }
 
+    /**
+     * @return list<ProfessionalCard>
+     */
+    public function getProfessionalCards(): array
+    {
+        return array_map(ProfessionalCard::from(...), $this->professionalCards ?? []);
+    }
+
+    /**
+     * @param list<ProfessionalCard> $cards
+     */
+    public function setProfessionalCards(array $cards): static
+    {
+        $values = array_values(array_unique(array_map(
+            static fn (ProfessionalCard $card): string => $card->value,
+            $cards,
+        )));
+        $this->professionalCards = [] !== $values ? $values : null;
+
+        return $this;
+    }
+
     public function getPosition(): ?AgencyPosition
     {
         return $this->position;
@@ -176,6 +237,95 @@ class RealEstateAgent
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCreatedByName(): ?string
+    {
+        return $this->createdByName;
+    }
+
+    public function setCreatedByName(?string $createdByName): static
+    {
+        $this->createdByName = $createdByName;
+
+        return $this;
+    }
+
+    public function getCreatedByAvatar(): ?string
+    {
+        return $this->createdByAvatar;
+    }
+
+    public function setCreatedByAvatar(?string $createdByAvatar): static
+    {
+        $this->createdByAvatar = $createdByAvatar;
+
+        return $this;
+    }
+
+    public function getUpdatedByAvatar(): ?string
+    {
+        return $this->updatedByAvatar;
+    }
+
+    public function setUpdatedByAvatar(?string $updatedByAvatar): static
+    {
+        $this->updatedByAvatar = $updatedByAvatar;
+
+        return $this;
+    }
+
+    public function getUpdatedByName(): ?string
+    {
+        return $this->updatedByName;
+    }
+
+    public function setUpdatedByName(?string $updatedByName): static
+    {
+        $this->updatedByName = $updatedByName;
+
+        return $this;
+    }
+
+    public function getDeactivatedAt(): ?\DateTimeImmutable
+    {
+        return $this->deactivatedAt;
+    }
+
+    public function setDeactivatedAt(?\DateTimeImmutable $deactivatedAt): static
+    {
+        $this->deactivatedAt = $deactivatedAt;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return null === $this->deactivatedAt;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): static
+    {
+        $this->note = '' !== trim((string) $note) ? $note : null;
 
         return $this;
     }

@@ -41,6 +41,9 @@ final class ContactsAccessTest extends WebTestCase
         // Full purge: the list sorts untreated-oldest first, so a leftover
         // contact from another test would displace our fixture off card #1.
         $em->createQuery('DELETE FROM '.Contact::class)->execute();
+        $em->createQuery('DELETE FROM '.\App\Dossier\Entity\Dossier::class.' d WHERE d.reference IN (:refs)')
+            ->setParameter('refs', ['DS-771101', 'DS-771102'])
+            ->execute();
 
         /** @var UserPasswordHasherInterface $hasher */
         $hasher = $container->get('security.user_password_hasher');
@@ -335,6 +338,110 @@ final class ContactsAccessTest extends WebTestCase
         self::assertSame('application/pdf', $this->client->getResponse()->headers->get('Content-Type'));
         self::assertStringContainsString('attachment', (string) $this->client->getResponse()->headers->get('Content-Disposition'));
         self::assertStringStartsWith('%PDF', (string) $this->client->getResponse()->getContent());
+    }
+
+    public function testLeadPageShowsNoLinkedDossiersBannerWithoutDossier(): void
+    {
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorNotExists('[data-testid="contact-linked-dossiers-banner"]');
+    }
+
+    public function testLeadPageBannersTheDossierConvertedFromIt(): void
+    {
+        $this->persistLinkedDossier('DS-771101', 'Relocation Dupont', \App\Dossier\Domain\DossierPersonRole::TENANT, sourceContactReference: 'CT-424242');
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('[data-testid="contact-linked-dossiers-banner"]', 'Dossier créé depuis ce lead');
+
+        $entry = $crawler->filter('[data-testid="contact-linked-dossier"]');
+        self::assertSame(1, $entry->count());
+        self::assertStringContainsString('DS-771101', $entry->text());
+        self::assertStringContainsString('Relocation Dupont', $entry->text());
+        // Admin has the dossiers section: the entry links to the file.
+        $link = $entry->filter('a')->count() > 0 ? $entry->filter('a') : $crawler->filter('a[data-testid="contact-linked-dossier"]');
+        self::assertGreaterThan(0, $link->count());
+        self::assertStringContainsString('/dossiers/DS-771101', (string) $link->attr('href'));
+    }
+
+    public function testLeadPageListsEveryDossierCarryingTheLeadEmail(): void
+    {
+        // No dossier was converted from this lead: two files simply carry
+        // the same email, one as tenant, one as a closed follow-up request.
+        $this->persistLinkedDossier('DS-771101', 'Relocation Dupont', \App\Dossier\Domain\DossierPersonRole::TENANT);
+        $closed = $this->persistLinkedDossier('DS-771102', 'Relocation Acme', \App\Dossier\Domain\DossierPersonRole::FOLLOW_UP);
+        $closed->setClosedAt(new \DateTimeImmutable());
+        static::getContainer()->get('doctrine.orm.entity_manager')->flush();
+
+        $this->loginAs(self::ADMIN_EMAIL);
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('[data-testid="contact-linked-dossiers-banner"]', 'Cette adresse apparaît dans 2 dossiers');
+
+        $entries = $crawler->filter('[data-testid="contact-linked-dossier"]');
+        self::assertSame(2, $entries->count());
+        $text = $crawler->filter('[data-testid="contact-linked-dossiers-banner"]')->text();
+        self::assertStringContainsString('Locataire', $text);
+        self::assertStringContainsString('Demande de suivi', $text);
+        self::assertStringContainsString('Clôturé', $text);
+    }
+
+    public function testLinkedDossierEntriesAreNotLinksWithoutTheDossiersSection(): void
+    {
+        $this->persistLinkedDossier('DS-771101', 'Relocation Dupont', \App\Dossier\Domain\DossierPersonRole::TENANT, sourceContactReference: 'CT-424242');
+
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository(User::class)->findOneBy(['email' => self::USER_EMAIL])
+            ?? throw new \RuntimeException('Test user not found.');
+        $user->setRoles(['ROLE_SECTION_CONTACTS']);
+        $em->flush();
+        $this->client->loginUser($user);
+
+        $crawler = $this->client->request('GET', $this->contactsUrl($this->adminPrefix).'/CT-424242');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-testid="contact-linked-dossiers-banner"]');
+        self::assertSelectorNotExists('a[data-testid="contact-linked-dossier"]');
+        $banner = $crawler->filter('[data-testid="contact-linked-dossiers-banner"]');
+        self::assertStringContainsString('DS-771101', $banner->text());
+        self::assertSame(0, $banner->filter('a')->count(), 'No link at all without the dossiers section.');
+    }
+
+    private function persistLinkedDossier(
+        string $reference,
+        string $name,
+        \App\Dossier\Domain\DossierPersonRole $role,
+        ?string $sourceContactReference = null,
+    ): \App\Dossier\Entity\Dossier {
+        /** @var EntityManagerInterface $em */
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+
+        $dossier = (new \App\Dossier\Entity\Dossier())
+            ->setName($name)
+            ->setReference($reference)
+            ->setPairingCode(substr(strtoupper(bin2hex(random_bytes(4))), 0, 6))
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setSourceContactReference($sourceContactReference);
+        $person = (new \App\Dossier\Entity\DossierPerson())
+            ->setRole($role)
+            ->setFirstName('Léa')
+            ->setLastName('Dupont')
+            // Different case from the contact email on purpose: the lookup
+            // must stay case-insensitive end to end.
+            ->setEmail('Contacts-Test-Lead@example.com')
+            ->setPrimaryContact(\App\Dossier\Domain\DossierPersonRole::TENANT === $role);
+        $dossier->addPerson($person);
+        $em->persist($dossier);
+        $em->flush();
+
+        return $dossier;
     }
 
     private function loginAs(string $email): void

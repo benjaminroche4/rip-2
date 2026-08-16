@@ -70,6 +70,22 @@
             <p class="text-gray-600">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
             {{ _self.managerChips(this.manager, this.managerChoices) }}
         </div>
+        {# Formule souscrite : information de pilotage, sous le responsable.
+           Masquée tant qu'elle n'est pas renseignée. #}
+        {% set offer = this.offer %}
+        {% if offer %}
+        {% set offerTitle = ('contact.contactForm.offer.' ~ offer ~ '.title')|trans %}
+        {% set offerPrice = ('contact.contactForm.offer.' ~ offer ~ '.price')|trans %}
+        {# Bande neutre bordée : titre + badge-check sobres, prix en
+           pastille grise. Choix utilisateur (août 2026). #}
+        <div class="mb-4">
+            <p class="text-gray-600">{{ 'admin.dossiers.show.followUp.offer'|trans }}</p>
+            <div class="mt-1.5 flex items-center justify-between gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5" data-testid="dossier-offer">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900">{{ ux_icon('lucide:badge-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }} {{ offerTitle }}</span>
+                <span class="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-gray-600 tabular-nums">{{ offerPrice }}</span>
+            </div>
+        </div>
+        {% endif %}
         {# Clôture : purge des pièces + rotation du lien de dépôt. La
            chronologie du dossier vit dans le tiroir Suivi et notes, comme
            le fil de suivi de la fiche contact. #}

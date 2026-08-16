@@ -174,8 +174,10 @@ header:
             fr: Français
             en: English
     logo:
+        ariaLabel: Retour à l'accueil - Relocation In Paris
         alt: Logo de Relocation In Paris, Agence de Relocation à Paris.
     menu:
+        mobile: Menu mobile
         findAccommodation: Recherche de logement
         propertyManagement: Gestion et services
         aboutUs: À propos
@@ -192,6 +194,8 @@ header:
             text: Logez vos collaborateurs à Paris facilement grâce à notre service clé en main.
         contactExpert: Contacter un expert
         blog: Nos actualités
+    nav:
+        ariaLabel: Navigation principale
     cta:
         title: On vous rappelle
         whatsapp:
@@ -483,6 +487,8 @@ home:
             title: Installation sereine
             text: Toutes les étapes gérées pour vous.
     services:
+        prev: Service précédent
+        next: Service suivant
         title: L'essentiel, sans le superflu
         subTitle: Paris autrement
         text: De la recherche d'appartement à votre installation complète, on s'occupe de tout. Vous n'avez plus qu'à profiter de Paris.
@@ -1798,6 +1804,8 @@ admin:
     toast:
         dismiss: Fermer la notification
         saved: Modifications enregistrées.
+        agentDeleted: Agent supprimé.
+        agencyDeleted: Agence supprimée.
         fileRenamed: Fichier renommé.
         noteAdded: Note ajoutée.
         noteUpdated: Note modifiée.
@@ -1914,6 +1922,13 @@ admin:
                 visit: Visite
                 finalization: Finalisation
                 closed: Clôturé
+                # Anciens statuts (workflow pré-août 2026) : plus jamais émis,
+                # mais les événements d'historique en base stockent la clé
+                # complète au moment du changement. Ne pas supprimer.
+                new: Nouveau
+                awaiting_documents: En attente de documents
+                searching: Recherche en cours
+                property_found: Bien trouvé
         list:
             viewMore: Voir le dossier
         card:
@@ -2117,6 +2132,7 @@ admin:
                         other: Autre
             followUp:
                 origin: Créé depuis le lead
+                offer: Formule
                 timeline: Chronologie
             requestDocuments: Demander des documents
             closure:
@@ -2128,7 +2144,7 @@ admin:
                 reopen: Rouvrir
                 modal:
                     title: Clôturer ce dossier ?
-                    text: Les fichiers déposés seront définitivement supprimés, le lien de dépôt sera désactivé et la page de dépôt refusera ce dossier. Vous pourrez rouvrir le dossier, mais les fichiers ne seront pas restaurés.
+                    text: Le dossier rejoindra les archives et l'espace de dépôt sera désactivé pour le client. Aucun fichier n'est supprimé, et vous pourrez rouvrir le dossier à tout moment.
                     confirm: Clôturer
             deletion:
                 delete: Supprimer le dossier
@@ -2158,7 +2174,7 @@ admin:
                 primaryChanged: '%name% devient le locataire principal'
                 managerAssigned: Dossier assigné à %name%
                 managerUnassigned: Dossier désassigné
-                dossierClosed: 'Dossier clôturé : %count% fichier(s) supprimé(s), lien de dépôt désactivé'
+                dossierClosed: 'Dossier clôturé, lien de dépôt désactivé'
                 depositLocked: Espace de dépôt verrouillé
                 depositUnlocked: Espace de dépôt déverrouillé
                 dossierReopened: Dossier rouvert
@@ -2294,6 +2310,7 @@ admin:
             button: Nouveau dossier
             title: Créer un dossier
             offer:
+                required: Choisissez une formule.
                 accompagne:
                     hint: Le client fait les visites lui-même, nous gérons tout le reste.
                 confie:
@@ -2382,8 +2399,9 @@ admin:
             toDossier: Transformer en dossier
             viewDossier: 'Voir le dossier (%reference%)'
             toDossierModal:
+                chooseOffer: 'Aucune formule sur la demande : choisissez celle du dossier.'
                 title: Transformer en dossier
-                description: 'Le dossier centralise le suivi de la relocation de %name% : personnes du foyer, recherche de biens, visites et paiements. Le contact devient le locataire principal du dossier. Si un dossier existe déjà avec cet email, vous y serez redirigé.'
+                description: '%name% devient le locataire principal du dossier.'
                 cancel: Annuler
                 confirm: Créer le dossier
             closureLabel: Motif de clôture
@@ -2391,6 +2409,11 @@ admin:
             closedTitle: Lead clôturé
             convertedTitle: Lead converti en client
             terminalSince: depuis le %date%
+            linkedDossiers:
+                createdTitle: Dossier créé depuis ce lead
+                othersAlso: '{1}Cette adresse apparaît aussi dans 1 autre dossier :|]1,Inf[Cette adresse apparaît aussi dans %count% autres dossiers :'
+                othersTitle: '{1}Cette adresse apparaît dans 1 dossier|]1,Inf[Cette adresse apparaît dans %count% dossiers'
+                closedBadge: Clôturé
             prev: Lead précédent
             next: Lead suivant
             field:
@@ -2563,6 +2586,7 @@ admin:
             visio_cancelled: Visio annulée
             title: Historique
             status: 'Statut passé à %status%'
+            reason: 'Motif de clôture : %reason%'
             recap_email: Récapitulatif envoyé par email
             recap_email_payment: Récapitulatif + lien de paiement envoyé par email
         drawer:
@@ -2775,6 +2799,8 @@ admin:
                 label: Adresse du bien
                 placeholder: 12 rue de la Roquette, 75011 Paris
     agents:
+        list:
+            loadMore: '{1}Voir 1 de plus|]1,Inf[Voir les %count% suivants'
         title: Agents immobiliers
         searchPlaceholder: Rechercher un agent...
         count: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
@@ -2789,9 +2815,58 @@ admin:
             description: Modifiez la recherche pour retrouver vos agents.
         card:
             noAgency: Indépendant
+            open: Voir la fiche agent
+        status:
+            active: Actif
+            inactive: Inactif
+        deactivate:
+            button: Désactiver l'agent
+            title: Désactiver cet agent ?
+            text: "L'agent n'apparaîtra plus dans les sélections (visites, rattachements). Sa fiche et son historique sont conservés."
+            confirm: Désactiver
+        reactivate:
+            button: Réactiver l'agent
+        deactivated:
+            title: Agent désactivé
+            text: Il n'apparaît plus dans les sélections. Réactivez-le pour le remettre en circulation.
+            updatedAt: Modifié le
+        show:
+            addedAt: Ajouté le
+            audit:
+                createdAt: Créée le
+                updatedAt: Modifiée le
+                by: par %name%
+            visits:
+                title: Visites
+                stats:
+                    upcoming: À venir
+                    total: Au total
+                    last: Dernière visite
+                    dossiers: Dossiers touchés
+                count: '{0}Aucune visite|{1}1 visite|]1,Inf[%count% visites'
+                upcoming: À venir
+                past: Passées
+                empty:
+                    title: Aucune visite pour le moment
+                    text: Les visites planifiées ou réalisées avec cet agent apparaîtront ici.
+        delete:
+            button: Supprimer l'agent
+            title: Supprimer cet agent ?
+            text: '%name% sera retiré de l''annuaire, avec ses coordonnées et sa note interne. Cette action est définitive.'
+            confirm: Supprimer
         specialty:
             location: Location
             transaction: Transaction
+        professionalCard:
+            label: Cartes professionnelles
+            choice:
+                t: Carte T
+                g: Carte G
+                s: Carte S
+            hint:
+                t: transaction
+                g: gestion
+                s: syndic
         position:
             assistant: Assistant
             consultant_sale: Consultant vente
@@ -2806,6 +2881,11 @@ admin:
             title: Nouvel agent immobilier
             photo:
                 label: Photo (optionnelle)
+                choose: Choisir une photo
+                none: Aucun fichier choisi
+                add: Ajouter une photo
+                formats: JPG, PNG ou WebP
+                drop: Cliquez ou déposez une photo
             subtitle: Ajoutez un agent partenaire à l'annuaire, avec son agence et ses coordonnées.
             cancel: Annuler
             submit: Ajouter l'agent
@@ -2831,6 +2911,15 @@ admin:
                 label: Email
             phone:
                 label: Téléphone
+            note:
+                label: Note interne
+                placeholder: Réactif sur WhatsApp, préfère les visites le matin...
+                help: Visible uniquement par l'équipe.
+            section:
+                identity: Identité
+                agency: Agence
+                specialties: Spécialités
+                contact: Coordonnées
     agencies:
         count: '{0}Aucune agence|{1}1 agence|]1,Inf[%count% agences'
         empty:
@@ -2841,13 +2930,37 @@ admin:
             description: Modifiez la recherche pour retrouver vos agences.
         card:
             agentCount: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
+            open: Voir la fiche agence
+            website: Ouvrir le site web
+        status:
+            active: Active
+            inactive: Inactive
+        deactivated:
+            title: Agence désactivée
+            text: Elle n'apparaît plus dans les sélections. Réactivez-la pour la remettre en circulation.
+        deactivate:
+            button: Désactiver l'agence
+            title: Désactiver cette agence ?
+            text: L'agence n'apparaîtra plus dans les sélections. Ses agents et son historique sont conservés.
+            confirm: Désactiver
+        reactivate:
+            button: Réactiver l'agence
+        show:
+            createdAt: Créée le
+            agentsTitle: Agents rattachés
+            empty: Aucun agent rattaché pour le moment.
+        delete:
+            button: Supprimer l'agence
+            title: Supprimer cette agence ?
+            text: '%name% sera retirée de l''annuaire. Ses agents restent enregistrés et passent en indépendants. Cette action est définitive.'
+            confirm: Supprimer
         create:
             menuItem:
                 title: Une agence
                 subtitle: Créer une agence seule
             title: Nouvelle agence
             logo:
-                label: Logo (optionnel)
+                label: Logo
             subtitle: Enregistrez une agence partenaire. Vous pourrez y rattacher des agents ensuite.
             cancel: Annuler
             submit: Créer l'agence
@@ -2866,6 +2979,17 @@ admin:
                 label: Téléphone
             email:
                 label: Email
+            website:
+                label: Site web
+                placeholder: www.agence.fr
+            note:
+                label: Note interne
+                placeholder: Exigent un dossier complet avant visite, commission négociable...
+                help: Visible uniquement par l'équipe.
+            section:
+                identity: Identité
+                address: Adresse
+                contact: Coordonnées
     tools:
         title: Outils
         documents:
@@ -3465,3 +3589,10 @@ twoFactor:
         submit: Vérifier
         error:
             title: Vérification impossible
+
+propertyEstimation:
+    form:
+        success:
+            title: Votre demande d'estimation a bien été envoyée. Nous revenons vers vous rapidement.
+        error:
+            tooManyRequests: Trop de demandes envoyées. Merci de réessayer dans quelques minutes.

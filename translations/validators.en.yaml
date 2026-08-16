@@ -76,6 +76,8 @@ admin:
             lastName:
                 length: 'The last name cannot exceed 50 characters.'
                 notBlank: 'The last name is required.'
+            note:
+                length: 'The note cannot exceed 2000 characters.'
             phone:
                 length: 'The phone number cannot exceed 30 characters.'
     agencies:
@@ -85,6 +87,11 @@ admin:
                 notBlank: 'The brand name is required.'
             address:
                 length: 'The address cannot exceed 255 characters.'
+            website:
+                invalid: 'This website address is not valid.'
+                length: 'The website address cannot exceed 255 characters.'
+            note:
+                length: 'The note cannot exceed 2000 characters.'
             email:
                 invalid: 'This email address is not valid.'
                 length: 'The email cannot exceed 180 characters.'

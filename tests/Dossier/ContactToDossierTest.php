@@ -105,6 +105,43 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('Relance par email.', $notes[1]->getText());
     }
 
+    public function testOfferPickedInTheModalLandsOnTheContactAndTheDossier(): void
+    {
+        // Lead sans formule : la modale propose le choix, la valeur postée
+        // est copiée sur le contact puis sur le dossier par le converter.
+        $contact = $this->persistContact(offer: null);
+        self::assertNull($contact->getOffer());
+
+        $crawler = $this->client->request('GET', $this->contactUrl($contact));
+        // Les radios de formule ne s'affichent que sans formule sur le lead.
+        self::assertSelectorExists('[data-testid="contact-to-dossier-offer-confie"]');
+
+        $form = $crawler->filter('[data-testid="contact-to-dossier"]')->closest('form')->form();
+        $form['offer'] = 'confie';
+        $this->client->submit($form);
+
+        self::assertResponseStatusCodeSame(303);
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy([]);
+        self::assertSame('confie', $dossier->getOffer());
+        $this->em->clear();
+        self::assertSame('confie', $this->em->getRepository(\App\Contact\Entity\Contact::class)->findOneBy(['reference' => $contact->getReference()])->getOffer());
+    }
+
+    public function testConversionWithoutAnyOfferIsRefused(): void
+    {
+        $contact = $this->persistContact(offer: null);
+
+        $crawler = $this->client->request('GET', $this->contactUrl($contact));
+        $form = $crawler->filter('[data-testid="contact-to-dossier"]')->closest('form')->form();
+        // POST sans formule (les radios required couvrent le navigateur,
+        // ceci force le chemin serveur) : retour fiche lead, rien de créé.
+        $this->client->submit($form);
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertStringContainsString('/contacts/', (string) $this->client->getResponse()->headers->get('Location'));
+        self::assertNull($this->em->getRepository(Dossier::class)->findOneBy([]));
+    }
+
     public function testTheConversionShowsACreatingOverlay(): void
     {
         $contact = $this->persistContact();
@@ -254,9 +291,10 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSelectorNotExists('[data-testid="contact-to-dossier-trigger"]');
     }
 
-    private function persistContact(): Contact
+    private function persistContact(?string $offer = 'accompagne'): Contact
     {
         $contact = (new Contact())
+            ->setOffer($offer)
             ->setFirstName('jane')->setLastName('Doe')
             ->setEmail('repro@example.com')
             ->setPhoneNumber('+33600000000')

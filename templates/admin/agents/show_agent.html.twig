@@ -1,0 +1,25 @@
+{% extends 'admin/base.html.twig' %}
+
+{% set agentName = agent.fullName|title %}
+
+{% block title %}{{ agentName }}{% endblock %}
+
+{% block page_header %}
+    <twig:Admin:PageHeader
+        title="{{ agentName }}"
+        :crumbs="[{label: 'admin.agents.title'|trans, url: path('admin_agents', {adminPrefix: adminPrefix})}]"
+    />
+{% endblock %}
+
+{% block body %}
+    {# Le chrome de page (titre, fil d'ariane) vit hors du composant live :
+       un morph Turbo le rafraîchit quand l'identité change. #}
+    <div
+        class="contents"
+        data-controller="page-refresh"
+        data-action="agent-identity:changed@window->page-refresh#refresh"
+    ></div>
+    <div class="mx-auto max-w-4xl" data-testid="agent-show-page">
+        <twig:RealEstateAgent:AgentDetails :agentId="agent.id" adminPrefix="{{ adminPrefix }}" />
+    </div>
+{% endblock %}

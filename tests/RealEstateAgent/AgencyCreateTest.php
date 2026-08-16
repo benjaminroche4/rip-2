@@ -169,6 +169,15 @@ final class AgencyCreateTest extends KernelTestCase
         self::assertStringContainsString('list="agency-create-brand-options"', $rendered);
         self::assertStringContainsString('data-testid="agency-create-address"', $rendered);
         self::assertStringContainsString('data-testid="agency-create-email"', $rendered);
+        // The form is split into titled sections separated by dividers.
+        self::assertSame(4, substr_count($rendered, 'border-t border-gray-950/5'), 'Identity | address | specialties | contact | note: four dividers.');
+        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-400 uppercase'), 'Five section micro-titles.');
+        // Address field: Google Places assist (same wiring as the estimation
+        // form), the submitted value stays the plain text input.
+        self::assertStringContainsString('data-controller="places-autocomplete"', $rendered);
+        self::assertStringContainsString('data-places-autocomplete-target="input"', $rendered);
+        self::assertStringContainsString('data-places-autocomplete-target="results"', $rendered);
+        self::assertStringContainsString('input->places-autocomplete#search', $rendered);
         self::assertStringContainsString('aria-labelledby="agency-create-title"', $rendered);
         self::assertStringContainsString('data-loading="action(create)|addAttribute(disabled)"', $rendered);
         // Cancel is a plain link back to the agents list, not a live action.

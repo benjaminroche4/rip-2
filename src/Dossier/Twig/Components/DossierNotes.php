@@ -15,7 +15,6 @@ use App\Dossier\Repository\DossierEventRepository;
 use App\Dossier\Repository\DossierNoteRepository;
 use App\Dossier\Repository\DossierRepository;
 use App\Dossier\Security\DossierNoteVoter;
-use App\Dossier\Service\DocumentStorage;
 use App\Dossier\Service\DossierDriveProvisioner;
 use App\Dossier\Service\DossierEventLogger;
 use App\Dossier\Service\DossierNoteThreadAdapter;
@@ -98,7 +97,6 @@ final class DossierNotes
         private readonly DossierEventRepository $eventRepository,
         private readonly DossierEventLogger $events,
         private readonly TranslatorInterface $translator,
-        private readonly DocumentStorage $storage,
         private readonly DossierNumberGenerator $numbers,
         private readonly ClockInterface $clock,
         private readonly LoggerInterface $securityLogger,
@@ -135,6 +133,12 @@ final class DossierNotes
     public function getSourceContactReference(): ?string
     {
         return $this->dossier()->getSourceContactReference();
+    }
+
+    /** Formule du client (accompagne|confie), copiée du lead à la conversion. */
+    public function getOffer(): ?string
+    {
+        return $this->dossier()->getOffer();
     }
 
     public function getCreatedAt(): \DateTimeImmutable
@@ -347,10 +351,10 @@ final class DossierNotes
     }
 
     /**
-     * Closes the dossier: every deposited file is purged from disk and
-     * database (the deposit page's retention promise), the pairing code is
-     * rotated so every emailed link dies, and the public deposit page
-     * refuses the dossier from now on.
+     * Closes the dossier: pure archiving. Nothing is deleted — the files
+     * stay in place for the staff — but the pairing code is rotated so
+     * every emailed link dies, and the public deposit page refuses the
+     * dossier from now on. Reopening restores everything as it was.
      */
     #[LiveAction]
     public function confirmClose(): void
@@ -362,31 +366,19 @@ final class DossierNotes
             return;
         }
 
-        $purged = 0;
-        foreach ($dossier->getPersons() as $person) {
-            foreach ($person->getDocuments() as $document) {
-                foreach ($document->getFiles()->toArray() as $file) {
-                    $this->storage->delete($dossier, $file);
-                    $document->removeFile($file);
-                    ++$purged;
-                }
-            }
-        }
-
         $dossier->setClosedAt($this->clock->now());
         $dossier->setPairingCode($this->numbers->pairingCode());
         // The rotated code is born now: its 90-day expiry window starts at
         // the rotation, and stays valid if the dossier ever reopens.
         $dossier->setPairingCodeSentAt($this->clock->now());
-        $this->events->log($dossier, 'dossier_closed', ['count' => $purged]);
+        $this->events->log($dossier, 'dossier_closed');
         $this->em->flush();
 
-        // Piste d'audit : la clôture purge les pièces déposées et invalide le
-        // lien de dépôt, elle rejoint la suppression sur le canal security.
+        // Piste d'audit : la clôture coupe l'accès public au dépôt (code
+        // rotaté + page refusée), sans toucher aux fichiers.
         $this->securityLogger->notice('Dossier closed', [
             'actor' => $this->security->getUser()?->getUserIdentifier(),
             'dossier' => $dossier->getReference(),
-            'purgedFiles' => $purged,
         ]);
         $this->emit('dossier-closure:changed');
         $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.dossierClosed')]);

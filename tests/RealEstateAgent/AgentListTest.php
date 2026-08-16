@@ -49,6 +49,30 @@ final class AgentListTest extends KernelTestCase
         self::assertSame(['Astier', 'durand', 'Ébrard'], array_column($rows, 'lastName'));
     }
 
+    public function testListIsPagedAndGrowsWithMore(): void
+    {
+        for ($i = 1; $i <= 28; ++$i) {
+            $this->persistAgent('Agent'.str_pad((string) $i, 2, '0', STR_PAD_LEFT), 'Zeta'.str_pad((string) $i, 2, '0', STR_PAD_LEFT));
+        }
+        $this->loginAsAdmin();
+
+        $component = $this->mountList();
+
+        // Première page : 25 lignes, 3 derrière le "Voir plus".
+        self::assertCount(25, $component->getAgents());
+        self::assertSame(3, $component->getHiddenCount());
+        self::assertSame(28, $component->getTotalCount());
+
+        $component->more();
+        self::assertCount(28, $component->getAgents());
+        self::assertSame(0, $component->getHiddenCount());
+
+        // Nouvelle recherche = retour à la première page.
+        $component->search = 'zeta';
+        $component->onSearchUpdated();
+        self::assertSame(25, $component->limit);
+    }
+
     public function testSearchMatchesNameAgencyEmailAndPhone(): void
     {
         $this->persistAgent('Jean', 'Martin', agency: 'Foncia Paris 11', email: 'jean@foncia.fr', phone: '+33611223344');
@@ -108,6 +132,39 @@ final class AgentListTest extends KernelTestCase
         self::assertStringContainsString('Transaction', $rendered);
         self::assertStringContainsString('data-testid="agent-position"', $rendered);
         self::assertStringContainsString('Gérant', $rendered);
+    }
+
+    public function testNoteShowsInItsOwnBandOnlyForNotedAgents(): void
+    {
+        $this->persistAgent('Jean', 'Martin', note: 'Réactif sur WhatsApp, préfère le matin.');
+        $this->persistAgent('Paul', 'Durand');
+        $this->loginAsAdmin();
+
+        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        // Only the noted agent gets the dedicated band, with the text visible
+        // in the card; the card of the other agent is unchanged.
+        self::assertSame(1, substr_count($rendered, 'data-testid="agent-note"'));
+        self::assertStringContainsString('Réactif sur WhatsApp, préfère le matin.', $rendered);
+    }
+
+    public function testEditedAgentShowsItsLastEditDateInsteadOfTheCreationDate(): void
+    {
+        $edited = $this->persistAgent('Jean', 'Martin');
+        $edited->setUpdatedAt(new \DateTimeImmutable('2026-08-16 10:00:00'));
+        $this->em->flush();
+        $this->persistAgent('Paul', 'Durand');
+        $this->loginAsAdmin();
+
+        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        // Only the edited profile switches to its last edit date; the
+        // untouched one keeps showing its creation date.
+        self::assertSame(1, substr_count($rendered, 'data-testid="agent-updated-at"'));
     }
 
     public function testEmptyStateRendersWithoutAgents(): void
@@ -257,6 +314,7 @@ final class AgentListTest extends KernelTestCase
         ?string $phone = null,
         array $specialties = [],
         ?AgencyPosition $position = null,
+        ?string $note = null,
     ): RealEstateAgent {
         $agencyEntity = null;
         if (null !== $agency) {
@@ -273,6 +331,7 @@ final class AgentListTest extends KernelTestCase
             ->setPhone($phone)
             ->setSpecialties($specialties)
             ->setPosition($position)
+            ->setNote($note)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($agent);
         $this->em->flush();

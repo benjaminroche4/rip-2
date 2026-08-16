@@ -146,11 +146,11 @@
                         <p class="mt-1 text-sm text-pretty text-gray-500">{{ 'admin.dossiers.create.subtitle'|trans }}</p>
                     </div>
 
-                    {# ── Formule visée : chips toggle-off, optionnelle à la
-                          création (modifiable plus tard). ── #}
+                    {# ── Formule visée : obligatoire, un dossier porte
+                          toujours sa formule. ── #}
                     <section class="px-3" data-testid="dossier-create-offer">
                         <h3 class="mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                            {{ 'admin.dossiers.card.package.label'|trans }}
+                            {{ 'admin.dossiers.card.package.label'|trans }} <span class="text-red-600" aria-hidden="true">*</span>
                         </h3>
                         {# Deux cards sélectionnables (titre, prix, résumé) :
                            résumé orienté staff (qui fait les visites), pas le
@@ -176,12 +176,15 @@
                                             {{ ('contact.contactForm.offer.' ~ offerValue ~ '.price')|trans }}
                                         </span>
                                     </span>
-                                    <span class="mt-1.5 block text-xs text-pretty text-gray-500">
+                                    <span class="mt-1.5 block text-xs text-balance text-gray-500">
                                         {{ ('admin.dossiers.create.offer.' ~ offerValue ~ '.hint')|trans }}
                                     </span>
                                 </button>
                             {% endfor %}
                         </div>
+                        {% if this.offerMissing %}
+                            <p class="mt-2 text-sm text-red-600" role="alert" data-testid="dossier-create-offer-error">{{ 'admin.dossiers.create.offer.required'|trans }}</p>
+                        {% endif %}
                     </section>
 
                     <section data-testid="dossier-create-persons">

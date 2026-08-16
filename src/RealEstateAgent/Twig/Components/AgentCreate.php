@@ -116,6 +116,12 @@ final class AgentCreate extends AbstractController
         }
 
         $agent->setCreatedAt(new \DateTimeImmutable());
+        // Instantané du créateur (nom, sinon email) : traçabilité de fiche.
+        $creator = $this->security->getUser();
+        if ($creator instanceof \App\Auth\Entity\User) {
+            $fullName = trim(($creator->getFirstName() ?? '').' '.($creator->getLastName() ?? ''));
+            $agent->setCreatedByName('' !== $fullName ? $fullName : (string) $creator->getEmail());
+        }
         $em->persist($agent);
         $em->flush();
 

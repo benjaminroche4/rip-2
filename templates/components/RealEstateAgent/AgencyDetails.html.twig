@@ -1,0 +1,424 @@
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="agency-details">
+    {% set agency = this.agency %}
+    {% set inputClass = 'w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none' %}
+    {% if agency %}
+    {% if not agency.active %}
+        {# Bandeau d'état, même famille que le bandeau de clôture d'un
+           dossier : teinte neutre, l'état n'est pas destructif. #}
+        <div
+            class="mb-6 flex items-center gap-4 rounded-2xl border border-neutral-300 bg-linear-to-r from-neutral-200/80 to-neutral-100/40 px-5 py-4 shadow-sm"
+            role="status"
+            data-testid="agency-deactivated-banner"
+        >
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-gray-600 shadow-sm">
+                {{ ux_icon('lucide:circle-slash-2', {class: 'size-5', 'aria-hidden': 'true'}) }}
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="font-semibold text-gray-900">{{ 'admin.agencies.deactivated.title'|trans }}</p>
+                <p class="mt-0.5 text-sm leading-5 text-gray-600">{{ 'admin.agencies.deactivated.text'|trans }}</p>
+            </div>
+        </div>
+    {% endif %}
+    <section class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="agency-identity">
+        <div class="flex flex-col gap-1 rounded-2xl bg-neutral-50 p-2">
+            {% if this.editing %}
+                {# Édition inline : mêmes sections (dividers + micro-titres
+                   uppercase) que le formulaire de création, validation
+                   Annuler / Enregistrer en bas (modèle Admin:ContactDetails). #}
+                <div class="flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
+                    <div class="text-sm">
+                        {# Identité : nom et enseigne. #}
+                        <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
+                        <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="min-w-0 space-y-2">
+                                <label for="agency-edit-name-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.name.label'|trans }}</label>
+                                <input id="agency-edit-name-{{ this.agencyId }}" type="text" data-model="norender|name" value="{{ this.name }}" placeholder="{{ 'admin.agencies.create.name.placeholder'|trans }}" class="{{ inputClass }}" data-testid="agency-edit-name">
+                                {% if this.errors.name is defined %}
+                                    <p class="text-xs text-red-600" role="alert">{{ this.errors.name|trans }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0 space-y-2">
+                                <label for="agency-edit-brand-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.brand.label'|trans }}</label>
+                                <input
+                                    id="agency-edit-brand-{{ this.agencyId }}"
+                                    type="text"
+                                    data-model="norender|brandName"
+                                    value="{{ this.brandName }}"
+                                    list="agency-edit-brand-names-{{ this.agencyId }}"
+                                    placeholder="{{ 'admin.agencies.create.brand.placeholder'|trans }}"
+                                    class="{{ inputClass }}"
+                                    data-testid="agency-edit-brand"
+                                >
+                                <datalist id="agency-edit-brand-names-{{ this.agencyId }}">
+                                    {% for name in this.brandNames %}
+                                        <option value="{{ name }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                                <p class="flex items-center gap-1.5 text-xs text-gray-400">{{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }} {{ 'admin.agencies.create.brand.help'|trans }}</p>
+                            </div>
+                        </div>
+
+                        {# Adresse. #}
+                        <div class="mt-4 border-t border-gray-950/5 pt-4">
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
+                            <div class="mt-3 min-w-0 space-y-2">
+                                <label for="agency-edit-address-{{ this.agencyId }}" class="sr-only">{{ 'admin.agencies.create.address.label'|trans }}</label>
+                                <input id="agency-edit-address-{{ this.agencyId }}" type="text" data-model="norender|address" value="{{ this.address }}" class="{{ inputClass }}" data-testid="agency-edit-address">
+                            </div>
+                        </div>
+
+                        {# Spécialités : mêmes chips multi toggle-off que le
+                           formulaire de création. #}
+                        <div class="mt-4 border-t border-gray-950/5 pt-4">
+                            <h3 id="agency-edit-specialties-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                            <div role="group" aria-labelledby="agency-edit-specialties-label-{{ this.agencyId }}" class="mt-3 flex flex-wrap gap-2">
+                                {% for specialty in enum('App\\RealEstateAgent\\Domain\\AgentSpecialty').cases() %}
+                                    {% set picked = specialty.value in this.specialties %}
+                                    <button
+                                        type="button"
+                                        aria-pressed="{{ picked ? 'true' : 'false' }}"
+                                        data-action="live#action"
+                                        data-live-action-param="toggleSpecialty"
+                                        data-live-specialty-param="{{ specialty.value }}"
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                        data-testid="agency-edit-specialty-{{ specialty.value }}"
+                                    >
+                                        {{ specialty.labelKey|trans }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {# Coordonnées : téléphone, email et site web. #}
+                        <div class="mt-4 border-t border-gray-950/5 pt-4">
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
+                            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div class="min-w-0 space-y-2">
+                                    <label for="agency-edit-phone-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.phone.label'|trans }}</label>
+                                    {# Même widget intl-tel-input que la création.
+                                       data-live-ignore : le widget construit son
+                                       propre DOM autour de l'input. #}
+                                    <div
+                                        data-live-ignore
+                                        data-controller="phone-input"
+                                        data-phone-input-initial-country-value="fr"
+                                        data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}"
+                                    >
+                                        <input id="agency-edit-phone-{{ this.agencyId }}" type="tel" data-model="norender|phone" value="{{ this.phone }}" placeholder="6 12 34 56 78" data-phone-input-target="input" class="{{ inputClass }}">
+                                    </div>
+                                </div>
+                                <div class="min-w-0 space-y-2">
+                                    <label for="agency-edit-email-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.email.label'|trans }}</label>
+                                    <input id="agency-edit-email-{{ this.agencyId }}" type="email" data-model="norender|email" value="{{ this.email }}" class="{{ inputClass }}" data-testid="agency-edit-email">
+                                    {% if this.errors.email is defined %}
+                                        <p class="text-xs text-red-600" role="alert">{{ this.errors.email|trans }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="min-w-0 space-y-2 sm:col-span-2">
+                                    <label for="agency-edit-website-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.website.label'|trans }}</label>
+                                    <input id="agency-edit-website-{{ this.agencyId }}" type="text" inputmode="url" data-model="norender|website" value="{{ this.website }}" placeholder="{{ 'admin.agencies.create.website.placeholder'|trans }}" class="{{ inputClass }}" data-testid="agency-edit-website">
+                                    {% if this.errors.website is defined %}
+                                        <p class="text-xs text-red-600" role="alert">{{ this.errors.website|trans }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Note interne : texte libre réservé à l'équipe. #}
+                        <div class="mt-4 border-t border-gray-950/5 pt-4">
+                            <h3 id="agency-edit-note-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                            <div class="mt-3 min-w-0 space-y-2">
+                                <textarea
+                                    id="agency-edit-note-{{ this.agencyId }}"
+                                    data-model="norender|note"
+                                    rows="3"
+                                    maxlength="2000"
+                                    placeholder="{{ 'admin.agencies.create.note.placeholder'|trans }}"
+                                    aria-labelledby="agency-edit-note-label-{{ this.agencyId }}"
+                                    class="{{ inputClass }} resize-y"
+                                    data-testid="agency-edit-note"
+                                >{{ this.note }}</textarea>
+                                <p class="flex items-center gap-1.5 text-xs text-gray-400">{{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }} {{ 'admin.agencies.create.note.help'|trans }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="cancelEditing"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="agency-details-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <twig:Button
+                            size="sm"
+                            data-action="live#action"
+                            data-live-action-param="files|saveDetails"
+                            data-loading="action(saveDetails)|addAttribute(disabled)"
+                            data-testid="agency-details-save"
+                        >
+                            {{ ux_icon('lucide:loader-circle', {class: 'hidden size-4 shrink-0 animate-spin', 'aria-hidden': 'true', 'data-loading': 'action(saveDetails)|removeClass(hidden)'}) }}
+                            {{ 'admin.contacts.notes.save'|trans }}
+                        </twig:Button>
+                    </div>
+                </div>
+            {% else %}
+                <header class="relative flex items-center gap-4 rounded-xl bg-white px-5 py-5 {{ agency.active ? '' : 'opacity-60' }}">
+                    <div class="absolute top-3 right-3 flex items-center gap-1.5">
+                    {# Switcher d'état actif/inactif, accessible sans passer par
+                       l'édition : la bascule vers inactif se confirme en modale,
+                       la réactivation est directe. #}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="{{ agency.active ? 'askDeactivate' : 'reactivateAgency' }}"
+                        class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
+                        role="switch"
+                        aria-checked="{{ agency.active ? 'true' : 'false' }}"
+                        data-testid="agency-active-switch"
+                    >
+                        {{ (agency.active ? 'admin.agencies.status.active' : 'admin.agencies.status.inactive')|trans }}
+                        <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ agency.active ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
+                            <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ agency.active ? 'translate-x-4' : '' }}"></span>
+                        </span>
+                    </button>
+                    {# Menu "…" unique : Modifier / Supprimer (suppression
+                       réservée aux admins, garde serveur en miroir dans le
+                       composant). #}
+                    <details
+                        class="relative"
+                        data-controller="details-dropdown"
+                        data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                        data-testid="agency-actions-menu"
+                    >
+                        <summary class="flex size-7 cursor-pointer list-none items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900 [&::-webkit-details-marker]:hidden" aria-label="{{ 'admin.contacts.show.actions'|trans }}" title="{{ 'admin.contacts.show.actions'|trans }}">
+                            {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                        </summary>
+                        <div class="absolute right-0 z-10 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                            <button
+                                type="button"
+                                data-action="live#action details-dropdown#close"
+                                data-live-action-param="startEditing"
+                                class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                data-testid="agency-details-edit"
+                            >
+                                {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.dossiers.show.persons.edit'|trans }}
+                            </button>
+                            {% if is_granted('ROLE_ADMIN') %}
+                            <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                            <button
+                                type="button"
+                                data-action="live#action details-dropdown#close"
+                                data-live-action-param="askDelete"
+                                class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                                data-testid="agency-details-delete"
+                            >
+                                {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.agencies.delete.button'|trans }}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </details>
+                    </div>
+                    {% if agency.logoFilename %}
+                        <twig:Avatar filename="{{ agency.logoFilename }}" name="{{ agency.name }}" size="12" />
+                    {% else %}
+                        <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/5 text-primary">
+                            {{ ux_icon('lucide:building-2', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                        </span>
+                    {% endif %}
+                    <div class="min-w-0 flex-1 pr-40">
+                        <div class="flex min-w-0 flex-wrap items-center gap-2">
+                            <h2 class="truncate text-lg font-medium text-gray-900">{{ agency.name }}</h2>
+                            {% if not agency.active %}
+                                <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500" data-testid="agency-show-inactive">{{ 'admin.agencies.status.inactive'|trans }}</span>
+                            {% endif %}
+                            {% if agency.brand %}
+                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-show-brand">{{ agency.brand }}</span>
+                            {% endif %}
+                            {% for specialty in agency.specialties %}
+                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-medium text-gray-600" data-testid="agency-show-specialty">{{ specialty.labelKey|trans }}</span>
+                            {% endfor %}
+                        </div>
+                        <p class="mt-0.5 truncate text-sm text-gray-500">
+                            {{ 'admin.agencies.card.agentCount'|trans({'%count%': this.agentCount}) }}
+                        </p>
+                    </div>
+                </header>
+
+                <dl class="grid grid-cols-1 gap-4 rounded-xl bg-white px-5 py-4 text-sm sm:grid-cols-2">
+                    <div class="min-w-0 sm:col-span-2">
+                        <dt class="text-gray-600">{{ 'admin.agencies.create.address.label'|trans }}</dt>
+                        <dd class="mt-0.5 truncate font-medium {{ agency.address ? 'text-gray-900' : 'text-gray-400' }}">{{ agency.address ?: '-' }}</dd>
+                    </div>
+                    <div class="min-w-0">
+                        <dt class="text-gray-600">{{ 'admin.agencies.create.phone.label'|trans }}</dt>
+                        <dd class="mt-0.5 truncate">
+                            {% if agency.phone %}
+                                {# Même affichage que la fiche lead : drapeau + numéro formaté. #}
+                                {% set phoneCountry = agency.phone|phone_country %}
+                                <a href="tel:{{ agency.phone }}" class="flex min-w-0 items-center gap-2 font-medium text-gray-900 transition-colors duration-100 hover:text-primary" data-testid="agency-show-phone">
+                                    {% if phoneCountry %}
+                                        {{ ux_icon('circle-flags:' ~ phoneCountry, {class: 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                                    {% endif %}
+                                    <span class="truncate">{{ agency.phone|phone_format }}</span>
+                                </a>
+                            {% else %}
+                                <span class="font-medium text-gray-400">-</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="min-w-0">
+                        <dt class="text-gray-600">{{ 'admin.agencies.create.email.label'|trans }}</dt>
+                        <dd class="mt-0.5 truncate">
+                            {% if agency.email %}
+                                <a href="mailto:{{ agency.email }}" class="font-medium text-gray-900 transition-colors duration-100 hover:text-primary" data-testid="agency-show-email">{{ agency.email }}</a>
+                            {% else %}
+                                <span class="font-medium text-gray-400">-</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="min-w-0">
+                        <dt class="text-gray-600">{{ 'admin.agencies.create.website.label'|trans }}</dt>
+                        <dd class="mt-0.5 truncate">
+                            {% if agency.website %}
+                                <a
+                                    href="{{ agency.website }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex max-w-full items-center gap-1.5 font-medium text-gray-900 transition-colors duration-100 hover:text-primary"
+                                    data-testid="agency-show-website"
+                                >
+                                    <span class="truncate">{{ agency.website }}</span>
+                                    {{ ux_icon('lucide:external-link', {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                </a>
+                            {% else %}
+                                <span class="font-medium text-gray-400">-</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="min-w-0">
+                        <dt class="text-gray-600">{{ 'admin.agencies.show.createdAt'|trans }}</dt>
+                        <dd class="mt-0.5 font-medium text-gray-900 tabular-nums">{{ agency.createdAt|format_date('medium') }}</dd>
+                    </div>
+                </dl>
+
+                {% if agency.note %}
+                    <div class="rounded-xl bg-white px-5 py-4" data-testid="agency-show-note">
+                        <h3 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                        <p class="mt-2 text-sm whitespace-pre-line text-gray-900">{{ agency.note }}</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </section>
+
+    {% if this.confirmingDeactivate %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agency-deactivate-title"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
+            data-live-action-param="cancelDeactivate"
+            data-testid="agency-deactivate-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="instant-exit#run live#action"
+                data-live-action-param="cancelDeactivate"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="space-y-4 rounded-2xl bg-neutral-50 p-5">
+                    <div class="space-y-1">
+                        <h2 id="agency-deactivate-title" class="text-base font-semibold text-gray-900">{{ 'admin.agencies.deactivate.title'|trans }}</h2>
+                        <p class="text-sm text-pretty text-gray-600">{{ 'admin.agencies.deactivate.text'|trans }}</p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4">
+                        <button
+                            type="button"
+                            data-action="instant-exit#run live#action"
+                            data-live-action-param="cancelDeactivate"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="agency-deactivate-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        {# Bouton sobre, pas rouge : désactiver n'est pas destructif. #}
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="deactivateAgency"
+                            data-loading="action(deactivateAgency)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                            data-testid="agency-deactivate-confirm"
+                        >
+                            {{ ux_icon('lucide:circle-slash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.agencies.deactivate.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if this.confirmingDelete %}
+        <div
+            class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agency-delete-title"
+            data-controller="modal-focus modal-anim instant-exit"
+            data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
+            data-live-action-param="cancelDelete"
+            data-testid="agency-delete-modal"
+        >
+            <button
+                type="button"
+                class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                data-action="instant-exit#run live#action"
+                data-live-action-param="cancelDelete"
+                aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                tabindex="-1"
+            ></button>
+            <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                <div class="space-y-4 rounded-2xl bg-neutral-50 p-5">
+                    <div class="space-y-1">
+                        <h2 id="agency-delete-title" class="text-base font-semibold text-gray-900">{{ 'admin.agencies.delete.title'|trans }}</h2>
+                        <p class="text-sm text-pretty text-gray-600">{{ 'admin.agencies.delete.text'|trans({'%name%': agency.name}) }}</p>
+                    </div>
+                    <div class="flex items-center justify-end gap-4">
+                        <button
+                            type="button"
+                            data-action="instant-exit#run live#action"
+                            data-live-action-param="cancelDelete"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                            data-testid="agency-delete-cancel"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="deleteAgency"
+                            data-loading="action(deleteAgency)|addAttribute(disabled)"
+                            class="flex cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-red-700 disabled:cursor-default disabled:opacity-60"
+                            data-testid="agency-delete-confirm"
+                        >
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.agencies.delete.confirm'|trans }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% endif %}
+</div>

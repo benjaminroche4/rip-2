@@ -18,12 +18,16 @@ final readonly class AgentSummary
         public string $firstName,
         public string $lastName,
         public ?string $agency,
+        public ?int $agencyId,
         public ?string $email,
         public ?string $phone,
         public array $specialties,
         public ?AgencyPosition $position,
         public \DateTimeImmutable $createdAt,
         public ?string $avatarFilename = null,
+        public ?string $note = null,
+        public bool $active = true,
+        public ?\DateTimeImmutable $updatedAt = null,
     ) {
     }
 

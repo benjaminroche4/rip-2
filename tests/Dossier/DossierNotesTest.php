@@ -98,6 +98,31 @@ final class DossierNotesTest extends KernelTestCase
         self::assertCount(0, $component->getFeed());
     }
 
+    public function testLegacyStatusChangeEventsStillRenderTheirLabel(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        // Pre-August-2026 workflow events store the full translation key of
+        // the status at the time of the change: the old keys must keep a
+        // label forever, or the feed shows the raw key.
+        $event = (new \App\Dossier\Entity\DossierEvent())
+            ->setDossier($dossier)
+            ->setKind('status_changed')
+            ->setPayload(['status' => 'admin.dossiers.status.choice.searching'])
+            ->setAuthorName('Système')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($event);
+        $this->em->flush();
+
+        $component = $this->mountNotes($dossier);
+        $texts = array_column($component->getEvents(), 'text');
+        $statusText = implode(' ', $texts);
+        self::assertStringContainsString('Recherche en cours', $statusText);
+        self::assertStringNotContainsString('admin.dossiers.status.choice', $statusText);
+    }
+
     public function testAuditEventsAppearInTheActivityFeedNotTheComments(): void
     {
         $dossier = $this->persistDossier();
@@ -210,22 +235,25 @@ final class DossierNotesTest extends KernelTestCase
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
         self::assertNotNull($fresh->getClosedAt());
         self::assertNotSame($oldCode, $fresh->getPairingCode(), 'The emailed deposit links must die.');
-        self::assertFileDoesNotExist($path);
-        self::assertCount(0, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+        // Closing is pure archiving: nothing is deleted, the staff keeps
+        // every deposited file.
+        self::assertFileExists($path);
+        self::assertCount(1, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
 
-        // Piste d'audit : la clôture purge des données client, elle part sur
-        // le canal security comme la suppression.
+        // Piste d'audit : la clôture coupe l'accès client au dépôt, elle
+        // part sur le canal security.
         self::assertNotSame([], array_filter(
             $spy->records,
             static fn (array $record): bool => 'Dossier closed' === $record['message'],
         ), 'The closure must be written to the security channel.');
 
-        // Reopening lifts the closure but never restores the files.
+        // Reopening lifts the closure with the files still in place.
         $component->reopen();
         $this->em->clear();
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
         self::assertNull($fresh->getClosedAt());
-        self::assertCount(0, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+        self::assertCount(1, $fresh->getPersons()->first()->getDocuments()->first()->getFiles());
+        self::assertFileExists($path);
     }
 
     public function testFeedPagination(): void
@@ -375,6 +403,22 @@ final class DossierNotesTest extends KernelTestCase
         $this->em->flush();
 
         return $user;
+    }
+
+    public function testTheOfferShowsInTheFollowUpCardOnlyWhenSet(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->loginAs($this->persistUser('staff', ['ROLE_SECTION_DOSSIERS']));
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Notes', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="dossier-offer"', $rendered, 'No offer: the row stays hidden.');
+
+        $dossier->setOffer('confie');
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Notes', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="dossier-offer"', $rendered);
+        self::assertStringContainsString('Confié', $rendered);
     }
 
     public function testTheClosedBannerAppearsOnlyOnAClosedDossier(): void

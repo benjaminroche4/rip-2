@@ -157,6 +157,7 @@ final class DashboardController extends AbstractController
             'previousRequests' => $this->contactRepository->listOtherByEmail($contact->email, $contact->id),
             'notesCount' => \count($noteRepository->listForContact($contact->id)),
             'convertedDossierRef' => $convertedDossier?->getReference(),
+            'linkedDossiers' => $dossierRepository->findByPersonEmail($contactEmail, $contact->reference),
         ]);
     }
 

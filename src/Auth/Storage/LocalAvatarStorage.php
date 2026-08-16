@@ -66,10 +66,10 @@ final readonly class LocalAvatarStorage implements AvatarStorage
         }
     }
 
-    /** Path traversal guard: keep only the expected users/.../avatar/uuid.webp shape. */
+    /** Path traversal guard: user avatars, agency logos and agent photos only. */
     private function resolve(string $path): string
     {
-        if (1 !== preg_match('#^users/[0-9A-Za-z]+/avatar/[0-9a-f-]{36}\.webp$#', $path)) {
+        if (1 !== preg_match('#^(users|agencies|agents)/[0-9A-Za-z]+/(avatar|logo)/[0-9a-f-]{36}\.webp$#', $path)) {
             throw new \RuntimeException('Illegal avatar path: '.$path);
         }
 
