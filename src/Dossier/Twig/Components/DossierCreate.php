@@ -82,7 +82,7 @@ final class DossierCreate extends AbstractController
     public function chooseOffer(#[LiveArg] string $offer): void
     {
         $this->ensureAdmin();
-        if (!\in_array($offer, ['accompagne', 'confie'], true)) {
+        if (!\in_array($offer, \App\Contact\Entity\Contact::OFFERS, true)) {
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(\sprintf('Unknown offer "%s".', $offer));
         }
         $this->offer = $offer;

@@ -2805,12 +2805,11 @@ admin:
             loadMore: '{1}Voir 1 de plus|]1,Inf[Voir les %count% suivants'
         title: Agents immobiliers
         searchPlaceholder: Rechercher un agent...
-        count: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
         view:
             agents: Agents
             agencies: Agences
         tab:
-            label: Filtrer les agents
+            label: Filtrer la liste
             all: Tous
             favorites: Favoris
         filter:
@@ -2836,20 +2835,17 @@ admin:
             active: Actif
             inactive: Inactif
         deactivate:
-            button: Désactiver l'agent
             title: Désactiver cet agent ?
             text: "L'agent n'apparaîtra plus dans les sélections (visites, rattachements). Sa fiche et son historique sont conservés."
             confirm: Désactiver
-        reactivate:
-            button: Réactiver l'agent
         deactivated:
             title: Agent désactivé
             text: Il n'apparaît plus dans les sélections. Réactivez-le pour le remettre en circulation.
         show:
             addedAt: Ajouté le
             audit:
-                createdAt: Créée le
-                updatedAt: Modifiée le
+                createdAt: Créé le
+                updatedAt: Modifié le
             visits:
                 title: Visites
                 stats:
@@ -2906,12 +2902,8 @@ admin:
                 subtitle: Ajouter un agent à l'annuaire
             title: Nouvel agent immobilier
             photo:
-                label: Photo (optionnelle)
+                label: Photo
                 choose: Choisir une photo
-                none: Aucun fichier choisi
-                add: Ajouter une photo
-                formats: JPG, PNG ou WebP
-                drop: Cliquez ou déposez une photo
             subtitle: Ajoutez un agent partenaire à l'annuaire, avec son agence et ses coordonnées.
             cancel: Annuler
             submit: Ajouter l'agent
@@ -2948,7 +2940,6 @@ admin:
                 specialties: Spécialités
                 contact: Coordonnées
     agencies:
-        count: '{0}Aucune agence|{1}1 agence|]1,Inf[%count% agences'
         empty:
             title: Aucune agence pour le moment
             description: Créez une agence, ou ajoutez un agent en agence.
@@ -2965,7 +2956,6 @@ admin:
         card:
             agentCount: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
             open: Voir la fiche
-            website: Ouvrir le site web
         status:
             active: Active
             inactive: Inactive
@@ -2973,12 +2963,9 @@ admin:
             title: Agence désactivée
             text: Elle n'apparaît plus dans les sélections. Réactivez-la pour la remettre en circulation.
         deactivate:
-            button: Désactiver l'agence
             title: Désactiver cette agence ?
             text: L'agence n'apparaîtra plus dans les sélections. Ses agents et son historique sont conservés.
             confirm: Désactiver
-        reactivate:
-            button: Réactiver l'agence
         show:
             createdAt: Créée le
             areas: Quartiers favoris

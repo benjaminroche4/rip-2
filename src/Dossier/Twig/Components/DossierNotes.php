@@ -167,7 +167,13 @@ final class DossierNotes
         $this->em->flush();
 
         // Re-sync the manager's read access on the dossier's Drive folder
-        // (grant new, revoke previous). No-op when Drive is off.
+        // (grant new, revoke previous). No-op when Drive is off. An access
+        // grant on client documents belongs on the audit channel.
+        $this->securityLogger->notice('Dossier Drive access re-synced with the assigned manager', [
+            'actor' => $this->security->getUser()?->getUserIdentifier(),
+            'dossier' => (string) $dossier->getReference(),
+            'manager' => $user?->getUserIdentifier(),
+        ]);
         $drive->syncManagerShare($dossier);
 
         $this->dispatchBrowserEvent('toast:show', ['message' => null !== $user

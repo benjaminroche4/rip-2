@@ -667,9 +667,38 @@ final class PersonsManagerTest extends KernelTestCase
         );
     }
 
+    public function testLockedCardRefusesEveryMutation(): void
+    {
+        $dossier = $this->persistDossier();
+        $manager = $this->mountTwigComponent('Dossier:PersonsManager', ['dossierId' => $dossier->getId()]);
+        self::assertTrue($manager->locked, 'The padlock starts closed on every load.');
+
+        // savePerson : la garde serveur ignore la mutation malgré un
+        // brouillon valide (le fieldset disabled ne suffit pas).
+        $manager->startAdd();
+        $manager->role = 'follow_up';
+        $manager->firstName = 'Intrus';
+        $manager->lastName = 'Verrouillé';
+        $manager->savePerson();
+        $this->em->clear();
+        self::assertCount(1, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+
+        // makePrimary / removePerson : ignorés aussi.
+        $before = $this->em->find(Dossier::class, $dossier->getId())->getPersons()->first()->getId();
+        $manager->makePrimary(999999);
+        $manager->removePerson((int) $before);
+        $this->em->clear();
+        self::assertCount(1, $this->em->find(Dossier::class, $dossier->getId())->getPersons());
+    }
+
     private function mountManager(Dossier $dossier): object
     {
-        return $this->mountTwigComponent('Dossier:PersonsManager', ['dossierId' => $dossier->getId()]);
+        $manager = $this->mountTwigComponent('Dossier:PersonsManager', ['dossierId' => $dossier->getId()]);
+        // Le cadenas anti-missclick démarre fermé : les scénarios d'édition
+        // le lèvent comme un utilisateur le ferait.
+        $manager->toggleLock();
+
+        return $manager;
     }
 
     private function loginAsAdmin(): void

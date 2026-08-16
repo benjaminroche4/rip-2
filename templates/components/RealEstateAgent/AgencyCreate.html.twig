@@ -108,7 +108,10 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="min-w-0">
+                        {# Même widget photo que le formulaire agent (vignette +
+                           bouton fantôme, prévisualisation, drop) : un seul
+                           vocabulaire d'upload dans le BO. #}
+                        <div class="min-w-0" data-controller="avatar-preview file-drop" data-file-drop-drag-class="ring-2 ring-primary/40 bg-primary/5">
                             <twig:Label for="agency-create-logo" class="text-gray-600">
                                 {{ 'admin.agencies.create.logo.label'|trans }}
                             </twig:Label>
@@ -119,9 +122,22 @@
                                 id="agency-create-logo"
                                 name="logo"
                                 accept="image/jpeg,image/png,image/webp,image/gif"
-                                class="mt-1.5 w-full cursor-pointer rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-500 transition-colors duration-100 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-neutral-100 file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-gray-700 hover:file:bg-neutral-200 focus:border-gray-400 focus:outline-none"
+                                class="sr-only"
+                                data-avatar-preview-target="input"
+                                data-file-drop-target="input"
+                                data-action="change->avatar-preview#changed"
                                 data-testid="agency-create-logo"
                             >
+                            <div class="mt-1.5 flex items-center gap-3">
+                                <span class="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-neutral-100 text-gray-400">
+                                    <span data-avatar-preview-target="placeholder" class="flex items-center justify-center">{{ ux_icon('lucide:image', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}</span>
+                                    <img data-avatar-preview-target="preview" src="" alt="" hidden class="absolute inset-0 size-full object-cover">
+                                </span>
+                                <label for="agency-create-logo" class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
+                                    {{ ux_icon('lucide:upload', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.agencies.create.logo.choose'|trans }}
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

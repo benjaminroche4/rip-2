@@ -196,7 +196,7 @@ final class DossierController extends AbstractController
         // toujours une formule : sans elle, la conversion est refusée (les
         // radios required couvrent le navigateur, ceci couvre le reste).
         $offer = (string) $request->request->get('offer', '');
-        if (null === $contact->getOffer() && \in_array($offer, ['accompagne', 'confie'], true)) {
+        if (null === $contact->getOffer() && \in_array($offer, Contact::OFFERS, true)) {
             $contact->setOffer($offer);
         }
         if (null === $contact->getOffer()) {
@@ -471,9 +471,10 @@ final class DossierController extends AbstractController
             ? $this->zipSafe(trim(trim((string) $primary->getLastName()).' '.trim((string) $primary->getFirstName())))
             : '';
         $zipName = ('' !== $who ? $who.' - ' : '').$reference.'.zip';
-        // ASCII fallback for the Content-Disposition header (accents in
-        // tenant names would make the raw header value invalid).
-        $fallback = trim((string) preg_replace('/[^\x20-\x7E]/', '', $zipName));
+        // ASCII fallback for the Content-Disposition header: non-ASCII, but
+        // also %, / and \ which makeDisposition() rejects outright (a tenant
+        // named "Dupont 50%" must not turn the export into a 500).
+        $fallback = trim((string) preg_replace('/[^\x20-\x7E]|[%\/\\\\"]/', '', $zipName));
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName, '' !== $fallback ? $fallback : $reference.'.zip');
 
         return $response;
@@ -484,6 +485,11 @@ final class DossierController extends AbstractController
     {
         $value = str_replace(['/', '\\'], '-', trim($value));
         $value = (string) preg_replace('/[[:cntrl:]]+/', '', $value);
+        // A person named ".." would produce a "../piece.pdf" entry escaping
+        // the extraction folder (zip-slip): collapse dot runs, and never
+        // start an entry with a dot (hidden file on extraction).
+        $value = (string) preg_replace('/\.{2,}/', '.', $value);
+        $value = ltrim($value, '. ');
 
         return '' !== $value ? $value : 'dossier';
     }
@@ -529,6 +535,11 @@ final class DossierController extends AbstractController
         $document = $em->getRepository(DossierDocument::class)->find($id);
         if (null === $document || $document->getPerson()?->getDossier() !== $dossier) {
             throw $this->createNotFoundException();
+        }
+        // Server-side mirror of the module's frozen state: a closed dossier
+        // takes no new file, whatever the DOM said.
+        if ($dossier->isClosed()) {
+            throw $this->createAccessDeniedException('Closed dossier.');
         }
 
         $redirect = $this->redirectToRoute('admin_dossier_show', [
@@ -594,6 +605,11 @@ final class DossierController extends AbstractController
         ]);
         $em->flush();
 
+        $securityLogger->notice('Dossier document uploaded by staff', [
+            'actor' => $this->getUser()?->getUserIdentifier(),
+            'dossier' => (string) $dossier->getReference(),
+            'file' => $originalName,
+        ]);
         $this->addFlash('success', 'admin.toast.fileUploaded');
 
         return $redirect;

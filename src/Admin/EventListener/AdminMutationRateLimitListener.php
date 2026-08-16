@@ -15,14 +15,20 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
  * requires ROLE_ADMIN, but if a session ever gets hijacked or an admin
  * account leaks, this caps the blast radius (60 mutations / minute / IP).
  *
- * Targets only `ux_live_component` POST/PATCH/DELETE requests whose
- * component name starts with `Admin:` — read-only admin GET routes and
- * non-admin Live components are left alone.
+ * Targets only `ux_live_component` POST/PATCH/DELETE requests of the
+ * back-office components — read-only admin GET routes and public Live
+ * components (Marketplace) are left alone.
  */
 #[AsEventListener(event: 'kernel.request')]
 final readonly class AdminMutationRateLimitListener
 {
     private const MUTATING_METHODS = ['POST', 'PATCH', 'DELETE'];
+
+    /**
+     * Every back-office component namespace. A new BO context must be added
+     * here, otherwise its mutations escape the hijack blast-radius cap.
+     */
+    private const BO_PREFIXES = ['Admin:', 'Dossier:', 'Visit:', 'RealEstateAgent:'];
 
     public function __construct(
         #[Autowire(service: 'limiter.admin_mutation')]
@@ -47,7 +53,7 @@ final readonly class AdminMutationRateLimitListener
         }
 
         $component = (string) $request->attributes->get('_live_component', '');
-        if (!str_starts_with($component, 'Admin:')) {
+        if (!array_any(self::BO_PREFIXES, static fn (string $prefix): bool => str_starts_with($component, $prefix))) {
             return;
         }
 

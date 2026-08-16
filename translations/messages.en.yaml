@@ -2803,12 +2803,11 @@ admin:
             loadMore: '{1}Show 1 more|]1,Inf[Show the next %count%'
         title: Real estate agents
         searchPlaceholder: Search for an agent...
-        count: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
         view:
             agents: Agents
             agencies: Agencies
         tab:
-            label: Filter agents
+            label: Filter the list
             all: All
             favorites: Favorites
         filter:
@@ -2834,12 +2833,9 @@ admin:
             active: Active
             inactive: Inactive
         deactivate:
-            button: Deactivate the agent
             title: Deactivate this agent?
             text: 'The agent will no longer appear in the pickers (visits, attachments). The profile and its history are kept.'
             confirm: Deactivate
-        reactivate:
-            button: Reactivate the agent
         deactivated:
             title: Agent deactivated
             text: This agent no longer appears in the pickers. Reactivate the profile to make it available again.
@@ -2904,12 +2900,8 @@ admin:
                 subtitle: Add an agent to the directory
             title: New real estate agent
             photo:
-                label: Photo (optional)
+                label: Photo
                 choose: Choose a photo
-                none: No file chosen
-                add: Add a photo
-                formats: JPG, PNG or WebP
-                drop: Click or drop a photo
             subtitle: Add a partner agent to the directory, with their agency and contact details.
             cancel: Cancel
             submit: Add agent
@@ -2946,7 +2938,6 @@ admin:
                 specialties: Specialties
                 contact: Contact details
     agencies:
-        count: '{0}No agencies|{1}1 agency|]1,Inf[%count% agencies'
         empty:
             title: No agencies yet
             description: Create an agency, or add an agent with an agency.
@@ -2963,7 +2954,6 @@ admin:
         card:
             agentCount: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
             open: View the profile
-            website: Open the website
         status:
             active: Active
             inactive: Inactive
@@ -2971,15 +2961,12 @@ admin:
             title: Agency deactivated
             text: This agency no longer appears in the pickers. Reactivate it to make it available again.
         deactivate:
-            button: Deactivate the agency
             title: Deactivate this agency?
             text: The agency will no longer appear in the pickers. Its agents and its history are kept.
             confirm: Deactivate
-        reactivate:
-            button: Reactivate the agency
         show:
             createdAt: Created on
-            areas: Favourite districts
+            areas: Favorite districts
             audit:
                 createdAt: Created on
                 updatedAt: Updated on

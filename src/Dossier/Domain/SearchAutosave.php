@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Dossier\Domain;
 
+use App\Contact\Domain\ParisDistricts;
 use App\Dossier\Entity\DossierSearch;
+use App\PropertyListing\Domain\PropertyType;
 
 /**
  * Normalized payload of the search card's main autosave: parses the raw
@@ -49,7 +51,26 @@ final readonly class SearchAutosave
             ? max(0, (int) trim($minSurface))
             : null;
 
-        return new self($budgetValue, $moveInAtValue, $minSurfaceValue, trim($areas), trim($propertyType));
+        // Writable props bypass the chip toggles: both CSVs are funnelled
+        // through the same whitelists here, so a hand-crafted live payload
+        // can neither overflow the 255-char columns nor mark the search
+        // "complete" with garbage tokens.
+        return new self(
+            $budgetValue,
+            $moveInAtValue,
+            $minSurfaceValue,
+            self::cleanCsv($areas, static fn (string $code): bool => isset(ParisDistricts::LABELS[$code])),
+            self::cleanCsv($propertyType, static fn (string $type): bool => null !== PropertyType::tryFrom($type)),
+        );
+    }
+
+    /** @param callable(string): bool $keep */
+    private static function cleanCsv(string $csv, callable $keep): string
+    {
+        return implode(',', array_values(array_unique(array_filter(
+            array_map(trim(...), explode(',', $csv)),
+            static fn (string $token): bool => '' !== $token && $keep($token),
+        ))));
     }
 
     public function apply(DossierSearch $search): void

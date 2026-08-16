@@ -18,6 +18,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Map\Bridge\Google\GoogleOptions;
 use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
+use Symfony\UX\Map\Icon\Icon;
 use Symfony\UX\Map\InfoWindow;
 use Symfony\UX\Map\Map;
 use Symfony\UX\Map\Marker;
@@ -343,6 +344,16 @@ final class AgentList
                 zoomControl: false,
             ));
 
+        // Pin maison du site (goutte bordeaux, pastille blanche, glyphe
+        // immeuble) : même signature que les cartes marketplace.
+        $pinSvg = <<<'SVG'
+            <svg xmlns="http://www.w3.org/2000/svg" width="39" height="50" viewBox="0 0 44 56">
+                <path d="M22 0C9.85 0 0 9.85 0 22c0 16.5 22 34 22 34s22-17.5 22-34C44 9.85 34.15 0 22 0Z" fill="#71172e"/>
+                <circle cx="22" cy="22" r="13" fill="white"/>
+                <path d="M17.5 15.5h5v4h4.5a1.5 1.5 0 0 1 1.5 1.5v8.5h-3.5v-3h-2v3H16a1.5 1.5 0 0 1-1.5-1.5V17a1.5 1.5 0 0 1 1.5-1.5Zm.5 3.5v1.5h1.5V19H18Zm3.5 0v1.5H23V19h-1.5ZM18 22.5V24h1.5v-1.5H18Zm3.5 0V24H23v-1.5h-1.5Zm4 1.5v1.5H27V24h-1.5Z" fill="#71172e"/>
+            </svg>
+            SVG;
+
         foreach ($this->agencies->findMapMarkers(trim($this->search), $this->isFavoritesTab()) as $row) {
             $link = $this->urlGenerator->generate('admin_agency_show', [
                 'adminPrefix' => $this->adminPrefix,
@@ -353,6 +364,7 @@ final class AgentList
             $content .= '<p><a href="'.htmlspecialchars($link).'">'.htmlspecialchars($this->translator->trans('admin.agencies.card.open')).'</a></p>';
             $map->addMarker(new Marker(
                 position: new Point($row['latitude'], $row['longitude']),
+                icon: Icon::svg($pinSvg),
                 title: $row['name'],
                 infoWindow: new InfoWindow(
                     headerContent: htmlspecialchars($row['name']),

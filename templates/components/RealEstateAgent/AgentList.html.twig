@@ -368,6 +368,11 @@
                 </div>
             </div>
         {% if agenciesView %}
+            {# Volet keyé par le mode d'affichage : la zone carte est en
+               data-live-ignore, donc le morph la laisserait en place au
+               retour sur la liste. Changer l'id du parent force le
+               remplacement du sous-arbre entier à chaque bascule. #}
+            <div id="agencies-display-pane-{{ this.display }}" class="contents">
             {% if this.isMapDisplay %}
                 {# Carte des agences actives géocodées (mêmes filtres que la
                    liste). data-live-ignore : un morph détruirait la carte;
@@ -447,6 +452,7 @@
                 </div>
             {% endif %}
             {% endif %}
+            </div>
         {% else %}
             {% set agents = this.agents %}
             {% if agents is empty %}

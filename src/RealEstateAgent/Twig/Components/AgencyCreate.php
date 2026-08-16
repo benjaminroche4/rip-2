@@ -160,8 +160,11 @@ final class AgencyCreate extends AbstractController
             // Sessionless context (component tests): no toast to queue.
         }
 
+        // Retour sur la vue Agences : la fiche fraîche doit être visible
+        // immédiatement (deleteAgency fait de même).
         return $this->redirectToRoute('admin_agents', [
             'adminPrefix' => $this->adminPrefix,
+            'view' => 'agencies',
         ]);
     }
 

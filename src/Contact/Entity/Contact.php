@@ -180,6 +180,9 @@ class Contact
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $projectNote = null;
 
+    /** Toutes les formules connues, seule source de vérité du champ offer. */
+    public const OFFERS = ['accompagne', 'confie'];
+
     public function __construct()
     {
         $this->reference = 'CT-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);

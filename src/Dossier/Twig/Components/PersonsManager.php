@@ -44,6 +44,14 @@ final class PersonsManager
     #[LiveProp]
     public bool $expanded = true;
 
+    /**
+     * Anti-missclick shield: fields start locked on every page load and
+     * only mutate once explicitly unlocked via the padlock (server-side
+     * mirror of the disabled fieldset).
+     */
+    #[LiveProp]
+    public bool $locked = true;
+
     /** Person id currently in edit mode, or null. */
     #[LiveProp]
     public ?int $editId = null;
@@ -257,6 +265,14 @@ final class PersonsManager
         $this->expanded = !$this->expanded;
     }
 
+    /** Cadenas anti-missclick : re-verrouillé à chaque chargement de page. */
+    #[LiveAction]
+    public function toggleLock(): void
+    {
+        $this->ensureAdmin();
+        $this->locked = !$this->locked;
+    }
+
     #[LiveAction]
     public function startAdd(): void
     {
@@ -309,6 +325,9 @@ final class PersonsManager
     public function savePerson(): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
         $dossier = $this->dossier();
 
         $role = DossierPersonRole::tryFrom($this->role);
@@ -508,6 +527,9 @@ final class PersonsManager
     public function removePerson(#[LiveArg] int $key): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
         $dossier = $this->dossier();
         $person = $this->person($key);
 
@@ -554,6 +576,9 @@ final class PersonsManager
     public function makePrimary(#[LiveArg] int $key): void
     {
         $this->ensureAdmin();
+        if ($this->locked) {
+            return;
+        }
         $dossier = $this->dossier();
         $person = $this->person($key);
 

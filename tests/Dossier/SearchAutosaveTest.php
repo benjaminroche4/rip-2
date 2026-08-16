@@ -53,14 +53,14 @@ final class SearchAutosaveTest extends TestCase
     public function testItWritesNormalizedValuesOnTheSnapshot(): void
     {
         $search = new DossierSearch();
-        $autosave = SearchAutosave::fromRaw('2000', '2026-09-01', '30', ' paris-3 ', 'apartment', $this->today);
+        $autosave = SearchAutosave::fromRaw('2000', '2026-09-01', '30', ' 3e ', 'studio', $this->today);
 
         $autosave->apply($search);
 
         self::assertSame(2000, $search->getBudget());
-        self::assertSame('paris-3', $search->getAreas());
+        self::assertSame('3e', $search->getAreas());
         self::assertSame('2026-09-01', $search->getMoveInAt()?->format('Y-m-d'));
-        self::assertSame('apartment', $search->getPropertyType());
+        self::assertSame('studio', $search->getPropertyType());
         self::assertSame(30, $search->getMinSurface());
     }
 
@@ -74,6 +74,23 @@ final class SearchAutosaveTest extends TestCase
         SearchAutosave::fromRaw('', '', '', '  ', '', $this->today)->apply($search);
 
         self::assertNull($search->getBudget());
+        self::assertNull($search->getAreas());
+        self::assertNull($search->getPropertyType());
+    }
+
+    public function testItWhitelistsAreasAndPropertyTypeTokens(): void
+    {
+        // Les props writable contournent les toggles : un payload live forgé
+        // ne doit ni gonfler les colonnes ni marquer la recherche complète
+        // avec des tokens bidons.
+        $autosave = SearchAutosave::fromRaw('', '', '', '11e, bogus, 94, 11e,'.str_repeat('x', 300), 'studio,peniche,house,studio', $this->today);
+
+        self::assertSame('11e,94', $autosave->areas);
+        self::assertSame('studio,house', $autosave->propertyType);
+
+        $empty = SearchAutosave::fromRaw('', '', '', 'nimporte-quoi', 'peniche', $this->today);
+        $search = new DossierSearch();
+        $empty->apply($search);
         self::assertNull($search->getAreas());
         self::assertNull($search->getPropertyType());
     }

@@ -179,7 +179,7 @@
                                             >
                                                 <twig:Avatar filename="{{ option.logoFilename }}" name="{{ option.name }}" size="8" />
                                                 <span class="min-w-0 flex-1">
-                                                    <span class="block truncate text-sm font-medium text-gray-900">{{ option.name }}</span>
+                                                    <span class="block truncate text-sm font-medium text-gray-900">{{ option.name }}{% if option.brand %} <span class="font-normal text-gray-500">- {{ option.brand }}</span>{% endif %}</span>
                                                     <span class="block truncate text-xs text-gray-500">{{ option.address ?? '-' }}</span>
                                                 </span>
                                                 {% if option.id == this.agencyId %}

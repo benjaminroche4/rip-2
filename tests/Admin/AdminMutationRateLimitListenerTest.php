@@ -15,9 +15,9 @@ use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 
 /**
  * Defense-in-depth limiter on Live admin mutations: only POST/PATCH/DELETE
- * calls to ux_live_component targeting an `Admin:` component consume the
- * per-IP budget; everything else (reads, public components, other routes)
- * must stay unmetered. Uses a real RateLimiterFactory over an in-memory
+ * calls to ux_live_component targeting a back-office component (Admin:,
+ * Dossier:, Visit:, RealEstateAgent:) consume the per-IP budget; everything
+ * else (reads, public components, other routes) must stay unmetered. Uses a real RateLimiterFactory over an in-memory
  * storage with a tiny limit so the cap is observable deterministically.
  */
 final class AdminMutationRateLimitListenerTest extends TestCase
@@ -46,15 +46,32 @@ final class AdminMutationRateLimitListenerTest extends TestCase
     {
         $listener = $this->listener(limit: 1);
 
-        // None of these may consume: GET re-renders, non-admin Live
+        // None of these may consume: GET re-renders, public Live
         // components, and ordinary POST routes.
         $listener($this->event('GET', 'ux_live_component', 'Admin:ContactList', '10.0.0.1'));
-        $listener($this->event('POST', 'ux_live_component', 'Visit:VisitDetails', '10.0.0.1'));
+        $listener($this->event('POST', 'ux_live_component', 'Marketplace:Search', '10.0.0.1'));
         $listener($this->event('POST', 'app_contact', 'Admin:ContactList', '10.0.0.1'));
 
         // The full budget is still available for a real admin mutation.
         $listener($this->adminMutation('10.0.0.1'));
         $this->addToAssertionCount(1);
+    }
+
+    public function testEveryBackOfficeNamespaceConsumesTheBudget(): void
+    {
+        // Le cap "session détournée" doit couvrir tout le BO, pas
+        // seulement les composants Admin: (régression corrigée août 2026).
+        foreach (['Dossier:Notes', 'Visit:VisitForm', 'RealEstateAgent:AgencyDetails'] as $component) {
+            $listener = $this->listener(limit: 1);
+            $listener($this->event('POST', 'ux_live_component', $component, '10.0.0.1'));
+
+            try {
+                $listener($this->event('POST', 'ux_live_component', $component, '10.0.0.1'));
+                self::fail($component.' must consume the admin mutation budget.');
+            } catch (TooManyRequestsHttpException) {
+                $this->addToAssertionCount(1);
+            }
+        }
     }
 
     public function testSubRequestsAreIgnored(): void

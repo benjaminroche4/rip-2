@@ -643,7 +643,9 @@ final class SearchEditor
             return;
         }
 
-        $this->note = trim($this->note);
+        // Bounded: the writable prop otherwise accepts an arbitrarily large
+        // blob, re-serialized into every live payload afterwards.
+        $this->note = mb_substr(trim($this->note), 0, 2000);
         $this->search()->setNote('' !== $this->note ? $this->note : null);
         $this->em->flush();
 

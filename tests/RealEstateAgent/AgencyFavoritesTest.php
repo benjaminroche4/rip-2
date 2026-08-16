@@ -148,6 +148,10 @@ final class AgencyFavoritesTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agencies-map"', $rendered);
         self::assertStringContainsString('data-live-ignore', $rendered);
         self::assertStringNotContainsString('data-testid="agency-row"', $rendered);
+        // The pane id is keyed by the display mode: the map zone is morph
+        // -ignored, so switching back to the list must swap the whole
+        // subtree (otherwise the map would linger over the list).
+        self::assertStringContainsString('id="agencies-display-pane-map"', $rendered);
 
         // Only the active geocoded agency gets a marker.
         self::assertStringContainsString('Foncia', $rendered);

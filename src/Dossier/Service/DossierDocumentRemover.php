@@ -9,6 +9,9 @@ use App\Dossier\Domain\PersonName;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierDocument;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -23,6 +26,9 @@ final class DossierDocumentRemover
         private readonly DocumentStorage $storage,
         private readonly DossierEventLogger $events,
         private readonly DossierStatusAdvancer $advancer,
+        private readonly Security $security,
+        #[Autowire(service: 'monolog.logger.security')]
+        private readonly LoggerInterface $securityLogger,
     ) {
     }
 
@@ -39,7 +45,6 @@ final class DossierDocumentRemover
                     if ($file->getId() !== $fileId) {
                         continue;
                     }
-                    $this->storage->delete($dossier, $file);
                     $fileName = (string) $file->getOriginalName();
                     $document->removeFile($file);
                     if ($document->getFiles()->isEmpty()) {
@@ -51,7 +56,24 @@ final class DossierDocumentRemover
                         'tenant' => PersonName::firstLast($document->getPerson()),
                         'file' => $fileName,
                     ]);
+                    // DB first: a storage hiccup then leaves at worst an
+                    // orphan blob, never a row pointing at a vanished file.
                     $this->em->flush();
+                    try {
+                        $this->storage->delete($dossier, $file);
+                    } catch (\Throwable $e) {
+                        $this->securityLogger->warning('Dossier file blob deletion failed: '.$e->getMessage(), [
+                            'dossier' => (string) $dossier->getReference(),
+                            'file' => $fileId,
+                        ]);
+                    }
+                    // The heaviest destructive mutation of the context: it
+                    // belongs on the audit channel like the dossier deletion.
+                    $this->securityLogger->notice('Dossier document file deleted', [
+                        'actor' => $this->security->getUser()?->getUserIdentifier(),
+                        'dossier' => (string) $dossier->getReference(),
+                        'file' => $fileName,
+                    ]);
                     $this->advancer->advance($dossier);
 
                     return;
@@ -89,6 +111,11 @@ final class DossierDocumentRemover
         $person?->removeDocument($document);
         $this->em->remove($document);
         $this->em->flush();
+        $this->securityLogger->notice('Dossier document piece deleted', [
+            'actor' => $this->security->getUser()?->getUserIdentifier(),
+            'dossier' => (string) $dossier->getReference(),
+            'piece' => $document->getType()?->labelKey() ?? '',
+        ]);
         $this->advancer->advance($dossier);
     }
 }

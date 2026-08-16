@@ -52,7 +52,7 @@ final class AgencyCreateTest extends KernelTestCase
 
         $response = $this->createAction($component);
         self::assertInstanceOf(RedirectResponse::class, $response);
-        self::assertMatchesRegularExpression('~/'.self::PREFIX.'/admin/(agents-immobiliers|real-estate-agents)$~', (string) $response->getTargetUrl());
+        self::assertMatchesRegularExpression('~/'.self::PREFIX.'/admin/(agents-immobiliers|real-estate-agents)\?view=agencies$~', (string) $response->getTargetUrl());
 
         $agency = $this->em->getRepository(Agency::class)->findOneBy(['name' => 'Foncia Paris 11']);
         self::assertNotNull($agency);
