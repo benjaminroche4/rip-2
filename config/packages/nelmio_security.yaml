@@ -13,18 +13,6 @@ nelmio_security:
     content_type:
         nosniff: true
 
-    # Strict-Transport-Security — locked in for 1 year, includes subdomains,
-    # opted into Chrome's HSTS preload list (https://hstspreload.org). Required
-    # before submitting the domain to the preload programme.
-    #
-    # NOTE: enabling this on a domain that is sometimes served over HTTP will
-    # lock browsers into HTTPS-only for `max_age` seconds. Confirm the entire
-    # surface is HTTPS-ready before deploying this change.
-    forced_ssl:
-        hsts_max_age: 31536000           # 1 year
-        hsts_subdomains: true
-        hsts_preload: true
-
     # Send a full URL in the `Referer` header when performing a same-origin request,
     # only send the origin of the document to secure destination (HTTPS->HTTPS),
     # and send no header to a less secure destination (HTTPS->HTTP).
@@ -84,13 +72,17 @@ nelmio_security:
             base-uri: ["'self'"]
             frame-ancestors: ["'self'"]
 
-# Dev + test run over http://localhost / 127.0.0.1 — HSTS forces the browser
-# into https-only and a single request would lock you out of the local server
-# for a year (browser HSTS cache, not server-side). Only enable HSTS in prod.
-when@dev:
+# Strict-Transport-Security — prod only (the bundle wires this at container
+# compile time, no runtime toggle possible). Locked in for 1 year, includes
+# subdomains, opted into Chrome's HSTS preload list (https://hstspreload.org).
+#
+# Dev + test run over plain http, so the block does not exist there. To run
+# APP_ENV=prod LOCALLY, serve over https (symfony server:ca:install once,
+# then `symfony serve` without --no-tls): the redirect never triggers and the
+# HSTS header is harmless since local https actually works.
+when@prod:
     nelmio_security:
-        forced_ssl: false
-
-when@test:
-    nelmio_security:
-        forced_ssl: false
+        forced_ssl:
+            hsts_max_age: 31536000           # 1 year
+            hsts_subdomains: true
+            hsts_preload: true
