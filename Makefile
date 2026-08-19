@@ -1,8 +1,10 @@
 hello:
 	echo "Hello World"
 
+# TLS local (CA Symfony installée) : indispensable depuis que le HSTS prod
+# peut être mémorisé par le navigateur pour localhost/127.0.0.1.
 start:
-	symfony server:start --no-tls
+	symfony server:start
 
 clean:
 	php bin/console cache:clear
