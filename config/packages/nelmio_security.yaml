@@ -40,6 +40,9 @@ nelmio_security:
                 - "'unsafe-inline'"
                 - "https://www.googletagmanager.com"
                 - "https://maps.googleapis.com"
+                # Chargés par GTM : bannière cookies CookieYes + Hotjar.
+                - "https://cdn-cookieyes.com"
+                - "https://*.hotjar.com"
             style-src:
                 - "'self'"
                 - "'unsafe-inline'"
@@ -47,6 +50,7 @@ nelmio_security:
             img-src:
                 - "'self'"
                 - "data:"
+                - "https://cdn-cookieyes.com"
                 - "https://cdn.sanity.io"
                 - "https://maps.googleapis.com"
                 - "https://maps.gstatic.com"
@@ -63,6 +67,13 @@ nelmio_security:
                 - "https://maps.googleapis.com"
                 - "https://www.google-analytics.com"
                 - "https://region1.google-analytics.com"
+                # Consentement CookieYes (log + config) et télémétrie Hotjar
+                # (HTTP + WebSocket).
+                - "https://cdn-cookieyes.com"
+                - "https://log.cookieyes.com"
+                - "https://*.hotjar.com"
+                - "https://*.hotjar.io"
+                - "wss://*.hotjar.com"
             frame-src:
                 - "'self'"
                 - "https://www.youtube.com"
