@@ -2312,6 +2312,14 @@ admin:
                     plan: Planifier une visite
                     counter: '%count% à venir'
                     refused: '{1}1 bien refusé|]1,Inf[%count% biens refusés'
+                    compare:
+                        title: Synthèse des visites
+                        address: Bien
+                        rent: Loyer
+                        feeling: Ressenti
+                        decision: Retour client
+                        highlights: Les plus
+                        noDecision: En attente
                 payment:
                     title: Paiement
                     description: Honoraires et suivi des paiements.
@@ -2693,6 +2701,17 @@ admin:
             hot: Client chaud
             warm: Client tiède
             cold: Client froid
+        highlight:
+            bright: Lumineux
+            quiet: Calme
+            well_laid_out: Bien agencé
+            renovated: Refait à neuf
+            spacious: Spacieux
+            nice_view: Belle vue
+            not_overlooked: Sans vis-à-vis
+            high_ceilings: Beaux volumes
+            outdoor: Extérieur
+            well_located: Bien situé
         decision:
             thinking: Réfléchit
             positioning: Se positionne
@@ -2733,7 +2752,8 @@ admin:
             outcomeTitle: Statut de la visite
             overdue:
                 title: 'Cette visite est passée : a-t-elle eu lieu ?'
-            feelingLabel: Ressenti du client
+            feelingLabel: Ressenti global
+            highlightsLabel: Les plus du logement
             reportPlaceholder: 'État du bien, luminosité, bruit, réaction du client, points de vigilance...'
             clientNote:
                 title: Note envoyée au client
@@ -2750,6 +2770,7 @@ admin:
                     title: Envoyer cette note au client ?
                     text: 'La note sera envoyée par email à toutes les personnes du dossier, chacune dans sa langue.'
                     resend: 'Une note a déjà été envoyée le %date%, un nouvel envoi sera effectué.'
+                    attachPhotos: '{1}Joindre la photo de l''annonce|]1,Inf[Joindre les %count% photos de l''annonce'
                     cancel: Annuler
                     confirm: Envoyer
             title: 'Visite du %date% à %time%'

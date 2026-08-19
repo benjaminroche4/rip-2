@@ -5,8 +5,8 @@
     data-gallery-photos-value='[{"url":…,"alt":…}]'. Open it from any
     <button data-action="gallery#open" data-gallery-index-param="N">.
 
-    Mobile = vertical scroll of every photo; desktop = single-image carousel
-    with keyboard nav, swipe, a thumbnail strip and a counter.
+    Single-image carousel at every viewport size (one photo per slide, no
+    stacked list) with keyboard nav, swipe, a thumbnail strip and a counter.
 
     props:
       photos: list<{url: string, alt: string}> — same order as the trigger grid
@@ -27,26 +27,12 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6"><path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
 
-    {# Mobile: vertical scroll #}
-    <div class="h-full overflow-y-auto overscroll-contain lg:hidden">
-        <div class="mx-auto flex max-w-4xl flex-col gap-2 px-3 pt-16 pb-8 sm:gap-3 sm:px-4 sm:pt-20 sm:pb-12">
-            {% for photo in photos %}
-                <img
-                    src="{{ photo.url }}?w=1400&fit=max&auto=format&fm=webp&q=85"
-                    alt="{{ photo.alt }}"
-                    loading="{{ loop.first ? 'eager' : 'lazy' }}"
-                    decoding="async"
-                    draggable="false"
-                    class="w-full rounded-xl select-none"
-                />
-            {% endfor %}
-        </div>
-    </div>
-
-    {# Desktop: carousel. Les gouttières latérales (px-20) réservent la
-       place des flèches (size-10 à 1rem du bord) : l'image en max-w-full
-       ne peut jamais passer dessous. #}
-    <div class="relative hidden h-full w-full items-center justify-center px-20 py-12 lg:flex">
+    {# Carrousel à tous les breakpoints : une seule photo par slide (la
+       liste verticale mobile affichait plusieurs photos à l'écran et se
+       lisait comme un slider cassé). Les gouttières latérales réservent
+       la place des flèches (size-10 à 1rem du bord) : l'image en
+       max-w-full ne peut jamais passer dessous. #}
+    <div class="relative flex h-full w-full items-center justify-center px-16 py-12 sm:px-20">
         <button
             type="button"
             data-action="gallery#prev"
@@ -57,14 +43,23 @@
         </button>
 
         <div class="flex max-h-full w-full flex-col items-center gap-6">
-            <img
-                data-gallery-target="image"
-                src=""
-                alt=""
-                draggable="false"
-                style="touch-action: none"
-                class="max-h-[calc(100vh-14rem)] max-w-full cursor-grab rounded-lg object-contain transition-all duration-300 ease-out select-none"
-            />
+            {# Skeleton de chargement : affiché par le controller tant que la
+               photo courante n'est pas décodée (ouverture et navigation). #}
+            <div class="flex w-full items-center justify-center">
+                <div
+                    data-gallery-target="skeleton"
+                    class="hidden aspect-[4/3] max-h-[calc(100vh-14rem)] w-full max-w-3xl animate-pulse rounded-lg bg-white/10"
+                    aria-hidden="true"
+                ></div>
+                <img
+                    data-gallery-target="image"
+                    src=""
+                    alt=""
+                    draggable="false"
+                    style="touch-action: none"
+                    class="max-h-[calc(100vh-14rem)] max-w-full cursor-grab rounded-lg object-contain transition-all duration-300 ease-out select-none"
+                />
+            </div>
             <div class="w-full max-w-4xl px-4">
                 <div class="flex flex-col items-center gap-2">
                     <span data-gallery-target="counter" class="text-xs font-medium text-white/50"></span>

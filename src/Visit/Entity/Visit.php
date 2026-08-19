@@ -63,9 +63,22 @@ class Visit
     #[ORM\Column(length: 10, nullable: true, enumType: \App\Visit\Domain\ClientFeeling::class)]
     private ?\App\Visit\Domain\ClientFeeling $clientFeeling = null;
 
+    /** "Les plus du logement" cochés dans le compte-rendu : valeurs de
+        PropertyHighlight, stockées en JSON dans l'ordre stable de l'enum. */
+    #[ORM\Column(nullable: true)]
+    private ?array $reportHighlights = null;
+
     /** Note destinée au client après la visite, rédigée ou générée par IA. */
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $clientNote = null;
+
+    /** Traduction anglaise de la note client, générée au moment de l'envoi
+        quand un destinataire est anglophone (traçabilité seulement, jamais
+        affichée; écrasée à chaque envoi car la note FR a pu être retouchée
+        entre deux; null quand la traduction a échoué, l'email anglophone
+        étant alors parti avec le texte français). */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $clientNoteEn = null;
 
     /** Horodatage du dernier changement de décision client (pour "en attente depuis"). */
     #[ORM\Column(nullable: true)]
@@ -80,6 +93,12 @@ class Visit
         du cron app:visits:send-decision-reminders). */
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $decisionReminderSentAt = null;
+
+    /** Rappel staff "compte-rendu à remplir" déjà envoyé (idempotence du
+        même cron); remis à null quand la visite quitte Effectuée pour que le
+        re-passage en Effectuée réarme un rappel. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $reportReminderSentAt = null;
 
     /** Décision du client sur le bien (réfléchit / se positionne / refuse). */
     #[ORM\Column(length: 20, nullable: true, enumType: \App\Visit\Domain\ClientDecision::class)]
@@ -437,6 +456,39 @@ class Visit
         return $this;
     }
 
+    /**
+     * @return list<\App\Visit\Domain\PropertyHighlight> in stable enum order
+     */
+    public function getReportHighlights(): array
+    {
+        $stored = $this->reportHighlights ?? [];
+
+        // L'ordre d'affichage est celui de l'enum, jamais celui des clics.
+        return array_values(array_filter(
+            \App\Visit\Domain\PropertyHighlight::cases(),
+            static fn (\App\Visit\Domain\PropertyHighlight $case): bool => \in_array($case->value, $stored, true),
+        ));
+    }
+
+    public function hasReportHighlight(\App\Visit\Domain\PropertyHighlight $highlight): bool
+    {
+        return \in_array($highlight->value, $this->reportHighlights ?? [], true);
+    }
+
+    /**
+     * @param list<\App\Visit\Domain\PropertyHighlight> $highlights
+     */
+    public function setReportHighlights(array $highlights): static
+    {
+        $values = array_values(array_intersect(
+            array_column(\App\Visit\Domain\PropertyHighlight::cases(), 'value'),
+            array_map(static fn (\App\Visit\Domain\PropertyHighlight $h): string => $h->value, $highlights),
+        ));
+        $this->reportHighlights = [] !== $values ? $values : null;
+
+        return $this;
+    }
+
     public function getClientNote(): ?string
     {
         return $this->clientNote;
@@ -445,6 +497,18 @@ class Visit
     public function setClientNote(?string $clientNote): static
     {
         $this->clientNote = $clientNote;
+
+        return $this;
+    }
+
+    public function getClientNoteEn(): ?string
+    {
+        return $this->clientNoteEn;
+    }
+
+    public function setClientNoteEn(?string $clientNoteEn): static
+    {
+        $this->clientNoteEn = $clientNoteEn;
 
         return $this;
     }
@@ -505,6 +569,18 @@ class Visit
     public function setDecisionReminderSentAt(?\DateTimeImmutable $decisionReminderSentAt): static
     {
         $this->decisionReminderSentAt = $decisionReminderSentAt;
+
+        return $this;
+    }
+
+    public function getReportReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->reportReminderSentAt;
+    }
+
+    public function setReportReminderSentAt(?\DateTimeImmutable $reportReminderSentAt): static
+    {
+        $this->reportReminderSentAt = $reportReminderSentAt;
 
         return $this;
     }

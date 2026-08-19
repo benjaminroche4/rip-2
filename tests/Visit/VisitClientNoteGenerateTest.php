@@ -156,6 +156,7 @@ final class VisitClientNoteGenerateTest extends WebTestCase
             $agent,
             static::getContainer()->get(VisitPropertyRecap::class),
             new NullLogger(),
+            static::getContainer()->get('translator'),
         ));
     }
 

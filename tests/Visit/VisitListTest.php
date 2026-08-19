@@ -214,6 +214,28 @@ final class VisitListTest extends KernelTestCase
         self::assertSame(1, substr_count($rendered, 'data-testid="visit-report-due"'));
     }
 
+    public function testADoneVisitWithAFeelingShowsTheIconOnlyBadge(): void
+    {
+        // Effectuée avec ressenti : badge icône seule (libellé en title).
+        $felt = $this->persistVisit('2026-06-15 08:00', '12 rue de la Roquette');
+        $felt->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReport('OK')
+            ->setClientFeeling(\App\Visit\Domain\ClientFeeling::Hot);
+        // Effectuée sans ressenti : pas de badge.
+        $blank = $this->persistVisit('2026-06-15 08:30', '5 rue Oberkampf');
+        $blank->setStatus(\App\Visit\Domain\VisitStatus::Done)->setReport('OK');
+        // Planifiée : jamais de badge, même avec un reliquat de ressenti.
+        $this->persistVisit('2026-06-15 14:00', '3 rue Amelot');
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-feeling-badge"'));
+        self::assertStringContainsString('title="Client chaud"', $rendered);
+    }
+
     public function testAnUnassignedVisitWithTheClientPresentReadsByClient(): void
     {
         // Client présent sans assigné : il s'y rend seul, pas d'alerte.

@@ -568,6 +568,61 @@ final class ModulesTest extends KernelTestCase
         self::assertStringContainsString('1 bien refus', $rendered);
     }
 
+    public function testTheComparativeSynthesisNeedsAtLeastTwoDoneVisits(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->validateFileStep($dossier);
+        $prefix = 'test_admin_prefix_1234567890abcdef';
+
+        // Une seule visite effectuée : pas de synthèse.
+        $first = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('-5 days 10:00'))
+            ->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setClientFeeling(\App\Visit\Domain\ClientFeeling::Hot)
+            ->setReportHighlights([\App\Visit\Domain\PropertyHighlight::Bright, \App\Visit\Domain\PropertyHighlight::Quiet, \App\Visit\Domain\PropertyHighlight::Outdoor])
+            ->setRentExcludingCharges(1450.0)
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        // Une visite planifiée ne compte pas dans le seuil.
+        $planned = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('3 rue Amelot, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('+2 days 10:00'))
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($first);
+        $this->em->persist($planned);
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringNotContainsString('module-visit-compare', $rendered, 'One done visit is not enough for the synthesis.');
+
+        $second = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('8 avenue Parmentier, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('-2 days 15:00'))
+            ->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setClientDecision(\App\Visit\Domain\ClientDecision::Refused)
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($second);
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringContainsString('data-testid="module-visit-compare"', $rendered);
+        self::assertSame(2, substr_count($rendered, 'data-testid="module-visit-compare-row"'), 'Only the done visits feed the synthesis.');
+        // Loyer, ressenti, décision et les deux premiers tags (+ compteur).
+        self::assertStringContainsString('1450', $rendered);
+        self::assertStringContainsString('Client chaud', $rendered);
+        self::assertStringContainsString('Refuse', $rendered);
+        self::assertStringContainsString('Lumineux, Calme', $rendered);
+        self::assertStringContainsString('+1', $rendered);
+        // Badge ressenti icône seule sur la ligne du module.
+        self::assertStringContainsString('data-testid="module-visit-feeling"', $rendered);
+    }
+
     /** Valide l'étape Dossier : une pièce demandée, puis validée. */
     private function validateFileStep(Dossier $dossier): void
     {

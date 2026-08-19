@@ -286,7 +286,11 @@ final class VisitController extends AbstractController
                 ->setApplicationOutcome(null)
                 ->setDecisionDeadline(null)
                 ->setRefusalOrigin(null)
-                ->setDecisionReminderSentAt(null);
+                ->setDecisionReminderSentAt(null)
+                // Réarmement du rappel "compte-rendu à remplir" : si la
+                // visite repasse en Effectuée plus tard, un nouveau rappel
+                // pourra partir.
+                ->setReportReminderSentAt(null);
         }
         // Fil du dossier : seule la transition vers Effectuée est notée (un
         // re-POST du même statut ne crée pas de doublon).
@@ -353,8 +357,18 @@ final class VisitController extends AbstractController
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException((string) $violations);
         }
 
+        // "Les plus du logement" : chips multi posted alongside the report
+        // (the whole form autosaves as one). Toute valeur inconnue (POST
+        // forgé) est rejetée, jamais ignorée en silence.
+        $highlights = [];
+        foreach ($request->request->all('highlights') as $raw) {
+            $highlights[] = \App\Visit\Domain\PropertyHighlight::tryFrom((string) $raw)
+                ?? throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Unknown property highlight.');
+        }
+
         $visit->setReport($input->reportOrNull())
-            ->setClientFeeling($input->toFeeling());
+            ->setClientFeeling($input->toFeeling())
+            ->setReportHighlights($highlights);
         $this->touchVisit($visit);
         $em->flush();
 
@@ -444,7 +458,11 @@ final class VisitController extends AbstractController
             throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('The client note is empty.');
         }
 
-        ['sent' => $sent, 'total' => $total] = $mailer->sendClientNote($visit);
+        // Choix de la modale : joindre les photos de la visite à l'email
+        // (case cochée par défaut quand des photos existent).
+        $attachPhotos = $request->request->getBoolean('attachPhotos');
+
+        ['sent' => $sent, 'total' => $total] = $mailer->sendClientNote($visit, $attachPhotos);
         if ($sent > 0) {
             $visit->setClientNoteSentAt(new \DateTimeImmutable());
             $this->touchVisit($visit);

@@ -28,10 +28,17 @@ final readonly class VisitClientNoteGenerator
         Règles :
         - Réponds UNIQUEMENT avec le texte du message, sans objet, sans
           signature, sans balises.
-        - 3 à 6 phrases en français, vouvoiement, ton professionnel et
-          chaleureux, adressé directement au client.
-        - Récapitule l'essentiel du bien visité (adresse, points clés) et ce
-          qui ressort de la visite, puis la suite proposée.
+        - Court et rapide à lire : 2 à 4 phrases simples en français,
+          vouvoiement, adressé directement au client.
+        - Ton naturel et vivant, comme un conseiller qui écrit à son client
+          après la visite : jamais de formules corporate ni de tournures
+          d'annonce immobilière.
+        - Donne un avis sur le logement, et cet avis est TOUJOURS positif :
+          appuie-toi sur tout ce qu'on te donne (caractéristiques du bien,
+          loyer, atouts cochés, ressenti global, retour du conseiller) pour
+          mettre en avant ce qui donne envie d'y vivre. Ne mentionne jamais
+          un défaut, une réserve ou un point négatif : s'il y en a dans le
+          retour interne, ignore-les.
         - Le retour interne sert de matière : reformule, ne le cite jamais
           tel quel et n'expose aucun jugement interne (ressenti chiffré,
           stratégie, réserves confidentielles).
@@ -39,11 +46,28 @@ final readonly class VisitClientNoteGenerator
           cadratin.
         PROMPT;
 
+    private const TRANSLATE_SYSTEM_PROMPT = <<<'PROMPT'
+        Tu traduis en anglais le message qu'un conseiller de Relocation in
+        Paris (agence de relocation à Paris) envoie à son client après la
+        visite d'un logement.
+
+        Règles :
+        - Réponds UNIQUEMENT avec la traduction, sans balises, sans
+          commentaire, sans objet ni signature.
+        - Traduction fidèle : même contenu, même découpage en phrases,
+          aucune information ajoutée ni retirée.
+        - Anglais naturel, même ton chaleureux et simple que l'original :
+          un conseiller qui écrit à son client, jamais du mot à mot ni des
+          formules corporate.
+        - Pas de tiret cadratin.
+        PROMPT;
+
     public function __construct(
         #[Autowire(service: 'ai.agent.visit_client_note')]
         private AgentInterface $agent,
         private VisitPropertyRecap $propertyRecap,
         private LoggerInterface $logger,
+        private \Symfony\Contracts\Translation\TranslatorInterface $translator,
     ) {
     }
 
@@ -70,6 +94,34 @@ final readonly class VisitClientNoteGenerator
         return '' !== $content ? $content : null;
     }
 
+    /**
+     * English translation of the final client note, produced at send time
+     * for English-speaking recipients. Returns null when the model is
+     * unreachable, answers garbage, or the note is blank (the caller falls
+     * back to the French text, the email still goes out).
+     */
+    public function translateToEnglish(string $note): ?string
+    {
+        $note = trim($note);
+        if ('' === $note) {
+            return null;
+        }
+
+        try {
+            $result = $this->agent->call(new MessageBag(
+                Message::forSystem(self::TRANSLATE_SYSTEM_PROMPT),
+                Message::ofUser($note),
+            ));
+            $content = trim((string) $result->getContent());
+        } catch (\Throwable $e) {
+            $this->logger->error('Visit client note translation failed: '.$e->getMessage());
+
+            return null;
+        }
+
+        return '' !== $content ? $content : null;
+    }
+
     private function buildContext(Visit $visit): string
     {
         $described = $this->propertyRecap->describe($visit);
@@ -88,6 +140,14 @@ final readonly class VisitClientNoteGenerator
         }
         if (null !== $visit->getReport() && '' !== trim($visit->getReport())) {
             $lines[] = 'Retour interne du conseiller (matière à reformuler, jamais à citer) : '.trim($visit->getReport());
+        }
+        if ([] !== $visit->getReportHighlights()) {
+            // Les tags positifs cochés par le conseiller : de la matière
+            // sûre (jamais un jugement interne), donnée en clair au modèle.
+            $lines[] = 'Les plus du logement cochés par le conseiller : '.implode(', ', array_map(
+                fn (\App\Visit\Domain\PropertyHighlight $highlight): string => $this->translator->trans($highlight->labelKey(), locale: 'fr'),
+                $visit->getReportHighlights(),
+            ));
         }
         if (null !== $visit->getClientFeeling()) {
             $lines[] = 'Ressenti interne du client pendant la visite : '.$visit->getClientFeeling()->value;

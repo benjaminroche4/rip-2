@@ -23,10 +23,17 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final readonly class VisitClientMailer
 {
+    /** Caps mutualisé o2switch : au-delà, les photos restantes sont
+        tronquées (loggé), l'envoi part quand même. */
+    private const MAX_ATTACHMENTS = 10;
+    private const MAX_ATTACHMENTS_BYTES = 15 * 1024 * 1024;
+
     public function __construct(
         private MailerInterface $mailer,
         private TranslatorInterface $translator,
         private LoggerInterface $logger,
+        private \App\Visit\Storage\VisitPhotoStorage $photoStorage,
+        private VisitClientNoteGenerator $noteGenerator,
     ) {
     }
 
@@ -53,7 +60,7 @@ final readonly class VisitClientMailer
      *
      * @return array{sent: int, total: int}
      */
-    public function sendClientNote(Visit $visit): array
+    public function sendClientNote(Visit $visit, bool $attachPhotos = false): array
     {
         $dossier = $visit->getDossier();
         $scheduledAt = $visit->getScheduledAt();
@@ -62,15 +69,100 @@ final readonly class VisitClientMailer
             return ['sent' => 0, 'total' => 0];
         }
 
+        // Les octets sont lus une seule fois dans le storage (local ou GCS)
+        // puis réutilisés pour chaque destinataire.
+        $attachments = $attachPhotos ? $this->photoAttachments($visit) : [];
+
         $recipients = $this->recipients($dossier);
+
+        // Traduction anglaise de la note finale (retouches manuelles
+        // comprises), demandée au moment de l'envoi et seulement quand un
+        // destinataire est anglophone. Persistée sur la visite (traçabilité,
+        // écrasée à chaque envoi car la note FR a pu être retouchée entre
+        // deux; le flush revient à l'appelant). Échec de traduction = repli
+        // silencieux sur le texte français, l'envoi part quand même.
+        $noteEn = null;
+        if ($this->hasEnglishSpeakingRecipient($recipients)) {
+            $noteEn = $this->noteGenerator->translateToEnglish($note);
+            $visit->setClientNoteEn($noteEn);
+            if (null === $noteEn) {
+                $this->logger->warning('Visit client note translation unavailable, English-speaking recipients get the French text.', [
+                    'visit' => (string) $visit->getReference(),
+                ]);
+            }
+        }
+
         $sent = 0;
         foreach ($recipients as $recipient) {
-            if ($this->sendNoteTo($recipient, $visit, $scheduledAt, $note)) {
+            if ($this->sendNoteTo($recipient, $visit, $scheduledAt, $note, $noteEn, $attachments)) {
                 ++$sent;
             }
         }
 
         return ['sent' => $sent, 'total' => \count($recipients)];
+    }
+
+    /**
+     * Photos jointes à la note : uniquement celles de l'annonce (phase
+     * 'before', couverture en tête). Les photos prises pendant la visite
+     * (phase 'after') restent internes, jamais envoyées au client.
+     * Best-effort de bout en bout : une photo illisible est sautée avec un
+     * warning, les caps (nombre et poids cumulé) tronquent la liste sans
+     * jamais faire échouer l'envoi.
+     *
+     * @return list<array{content: string, name: string, mime: string}>
+     */
+    private function photoAttachments(Visit $visit): array
+    {
+        $ordered = array_values(array_filter(
+            $visit->getPhotos()->toArray(),
+            static fn (\App\Visit\Entity\VisitPhoto $p): bool => 'after' !== $p->getPhase(),
+        ));
+
+        $attachments = [];
+        $totalBytes = 0;
+        $truncated = 0;
+        foreach ($ordered as $photo) {
+            if (\count($attachments) >= self::MAX_ATTACHMENTS) {
+                ++$truncated;
+                continue;
+            }
+            try {
+                $stream = $this->photoStorage->readStream((string) $photo->getPath());
+                $content = stream_get_contents($stream);
+                fclose($stream);
+                if (false === $content || '' === $content) {
+                    throw new \RuntimeException('Empty photo object.');
+                }
+            } catch (\Throwable $e) {
+                $this->logger->warning('Visit photo could not be attached to the client note email.', [
+                    'visit' => (string) $visit->getReference(),
+                    'path' => (string) $photo->getPath(),
+                    'error' => $e->getMessage(),
+                ]);
+                continue;
+            }
+            if ($totalBytes + \strlen($content) > self::MAX_ATTACHMENTS_BYTES) {
+                ++$truncated;
+                continue;
+            }
+            $totalBytes += \strlen($content);
+            $attachments[] = [
+                'content' => $content,
+                'name' => (string) $photo->getOriginalName(),
+                'mime' => (string) $photo->getMimeType(),
+            ];
+        }
+
+        if ($truncated > 0) {
+            $this->logger->info('Visit client note attachments truncated (attachment caps).', [
+                'visit' => (string) $visit->getReference(),
+                'attached' => \count($attachments),
+                'skipped' => $truncated,
+            ]);
+        }
+
+        return $attachments;
     }
 
     /**
@@ -94,7 +186,24 @@ final readonly class VisitClientMailer
         return $recipients;
     }
 
-    private function sendNoteTo(\App\Dossier\Entity\DossierPerson $recipient, Visit $visit, \DateTimeImmutable $scheduledAt, string $note): bool
+    /**
+     * @param list<array{content: string, name: string, mime: string}> $attachments
+     */
+    /**
+     * @param array<string, \App\Dossier\Entity\DossierPerson> $recipients
+     */
+    private function hasEnglishSpeakingRecipient(array $recipients): bool
+    {
+        foreach ($recipients as $recipient) {
+            if ('fr' !== ($recipient->getLanguage()->value ?? 'fr')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function sendNoteTo(\App\Dossier\Entity\DossierPerson $recipient, Visit $visit, \DateTimeImmutable $scheduledAt, string $note, ?string $noteEn, array $attachments = []): bool
     {
         $address = trim((string) $recipient->getEmail());
         $locale = $recipient->getLanguage()->value ?? 'fr';
@@ -110,6 +219,13 @@ final readonly class VisitClientMailer
         $dateText = (string) $dateFormatter->format($scheduledAt);
         $timeText = $scheduledAt->format('H:i');
 
+        // "Les plus du logement" cochés, traduits dans la langue du
+        // destinataire, dans l'ordre stable de l'enum.
+        $highlights = array_map(
+            fn (\App\Visit\Domain\PropertyHighlight $highlight): string => $this->translator->trans($highlight->labelKey(), locale: $locale),
+            $visit->getReportHighlights(),
+        );
+
         $email = (new TemplatedEmail())
             ->from(new Address(EmailAddress::CONTACT->value, 'Relocation in Paris'))
             ->to($address)
@@ -120,11 +236,22 @@ final readonly class VisitClientMailer
             ->context([
                 'fr' => $fr,
                 'recipientFirstName' => trim((string) $recipient->getFirstName()),
-                'note' => $note,
+                // Corps dans la langue du destinataire; sans traduction
+                // disponible, l'anglophone reçoit le texte français.
+                'note' => $fr ? $note : ($noteEn ?? $note),
                 'dateText' => $dateText,
                 'timeText' => $timeText,
                 'visitAddress' => trim((string) $visit->getAddress()),
+                'highlights' => $highlights,
             ]);
+
+        foreach ($attachments as $attachment) {
+            $email->addPart(new \Symfony\Component\Mime\Part\DataPart(
+                $attachment['content'],
+                $attachment['name'],
+                $attachment['mime'],
+            ));
+        }
 
         try {
             $this->mailer->send($email);

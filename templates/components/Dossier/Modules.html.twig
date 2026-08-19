@@ -587,6 +587,17 @@
                                                         {{ ux_icon(visit.status.icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
                                                         {{ visit.status.labelKey|trans }}
                                                     </span>
+                                                    {# Ressenti global d'une visite effectuée : icône seule + infobulle. #}
+                                                    {% if visit.status.value == 'done' and visit.clientFeeling %}
+                                                        <span
+                                                            class="flex items-center rounded-full bg-neutral-100 p-1 text-gray-500"
+                                                            title="{{ visit.clientFeeling.labelKey|trans }}"
+                                                            aria-label="{{ visit.clientFeeling.labelKey|trans }}"
+                                                            data-testid="module-visit-feeling"
+                                                        >
+                                                            {{ ux_icon(visit.clientFeeling.icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                                        </span>
+                                                    {% endif %}
                                                 </div>
                                                 <p class="mt-0.5 truncate text-xs text-gray-500">{{ visit.address }}</p>
                                             </div>
@@ -597,6 +608,87 @@
                                     </li>
                                 {% endfor %}
                             </ul>
+                        {% endif %}
+                        {# ── Synthèse comparative : lecture seule, dès deux
+                              visites effectuées, pour comparer les biens
+                              d'un coup d'œil. ── #}
+                        {% set doneVisits = (dossierVisits.all)|filter(v => v.status.value == 'done') %}
+                        {% if doneVisits|length >= 2 %}
+                            <div class="mt-1 rounded-xl bg-white px-4 py-3" data-testid="module-visit-compare">
+                                <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.modules.visit.compare.title'|trans }}</p>
+                                <div class="mt-2 overflow-x-auto">
+                                    <table class="w-full min-w-[36rem] text-left text-sm">
+                                        <thead>
+                                            <tr class="border-b border-gray-950/5 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                                <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.dossiers.show.modules.visit.compare.address'|trans }}</th>
+                                                <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.dossiers.show.modules.visit.compare.rent'|trans }}</th>
+                                                <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.dossiers.show.modules.visit.compare.feeling'|trans }}</th>
+                                                <th scope="col" class="py-2 pr-4 font-medium">{{ 'admin.dossiers.show.modules.visit.compare.decision'|trans }}</th>
+                                                <th scope="col" class="py-2 font-medium">{{ 'admin.dossiers.show.modules.visit.compare.highlights'|trans }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-950/5">
+                                            {% for visit in doneVisits %}
+                                                <tr data-testid="module-visit-compare-row">
+                                                    <td class="max-w-56 py-2.5 pr-4">
+                                                        {% if canOpenVisit %}
+                                                            <a
+                                                                href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, reference: visit.reference}) }}"
+                                                                class="block truncate font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                                                            >{{ visit.address }}</a>
+                                                        {% else %}
+                                                            <span class="block truncate font-medium text-gray-900">{{ visit.address }}</span>
+                                                        {% endif %}
+                                                        <span class="text-xs text-gray-400 tabular-nums">{{ visit.scheduledAt|format_datetime(pattern='d MMM yyyy') }}</span>
+                                                    </td>
+                                                    <td class="py-2.5 pr-4 whitespace-nowrap text-gray-900 tabular-nums">
+                                                        {% if visit.rentExcludingCharges %}
+                                                            {{ (visit.rentChargesIncluded ? 'admin.visits.create.propertyDetails.recap.rentCc' : 'admin.visits.create.propertyDetails.recap.rent')|trans({'%amount%': visit.rentExcludingCharges|round(0, 'common')}) }}
+                                                        {% else %}
+                                                            <span class="text-gray-400">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="py-2.5 pr-4 whitespace-nowrap">
+                                                        {% if visit.clientFeeling %}
+                                                            <span class="flex items-center gap-1.5 text-gray-900">
+                                                                {{ ux_icon(visit.clientFeeling.icon, {class: 'size-3.5 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                                {{ visit.clientFeeling.labelKey|trans }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-gray-400">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="py-2.5 pr-4 whitespace-nowrap">
+                                                        {% if visit.applicationOutcome %}
+                                                            <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium {{ visit.applicationOutcome.value == 'accepted' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600' }}">
+                                                                {{ ux_icon(visit.applicationOutcome.value == 'accepted' ? 'lucide:badge-check' : 'lucide:badge-x', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                                                {{ visit.applicationOutcome.labelKey|trans }}
+                                                            </span>
+                                                        {% elseif visit.clientDecision %}
+                                                            <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium {{ {thinking: 'bg-sky-50 text-sky-700', positioning: 'bg-primary/5 text-primary', refused: 'bg-amber-50 text-amber-700'}[visit.clientDecision.value] }}">
+                                                                {{ ux_icon({thinking: 'lucide:hourglass', positioning: 'lucide:send', refused: 'lucide:x'}[visit.clientDecision.value], {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                                                {{ visit.clientDecision.labelKey|trans }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-xs text-gray-400">{{ 'admin.dossiers.show.modules.visit.compare.noDecision'|trans }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="py-2.5 whitespace-nowrap">
+                                                        {% if visit.reportHighlights is not empty %}
+                                                            <span class="text-gray-900">{{ visit.reportHighlights|slice(0, 2)|map(h => h.labelKey|trans)|join(', ') }}</span>
+                                                            {% if visit.reportHighlights|length > 2 %}
+                                                                <span class="text-xs text-gray-400">+{{ visit.reportHighlights|length - 2 }}</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="text-gray-400">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         {% endif %}
                         {% if canOpenVisit %}
                             <div class="mt-1 flex justify-end rounded-xl bg-white px-5 py-3">

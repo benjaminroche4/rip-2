@@ -492,6 +492,36 @@ class VisitRepository extends ServiceEntityRepository
         return $visits;
     }
 
+    /**
+     * Visites effectuées depuis plus de 24 h dont le retour de l'agent est
+     * toujours vide, rappel staff jamais parti, sur dossier encore ouvert.
+     * Nourrit le cron quotidien app:visits:send-decision-reminders (volet
+     * "compte-rendu à remplir"), borné par le limit. Faute d'horodatage de
+     * transition, "effectuée depuis plus de 24 h" s'approxime sur le
+     * créneau : scheduledAt à plus de 24 h (heure murale Paris).
+     *
+     * @return list<Visit>
+     */
+    public function findReportRemindersDue(\DateTimeImmutable $now, int $limit): array
+    {
+        /** @var list<Visit> $visits */
+        $visits = $this->createQueryBuilder('v')
+            ->leftJoin('v.dossier', 'd')->addSelect('d')
+            ->where('v.status = :done')
+            ->andWhere("v.report IS NULL OR TRIM(v.report) = ''")
+            ->andWhere('v.reportReminderSentAt IS NULL')
+            ->andWhere('v.scheduledAt <= :cutoff')
+            ->andWhere('d.closedAt IS NULL')
+            ->setParameter('done', VisitStatus::Done)
+            ->setParameter('cutoff', $now->modify('-24 hours'))
+            ->orderBy('v.scheduledAt', 'ASC')
+            ->setMaxResults(max(1, $limit))
+            ->getQuery()
+            ->getResult();
+
+        return $visits;
+    }
+
     private function toSummary(Visit $visit): VisitSummary
     {
         $agent = $visit->getAgent();
@@ -552,6 +582,9 @@ class VisitRepository extends ServiceEntityRepository
             applicationOutcome: $visit->getApplicationOutcome(),
             decisionDeadline: $visit->getDecisionDeadline(),
             refusalOrigin: $visit->getRefusalOrigin(),
+            reportHighlights: $visit->getReportHighlights(),
+            rentExcludingCharges: $visit->getRentExcludingCharges(),
+            rentChargesIncluded: $visit->getRentChargesIncluded(),
         );
     }
 }

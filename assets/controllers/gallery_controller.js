@@ -2,7 +2,7 @@
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
-    static targets = ['dialog', 'image', 'counter', 'thumbnails']
+    static targets = ['dialog', 'image', 'counter', 'thumbnails', 'skeleton', 'photoCount']
 
     #currentIndex = 0
     #photos = []
@@ -11,6 +11,7 @@ export default class extends Controller {
     #swiping = false
     #didSwipe = false
     #idleCallbackId = null
+    #slideTimeoutId = null
 
     connect() {
         this.#photos = JSON.parse(this.element.dataset.galleryPhotosValue || '[]')
@@ -28,6 +29,10 @@ export default class extends Controller {
             const cancel = window.cancelIdleCallback || clearTimeout
             cancel(this.#idleCallbackId)
             this.#idleCallbackId = null
+        }
+        if (this.#slideTimeoutId !== null) {
+            clearTimeout(this.#slideTimeoutId)
+            this.#slideTimeoutId = null
         }
     }
 
@@ -57,7 +62,7 @@ export default class extends Controller {
         document.body.style.overflow = 'hidden'
         document.addEventListener('keydown', this.#handleKeydown)
 
-        // Desktop carousel setup only if those targets are present (hidden lg:flex markup)
+        // Carousel setup only if those targets are present
         if (this.hasImageTarget) {
             if (!this.#thumbnailsRendered) {
                 this.#renderThumbnails()
@@ -70,11 +75,17 @@ export default class extends Controller {
             img.addEventListener('pointermove', this.#handlePointerMove)
             img.addEventListener('pointerup', this.#handlePointerUp)
             img.addEventListener('pointercancel', this.#handlePointerUp)
+            img.addEventListener('load', this.#handleImageLoad)
+            img.addEventListener('error', this.#handleImageLoad)
         }
     }
 
     close() {
         this.#swiping = false
+        if (this.#slideTimeoutId !== null) {
+            clearTimeout(this.#slideTimeoutId)
+            this.#slideTimeoutId = null
+        }
         this.dialogTarget.close()
         document.body.style.overflow = ''
         document.removeEventListener('keydown', this.#handleKeydown)
@@ -85,6 +96,8 @@ export default class extends Controller {
             img.removeEventListener('pointermove', this.#handlePointerMove)
             img.removeEventListener('pointerup', this.#handlePointerUp)
             img.removeEventListener('pointercancel', this.#handlePointerUp)
+            img.removeEventListener('load', this.#handleImageLoad)
+            img.removeEventListener('error', this.#handleImageLoad)
         }
 
         // Blur the trigger button that re-gains focus on dialog close — otherwise
@@ -116,7 +129,35 @@ export default class extends Controller {
         this.#render('right')
     }
 
+    // Une vignette vient d'être supprimée de la grille (photo-delete:removed) :
+    // retire la photo du slider sans recharger la page, recale l'index
+    // courant, le compteur affiché et les miniatures du lightbox.
+    removePhoto({ detail: { index } }) {
+        if (index < 0 || index >= this.#photos.length) return
+        this.#photos.splice(index, 1)
+        this.#thumbnailsRendered = false
+
+        if (this.hasPhotoCountTarget) {
+            this.photoCountTarget.textContent = this.#photos.length
+        }
+
+        if (!this.dialogTarget.open) return
+        if (!this.#photos.length) {
+            this.close()
+            return
+        }
+        if (this.#currentIndex >= this.#photos.length) {
+            this.#currentIndex = this.#photos.length - 1
+        }
+        if (this.hasImageTarget) {
+            this.#renderThumbnails()
+            this.#thumbnailsRendered = true
+            this.#render()
+        }
+    }
+
     goTo({ params: { index } }) {
+        if (index === this.#currentIndex) return
         const direction = index > this.#currentIndex ? 'right' : 'left'
         this.#currentIndex = index ?? 0
         this.#render(direction)
@@ -175,6 +216,18 @@ export default class extends Controller {
         }
     }
 
+    // Photo pas encore décodée : plaque animée à la place de l'image
+    // (l'événement load/error de l'image fait la bascule inverse).
+    #toggleSkeleton(loading) {
+        if (!this.hasSkeletonTarget) return
+        this.skeletonTarget.classList.toggle('hidden', !loading)
+        this.imageTarget.classList.toggle('hidden', loading)
+    }
+
+    #handleImageLoad = () => {
+        this.#toggleSkeleton(false)
+    }
+
     #render(direction) {
         const photo = this.#photos[this.#currentIndex]
         if (!photo || !this.hasImageTarget) return
@@ -182,11 +235,19 @@ export default class extends Controller {
         const img = this.imageTarget
         const src = photo.url + '?w=1400&fit=max&auto=format&fm=webp&q=85'
 
+        // Navigations rapprochées : le timeout d'une slide précédente encore
+        // en vol appliquerait une photo périmée par-dessus la nouvelle.
+        if (this.#slideTimeoutId !== null) {
+            clearTimeout(this.#slideTimeoutId)
+            this.#slideTimeoutId = null
+        }
+
         if (direction === undefined) {
             // Initial render (on open): no slide animation, paint ASAP
             img.src = src
             img.alt = photo.alt || ''
             img.classList.remove('opacity-0', 'translate-x-4', '-translate-x-4', 'translate-x-6', '-translate-x-6')
+            this.#toggleSkeleton(!img.complete)
         } else {
             // Navigation between photos: slide animation
             const slideOut = direction === 'left' ? 'translate-x-6' : '-translate-x-6'
@@ -194,12 +255,16 @@ export default class extends Controller {
 
             img.classList.add('opacity-0', slideOut)
 
-            setTimeout(() => {
+            this.#slideTimeoutId = setTimeout(() => {
+                this.#slideTimeoutId = null
                 img.src = src
                 img.alt = photo.alt || ''
 
-                img.classList.remove(slideOut)
+                // Purge les deux sens : une animation interrompue peut avoir
+                // laissé la classe de l'autre direction sur l'élément.
+                img.classList.remove('translate-x-6', '-translate-x-6')
                 img.classList.add(slideIn)
+                this.#toggleSkeleton(!img.complete)
 
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {

@@ -127,7 +127,7 @@ final class VisitClientNoteTest extends WebTestCase
                 return 'fixed';
             }
         };
-        $generator = new VisitClientNoteGenerator($agent, $container->get(VisitPropertyRecap::class), new NullLogger());
+        $generator = new VisitClientNoteGenerator($agent, $container->get(VisitPropertyRecap::class), new NullLogger(), $container->get('translator'));
 
         $note = $generator->generate($visit);
 
@@ -151,7 +151,7 @@ final class VisitClientNoteTest extends WebTestCase
                 return 'failing';
             }
         };
-        $generator = new VisitClientNoteGenerator($agent, self::getContainer()->get(VisitPropertyRecap::class), new NullLogger());
+        $generator = new VisitClientNoteGenerator($agent, self::getContainer()->get(VisitPropertyRecap::class), new NullLogger(), self::getContainer()->get('translator'));
 
         $visit = (new Visit())
             ->setReference('VS-000001')

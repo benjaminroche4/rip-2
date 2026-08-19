@@ -21,6 +21,18 @@
             {{ visit.status.labelKey|trans }}
         </span>
     {% endif %}
+    {# Ressenti global d'une visite effectuée : icône seule, libellé en
+       infobulle (la card reste compacte). #}
+    {% if visit.status.value == 'done' and visit.clientFeeling %}
+        <span
+            class="flex items-center rounded-full bg-neutral-100 p-1 text-gray-500"
+            title="{{ visit.clientFeeling.labelKey|trans }}"
+            aria-label="{{ visit.clientFeeling.labelKey|trans }}"
+            data-testid="visit-feeling-badge"
+        >
+            {{ ux_icon(visit.clientFeeling.icon, {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+        </span>
+    {% endif %}
     {# Compte à rebours discret quand la visite est imminente (moins de
        deux heures), sur la même rangée que le type. #}
     {% if minutesUntil and visit.status.value == 'planned' %}

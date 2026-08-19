@@ -62,6 +62,13 @@ final readonly class VisitSummary
         public ?\DateTimeImmutable $decisionDeadline = null,
         /** Origine du refus (bailleur ou client) quand la décision est "Refuse". */
         public ?RefusalOrigin $refusalOrigin = null,
+        /** "Les plus du logement" cochés dans le compte-rendu, ordre de l'enum.
+            @var list<PropertyHighlight> */
+        public array $reportHighlights = [],
+        /** Loyer mensuel connu (euros), pour la synthèse comparative. */
+        public ?float $rentExcludingCharges = null,
+        /** Loyer charges comprises (true) ou hors charges (false/null = HC). */
+        public ?bool $rentChargesIncluded = null,
     ) {
     }
 

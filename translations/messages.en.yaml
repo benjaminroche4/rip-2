@@ -2310,6 +2310,14 @@ admin:
                     plan: Schedule a visit
                     counter: '%count% upcoming'
                     refused: '{1}1 property declined|]1,Inf[%count% properties declined'
+                    compare:
+                        title: Visit summary
+                        address: Property
+                        rent: Rent
+                        feeling: Impression
+                        decision: Client feedback
+                        highlights: Highlights
+                        noDecision: Pending
                 payment:
                     title: Payment
                     description: Fees and payment tracking.
@@ -2693,6 +2701,17 @@ admin:
             hot: Hot client
             warm: Warm client
             cold: Cold client
+        highlight:
+            bright: Bright
+            quiet: Quiet
+            well_laid_out: Well laid out
+            renovated: Newly renovated
+            spacious: Spacious
+            nice_view: Nice view
+            not_overlooked: Not overlooked
+            high_ceilings: High ceilings
+            outdoor: Outdoor space
+            well_located: Great location
         decision:
             thinking: Thinking it over
             positioning: Making an offer
@@ -2731,7 +2750,8 @@ admin:
             outcomeTitle: Visit status
             overdue:
                 title: 'This visit is in the past: did it take place?'
-            feelingLabel: Client feeling
+            feelingLabel: Overall feeling
+            highlightsLabel: Property highlights
             reportPlaceholder: 'Property condition, natural light, noise, client reaction, points of attention...'
             clientNote:
                 title: Note sent to the client
@@ -2748,6 +2768,7 @@ admin:
                     title: Send this note to the client?
                     text: 'The note will be emailed to every person on the file, each in their own language.'
                     resend: 'A note was already sent on %date%, it will be sent again.'
+                    attachPhotos: '{1}Attach the listing photo|]1,Inf[Attach the %count% listing photos'
                     cancel: Cancel
                     confirm: Send
             title: 'Visit on %date% at %time%'
