@@ -116,7 +116,7 @@
                                     </div>
                                     <nav class="space-y-3" data-controller="toc">
                                         {% for block in post.body %}
-                                            {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock', 'tableBlock'] and block.title ?? false %}
+                                            {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock', 'tableBlock'] and (block.title ?? false) %}
                                                 <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
                                                     {{ block.title }}
                                                 </a>
