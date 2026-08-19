@@ -25,7 +25,7 @@ enum VisitStatus: string
         return match ($this) {
             self::Planned => 'bg-blue-50 text-blue-700',
             self::Done => 'bg-green-50 text-green-700',
-            self::Cancelled => 'bg-gray-100 text-gray-500',
+            self::Cancelled => 'bg-amber-50 text-amber-700',
             self::NoShow => 'bg-red-50 text-red-600',
         };
     }

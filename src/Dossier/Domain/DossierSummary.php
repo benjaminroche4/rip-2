@@ -32,6 +32,8 @@ final readonly class DossierSummary
         public ?\DateTimeImmutable $closedAt = null,
         /** Search criteria filled in: gates the modules and visit booking. */
         public bool $searchComplete = false,
+        /** Searched districts (CSV of ParisDistricts codes), when filled in. */
+        public ?string $searchAreas = null,
     ) {
     }
 }

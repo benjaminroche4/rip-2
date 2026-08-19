@@ -31,6 +31,32 @@ class DossierRepository extends ServiceEntityRepository
     }
 
     /**
+     * Dossiers proposables à la planification d'une visite : ouverts ET
+     * recherche complète (une visite se prépare sur les critères validés).
+     * Le tri alphabétique suit le dropdown du formulaire de visite ;
+     * DossierSearch::isComplete() reste l'unique source de vérité, d'où le
+     * filtre en PHP plutôt qu'une réplication des sept critères en DQL.
+     *
+     * @return list<Dossier>
+     */
+    public function findOpenWithCompleteSearch(): array
+    {
+        /** @var list<Dossier> $dossiers */
+        $dossiers = $this->createQueryBuilder('d')
+            ->leftJoin('d.search', 's')
+            ->addSelect('s')
+            ->where('d.closedAt IS NULL')
+            ->orderBy('d.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_values(array_filter(
+            $dossiers,
+            static fn (Dossier $dossier): bool => $dossier->getSearch()?->isComplete() ?? false,
+        ));
+    }
+
+    /**
      * Read model for the admin list, newest first.
      *
      * @return list<DossierSummary>
@@ -113,6 +139,7 @@ class DossierRepository extends ServiceEntityRepository
             moveInAt: $moveInAt,
             timeline: null !== $moveInAt ? MoveInTimeline::fromDates($createdAt, $moveInAt, $now) : null,
             searchComplete: $dossier->getSearch()?->isComplete() ?? false,
+            searchAreas: $dossier->getSearch()?->getAreas(),
             closedAt: $dossier->getClosedAt(),
         );
     }

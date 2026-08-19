@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="{{ fr ? 'fr' : 'en' }}">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="width=device-width" name="viewport" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta content="telephone=no,address=no,email=no,date=no,url=no" name="format-detection" />
+</head>
+<body>
+    {% set fontStack = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" %}
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center">
+        <tbody>
+            <tr>
+                <td>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                        style="font-family:{{ fontStack }};font-size:1.077em;min-height:100%;line-height:155%">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" align="center"
+                                        style="max-width:600px;width:100%;padding:40px 20px;border:1px solid #e2e2e2;border-radius:12px;background-color:#ffffff;font-family:{{ fontStack }}">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <img
+                                                        src="https://resend-attachments.s3.amazonaws.com/y8VsZ3nZ1GDIWiz"
+                                                        alt="Logo Relocation in Paris"
+                                                        width="166" height="38"
+                                                        style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;border-radius:0" />
+
+                                                    <p style="margin:0;padding:0.5em 0"><br /></p>
+
+                                                    <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600">
+                                                        {{ fr ? 'Votre visite est planifiée' : 'Your visit is scheduled' }}
+                                                    </h2>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:1em;color:#111827">
+                                                        {{ fr ? 'Bonjour' : 'Hello' }}{% if recipientFirstName %} {{ recipientFirstName }}{% endif %},
+                                                    </p>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:1em;color:#525252">
+                                                        {% if fr %}
+                                                            Nous avons planifié pour vous : <strong style="color:#111827">{{ typeLabel|lower }}</strong>.
+                                                        {% else %}
+                                                            We have scheduled for you: <strong style="color:#111827">{{ typeLabel|lower }}</strong>.
+                                                        {% endif %}
+                                                    </p>
+
+                                                    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                        style="margin-top:16px;border:1px solid #e2e2e2;border-radius:12px;background-color:#fafafa">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="padding:16px 20px">
+                                                                    <p style="margin:0;padding:0;font-size:1em;color:#111827">
+                                                                        <strong>{{ fr ? 'Date' : 'Date' }}</strong> : {{ dateText }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.4em 0 0;font-size:1em;color:#111827">
+                                                                        <strong>{{ fr ? 'Heure' : 'Time' }}</strong> : {{ timeText }} {{ fr ? '(heure de Paris)' : '(Paris time)' }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.4em 0 0;font-size:1em;color:#111827">
+                                                                        <strong>{{ fr ? 'Adresse' : 'Address' }}</strong> : {{ visitAddress }}
+                                                                    </p>
+                                                                    <p style="margin:0;padding:0.4em 0 0;font-size:1em;color:#111827">
+                                                                        <strong>{{ fr ? 'Durée estimée' : 'Estimated duration' }}</strong> : {{ durationMinutes }} min
+                                                                    </p>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:1em;color:#525252">
+                                                        {% if clientVisitsAlone %}
+                                                            {{ fr ? 'Vous effectuerez cette visite par vous-même. Bonne visite !' : 'You will carry out this visit on your own. Enjoy the visit!' }}
+                                                        {% elseif assigneeName %}
+                                                            {% if fr %}
+                                                                <strong style="color:#111827">{{ assigneeName }}</strong>, de notre équipe, réalisera cette visite.
+                                                                {{ clientPresent ? 'Votre présence est prévue sur place.' : "Votre présence n'est pas nécessaire : nous visitons pour votre compte et vous enverrons un compte-rendu." }}
+                                                            {% else %}
+                                                                <strong style="color:#111827">{{ assigneeName }}</strong>, from our team, will carry out this visit.
+                                                                {{ clientPresent ? 'You are expected on site.' : 'Your presence is not required: we visit on your behalf and will send you a report.' }}
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {{ fr ? 'Notre équipe reviendra vers vous avec les détails pratiques.' : 'Our team will get back to you with the practical details.' }}
+                                                        {% endif %}
+                                                    </p>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:1em;color:#525252">
+                                                        {% if fr %}
+                                                            Un empêchement ? Répondez simplement à cet email et nous trouverons un autre créneau.
+                                                        {% else %}
+                                                            Something came up? Simply reply to this email and we will find another slot.
+                                                        {% endif %}
+                                                    </p>
+
+                                                    <p style="margin:0;padding:0.8em 0 0;font-size:1em;color:#111827">
+                                                        {{ fr ? 'À très vite,' : 'See you soon,' }}<br />
+                                                        {{ fr ? "L'équipe Relocation in Paris" : 'The Relocation in Paris team' }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

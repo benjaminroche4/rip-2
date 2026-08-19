@@ -171,7 +171,7 @@ final class AgentCreateTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agent-create-form"', $rendered);
         // The form is split into titled sections separated by dividers.
         self::assertSame(4, substr_count($rendered, 'border-t border-gray-950/5'), 'Identity | agency | specialties | contact | note: four dividers.');
-        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-400 uppercase'), 'Five section micro-titles.');
+        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-500 uppercase'), 'Five section micro-titles.');
         self::assertStringContainsString('data-testid="agent-create-note"', $rendered);
         // Specialty chips (multi) and position chips (agency context, the
         // default kind) with their toggle-off live action.

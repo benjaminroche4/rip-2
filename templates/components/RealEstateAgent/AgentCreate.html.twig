@@ -72,7 +72,7 @@
             <div class="rounded-xl bg-white px-4 py-4">
                 {# Identité : qui est l'agent. #}
                 <div>
-                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.identity'|trans }}</h3>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.identity'|trans }}</h3>
                     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         {{ ui.input(form.firstName, 'admin.agents.create.firstName.label', 'text') }}
                         {{ ui.input(form.lastName, 'admin.agents.create.lastName.label', 'text') }}
@@ -113,7 +113,7 @@
                    n'apparaissent que pour un agent en agence (le composant
                    re-rend au change). #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.agency'|trans }}</h3>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.agency'|trans }}</h3>
                     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="sm:col-span-2">
                             <p id="{{ form.kind.vars.id }}-label" class="text-sm text-gray-600">
@@ -373,7 +373,7 @@
                    section sert de libellé au groupe (pas de doublon). #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
                     <div data-testid="agent-create-specialties-block">
-                        <h3 id="{{ form.specialties.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                        <h3 id="{{ form.specialties.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
                         <div role="group" aria-labelledby="{{ form.specialties.vars.id }}-label" class="mt-3 flex flex-wrap gap-2">
                             {% for choice in form.specialties.children %}
                                 <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
@@ -421,7 +421,7 @@
 
                 {# Coordonnées : téléphone et email de l'agent. #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.contact'|trans }}</h3>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.contact'|trans }}</h3>
                     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="min-w-0">
                             <twig:Label for="{{ form.phone.vars.id }}" class="text-gray-600">
@@ -478,7 +478,7 @@
                 {# Note interne : texte libre réservé à l'équipe. Le micro-titre
                    de section sert de libellé au champ. #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 id="{{ form.note.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
+                    <h3 id="{{ form.note.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
                     <div class="mt-3">
                         <textarea
                             id="{{ form.note.vars.id }}"

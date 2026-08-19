@@ -111,7 +111,7 @@
 
 {% macro closureBlock(contact, reasons) %}
     {# Motif de clôture : demandé uniquement quand le lead est fermé. #}
-    <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.show.closureLabel'|trans }}</p>
+    <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.show.closureLabel'|trans }}</p>
     <div class="mt-2 flex flex-wrap gap-1.5">
         {% for reason in reasons %}
             <button
@@ -153,7 +153,7 @@
 {% macro planner(contact, recallAt, stepCase, channels = [], pendingChannel = '') %}
     {# Selon l'étape choisie : planifier le rappel ou la visio (brouillon). #}
     <div class="space-y-1.5" data-testid="status-card-recall">
-        <p class="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-400 uppercase">
+        <p class="flex items-center gap-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
             {{ ('admin.contacts.nextStep.planner.' ~ stepCase.value)|trans }}
             {% if contact.recallAt and contact.recallAt < date() %}
                 <span class="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium tracking-normal normal-case text-red-600">
@@ -196,7 +196,7 @@
 
         {# Recontact : par quel canal (même liste que Qualité du lead). #}
         {% if stepCase.value == 'recontact' and channels is not empty %}
-            <p class="pt-1.5 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.channelLabel'|trans }}</p>
+            <p class="pt-1.5 text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.nextStep.channelLabel'|trans }}</p>
             <div class="flex flex-wrap gap-1.5">
                 {% for channel in channels %}
                     <button
@@ -268,7 +268,7 @@
                         {{ ux_icon(contact.nextStep.icon, {class: 'size-4 shrink-0 ' ~ (overdue ? 'text-red-600' : 'text-amber-600'), 'aria-hidden': 'true'}) }}
                     </span>
                     <span class="min-w-0 flex-1">
-                        <span class="block text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</span>
+                        <span class="block text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</span>
                         <span class="block text-sm font-medium text-gray-900 tabular-nums">{{ ui.calloutText(contact, planned) }}</span>
                     </span>
                     {% if contact.nextStep.value == 'recontact' and contact.recontactChannel %}
@@ -388,7 +388,7 @@
             {% set pendingCase = this.pendingCase %}
             {% set needsPlanner = pendingCase and pendingCase.needsDate %}
             <div id="next-step-editor" class="rounded-xl border-2 border-dashed border-primary/40 bg-white px-4 py-3 text-sm" data-loading="action(confirmStep)|addClass(hidden)" data-testid="next-step">
-                <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</p>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.nextStep.label'|trans }}</p>
                 <div class="mt-2">
                     {{ ui.stepChips(this.pendingStep, this.nextSteps) }}
                 </div>
@@ -442,12 +442,12 @@
               en ligne) quand il faut choisir. ──────────────────────────── #}
         {% if contact.assigneeName %}
             <div class="flex items-start justify-between gap-4 rounded-xl bg-white px-4 py-3 text-sm">
-                <p class="shrink-0 pt-1 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+                <p class="shrink-0 pt-1 text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
                 {{ ui.assignee(contact, this.assignees) }}
             </div>
         {% else %}
             <div class="rounded-xl bg-white px-4 py-3 text-sm">
-                <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
+                <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.contacts.followUp.assignee'|trans }}</p>
                 <div class="mt-2">
                     {{ ui.assignee(contact, this.assignees) }}
                 </div>

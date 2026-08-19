@@ -40,6 +40,14 @@ class VisitPhoto
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /**
+     * Moment de la prise de vue par rapport à la visite : 'before' pour les
+     * photos d'annonce/agent jointes à la création, 'after' pour celles
+     * ajoutées depuis la fiche (prises pendant ou après la visite).
+     */
+    #[ORM\Column(length: 10, options: ['default' => 'before'])]
+    private string $phase = 'before';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +97,18 @@ class VisitPhoto
     public function setMimeType(string $mimeType): static
     {
         $this->mimeType = $mimeType;
+
+        return $this;
+    }
+
+    public function getPhase(): string
+    {
+        return $this->phase;
+    }
+
+    public function setPhase(string $phase): static
+    {
+        $this->phase = $phase;
 
         return $this;
     }

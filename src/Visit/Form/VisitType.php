@@ -22,6 +22,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class VisitType extends AbstractType
 {
+    public function __construct(private readonly DossierRepository $dossiers)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -29,11 +33,18 @@ class VisitType extends AbstractType
                 'class' => Dossier::class,
                 'label' => 'admin.visits.create.dossier.label',
                 'placeholder' => 'admin.visits.create.dossier.placeholder',
-                // Only open dossiers: no visit is scheduled on a closed one.
-                'query_builder' => static fn (DossierRepository $r) => $r->createQueryBuilder('d')
-                    ->where('d.closedAt IS NULL')
-                    ->orderBy('d.name', 'ASC'),
+                // Open dossiers with a complete search only: no visit on a
+                // closed dossier, and none before the criteria are validated
+                // (the submit-time guard keeps rejecting forged ids). The
+                // preselected dossier (arrival from a dossier page) stays in
+                // the list even incomplete, so the explanatory banner and the
+                // search link can render.
+                'choices' => $this->dossierChoices($options['preselected_dossier']),
                 'choice_label' => static fn (Dossier $d): string => $d->getName().' ('.$d->getReference().')',
+                // Editing an existing visit: the dossier is locked (changing
+                // it would be another visit). Disabled = the submitted value
+                // is ignored server-side, the stored dossier always wins.
+                'disabled' => true === $options['editing'],
             ])
             ->add('assignee', EntityType::class, [
                 'class' => \App\Auth\Entity\User::class,
@@ -77,9 +88,11 @@ class VisitType extends AbstractType
                 'model_timezone' => 'Europe/Paris',
                 'view_timezone' => 'Europe/Paris',
                 // No scheduling in the past (10 min of grace for "right
-                // now"); form-level on purpose: editing an already-past
-                // visit from its detail page stays possible.
-                'constraints' => [
+                // now"); form-level on purpose, and lifted in edit mode: a
+                // past visit must stay editable (note, address...). Moving
+                // the slot INTO the past is still refused by the edit-mode
+                // guard in VisitForm::create().
+                'constraints' => true === $options['editing'] ? [] : [
                     new \Symfony\Component\Validator\Constraints\GreaterThan('-10 minutes', message: 'admin.visits.create.scheduledAt.past'),
                 ],
             ])
@@ -118,6 +131,68 @@ class VisitType extends AbstractType
                     'placeholder' => 'admin.visits.create.note.placeholder',
                 ],
             ])
+            // ── "Le bien en détail": optional property facts, chips fed by
+            // LiveActions (hidden inputs), never required. ──
+            ->add('surface', \Symfony\Component\Form\Extension\Core\Type\NumberType::class, [
+                'label' => 'admin.visits.create.propertyDetails.surface.label',
+                'required' => false,
+                'html5' => true,
+                'scale' => 1,
+                'attr' => ['step' => '0.5', 'min' => '0'],
+            ])
+            ->add('floor', \Symfony\Component\Form\Extension\Core\Type\IntegerType::class, [
+                'label' => 'admin.visits.create.propertyDetails.floor.label',
+                'required' => false,
+                'attr' => ['min' => '0', 'placeholder' => 'admin.visits.create.propertyDetails.floor.placeholder'],
+            ])
+            // Same codes as the dossier-search chips: a forged value falls
+            // out of the choices and is rejected by the form.
+            ->add('propertyKind', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
+                'label' => 'admin.visits.create.propertyDetails.propertyKind.label',
+                'required' => false,
+                'choices' => array_combine(
+                    array_column(\App\PropertyListing\Domain\PropertyType::cases(), 'value'),
+                    array_column(\App\PropertyListing\Domain\PropertyType::cases(), 'value'),
+                ),
+            ])
+            ->add('furnishing', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
+                'label' => 'admin.visits.create.propertyDetails.furnishing.label',
+                'required' => false,
+                'choices' => array_combine(
+                    array_column(\App\Contact\Domain\Furnishing::cases(), 'value'),
+                    array_column(\App\Contact\Domain\Furnishing::cases(), 'value'),
+                ),
+            ])
+            ->add('leaseType', \Symfony\Component\Form\Extension\Core\Type\EnumType::class, [
+                'label' => 'admin.visits.create.propertyDetails.leaseType.label',
+                'required' => false,
+                'class' => \App\Visit\Domain\LeaseType::class,
+            ])
+            ->add('rentExcludingCharges', \Symfony\Component\Form\Extension\Core\Type\NumberType::class, [
+                'label' => 'admin.visits.create.propertyDetails.rentExcludingCharges.label',
+                'required' => false,
+                'html5' => true,
+                'scale' => 2,
+                'attr' => ['step' => '0.01', 'min' => '0'],
+            ])
+            ->add('charges', \Symfony\Component\Form\Extension\Core\Type\NumberType::class, [
+                'label' => 'admin.visits.create.propertyDetails.charges.label',
+                'required' => false,
+                'html5' => true,
+                'scale' => 2,
+                'attr' => ['step' => '0.01', 'min' => '0'],
+            ])
+            // Loyer CC ou HC : les chips du formulaire pilotent l'input caché
+            // ('1' = charges comprises).
+            ->add('rentChargesIncluded', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
+                'label' => 'admin.visits.create.propertyDetails.rentMode.cc',
+                'required' => false,
+                // L'input caché soumet toujours la clé : sans ceci, la chaîne
+                // vide (mode HC) serait interprétée comme cochée (le défaut de
+                // CheckboxType ne tient que null pour faux) et le mode
+                // resterait verrouillé sur "Charges comprises".
+                'false_values' => [null, '', '0'],
+            ])
             ->add('address', TextType::class, [
                 'label' => 'admin.visits.create.address.label',
                 'attr' => [
@@ -136,6 +211,31 @@ class VisitType extends AbstractType
             'translation_domain' => 'messages',
             // Live handles CSRF at the component level.
             'csrf_protection' => false,
+            'preselected_dossier' => null,
+            // "Modifier la visite": same form, dossier locked and past-slot
+            // constraints lifted (see VisitForm::create()). The entity-level
+            // past guard lives in the visit_create group, applied here only
+            // outside edit mode.
+            'editing' => false,
+            'validation_groups' => static fn (\Symfony\Component\Form\FormInterface $form): array => true === $form->getConfig()->getOption('editing')
+                ? ['Default']
+                : ['Default', 'visit_create'],
         ]);
+        $resolver->setAllowedTypes('preselected_dossier', [Dossier::class, 'null']);
+        $resolver->setAllowedTypes('editing', 'bool');
+    }
+
+    /**
+     * @return list<Dossier>
+     */
+    private function dossierChoices(?Dossier $preselected): array
+    {
+        $choices = $this->dossiers->findOpenWithCompleteSearch();
+        if ($preselected instanceof Dossier
+            && !\in_array($preselected->getId(), array_map(static fn (Dossier $d): ?int => $d->getId(), $choices), true)) {
+            $choices[] = $preselected;
+        }
+
+        return $choices;
     }
 }

@@ -29,7 +29,7 @@
                 <div class="flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
                     <div class="text-sm">
                         {# Identité : prénom, nom et photo. #}
-                        <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.identity'|trans }}</h3>
+                        <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.identity'|trans }}</h3>
                         <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div class="min-w-0 space-y-2">
                                 <label for="agent-edit-first-{{ this.agentId }}" class="block text-gray-600">{{ 'admin.agents.create.firstName.label'|trans }}</label>
@@ -78,7 +78,7 @@
 
                         {# Agence : nom (autocomplétion) et poste. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.agency'|trans }}</h3>
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.agency'|trans }}</h3>
                             <div class="mt-3 grid grid-cols-1 gap-4">
                                 <div class="min-w-0 space-y-2">
                                     <p id="agent-edit-agency-label-{{ this.agentId }}" class="text-gray-600">{{ 'admin.agents.create.agency.label'|trans }}</p>
@@ -318,7 +318,7 @@
 
                         {# Spécialités : chips multi toggle-off, comme à la création. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 id="agent-edit-specialties-label-{{ this.agentId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                            <h3 id="agent-edit-specialties-label-{{ this.agentId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
                             <div role="group" aria-labelledby="agent-edit-specialties-label-{{ this.agentId }}" class="mt-3 flex flex-wrap gap-2">
                                 {% for specialty in enum('App\\RealEstateAgent\\Domain\\AgentSpecialty').cases() %}
                                     {% set picked = specialty.value in this.specialties %}
@@ -359,7 +359,7 @@
 
                         {# Coordonnées : téléphone et email. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.contact'|trans }}</h3>
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.contact'|trans }}</h3>
                             <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div class="min-w-0 space-y-2">
                                     <label for="agent-edit-phone-{{ this.agentId }}" class="block text-gray-600">{{ 'admin.agents.create.phone.label'|trans }}</label>
@@ -387,7 +387,7 @@
 
                         {# Note interne : texte libre réservé à l'équipe. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 id="agent-edit-note-label-{{ this.agentId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
+                            <h3 id="agent-edit-note-label-{{ this.agentId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
                             <div class="mt-3 min-w-0 space-y-2">
                                 <textarea
                                     id="agent-edit-note-{{ this.agentId }}"
@@ -683,7 +683,7 @@
 
                 {% if agent.note %}
                     <div class="rounded-xl bg-white px-5 py-4" data-testid="agent-show-note">
-                        <h3 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
+                        <h3 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.note.label'|trans }}</h3>
                         <p class="mt-2 text-sm whitespace-pre-line text-gray-900">{{ agent.note }}</p>
                     </div>
                 {% endif %}
@@ -750,7 +750,7 @@
                 {% for groupKey, groupVisits in {upcoming: agentVisits.upcoming, past: agentVisits.past} %}
                     {% if groupVisits is not empty %}
                         {% if showGroups %}
-                            <h3 class="px-3 pt-2 pb-1 text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase" data-testid="agent-visits-group-{{ groupKey }}">
+                            <h3 class="px-3 pt-2 pb-1 text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase" data-testid="agent-visits-group-{{ groupKey }}">
                                 {{ ('admin.agents.show.visits.' ~ groupKey)|trans }}
                             </h3>
                         {% endif %}
@@ -759,7 +759,7 @@
                                 {% set rowTag = canOpenVisit ? 'a' : 'div' %}
                                 <li class="bg-white first:rounded-t-xl last:rounded-b-xl" data-testid="agent-visit-row">
                                     <{{ rowTag }}
-                                        {% if canOpenVisit %}href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, id: visit.id}) }}"{% endif %}
+                                        {% if canOpenVisit %}href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, reference: visit.reference}) }}"{% endif %}
                                         class="group/visit flex items-center gap-4 px-5 py-3.5 {{ canOpenVisit ? 'transition-colors duration-100 ease-out hover:bg-neutral-50' }}"
                                         {% if canOpenVisit %}data-testid="agent-visit-link"{% endif %}
                                     >
@@ -793,7 +793,7 @@
         <div class="rounded-2xl bg-neutral-50 p-2">
             <dl class="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
                 <div class="rounded-xl bg-white px-4 py-3">
-                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.show.audit.createdAt'|trans }}</dt>
+                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.show.audit.createdAt'|trans }}</dt>
                     <dd class="mt-1.5 flex items-center gap-2">
                         {% if agent.createdByName %}
                             <twig:Avatar filename="{{ agent.createdByAvatar }}" name="{{ agent.createdByName }}" size="6" />
@@ -805,7 +805,7 @@
                 </div>
                 {% if agent.updatedAt %}
                     <div class="rounded-xl bg-white px-4 py-3" data-testid="agent-audit-updated">
-                        <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.show.audit.updatedAt'|trans }}</dt>
+                        <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.show.audit.updatedAt'|trans }}</dt>
                         <dd class="mt-1.5 flex items-center gap-2">
                             {% if agent.updatedByName %}
                                 <twig:Avatar filename="{{ agent.updatedByAvatar }}" name="{{ agent.updatedByName }}" size="6" />

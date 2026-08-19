@@ -528,7 +528,8 @@ final class ModulesTest extends KernelTestCase
         $component = $this->mountModules($dossier);
         $visits = $component->getDossierVisits();
         self::assertSame([$upcoming->getId()], array_map(static fn ($v) => $v->id, $visits['upcoming']));
-        self::assertSame([$past->getId()], array_map(static fn ($v) => $v->id, $visits['past']));
+        // Une seule liste, de la plus récente à la plus ancienne.
+        self::assertSame([$upcoming->getId(), $past->getId()], array_map(static fn ($v) => $v->id, $visits['all']));
 
         $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
         self::assertStringNotContainsString('module-visit-empty', $rendered);
@@ -536,6 +537,35 @@ final class ModulesTest extends KernelTestCase
         self::assertStringContainsString('module-visit-counter', $rendered);
         self::assertStringContainsString('12 rue de la Roquette, 75011 Paris', $rendered);
         self::assertStringContainsString('8 avenue Parmentier, 75011 Paris', $rendered);
+    }
+
+    public function testRefusedVisitsShowTheAmberBadgeOnTheVisitModule(): void
+    {
+        $dossier = $this->persistDossier();
+        $this->validateFileStep($dossier);
+        $prefix = 'test_admin_prefix_1234567890abcdef';
+
+        // Sans refus : pas de badge.
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringNotContainsString('dossier-refused-count', $rendered);
+
+        // Un bien refusé par le client (retour client de la fiche visite).
+        $refused = (new \App\Visit\Entity\Visit())
+            ->setDossier($dossier)
+            ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setScheduledAt(new \DateTimeImmutable('-3 days 11:00'))
+            ->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setClientDecision(\App\Visit\Domain\ClientDecision::Refused)
+            // Seul le refus décidé par le client compte dans le badge.
+            ->setRefusalOrigin(\App\Visit\Domain\RefusalOrigin::Client)
+            ->setReference('VS-'.random_int(100000, 999999))
+            ->setCreatedAt(new \DateTimeImmutable());
+        $this->em->persist($refused);
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', ['dossierId' => $dossier->getId(), 'adminPrefix' => $prefix]);
+        self::assertStringContainsString('data-testid="dossier-refused-count"', $rendered);
+        self::assertStringContainsString('1 bien refus', $rendered);
     }
 
     /** Valide l'étape Dossier : une pièce demandée, puis validée. */

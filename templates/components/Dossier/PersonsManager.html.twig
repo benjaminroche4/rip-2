@@ -124,7 +124,7 @@
             </div>
             {# ── Identité & contact ── #}
             <div class="mt-4 border-t border-gray-950/5 pt-4">
-                <h4 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.identity'|trans }}</h4>
+                <h4 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.persons.sections.identity'|trans }}</h4>
                 <div class="mt-3 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div class="min-w-0">
                     <twig:Label for="pm-first" class="text-gray-600">
@@ -176,7 +176,7 @@
             {# ── Situation personnelle : un seul panneau, replié dès que le
                   rôle n'est pas locataire. ── #}
             <div class="mt-4 border-t border-gray-950/5 pt-4" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %} data-testid="person-personal-pane">
-                <h4 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.personal'|trans }}</h4>
+                <h4 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.persons.sections.personal'|trans }}</h4>
                 <div class="mt-3 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 {# L'âge se calcule côté client (controller age-badge) : il
                    suit chaque frappe et disparaît dès que la date est vidée. #}
@@ -303,7 +303,7 @@
                la checkbox "sans activité" replie tout le volet. #}
             {% set proShows = constant('App\\Dossier\\Twig\\Components\\PersonsManager::PRO_FIELD_PROFESSIONS') %}
             <div class="mt-4 border-t border-gray-950/5 pt-4 text-sm" data-pro-fields-target="pane" data-show-role="tenant" {% if this.role != 'tenant' %}hidden{% endif %} data-testid="person-pro-pane">
-                <h4 class="mb-3 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.persons.sections.pro'|trans }}</h4>
+                <h4 class="mb-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.persons.sections.pro'|trans }}</h4>
                 {# Input natif (pas <twig:Checkbox>) : sur un tag de composant,
                    data-model serait interprété comme un binding de prop. #}
                 <label class="flex w-fit cursor-pointer items-center gap-2 text-gray-600">

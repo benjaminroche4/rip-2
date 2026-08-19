@@ -14,6 +14,13 @@ admin:
             listingUrl:
                 invalid: 'The listing link is not a valid URL.'
                 length: 'The link cannot exceed 500 characters.'
+            propertyDetails:
+                surface:
+                    invalid: 'Invalid surface area.'
+                floor:
+                    invalid: 'Invalid floor.'
+                amount:
+                    invalid: 'Invalid amount.'
             note:
                 length: 'The note cannot exceed 2000 characters.'
     profile:

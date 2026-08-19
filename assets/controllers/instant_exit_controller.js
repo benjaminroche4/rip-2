@@ -14,8 +14,20 @@ export default class extends Controller {
     run() {
         this.element.style.opacity = '0'
 
-        document.addEventListener('live:render', () => {
+        // Handler stocké pour le retrait en disconnect(); `once` reste le
+        // comportement nominal, le disconnect couvre le démontage avant
+        // qu'un live:render n'arrive.
+        this.restore = () => {
             this.element.style.opacity = ''
-        }, { once: true, capture: true })
+            this.restore = null
+        }
+        document.addEventListener('live:render', this.restore, { once: true, capture: true })
+    }
+
+    disconnect() {
+        if (this.restore) {
+            document.removeEventListener('live:render', this.restore, { capture: true })
+            this.restore = null
+        }
     }
 }

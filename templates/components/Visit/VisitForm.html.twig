@@ -1,8 +1,9 @@
 {#
     Visit:VisitForm — quick booking form. One narrow column of separated
     white bands (same vocabulary as the Recherche card): visit, property,
-    slot, who performs it, notes. The optional fields (real estate agent,
-    listing link, client presence) live behind the "detail mode" toggle.
+    slot, who performs it, notes. The optional fields live behind three
+    collapsible sections (contacts, property details, photos), each driven
+    by a LiveProp + LiveAction toggle band.
 #}
 
 {% macro input(field, label, type, required = true, min = null) %}
@@ -34,10 +35,13 @@
 {% endmacro %}
 
 {% macro enumChips(field, label, enumCases) %}
-    {# Chips radio natives : input sr-only + peer-checked, POST classique. #}
+    {# Chips radio natives : input sr-only + peer-checked, POST classique.
+       label null = le titre de bande fait office de libellé. #}
     <div class="min-w-0">
-        <twig:Label class="text-gray-600">{{ label|trans }}</twig:Label>
-        <div class="mt-1.5 flex flex-wrap gap-1.5">
+        {% if label %}
+            <twig:Label class="text-gray-600">{{ label|trans }}</twig:Label>
+        {% endif %}
+        <div class="{{ label ? 'mt-1.5' }} flex flex-wrap gap-1.5">
             {% for case in enumCases %}
                 <label class="cursor-pointer">
                     <input
@@ -69,7 +73,7 @@
         {% if choice.value == field.vars.value %}{% set selectedLabel = choice.label %}{% endif %}
     {% endfor %}
     <div class="min-w-0">
-        <twig:Label for="{{ field.vars.id }}" class="text-gray-600">
+        <twig:Label for="{{ field.vars.id }}" id="{{ field.vars.id }}-label" class="text-gray-600">
             {{ label|trans }}
             {% if required %}<span class="text-red-600" aria-hidden="true">*</span>{% endif %}
         </twig:Label>
@@ -101,10 +105,13 @@
                 aria-haspopup="listbox"
                 aria-expanded="false"
                 aria-controls="{{ field.vars.id }}-panel"
+                {# Nom accessible du bouton : le label du champ, puis la
+                   valeur affichée ("Dossier, Famille Martin"). #}
+                aria-labelledby="{{ field.vars.id }}-label {{ field.vars.id }}-display"
                 class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors duration-100 ease-out hover:border-gray-300 hover:bg-gray-50 focus:border-gray-400 focus:outline-none"
                 data-testid="visit-form-{{ field.vars.name }}-button"
             >
-                <span data-select-target="display" class="{{ selectedLabel is empty ? 'text-gray-400' }} min-w-0 truncate">{{ selectedLabel is not empty ? selectedLabel : placeholder }}</span>
+                <span id="{{ field.vars.id }}-display" data-select-target="display" class="{{ selectedLabel is empty ? 'text-gray-400' }} min-w-0 truncate">{{ selectedLabel is not empty ? selectedLabel : placeholder }}</span>
                 {{ ux_icon('lucide:chevrons-up-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
             </button>
             <div
@@ -128,6 +135,88 @@
     </div>
 {% endmacro %}
 
+{% macro sectionToggle(action, open, labelKey, helpKey, testid) %}
+    {# Bande-bouton d'une section repliable : LiveProp + LiveAction (jamais
+       de <details> natif ici, le morph perdrait l'état open). #}
+    <button
+        type="button"
+        data-action="live#action"
+        data-live-action-param="{{ action }}"
+        aria-expanded="{{ open ? 'true' : 'false' }}"
+        class="{{ open ? 'rounded-t-xl' : 'rounded-xl' }} flex w-full cursor-pointer items-center gap-3 px-5 py-3.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-100/60"
+        data-testid="{{ testid }}"
+    >
+        <span class="min-w-0 flex-1">
+            <span class="block text-sm font-medium text-gray-900">{{ labelKey|trans }}</span>
+            <span class="block text-xs text-gray-500">{{ helpKey|trans }}</span>
+        </span>
+        <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-gray-400 transition-transform duration-100 ease-out {{ open ? 'rotate-180' : '' }}" aria-hidden="true">
+            {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0'}) }}
+        </span>
+    </button>
+{% endmacro %}
+
+{% macro suffixInput(field, label, suffix, step, min = '0') %}
+    {# Input number avec unité (m², €) collée à droite dans le champ. #}
+    <div class="min-w-0">
+        <twig:Label for="{{ field.vars.id }}" class="text-gray-600">{{ label|trans }}</twig:Label>
+        <div class="relative mt-1.5">
+            <input
+                type="number"
+                step="{{ step }}"
+                min="{{ min }}"
+                id="{{ field.vars.id }}"
+                name="{{ field.vars.full_name }}"
+                value="{{ field.vars.value }}"
+                {% if field.vars.attr.placeholder is defined %}placeholder="{{ field.vars.attr.placeholder|trans }}"{% endif %}
+                aria-invalid="{{ field.vars.errors|length > 0 ? 'true' : 'false' }}"
+                class="w-full rounded-xl border border-neutral-200 bg-white py-2 pl-3.5 {{ suffix is not empty ? 'pr-12' : 'pr-3.5' }} text-sm text-gray-900 tabular-nums transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                data-testid="visit-form-{{ field.vars.name }}"
+            >
+            {% if suffix is not empty %}
+                <span class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-gray-400" aria-hidden="true">{{ suffix }}</span>
+            {% endif %}
+        </div>
+        {% for error in field.vars.errors %}
+            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro liveChips(field, label, action, choices, current) %}
+    {# Chips pill single toggle-off pilotées par LiveAction : la valeur
+       voyage dans l'input caché, comme "Effectuée par". #}
+    <div class="min-w-0">
+        <twig:Label class="text-gray-600">{{ label|trans }}</twig:Label>
+        <input
+            type="hidden"
+            id="{{ field.vars.id }}"
+            name="{{ field.vars.full_name }}"
+            value="{{ current }}"
+            data-testid="visit-form-{{ field.vars.name }}"
+        >
+        <div class="mt-1.5 flex flex-wrap gap-1.5">
+            {% for choice in choices %}
+                {% set active = current == choice.value %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="{{ action }}"
+                    data-live-value-param="{{ choice.value }}"
+                    aria-pressed="{{ active ? 'true' : 'false' }}"
+                    class="flex cursor-pointer items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ active ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                    data-testid="visit-form-{{ field.vars.name }}-{{ choice.value }}"
+                >
+                    {{ choice.label|trans }}
+                </button>
+            {% endfor %}
+        </div>
+        {% for error in field.vars.errors %}
+            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
 {% import _self as ui %}
 
 <div {{ attributes }} data-testid="visit-form-page">
@@ -135,13 +224,25 @@
        formulaire se limite à ce champ (une visite sans dossier n'existe
        pas, et les cards de rappel n'auraient rien à afficher). #}
     {% set dossier = this.selectedDossier %}
+    {# Mode édition (page "Modifier") : mêmes bandes que la création, mais le
+       dossier est verrouillé, la section photos masquée et la modale de
+       confirmation simplifiée (pas d'email, pas d'événement dossier). #}
+    {% set editing = this.editing %}
     {# Une visite se cadre sur les critères de recherche : dossier
-       incomplet, le formulaire s'arrête au choix du dossier. #}
-    {% set ready = dossier and dossier.searchComplete %}
+       incomplet, le formulaire s'arrête au choix du dossier. En édition la
+       visite a déjà été cadrée : une recherche redevenue incomplète ne doit
+       pas rendre la visite inéditable. #}
+    {% set ready = dossier and (editing or dossier.searchComplete) %}
+    {# Formule Accompagné : le client visite seul, mais uniquement pour une
+       visite de bien. Un état des lieux ou une intervention technique se fait
+       toujours avec un membre de l'équipe désigné. #}
+    {% set clientVisits = dossier and dossier.offer == 'accompagne' and (this.formValues['type'] ?? 'property_visit') == 'property_visit' %}
     <div class="mx-auto flex max-w-2xl flex-col gap-4 lg:max-w-5xl lg:flex-row lg:items-start lg:gap-6">
     <form
         data-action="live#action:prevent"
-        data-live-action-param="create"
+        {# Le submit ne fait que valider et ouvrir la modale de confirmation;
+           les fichiers ("files|") partent avec create, depuis la modale. #}
+        data-live-action-param="askCreate"
         data-model="on(input)|debounce(400)|*"
         novalidate
         autocomplete="off"
@@ -149,15 +250,52 @@
         data-testid="visit-form"
     >
         <div class="rounded-3xl border border-neutral-200 bg-white p-2">
-            <div class="space-y-2 rounded-2xl bg-neutral-50 p-2">
+            <div class="space-y-4 rounded-2xl bg-neutral-50 p-2">
 
                 {# ── L'essentiel, en bandes séparées comme la card Recherche :
                       dossier et type, le bien, le créneau, l'agent, la note. ── #}
-                <div class="flex flex-col gap-1">
-                    <div class="{{ ready ? 'rounded-t-xl' : 'rounded-xl' }} bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.visit'|trans }}</h3>
+                <div class="flex flex-col gap-1.5">
+                    {% if not dossier %}
+                    {# Accueil centré : pastille, consigne, select et compteur
+                       des dossiers proposables (recherche validée uniquement). #}
+                    <div class="animate-slide-in rounded-xl bg-white px-6 py-10 motion-reduce:animate-none" data-testid="visit-form-intro">
+                        <div data-loading="model(visit.dossier)|addClass(opacity-60)" class="mx-auto flex w-full max-w-md flex-col items-center gap-4 text-center transition-opacity duration-200">
+                            <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                {{ ux_icon('lucide:calendar-plus', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-sm font-medium text-gray-900">{{ 'admin.visits.create.intro.text'|trans }}</p>
+                                <p class="max-w-[44ch] text-xs text-pretty text-gray-400">{{ 'admin.visits.create.intro.criteria'|trans }}</p>
+                            </div>
+                            <div class="w-full text-left">
+                                {{ ui.select(form.dossier, 'admin.visits.create.dossier.label') }}
+                            </div>
+                            <div data-loading="model(visit.dossier)|removeClass(hidden)" class="hidden flex items-center gap-2 text-sm text-gray-400">
+                                {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.create.dossier.loading'|trans }}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="{{ ready ? 'rounded-t-xl' : 'rounded-xl' }} animate-slide-in bg-white px-5 py-5 motion-reduce:animate-none">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.sections.visit'|trans }}</h3>
                         <div class="space-y-4">
+                            {% if editing %}
+                                {# Dossier verrouillé en édition : changer de
+                                   dossier = une autre visite. Le champ du
+                                   formulaire est désactivé côté serveur, ici
+                                   il s'affiche en lecture seule. #}
+                                <div class="min-w-0" data-testid="visit-form-dossier-locked">
+                                    <twig:Label class="text-gray-600">{{ 'admin.visits.create.dossier.label'|trans }}</twig:Label>
+                                    <p class="mt-1.5 flex min-w-0 items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-2 text-sm font-medium text-gray-900">
+                                        {{ ux_icon('lucide:folder-open', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ dossier.name }} <span class="font-normal text-gray-400">({{ dossier.reference }})</span></span>
+                                        {{ ux_icon('lucide:lock', {class: 'ml-auto size-3.5 shrink-0 text-gray-300', 'aria-hidden': 'true'}) }}
+                                    </p>
+                                </div>
+                            {% else %}
                             {{ ui.select(form.dossier, 'admin.visits.create.dossier.label') }}
+                            {% endif %}
                             {# Le choix d'un dossier déclenche un re-rendu live (récap,
                                critères) : petit loader le temps de la requête. #}
                             <div
@@ -224,18 +362,27 @@
                                         </p>
                                     </div>
                                 </div>
-                                {{ ui.enumChips(form.type, 'admin.visits.create.type.label', enum('App\\Visit\\Domain\\VisitType').cases()) }}
                                 </div>
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
+
+                    {% if ready %}
+                    {# Type de visite : bande dédiée, détachée du dossier
+                       (même découpage que la bande adresse). #}
+                    <div data-loading="model(visit.dossier)|addClass(hidden)" class="animate-slide-in bg-white px-5 py-5 motion-reduce:animate-none" data-testid="visit-form-type-band">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.type.label'|trans }}</h3>
+                        {{ ui.enumChips(form.type, null, enum('App\\Visit\\Domain\\VisitType').cases()) }}
+                    </div>
+                    {% endif %}
 
                     {% if ready %}
                     {# Les bandes suivantes dépendent du dossier : masquées le
                        temps qu'un changement de dossier se re-rende. #}
-                    <div data-loading="model(visit.dossier)|addClass(hidden)" class="flex flex-col gap-1">
-                    <div class="bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.property'|trans }}</h3>
+                    <div data-loading="model(visit.dossier)|addClass(hidden)" class="animate-slide-in flex flex-col gap-1.5 [animation-delay:60ms] motion-reduce:animate-none">
+                    <div class="bg-white px-5 py-5">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.sections.property'|trans }}</h3>
                         {# Adresse : autocomplete Places (même widget que "Proposer
                            un bien"), les coordonnées partent via chooseLocation. #}
                         <div
@@ -281,22 +428,42 @@
                                 {% for error in form.address.vars.errors %}
                                     <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                                 {% endfor %}
+                                <p class="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-400" data-testid="visit-form-address-help">
+                                    {{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.visits.create.address.help'|trans }}
+                                </p>
                             </div>
                         </div>
-                        <twig:Visit:DuplicateWarning :visits="this.matchingVisits" adminPrefix="{{ this.adminPrefix }}" />
+                        {% set outOfArea = this.outOfArea %}
+                        {% if outOfArea %}
+                            {# Hors secteur : informatif et discret, la visite
+                               reste possible (un bien limitrophe se tente). #}
+                            {# Phrase discrète : une ligne grise, le quartier
+                               du bien en évidence. #}
+                            <div class="mt-3 flex items-start gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 py-2.5" role="status" data-testid="visit-form-out-of-area">
+                                {{ ux_icon('lucide:map-pin', {class: 'mt-0.5 size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                <p class="text-sm text-gray-600">{{ 'admin.visits.create.address.outOfArea.title'|trans }} : <span class="font-medium text-gray-900" data-testid="visit-form-out-of-area-district">{{ outOfArea.district }}</span> {{ 'admin.visits.create.address.outOfArea.searched'|trans }} {{ outOfArea.areas|join(', ') }}.</p>
+                            </div>
+                        {% endif %}
+                        <twig:Visit:DuplicateWarning :visits="this.matchingVisits" :currentDossierId="dossier ? dossier.id : null" adminPrefix="{{ this.adminPrefix }}" />
                     </div>
 
-                    <div class="bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.slot'|trans }}</h3>
+                    <div class="bg-white px-5 py-5">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.sections.slot'|trans }}</h3>
                         <div class="grid gap-4 sm:grid-cols-2">
                             {{ ui.input(form.scheduledAt, 'admin.visits.create.scheduledAt.label', 'datetime-local', true, 'now'|date('Y-m-d\\TH:i')) }}
                             <div class="min-w-0">
-                                <p id="{{ form.durationMinutes.vars.id }}-label" class="text-sm text-gray-600">
+                                {# Mêmes métriques que <twig:Label> (leading-none,
+                                   font-medium) : les deux libellés de la grille
+                                   partent de la même ligne de base. #}
+                                <p id="{{ form.durationMinutes.vars.id }}-label" class="flex items-center gap-2 text-sm leading-none font-medium text-gray-600">
                                     {{ 'admin.visits.create.duration.label'|trans }}
                                     <span class="text-red-600" aria-hidden="true">*</span>
                                 </p>
-                                {# Chips radio, même vocabulaire que le choix de type. #}
-                                <div role="radiogroup" aria-labelledby="{{ form.durationMinutes.vars.id }}-label" class="mt-2 flex flex-wrap gap-1.5">
+                                {# Chips radio, même vocabulaire que le choix de type.
+                                   min-h aligné sur la hauteur de l'input datetime
+                                   voisin pour que les deux rangées soient de niveau. #}
+                                <div role="radiogroup" aria-labelledby="{{ form.durationMinutes.vars.id }}-label" class="mt-1.5 flex min-h-[38px] flex-wrap items-center gap-1.5">
                                     {% for choice in form.durationMinutes.vars.choices %}
                                         <label class="cursor-pointer">
                                             <input
@@ -318,12 +485,20 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {% if this.oddHourSlot %}
+                            {# Rappel doux, jamais bloquant : une visite à 3h du
+                               matin est plus souvent une coquille qu'un choix. #}
+                            <p class="mt-3 flex items-center gap-1.5 text-xs text-amber-600" role="status" data-testid="visit-form-odd-hour">
+                                {{ ux_icon('lucide:clock-alert', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.create.scheduledAt.oddHour'|trans }}
+                            </p>
+                        {% endif %}
                     </div>
 
                     {# Effectuée par : chips des agents de visite (même geste que
                        "Suivi par" sur un lead), le titre de bande sert de label. #}
-                    <div class="bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.assignee.label'|trans }}</h3>
+                    <div class="bg-white px-5 py-5">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.assignee.label'|trans }}</h3>
                         <input
                             type="hidden"
                             id="{{ form.assignee.vars.id }}"
@@ -331,6 +506,14 @@
                             value="{{ this.formValues['assignee'] ?? '' }}"
                             data-testid="visit-form-assignee"
                         >
+                        {% if clientVisits %}
+                            {# Formule Accompagné : le client visite pour son
+                               propre compte, personne de l'équipe à assigner. #}
+                            <p class="flex items-center gap-2 text-sm text-gray-600" data-testid="visit-form-client-self">
+                                {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.create.assignee.clientSelf'|trans }}
+                            </p>
+                        {% else %}
                         {% set pickedAssignee = (this.formValues['assignee'] ?? '') %}
                         <div class="flex flex-wrap items-center gap-2" data-testid="assignee-chips">
                             {% for choice in this.assigneeChoices %}
@@ -357,66 +540,12 @@
                         {% for error in form.assignee.vars.errors %}
                             <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
                         {% endfor %}
-                    </div>
-
-                    {# Consignes du jour J : code d'accès, contact sur place... #}
-                    <div class="rounded-b-xl bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.note.label'|trans }}</h3>
-                        <textarea
-                            id="{{ form.note.vars.id }}"
-                            name="{{ form.note.vars.full_name }}"
-                            rows="3"
-                            maxlength="2000"
-                            placeholder="{{ 'admin.visits.create.note.placeholder'|trans }}"
-                            aria-label="{{ 'admin.visits.create.note.label'|trans }}"
-                            class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                            data-testid="visit-form-note"
-                        >{{ form.note.vars.value }}</textarea>
-                        {% for error in form.note.vars.errors %}
-                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
-                        {% endfor %}
-                    </div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                {% if ready %}
-                <div data-loading="model(visit.dossier)|addClass(hidden)" class="space-y-2">
-                {# ── Mode détaillé : le complément, replié par défaut. ── #}
-                <button
-                    type="button"
-                    data-action="live#action"
-                    data-live-action-param="toggleDetails"
-                    aria-pressed="{{ this.detailed ? 'true' : 'false' }}"
-                    class="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white px-5 py-3.5 text-left transition-colors duration-100 ease-out hover:bg-neutral-100/60"
-                    data-testid="visit-form-details-toggle"
-                >
-                    <span class="min-w-0 flex-1">
-                        <span class="block text-sm font-medium text-gray-900">{{ 'admin.visits.create.details.label'|trans }}</span>
-                        <span class="block text-xs text-gray-500">{{ 'admin.visits.create.details.help'|trans }}</span>
-                    </span>
-                    {# Interrupteur visuel piloté par la prop live. #}
-                    <span class="flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors duration-100 ease-out {{ this.detailed ? 'bg-primary' : 'bg-neutral-200' }}" aria-hidden="true">
-                        <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out {{ this.detailed ? 'translate-x-4' : '' }}"></span>
-                    </span>
-                </button>
-
-                {% if this.detailed %}
-                    <div class="flex flex-col gap-1" data-testid="visit-form-details">
-                        <div class="rounded-t-xl bg-white px-5 py-4">
-                            <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.contacts'|trans }}</h3>
-                            <div class="space-y-4">
-                                {{ ui.select(form.agent, 'admin.visits.create.agent.label', false) }}
-                                {{ ui.input(form.listingUrl, 'admin.visits.create.listingUrl.label', 'url', false) }}
-                            </div>
-                        </div>
-
-                        {# Tuile-option cliquable : le client vient, ou l'agent
-                           visite pour son compte (procuration). #}
-                        <div class="rounded-b-xl bg-white px-5 py-4">
-                            <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.sections.options'|trans }}</h3>
+                        {# Le client participe ? Sa place est ici : la bande
+                           dit qui sera sur place le jour J. Sans objet en
+                           formule Accompagné (le client EST le visiteur). #}
+                        {% if not clientVisits %}
                             <label
-                                class="group/present flex w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-colors duration-100 ease-out has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50 has-[input:checked]:hover:bg-primary/10"
+                                class="group/present mt-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-colors duration-100 ease-out has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50 has-[input:checked]:hover:bg-primary/10"
                             >
                                 <input
                                     type="checkbox"
@@ -437,48 +566,416 @@
                                     <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out group-has-[input:checked]/present:translate-x-4"></span>
                                 </span>
                             </label>
+                        {% endif %}
+                        {% set assigneeConflicts = this.assigneeConflicts %}
+                        {% if assigneeConflicts is not empty %}
+                            {# Conflit d'agenda : la personne désignée a déjà une
+                               visite qui chevauche ce créneau. Informatif, jamais
+                               bloquant (même vocabulaire que le bandeau doublon). #}
+                            <div
+                                class="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5"
+                                role="status"
+                                data-testid="visit-form-assignee-conflict"
+                            >
+                                {{ ux_icon('lucide:triangle-alert', {class: 'mt-0.5 size-4 shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
+                                <div class="min-w-0 space-y-1">
+                                    <p class="text-sm font-medium text-amber-900">
+                                        {{ 'admin.visits.create.assignee.conflict'|trans({'%name%': ((assigneeConflicts|first).assigneeName ?? '')|title}) }}
+                                    </p>
+                                    <ul class="space-y-0.5" role="list">
+                                        {% for conflict in assigneeConflicts %}
+                                            <li class="min-w-0 text-xs text-amber-800">
+                                                <a
+                                                    href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, reference: conflict.reference}) }}"
+                                                    class="font-medium underline underline-offset-2 transition-colors duration-100 ease-out hover:text-amber-950"
+                                                    data-testid="visit-form-assignee-conflict-link"
+                                                >
+                                                    {{ conflict.reference }}
+                                                </a>
+                                                {{ conflict.scheduledAt|format_datetime(pattern='dd MMM yyyy, HH:mm') }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+
+                    {# Consignes du jour J : code d'accès, contact sur place... #}
+                    <div class="rounded-b-xl bg-white px-5 py-5">
+                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.note.label'|trans }}</h3>
+                        <textarea
+                            id="{{ form.note.vars.id }}"
+                            name="{{ form.note.vars.full_name }}"
+                            rows="3"
+                            maxlength="2000"
+                            placeholder="{{ 'admin.visits.create.note.placeholder'|trans }}"
+                            aria-label="{{ 'admin.visits.create.note.label'|trans }}"
+                            class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                            data-testid="visit-form-note"
+                        >{{ form.note.vars.value }}</textarea>
+                        {% for error in form.note.vars.errors %}
+                            <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if ready %}
+                <div data-loading="model(visit.dossier)|addClass(hidden)" class="space-y-4">
+                {# ── Sections repliables (repliées par défaut) : contacts,
+                      le bien en détail, photos. Tout y est optionnel. ── #}
+                <div class="rounded-xl bg-white">
+                {{ ui.sectionToggle('toggleContacts', this.contactsOpen, 'admin.visits.create.sections.contacts', 'admin.visits.create.sections.contactsHelp', 'visit-form-contacts-toggle') }}
+
+                {% if this.contactsOpen %}
+                    <div class="divide-y divide-gray-950/5 border-t border-gray-950/5" data-testid="visit-form-contacts">
+                        <div class="px-5 py-5">
+                            <div class="space-y-4">
+                                {# Dropdown agent enrichi : photo de profil, nom,
+                                   agence et enseigne (même famille que le picker
+                                   agence du formulaire agent). La valeur voyage
+                                   dans l'input caché, comme "Effectuée par". #}
+                                <div class="min-w-0">
+                                    <twig:Label class="text-gray-600">{{ 'admin.visits.create.agent.label'|trans }}</twig:Label>
+                                    <input
+                                        type="hidden"
+                                        id="{{ form.agent.vars.id }}"
+                                        name="{{ form.agent.vars.full_name }}"
+                                        value="{{ this.formValues['agent'] ?? '' }}"
+                                        data-testid="visit-form-agent"
+                                    >
+                                    {% set selectedAgent = this.selectedAgent %}
+                                    <details class="relative mt-1.5" data-controller="details-dropdown dropdown-filter" data-testid="visit-form-agent-picker">
+                                        <summary class="flex w-full cursor-pointer list-none items-center justify-between gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm transition-colors duration-100 ease-out hover:border-gray-300 hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                                            {% if selectedAgent %}
+                                                <span class="flex min-w-0 items-center gap-2.5">
+                                                    <twig:Avatar filename="{{ selectedAgent.avatarFilename }}" name="{{ selectedAgent.fullName }}" size="7" />
+                                                    <span class="min-w-0 text-left">
+                                                        <span class="block truncate font-medium text-gray-900">{{ selectedAgent.fullName|title }}</span>
+                                                        <span class="block truncate text-xs text-gray-500">{{ selectedAgent.agencyLine ?? 'admin.agents.card.noAgency'|trans }}</span>
+                                                    </span>
+                                                </span>
+                                            {% else %}
+                                                <span class="text-gray-400">{{ 'admin.visits.create.agent.placeholder'|trans }}</span>
+                                            {% endif %}
+                                            {{ ux_icon('lucide:chevrons-up-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                        </summary>
+                                        <div class="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg">
+                                            {# Recherche locale : filtre la liste sans requête. #}
+                                            <div class="relative p-1">
+                                                {{ ux_icon('lucide:search', {class: 'pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-gray-400', 'aria-hidden': 'true'}) }}
+                                                <input
+                                                    type="search"
+                                                    data-dropdown-filter-target="input"
+                                                    data-action="input->dropdown-filter#filter"
+                                                    placeholder="{{ 'admin.visits.create.agent.searchPlaceholder'|trans }}"
+                                                    aria-label="{{ 'admin.visits.create.agent.searchPlaceholder'|trans }}"
+                                                    class="w-full rounded-lg bg-neutral-50 py-2 pr-3 pl-8 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:bg-neutral-100/70 focus:outline-none"
+                                                    data-testid="visit-form-agent-search"
+                                                >
+                                            </div>
+                                            <p class="px-3 py-2 text-sm text-gray-400" data-dropdown-filter-target="empty" hidden data-testid="visit-form-agent-search-empty">{{ 'admin.visits.create.agent.searchEmpty'|trans }}</p>
+                                            <ul class="max-h-72 space-y-0.5 overflow-y-auto p-1" role="listbox">
+                                                {% if selectedAgent %}
+                                                    <li>
+                                                        <button
+                                                            type="button"
+                                                            data-action="live#action details-dropdown#close"
+                                                            data-live-action-param="chooseAgent"
+                                                            class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                                            data-testid="visit-form-agent-clear"
+                                                        >
+                                                            {{ ux_icon('lucide:x', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                            {{ 'admin.visits.create.agent.placeholder'|trans }}
+                                                        </button>
+                                                    </li>
+                                                {% endif %}
+                                                {% for option in this.agentOptions %}
+                                                    {% set isActive = selectedAgent and selectedAgent.id == option.id %}
+                                                    <li data-dropdown-filter-target="item" data-dropdown-filter-text="{{ option.fullName }} {{ option.agencyLine ?? '' }}">
+                                                        <button
+                                                            type="button"
+                                                            data-action="live#action details-dropdown#close"
+                                                            data-live-action-param="chooseAgent"
+                                                            data-live-id-param="{{ option.id }}"
+                                                            class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors duration-100 ease-out {{ isActive ? 'bg-primary/5' : 'hover:bg-gray-50' }}"
+                                                            data-testid="visit-form-agent-option-{{ option.id }}"
+                                                        >
+                                                            <twig:Avatar filename="{{ option.avatarFilename }}" name="{{ option.fullName }}" size="8" />
+                                                            <span class="min-w-0 flex-1">
+                                                                <span class="block truncate text-sm font-medium {{ isActive ? 'text-primary' : 'text-gray-900' }}">{{ option.fullName|title }}</span>
+                                                                <span class="block truncate text-xs {{ isActive ? 'text-primary/60' : 'text-gray-500' }}">{{ option.agencyLine ?? 'admin.agents.card.noAgency'|trans }}</span>
+                                                            </span>
+                                                            {% if isActive %}
+                                                                {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                                            {% endif %}
+                                                        </button>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </details>
+                                    {% for error in form.agent.vars.errors %}
+                                        <p class="mt-1.5 text-sm text-red-600" role="alert">{{ error.message }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endif %}
+                </div>
+
+                {# ── Le bien en détail : caractéristiques du bien visité. ── #}
+                <div class="rounded-xl bg-white">
+                {{ ui.sectionToggle('togglePropertyDetails', this.propertyDetailsOpen, 'admin.visits.create.sections.property_details', 'admin.visits.create.sections.property_detailsHelp', 'visit-form-property-details-toggle') }}
+
+                {% if this.propertyDetailsOpen %}
+                    <div class="border-t border-gray-950/5 px-5 py-5" data-testid="visit-form-property-details">
+                        <div class="space-y-4">
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                {{ ui.suffixInput(form.surface, 'admin.visits.create.propertyDetails.surface.label', 'm²', '0.5') }}
+                                {{ ui.suffixInput(form.floor, 'admin.visits.create.propertyDetails.floor.label', '', '1') }}
+                            </div>
+                            {# Loyer HC ou CC : en charges comprises, le champ
+                               Charges n'a plus d'objet et disparaît. #}
+                            {% set rentCC = (this.formValues['rentChargesIncluded'] ?? '') == '1' %}
+                            <input
+                                type="hidden"
+                                id="{{ form.rentChargesIncluded.vars.id }}"
+                                name="{{ form.rentChargesIncluded.vars.full_name }}"
+                                value="{{ rentCC ? '1' : '' }}"
+                                data-testid="visit-form-rentChargesIncluded"
+                            >
+                            <div class="min-w-0">
+                                <twig:Label class="text-gray-600">{{ 'admin.visits.create.propertyDetails.rentMode.label'|trans }}</twig:Label>
+                                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                                    {% for mode in ['hc', 'cc'] %}
+                                        {% set active = mode == (rentCC ? 'cc' : 'hc') %}
+                                        <button
+                                            type="button"
+                                            data-action="live#action"
+                                            data-live-action-param="chooseRentMode"
+                                            data-live-value-param="{{ mode }}"
+                                            aria-pressed="{{ active ? 'true' : 'false' }}"
+                                            class="flex cursor-pointer items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ active ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                                            data-testid="visit-form-rent-mode-{{ mode }}"
+                                        >
+                                            {{ ('admin.visits.create.propertyDetails.rentMode.' ~ mode)|trans }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                {{ ui.suffixInput(form.rentExcludingCharges, 'admin.visits.create.propertyDetails.rentExcludingCharges.label', '€', '0.01') }}
+                                {% if not rentCC %}
+                                    {{ ui.suffixInput(form.charges, 'admin.visits.create.propertyDetails.charges.label', '€', '0.01') }}
+                                {% endif %}
+                            </div>
+                            {# L'annonce décrit le bien : son lien vit ici. #}
+                            {{ ui.input(form.listingUrl, 'admin.visits.create.listingUrl.label', 'url', false) }}
+                            {# Mêmes codes et libellés que la recherche dossier :
+                               une visite décrit un bien précis, donc single. #}
+                            {% set kindChoices = enum('App\\PropertyListing\\Domain\\PropertyType').cases()|map(c => {value: c.value, label: 'listProperty.form.propertyType.choice.' ~ c.value}) %}
+                            {{ ui.liveChips(form.propertyKind, 'admin.visits.create.propertyDetails.propertyKind.label', 'choosePropertyKind', kindChoices, this.formValues['propertyKind'] ?? '') }}
+                            {% set furnishingChoices = enum('App\\Contact\\Domain\\Furnishing').cases()|map(c => {value: c.value, label: c.labelKey}) %}
+                            {{ ui.liveChips(form.furnishing, 'admin.visits.create.propertyDetails.furnishing.label', 'chooseFurnishing', furnishingChoices, this.formValues['furnishing'] ?? '') }}
+                            {% set leaseChoices = enum('App\\Visit\\Domain\\LeaseType').cases()|map(c => {value: c.value, label: c.labelKey}) %}
+                            {{ ui.liveChips(form.leaseType, 'admin.visits.create.propertyDetails.leaseType.label', 'chooseLeaseType', leaseChoices, this.formValues['leaseType'] ?? '') }}
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+
+                {# ── Photos du bien, envoyées avec l'action create. Masquées
+                      en édition : les photos se gèrent sur la fiche. ── #}
+                {% if not editing %}
+                <div class="rounded-xl bg-white">
+                {{ ui.sectionToggle('togglePhotos', this.photosOpen, 'admin.visits.create.sections.photos', 'admin.visits.create.sections.photosHelp', 'visit-form-photos-toggle') }}
+
+                {% if this.photosOpen %}
+                    <div class="border-t border-gray-950/5 px-5 py-5" data-testid="visit-form-photos">
+                        {# data-live-ignore : la sélection de fichiers et les
+                           vignettes sont purement client, un morph pendant la
+                           saisie des autres champs les effacerait. #}
+                        <div data-live-ignore>
+                            <div
+                                data-controller="photo-preview file-drop"
+                                data-file-drop-drag-class="ring-2 ring-primary/40 bg-primary/5"
+                                data-photo-preview-max-value="12"
+                                data-photo-preview-cover-label-value="{{ 'admin.visits.create.photos.cover'|trans }}"
+                                data-photo-preview-make-cover-label-value="{{ 'admin.visits.create.photos.makeCover'|trans }}"
+                                data-action="dragover->file-drop#dragOver dragenter->file-drop#dragEnter dragleave->file-drop#dragLeave drop->file-drop#drop dragover@window->file-drop#guardWindow drop@window->file-drop#guardWindow"
+                                class="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/60 px-4 py-4 transition-colors duration-100 ease-out"
+                            >
+                                <input
+                                    type="file"
+                                    id="visit-form-photos-input"
+                                    name="photos[]"
+                                    multiple
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="sr-only"
+                                    data-file-drop-target="input"
+                                    data-photo-preview-target="input"
+                                    data-action="change->photo-preview#changed"
+                                    data-testid="visit-form-photos-input"
+                                >
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <label for="visit-form-photos-input" class="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
+                                        {{ ux_icon('lucide:image-plus', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ 'admin.visits.create.photos.choose'|trans }}
+                                    </label>
+                                    <p class="text-xs text-gray-400">{{ 'admin.visits.create.photos.drop'|trans }}</p>
+                                    {# Compteur discret n/12, tenu par le controller. #}
+                                    <p class="ml-auto text-xs text-gray-400 tabular-nums" data-photo-preview-target="counter" data-testid="visit-form-photos-count">0/12</p>
+                                </div>
+                                <p class="mt-2 flex items-center gap-1.5 text-xs text-neutral-400">
+                                    {{ ux_icon('lucide:info', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ 'admin.visits.create.photos.hint'|trans }}
+                                </p>
+                                <div data-photo-preview-target="grid" class="mt-3 hidden grid-cols-3 gap-2 sm:grid-cols-4"></div>
+                            </div>
                         </div>
                     </div>
                 {% endif %}
                 </div>
                 {% endif %}
+                </div>
+                {% endif %}
 
-                {# Pied : annuler / planifier. #}
+                {# Pied : annuler / planifier (ou enregistrer en édition, avec
+                   retour sur la fiche). #}
                 <div class="flex items-center justify-end gap-4 p-3">
                     <a
-                        href="{{ path('admin_visits', {adminPrefix: this.adminPrefix}) }}"
+                        href="{{ editing ? path('admin_visit_show', {adminPrefix: this.adminPrefix, reference: this.editedReference}) : path('admin_visits', {adminPrefix: this.adminPrefix}) }}"
                         class="text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
                         data-testid="visit-form-cancel"
                     >
                         {{ 'admin.visits.create.cancel'|trans }}
                     </a>
                     {% if ready %}
-                    {# data-loading désactive le bouton pendant create :
-                       un double-clic créerait deux visites. #}
+                    {# Le submit valide le formulaire (askCreate) et ouvre la
+                       modale de confirmation; la création réelle part du
+                       bouton de la modale. data-loading désactive le bouton
+                       pendant la validation : un double-clic est sans objet. #}
                     <button
                         type="submit"
-                        data-loading="action(create)|addAttribute(disabled) model(visit.dossier)|addClass(hidden)"
+                        data-loading="action(askCreate)|addAttribute(disabled) model(visit.dossier)|addClass(hidden)"
                         class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
                         data-testid="visit-form-submit"
                     >
-                        <span data-loading="action(create)|addClass(hidden)">{{ 'admin.visits.create.submit'|trans }}</span>
-                        <span data-loading="action(create)|removeClass(hidden)" class="hidden flex items-center gap-2">
+                        <span data-loading="action(askCreate)|addClass(hidden)">{{ (editing ? 'admin.visits.edit.submit' : 'admin.visits.create.submit')|trans }}</span>
+                        <span data-loading="action(askCreate)|removeClass(hidden)" class="hidden flex items-center gap-2">
                             {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
-                            {{ 'admin.visits.create.submitting'|trans }}
+                            {{ (editing ? 'admin.visits.edit.submitting' : 'admin.visits.create.submitting')|trans }}
                         </span>
                     </button>
                     {% endif %}
                 </div>
             </div>
         </div>
+
+        {% if this.confirmingCreate %}
+            {# Modale de confirmation, même vocabulaire que les modales du BO
+               (désactivation d'agent) : entrée animée, backdrop cliquable,
+               Échap. Sûre malgré l'animation : la tuile email est en
+               data-model norender, la modale ne se re-rend jamais ouverte
+               (le morph ne retire donc jamais data-entered). #}
+            <div
+                class="group/modal fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 ease-out data-entered:opacity-100 motion-reduce:transition-none"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="visit-form-confirm-title"
+                data-controller="modal-focus modal-anim instant-exit"
+                data-action="keydown.esc@window->instant-exit#run keydown.esc@window->live#action"
+                data-live-action-param="cancelCreate"
+                data-testid="visit-form-confirm-modal"
+            >
+                <button
+                    type="button"
+                    class="absolute inset-0 cursor-default bg-gray-950/60 backdrop-blur-[2px]"
+                    data-action="instant-exit#run live#action"
+                    data-live-action-param="cancelCreate"
+                    aria-label="{{ 'admin.contacts.notes.cancel'|trans }}"
+                    tabindex="-1"
+                ></button>
+                <div class="relative w-full max-w-md rounded-3xl border border-neutral-200 bg-white p-2 shadow-xl scale-90 translate-y-4 transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-entered/modal:scale-100 group-data-entered/modal:translate-y-0 motion-reduce:transition-none">
+                    <div class="space-y-4 rounded-2xl bg-neutral-50 p-5">
+                        <div class="space-y-1">
+                            <h2 id="visit-form-confirm-title" class="text-base font-semibold text-gray-900">{{ (editing ? 'admin.visits.edit.confirm.title' : 'admin.visits.create.confirm.title')|trans }}</h2>
+                            {% if not editing %}
+                                <p class="text-sm text-pretty text-gray-600">{{ 'admin.visits.create.confirm.text'|trans }}</p>
+                            {% endif %}
+                        </div>
+                        {% if not editing %}
+                        {# Même tuile-interrupteur que "Le client participe" :
+                           l'email de confirmation part par défaut. norender :
+                           la bascule ne re-rend pas la modale ouverte, la
+                           valeur part avec l'action create. #}
+                        <label
+                            class="group/notify flex w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 transition-colors duration-100 ease-out has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 hover:bg-neutral-50 has-[input:checked]:hover:bg-primary/10"
+                        >
+                            <input
+                                type="checkbox"
+                                data-model="norender|notifyClient"
+                                {{ this.notifyClient ? 'checked' }}
+                                class="sr-only"
+                                data-testid="visit-form-confirm-notify"
+                            >
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-gray-400 transition-colors duration-100 ease-out group-has-[input:checked]/notify:bg-primary group-has-[input:checked]/notify:text-white">
+                                {{ ux_icon('lucide:mail', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-sm font-medium text-gray-900 transition-colors duration-100 ease-out group-has-[input:checked]/notify:text-primary">{{ 'admin.visits.create.confirm.notify'|trans }}</span>
+                                <span class="block text-xs text-gray-500">{{ 'admin.visits.create.confirm.notifyHelp'|trans }}</span>
+                            </span>
+                            <span class="flex h-5 w-9 shrink-0 items-center rounded-full bg-neutral-200 p-0.5 transition-colors duration-100 ease-out group-has-[input:checked]/notify:bg-primary" aria-hidden="true">
+                                <span class="size-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out group-has-[input:checked]/notify:translate-x-4"></span>
+                            </span>
+                        </label>
+                        {% endif %}
+                        <div class="flex items-center justify-end gap-4">
+                            <button
+                                type="button"
+                                data-action="instant-exit#run live#action"
+                                data-live-action-param="cancelCreate"
+                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                data-testid="visit-form-confirm-cancel"
+                            >
+                                {{ 'admin.contacts.notes.cancel'|trans }}
+                            </button>
+                            {# La création part d'ici, photos comprises
+                               ("files|"); désactivé pendant l'action pour
+                               éviter la double visite. #}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="files|create"
+                                data-loading="action(create)|addAttribute(disabled)"
+                                class="flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-100 ease-out hover:bg-primary/90 disabled:cursor-default disabled:opacity-60"
+                                data-testid="visit-form-confirm-submit"
+                            >
+                                <span data-loading="action(create)|addClass(hidden)" class="flex items-center gap-2">
+                                    {{ ux_icon(editing ? 'lucide:check' : 'lucide:calendar-check', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                    {{ (editing ? 'admin.visits.edit.submit' : 'admin.visits.create.submit')|trans }}
+                                </span>
+                                <span data-loading="action(create)|removeClass(hidden)" class="hidden flex items-center gap-2">
+                                    {{ ux_icon('lucide:loader-circle', {class: 'size-4 shrink-0 animate-spin', 'aria-hidden': 'true'}) }}
+                                    {{ (editing ? 'admin.visits.edit.submitting' : 'admin.visits.create.submitting')|trans }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </form>
 
     {% if ready %}
-        {# ── Récapitulatif de la visite en cours de saisie : colonne sticky à
-              droite sur desktop, re-rendue à chaque frappe (le formulaire est
-              déjà un live model). Masquée sur mobile (elle ne ferait que
-              dupliquer le formulaire juste au-dessus) et pendant qu'un
-              changement de dossier charge. ── #}
+        {# ── Récapitulatif latéral (desktop) : reflet vivant du formulaire. ── #}
         {% set recapType = (this.formValues['type'] ?? '') ? enum('App\\Visit\\Domain\\VisitType').tryFrom(this.formValues['type']) : null %}
         {% set recapAddress = (this.formValues['address'] ?? '')|trim %}
         {% set recapScheduledAt = this.formValues['scheduledAt'] ?? '' %}
@@ -489,14 +986,23 @@
         {% set recapAssignee = this.assigneeChoices|filter(c => c.id == (this.formValues['assignee'] ?? ''))|first %}
         <aside
             data-loading="model(visit.dossier)|addClass(hidden)"
-            class="hidden lg:sticky lg:top-6 lg:block lg:w-80 lg:shrink-0"
+            class="animate-slide-in hidden [animation-delay:120ms] lg:sticky lg:top-6 lg:block lg:w-80 lg:shrink-0 motion-reduce:animate-none"
             data-testid="visit-form-recap"
         >
-            <div class="rounded-3xl border border-neutral-200 bg-white p-2">
-                <div class="rounded-2xl bg-neutral-50 p-2">
-                    <div class="rounded-xl bg-white px-5 py-4">
-                        <h3 class="mb-4 text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.recap.title'|trans }}</h3>
-                        <dl class="space-y-3.5">
+            {% set propertyParts = this.propertyRecapParts %}
+            {# Blocs partagés : zone photos (client-only, relayée par
+               photo-preview) et lignes du récap. #}
+            {% set recapPhotoZone %}
+                <div data-live-ignore>
+                    <div data-controller="recap-photos" class="contents">
+                        <div data-recap-photos-target="zone" hidden class="relative px-1" data-testid="visit-form-recap-photos">
+                            <img data-recap-photos-target="cover" alt="" class="aspect-video w-full rounded-lg border border-neutral-200 object-cover">
+                            <span data-recap-photos-target="count" hidden class="absolute right-3 bottom-2 rounded-full bg-gray-950/70 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums"></span>
+                        </div>
+                    </div>
+                </div>
+            {% endset %}
+            {% set recapItems %}
                             <div class="min-w-0">
                                 <dt class="flex items-center gap-1.5 text-xs text-gray-400">
                                     {{ ux_icon('lucide:folder', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
@@ -516,15 +1022,6 @@
                                     <dd class="mt-1 truncate text-sm font-medium text-gray-900">{{ recapType.labelKey|trans }}</dd>
                                 </div>
                             {% endif %}
-                            {% if recapAddress %}
-                                <div class="min-w-0">
-                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
-                                        {{ ux_icon('lucide:map-pin', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                        <span class="truncate">{{ 'admin.visits.create.address.label'|trans }}</span>
-                                    </dt>
-                                    <dd class="mt-1 text-sm font-medium text-gray-900">{{ recapAddress }}</dd>
-                                </div>
-                            {% endif %}
                             {% if recapScheduledAt %}
                                 <div class="min-w-0">
                                     <dt class="flex items-center gap-1.5 text-xs text-gray-400">
@@ -539,18 +1036,142 @@
                                     </dd>
                                 </div>
                             {% endif %}
-                            {% if recapAssignee %}
+                            {% if clientVisits %}
                                 <div class="min-w-0">
                                     <dt class="flex items-center gap-1.5 text-xs text-gray-400">
                                         {{ ux_icon('lucide:user', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
                                         <span class="truncate">{{ 'admin.visits.create.assignee.label'|trans }}</span>
                                     </dt>
-                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900">{{ recapAssignee.name|title }}</dd>
+                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900" data-testid="visit-form-recap-client-self">{{ dossier.primaryTenantName ? dossier.primaryTenantName|title : 'admin.visits.create.assignee.clientSelfShort'|trans }}</dd>
+                                </div>
+                            {% elseif recapAssignee %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:user', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.assignee.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 flex min-w-0 items-center gap-2">
+                                        <twig:Avatar filename="{{ recapAssignee.avatar }}" name="{{ recapAssignee.name }}" size="6" />
+                                        <span class="truncate text-sm font-medium text-gray-900">{{ recapAssignee.name|title }}</span>
+                                    </dd>
                                 </div>
                             {% endif %}
-                        </dl>
+            {% endset %}
+            {% set recapItemsMore %}
+                            {# Tout ce qui est saisi remonte au récap : agent
+                               immobilier, annonce, présence du client. #}
+                            {% if this.selectedAgent %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:briefcase', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.agent.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 flex min-w-0 items-center gap-2" data-testid="visit-form-recap-agent">
+                                        <twig:Avatar filename="{{ this.selectedAgent.avatarFilename }}" name="{{ this.selectedAgent.fullName }}" size="6" />
+                                        <span class="min-w-0">
+                                            <span class="block truncate text-sm font-medium text-gray-900">{{ this.selectedAgent.fullName|title }}</span>
+                                            {% if this.selectedAgent.agencyLine %}
+                                                <span class="block truncate text-xs text-gray-500">{{ this.selectedAgent.agencyLine }}</span>
+                                            {% endif %}
+                                        </span>
+                                    </dd>
+                                </div>
+                            {% endif %}
+                            {% set recapListingUrl = (this.formValues['listingUrl'] ?? '')|trim %}
+                            {% if recapListingUrl != '' %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:link', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.listingUrl.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 min-w-0" data-testid="visit-form-recap-listing">
+                                        <a
+                                            href="{{ recapListingUrl }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="block truncate text-sm font-medium text-gray-900 underline-offset-2 transition-colors duration-100 ease-out hover:text-primary hover:underline"
+                                        >{{ recapListingUrl|replace({'https://': '', 'http://': ''}) }}</a>
+                                    </dd>
+                                </div>
+                            {% endif %}
+                            {% if not clientVisits %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:user-check', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.clientPresent.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 truncate text-sm font-medium text-gray-900" data-testid="visit-form-recap-client-present">
+                                        {{ ((this.formValues['clientPresent'] ?? '') == '1' ? 'admin.visits.create.recap.yes' : 'admin.visits.create.recap.no')|trans }}
+                                    </dd>
+                                </div>
+                            {% endif %}
+                            {% set recapNote = (this.formValues['note'] ?? '')|trim %}
+                            {% if recapNote != '' %}
+                                <div class="min-w-0">
+                                    <dt class="flex items-center gap-1.5 text-xs text-gray-400">
+                                        {{ ux_icon('lucide:sticky-note', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                        <span class="truncate">{{ 'admin.visits.create.note.label'|trans }}</span>
+                                    </dt>
+                                    <dd class="mt-1 line-clamp-2 text-sm font-medium text-gray-900" data-testid="visit-form-recap-note">{{ recapNote }}</dd>
+                                </div>
+                            {% endif %}
+                        {% endset %}
+
+            {# Rail vertical : chaque ligne du récap accrochée à un rail à
+               puces, l'en-tête au langage carte d'annonce (pin + adresse sur
+               une ligne, caractéristiques discrètes, loyer en avant). #}
+            <div class="rounded-3xl border border-neutral-200 bg-white p-4">
+                <h3 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.recap.title'|trans }}</h3>
+                <div class="mt-2 [&_.px-1]:px-0">{{ recapPhotoZone }}</div>
+                {% if recapAddress or propertyParts is not empty %}
+                    <div class="pt-2">
+                        {% if recapAddress %}
+                            <p class="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-gray-900" data-testid="visit-form-recap-address">
+                                {{ ux_icon('lucide:map-pin', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                <span class="min-w-0 truncate">{{ recapAddress }}</span>
+                            </p>
+                        {% endif %}
                     </div>
-                </div>
+                {% endif %}
+                {# Puces ciblées sur les lignes (.min-w-0) et plus sur les
+                   enfants directs : le wrapper animé du complément peut
+                   s'intercaler sans perdre les puces. #}
+                <dl class="mt-3 ml-1.5 space-y-4 border-l border-gray-200 pl-4 [&_div.min-w-0]:relative before:[&_div.min-w-0]:absolute before:[&_div.min-w-0]:top-1 before:[&_div.min-w-0]:-left-[21.5px] before:[&_div.min-w-0]:size-2 before:[&_div.min-w-0]:rounded-full before:[&_div.min-w-0]:bg-gray-300 before:[&_div.min-w-0]:content-['']">
+                    {{ recapItems }}
+                    {% if this.recapMoreOpen %}
+                        {# Le morph ne crée ces noeuds qu'à l'ouverture :
+                           l'entrée douce joue une fois, sans rejouer. #}
+                        <div class="animate-slide-in space-y-4 motion-reduce:animate-none">{{ recapItemsMore }}</div>
+                    {% endif %}
+                </dl>
+                {# Le complément (agent, annonce, présence, note) se déplie. #}
+                {% set hasRecapMore = this.selectedAgent or (this.formValues['listingUrl'] ?? '')|trim != '' or not clientVisits or (this.formValues['note'] ?? '')|trim != '' %}
+                {% if hasRecapMore %}
+                    <button
+                        type="button"
+                        data-action="live#action"
+                        data-live-action-param="toggleRecapMore"
+                        aria-expanded="{{ this.recapMoreOpen ? 'true' : 'false' }}"
+                        class="mt-3 ml-1.5 flex cursor-pointer items-center gap-1 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:text-gray-900"
+                        data-testid="visit-form-recap-more"
+                    >
+                        {{ (this.recapMoreOpen ? 'admin.visits.create.recap.less' : 'admin.visits.create.recap.more')|trans }}
+                        {{ ux_icon('lucide:chevron-down', {class: 'size-3.5 shrink-0 transition-transform duration-100 ease-out ' ~ (this.recapMoreOpen ? 'rotate-180' : ''), 'aria-hidden': 'true'}) }}
+                    </button>
+                {% endif %}
+                {# Les infos du logement ferment la card. #}
+                {% set recapFacts = this.recapFacts %}
+                {% set recapRent = this.recapRent %}
+                {% if recapFacts is not empty or recapRent %}
+                    <div class="mt-3 rounded-lg bg-neutral-50 px-3 py-2.5" data-testid="visit-form-recap-property-card">
+                        {% if recapFacts is not empty %}
+                            <p class="text-xs text-gray-500 tabular-nums" data-testid="visit-form-recap-property">{{ recapFacts|join(' · ') }}</p>
+                        {% endif %}
+                        {% if recapRent %}
+                            <p class="{{ recapFacts is not empty ? 'mt-1' }} text-sm font-semibold text-gray-900 tabular-nums" data-testid="visit-form-recap-rent">{{ recapRent }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </aside>
     {% endif %}

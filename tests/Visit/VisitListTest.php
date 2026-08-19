@@ -161,6 +161,122 @@ final class VisitListTest extends KernelTestCase
         self::assertStringContainsString('data-testid="visits-later-map-toggle"', $rendered);
     }
 
+    public function testRowShowsTheFirstPhotoAndNeverTheBooker(): void
+    {
+        $withPhoto = $this->persistVisit('2026-06-15 10:00', '12 rue de la Roquette');
+        $photo = (new \App\Visit\Entity\VisitPhoto())
+            ->setPath('visits/'.$withPhoto->getReference().'/photos/first.webp')
+            ->setOriginalName('salon.webp')
+            ->setMimeType('image/webp')
+            ->setCreatedAt(new \DateTimeImmutable());
+        $withPhoto->addPhoto($photo);
+        $this->persistVisit('2026-06-16 11:00', '5 rue Oberkampf');
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-photo-thumb"'), 'Only the visit holding a photo shows the thumbnail.');
+        self::assertStringContainsString(sprintf('/visites/%s/photos/%d', $withPhoto->getReference(), $photo->getId()), $rendered);
+        self::assertStringNotContainsString('data-testid="visit-booked-by"', $rendered, 'The booker only shows on the detail page.');
+    }
+
+    public function testAPastPlannedVisitAsksForItsReport(): void
+    {
+        // 08h00 déjà passée (NOW = 09h00) et toujours "planned" : la card
+        // réclame le compte-rendu; la visite à venir n'affiche rien.
+        $this->persistVisit('2026-06-15 08:00', '12 rue de la Roquette');
+        $this->persistVisit('2026-06-15 14:00', '5 rue Oberkampf');
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertStringContainsString('data-testid="visit-report-due"', $rendered);
+        self::assertStringContainsString('Compte-rendu à compléter', $rendered);
+    }
+
+    public function testADoneVisitWithoutItsReportStillAsksForIt(): void
+    {
+        // Marquée effectuée sans compte-rendu : le rappel reste; une fois le
+        // compte-rendu rédigé, il disparaît.
+        $done = $this->persistVisit('2026-06-15 08:00', '12 rue de la Roquette');
+        $done->setStatus(\App\Visit\Domain\VisitStatus::Done);
+        $complete = $this->persistVisit('2026-06-15 08:30', '5 rue Oberkampf');
+        $complete->setStatus(\App\Visit\Domain\VisitStatus::Done)->setReport('RAS, client conquis.');
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-report-due"'));
+    }
+
+    public function testAnUnassignedVisitWithTheClientPresentReadsByClient(): void
+    {
+        // Client présent sans assigné : il s'y rend seul, pas d'alerte.
+        $alone = $this->persistVisit('2026-06-15 10:00', '12 rue de la Roquette');
+        $alone->setClientPresent(true);
+        $this->em->flush();
+        // Ni assignée ni client présent : l'alerte ambre reste.
+        $this->persistVisit('2026-06-16 11:00', '5 rue Oberkampf');
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-by-client"'));
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-unassigned"'));
+        self::assertStringContainsString('Par le client', $rendered);
+    }
+
+    public function testImminentVisitsCarryADiscreetCountdownBadge(): void
+    {
+        // NOW = 09:00 : 09:30 -> "dans 30 min", 10:30 -> "dans 1 h",
+        // 11:00 (120 min) -> "dans 2 h" ; 11:30 (> 2 h) et passée : rien.
+        $this->persistVisit('2026-06-15 09:30', 'Dans trente minutes');
+        $this->persistVisit('2026-06-15 10:30', 'Dans une heure');
+        $this->persistVisit('2026-06-15 11:00', 'Dans deux heures');
+        $this->persistVisit('2026-06-15 11:30', 'Plus tard');
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(3, substr_count($rendered, 'data-testid="visit-countdown"'));
+        self::assertStringContainsString('dans 30 min', $rendered);
+        self::assertStringContainsString('dans 1 h', $rendered);
+        self::assertStringContainsString('dans 2 h', $rendered);
+    }
+
+    public function testAPositionedVisitWithoutOutcomeShowsTheWaitingBadge(): void
+    {
+        // Positionné il y a 3 jours, toujours sans réponse : badge d'attente.
+        $waiting = $this->persistVisit('2026-06-15 08:00', 'En attente');
+        $waiting->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReport('OK')
+            ->setClientDecision(\App\Visit\Domain\ClientDecision::Positioning)
+            // Ancré sur l'horloge réelle : le badge lit 'now' Twig, pas la
+            // MockClock. -1h de marge pour un floor déterministe à 3 jours.
+            ->setClientDecisionAt(new \DateTimeImmutable('-3 days -1 hour'));
+        // Réponse arrivée : plus d'attente à afficher.
+        $settled = $this->persistVisit('2026-06-15 09:30', 'Validée');
+        $settled->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReport('OK')
+            ->setClientDecision(\App\Visit\Domain\ClientDecision::Positioning)
+            ->setApplicationOutcome(\App\Visit\Domain\ApplicationOutcome::Accepted);
+        $this->em->flush();
+
+        $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+        ]);
+
+        self::assertSame(1, substr_count($rendered, 'data-testid="visit-waiting-chip"'));
+        self::assertStringContainsString('En attente depuis 3 jours', $rendered);
+    }
+
     public function testEmptyStateRendersWithoutVisits(): void
     {
         $rendered = (string) $this->renderTwigComponent('Visit:VisitList', [
@@ -178,6 +294,20 @@ final class VisitListTest extends KernelTestCase
         ]);
 
         return $component;
+    }
+
+    public function testTheUpcomingCounterIgnoresCancelledVisits(): void
+    {
+        $this->persistVisit('2026-06-15 14:00', 'Auj 14h');
+        $this->persistVisit('2026-06-16 11:00', 'Demain 11h')
+            ->setStatus(\App\Visit\Domain\VisitStatus::Cancelled);
+        $this->em->flush();
+
+        $now = new \DateTimeImmutable(self::NOW, new \DateTimeZone('Europe/Paris'));
+        $repository = $this->em->getRepository(Visit::class);
+        // Une visite annulée n'est pas "à venir" : elle sort du compteur
+        // mais reste comptée dans l'archive une fois le jour passé.
+        self::assertSame(1, $repository->countUpcoming($now));
     }
 
     private function persistVisit(string $scheduledAt, string $address, ?float $lat = null, ?float $lng = null): Visit

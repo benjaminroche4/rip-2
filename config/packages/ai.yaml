@@ -15,3 +15,14 @@ ai:
                     temperature: 0.3
                     max_tokens: 1000
             tools: false
+
+        # Note client post-visite : texte court destiné au client, généré à
+        # partir des données du bien + du retour interne de l'agent.
+        visit_client_note:
+            platform: 'ai.platform.anthropic'
+            model:
+                name: 'claude-haiku-4-5'
+                options:
+                    temperature: 0.4
+                    max_tokens: 700
+            tools: false

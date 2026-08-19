@@ -4,6 +4,27 @@
 
 <div {{ attributes }} data-testid="visits-archive-component">
     {% set visitsByDay = this.visitsByDay %}
+    {% set activePostStatus = this.activePostStatus %}
+
+    {# ── Filtre par statut post-visite : chips pill à toggle-off, comme les
+          filtres de l'annuaire agents. ── #}
+    <div class="mb-4 flex flex-wrap items-center gap-1.5" data-testid="visits-archive-filters">
+        {% for filter in this.postStatusFilters %}
+            {% set active = activePostStatus == filter.value %}
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="choosePostStatus"
+                data-live-value-param="{{ filter.value }}"
+                aria-pressed="{{ active ? 'true' : 'false' }}"
+                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-100 ease-out {{ active ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                data-testid="visits-archive-filter-{{ filter.value }}"
+            >
+                {{ ux_icon(filter.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ filter.labelKey|trans }}
+            </button>
+        {% endfor %}
+    </div>
 
     {% if visitsByDay is empty %}
         <section class="rounded-2xl border border-dashed border-gray-950/10 bg-white/50 p-2" data-testid="visits-archive-empty">
@@ -12,8 +33,8 @@
                     {{ ux_icon('lucide:archive', {class: 'size-6', 'aria-hidden': 'true'}) }}
                 </div>
                 <div class="space-y-1">
-                    <h2 class="text-sm font-medium text-gray-700">{{ 'admin.visits.archive.empty.title'|trans }}</h2>
-                    <p class="max-w-[40ch] text-xs text-pretty text-gray-400">{{ 'admin.visits.archive.empty.description'|trans }}</p>
+                    <h2 class="text-sm font-medium text-gray-700">{{ (activePostStatus ? 'admin.visits.archive.emptyFiltered.title' : 'admin.visits.archive.empty.title')|trans }}</h2>
+                    <p class="max-w-[40ch] text-xs text-pretty text-gray-400">{{ (activePostStatus ? 'admin.visits.archive.emptyFiltered.description' : 'admin.visits.archive.empty.description')|trans }}</p>
                 </div>
             </div>
         </section>
@@ -22,7 +43,7 @@
             {# Un groupe par jour, du plus récent au plus ancien. #}
             {% for day, visits in visitsByDay %}
                 <section>
-                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+                    <h2 class="mb-3 flex items-baseline gap-2 px-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                         {{ visits[0].scheduledAt|format_datetime(pattern='EEEE d MMMM yyyy')|capitalize }}
                         <span class="text-xs font-medium text-gray-400 normal-case tabular-nums">{{ visits|length }}</span>
                     </h2>

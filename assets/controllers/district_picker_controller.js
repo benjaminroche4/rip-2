@@ -49,6 +49,15 @@ export default class extends Controller {
     connect() {
         this.#onMapConnect = (event) => this.#draw(event.detail.map)
         this.mapTarget.addEventListener('ux:map:connect', this.#onMapConnect)
+        // Rattrapage lazy : le controller UX Map a pu émettre ux:map:connect
+        // avant nous (navigation Turbo) — sans lui, carte sans polygones.
+        for (const identifier of (this.mapTarget.dataset.controller ?? '').split(/\s+/)) {
+            const controller = this.application.getControllerForElementAndIdentifier(this.mapTarget, identifier)
+            if (controller?.map) {
+                this.#draw(controller.map)
+                break
+            }
+        }
     }
 
     disconnect() {

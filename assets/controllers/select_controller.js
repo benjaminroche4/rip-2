@@ -81,6 +81,7 @@ export default class extends Controller {
     }
 
     keydown(event) {
+        // querySelectorAll assumé : les options sont reconstruites en JS depuis le <select> natif (DOM dynamique), hors de portée d'un target déclaratif.
         const items = this.listTarget.querySelectorAll('[data-select-value]');
         switch (event.key) {
             case 'ArrowDown':

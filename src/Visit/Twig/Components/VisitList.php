@@ -240,6 +240,23 @@ final class VisitList
     }
 
     /**
+     * Minutes avant le début de la visite, pour le badge compte à rebours
+     * des lignes. Null hors de la fenêtre "bientôt" (visite passée ou à
+     * plus de deux heures). Comparaison en heures murales Paris : le
+     * scheduledAt est stocké en heure locale, on aligne les deux cadrans
+     * dans le même référentiel avant de soustraire.
+     */
+    public function minutesUntil(\DateTimeImmutable $scheduledAt): ?int
+    {
+        $nowWall = $this->clock->now()
+            ->setTimezone(new \DateTimeZone(self::TIMEZONE))
+            ->format('Y-m-d H:i:s');
+        $minutes = (int) floor((strtotime($scheduledAt->format('Y-m-d H:i:s')) - strtotime($nowWall)) / 60);
+
+        return $minutes > 0 && $minutes <= 120 ? $minutes : null;
+    }
+
+    /**
      * @return list<VisitSummary>
      */
     private function summaries(): array

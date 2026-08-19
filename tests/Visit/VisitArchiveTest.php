@@ -114,6 +114,67 @@ final class VisitArchiveTest extends KernelTestCase
         self::assertStringContainsString('data-testid="visits-archive-empty"', $rendered);
     }
 
+    public function testThePostStatusFilterNarrowsTheArchive(): void
+    {
+        // Trois issues différentes : le filtre n'en garde qu'une à la fois.
+        $thinking = $this->persistVisit('2026-06-13 10:00', 'Réfléchit');
+        $thinking->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReport('OK')
+            ->setClientDecision(\App\Visit\Domain\ClientDecision::Thinking);
+        $accepted = $this->persistVisit('2026-06-12 11:00', 'Validée');
+        $accepted->setStatus(\App\Visit\Domain\VisitStatus::Done)
+            ->setReport('OK')
+            ->setApplicationOutcome(\App\Visit\Domain\ApplicationOutcome::Accepted);
+        // Effectuée sans compte-rendu : attendue par le filtre report_due.
+        $this->persistVisit('2026-06-11 09:00', 'Sans compte-rendu')
+            ->setStatus(\App\Visit\Domain\VisitStatus::Done);
+        $this->em->flush();
+
+        $component = $this->mountComponent();
+        self::assertSame(3, $component->getTotalCount());
+
+        $component->choosePostStatus('thinking');
+        self::assertSame(['Réfléchit'], $this->addresses($component));
+
+        $component->choosePostStatus('accepted');
+        self::assertSame(['Validée'], $this->addresses($component));
+
+        $component->choosePostStatus('report_due');
+        self::assertSame(['Sans compte-rendu'], $this->addresses($component));
+        self::assertSame(1, $component->getTotalCount(), 'The counter follows the filter.');
+
+        // Toggle-off : re-cliquer la chip active retire le filtre.
+        $component->choosePostStatus('report_due');
+        self::assertSame(3, $component->getTotalCount());
+    }
+
+    public function testAnUnknownPostStatusFromTheUrlFiltersNothing(): void
+    {
+        $this->persistVisit('2026-06-13 10:00', 'Hier');
+
+        /** @var VisitArchive $component */
+        $component = $this->mountTwigComponent('Visit:VisitArchive', [
+            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+            'postStatus' => 'DROP TABLE visit',
+        ]);
+
+        self::assertNull($component->getActivePostStatus());
+        self::assertSame(1, $component->getTotalCount());
+    }
+
+    /** @return list<string> */
+    private function addresses(VisitArchive $component): array
+    {
+        $addresses = [];
+        foreach ($component->getVisitsByDay() as $visits) {
+            foreach ($visits as $visit) {
+                $addresses[] = $visit->address;
+            }
+        }
+
+        return $addresses;
+    }
+
     private function mountComponent(): VisitArchive
     {
         /** @var VisitArchive $component */

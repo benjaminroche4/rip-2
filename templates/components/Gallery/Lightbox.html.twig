@@ -43,8 +43,10 @@
         </div>
     </div>
 
-    {# Desktop: carousel #}
-    <div class="relative hidden h-full w-full items-center justify-center px-4 py-12 lg:flex">
+    {# Desktop: carousel. Les gouttières latérales (px-20) réservent la
+       place des flèches (size-10 à 1rem du bord) : l'image en max-w-full
+       ne peut jamais passer dessous. #}
+    <div class="relative hidden h-full w-full items-center justify-center px-20 py-12 lg:flex">
         <button
             type="button"
             data-action="gallery#prev"

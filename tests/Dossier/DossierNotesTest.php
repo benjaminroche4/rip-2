@@ -123,6 +123,67 @@ final class DossierNotesTest extends KernelTestCase
         self::assertStringNotContainsString('admin.dossiers.status.choice', $statusText);
     }
 
+    public function testAdminCanSetThenChangeTheOfferButNeverClearIt(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+
+        // Cadenas anti-missclick : verrouillé par défaut, le changement est
+        // refusé tant qu'il n'est pas ouvert.
+        try {
+            $component->chooseOffer('accompagne');
+            self::fail('A locked offer must reject changes.');
+        } catch (\Symfony\Component\HttpKernel\Exception\BadRequestHttpException) {
+        }
+        $component->toggleOfferLock();
+
+        $component->chooseOffer('accompagne');
+        self::assertSame('accompagne', $this->em->find(\App\Dossier\Entity\Dossier::class, $dossier->getId())->getOffer());
+
+        $component->chooseOffer('confie');
+        self::assertSame('confie', $this->em->find(\App\Dossier\Entity\Dossier::class, $dossier->getId())->getOffer());
+
+        // Chaque changement laisse sa trace dans le fil de suivi.
+        $texts = array_column($component->getEvents(), 'text');
+        self::assertStringContainsString('Accompagné', implode(' ', $texts));
+
+        // Un dossier garde toujours une formule : le retrait est refusé.
+        try {
+            $component->chooseOffer('');
+            self::fail('Clearing the offer must be rejected.');
+        } catch (\Symfony\Component\HttpKernel\Exception\BadRequestHttpException) {
+        }
+        self::assertSame('confie', $this->em->find(\App\Dossier\Entity\Dossier::class, $dossier->getId())->getOffer());
+    }
+
+    public function testSectionStaffCannotChangeTheOffer(): void
+    {
+        $dossier = $this->persistDossier();
+        $staff = $this->persistUser('staff-offer', ['ROLE_SECTION_DOSSIERS']);
+        $this->loginAs($staff);
+
+        $component = $this->mountNotes($dossier);
+
+        $this->expectException(\Symfony\Component\Security\Core\Exception\AccessDeniedException::class);
+        $component->chooseOffer('accompagne');
+    }
+
+    public function testUnknownOfferIsRejected(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->toggleOfferLock();
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+        $component->chooseOffer('premium');
+    }
+
     public function testAuditEventsAppearInTheActivityFeedNotTheComments(): void
     {
         $dossier = $this->persistDossier();

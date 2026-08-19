@@ -6,6 +6,9 @@
     --breakpoint-3xl: 2100px;
 
     --color-primary: #71172e;
+    /* Actions destructives (bg-destructive des boutons de confirmation) :
+       sans ce token la classe ne peint rien et le bouton reste blanc. */
+    --color-destructive: oklch(0.577 0.245 27.325);
     /* Override the default `ring` color (blue) used by shadcn-style components
        (Button, Accordion, …) so `focus-visible:ring-ring` adopts the brand. */
     --color-ring: var(--color-primary);
@@ -310,6 +313,21 @@ turbo-frame#blog-list[busy] {
 }
 .map-plain-iw .gm-style-iw-tc {
     display: none !important;
+}
+
+/* === Google Maps InfoWindow — bulle sans bouton fermer (.map-tidy-iw) ===
+   Garde la bulle blanche standard mais retire la rangée d'en-tête (croix
+   comprise) et son espace réservé : la fermeture se fait au clic en dehors
+   (controller map-iw-close sur l'élément ux_map). */
+.map-tidy-iw .gm-style-iw-chr {
+    display: none !important;
+}
+.map-tidy-iw .gm-style-iw-c {
+    padding: 12px !important;
+}
+.map-tidy-iw .gm-style-iw-d {
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
 /* === Admin — status change feedback ===

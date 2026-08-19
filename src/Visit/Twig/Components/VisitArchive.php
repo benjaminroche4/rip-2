@@ -37,6 +37,16 @@ final class VisitArchive
     #[LiveProp]
     public int $limit = self::PAGE_SIZE;
 
+    /**
+     * Filtre "statut post-visite" ('' = tout). Writable + url : une valeur
+     * inconnue arrivée par l'URL est neutralisée à la lecture
+     * (getActivePostStatus), jamais passée telle quelle à la requête.
+     */
+    #[LiveProp(writable: true, url: true)]
+    public string $postStatus = '';
+
+    private const POST_STATUSES = ['report_due', 'thinking', 'positioning', 'refused', 'accepted', 'outcome_refused'];
+
     public function mount(): void
     {
         $this->ensureAdmin();
@@ -57,6 +67,41 @@ final class VisitArchive
         $this->limit += self::PAGE_SIZE;
     }
 
+    /** Chips de filtre post-visite : toggle-off sur la chip active. */
+    #[LiveAction]
+    public function choosePostStatus(#[\Symfony\UX\LiveComponent\Attribute\LiveArg] string $value): void
+    {
+        $this->ensureAdmin();
+        if (!\in_array($value, self::POST_STATUSES, true)) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Unknown post status.');
+        }
+        $this->postStatus = $this->postStatus === $value ? '' : $value;
+        $this->limit = self::PAGE_SIZE;
+    }
+
+    /** Filtre effectif : une valeur inconnue venue de l'URL ne filtre rien. */
+    public function getActivePostStatus(): ?string
+    {
+        return \in_array($this->postStatus, self::POST_STATUSES, true) ? $this->postStatus : null;
+    }
+
+    /**
+     * Chips proposées, avec le vocabulaire des badges des cards.
+     *
+     * @return list<array{value: string, labelKey: string, icon: string}>
+     */
+    public function getPostStatusFilters(): array
+    {
+        return [
+            ['value' => 'report_due', 'labelKey' => 'admin.visits.row.reportDue', 'icon' => 'lucide:clipboard-pen'],
+            ['value' => 'thinking', 'labelKey' => \App\Visit\Domain\ClientDecision::Thinking->labelKey(), 'icon' => \App\Visit\Domain\ClientDecision::Thinking->icon()],
+            ['value' => 'positioning', 'labelKey' => \App\Visit\Domain\ClientDecision::Positioning->labelKey(), 'icon' => \App\Visit\Domain\ClientDecision::Positioning->icon()],
+            ['value' => 'refused', 'labelKey' => \App\Visit\Domain\ClientDecision::Refused->labelKey(), 'icon' => \App\Visit\Domain\ClientDecision::Refused->icon()],
+            ['value' => 'accepted', 'labelKey' => 'admin.visits.archive.filter.accepted', 'icon' => 'lucide:badge-check'],
+            ['value' => 'outcome_refused', 'labelKey' => 'admin.visits.archive.filter.outcomeRefused', 'icon' => 'lucide:badge-x'],
+        ];
+    }
+
     /**
      * Shown window, grouped by day [Y-m-d => visits], most recent first.
      *
@@ -65,7 +110,7 @@ final class VisitArchive
     public function getVisitsByDay(): array
     {
         $groups = [];
-        foreach ($this->repository->findArchivedSummaries($this->today(), $this->limit) as $visit) {
+        foreach ($this->repository->findArchivedSummaries($this->today(), $this->limit, $this->getActivePostStatus()) as $visit) {
             $groups[$visit->scheduledAt->format('Y-m-d')][] = $visit;
         }
 
@@ -74,7 +119,7 @@ final class VisitArchive
 
     public function getTotalCount(): int
     {
-        return $this->repository->countArchived($this->today());
+        return $this->repository->countArchived($this->today(), $this->getActivePostStatus());
     }
 
     public function hasMore(): bool

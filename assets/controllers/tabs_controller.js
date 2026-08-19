@@ -15,6 +15,12 @@ export default class extends Controller {
 
     connect() {
         this.apply(this.keyFromUrl() || this.element.dataset.activeTab || this.tabTargets[0]?.dataset.tabsKey);
+        // Navigation clavier du pattern tabs (activation manuelle) : les
+        // flèches et Home/End déplacent le focus entre les onglets, Entrée
+        // ou Espace active (clic natif du bouton). Écouteur au niveau du
+        // wrapper : les barres n'ont pas à câbler chaque bouton.
+        this.onKeydown = (event) => this.navigate(event);
+        this.element.addEventListener('keydown', this.onKeydown);
         // Position the sliding pill once the layout is settled, and follow
         // width changes (viewport resize, fonts).
         this.frame = requestAnimationFrame(() => this.moveIndicatorToActive(false));
@@ -29,7 +35,31 @@ export default class extends Controller {
     disconnect() {
         cancelAnimationFrame(this.frame);
         window.removeEventListener('resize', this.onResize);
+        this.element.removeEventListener('keydown', this.onKeydown);
         this.observer?.disconnect();
+    }
+
+    /** Flèches / Home / End sur un onglet : focus roving, activation manuelle. */
+    navigate(event) {
+        const tabs = this.tabTargets.filter((tab) => !tab.disabled);
+        const index = tabs.indexOf(event.target);
+        if (-1 === index) {
+            return;
+        }
+        let next = null;
+        if ('ArrowRight' === event.key || 'ArrowDown' === event.key) {
+            next = tabs[(index + 1) % tabs.length];
+        } else if ('ArrowLeft' === event.key || 'ArrowUp' === event.key) {
+            next = tabs[(index - 1 + tabs.length) % tabs.length];
+        } else if ('Home' === event.key) {
+            next = tabs[0];
+        } else if ('End' === event.key) {
+            next = tabs[tabs.length - 1];
+        }
+        if (next) {
+            event.preventDefault();
+            next.focus();
+        }
     }
 
     /**

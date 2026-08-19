@@ -1803,6 +1803,7 @@ admin:
     toast:
         dismiss: Dismiss the notification
         saved: Changes saved.
+        visitClientNoteSent: Note sent.
         agentDeleted: Agent deleted.
         agencyDeleted: Agency deleted.
         fileRenamed: File renamed.
@@ -1851,8 +1852,6 @@ admin:
     meta:
         titlePrefix: Admin
         description: Relocation in Paris admin area. Team access only.
-    busyGuard:
-        message: An action is still running. Leaving the page now may lose it.
     nav:
         users: Users
         contacts: Leads
@@ -2132,6 +2131,7 @@ admin:
                 origin: Created from the lead
                 offer: Package
                 timeline: Timeline
+                setOffer: Set the package
             requestDocuments: Request documents
             closure:
                 badge: File closed
@@ -2152,6 +2152,7 @@ admin:
                     confirm: Delete permanently
             events:
                 statusChanged: 'File status: %status%'
+                offerChanged: 'File package: %offer%'
                 system: System
                 documentsRequested: 'Documents requested for %tenant% (sent to %recipient%): %pieces%'
                 documentsResent: 'Reminder sent to %recipient% for the documents of %tenant%: %pieces%'
@@ -2178,6 +2179,13 @@ admin:
                 dossierReopened: File reopened
                 stepValidated: '%step% step validated'
                 stepReopened: '%step% step reopened'
+                visitBooked: 'Visit scheduled at %value%, on %date%'
+                visitDone: 'Visit carried out at %value%, on %date%'
+                visitClientRefused: 'The client declines the property visited at %value%'
+                visitClientPositioned: 'The client is making an offer on the property visited at %value%'
+                visitRefusalOrigin: 'Origin of the refusal of the property at %value%: %status%'
+                visitApplicationOutcome: 'Application outcome at %value%: %status%'
+                visitClientNoteSent: 'Visit note sent to the client (%value%)'
                 searchUpdated: 'Search updated, %field%: %value%'
                 searchCleared: Search updated, %field% cleared
                 searchField:
@@ -2301,6 +2309,7 @@ admin:
                     empty: No visits scheduled for this file.
                     plan: Schedule a visit
                     counter: '%count% upcoming'
+                    refused: '{1}1 property declined|]1,Inf[%count% properties declined'
                 payment:
                     title: Payment
                     description: Fees and payment tracking.
@@ -2673,6 +2682,8 @@ admin:
             property_visit: Visit
             inventory: Inventory
             technical_intervention: Technical intervention
+        calendar:
+            autonomous: Autonomous
         status:
             planned: Planned
             done: Done
@@ -2682,32 +2693,91 @@ admin:
             hot: Hot client
             warm: Warm client
             cold: Cold client
+        decision:
+            thinking: Thinking it over
+            positioning: Making an offer
+            refused: Declines
+            since: 'Since %date%'
+        applicationOutcome:
+            title: Application outcome
+            help: Decision of the landlord, the owner or the agency.
+            accepted: Accepted
+            refused: Declined
+        decisionDeadline:
+            label: Until when?
+            overdue: Deadline passed
+        refusalOrigin:
+            other: Other
+            title: Who declined?
+            landlord: 'Landlord, owner or agency'
+            client: The client
+        banner:
+            thinking:
+                title: The client is thinking it over
+                deadline: Answer expected by %date%
+            positioning:
+                title: 'Application filed: awaiting the landlord''s answer.'
         show:
-            modules:
-                booking: Visit booking
-                report: Report
-            outcomeTitle: Visit outcome
-            proxyVisit: Without the client
-            feelingLabel: Client feeling
-            reportPlaceholder: 'Highlights, objections, next action...'
-            reportSave: Save the report
-            title: 'Visit on %date% at %time%'
-            detailsTitle: 'Visit details'
+            reportBlocks:
+                agent: Agent feedback
+                agentInfo: "This feedback stays internal: it powers the AI-generated client note and the reporting."
+                client: Client feedback
+            updatedAt: Edited by
             reference: Reference
+            reportDone: Completed
+            reportTodo: Required after the visit
+            modules:
+                report: Report
+            outcomeTitle: Visit status
+            overdue:
+                title: 'This visit is in the past: did it take place?'
+            feelingLabel: Client feeling
+            reportPlaceholder: 'Property condition, natural light, noise, client reaction, points of attention...'
+            clientNote:
+                title: Note sent to the client
+                placeholder: 'The message sent to the client after the visit...'
+                generate: Generate with AI
+                generateInfo: 'Drafts the note from the property data and the agent internal feedback.'
+                generateFailed: 'Generation failed, try again in a moment.'
+                generateConfirm: 'The current note will be replaced by a new AI-generated draft.'
+                send: Send to the client
+                sentAt: 'Sent on %date%'
+                sendFailed: 'No person on the file has a valid email address: the note was not sent.'
+                sentPartial: 'Note sent to %sent% of %total% contacts.'
+                sendModal:
+                    title: Send this note to the client?
+                    text: 'The note will be emailed to every person on the file, each in their own language.'
+                    resend: 'A note was already sent on %date%, it will be sent again.'
+                    cancel: Cancel
+                    confirm: Send
+            title: 'Visit on %date% at %time%'
             durationMinutes: '%count% min'
+            tracking: Follow-up
+            clientPresent: Client attending
+            createdAt: Created on
+            calendarSynced: Synced to the calendar
         edit:
             title: Edit the visit
+            submit: Save
+            submitting: Saving...
+            confirm:
+                title: Save the changes to this visit?
         row:
+            startsInHours: 'in %count% h'
+            startsInMinutes: 'in %count% min'
             openInMaps: Open in Google Maps
             performedBy: Performed by
             unassigned: Unassigned
+            reportDue: Report to complete
+            waitingSince: '{0}Waiting since today|{1}Waiting for 1 day|]1,Inf[Waiting for %count% days'
+            byClient: By the client
             bookedBy: Booked by
             open: Open the visit
             edit: Edit
             delete: Delete
             deleteModal:
                 title: Delete this visit?
-                text: 'The visit at %address% will be permanently deleted.'
+                text: 'The visit at %address% will be permanently deleted, photos included, and removed from the Google calendars.'
                 cancel: Cancel
                 confirm: Delete
         title: Visits
@@ -2717,9 +2787,14 @@ admin:
         new:
             title: New visit
         photos:
-            title: Property photos
+            download: Download
+            none: No photo attached to the visit.
+            deleteConfirm: 'Delete the photo "%name%"? This cannot be undone.'
+            title: Listing photos
+            after: After the visit
+            afterEmpty: No photo taken during the visit yet.
+            manage: Manage photos
             add: Add photos
-            empty: No photos yet. Add the pictures taken during the visit.
             delete: Delete
             rejected: '{1}1 file was rejected (accepted formats: JPEG, PNG, WebP, 10 MB max).|]1,Inf[%count% files were rejected (accepted formats: JPEG, PNG, WebP, 10 MB max).'
         tabs:
@@ -2727,6 +2802,12 @@ admin:
             upcoming: Upcoming
             archive: Archive
         archive:
+            filter:
+                accepted: Application accepted
+                outcomeRefused: Application refused
+            emptyFiltered:
+                title: No visit for this status
+                description: Change or clear the filter to see the whole archive.
             title: Visits archive
             loadMore: See more
             shown: '%shown% of %total% visits'
@@ -2741,21 +2822,65 @@ admin:
             showMap: See on the map
             hideMap: Hide the map
         create:
+            intro:
+                text: Choose the dossier to open the rest of the form.
+                criteria: Only open dossiers with a validated search are listed.
             sections:
                 visit: The visit
                 property: The property
                 slot: The time slot
-                contacts: Real estate agent and listing
-                options: Options
-            details:
-                label: Detail mode
-                help: Real estate agent, listing link, client presence.
+                contacts: Real estate agent
+                contactsHelp: The agent showing the property.
+                property_details: Property details
+                property_detailsHelp: Describe the property if you have the details, nothing is required.
+                photos: Photos
+                photosHelp: Property photos attached to the visit.
+            propertyDetails:
+                surface:
+                    label: Surface area
+                floor:
+                    label: Floor
+                    placeholder: 0 = ground floor
+                propertyKind:
+                    label: Property type
+                furnishing:
+                    label: Furnished or unfurnished
+                leaseType:
+                    label: Lease type
+                    airbnb: Airbnb
+                    mobility: Mobility lease
+                    civil_code: Civil-code lease
+                    alur: Alur-law lease
+                rentMode:
+                    label: Rent
+                    hc: Excluding charges
+                    cc: Charges included
+                rentExcludingCharges:
+                    label: Rent amount
+                charges:
+                    label: Charges
+                recap:
+                    surface: '%surface% m²'
+                    floor: 'floor %floor%'
+                    groundFloor: Ground floor
+                    rent: '%amount% € excl. charges'
+                    rentCc: '%amount% € (charges included)'
+                    charges: '+ %amount% €'
+                    chargesAlone: '%amount% € charges'
+            photos:
+                cover: Cover
+                makeCover: Set as cover
+                choose: Choose photos
+                drop: or drag and drop them here
+                hint: 'JPEG, PNG or WebP, 10 MB max per photo, up to 12 photos.'
             type:
                 label: Visit type
             listingUrl:
                 label: Listing link
                 placeholder: https://www.seloger.com/...
             duplicate:
+                blocked: This dossier already has a visit at this address on that day.
+                sameDossier: same dossier
                 title: '{1}A visit is already booked for this property.|]1,Inf[%count% visits are already booked for this property.'
                 item: 'on %date% for %dossier%'
             duration:
@@ -2766,36 +2891,57 @@ admin:
                 min60: +1h
             clientPresent:
                 label: The client attends the visit
-                help: Untick if the agent visits on their behalf (proxy visit).
+                help: 'The team is on site either way: indicate whether the client will attend too.'
             button: New visit
-            title: New visit
-            subtitle: Schedule a visit for a file, with the property address and the agent showing it.
             cancel: Cancel
             submit: Schedule the visit
             submitting: Scheduling...
+            confirm:
+                title: Schedule this visit?
+                text: The visit will be created and added to the dossier's follow-up thread.
+                notify: Notify the client by email
+                notifyHelp: The dossier contacts will receive the date, time and address of the visit.
             dossier:
-                label: File
-                placeholder: Pick a file...
-                incomplete: Complete this file's search criteria before scheduling a visit.
+                label: Dossier
+                placeholder: Pick a dossier...
+                incomplete: Complete this dossier's search criteria before scheduling a visit.
                 incompleteLink: Complete the search
-                loading: Loading the file...
+                loading: Loading the dossier...
+                closed: 'This dossier is closed: no visit can be scheduled on it.'
             recap:
                 title: Summary
+                'yes': Yes
+                'no': No
+                more: Show more
+                less: Show less
             assignee:
+                requiredForType: 'Assign a team member: this type of visit cannot be done by the client alone.'
+                clientSelf: The client performs the visit on their own behalf (Accompanied package).
+                clientSelfShort: The client
                 none: 'No visit agent yet. Grant the "Visit agent" function on the user profile.'
                 label: Performed by
                 placeholder: Pick a team member
+                conflict: '%name% already has a visit on this slot:'
+                overlap: '%name% already has a visit from %start% to %end% (%reference%): pick another slot.'
+                busy: '%name% is already busy from %start% to %end% (Google agenda): pick another slot.'
             agent:
                 label: Real estate agent
                 placeholder: No agent
+                searchPlaceholder: Search for an agent...
+                searchEmpty: No agent matches.
             note:
                 label: Free note
                 placeholder: 'Access code, on-site contact, instructions...'
             scheduledAt:
                 past: The visit cannot be scheduled in the past.
                 label: Date and time
+                oddHour: 'Unusual time slot: double-check the entered time.'
             address:
+                help: Enter the full address of the property (number, street, postal code and city).
                 idf: The address must be located in Île-de-France.
+                outOfArea:
+                    title: The property is outside the searched area
+                    searched: instead of
                 label: Property address
                 placeholder: 12 rue de la Roquette, 75011 Paris
     agents:
@@ -2821,7 +2967,7 @@ admin:
             description: Add an agent to the favorites with the heart on its card or profile.
         empty:
             title: No agents yet
-            description: Add your first real estate agent with the button above.
+            description: Add your first partner real-estate agent, on their own or with their agency.
         emptyFiltered:
             title: No matching agent
             description: Adjust the search or the filters to find your agents.
@@ -2947,10 +3093,6 @@ admin:
         emptyFavorites:
             title: No favorites yet
             description: Add an agency to the favorites with the heart on its card or profile.
-        display:
-            label: Display
-            list: List
-            map: Map
         card:
             agentCount: '{0}No agents|{1}1 agent|]1,Inf[%count% agents'
             open: View the profile

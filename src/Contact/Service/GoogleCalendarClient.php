@@ -23,9 +23,17 @@ final class GoogleCalendarClient
 {
     private const TOKEN_URL = 'https://oauth2.googleapis.com/token';
     private const CALENDAR_URL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+    private const FREEBUSY_URL = 'https://www.googleapis.com/calendar/v3/freeBusy';
     private const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+    // freebusy.query is not covered by calendar.events: it needs its own
+    // granular scope. Requested in a separate JWT grant so a domain-wide
+    // delegation limited to calendar.events keeps the event flows working
+    // (the freebusy grant then fails alone, and callers fall back).
+    private const FREEBUSY_SCOPE = 'https://www.googleapis.com/auth/calendar.freebusy';
 
-    private ?string $accessToken = null;
+    /** Access tokens cached per impersonated subject (one JWT grant each). */
+    /** @var array<string, string> */
+    private array $accessTokens = [];
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -108,29 +116,137 @@ final class GoogleCalendarClient
     }
 
     /**
-     * Removes the visio event from the agenda (reschedule aborted, lead
-     * closed). Missing events are fine: the goal is "not in the agenda".
+     * Generic upsert on the primary agenda of the (optionally) impersonated
+     * subject: PATCH when an event id is known (recreate if it vanished),
+     * POST otherwise. Returns the raw event resource, or null when the API
+     * is unavailable or the call failed (best-effort callers keep going).
+     *
+     * @param array<string, mixed> $payload
+     *
+     * @return array<string, mixed>|null
      */
-    public function deleteEvent(string $eventId): void
+    public function upsertEvent(array $payload, ?string $eventId = null, ?string $impersonate = null): ?array
     {
         if (!$this->isConfigured()) {
-            return;
+            return null;
         }
 
         try {
-            $token = $this->accessToken();
-            if (null === $token) {
-                return;
+            if (null !== $eventId) {
+                $event = $this->request('PATCH', self::CALENDAR_URL.'/'.rawurlencode($eventId), $payload, $impersonate);
+                if (null !== $event) {
+                    $this->logger->info('Google Calendar event patched', ['eventId' => $eventId, 'subject' => $impersonate ?? $this->impersonate]);
+
+                    return $event;
+                }
+                // Event gone (deleted from the agenda): create a fresh one.
             }
-            $this->httpClient->request('DELETE', self::CALENDAR_URL.'/'.rawurlencode($eventId), [
+
+            $event = $this->request('POST', self::CALENDAR_URL, $payload, $impersonate);
+            if (null !== $event) {
+                $this->logger->info('Google Calendar event created', ['eventId' => $event['id'] ?? null, 'subject' => $impersonate ?? $this->impersonate]);
+            }
+
+            return $event;
+        } catch (\Throwable $e) {
+            $this->logger->error('Google Calendar event upsert failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Busy intervals of the impersonated subject's primary agenda between
+     * the two instants. Null when the API is unavailable, unconfigured, or
+     * the delegation does not cover the freebusy scope: callers must treat
+     * null as "unknown", never as "free".
+     *
+     * @return list<array{start: string, end: string}>|null
+     */
+    public function freeBusy(\DateTimeImmutable $start, \DateTimeImmutable $end, ?string $impersonate = null): ?array
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $token = $this->accessToken($impersonate, self::FREEBUSY_SCOPE);
+            if (null === $token) {
+                return null;
+            }
+
+            $utc = new \DateTimeZone('UTC');
+            $response = $this->httpClient->request('POST', self::FREEBUSY_URL, [
+                'auth_bearer' => $token,
+                'json' => [
+                    'timeMin' => $start->setTimezone($utc)->format('Y-m-d\TH:i:s\Z'),
+                    'timeMax' => $end->setTimezone($utc)->format('Y-m-d\TH:i:s\Z'),
+                    'items' => [['id' => 'primary']],
+                ],
+                'timeout' => 5,
+                'max_duration' => 10,
+            ]);
+            if ($response->getStatusCode() >= 400) {
+                $this->logger->warning(\sprintf('Google Calendar freeBusy returned %d', $response->getStatusCode()));
+
+                return null;
+            }
+
+            /** @var array{calendars?: array{primary?: array{busy?: list<array{start: string, end: string}>, errors?: list<array<string, string>>}}} $data */
+            $data = $response->toArray();
+            $primary = $data['calendars']['primary'] ?? null;
+            if (null === $primary || [] !== ($primary['errors'] ?? [])) {
+                $this->logger->warning('Google Calendar freeBusy could not read the agenda', ['subject' => $impersonate ?? $this->impersonate]);
+
+                return null;
+            }
+
+            return $primary['busy'] ?? [];
+        } catch (\Throwable $e) {
+            $this->logger->warning('Google Calendar freeBusy failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Removes the visio event from the agenda (reschedule aborted, lead
+     * closed). Missing events are fine: the goal is "not in the agenda".
+     *
+     * Returns true when the event is gone for sure (deleted, or it no
+     * longer existed: 404/410), false on any other failure so callers that
+     * store the event id can keep it and retry on their next mutation.
+     */
+    public function deleteEvent(string $eventId, ?string $impersonate = null): bool
+    {
+        if (!$this->isConfigured()) {
+            // Nothing is mirrored when the integration is off.
+            return true;
+        }
+
+        try {
+            $token = $this->accessToken($impersonate);
+            if (null === $token) {
+                return false;
+            }
+            $status = $this->httpClient->request('DELETE', self::CALENDAR_URL.'/'.rawurlencode($eventId), [
                 'query' => ['sendUpdates' => 'none'],
                 'auth_bearer' => $token,
                 'timeout' => 5,
                 'max_duration' => 10,
             ])->getStatusCode();
+            if ($status >= 400 && 404 !== $status && 410 !== $status) {
+                $this->logger->error(\sprintf('Google Calendar event deletion returned %d', $status), ['eventId' => $eventId]);
+
+                return false;
+            }
             $this->logger->info('Google Calendar event deleted', ['eventId' => $eventId]);
+
+            return true;
         } catch (\Throwable $e) {
             $this->logger->error('Google Calendar event deletion failed: '.$e->getMessage());
+
+            return false;
         }
     }
 
@@ -155,15 +271,21 @@ final class GoogleCalendarClient
     }
 
     /**
+     * Null strictly means "event gone" (404/410): the PATCH callers then
+     * legitimately recreate it. Every other failure (no token, 403, 429,
+     * 5xx) throws so it never masquerades as a missing event.
+     *
      * @param array<string, mixed> $payload
      *
      * @return array<string, mixed>|null
      */
-    private function request(string $method, string $url, array $payload): ?array
+    private function request(string $method, string $url, array $payload, ?string $impersonate = null): ?array
     {
-        $token = $this->accessToken();
+        $token = $this->accessToken($impersonate);
         if (null === $token) {
-            return null;
+            // No credentials: transient failure, never "event gone" (a null
+            // return would make a PATCH caller recreate the event).
+            throw new \RuntimeException('Google Calendar access token unavailable.');
         }
 
         $response = $this->httpClient->request($method, $url, [
@@ -184,7 +306,12 @@ final class GoogleCalendarClient
         if ($status >= 400) {
             $this->logger->error(\sprintf('Google Calendar API %s %s returned %d', $method, $url, $status));
 
-            return null;
+            // Transient/auth failure (403, 429, 5xx...): unlike a 404/410,
+            // the event may still exist. Throwing (caught by the upsert
+            // entry points) aborts the whole upsert so a failed PATCH is
+            // never followed by a duplicate POST; the stored ids survive
+            // and the next mutation retries against them.
+            throw new \RuntimeException(\sprintf('Google Calendar API %s returned %d', $method, $status));
         }
 
         /* @var array<string, mixed> */
@@ -192,12 +319,16 @@ final class GoogleCalendarClient
     }
 
     /**
-     * Service-account JWT grant, impersonating the organizer address.
+     * Service-account JWT grant, impersonating the given domain address
+     * (default: the central organizer from the env). Tokens are cached per
+     * (subject, scope) pair: syncing one visit touches two agendas.
      */
-    private function accessToken(): ?string
+    private function accessToken(?string $impersonate = null, string $scope = self::SCOPE): ?string
     {
-        if (null !== $this->accessToken) {
-            return $this->accessToken;
+        $subject = $impersonate ?? $this->impersonate;
+        $cacheKey = $scope.'|'.$subject;
+        if (isset($this->accessTokens[$cacheKey])) {
+            return $this->accessTokens[$cacheKey];
         }
 
         // The env var holds either a path to the key file, or the key JSON
@@ -224,8 +355,8 @@ final class GoogleCalendarClient
         $now = time();
         $claims = [
             'iss' => $key['client_email'],
-            'sub' => $this->impersonate,
-            'scope' => self::SCOPE,
+            'sub' => $subject,
+            'scope' => $scope,
             'aud' => self::TOKEN_URL,
             'iat' => $now,
             'exp' => $now + 3600,
@@ -256,8 +387,11 @@ final class GoogleCalendarClient
             return null;
         }
         $token = $response->toArray()['access_token'] ?? null;
+        if (!\is_string($token)) {
+            return null;
+        }
 
-        return $this->accessToken = \is_string($token) ? $token : null;
+        return $this->accessTokens[$cacheKey] = $token;
     }
 
     private function base64Url(string $data): string

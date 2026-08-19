@@ -82,7 +82,47 @@ final class VisitPhotoTest extends WebTestCase
                 (string) $photo->getPath(),
             );
             self::assertTrue($this->storage()->exists((string) $photo->getPath()));
+            // Bibliothèque = photos de l'annonce : phase 'before' par défaut.
+            self::assertSame('before', $photo->getPhase());
         }
+    }
+
+    public function testReportBlockUploadStoresAfterPhotosInTheirOwnGroup(): void
+    {
+        // Le bloc compte-rendu (visite effectuée) envoie phase=after : la
+        // photo rejoint le groupe "Après la visite" du compte-rendu, pas la
+        // bibliothèque des photos de l'annonce.
+        $this->visit->setStatus(\App\Visit\Domain\VisitStatus::Done);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        // ->first() : la zone compte-rendu peut porter plusieurs variantes
+        // de design (exploration uidotsh) qui dupliquent le formulaire.
+        $token = (string) $crawler->filter('[data-testid="visit-report-photos-input"]')->first()->closest('form')->filter('input[name="_token"]')->attr('value');
+        $this->client->request('POST', $this->visitUrl().'/photos', ['_token' => $token, 'phase' => 'after'], ['photos' => [$this->pngUpload('salon.png')]]);
+        self::assertResponseStatusCodeSame(303);
+
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+        self::assertSame('after', $photo->getPhase());
+
+        $crawler = $this->client->followRedirect();
+        // La photo vit dans la grille du compte-rendu; la bibliothèque reste
+        // sur sa mention "aucune photo" (zéro photo d'annonce).
+        self::assertGreaterThan(0, \count($crawler->filter('[data-testid="visit-report-photos-grid"] [data-testid="visit-report-photo"]')));
+        self::assertCount(0, $crawler->filter('[data-testid="visit-photos-grid"]'));
+        self::assertCount(1, $crawler->filter('[data-testid="visit-photos-none"]'));
+    }
+
+    public function testAForgedPhaseIsRejected(): void
+    {
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        $token = (string) $crawler->filter('[data-testid="visit-photos-input"]')->closest('form')->filter('input[name="_token"]')->attr('value');
+
+        $this->client->request('POST', $this->visitUrl().'/photos', ['_token' => $token, 'phase' => 'during'], ['photos' => [$this->pngUpload('salon.png')]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame(0, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
     }
 
     public function testPhotosAreOpenableInTheFullscreenGallery(): void
@@ -92,7 +132,7 @@ final class VisitPhotoTest extends WebTestCase
 
         // The grid is wired to the shared gallery controller, fed a JSON list
         // of {url, alt} pointing at the authenticated streaming route.
-        $card = $crawler->filter('[data-controller="gallery"]');
+        $card = $crawler->filter('[data-controller~="gallery"]');
         self::assertCount(1, $card);
         $photos = json_decode((string) $card->attr('data-gallery-photos-value'), true);
         self::assertCount(2, $photos);
@@ -103,6 +143,26 @@ final class VisitPhotoTest extends WebTestCase
         self::assertSame(2, $crawler->filter('button[data-action="gallery#open"]')->count());
         self::assertSame('0', $crawler->filter('button[data-action="gallery#open"]')->first()->attr('data-gallery-index-param'));
         self::assertCount(1, $crawler->filter('dialog[data-gallery-target="dialog"]'));
+    }
+
+    public function testManagePencilIsPresentAndTheFormsStayInTheDom(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        $crawler = $this->client->followRedirect();
+
+        // Bibliothèque par défaut : le stylo « Gérer » est là, mode gestion
+        // éteint (aria-pressed=false), la bascule est purement client-side.
+        $card = $crawler->filter('[data-testid="visit-photos"]');
+        self::assertStringContainsString('photo-manage', (string) $card->attr('data-controller'));
+        $pencil = $crawler->filter('[data-testid="visit-photos-manage"]');
+        self::assertCount(1, $pencil);
+        self::assertSame('false', $pencil->attr('aria-pressed'));
+
+        // Les formulaires d'upload et de suppression restent dans le DOM en
+        // permanence (masqués en CSS hors mode gestion) : le crawler et le
+        // fallback no-JS les trouvent toujours.
+        self::assertCount(1, $crawler->filter('[data-testid="visit-photos-input"]'));
+        self::assertCount(1, $crawler->filter('[data-testid="visit-photo-delete"]'));
     }
 
     public function testRejectedFileStoresNothingAndFlashesTheCount(): void
@@ -132,6 +192,39 @@ final class VisitPhotoTest extends WebTestCase
         self::assertSame(base64_decode(self::PNG), $this->client->getInternalResponse()->getContent());
     }
 
+    public function testDownloadStreamsAsAttachmentUnderTheOriginalName(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+
+        $this->client->request('GET', $this->visitUrl().'/photos/'.$photo->getId().'?download=1');
+
+        self::assertResponseIsSuccessful();
+        $disposition = (string) $this->client->getResponse()->headers->get('Content-Disposition');
+        self::assertStringStartsWith('attachment', $disposition);
+        self::assertStringContainsString('salon.png', $disposition);
+        self::assertSame(base64_decode(self::PNG), $this->client->getInternalResponse()->getContent());
+    }
+
+    public function testDownloadFallsBackToPhotoIdWhenTheOriginalNameIsNotAscii(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+        // Nom d'origine non-ASCII : le paramètre filename= de la disposition
+        // retombe sur photo-{id}, le nom réel passe en filename*(utf-8).
+        $photo->setOriginalName('séjour.png');
+        $this->em->flush();
+
+        $this->client->request('GET', $this->visitUrl().'/photos/'.$photo->getId().'?download=1');
+
+        self::assertResponseIsSuccessful();
+        $disposition = (string) $this->client->getResponse()->headers->get('Content-Disposition');
+        self::assertStringStartsWith('attachment', $disposition);
+        self::assertStringContainsString('filename=photo-'.$photo->getId(), str_replace('"', '', $disposition));
+        self::assertStringContainsString("filename*=utf-8''s%C3%A9jour.png", $disposition);
+    }
+
     public function testPhotoOfAnotherVisitIs404(): void
     {
         $this->uploadPhotos([$this->pngUpload('salon.png')]);
@@ -150,8 +243,24 @@ final class VisitPhotoTest extends WebTestCase
         $em->persist($other);
         $em->flush();
 
-        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$other->getId().'/photos/'.$photo->getId());
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$other->getReference().'/photos/'.$photo->getId());
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAnonymousPhotoStreamingNeverServesTheBytes(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png')]);
+        /** @var VisitPhoto $photo */
+        $photo = $this->em->getRepository(VisitPhoto::class)->findOneBy([]);
+
+        // Session jetée : la même URL, anonyme, part au challenge login sans
+        // servir un octet de l'image (même convention que les documents de
+        // dossier; un mauvais préfixe tombe, lui, en 404 direct).
+        $this->client->getCookieJar()->clear();
+        $this->client->request('GET', $this->visitUrl().'/photos/'.$photo->getId());
+
+        self::assertResponseStatusCodeSame(302);
+        self::assertStringContainsString('connexion', (string) $this->client->getResponse()->headers->get('Location'));
     }
 
     public function testDeleteRemovesTheRowAndTheStoredObject(): void
@@ -212,7 +321,7 @@ final class VisitPhotoTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.$this->adminPrefix.'/admin/visites/'.$other->getId().'/photos/'.$photo->getId().'/suppression',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$other->getReference().'/photos/'.$photo->getId().'/suppression',
             ['_token' => $token],
         );
 
@@ -256,12 +365,121 @@ final class VisitPhotoTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/00000000000000000000000000000000/admin/visites/'.$this->visit->getId().'/photos/'.$photo->getId().'/suppression',
+            '/fr/00000000000000000000000000000000/admin/visites/'.$this->visit->getReference().'/photos/'.$photo->getId().'/suppression',
             ['_token' => 'irrelevant'],
         );
 
         self::assertResponseStatusCodeSame(404);
         self::assertSame(1, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
+    public function testDeletingTheVisitRemovesTheStoredObjects(): void
+    {
+        $this->uploadPhotos([$this->pngUpload('salon.png'), $this->pngUpload('cuisine.png')]);
+        $paths = array_map(
+            static fn (VisitPhoto $photo): string => (string) $photo->getPath(),
+            $this->em->getRepository(VisitPhoto::class)->findBy(['visit' => $this->visit->getId()]),
+        );
+        self::assertCount(2, $paths);
+
+        // Suppression de la visite : les lignes tombent par cascade et les
+        // objets du préfixe visits/<ref>/photos/ quittent le stockage.
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        $this->client->submit($crawler->filter('[data-testid="visit-show-delete"]')->closest('form')->form());
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertSame(0, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+        foreach ($paths as $path) {
+            self::assertFalse($this->storage()->exists($path), 'Stored photo must be deleted with the visit: '.$path);
+        }
+    }
+
+    public function testDeletingAPhotoSucceedsDespiteAStorageOutage(): void
+    {
+        $this->client->disableReboot();
+        $photo = $this->persistPhotoRow();
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        // La panne survient après le rendu de la page (le stub remplace le
+        // stockage avant le POST qui l'utilise).
+        static::getContainer()->set(VisitPhotoStorage::class, $this->failingStorage());
+
+        $this->client->submit($crawler->filter('[data-testid="visit-photo-delete"]')->closest('form')->form());
+
+        // Best-effort : la suppression métier aboutit malgré la panne.
+        self::assertResponseStatusCodeSame(303);
+        self::assertNull($this->em->find(VisitPhoto::class, $photo->getId()));
+    }
+
+    public function testDeletingTheVisitSucceedsDespiteAStorageOutage(): void
+    {
+        $this->client->disableReboot();
+        $this->persistPhotoRow();
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        static::getContainer()->set(VisitPhotoStorage::class, $this->failingStorage());
+
+        $this->client->submit($crawler->filter('[data-testid="visit-show-delete"]')->closest('form')->form());
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertNull($this->em->find(Visit::class, $this->visit->getId()));
+        self::assertSame(0, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
+    public function testAStoreFailureDuringUploadCountsAsRejectedWithoutBlocking(): void
+    {
+        $this->client->disableReboot();
+        $crawler = $this->client->request('GET', $this->visitUrl());
+        $token = (string) $crawler->filter('[data-testid="visit-photos-input"]')->closest('form')->filter('input[name="_token"]')->attr('value');
+        static::getContainer()->set(VisitPhotoStorage::class, $this->failingStorage());
+
+        $this->client->request('POST', $this->visitUrl().'/photos', ['_token' => $token], ['photos' => [$this->pngUpload('salon.png')]]);
+        self::assertResponseStatusCodeSame(303);
+        $this->client->followRedirect();
+
+        // L'échec de stockage est compté comme rejet, rien n'est persisté.
+        self::assertSelectorExists('[data-testid="visit-photos-rejected"]');
+        self::assertSame(0, (int) $this->em->getRepository(VisitPhoto::class)->count([]));
+    }
+
+    /** Ligne photo posée directement en base, sans passer par le stockage. */
+    private function persistPhotoRow(): VisitPhoto
+    {
+        $photo = (new VisitPhoto())
+            ->setOriginalName('salon.png')
+            ->setMimeType('image/png')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setPhase('before')
+            ->setPath('visits/'.$this->visit->getReference().'/photos/00000000-0000-0000-0000-000000000001.png');
+        $this->visit->addPhoto($photo);
+        $this->em->persist($photo);
+        $this->em->flush();
+
+        return $photo;
+    }
+
+    /** Stockage en panne : tout accès objet échoue. */
+    private function failingStorage(): VisitPhotoStorage
+    {
+        return new class implements VisitPhotoStorage {
+            public function store(string $visitRef, UploadedFile $file): string
+            {
+                throw new \RuntimeException('Storage down.');
+            }
+
+            public function exists(string $path): bool
+            {
+                return true;
+            }
+
+            public function readStream(string $path)
+            {
+                throw new \RuntimeException('Storage down.');
+            }
+
+            public function delete(string $path): void
+            {
+                throw new \RuntimeException('Storage down.');
+            }
+        };
     }
 
     public function testPathGuardRejectsForeignShapes(): void
@@ -293,7 +511,7 @@ final class VisitPhotoTest extends WebTestCase
 
     private function visitUrl(): string
     {
-        return '/fr/'.$this->adminPrefix.'/admin/visites/'.$this->visit->getId();
+        return '/fr/'.$this->adminPrefix.'/admin/visites/'.$this->visit->getReference();
     }
 
     private function loginAsAdmin(): void

@@ -16,7 +16,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
 /**
- * Agency favorites and the list/map display of the agencies view, mirroring
+ * Agency favorites of the agencies view, mirroring
  * the agent favorites: shared heart toggle, favorites tab filtering, and a
  * map with one marker per active geocoded agency.
  */
@@ -120,76 +120,13 @@ final class AgencyFavoritesTest extends KernelTestCase
             'view' => 'agencies',
         ]);
 
-        // The Tous / Favoris tab now shows above the agencies view too, next
-        // to the list/map display toggle; each card carries the heart.
+        // The Tous / Favoris tab shows above the agencies view too; each
+        // card carries the heart. No list/map toggle anymore.
         self::assertStringContainsString('data-testid="agents-tab"', $rendered);
         self::assertStringContainsString('data-testid="agents-tab-favorites"', $rendered);
-        self::assertStringContainsString('data-testid="agencies-display"', $rendered);
-        self::assertStringContainsString('data-testid="agencies-display-list"', $rendered);
-        self::assertStringContainsString('data-testid="agencies-display-map"', $rendered);
+        self::assertStringNotContainsString('data-testid="agencies-display"', $rendered);
         self::assertStringContainsString('data-testid="agency-favorite-toggle"', $rendered);
         self::assertStringContainsString('aria-pressed="true"', $rendered);
-    }
-
-    public function testMapDisplayRendersTheMapWithActiveGeocodedMarkersOnly(): void
-    {
-        $this->persistAgency('Foncia', lat: 48.8566, lng: 2.3522, address: '1 rue de Rivoli, Paris');
-        $this->persistAgency('Sans Adresse');
-        $this->persistAgency('Fermee', lat: 48.85, lng: 2.35, deactivated: true);
-        $this->loginAsAdmin();
-
-        $rendered = (string) $this->renderTwigComponent('RealEstateAgent:AgentList', [
-            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
-            'view' => 'agencies',
-            'display' => 'map',
-        ]);
-
-        // The map container replaces the list entirely.
-        self::assertStringContainsString('data-testid="agencies-map"', $rendered);
-        self::assertStringContainsString('data-live-ignore', $rendered);
-        self::assertStringNotContainsString('data-testid="agency-row"', $rendered);
-        // The pane id is keyed by the display mode: the map zone is morph
-        // -ignored, so switching back to the list must swap the whole
-        // subtree (otherwise the map would linger over the list).
-        self::assertStringContainsString('id="agencies-display-pane-map"', $rendered);
-
-        // Only the active geocoded agency gets a marker.
-        self::assertStringContainsString('Foncia', $rendered);
-        self::assertStringNotContainsString('Sans Adresse', $rendered);
-        self::assertStringNotContainsString('Fermee', $rendered);
-    }
-
-    public function testMapMarkersFollowTheSearchAndFavoritesFilters(): void
-    {
-        $this->persistAgency('Foncia', lat: 48.8566, lng: 2.3522, favorite: true);
-        $this->persistAgency('Century 21', lat: 48.86, lng: 2.34);
-        $this->loginAsAdmin();
-
-        $component = $this->mountList();
-        $component->chooseView('agencies');
-        $component->chooseDisplay('map');
-
-        self::assertTrue($component->isMapDisplay());
-        self::assertCount(2, $component->getAgenciesMap()->toArray()['markers']);
-
-        $component->chooseTab('favorites');
-        $markers = $component->getAgenciesMap()->toArray()['markers'];
-        self::assertCount(1, $markers);
-        self::assertSame('Foncia', $markers[0]['title']);
-
-        $component->chooseTab('all');
-        $component->search = 'century';
-        $markers = $component->getAgenciesMap()->toArray()['markers'];
-        self::assertCount(1, $markers);
-        self::assertSame('Century 21', $markers[0]['title']);
-    }
-
-    public function testUnknownDisplayIsRejected(): void
-    {
-        $this->loginAsAdmin();
-
-        $this->expectException(NotFoundHttpException::class);
-        $this->mountList()->chooseDisplay('satellite');
     }
 
     private function mountList(): AgentList

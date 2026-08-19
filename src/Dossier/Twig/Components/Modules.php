@@ -213,26 +213,29 @@ final class Modules
     }
 
     /**
-     * Visits booked for this dossier, split for the visit module card:
-     * upcoming ones first (soonest on top), then past ones (most recent
-     * on top). "Past" starts at the previous midnight, like the archive.
+     * Visits booked for this dossier: one chronological list, most recent
+     * first, for the visit module card. The upcoming split only feeds the
+     * counter; "past" starts at the previous midnight, like the archive.
      *
-     * @return array{upcoming: list<VisitSummary>, past: list<VisitSummary>}
+     * @return array{all: list<VisitSummary>, upcoming: list<VisitSummary>}
      */
     public function getDossierVisits(): array
     {
         $today = $this->clock->now()->setTime(0, 0);
-        $upcoming = [];
-        $past = [];
-        foreach ($this->visits->findByDossierSummaries($this->dossierId) as $summary) {
-            if ($summary->scheduledAt >= $today) {
-                $upcoming[] = $summary;
-            } else {
-                $past[] = $summary;
-            }
-        }
+        $all = array_reverse($this->visits->findByDossierSummaries($this->dossierId));
+        $upcoming = array_values(array_filter($all, static fn (VisitSummary $summary): bool => $summary->scheduledAt >= $today));
 
-        return ['upcoming' => $upcoming, 'past' => array_reverse($past)];
+        return ['all' => $all, 'upcoming' => $upcoming];
+    }
+
+    /**
+     * Biens refusés par le client sur ce dossier (retour client "Refuse"
+     * posé sur la fiche visite), pour le badge ambre du module Visites.
+     * Recalculé à chaque rendu, jamais dénormalisé.
+     */
+    public function getRefusedVisitCount(): int
+    {
+        return $this->visits->countRefusedByDossier($this->dossierId);
     }
 
     /**

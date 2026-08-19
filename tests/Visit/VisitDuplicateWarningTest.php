@@ -11,7 +11,6 @@ use App\Visit\Repository\VisitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\UX\LiveComponent\LiveResponder;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
 /**
@@ -97,7 +96,6 @@ final class VisitDuplicateWarningTest extends KernelTestCase
             'visitId' => (int) $edited->getId(),
             'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
         ]);
-        $component->setLiveResponder(new LiveResponder());
 
         $matches = $component->getMatchingVisits();
 
@@ -116,7 +114,7 @@ final class VisitDuplicateWarningTest extends KernelTestCase
 
         self::assertStringContainsString('data-testid="visit-duplicate-warning"', $rendered);
         self::assertStringContainsString($existing->getReference(), $rendered);
-        self::assertStringContainsString('/admin/visites/'.$existing->getId(), $rendered);
+        self::assertStringContainsString('/admin/visites/'.$existing->getReference(), $rendered);
     }
 
     public function testTheBannerIsAbsentWithoutAMatch(): void

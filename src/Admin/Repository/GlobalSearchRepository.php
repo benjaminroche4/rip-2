@@ -145,7 +145,7 @@ final readonly class GlobalSearchRepository
                 title: (string) $visit->getAddress(),
                 subtitle: trim(((string) $visit->getReference()).' · '.$visit->getScheduledAt()?->format('d.m.Y H\hi'), ' ·'),
                 route: 'admin_visit_show',
-                routeParams: ['id' => (int) $visit->getId()],
+                routeParams: ['reference' => (string) $visit->getReference()],
                 badgeKey: $visit->getStatus()->labelKey(),
             );
         }

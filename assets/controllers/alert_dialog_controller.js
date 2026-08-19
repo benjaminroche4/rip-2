@@ -42,6 +42,14 @@ export default class extends Controller {
         }
     }
 
+    /* Un clic sur le ::backdrop atterrit sur le <dialog> lui-même (jamais
+       sur son contenu) : c'est le signal "clic en dehors" natif. */
+    backdropClose(event) {
+        if (event.target === this.dialogTarget) {
+            this.close();
+        }
+    }
+
     async close() {
         this.dialogTarget.close();
 

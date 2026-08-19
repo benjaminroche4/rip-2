@@ -1804,6 +1804,7 @@ admin:
     toast:
         dismiss: Fermer la notification
         saved: Modifications enregistrées.
+        visitClientNoteSent: Note envoyée.
         agentDeleted: Agent supprimé.
         agencyDeleted: Agence supprimée.
         fileRenamed: Fichier renommé.
@@ -1852,8 +1853,6 @@ admin:
     meta:
         titlePrefix: Admin
         description: Espace d'administration Relocation in Paris. Accès réservé à l'équipe.
-    busyGuard:
-        message: Une action est encore en cours. Si vous quittez la page maintenant, elle risque de ne pas être enregistrée.
     nav:
         users: Utilisateurs
         contacts: Leads
@@ -2134,6 +2133,7 @@ admin:
                 origin: Créé depuis le lead
                 offer: Formule
                 timeline: Chronologie
+                setOffer: Renseigner la formule
             requestDocuments: Demander des documents
             closure:
                 badge: Dossier clôturé
@@ -2154,6 +2154,7 @@ admin:
                     confirm: Supprimer définitivement
             events:
                 statusChanged: 'Statut du dossier : %status%'
+                offerChanged: 'Formule du dossier : %offer%'
                 system: Système
                 documentsRequested: 'Pièces demandées pour %tenant% (envoyé à %recipient%) : %pieces%'
                 documentsResent: 'Relance envoyée à %recipient% pour les pièces de %tenant% : %pieces%'
@@ -2180,6 +2181,13 @@ admin:
                 dossierReopened: Dossier rouvert
                 stepValidated: 'Étape %step% validée'
                 stepReopened: 'Étape %step% rouverte'
+                visitBooked: 'Visite planifiée au %value%, le %date%'
+                visitDone: 'Visite effectuée au %value%, le %date%'
+                visitClientRefused: 'Le client refuse le bien visité au %value%'
+                visitClientPositioned: 'Le client se positionne sur le bien visité au %value%'
+                visitRefusalOrigin: 'Origine du refus du bien au %value% : %status%'
+                visitApplicationOutcome: 'Issue de la candidature au %value% : %status%'
+                visitClientNoteSent: 'Note de visite envoyée au client (%value%)'
                 searchUpdated: 'Recherche mise à jour, %field% : %value%'
                 searchCleared: Recherche mise à jour, %field% effacé
                 searchField:
@@ -2303,6 +2311,7 @@ admin:
                     empty: Aucune visite planifiée pour ce dossier.
                     plan: Planifier une visite
                     counter: '%count% à venir'
+                    refused: '{1}1 bien refusé|]1,Inf[%count% biens refusés'
                 payment:
                     title: Paiement
                     description: Honoraires et suivi des paiements.
@@ -2684,32 +2693,93 @@ admin:
             hot: Client chaud
             warm: Client tiède
             cold: Client froid
+        decision:
+            thinking: Réfléchit
+            positioning: Se positionne
+            refused: Refuse
+            since: 'Depuis le %date%'
+        applicationOutcome:
+            title: Issue de la candidature
+            help: Décision du bailleur, du propriétaire ou de l'agence.
+            accepted: Validé
+            refused: Refusé
+        decisionDeadline:
+            label: Jusqu'à quand ?
+            overdue: Échéance dépassée
+        refusalOrigin:
+            other: Autre
+            title: Qui a refusé ?
+            landlord: Bailleur / propriétaire / agence
+            client: Le client
+        banner:
+            thinking:
+                title: Le client réfléchit
+                deadline: Réponse attendue avant le %date%
+            positioning:
+                title: 'Candidature déposée : en attente de la réponse du bailleur.'
+        calendar:
+            autonomous: Autonome
         show:
-            modules:
-                booking: Prise de visite
-                report: Compte-rendu
-            outcomeTitle: Issue de la visite
-            proxyVisit: Sans le client
-            feelingLabel: Ressenti du client
-            reportPlaceholder: 'Points marquants, objections, prochaine action...'
-            reportSave: Enregistrer le compte-rendu
-            title: 'Visite du %date% à %time%'
-            detailsTitle: 'Détails de la visite'
+            reportBlocks:
+                agent: Retour de l'agent
+                agentInfo: "Ce retour reste interne : il sert à générer la note client par IA et alimente le reporting."
+                client: Retour client
+            updatedAt: Modifiée par
             reference: Référence
+            reportDone: Complété
+            reportTodo: Obligatoire après la visite
+            modules:
+                report: Compte-rendu
+            outcomeTitle: Statut de la visite
+            overdue:
+                title: 'Cette visite est passée : a-t-elle eu lieu ?'
+            feelingLabel: Ressenti du client
+            reportPlaceholder: 'État du bien, luminosité, bruit, réaction du client, points de vigilance...'
+            clientNote:
+                title: Note envoyée au client
+                placeholder: 'Le message transmis au client après la visite...'
+                generate: Générer avec l'IA
+                generateInfo: 'Rédige un brouillon à partir des infos du logement et du retour interne de l''agent.'
+                generateFailed: 'La génération a échoué, réessayez dans un instant.'
+                generateConfirm: 'La note actuelle sera remplacée par un nouveau brouillon généré par l''IA.'
+                send: Envoyer au client
+                sentAt: 'Envoyée le %date%'
+                sendFailed: 'Aucune personne du dossier n''a d''email valide : la note n''a pas été envoyée.'
+                sentPartial: 'Note envoyée à %sent% contacts sur %total%.'
+                sendModal:
+                    title: Envoyer cette note au client ?
+                    text: 'La note sera envoyée par email à toutes les personnes du dossier, chacune dans sa langue.'
+                    resend: 'Une note a déjà été envoyée le %date%, un nouvel envoi sera effectué.'
+                    cancel: Annuler
+                    confirm: Envoyer
+            title: 'Visite du %date% à %time%'
             durationMinutes: '%count% min'
+            tracking: Suivi
+            clientPresent: Le client participe
+            createdAt: Créée le
+            calendarSynced: Synchronisée à l'agenda
         edit:
             title: Modifier la visite
+            submit: Enregistrer
+            submitting: Enregistrement...
+            confirm:
+                title: Enregistrer les modifications de cette visite ?
         row:
+            startsInHours: 'dans %count% h'
+            startsInMinutes: 'dans %count% min'
             openInMaps: Ouvrir dans Google Maps
             performedBy: Réalisée par
             unassigned: Non assignée
+            reportDue: Compte-rendu à compléter
+            waitingSince: '{0}En attente depuis aujourd''hui|{1}En attente depuis 1 jour|]1,Inf[En attente depuis %count% jours'
+            byClient: Par le client
             bookedBy: Réservée par
             open: Ouvrir la visite
             edit: Modifier
             delete: Supprimer
             deleteModal:
                 title: Supprimer cette visite ?
-                text: 'La visite au %address% sera définitivement supprimée.'
+                text: 'La visite au %address% sera définitivement supprimée, photos comprises, et retirée des agendas Google.'
                 cancel: Annuler
                 confirm: Supprimer
         title: Visites
@@ -2719,9 +2789,14 @@ admin:
         new:
             title: Nouvelle visite
         photos:
-            title: Photos du bien
+            download: Télécharger
+            none: Aucune photo jointe à la visite.
+            deleteConfirm: 'Supprimer la photo « %name% » ? Cette action est définitive.'
+            title: Photos de l'annonce
+            after: Après la visite
+            afterEmpty: Aucune photo prise pendant la visite pour le moment.
+            manage: Gérer les photos
             add: Ajouter des photos
-            empty: Aucune photo pour le moment. Ajoutez les photos prises pendant la visite.
             delete: Supprimer
             rejected: '{1}1 fichier a été refusé (formats acceptés : JPEG, PNG, WebP, 10 Mo max).|]1,Inf[%count% fichiers ont été refusés (formats acceptés : JPEG, PNG, WebP, 10 Mo max).'
         tabs:
@@ -2729,6 +2804,12 @@ admin:
             upcoming: À venir
             archive: Archives
         archive:
+            filter:
+                accepted: Dossier validé
+                outcomeRefused: Dossier refusé
+            emptyFiltered:
+                title: Aucune visite pour ce statut
+                description: Modifiez ou retirez le filtre pour revoir toute l'archive.
             title: Archives des visites
             loadMore: Voir plus
             shown: '%shown% sur %total% visites'
@@ -2743,21 +2824,65 @@ admin:
             showMap: Voir sur la carte
             hideMap: Masquer la carte
         create:
+            intro:
+                text: Choisissez le dossier pour ouvrir le reste du formulaire.
+                criteria: Seuls les dossiers ouverts dont la recherche est validée sont proposés.
             sections:
                 visit: La visite
                 property: Le bien
                 slot: Le créneau
-                contacts: Agent immobilier et annonce
-                options: Options
-            details:
-                label: Mode détaillé
-                help: Agent immobilier, lien de l'annonce, présence du client.
+                contacts: Agent immobilier
+                contactsHelp: L'agent qui fait visiter le bien.
+                property_details: Le bien en détail
+                property_detailsHelp: Décrivez le bien si vous avez les infos, rien n'est obligatoire.
+                photos: Photos
+                photosHelp: Photos du bien, jointes à la visite.
+            propertyDetails:
+                surface:
+                    label: Surface
+                floor:
+                    label: Étage
+                    placeholder: 0 = rez-de-chaussée
+                propertyKind:
+                    label: Type de bien
+                furnishing:
+                    label: Meublé ou vide
+                leaseType:
+                    label: Type de bail
+                    airbnb: Airbnb
+                    mobility: Bail mobilité
+                    civil_code: Bail code civil
+                    alur: Bail loi Alur
+                rentMode:
+                    label: Loyer
+                    hc: Hors charges
+                    cc: Charges comprises
+                rentExcludingCharges:
+                    label: Montant du loyer
+                charges:
+                    label: Charges
+                recap:
+                    surface: '%surface% m²'
+                    floor: '%floor%e étage'
+                    groundFloor: RDC
+                    rent: '%amount% € HC'
+                    rentCc: '%amount% € CC'
+                    charges: '+ %amount% €'
+                    chargesAlone: '%amount% € de charges'
+            photos:
+                cover: Couverture
+                makeCover: Définir comme couverture
+                choose: Choisir des photos
+                drop: ou glissez-les ici
+                hint: 'JPEG, PNG ou WebP, 10 Mo max par photo, 12 photos maximum.'
             type:
                 label: Type de visite
             listingUrl:
                 label: "Lien de l'annonce"
                 placeholder: https://www.seloger.com/...
             duplicate:
+                blocked: Ce dossier a déjà une visite à cette adresse ce jour-là.
+                sameDossier: même dossier
                 title: '{1}Une visite est déjà prévue sur ce bien.|]1,Inf[%count% visites sont déjà prévues sur ce bien.'
                 item: 'le %date% pour %dossier%'
             duration:
@@ -2768,36 +2893,57 @@ admin:
                 min60: +1h
             clientPresent:
                 label: Le client participe à la visite
-                help: Décochez si l'agent visite pour son compte (visite par procuration).
+                help: 'L''équipe est sur place dans tous les cas : indiquez si le client sera présent lui aussi.'
             button: Nouvelle visite
-            title: Nouvelle visite
-            subtitle: Planifiez une visite pour un dossier, avec l'adresse du bien et l'agent qui la fait visiter.
             cancel: Annuler
             submit: Planifier la visite
             submitting: Planification...
+            confirm:
+                title: Planifier cette visite ?
+                text: La visite sera créée et ajoutée au fil de suivi du dossier.
+                notify: Prévenir le client par email
+                notifyHelp: Les contacts du dossier recevront la date, l'heure et l'adresse de la visite.
             dossier:
                 label: Dossier
                 placeholder: Choisir un dossier...
                 incomplete: Complétez la recherche de ce dossier pour pouvoir planifier une visite.
                 incompleteLink: Compléter la recherche
                 loading: Chargement du dossier...
+                closed: 'Ce dossier est clôturé : aucune visite ne peut y être planifiée.'
             recap:
                 title: Récapitulatif
+                'yes': Oui
+                'no': Non
+                more: Voir plus
+                less: Voir moins
             assignee:
+                requiredForType: 'Désignez un membre de l''équipe : ce type de visite ne peut pas être réalisé par le client seul.'
+                clientSelf: Le client réalise la visite pour son propre compte (formule Accompagné).
+                clientSelfShort: Le client
                 none: 'Aucun agent de visite. Attribuez la fonction "Agent de visite" dans la fiche utilisateur.'
                 label: Effectuée par
                 placeholder: Choisir un membre de l'équipe
+                conflict: '%name% a déjà une visite sur ce créneau :'
+                overlap: '%name% a déjà une visite de %start% à %end% (%reference%) : choisissez un autre créneau.'
+                busy: '%name% est déjà occupé de %start% à %end% (agenda Google) : choisissez un autre créneau.'
             agent:
                 label: Agent immobilier
                 placeholder: Aucun agent
+                searchPlaceholder: Rechercher un agent...
+                searchEmpty: Aucun agent ne correspond.
             note:
                 label: Note libre
                 placeholder: 'Code d''accès, interlocuteur sur place, consignes...'
             scheduledAt:
                 past: La visite ne peut pas être planifiée dans le passé.
                 label: Date et heure
+                oddHour: 'Créneau inhabituel : vérifiez l''heure saisie.'
             address:
+                help: Renseignez l'adresse complète du bien (numéro, rue, code postal et ville).
                 idf: L'adresse doit se situer en Île-de-France.
+                outOfArea:
+                    title: Le bien est hors du secteur recherché
+                    searched: au lieu de
                 label: Adresse du bien
                 placeholder: 12 rue de la Roquette, 75011 Paris
     agents:
@@ -2823,7 +2969,7 @@ admin:
             description: Ajoutez un agent aux favoris avec le cœur sur sa card ou sa fiche.
         empty:
             title: Aucun agent pour le moment
-            description: Ajoutez votre premier agent immobilier avec le bouton ci-dessus.
+            description: Ajoutez votre premier agent immobilier partenaire, seul ou avec son agence.
         emptyFiltered:
             title: Aucun agent ne correspond
             description: Modifiez la recherche ou les filtres pour retrouver vos agents.
@@ -2949,10 +3095,6 @@ admin:
         emptyFavorites:
             title: Aucun favori pour le moment
             description: Ajoutez une agence aux favoris avec le cœur sur sa card ou sa fiche.
-        display:
-            label: Affichage
-            list: Liste
-            map: Carte
         card:
             agentCount: '{0}Aucun agent|{1}1 agent|]1,Inf[%count% agents'
             open: Voir la fiche

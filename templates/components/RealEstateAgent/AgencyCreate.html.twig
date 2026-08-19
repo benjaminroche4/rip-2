@@ -53,7 +53,7 @@
             <div class="rounded-xl bg-white px-4 py-4">
                 {# Identité : nom, enseigne et logo de l'agence. #}
                 <div>
-                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
                     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="min-w-0">
                             <twig:Label for="{{ form.name.vars.id }}" class="text-gray-600">
@@ -148,7 +148,7 @@
                    valeur soumise reste le texte du champ, choisi ou saisi. Le
                    micro-titre de section sert de libellé au champ. #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 id="agency-create-address-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
+                    <h3 id="agency-create-address-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
                     <div class="mt-3">
                         <div class="relative" data-controller="places-autocomplete" data-places-autocomplete-script-url-value="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&amp;libraries=places&amp;language={{ app.request ? app.request.locale : 'fr' }}">
                             <input
@@ -179,7 +179,7 @@
                    section sert de libellé au groupe (pas de doublon). #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
                     <div data-testid="agency-create-specialties-block">
-                        <h3 id="{{ form.specialties.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                        <h3 id="{{ form.specialties.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
                         <div role="group" aria-labelledby="{{ form.specialties.vars.id }}-label" class="mt-3 flex flex-wrap gap-2">
                             {% for choice in form.specialties.children %}
                                 <label for="{{ choice.vars.id }}" class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary">
@@ -204,7 +204,7 @@
 
                 {# Coordonnées : téléphone, email et site web de l'agence. #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
+                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
                     <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="min-w-0">
                             <twig:Label for="{{ form.phone.vars.id }}" class="text-gray-600">
@@ -267,7 +267,7 @@
                 {# Note interne : texte libre réservé à l'équipe. Le micro-titre
                    de section sert de libellé au champ. #}
                 <div class="mt-4 border-t border-gray-950/5 pt-4">
-                    <h3 id="{{ form.note.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                    <h3 id="{{ form.note.vars.id }}-label" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
                     <div class="mt-3">
                         <textarea
                             id="{{ form.note.vars.id }}"

@@ -255,43 +255,6 @@ class AgencyRepository extends ServiceEntityRepository
         return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
-    /**
-     * Rows for the map display of the agencies view: active geocoded agencies
-     * only, filtered like the list (search + favorites) so both displays show
-     * the same directory slice.
-     *
-     * @return list<array{id: int, name: string, address: string|null, latitude: float, longitude: float, reference: string}>
-     */
-    public function findMapMarkers(string $search = '', bool $favoritesOnly = false): array
-    {
-        $qb = $this->createQueryBuilder('ag')
-            ->select('ag.id AS id', 'ag.name AS name', 'ag.address AS address', 'ag.latitude AS latitude', 'ag.longitude AS longitude', 'ag.reference AS reference')
-            ->leftJoin('ag.brand', 'b')
-            ->where('ag.deactivatedAt IS NULL')
-            ->andWhere('ag.latitude IS NOT NULL')
-            ->andWhere('ag.longitude IS NOT NULL')
-            ->orderBy('ag.name', 'ASC');
-        $this->applySearch($qb, $search);
-        if ($favoritesOnly) {
-            $qb->andWhere('ag.favoritedAt IS NOT NULL');
-        }
-
-        /** @var list<array{id: int, name: string, address: string|null, latitude: float, longitude: float, reference: string|null}> $rows */
-        $rows = $qb->getQuery()->getArrayResult();
-
-        return array_map(
-            static fn (array $r): array => [
-                'id' => (int) $r['id'],
-                'name' => (string) $r['name'],
-                'address' => null !== $r['address'] ? (string) $r['address'] : null,
-                'latitude' => (float) $r['latitude'],
-                'longitude' => (float) $r['longitude'],
-                'reference' => (string) ($r['reference'] ?? ''),
-            ],
-            $rows,
-        );
-    }
-
     private function applySearch(\Doctrine\ORM\QueryBuilder $qb, string $search): void
     {
         $needle = trim($search);

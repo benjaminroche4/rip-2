@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Visit\Twig\Components;
 
 use App\Visit\Repository\VisitRepository;
+use Psr\Clock\ClockInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
@@ -19,6 +20,7 @@ final class VisitsNavBadge
     public function __construct(
         private readonly VisitRepository $repository,
         private readonly Security $security,
+        private readonly ClockInterface $clock,
     ) {
     }
 
@@ -31,6 +33,10 @@ final class VisitsNavBadge
 
     public function getCount(): int
     {
-        return $this->repository->countOnDay(new \DateTimeImmutable('today'));
+        // Jour courant en heure murale Paris (horloge injectée, testable) :
+        // même convention que le reste du contexte Visite.
+        return $this->repository->countOnDay(
+            $this->clock->now()->setTimezone(new \DateTimeZone('Europe/Paris')),
+        );
     }
 }

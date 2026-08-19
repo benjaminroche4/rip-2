@@ -141,6 +141,52 @@ final class DossierNotes
         return $this->dossier()->getOffer();
     }
 
+    /** Cadenas anti-missclick de la formule : verrouillé par défaut à chaque chargement. */
+    #[LiveProp]
+    public bool $offerLocked = true;
+
+    #[LiveAction]
+    public function toggleOfferLock(): void
+    {
+        $this->ensureAdmin();
+        if (!$this->security->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException('Admin access required.');
+        }
+        $this->offerLocked = !$this->offerLocked;
+    }
+
+    /**
+     * Formule du dossier, renseignable ou modifiable après coup, jamais
+     * retirée (un dossier a toujours une formule). Réservé aux admins :
+     * le staff de section la consulte seulement, et le cadenas doit être
+     * ouvert (garde serveur en miroir du pointer-events-none).
+     */
+    #[LiveAction]
+    public function chooseOffer(#[LiveArg] string $offer): void
+    {
+        $this->ensureAdmin();
+        if (!$this->security->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException('Admin access required.');
+        }
+        if ($this->offerLocked) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Offer changes are locked.');
+        }
+        if (!\in_array($offer, \App\Contact\Entity\Contact::OFFERS, true)) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(\sprintf('Unknown offer "%s".', $offer));
+        }
+
+        $dossier = $this->dossier();
+        if ($offer === $dossier->getOffer()) {
+            return;
+        }
+
+        $dossier->setOffer($offer);
+        $this->events->log($dossier, 'offer_changed', [
+            'offer' => 'contact.contactForm.offer.'.$offer.'.title',
+        ]);
+        $this->em->flush();
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->dossier()->getCreatedAt() ?? new \DateTimeImmutable();
@@ -485,11 +531,13 @@ final class DossierNotes
             '%tenant%' => (string) ($payload['tenant'] ?? ''),
             '%name%' => (string) ($payload['name'] ?? ''),
             '%recipient%' => (string) ($payload['recipient'] ?? ''),
+            '%date%' => (string) ($payload['date'] ?? ''),
             '%file%' => (string) ($payload['file'] ?? ''),
             '%reason%' => (string) ($payload['reason'] ?? ''),
             '%description%' => (string) ($payload['description'] ?? ''),
             '%role%' => isset($payload['role']) ? $this->translator->trans((string) $payload['role']) : '',
             '%status%' => isset($payload['status']) ? $this->translator->trans((string) $payload['status']) : '',
+            '%offer%' => isset($payload['offer']) ? $this->translator->trans((string) $payload['offer']) : '',
             '%step%' => isset($payload['step']) ? $this->translator->trans((string) $payload['step']) : '',
             '%pieces%' => implode(', ', array_map(
                 fn (string $key): string => $this->translator->trans($key),

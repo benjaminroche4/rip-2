@@ -44,7 +44,7 @@ final class VisitStatusReportAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.self::WRONG_PREFIX.'/admin/visites/'.$visit->getId().'/statut',
+            '/fr/'.self::WRONG_PREFIX.'/admin/visites/'.$visit->getReference().'/statut',
             ['_token' => 'x', 'status' => 'done'],
         );
 
@@ -58,7 +58,7 @@ final class VisitStatusReportAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.self::WRONG_PREFIX.'/admin/visites/'.$visit->getId().'/compte-rendu',
+            '/fr/'.self::WRONG_PREFIX.'/admin/visites/'.$visit->getReference().'/compte-rendu',
             ['_token' => 'x', 'report' => 'Hello'],
         );
 
@@ -132,7 +132,9 @@ final class VisitStatusReportAccessTest extends WebTestCase
     public function testItPersistsAValidReportAndFeeling(): void
     {
         $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
-        $visit = $this->persistVisit();
+        // Statut Effectuée : le formulaire de compte-rendu (où se scrape le
+        // token CSRF) n'apparaît sur la fiche qu'une fois la visite faite.
+        $visit = $this->persistVisit(status: VisitStatus::Done);
 
         $this->client->request(
             'POST',
@@ -150,7 +152,7 @@ final class VisitStatusReportAccessTest extends WebTestCase
     public function testItRejectsAReportOver5000CharactersWith400(): void
     {
         $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
-        $visit = $this->persistVisit();
+        $visit = $this->persistVisit(status: VisitStatus::Done);
 
         $this->client->request(
             'POST',
@@ -195,9 +197,155 @@ final class VisitStatusReportAccessTest extends WebTestCase
         self::assertNull($this->em->find(Visit::class, $visit->getId())->getReport());
     }
 
+    public function testDoneStatusRedirectCarriesTheReportAnchor(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit();
+
+        $this->client->request(
+            'POST',
+            $this->visitUrl($visit).'/statut',
+            ['_token' => $this->statusToken($visit), 'status' => 'done'],
+        );
+
+        self::assertResponseStatusCodeSame(303);
+        // Effectuée atterrit directement sur le formulaire de compte-rendu.
+        self::assertStringEndsWith('#visit-report', (string) $this->client->getResponse()->headers->get('Location'));
+    }
+
+    public function testNonDoneStatusRedirectCarriesNoAnchor(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit();
+
+        $this->client->request(
+            'POST',
+            $this->visitUrl($visit).'/statut',
+            ['_token' => $this->statusToken($visit), 'status' => 'cancelled'],
+        );
+
+        self::assertResponseStatusCodeSame(303);
+        self::assertStringNotContainsString('#', (string) $this->client->getResponse()->headers->get('Location'));
+    }
+
+    public function testOverdueBannerShowsForAPlannedPastVisit(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit('-1 day 10:30');
+
+        $crawler = $this->client->request('GET', $this->visitUrl($visit));
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filter('[data-testid="visit-overdue-banner"]'));
+        // Les deux issues proposées par le bandeau : Effectuée et Annulée.
+        self::assertCount(1, $crawler->filter('[data-testid="visit-overdue-done"]'));
+        self::assertCount(1, $crawler->filter('[data-testid="visit-overdue-cancelled"]'));
+    }
+
+    public function testOverdueBannerIsAbsentForFutureDoneAndCancelledVisits(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+
+        foreach ([
+            $this->persistVisit('+1 day 10:30'),
+            $this->persistVisit('-1 day 10:30', VisitStatus::Done),
+            $this->persistVisit('-1 day 10:30', VisitStatus::Cancelled),
+        ] as $visit) {
+            $crawler = $this->client->request('GET', $this->visitUrl($visit));
+            self::assertResponseIsSuccessful();
+            self::assertCount(0, $crawler->filter('[data-testid="visit-overdue-banner"]'), 'No banner expected for '.$visit->getReference());
+        }
+    }
+
+    public function testStatusActionsNeverOfferTheCurrentStatus(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+
+        $expected = [
+            ['visit' => $this->persistVisit(status: VisitStatus::Planned), 'absent' => 'planned', 'present' => ['done', 'cancelled']],
+            ['visit' => $this->persistVisit(status: VisitStatus::Done), 'absent' => 'done', 'present' => ['planned', 'cancelled']],
+            ['visit' => $this->persistVisit(status: VisitStatus::Cancelled), 'absent' => 'cancelled', 'present' => ['planned', 'done']],
+        ];
+        foreach ($expected as $case) {
+            $crawler = $this->client->request('GET', $this->visitUrl($case['visit']));
+            self::assertResponseIsSuccessful();
+            $actions = $crawler->filter('[data-testid="visit-status-actions"]');
+            // Le statut courant reste visible, coloré et non soumis (span
+            // aria-current) ; les deux autres sont des bascules en form.
+            $current = $actions->filter('[data-testid="visit-status-'.$case['absent'].'"]');
+            self::assertCount(1, $current);
+            self::assertSame('span', $current->nodeName());
+            self::assertSame('true', $current->attr('aria-current'));
+            foreach ($case['present'] as $status) {
+                $button = $actions->filter('[data-testid="visit-status-'.$status.'"]');
+                self::assertCount(1, $button);
+                self::assertSame('button', $button->nodeName());
+            }
+        }
+    }
+
+    public function testAFilledReportRendersLockedWithAPencilAndTheFormStaysInTheDom(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit(status: VisitStatus::Done);
+        $visit->setReport("Points forts :\nTrès lumineux, client conquis.");
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', $this->visitUrl($visit));
+
+        self::assertResponseIsSuccessful();
+        // Lecture verrouillée : le texte rendu + le stylo d'édition.
+        $display = $crawler->filter('[data-testid="visit-report-display"]');
+        self::assertCount(1, $display);
+        self::assertStringContainsString('client conquis', $display->text());
+        self::assertCount(1, $crawler->filter('[data-testid="visit-report-edit"]'));
+        // L'éditeur reste dans le DOM (autosave + tests crawler), juste masqué.
+        $textarea = $crawler->filter('[data-testid="visit-report-text"]');
+        self::assertCount(1, $textarea);
+        self::assertStringContainsString('hidden', (string) $textarea->attr('class'));
+        self::assertCount(1, $crawler->filter('[data-testid="visit-report-form"] textarea[name="report"]'));
+    }
+
+    public function testAnEmptyReportRendersDirectlyInEditMode(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit(status: VisitStatus::Done);
+
+        $crawler = $this->client->request('GET', $this->visitUrl($visit));
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(0, $crawler->filter('[data-testid="visit-report-display"]'));
+        self::assertCount(0, $crawler->filter('[data-testid="visit-report-edit"]'));
+        $textarea = $crawler->filter('[data-testid="visit-report-text"]');
+        self::assertCount(1, $textarea);
+        self::assertStringNotContainsString('hidden', (string) $textarea->attr('class'));
+    }
+
+    public function testAFeelingChipAutosaveSubmissionPersistsTheFeeling(): void
+    {
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $visit = $this->persistVisit(status: VisitStatus::Done);
+        $visit->setReport('Retour déjà en base.');
+        $this->em->flush();
+
+        // Le clic sur une chip soumet le formulaire tel quel (pas de bouton
+        // Enregistrer) : même soumission que requestSubmit() côté navigateur.
+        $crawler = $this->client->request('GET', $this->visitUrl($visit));
+        $form = $crawler->filter('[data-testid="visit-report-form"]')->form();
+        $form['feeling']->select('hot');
+        $this->client->submit($form);
+
+        self::assertResponseStatusCodeSame(303);
+        $this->em->clear();
+        $reloaded = $this->em->find(Visit::class, $visit->getId());
+        self::assertSame(ClientFeeling::Hot, $reloaded->getClientFeeling());
+        // Le textarea voyage dans le même POST : le retour agent survit.
+        self::assertSame('Retour déjà en base.', $reloaded->getReport());
+    }
+
     private function visitUrl(Visit $visit): string
     {
-        return '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId();
+        return '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference();
     }
 
     /** Scrapes the CSRF token of the status form on the show page. */
@@ -218,7 +366,7 @@ final class VisitStatusReportAccessTest extends WebTestCase
         return (string) $crawler->filter('[data-testid="visit-report-form"] input[name="_token"]')->attr('value');
     }
 
-    private function persistVisit(): Visit
+    private function persistVisit(string $when = '+1 day 10:30', VisitStatus $status = VisitStatus::Planned): Visit
     {
         $dossier = (new Dossier())
             ->setName('Famille Martin')
@@ -230,8 +378,9 @@ final class VisitStatusReportAccessTest extends WebTestCase
         $visit = (new Visit())
             ->setReference('VS-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT))
             ->setDossier($dossier)
-            ->setScheduledAt(new \DateTimeImmutable('+1 day 10:30'))
+            ->setScheduledAt(new \DateTimeImmutable($when))
             ->setAddress('12 rue de la Roquette, 75011 Paris')
+            ->setStatus($status)
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($visit);
         $this->em->flush();

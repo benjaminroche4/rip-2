@@ -214,6 +214,37 @@ class RealEstateAgentRepository extends ServiceEntityRepository
     }
 
     /**
+     * Options du dropdown agent enrichi (formulaire de visite) : agents
+     * actifs uniquement, avec la ligne agence + enseigne, tri alphabétique.
+     *
+     * @return list<\App\RealEstateAgent\Domain\AgentPickerOption>
+     */
+    public function findPickerOptions(): array
+    {
+        /** @var list<array{id: int, firstName: string, lastName: string, avatarFilename: string|null, agencyName: string|null, brand: string|null}> $rows */
+        $rows = $this->createQueryBuilder('a')
+            ->select('a.id AS id', 'a.firstName AS firstName', 'a.lastName AS lastName', 'a.avatarFilename AS avatarFilename', 'ag.name AS agencyName', 'b.name AS brand')
+            ->leftJoin('a.agency', 'ag')
+            ->leftJoin('ag.brand', 'b')
+            ->where('a.deactivatedAt IS NULL')
+            ->orderBy('a.lastName', 'ASC')
+            ->addOrderBy('a.firstName', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(
+            static fn (array $r): \App\RealEstateAgent\Domain\AgentPickerOption => new \App\RealEstateAgent\Domain\AgentPickerOption(
+                id: (int) $r['id'],
+                fullName: trim($r['firstName'].' '.$r['lastName']),
+                avatarFilename: null !== $r['avatarFilename'] ? (string) $r['avatarFilename'] : null,
+                agencyName: null !== $r['agencyName'] ? (string) $r['agencyName'] : null,
+                brand: null !== $r['brand'] ? (string) $r['brand'] : null,
+            ),
+            $rows,
+        );
+    }
+
+    /**
      * Doublon probable à la création : même email (insensible à la casse)
      * ou même téléphone (E.164). Première fiche correspondante, fiches
      * désactivées comprises (un doublon dormant reste un doublon).

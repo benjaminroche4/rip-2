@@ -70,6 +70,7 @@ export default class extends Controller {
 
     /** Instance Google déjà créée par le controller UX Map, s'il a pris les devants. */
     #adoptConnectedMap() {
+        // querySelector assumé : l'élément appartient au bundle UX Map (tiers), pas à notre markup, donc aucun target Stimulus possible.
         const element = this.frameTarget.querySelector('[data-controller*="map"]')
         if (!element) {
             return

@@ -243,6 +243,7 @@ export default class extends Controller {
 
     #updateThumbnails() {
         if (!this.hasThumbnailsTarget) return
+        // querySelectorAll assumé : les vignettes sont générées en JS au vol (DOM dynamique), un target Stimulus déclaratif ne peut pas les couvrir.
         const buttons = this.thumbnailsTarget.querySelectorAll('button')
         buttons.forEach((btn, i) => {
             const isActive = i === this.#currentIndex

@@ -343,10 +343,20 @@
                                 >
                                     {{ ux_icon(this.fileLocked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                                 </button>
-                            {% elseif module.key == 'visit' and dossierVisits.upcoming|length > 0 %}
-                                <span class="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 tabular-nums" data-testid="module-visit-counter">
-                                    {{ 'admin.dossiers.show.modules.visit.counter'|trans({'%count%': dossierVisits.upcoming|length}) }}
-                                </span>
+                            {% elseif module.key == 'visit' %}
+                                {# Badge discret : biens refusés par le client
+                                   (retour client posé sur la fiche visite). #}
+                                {% set refusedCount = this.refusedVisitCount %}
+                                {% if refusedCount > 0 %}
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 tabular-nums" data-testid="dossier-refused-count">
+                                        {{ 'admin.dossiers.show.modules.visit.refused'|trans({'%count%': refusedCount}) }}
+                                    </span>
+                                {% endif %}
+                                {% if dossierVisits.upcoming|length > 0 %}
+                                    <span class="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 tabular-nums" data-testid="module-visit-counter">
+                                        {{ 'admin.dossiers.show.modules.visit.counter'|trans({'%count%': dossierVisits.upcoming|length}) }}
+                                    </span>
+                                {% endif %}
                             {% endif %}
                             {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
                         </div>
@@ -530,11 +540,11 @@
                            actions regroupées dans une tuile pleine largeur. #}
                         <div class="mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2" data-controller="copy-link" data-copy-link-text-value="{{ depositUrl }}" data-copy-link-copied-label-value="{{ 'admin.dossiers.show.modules.file.depositLink.copied'|trans }}" data-testid="module-file-deposit-link">
                             <div class="rounded-xl bg-white px-4 py-3">
-                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.label'|trans }}</p>
+                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.label'|trans }}</p>
                                 <a href="{{ depositUrl }}" target="_blank" rel="noopener noreferrer" class="mt-0.5 block truncate text-xs text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors duration-100 ease-out hover:text-gray-900">{{ depositUrl }}</a>
                             </div>
                             <div class="rounded-xl bg-white px-4 py-3">
-                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.codeLabel'|trans|trim(':') }}</p>
+                                <p class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.modules.file.depositLink.codeLabel'|trans|trim(':') }}</p>
                                 <div class="mt-0.5">{{ codeInline }}</div>
                             </div>
                             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white px-4 py-3 sm:col-span-2">
@@ -551,11 +561,11 @@
                         {% endif %}
                         <twig:FilePreview />
                     {% elseif module.key == 'visit' %}
-                        {# Visites du dossier : à venir puis passées; chaque
-                           ligne ouvre la fiche visite si l'utilisateur a
-                           accès à la section Visites. #}
+                        {# Visites du dossier, de la plus récente à la plus
+                           ancienne; chaque ligne ouvre la fiche visite si
+                           l'utilisateur a accès à la section Visites. #}
                         {% set canOpenVisit = this.adminPrefix != '' and is_granted('ROLE_SECTION_VISITS') %}
-                        {% set moduleVisits = dossierVisits.upcoming|merge(dossierVisits.past) %}
+                        {% set moduleVisits = dossierVisits.all %}
                         {% if moduleVisits is empty %}
                             <p class="mt-1 rounded-xl bg-white px-5 py-6 text-sm text-gray-400" data-testid="module-visit-empty">
                                 {{ 'admin.dossiers.show.modules.visit.empty'|trans }}
@@ -566,7 +576,7 @@
                                     {% set rowTag = canOpenVisit ? 'a' : 'div' %}
                                     <li class="bg-white first:rounded-t-xl last:rounded-b-xl" data-testid="module-visit-row">
                                         <{{ rowTag }}
-                                            {% if canOpenVisit %}href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, id: visit.id}) }}"{% endif %}
+                                            {% if canOpenVisit %}href="{{ path('admin_visit_show', {adminPrefix: this.adminPrefix, reference: visit.reference}) }}"{% endif %}
                                             class="group/visit flex items-center gap-4 px-5 py-3.5 {{ canOpenVisit ? 'transition-colors duration-100 ease-out hover:bg-neutral-50' }}"
                                         >
                                             <div class="min-w-0 flex-1">

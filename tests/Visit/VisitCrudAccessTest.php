@@ -38,13 +38,36 @@ final class VisitCrudAccessTest extends WebTestCase
         $this->loginAs(['ROLE_ADMIN']);
         $visit = $this->persistVisit();
 
-        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId());
+        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference());
 
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('12 rue de la Roquette, 75011 Paris', $crawler->filter('[data-testid="visit-show-page"]')->text());
         self::assertCount(1, $crawler->filter('[data-testid="visit-show-dossier"]'));
-        // Une seule action sur la fiche : bouton Supprimer direct, sans menu.
+        // La suppression vit dans le menu "..." de la card "Le bien".
         self::assertCount(1, $crawler->filter('[data-testid="visit-show-delete-trigger"]'));
+    }
+
+    public function testShowReturns404ForAnUnknownReference(): void
+    {
+        $this->loginAs(['ROLE_ADMIN']);
+        $this->persistVisit();
+
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/VS-999999');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testShowReturns404ForANumericIdInTheUrl(): void
+    {
+        // Les URLs sont keyées sur la référence publique : l'ancien format
+        // par id auto-incrémenté ne matche plus le requirement (pas de
+        // redirection de compatibilité, décision assumée).
+        $this->loginAs(['ROLE_ADMIN']);
+        $visit = $this->persistVisit();
+
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId());
+
+        self::assertResponseStatusCodeSame(404);
     }
 
     public function testTabsShowTheUpcomingAndArchivedCounts(): void
@@ -73,22 +96,69 @@ final class VisitCrudAccessTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $link = $crawler->filter('[data-testid="visit-row-link"]')->first();
-        self::assertStringContainsString('/admin/visites/'.$visit->getId(), (string) $link->attr('href'));
+        self::assertStringContainsString('/admin/visites/'.$visit->getReference(), (string) $link->attr('href'));
     }
 
-    public function testShowPageEmbedsTheInlineEditor(): void
+    public function testShowPageEmbedsTheReadOnlyCardAndItsMenu(): void
     {
         $this->loginAs(['ROLE_ADMIN']);
         $visit = $this->persistVisit();
 
-        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId());
+        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference());
 
         self::assertResponseIsSuccessful();
-        // La card détail est le composant éditable, cadenas en tête.
+        // La card détail est en lecture pure : menu "..." en tête (Modifier
+        // + Supprimer), plus aucun cadenas d'édition en place.
         self::assertCount(1, $crawler->filter('[data-testid="visit-details-card"]'));
-        self::assertCount(1, $crawler->filter('[data-testid="visit-details-lock"]'));
-        // L'ancienne page modifier n'existe plus.
-        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId().'/modifier');
+        self::assertCount(1, $crawler->filter('[data-testid="visit-details-menu"]'));
+        self::assertCount(0, $crawler->filter('[data-testid="visit-details-lock"]'));
+        $edit = $crawler->filter('[data-testid="visit-details-edit"]');
+        self::assertCount(1, $edit);
+        self::assertStringEndsWith('/visites/'.$visit->getReference().'/modifier', (string) $edit->attr('href'));
+    }
+
+    public function testEditPageLoadsPrefilledWithoutDossierNorPhotosSections(): void
+    {
+        $this->loginAs(['ROLE_ADMIN']);
+        $visit = $this->persistVisit();
+        $visit->setNote('Code 4812');
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/modifier');
+
+        self::assertResponseIsSuccessful();
+        // Même page que la création, montée sur la visite : champs pré-remplis.
+        self::assertCount(1, $crawler->filter('[data-testid="visit-edit-page"]'));
+        self::assertSame('12 rue de la Roquette, 75011 Paris', $crawler->filter('[data-testid="visit-form-address"]')->attr('value'));
+        self::assertStringContainsString('Code 4812', (string) $crawler->filter('[data-testid="visit-form-note"]')->text());
+        // Dossier verrouillé (lecture seule) et section photos absente.
+        self::assertCount(1, $crawler->filter('[data-testid="visit-form-dossier-locked"]'));
+        self::assertCount(0, $crawler->filter('select[data-testid="visit-form-dossier"]'));
+        self::assertCount(0, $crawler->filter('[data-testid="visit-form-photos-toggle"]'));
+        // Libellé d'action : Enregistrer, pas Planifier.
+        self::assertStringContainsString('Enregistrer', (string) $crawler->filter('[data-testid="visit-form-submit"]')->text());
+    }
+
+    public function testEditPageAccessFollowsTheSectionModel(): void
+    {
+        $visit = $this->persistVisit();
+
+        // Anonyme sur un mauvais préfixe : 404 avant tout challenge.
+        $this->client->request('GET', '/fr/00000000000000000000000000000000/admin/visites/'.$visit->getReference().'/modifier');
+        self::assertResponseStatusCodeSame(404);
+
+        // Staff sans la section Visites : 403.
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_CONTACTS']);
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/modifier');
+        self::assertResponseStatusCodeSame(403);
+
+        // Staff avec la section : 200.
+        $this->loginAs(['ROLE_STAFF', 'ROLE_SECTION_VISITS']);
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/modifier');
+        self::assertResponseIsSuccessful();
+
+        // Référence inconnue : 404.
+        $this->client->request('GET', '/fr/'.$this->adminPrefix.'/admin/visites/VS-999999/modifier');
         self::assertResponseStatusCodeSame(404);
     }
 
@@ -104,7 +174,7 @@ final class VisitCrudAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId().'/supprimer',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/supprimer',
             ['_token' => $token],
         );
 
@@ -119,7 +189,7 @@ final class VisitCrudAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId().'/supprimer',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/supprimer',
             ['_token' => 'not-a-valid-token'],
         );
 
@@ -139,7 +209,7 @@ final class VisitCrudAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId().'/supprimer',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/supprimer',
             ['_token' => $token],
         );
 
@@ -154,7 +224,7 @@ final class VisitCrudAccessTest extends WebTestCase
 
         $this->client->request(
             'POST',
-            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getId().'/supprimer',
+            '/fr/'.$this->adminPrefix.'/admin/visites/'.$visit->getReference().'/supprimer',
             ['_token' => 'irrelevant'],
         );
 

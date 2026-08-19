@@ -1,255 +1,108 @@
-<div {{ attributes }} data-testid="visit-details-card">
+{# Fiche visite en lecture pure : le composant émet deux blocs (card "Le
+   bien" + latérale sticky) qui se placent dans la grille de la page grâce au
+   root en display:contents. Les modifications passent par la page dédiée
+   "Modifier" (menu "..." en tête de card), la suppression par le même menu.
+   L'adresse ne s'affiche pas en lecture : la carte et la page Modifier
+   suffisent. #}
+<div {{ attributes.defaults({class: 'contents'}) }} data-testid="visit-details-card">
     {% set visit = this.visit %}
     {% if visit %}
-        {% set locked = this.locked %}
-        <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+        {% set adminPrefix = this.adminPrefix %}
+        {% set rowLabelClass = 'shrink-0 text-xs font-medium tracking-wide text-gray-500 uppercase' %}
+
+        {# ══ Colonne principale : le bien visité. Quand la visite est
+              effectuée, la card compte-rendu de la page occupe la première
+              rangée : celle-ci descend en deuxième. ══ #}
+        {% set reportShown = visit.status.value == 'done' %}
+        <section class="rounded-3xl border border-neutral-200 bg-white p-2 lg:col-start-1 {{ reportShown ? 'lg:row-start-2' : 'lg:row-start-1' }}" data-testid="visit-property-card">
             <div class="rounded-2xl bg-neutral-50 p-2">
-                <div class="flex items-center justify-between gap-4 px-4 pt-3 pb-1">
-                    <h2 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">
-                        {{ 'admin.visits.show.detailsTitle'|trans }}
-                    </h2>
-                    {# Cadenas anti-fausse manip : les champs ne s'éditent
-                       qu'une fois déverrouillés, comme sur les dossiers. #}
-                    <button
-                        type="button"
-                        data-action="live#action"
-                        data-live-action-param="toggleLock"
-                        class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-900"
-                        aria-pressed="{{ locked ? 'false' : 'true' }}"
-                        aria-label="{{ (locked ? 'admin.visits.show.unlock' : 'admin.visits.show.lock')|trans }}"
-                        title="{{ (locked ? 'admin.visits.show.unlock' : 'admin.visits.show.lock')|trans }}"
-                        data-testid="visit-details-lock"
-                    >
-                        {{ ux_icon(locked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0 ' ~ (locked ? '' : 'text-primary'), 'aria-hidden': 'true'}) }}
-                    </button>
-                </div>
-                {# Verrouillé : contenu grisé et désaturé + bandeau cliquable
-                   qui déverrouille. Même traitement que le module Dossier
-                   (module-file-locked-banner). #}
-                {% if locked %}
-                    <button
-                        type="button"
-                        data-action="live#action"
-                        data-live-action-param="toggleLock"
-                        class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
-                        data-testid="visit-locked-banner"
-                    >
-                        {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.locked.notice'|trans }}
-                    </button>
+
+                {# ── Mini carte épinglée sur le bien. data-live-ignore : un
+                      morph live détruirait la Google Map. ── #}
+                {% if this.map %}
+                    <div class="mt-1 overflow-hidden rounded-xl" data-live-ignore data-testid="visit-show-map">
+                        <div class="h-72">
+                            {{ ux_map(this.map, {style: 'height: 100%; width: 100%;'}) }}
+                        </div>
+                    </div>
                 {% endif %}
-                <div class="transition-[opacity,filter] duration-200 ease-out {{ locked ? 'opacity-70 saturate-50' : '' }}">
-                <div class="mt-1 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm {{ locked ? '' : 'ring-1 ring-primary/20' }}">
-                    {# ── Référence (jamais éditable). ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.show.reference'|trans }}</p>
-                        <p class="font-medium text-gray-900 tabular-nums" data-testid="visit-show-reference">{{ visit.reference }}</p>
-                    </div>
 
-                    {# ── Type et déroulement : chips cliquables une fois déverrouillé. ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.type.label'|trans }}</p>
-                        {% if locked %}
-                            <p class="flex items-center gap-1.5 font-medium text-gray-900">
-                                {{ ux_icon(visit.type.icon, {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                {{ visit.type.labelKey|trans }}
-                            </p>
-                        {% else %}
-                            <div class="flex flex-wrap justify-end gap-1.5">
-                                {% for case in enum('App\\Visit\\Domain\\VisitType').cases() %}
-                                    <button
-                                        type="button"
-                                        data-action="live#action"
-                                        data-live-action-param="chooseType"
-                                        data-live-type-param="{{ case.value }}"
-                                        aria-pressed="{{ case == visit.type ? 'true' : 'false' }}"
-                                        class="flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-100 ease-out {{ case == visit.type ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                        data-testid="visit-type-chip-{{ case.value }}"
-                                    >
-                                        {{ ux_icon(case.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {{ case.labelKey|trans }}
-                                    </button>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                {# ── Caractéristiques + loyer : toutes les lignes, "-" quand
+                      rien n'est renseigné en base. ── #}
+                <div class="mt-1.5 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm" data-testid="visit-property-rows">
+                    {# Adresse en tête, cliquable vers Maps. #}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.create.address.label'|trans }}</p>
+                        <a
+                            href="https://www.google.com/maps/search/?api=1&query={{ visit.address|url_encode }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex min-w-0 items-center gap-1.5 font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                            title="{{ 'admin.visits.row.openInMaps'|trans }}"
+                            data-testid="visit-show-address"
+                        >
+                            {{ ux_icon('lucide:map-pin', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                            <span class="truncate">{{ visit.address }}</span>
+                        </a>
                     </div>
+                    {% for row in this.propertyRows %}
+                        <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                            <p class="{{ rowLabelClass }}">{{ row.label|trans }}</p>
+                            <p class="font-medium {{ row.value ? 'text-gray-900' : 'text-gray-400' }} tabular-nums">{{ row.value ?? '-' }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
 
-                    {# ── Date et heure. ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.scheduledAt.label'|trans }}</p>
-                        {% if locked %}
-                            <p class="flex items-center gap-2 font-medium text-gray-900 tabular-nums">
-                                <span class="flex size-7 items-center justify-center rounded-full bg-primary/10">
-                                    {{ ux_icon('lucide:clock', {class: 'size-3.5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                </span>
-                                {{ visit.scheduledAt|format_datetime(pattern='EEEE d MMMM')|capitalize }}, {{ visit.scheduledAt|format_datetime(pattern="HH'h'mm") }}
-                            </p>
-                        {% else %}
-                            <div class="text-right">
-                                <input
-                                    type="datetime-local"
-                                    data-model="norender|scheduledAt"
-                                    data-action="change->live#action"
-                                    data-live-action-param="save"
-                                    value="{{ this.scheduledAt }}"
-                                    class="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                                    data-testid="visit-details-scheduled-at"
-                                >
-                                {% if this.errors.scheduledAt is defined %}
-                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.scheduledAt|trans }}</p>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    {# ── Durée + client présent. ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.duration.label'|trans }}</p>
-                        {% if locked %}
-                            <p class="font-medium text-gray-900 tabular-nums">{{ 'admin.visits.show.durationMinutes'|trans({'%count%': visit.durationMinutes}) }}
-                                {% if not visit.clientPresent %}
-                                    <span class="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">{{ 'admin.visits.show.proxyVisit'|trans }}</span>
-                                {% endif %}
-                            </p>
-                        {% else %}
-                            <div class="flex items-center gap-3">
-                                {# Dropdown custom (même mécanique <details> que
-                                   les statuts) : chaque choix persiste via
-                                   chooseDuration. #}
-                                <details
-                                    class="relative"
-                                    data-controller="details-dropdown"
-                                    data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                                >
-                                    <summary
-                                        class="flex w-28 cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
-                                        aria-label="{{ 'admin.visits.create.duration.label'|trans }}"
-                                        data-testid="visit-details-duration"
-                                    >
-                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900 tabular-nums">{{ ('admin.visits.create.duration.min' ~ this.durationMinutes)|trans }}</span>
-                                        {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                    </summary>
-                                    <div class="absolute left-0 z-10 mt-2 w-32 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
-                                        {% for minutes in [15, 30, 45, 60] %}
-                                            <button
-                                                type="button"
-                                                data-action="live#action details-dropdown#close"
-                                                data-live-action-param="chooseDuration"
-                                                data-live-minutes-param="{{ minutes }}"
-                                                class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors duration-100 ease-out {{ this.durationMinutes == minutes ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                                data-testid="visit-details-duration-choice"
-                                            >
-                                                <span class="min-w-0 flex-1 truncate">{{ ('admin.visits.create.duration.min' ~ minutes)|trans }}</span>
-                                                {% if this.durationMinutes == minutes %}
-                                                    {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                                {% endif %}
-                                            </button>
-                                        {% endfor %}
-                                    </div>
-                                </details>
-                                <label class="flex cursor-pointer items-center gap-1.5 text-xs text-gray-600">
-                                    <input
-                                        type="checkbox"
-                                        {{ visit.clientPresent ? 'checked' }}
-                                        data-action="change->live#action"
-                                        data-live-action-param="toggleClientPresent"
-                                        class="size-3.5 cursor-pointer rounded border-neutral-300 accent-[#71172e]"
-                                        data-testid="visit-details-client-present"
-                                    >
-                                    {{ 'admin.visits.create.clientPresent.label'|trans }}
-                                </label>
-                            </div>
-                        {% endif %}
-                    </div>
-
+                <div class="mt-1.5 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm">
                     {# ── Lien de l'annonce. ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.listingUrl.label'|trans }}</p>
-                        {% if locked %}
-                            {% if visit.listingUrl %}
-                                <a
-                                    href="{{ visit.listingUrl }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="flex min-w-0 items-center gap-1.5 truncate font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
-                                    data-testid="visit-show-listing"
-                                >
-                                    {{ ux_icon('lucide:external-link', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                    <span class="truncate">{{ visit.listingUrl|replace({'https://': '', 'http://': ''}) }}</span>
-                                </a>
-                            {% else %}
-                                <p class="text-gray-400">-</p>
-                            {% endif %}
-                        {% else %}
-                            <div class="w-full max-w-xs text-right">
-                                <input
-                                    type="url"
-                                    data-model="norender|listingUrl"
-                                    data-action="change->live#action"
-                                    data-live-action-param="save"
-                                    value="{{ this.listingUrl }}"
-                                    maxlength="500"
-                                    placeholder="{{ 'admin.visits.create.listingUrl.placeholder'|trans }}"
-                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                    data-testid="visit-details-listing-url"
-                                >
-                                {% if this.errors.listingUrl is defined %}
-                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.listingUrl|trans }}</p>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    {# ── Adresse (géocodée + bornée Île-de-France à la sauvegarde). ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.address.label'|trans }}</p>
-                        {% if locked %}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.create.listingUrl.label'|trans }}</p>
+                        {% if visit.listingUrl %}
                             <a
-                                href="https://www.google.com/maps/search/?api=1&query={{ visit.address|url_encode }}"
+                                href="{{ visit.listingUrl }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="flex min-w-0 items-center gap-1.5 truncate text-right font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
-                                title="{{ 'admin.visits.row.openInMaps'|trans }}"
+                                class="flex min-w-0 items-center gap-1.5 truncate font-medium text-gray-900 transition-colors duration-100 ease-out hover:text-primary"
+                                data-testid="visit-show-listing"
                             >
-                                {{ ux_icon('lucide:map-pin', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                <span class="truncate">{{ visit.address }}</span>
+                                {{ ux_icon('lucide:external-link', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                <span class="truncate">{{ visit.listingUrl|replace({'https://': '', 'http://': ''}) }}</span>
                             </a>
                         {% else %}
-                            <div class="w-full max-w-md text-right">
-                                <input
-                                    type="text"
-                                    data-model="norender|address"
-                                    data-action="change->live#action"
-                                    data-live-action-param="save"
-                                    value="{{ this.address }}"
-                                    maxlength="255"
-                                    class="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                                    data-testid="visit-details-address"
-                                >
-                                {% if this.errors.address is defined %}
-                                    <p class="mt-1 text-xs text-red-600" role="alert">{{ this.errors.address|trans }}</p>
-                                {% endif %}
-                            </div>
+                            <p class="text-gray-400">-</p>
                         {% endif %}
                     </div>
 
-                    {# Même bien déjà visité : bandeau informatif, sous l'adresse
-                       et le lien d'annonce qui le déclenchent. #}
+                    {# ── Note libre (code d'accès, interlocuteur sur place...). ── #}
+                    <div class="px-4 py-3">
+                        <p class="text-xs font-medium tracking-wide text-gray-500 uppercase">{{ 'admin.visits.create.note.label'|trans }}</p>
+                        {% if visit.note %}
+                            <p class="mt-1.5 leading-relaxed text-pretty whitespace-pre-line text-gray-900" data-testid="visit-show-note">{{ visit.note }}</p>
+                        {% else %}
+                            <p class="mt-1.5 text-gray-400">-</p>
+                        {% endif %}
+                    </div>
+
+                    {# Même bien déjà visité : bandeau informatif, déclenché
+                       par l'adresse ou le lien d'annonce. #}
                     {% set duplicates = this.matchingVisits %}
                     {% if duplicates is not empty %}
-                        <div class="px-4 pb-3">
-                            <twig:Visit:DuplicateWarning :visits="duplicates" adminPrefix="{{ this.adminPrefix }}" />
+                        <div class="px-4 py-3">
+                            <twig:Visit:DuplicateWarning :visits="duplicates" :currentDossierId="visit.dossierId" adminPrefix="{{ adminPrefix }}" />
                         </div>
                     {% endif %}
+                </div>
 
-                    {# ── Dossier (rattachement en lecture seule). ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.dossier.label'|trans }}</p>
-                        {# Cliquable seulement avec la section Dossiers : un
-                           agent de visite ne doit pas atterrir sur un 403. #}
+                {# ── Qui : dossier, réalisée par, présence client, agent
+                      immobilier. Valeurs en lecture, modifiables via la
+                      page Modifier. ── #}
+                <div class="mt-1.5 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm">
+                    {# ── Dossier rattaché. ── #}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.create.dossier.label'|trans }}</p>
                         {% set canOpenDossier = is_granted('ROLE_SECTION_DOSSIERS') %}
                         <{{ canOpenDossier ? 'a' : 'span' }}
-                            {% if canOpenDossier %}href="{{ path('admin_dossier_show', {adminPrefix: this.adminPrefix, reference: visit.dossierReference}) }}"{% endif %}
+                            {% if canOpenDossier %}href="{{ path('admin_dossier_show', {adminPrefix: adminPrefix, reference: visit.dossierReference}) }}"{% endif %}
                             class="flex min-w-0 items-center gap-1.5 truncate font-medium text-gray-900 {{ canOpenDossier ? 'transition-colors duration-100 ease-out hover:text-primary' }}"
                             data-testid="visit-show-dossier"
                         >
@@ -258,147 +111,232 @@
                         </{{ canOpenDossier ? 'a' : 'span' }}>
                     </div>
 
-                    {# ── Réalisée par : chips des agents de visite. ── #}
-                    <div class="flex items-start justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 pt-1 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.performedBy'|trans }}</p>
-                        {% if locked %}
-                            {% if visit.assigneeName %}
-                                <p class="flex items-center gap-2 font-medium text-gray-900">
-                                    <twig:Avatar filename="{{ visit.assigneeAvatar }}" name="{{ visit.assigneeName }}" size="6" />
-                                    {{ visit.assigneeName|title }}
-                                </p>
-                            {% else %}
-                                <p class="flex items-center gap-1.5 font-medium text-amber-600">
-                                    {{ ux_icon('lucide:circle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
-                                    {{ 'admin.visits.row.unassigned'|trans }}
-                                </p>
-                            {% endif %}
-                        {% else %}
-                            <div class="flex flex-wrap justify-end gap-2" data-testid="visit-details-assignees">
-                                {% for choice in this.assigneeChoices %}
-                                    {% set picked = visit.assigneeId == choice.id %}
-                                    <button
-                                        type="button"
-                                        data-action="live#action"
-                                        data-live-action-param="pickAssignee"
-                                        data-live-id-param="{{ choice.id }}"
-                                        aria-pressed="{{ picked ? 'true' : 'false' }}"
-                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border py-1 pr-3 pl-1 text-sm transition-colors duration-100 ease-out {{ picked ? 'border-primary/40 bg-primary/5 font-medium text-primary' : 'border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-900' }}"
-                                        data-testid="visit-details-assignee-chip"
-                                    >
-                                        <twig:Avatar filename="{{ choice.avatar }}" name="{{ choice.name }}" size="6" class="{{ picked ? '' : 'opacity-70' }}" />
-                                        {{ choice.name|title }}
-                                        {% if picked %}
-                                            {{ ux_icon('lucide:x', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
-                                        {% endif %}
-                                    </button>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    {# ── Réservée par (lecture seule). ── #}
-                    {% if visit.bookedByName %}
-                        <div class="flex items-center justify-between gap-4 px-4 py-3">
-                            <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.row.bookedBy'|trans }}</p>
-                            <p class="flex items-center gap-2 font-medium text-gray-900">
-                                <twig:Avatar filename="{{ visit.bookedByAvatar }}" name="{{ visit.bookedByName }}" size="6" />
-                                {{ visit.bookedByName|title }}
+                    {# Réalisée par : membre d'équipe, client seul, ou
+                       alerte non-assignée. #}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.row.performedBy'|trans }}</p>
+                        {% if visit.assigneeName %}
+                            <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                                <twig:Avatar filename="{{ visit.assigneeAvatar }}" name="{{ visit.assigneeName }}" size="6" />
+                                <span class="truncate">{{ visit.assigneeName|title }}</span>
                             </p>
-                        </div>
-                    {% endif %}
-
-                    {# ── Agent immobilier. ── #}
-                    <div class="flex items-center justify-between gap-4 px-4 py-3">
-                        <p class="shrink-0 text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.agent.label'|trans }}</p>
-                        {% if locked %}
-                            {% if visit.agentName %}
-                                <p class="flex items-center gap-2 font-medium text-gray-900">
-                                    <twig:Avatar name="{{ visit.agentName }}" size="6" />
-                                    {{ visit.agentName }}
-                                </p>
-                            {% else %}
-                                <p class="text-gray-400">-</p>
-                            {% endif %}
+                        {% elseif visit.clientPresent %}
+                            <p class="flex items-center gap-1.5 font-medium text-gray-900">
+                                {{ ux_icon('lucide:user-check', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.row.byClient'|trans }}
+                            </p>
                         {% else %}
-                            {# Dropdown custom (même mécanique <details> que les
-                               statuts) : le choix persiste via chooseAgent,
-                               '0' = aucun agent. #}
-                            {% set currentAgentName = '' %}
-                            {% for choice in this.agentChoices %}
-                                {% if this.agentId == choice.id %}{% set currentAgentName = choice.name %}{% endif %}
-                            {% endfor %}
-                            <details
-                                class="relative w-full max-w-xs"
-                                data-controller="details-dropdown"
-                                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
-                            >
-                                <summary
-                                    class="flex w-full cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden"
-                                    aria-label="{{ 'admin.visits.create.agent.label'|trans }}"
-                                    data-testid="visit-details-agent"
-                                >
-                                    {% if currentAgentName %}
-                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ currentAgentName }}</span>
-                                    {% else %}
-                                        <span class="min-w-0 flex-1 truncate text-sm text-gray-400">{{ 'admin.visits.create.agent.placeholder'|trans }}</span>
-                                    {% endif %}
-                                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
-                                </summary>
-                                <div class="absolute right-0 z-10 mt-2 max-h-60 w-full min-w-56 overflow-auto rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
-                                    <button
-                                        type="button"
-                                        data-action="live#action details-dropdown#close"
-                                        data-live-action-param="chooseAgent"
-                                        data-live-id-param="0"
-                                        class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.agentId == '0' ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900' }}"
-                                        data-testid="visit-details-agent-choice"
-                                    >
-                                        <span class="min-w-0 flex-1 truncate">{{ 'admin.visits.create.agent.placeholder'|trans }}</span>
-                                    </button>
-                                    {% for choice in this.agentChoices %}
-                                        <button
-                                            type="button"
-                                            data-action="live#action details-dropdown#close"
-                                            data-live-action-param="chooseAgent"
-                                            data-live-id-param="{{ choice.id }}"
-                                            class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-100 ease-out {{ this.agentId == choice.id ? 'bg-neutral-100 font-medium text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
-                                            data-testid="visit-details-agent-choice"
-                                        >
-                                            <span class="min-w-0 flex-1 truncate">{{ choice.name }}</span>
-                                            {% if this.agentId == choice.id %}
-                                                {{ ux_icon('lucide:check', {class: 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                            {% endif %}
-                                        </button>
-                                    {% endfor %}
-                                </div>
-                            </details>
+                            <p class="flex items-center gap-1.5 font-medium text-amber-600">
+                                {{ ux_icon('lucide:circle-alert', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.row.unassigned'|trans }}
+                            </p>
                         {% endif %}
                     </div>
 
-                    {# ── Note libre. ── #}
-                    <div class="px-4 py-3">
-                        <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">{{ 'admin.visits.create.note.label'|trans }}</p>
-                        {% if locked %}
-                            {% if visit.note %}
-                                <p class="mt-1.5 leading-relaxed text-pretty whitespace-pre-line text-gray-900" data-testid="visit-show-note">{{ visit.note }}</p>
-                            {% else %}
-                                <p class="mt-1.5 text-gray-400">-</p>
-                            {% endif %}
+                    {# ── Le client participe. ── #}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.show.clientPresent'|trans }}</p>
+                        <p class="font-medium text-gray-900" data-testid="visit-show-client-present">{{ (visit.clientPresent ? 'admin.visits.create.recap.yes' : 'admin.visits.create.recap.no')|trans }}</p>
+                    </div>
+
+                    {# ── Agent immobilier (annuaire). ── #}
+                    <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                        <p class="{{ rowLabelClass }}">{{ 'admin.visits.create.agent.label'|trans }}</p>
+                        {% if visit.agentName %}
+                            {# Cliquable seulement avec la section Agents : un
+                               agent de visite ne doit pas atterrir sur un 403. #}
+                            {% set canOpenAgent = visit.agentReference and is_granted('ROLE_SECTION_AGENTS') %}
+                            <{{ canOpenAgent ? 'a' : 'div' }}
+                                {% if canOpenAgent %}href="{{ path('admin_agent_show', {adminPrefix: adminPrefix, reference: visit.agentReference}) }}"{% endif %}
+                                class="group/agent flex min-w-0 items-center gap-2"
+                                data-testid="visit-show-agent"
+                            >
+                                <twig:Avatar filename="{{ visit.agentAvatar }}" name="{{ visit.agentName }}" size="6" />
+                                <span class="min-w-0">
+                                    <span class="block truncate font-medium text-gray-900 {{ canOpenAgent ? 'transition-colors duration-100 ease-out group-hover/agent:text-primary' }}">{{ visit.agentName|title }}</span>
+                                    {% if visit.agentAgencyLine %}
+                                        <span class="block truncate text-xs text-gray-500">{{ visit.agentAgencyLine }}</span>
+                                    {% endif %}
+                                </span>
+                            </{{ canOpenAgent ? 'a' : 'div' }}>
                         {% else %}
-                            <textarea
-                                data-model="norender|note"
-                                data-action="change->live#action"
-                                data-live-action-param="save"
-                                rows="3"
-                                maxlength="2000"
-                                placeholder="{{ 'admin.visits.create.note.placeholder'|trans }}"
-                                class="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
-                                data-testid="visit-details-note"
-                            >{{ this.note }}</textarea>
+                            <p class="text-gray-400">-</p>
                         {% endif %}
                     </div>
                 </div>
+            </div>
+        </section>
+
+        {# ══ Latérale sticky : issue de la visite. Sous la colonne
+              principale en mobile (order-last). ══ #}
+        <aside class="order-last flex flex-col gap-6 lg:order-none lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-6" data-testid="visit-aside">
+
+            {# Menu "..." : Modifier / Supprimer, juste au-dessus des
+               actions. #}
+            <div class="flex justify-end">
+            {# Menu "..." : Modifier (page dédiée) et Supprimer
+               (modale de confirmation). Exception assumée à la
+               convention "stylo direct" : l'édition en place a été
+               remplacée par la page Modifier. #}
+            <details
+                class="relative"
+                data-controller="details-dropdown"
+                data-action="click@window->details-dropdown#closeOnOutside keydown.esc@window->details-dropdown#close"
+                data-testid="visit-details-menu"
+            >
+                <summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-900 transition-colors duration-100 ease-out hover:bg-gray-50 [&::-webkit-details-marker]:hidden">
+                    {{ ux_icon('lucide:ellipsis', {class: 'size-4 shrink-0 text-gray-500', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.contacts.show.actions'|trans }}
+                    {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                </summary>
+                <div class="absolute right-0 z-10 mt-2 w-60 rounded-xl border border-neutral-200 bg-white p-1 shadow-lg">
+                    <a
+                        href="{{ path('admin_visit_edit', {adminPrefix: adminPrefix, reference: visit.reference}) }}"
+                        class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                        data-testid="visit-details-edit"
+                    >
+                        {{ ux_icon('lucide:pencil', {class: 'size-4 shrink-0 text-gray-400', 'aria-hidden': 'true'}) }}
+                        {{ 'admin.visits.row.edit'|trans }}
+                    </a>
+                    <div class="-mx-1 my-1 h-px bg-neutral-200/70" aria-hidden="true"></div>
+                    <twig:AlertDialog id="delete-visit-details-{{ visit.id }}">
+                        <button
+                            type="button"
+                            class="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 transition-colors duration-100 ease-out hover:bg-red-50"
+                            data-action="click->alert-dialog#open"
+                            data-alert-dialog-target="trigger"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            data-testid="visit-show-delete-trigger"
+                        >
+                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.visits.row.delete'|trans }}
+                        </button>
+                        <twig:AlertDialog:Content class="sm:max-w-md">
+                            <twig:AlertDialog:Header>
+                                <twig:AlertDialog:Title>
+                                    {{ 'admin.visits.row.deleteModal.title'|trans }}
+                                </twig:AlertDialog:Title>
+                                <twig:AlertDialog:Description>
+                                    {{ 'admin.visits.row.deleteModal.text'|trans({'%address%': visit.address}) }}
+                                </twig:AlertDialog:Description>
+                            </twig:AlertDialog:Header>
+                            <twig:AlertDialog:Footer class="mt-4">
+                                <twig:AlertDialog:Cancel>
+                                    {{ 'admin.visits.row.deleteModal.cancel'|trans }}
+                                </twig:AlertDialog:Cancel>
+                                <form
+                                    method="post"
+                                    action="{{ path('admin_visit_delete', {adminPrefix: adminPrefix, reference: visit.reference}) }}"
+                                    class="contents"
+                                >
+                                    <input type="hidden" name="_token" value="{{ app.request ? csrf_token('delete_visit') : '' }}">
+                                    <twig:AlertDialog:Action type="submit" variant="destructive" data-testid="visit-show-delete">
+                                        <span class="flex items-center gap-2">
+                                            {{ ux_icon('lucide:trash-2', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ 'admin.visits.row.deleteModal.confirm'|trans }}
+                                        </span>
+                                    </twig:AlertDialog:Action>
+                                </form>
+                            </twig:AlertDialog:Footer>
+                        </twig:AlertDialog:Content>
+                    </twig:AlertDialog>
+                </div>
+            </details>
+            </div>
+
+            {# ── Actions : issue de la visite (la suppression vit dans le
+                  menu "..." de la card "Le bien"). ── #}
+            <div class="rounded-3xl border border-neutral-200 bg-white p-2" data-testid="visit-actions-card">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <h3 class="px-4 pt-3 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.show.outcomeTitle'|trans }}</h3>
+                    <div class="mt-1 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm">
+                        {# Le statut courant garde sa couleur, les deux autres
+                           sont des bascules. #}
+                        <div class="flex flex-col gap-2 px-4 py-3">
+                            <div class="flex flex-wrap gap-1.5" data-testid="visit-status-actions">
+                                {# Les trois issues restent visibles : la
+                                   courante porte sa couleur de statut, les
+                                   autres basculent au clic. #}
+                                {% for status in ['planned', 'done', 'cancelled'] %}
+                                    {% set case = enum('App\\Visit\\Domain\\VisitStatus').from(status) %}
+                                    {% if status == visit.status.value %}
+                                        <span
+                                            class="flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-xs font-semibold {{ case.badgeClasses }}"
+                                            aria-current="true"
+                                            data-testid="visit-status-{{ status }}"
+                                        >
+                                            {{ ux_icon(case.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                            {{ case.labelKey|trans }}
+                                        </span>
+                                    {% else %}
+                                        <form method="post" action="{{ path('admin_visit_status', {adminPrefix: adminPrefix, reference: visit.reference}) }}" class="contents">
+                                            <input type="hidden" name="_token" value="{{ app.request ? csrf_token('visit_status') : '' }}">
+                                            <input type="hidden" name="status" value="{{ status }}">
+                                            <button
+                                                type="submit"
+                                                class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors duration-100 ease-out hover:bg-gray-50 hover:text-gray-900"
+                                                data-testid="visit-status-{{ status }}"
+                                            >
+                                                {{ ux_icon(case.icon, {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                {{ case.labelKey|trans }}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        {# ── Suivi en pied de page, pleine largeur (modèle card d'audit des
+              fiches agent) : réservation, création, miroir agenda. ── #}
+        <div class="lg:col-start-1" data-testid="visit-tracking-card">
+            <div class="rounded-3xl border border-neutral-200 bg-white p-2">
+                <div class="rounded-2xl bg-neutral-50 p-2">
+                    <h3 class="px-4 pt-3 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.visits.show.tracking'|trans }}</h3>
+                    <div class="mt-1 flex flex-col divide-y divide-gray-950/5 rounded-xl bg-white text-sm">
+                        {% if visit.bookedByName %}
+                            <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                                <p class="{{ rowLabelClass }}">{{ 'admin.visits.row.bookedBy'|trans }}</p>
+                                <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                                    <twig:Avatar filename="{{ visit.bookedByAvatar }}" name="{{ visit.bookedByName }}" size="6" />
+                                    <span class="truncate">{{ visit.bookedByName|title }}</span>
+                                </p>
+                            </div>
+                        {% endif %}
+                        {% if visit.createdAt %}
+                            <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                                <p class="{{ rowLabelClass }}">{{ 'admin.visits.show.createdAt'|trans }}</p>
+                                <p class="font-medium text-gray-900 tabular-nums">{{ visit.createdAt|format_datetime(pattern='d MMM yyyy') }}</p>
+                            </div>
+                        {% endif %}
+                        {% if visit.updatedAt %}
+                            <div class="flex items-center justify-between gap-6 px-5 py-3.5" data-testid="visit-show-updated">
+                                <p class="{{ rowLabelClass }}">{{ 'admin.visits.show.updatedAt'|trans }}</p>
+                                <p class="flex min-w-0 items-center gap-2 font-medium text-gray-900">
+                                    {% if visit.updatedByName %}
+                                        <twig:Avatar filename="{{ visit.updatedByAvatar }}" name="{{ visit.updatedByName }}" size="6" />
+                                        <span class="truncate">{{ visit.updatedByName|title }}</span>
+                                        <span class="font-normal text-gray-400">&middot;</span>
+                                    {% endif %}
+                                    <span class="font-normal text-gray-500 tabular-nums">{{ visit.updatedAt|format_datetime(pattern='d MMM yyyy, HH:mm') }}</span>
+                                </p>
+                            </div>
+                        {% endif %}
+                        <div class="flex items-center justify-between gap-6 px-5 py-3.5">
+                            <p class="{{ rowLabelClass }}">{{ 'admin.visits.show.reference'|trans }}</p>
+                            <p class="font-medium text-gray-900 tabular-nums" data-testid="visit-show-reference">{{ visit.reference }}</p>
+                        </div>
+                        {% if visit.calendarSynced %}
+                            <div class="flex items-center gap-1.5 px-4 py-3 text-xs text-gray-500" data-testid="visit-calendar-synced">
+                                {{ ux_icon('lucide:calendar-check', {class: 'size-3.5 shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                                {{ 'admin.visits.show.calendarSynced'|trans }}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>

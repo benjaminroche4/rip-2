@@ -30,7 +30,7 @@
                 <div class="flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
                     <div class="text-sm">
                         {# Identité : nom et enseigne. #}
-                        <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
+                        <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.identity'|trans }}</h3>
                         <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div class="min-w-0 space-y-2">
                                 <label for="agency-edit-name-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.name.label'|trans }}</label>
@@ -65,7 +65,7 @@
                            Même bloc que la photo d'un agent : vignette + bouton
                            fantôme, prévisualisation immédiate, glisser-déposer. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.logo.label'|trans }}</h3>
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.logo.label'|trans }}</h3>
                             <div
                                 class="mt-3 min-w-0 space-y-2 rounded-lg has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-primary/60"
                                 data-controller="avatar-preview file-drop"
@@ -100,7 +100,7 @@
                            "Proposer un bien"), la sélection pose les coordonnées
                            via chooseAddressLocation pour la carte de la fiche. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.address'|trans }}</h3>
                             <div
                                 class="relative mt-3 min-w-0 space-y-2"
                                 data-controller="places-autocomplete"
@@ -142,7 +142,7 @@
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
                             <div class="min-w-0 space-y-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse">
                                 <div class="flex items-center justify-between gap-2">
-                                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.show.areas'|trans }}</h3>
+                                    <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.show.areas'|trans }}</h3>
                                     <button
                                         type="button"
                                         data-action="district-picker#toggleAll"
@@ -229,7 +229,7 @@
                         {# Spécialités : mêmes chips multi toggle-off que le
                            formulaire de création. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 id="agency-edit-specialties-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
+                            <h3 id="agency-edit-specialties-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agents.create.section.specialties'|trans }}</h3>
                             <div role="group" aria-labelledby="agency-edit-specialties-label-{{ this.agencyId }}" class="mt-3 flex flex-wrap gap-2">
                                 {% for specialty in enum('App\\RealEstateAgent\\Domain\\AgentSpecialty').cases() %}
                                     {% set picked = specialty.value in this.specialties %}
@@ -250,7 +250,7 @@
 
                         {# Coordonnées : téléphone, email et site web. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
+                            <h3 class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.section.contact'|trans }}</h3>
                             <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div class="min-w-0 space-y-2">
                                     <label for="agency-edit-phone-{{ this.agencyId }}" class="block text-gray-600">{{ 'admin.agencies.create.phone.label'|trans }}</label>
@@ -285,7 +285,7 @@
 
                         {# Note interne : texte libre réservé à l'équipe. #}
                         <div class="mt-4 border-t border-gray-950/5 pt-4">
-                            <h3 id="agency-edit-note-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                            <h3 id="agency-edit-note-label-{{ this.agencyId }}" class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
                             <div class="mt-3 min-w-0 space-y-2">
                                 <textarea
                                     id="agency-edit-note-{{ this.agencyId }}"
@@ -549,7 +549,7 @@
 
                 {% if agency.note %}
                     <div class="rounded-xl bg-white px-5 py-4" data-testid="agency-show-note">
-                        <h3 class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
+                        <h3 class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.create.note.label'|trans }}</h3>
                         <p class="mt-2 text-sm whitespace-pre-line text-gray-900">{{ agency.note }}</p>
                     </div>
                 {% endif %}
@@ -566,7 +566,7 @@
         <div class="rounded-2xl bg-neutral-50 p-2">
             <dl class="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
                 <div class="rounded-xl bg-white px-4 py-3">
-                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.show.audit.createdAt'|trans }}</dt>
+                    <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.show.audit.createdAt'|trans }}</dt>
                     <dd class="mt-1.5 flex items-center gap-2">
                         {% if agency.createdByName %}
                             <twig:Avatar filename="{{ agency.createdByAvatar }}" name="{{ agency.createdByName }}" size="6" />
@@ -578,7 +578,7 @@
                 </div>
                 {% if agency.updatedAt %}
                     <div class="rounded-xl bg-white px-4 py-3" data-testid="agency-audit-updated">
-                        <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.agencies.show.audit.updatedAt'|trans }}</dt>
+                        <dt class="text-[0.6875rem] font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.agencies.show.audit.updatedAt'|trans }}</dt>
                         <dd class="mt-1.5 flex items-center gap-2">
                             {% if agency.updatedByName %}
                                 <twig:Avatar filename="{{ agency.updatedByAvatar }}" name="{{ agency.updatedByName }}" size="6" />

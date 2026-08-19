@@ -13,16 +13,7 @@ use App\RealEstateAgent\Repository\RealEstateAgentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\UX\Map\Bridge\Google\GoogleOptions;
-use Symfony\UX\Map\Bridge\Google\Option\GestureHandling;
-use Symfony\UX\Map\Icon\Icon;
-use Symfony\UX\Map\InfoWindow;
-use Symfony\UX\Map\Map;
-use Symfony\UX\Map\Marker;
-use Symfony\UX\Map\Point;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -44,8 +35,6 @@ final class AgentList
 
     private const TABS = ['all', 'favorites'];
 
-    private const DISPLAYS = ['list', 'map'];
-
     /** Secret admin URL prefix, needed to build links inside the component. */
     #[LiveProp]
     public string $adminPrefix = '';
@@ -61,10 +50,6 @@ final class AgentList
     /** Onglet des deux vues : 'all' ou 'favorites', comme la portée dossiers. */
     #[LiveProp(writable: true, url: true)]
     public string $tab = 'all';
-
-    /** Affichage de la vue agences : 'list' (défaut) ou 'map'. Mirroré dans l'URL. */
-    #[LiveProp(writable: true, url: true)]
-    public string $display = 'list';
 
     /**
      * Filtre spécialité de la vue agents ('' = toutes). Writable + url : une
@@ -88,8 +73,6 @@ final class AgentList
         private readonly RealEstateAgentRepository $repository,
         private readonly AgencyRepository $agencies,
         private readonly Security $security,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -125,17 +108,6 @@ final class AgentList
         }
         $this->tab = $tab;
         $this->limit = self::PAGE;
-    }
-
-    /** Affichage Liste / Carte de la vue agences. */
-    #[LiveAction]
-    public function chooseDisplay(#[LiveArg] string $display): void
-    {
-        $this->ensureAdmin();
-        if (!\in_array($display, self::DISPLAYS, true)) {
-            throw new NotFoundHttpException('Unknown display.');
-        }
-        $this->display = $display;
     }
 
     /** Favori d'équipe (global) : bascule le cœur depuis la card, la liste se re-rend. */
@@ -254,11 +226,6 @@ final class AgentList
         return 'favorites' === $this->tab;
     }
 
-    public function isMapDisplay(): bool
-    {
-        return $this->isAgenciesView() && 'map' === $this->display;
-    }
-
     /** Total des favoris de la vue active (non filtré), pour le libellé de l'onglet. */
     public function getFavoriteTotal(): int
     {
@@ -324,68 +291,6 @@ final class AgentList
     public function getAgencies(): array
     {
         return $this->agencies->findPagedSummaries(trim($this->search), $this->limit, $this->isFavoritesTab());
-    }
-
-    /**
-     * Carte de la vue agences : mêmes options que la carte de la fiche
-     * agence, un marker par agence active géocodée. Les markers suivent la
-     * recherche et l'onglet favoris (mêmes filtres que la liste).
-     */
-    public function getAgenciesMap(): Map
-    {
-        $map = (new Map('default'))
-            ->center(new Point(48.8566, 2.3522))
-            ->zoom(11.2)
-            ->options(new GoogleOptions(
-                gestureHandling: GestureHandling::COOPERATIVE,
-                mapTypeControl: false,
-                streetViewControl: false,
-                fullscreenControl: false,
-                zoomControl: false,
-            ));
-
-        // Pin maison du site (goutte bordeaux, pastille blanche, glyphe
-        // immeuble) : même signature que les cartes marketplace.
-        $pinSvg = <<<'SVG'
-            <svg xmlns="http://www.w3.org/2000/svg" width="39" height="50" viewBox="0 0 44 56">
-                <path d="M22 0C9.85 0 0 9.85 0 22c0 16.5 22 34 22 34s22-17.5 22-34C44 9.85 34.15 0 22 0Z" fill="#71172e"/>
-                <circle cx="22" cy="22" r="13" fill="white"/>
-                <path d="M17.5 15.5h5v4h4.5a1.5 1.5 0 0 1 1.5 1.5v8.5h-3.5v-3h-2v3H16a1.5 1.5 0 0 1-1.5-1.5V17a1.5 1.5 0 0 1 1.5-1.5Zm.5 3.5v1.5h1.5V19H18Zm3.5 0v1.5H23V19h-1.5ZM18 22.5V24h1.5v-1.5H18Zm3.5 0V24H23v-1.5h-1.5Zm4 1.5v1.5H27V24h-1.5Z" fill="#71172e"/>
-            </svg>
-            SVG;
-
-        foreach ($this->agencies->findMapMarkers(trim($this->search), $this->isFavoritesTab()) as $row) {
-            $link = $this->urlGenerator->generate('admin_agency_show', [
-                'adminPrefix' => $this->adminPrefix,
-                'reference' => $row['reference'],
-            ]);
-            // Contenu maîtrisé : nom et adresse échappés, lien path() vers la fiche.
-            $content = null !== $row['address'] ? '<p>'.htmlspecialchars($row['address']).'</p>' : '';
-            $content .= '<p><a href="'.htmlspecialchars($link).'">'.htmlspecialchars($this->translator->trans('admin.agencies.card.open')).'</a></p>';
-            $map->addMarker(new Marker(
-                position: new Point($row['latitude'], $row['longitude']),
-                icon: Icon::svg($pinSvg),
-                title: $row['name'],
-                infoWindow: new InfoWindow(
-                    headerContent: htmlspecialchars($row['name']),
-                    content: $content,
-                ),
-                id: (string) $row['id'],
-            ));
-        }
-
-        return $map;
-    }
-
-    /**
-     * Clé du wrapper data-live-ignore de la carte : elle change avec les
-     * filtres, donc le morph remplace la zone entière et la carte se
-     * reconstruit avec les markers à jour (une zone ignorée ne se met
-     * jamais à jour en place).
-     */
-    public function getMapKey(): string
-    {
-        return substr(md5(trim($this->search).'|'.$this->tab), 0, 8);
     }
 
     /** @var array<string, array<string, int>> */

@@ -171,7 +171,7 @@ final class AgencyCreateTest extends KernelTestCase
         self::assertStringContainsString('data-testid="agency-create-email"', $rendered);
         // The form is split into titled sections separated by dividers.
         self::assertSame(4, substr_count($rendered, 'border-t border-gray-950/5'), 'Identity | address | specialties | contact | note: four dividers.');
-        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-400 uppercase'), 'Five section micro-titles.');
+        self::assertSame(5, substr_count($rendered, 'tracking-wide text-gray-500 uppercase'), 'Five section micro-titles.');
         // Address field: Google Places assist (same wiring as the estimation
         // form), the submitted value stays the plain text input.
         self::assertStringContainsString('data-controller="places-autocomplete"', $rendered);

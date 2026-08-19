@@ -27,6 +27,17 @@ class VisitRepository extends ServiceEntityRepository
         return null !== $visit ? $this->toSummary($visit) : null;
     }
 
+    /**
+     * Lookup by public reference ("VS-087526"): the admin URLs are keyed on
+     * it, never on the auto-increment id (same model as agents/dossiers).
+     */
+    public function findOneSummaryByReference(string $reference): ?VisitSummary
+    {
+        $visit = $this->findOneBy(['reference' => $reference]);
+
+        return null !== $visit ? $this->toSummary($visit) : null;
+    }
+
     public function countOnDay(\DateTimeImmutable $day): int
     {
         return (int) $this->createQueryBuilder('v')
@@ -46,16 +57,19 @@ class VisitRepository extends ServiceEntityRepository
      *
      * @return list<VisitSummary>
      */
-    public function findArchivedSummaries(\DateTimeImmutable $now, ?int $limit = null): array
+    public function findArchivedSummaries(\DateTimeImmutable $now, ?int $limit = null, ?string $postStatus = null): array
     {
         $qb = $this->createQueryBuilder('v')
             ->leftJoin('v.dossier', 'd')->addSelect('d')
             ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
             ->leftJoin('v.assignee', 'u')->addSelect('u')
             ->leftJoin('v.bookedBy', 'b')->addSelect('b')
             ->where('v.scheduledAt < :start')
             ->setParameter('start', $now->setTime(0, 0))
             ->orderBy('v.scheduledAt', 'DESC');
+        $this->applyPostStatus($qb, $postStatus);
         if (null !== $limit) {
             $qb->setMaxResults($limit);
         }
@@ -68,10 +82,14 @@ class VisitRepository extends ServiceEntityRepository
 
     public function countUpcoming(\DateTimeImmutable $now): int
     {
+        // Une visite annulée n'est pas "à venir" : elle sort du compteur
+        // (l'archive, elle, liste bien les annulées).
         return (int) $this->createQueryBuilder('v')
             ->select('COUNT(v.id)')
             ->where('v.scheduledAt >= :start')
+            ->andWhere('v.status != :cancelled')
             ->setParameter('start', $now->setTime(0, 0))
+            ->setParameter('cancelled', VisitStatus::Cancelled)
             ->getQuery()
             ->getSingleScalarResult();
     }
@@ -117,30 +135,43 @@ class VisitRepository extends ServiceEntityRepository
         return $counts;
     }
 
-    public function countArchived(\DateTimeImmutable $now): int
+    public function countArchived(\DateTimeImmutable $now, ?string $postStatus = null): int
     {
-        return (int) $this->createQueryBuilder('v')
+        $qb = $this->createQueryBuilder('v')
             ->select('COUNT(v.id)')
             ->where('v.scheduledAt < :start')
-            ->setParameter('start', $now->setTime(0, 0))
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('start', $now->setTime(0, 0));
+        $this->applyPostStatus($qb, $postStatus);
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /**
-     * Visits actually carried out on a dossier: the dossier step path is
-     * gated on this, a booked-but-not-done visit does not count.
+     * Filtre "statut post-visite" de l'archive : compte-rendu attendu,
+     * décision du client, ou issue de la candidature. Une valeur inconnue
+     * est ignorée (aucun filtre), jamais passée telle quelle en SQL.
      */
-    public function countDoneByDossier(int $dossierId): int
+    private function applyPostStatus(\Doctrine\ORM\QueryBuilder $qb, ?string $postStatus): void
     {
-        return (int) $this->createQueryBuilder('v')
-            ->select('COUNT(v.id)')
-            ->where('IDENTITY(v.dossier) = :dossier')
-            ->andWhere('v.status = :done')
-            ->setParameter('dossier', $dossierId)
-            ->setParameter('done', VisitStatus::Done)
-            ->getQuery()
-            ->getSingleScalarResult();
+        if (null === $postStatus || '' === $postStatus) {
+            return;
+        }
+        if ('report_due' === $postStatus) {
+            $qb->andWhere("v.status = :psPlanned OR (v.status = :psDone AND (v.report IS NULL OR TRIM(v.report) = ''))")
+                ->setParameter('psPlanned', VisitStatus::Planned)
+                ->setParameter('psDone', VisitStatus::Done);
+
+            return;
+        }
+        if (null !== ($decision = \App\Visit\Domain\ClientDecision::tryFrom($postStatus))) {
+            $qb->andWhere('v.clientDecision = :psDecision')->setParameter('psDecision', $decision);
+
+            return;
+        }
+        if ('accepted' === $postStatus || 'outcome_refused' === $postStatus) {
+            $qb->andWhere('v.applicationOutcome = :psOutcome')
+                ->setParameter('psOutcome', 'accepted' === $postStatus ? \App\Visit\Domain\ApplicationOutcome::Accepted : \App\Visit\Domain\ApplicationOutcome::Refused);
+        }
     }
 
     /**
@@ -155,6 +186,8 @@ class VisitRepository extends ServiceEntityRepository
         $visits = $this->createQueryBuilder('v')
             ->leftJoin('v.dossier', 'd')->addSelect('d')
             ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
             ->leftJoin('v.assignee', 'u')->addSelect('u')
             ->leftJoin('v.bookedBy', 'b')->addSelect('b')
             ->where('d.id = :dossier')
@@ -179,6 +212,8 @@ class VisitRepository extends ServiceEntityRepository
         $visits = $this->createQueryBuilder('v')
             ->leftJoin('v.dossier', 'd')->addSelect('d')
             ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
             ->leftJoin('v.assignee', 'u')->addSelect('u')
             ->leftJoin('v.bookedBy', 'b')->addSelect('b')
             ->where('a.id = :agent')
@@ -204,10 +239,14 @@ class VisitRepository extends ServiceEntityRepository
             ->addSelect('d')
             ->leftJoin('v.agent', 'a')
             ->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
             ->leftJoin('v.assignee', 'u')
             ->addSelect('u')
             ->leftJoin('v.bookedBy', 'b')
             ->addSelect('b')
+            ->leftJoin('v.photos', 'p')
+            ->addSelect('p')
             ->where('v.scheduledAt >= :from')
             ->setParameter('from', $from->setTime(0, 0))
             ->orderBy('v.scheduledAt', 'ASC')
@@ -240,6 +279,8 @@ class VisitRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('v')
             ->leftJoin('v.dossier', 'd')->addSelect('d')
             ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
             ->leftJoin('v.assignee', 'u')->addSelect('u')
             ->leftJoin('v.bookedBy', 'b')->addSelect('b')
             ->orderBy('v.scheduledAt', 'ASC')
@@ -302,21 +343,179 @@ class VisitRepository extends ServiceEntityRepository
         return array_values(array_unique($variants));
     }
 
+    /**
+     * Visites non annulées du même assigné qui chevauchent le créneau
+     * [start, start + duration] : nourrit le bandeau "conflit d'agenda" du
+     * formulaire de réservation. Le chevauchement dépend de la durée de
+     * chaque visite existante (stockée en base), donc il se calcule en PHP
+     * après un préfiltre SQL sur les journées touchées par l'intervalle.
+     *
+     * @return list<VisitSummary> au plus 3, chronologiques
+     */
+    public function findAssigneeConflicts(int $assigneeId, \DateTimeImmutable $start, int $durationMinutes, ?int $excludeId = null): array
+    {
+        $end = $start->modify(sprintf('+%d minutes', max(1, $durationMinutes)));
+
+        $qb = $this->createQueryBuilder('v')
+            ->leftJoin('v.dossier', 'd')->addSelect('d')
+            ->leftJoin('v.agent', 'a')->addSelect('a')
+            ->leftJoin('a.agency', 'ag')->addSelect('ag')
+            ->leftJoin('ag.brand', 'br')->addSelect('br')
+            ->leftJoin('v.assignee', 'u')->addSelect('u')
+            ->leftJoin('v.bookedBy', 'b')->addSelect('b')
+            ->where('u.id = :assignee')
+            ->andWhere('v.status != :cancelled')
+            ->andWhere('v.scheduledAt >= :dayStart AND v.scheduledAt < :dayEnd')
+            ->setParameter('assignee', $assigneeId)
+            ->setParameter('cancelled', VisitStatus::Cancelled)
+            // La veille est incluse dans le préfiltre : une visite qui
+            // démarre avant minuit et déborde sur le jour du créneau (23h30
+            // + 60 min vs 00h15) serait sinon ratée; le vrai chevauchement
+            // se rejoue de toute façon en PHP juste en dessous.
+            ->setParameter('dayStart', $start->setTime(0, 0)->modify('-1 day'))
+            ->setParameter('dayEnd', $end->setTime(0, 0)->modify('+1 day'))
+            ->orderBy('v.scheduledAt', 'ASC');
+        if (null !== $excludeId) {
+            $qb->andWhere('v.id != :self')->setParameter('self', $excludeId);
+        }
+
+        /** @var list<Visit> $visits */
+        $visits = $qb->getQuery()->getResult();
+
+        $conflicts = [];
+        foreach ($visits as $visit) {
+            $existingStart = $visit->getScheduledAt();
+            if (null === $existingStart) {
+                continue;
+            }
+            $existingEnd = $existingStart->modify(sprintf('+%d minutes', max(1, $visit->getDurationMinutes())));
+            // Vrai chevauchement : débutA < finB et débutB < finA. Deux
+            // visites dos à dos (14h-14h30 puis 14h30-15h) ne se gênent pas.
+            if ($existingStart < $end && $start < $existingEnd) {
+                $conflicts[] = $this->toSummary($visit);
+                if (3 === \count($conflicts)) {
+                    break;
+                }
+            }
+        }
+
+        return $conflicts;
+    }
+
+    /**
+     * Vrai double-booking : le même dossier a déjà une visite (non annulée)
+     * à la même adresse le même jour. Bloque la création; une contre-visite
+     * un autre jour reste possible.
+     */
+    public function hasSameDossierSameDayVisit(int $dossierId, string $address, \DateTimeImmutable $scheduledAt, ?int $excludeId = null): bool
+    {
+        $address = self::normalizeAddress($address);
+        if ('' === $address) {
+            return false;
+        }
+        $dayStart = $scheduledAt->setTime(0, 0);
+
+        $qb = $this->createQueryBuilder('v')
+            ->select('COUNT(v.id)')
+            ->where('v.dossier = :dossier')
+            ->andWhere('LOWER(TRIM(v.address)) = :address')
+            ->andWhere('v.scheduledAt >= :dayStart AND v.scheduledAt < :dayEnd')
+            ->andWhere('v.status != :cancelled')
+            ->setParameter('dossier', $dossierId)
+            ->setParameter('address', $address)
+            ->setParameter('dayStart', $dayStart)
+            ->setParameter('dayEnd', $dayStart->modify('+1 day'))
+            ->setParameter('cancelled', \App\Visit\Domain\VisitStatus::Cancelled);
+        if (null !== $excludeId) {
+            $qb->andWhere('v.id != :self')->setParameter('self', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * Biens refusés par le client sur ce dossier (retour client "Refuse"),
+     * pour le badge du module Visites de la fiche dossier. Calculé à chaque
+     * rendu, jamais dénormalisé.
+     */
+    public function countRefusedByDossier(int $dossierId): int
+    {
+        // Seul le refus décidé PAR LE CLIENT compte (un refus du bailleur
+        // ou une autre raison ne dit rien de l'exigence du client), et
+        // uniquement sur une visite Effectuée : une visite annulée ou
+        // ratée n'a jamais produit de retour client fondé (cohérent avec
+        // countsByDossier : "une visite annulée n'a jamais eu lieu").
+        return (int) $this->createQueryBuilder('v')
+            ->select('COUNT(v.id)')
+            ->where('v.dossier = :dossier')
+            ->andWhere('v.status = :done')
+            ->andWhere('v.clientDecision = :refused')
+            ->andWhere('v.refusalOrigin = :client')
+            ->setParameter('dossier', $dossierId)
+            ->setParameter('done', VisitStatus::Done)
+            ->setParameter('refused', \App\Visit\Domain\ClientDecision::Refused)
+            ->setParameter('client', \App\Visit\Domain\RefusalOrigin::Client)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Visites dont l'échéance de réflexion est atteinte ou dépassée (date
+     * seule, heure de Paris) alors que le client réfléchit toujours, et dont
+     * le rappel staff n'est jamais parti. Nourrit le cron
+     * app:visits:send-decision-reminders, borné par le limit.
+     *
+     * @return list<Visit>
+     */
+    public function findDecisionRemindersDue(\DateTimeImmutable $today, int $limit): array
+    {
+        /** @var list<Visit> $visits */
+        $visits = $this->createQueryBuilder('v')
+            ->leftJoin('v.dossier', 'd')->addSelect('d')
+            ->where('v.clientDecision = :thinking')
+            ->andWhere('v.decisionDeadline IS NOT NULL')
+            ->andWhere('v.decisionDeadline <= :today')
+            ->andWhere('v.decisionReminderSentAt IS NULL')
+            // Un rappel n'a de sens que pour une visite réellement effectuée
+            // (une annulée/ratée n'a pas de retour client à relancer) sur un
+            // dossier encore ouvert.
+            ->andWhere('v.status = :done')
+            ->andWhere('d.closedAt IS NULL')
+            ->setParameter('thinking', \App\Visit\Domain\ClientDecision::Thinking)
+            ->setParameter('done', VisitStatus::Done)
+            ->setParameter('today', $today->setTime(0, 0))
+            ->orderBy('v.decisionDeadline', 'ASC')
+            ->setMaxResults(max(1, $limit))
+            ->getQuery()
+            ->getResult();
+
+        return $visits;
+    }
+
     private function toSummary(Visit $visit): VisitSummary
     {
         $agent = $visit->getAgent();
         $agentName = null;
+        $agentAgencyLine = null;
         if (null !== $agent) {
             $agentName = trim($agent->getFirstName().' '.$agent->getLastName());
+            $agencyName = $agent->getAgency()?->getName();
+            $brand = $agent->getAgency()?->getBrand()?->getName();
+            $agentAgencyLine = null !== $agencyName && null !== $brand && $brand !== $agencyName
+                ? $agencyName.' · '.$brand
+                : $agencyName;
         }
 
         return new VisitSummary(
             id: (int) $visit->getId(),
             reference: (string) $visit->getReference(),
+            // La colonne est NOT NULL : le repli ne sert qu'à satisfaire le
+            // type (une entité hydratée porte toujours son créneau).
             scheduledAt: $visit->getScheduledAt() ?? new \DateTimeImmutable(),
             address: (string) $visit->getAddress(),
             latitude: $visit->getLatitude(),
             longitude: $visit->getLongitude(),
+            dossierId: $visit->getDossier()?->getId(),
             dossierName: (string) $visit->getDossier()?->getName(),
             dossierReference: (string) $visit->getDossier()?->getReference(),
             agentName: $agentName,
@@ -336,7 +535,23 @@ class VisitRepository extends ServiceEntityRepository
             durationMinutes: $visit->getDurationMinutes(),
             clientPresent: $visit->isClientPresent(),
             report: $visit->getReport(),
+            clientNote: $visit->getClientNote(),
+            clientNoteSentAt: $visit->getClientNoteSentAt(),
             clientFeeling: $visit->getClientFeeling(),
+            firstPhotoId: false !== ($firstPhoto = $visit->getPhotos()->first()) ? (int) $firstPhoto->getId() : null,
+            agentAvatar: $agent?->getAvatarFilename(),
+            agentAgencyLine: $agentAgencyLine,
+            agentReference: null !== $agent ? (string) $agent->getReference() : null,
+            createdAt: $visit->getCreatedAt(),
+            calendarSynced: null !== $visit->getCalendarCentralEventId(),
+            updatedAt: $visit->getUpdatedAt(),
+            updatedByName: $visit->getUpdatedByName(),
+            updatedByAvatar: $visit->getUpdatedByAvatar(),
+            clientDecision: $visit->getClientDecision(),
+            clientDecisionAt: $visit->getClientDecisionAt(),
+            applicationOutcome: $visit->getApplicationOutcome(),
+            decisionDeadline: $visit->getDecisionDeadline(),
+            refusalOrigin: $visit->getRefusalOrigin(),
         );
     }
 }

@@ -14,6 +14,13 @@ admin:
             listingUrl:
                 invalid: "Le lien de l'annonce n'est pas une URL valide."
                 length: 'Le lien ne peut pas dépasser 500 caractères.'
+            propertyDetails:
+                surface:
+                    invalid: 'Surface invalide.'
+                floor:
+                    invalid: 'Étage invalide.'
+                amount:
+                    invalid: 'Montant invalide.'
             note:
                 length: 'La note ne peut pas dépasser 2000 caractères.'
     profile:

@@ -45,6 +45,7 @@ export default class extends Controller {
     }
 
     focusables() {
+        // querySelectorAll assumé : le piège à focus doit voir tout élément focusable, quel que soit le contenu projeté dans la modale (impossible à cibler via targets).
         return [
             ...this.element.querySelectorAll(
                 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',

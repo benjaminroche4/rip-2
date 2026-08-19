@@ -57,26 +57,9 @@ final class VisitSectionSecurityTest extends KernelTestCase
         }
     }
 
-    public function testVisitDetailsMutationsRefuseADemotedUser(): void
-    {
-        $visit = $this->persistVisit();
-        $this->loginAs($this->seedUser('visits@visit-section-sec.local', ['ROLE_STAFF', 'ROLE_SECTION_VISITS']));
-        $component = $this->mountTwigComponent('Visit:VisitDetails', ['visitId' => (int) $visit->getId()]);
-        $component->toggleLock();
-
-        // Role revoked mid-session: replaying the actions with a valid
-        // dehydrated payload must refuse.
-        $this->loginAs($this->seedUser('demoted@visit-section-sec.local', ['ROLE_STAFF']));
-        $this->assertAllDenied([
-            fn () => $component->save(),
-            fn () => $component->chooseDuration(30),
-            fn () => $component->chooseAgent(0),
-            fn () => $component->toggleLock(),
-            fn () => $component->chooseType('property_visit'),
-            fn () => $component->toggleClientPresent(),
-            fn () => $component->pickAssignee(0),
-        ]);
-    }
+    // Visit:VisitDetails n'a plus de LiveAction de mutation : la card est en
+    // lecture pure, les modifications passent par la page Modifier (dont les
+    // actions du VisitForm sont couvertes ci-dessous) et les routes POST.
 
     public function testVisitFormMutationsRefuseADemotedUser(): void
     {
@@ -89,7 +72,12 @@ final class VisitSectionSecurityTest extends KernelTestCase
             fn () => $component->create($this->em, new AddressGeocoder(new MockHttpClient(), '')),
             fn () => $component->chooseLocation(48.85, 2.35),
             fn () => $component->pickAssignee(1),
-            fn () => $component->toggleDetails(),
+            fn () => $component->toggleContacts(),
+            fn () => $component->togglePropertyDetails(),
+            fn () => $component->togglePhotos(),
+            fn () => $component->choosePropertyKind('t2'),
+            fn () => $component->chooseFurnishing('furnished'),
+            fn () => $component->chooseLeaseType('airbnb'),
         ]);
     }
 

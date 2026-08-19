@@ -4,38 +4,25 @@ declare(strict_types=1);
 
 namespace App\Visit\Twig\Components;
 
-use App\Auth\Repository\UserRepository;
-use App\RealEstateAgent\Repository\RealEstateAgentRepository;
-use App\Visit\Domain\VisitType;
-use App\Visit\Entity\Visit;
 use App\Visit\Repository\VisitRepository;
-use App\Visit\Service\AddressGeocoder;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
-use Symfony\UX\LiveComponent\Attribute\LiveAction;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
-use Symfony\UX\LiveComponent\ComponentToolsTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
 /**
- * Inline editor of the visit detail card, dossier-style: fields start
- * locked behind the padlock (anti-missclick), then every change autosaves
- * on its own. The dossier attachment stays read-only (rare enough to
- * recreate the visit); chips persist immediately, text fields save on
- * change with per-field errors.
+ * Read-only detail card of the visit page: the property (map, facts,
+ * listing link, note), who is involved, the status actions and the
+ * follow-up card. Every mutation goes through the dedicated "Modifier"
+ * page (menu "..." of the card) or the status/report/photos endpoints:
+ * the inline editing (padlock + autosave) is gone.
  */
 #[AsLiveComponent(name: 'Visit:VisitDetails', template: 'components/Visit/VisitDetails.html.twig')]
 final class VisitDetails
 {
     use VisitsSectionGuard;
-    use ComponentToolsTrait;
     use DefaultActionTrait;
-
-    private const TIMEZONE = 'Europe/Paris';
 
     #[LiveProp]
     public int $visitId = 0;
@@ -43,42 +30,10 @@ final class VisitDetails
     #[LiveProp]
     public string $adminPrefix = '';
 
-    /** Anti-missclick shield, same gesture as the dossier cards. */
-    #[LiveProp]
-    public bool $locked = true;
-
-    #[LiveProp(writable: true)]
-    public string $scheduledAt = '';
-
-    #[LiveProp(writable: true)]
-    public string $address = '';
-
-    #[LiveProp(writable: true)]
-    public string $listingUrl = '';
-
-    /** Persisted through chooseDuration (dropdown), not the autosave form. */
-    #[LiveProp]
-    public string $durationMinutes = '30';
-
-    #[LiveProp(writable: true)]
-    public string $note = '';
-
-    /** Agent immobilier sélectionné ('0' = aucun), persisté via chooseAgent. */
-    #[LiveProp]
-    public string $agentId = '0';
-
-    /** field name => translation key. */
-    #[LiveProp]
-    public array $errors = [];
-
     public function __construct(
         private readonly VisitRepository $visits,
-        private readonly UserRepository $users,
-        private readonly RealEstateAgentRepository $agents,
-        private readonly EntityManagerInterface $em,
         private readonly Security $security,
-        private readonly AddressGeocoder $geocoder,
-        private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
+        private readonly \App\Visit\Service\VisitPropertyRecap $propertyRecap,
     ) {
     }
 
@@ -86,7 +41,6 @@ final class VisitDetails
     {
         $this->ensureAdmin();
         $this->visitId = $visitId;
-        $this->prefill();
     }
 
     public function getVisit(): ?\App\Visit\Domain\VisitSummary
@@ -95,244 +49,73 @@ final class VisitDetails
     }
 
     /**
-     * @return list<array{id: int, name: string, avatar: ?string}>
+     * Mini carte épinglée sur le bien, en tête de la card "Le bien".
+     * Rendue dans une zone data-live-ignore (un morph live la détruirait).
      */
-    public function getAssigneeChoices(): array
+    public function getMap(): ?\Symfony\UX\Map\Map
     {
-        return array_map(
-            static fn ($user): array => [
-                'id' => (int) $user->getId(),
-                'name' => trim(($user->getFirstName() ?? '').' '.($user->getLastName() ?? '')) ?: (string) $user->getEmail(),
-                'avatar' => $user->getAvatarFilename(),
-            ],
-            $this->users->findVisitAgents(),
-        );
+        $visit = $this->getVisit();
+        if (null === $visit || null === $visit->latitude || null === $visit->longitude) {
+            return null;
+        }
+
+        $point = new \Symfony\UX\Map\Point($visit->latitude, $visit->longitude);
+
+        return (new \Symfony\UX\Map\Map('default'))
+            ->center($point)
+            ->zoom(15)
+            ->options(new \Symfony\UX\Map\Bridge\Google\GoogleOptions(
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+            ))
+            ->addMarker(new \Symfony\UX\Map\Marker(
+                position: $point,
+                // Pin maison (goutte bordeaux, pastille blanche, maison) :
+                // même signature que les autres cartes du site.
+                icon: \Symfony\UX\Map\Icon\Icon::svg(<<<'SVG'
+                    <svg xmlns="http://www.w3.org/2000/svg" width="39" height="50" viewBox="0 0 44 56">
+                        <path d="M22 0C9.85 0 0 9.85 0 22c0 16.5 22 34 22 34s22-17.5 22-34C44 9.85 34.15 0 22 0Z" fill="#71172e"/>
+                        <circle cx="22" cy="22" r="13" fill="white"/>
+                        <path d="M22 14.5a2 2 0 0 0-1.28.46l-5.44 4.53A2 2 0 0 0 14.57 21v7.5a1.5 1.5 0 0 0 1.5 1.5h3v-4.5a1.5 1.5 0 0 1 1.5-1.5h2.86a1.5 1.5 0 0 1 1.5 1.5V30h3a1.5 1.5 0 0 0 1.5-1.5V21a2 2 0 0 0-.71-1.51l-5.44-4.53A2 2 0 0 0 22 14.5Z" fill="#71172e" stroke="#71172e" stroke-width="0.5" stroke-linejoin="round"/>
+                    </svg>
+                    SVG),
+                title: (string) $visit->address,
+            ));
     }
 
     /**
-     * @return list<array{id: int, name: string}>
+     * Toutes les caractéristiques du bien, champs vides compris ("-").
+     *
+     * @return list<array{label: string, value: string|null}>
      */
-    public function getAgentChoices(): array
+    public function getPropertyRows(): array
     {
-        return array_map(
-            static function ($agent): array {
-                $name = trim($agent->getFirstName().' '.$agent->getLastName());
-                $agency = $agent->getAgency()?->getName();
+        $visit = $this->visits->find($this->visitId);
 
-                return ['id' => (int) $agent->getId(), 'name' => null !== $agency ? $name.' ('.$agency.')' : $name];
-            },
-            // Deactivated agents leave the picker (the directory keeps them).
-            $this->agents->findActiveOrdered(),
-        );
+        return null !== $visit ? $this->propertyRecap->rows($visit) : [];
     }
 
     /**
-     * Autres visites déjà prévues sur le même bien (même adresse ou même lien
-     * d'annonce), la visite courante exclue.
+     * Autres visites déjà prévues sur le même bien (même adresse ou même
+     * lien d'annonce), la visite courante exclue. En lecture pure, les
+     * valeurs stockées font foi.
      *
      * @return list<\App\Visit\Domain\VisitSummary>
      */
     public function getMatchingVisits(): array
     {
-        $address = trim($this->address);
+        $visit = $this->visits->find($this->visitId);
+        if (null === $visit) {
+            return [];
+        }
+
+        $address = trim((string) $visit->getAddress());
         if (mb_strlen($address) < 5) {
             $address = '';
         }
 
-        return $this->visits->findMatchingSummaries($address, trim($this->listingUrl), $this->visitId);
-    }
-
-    #[LiveAction]
-    public function toggleLock(): void
-    {
-        $this->ensureAdmin();
-        $this->locked = !$this->locked;
-        if ($this->locked) {
-            // Relocking drops any unsaved draft and stale errors.
-            $this->errors = [];
-            $this->prefill();
-        }
-    }
-
-    #[LiveAction]
-    public function chooseType(#[LiveArg] string $type): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        $case = VisitType::tryFrom($type)
-            ?? throw new BadRequestHttpException(\sprintf('Unknown visit type "%s".', $type));
-        $this->entity()->setType($case);
-        $this->em->flush();
-    }
-
-    #[LiveAction]
-    public function toggleClientPresent(): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        $visit = $this->entity();
-        $visit->setClientPresent(!$visit->isClientPresent());
-        $this->em->flush();
-    }
-
-    #[LiveAction]
-    public function pickAssignee(#[LiveArg] int $id): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        $visit = $this->entity();
-        if (0 !== $id && !\in_array($id, array_column($this->getAssigneeChoices(), 'id'), true)) {
-            throw new BadRequestHttpException('Assignee outside the visit-agents pool.');
-        }
-        $current = (int) $visit->getAssignee()?->getId();
-        $visit->setAssignee($current === $id || 0 === $id ? null : $this->users->find($id));
-        $this->em->flush();
-    }
-
-    /** Durée choisie dans le dropdown custom, persistée immédiatement. */
-    #[LiveAction]
-    public function chooseDuration(#[LiveArg] int $minutes): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        if (!\in_array($minutes, [15, 30, 45, 60], true)) {
-            throw new BadRequestHttpException(\sprintf('Invalid duration "%d".', $minutes));
-        }
-        $this->durationMinutes = (string) $minutes;
-        $this->entity()->setDurationMinutes($minutes);
-        $this->em->flush();
-    }
-
-    /** Agent immobilier choisi dans le dropdown custom (0 = aucun). */
-    #[LiveAction]
-    public function chooseAgent(#[LiveArg] int $id): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        $visit = $this->entity();
-        if (0 === $id) {
-            $visit->setAgent(null);
-        } else {
-            $agent = $this->agents->find($id)
-                ?? throw new BadRequestHttpException('Unknown real-estate agent.');
-            $visit->setAgent($agent);
-        }
-        $this->agentId = (string) $id;
-        $this->em->flush();
-    }
-
-    /** Autosave of the text/date fields, per-field errors, geocode on move. */
-    #[LiveAction]
-    public function save(): void
-    {
-        $this->ensureAdmin();
-        if ($this->locked) {
-            return;
-        }
-
-        $this->errors = [];
-        $visit = $this->entity();
-
-        // Date : future only when it actually moved (editing the address of
-        // a past visit must not be blocked by its old date).
-        $raw = trim($this->scheduledAt);
-        $scheduledAt = '' !== $raw
-            ? (\DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $raw, new \DateTimeZone(self::TIMEZONE)) ?: null)
-            : null;
-        if (null === $scheduledAt) {
-            $this->errors['scheduledAt'] = 'admin.visits.create.scheduledAt.notNull';
-        } elseif (
-            $scheduledAt->format('Y-m-d H:i') !== $visit->getScheduledAt()?->format('Y-m-d H:i')
-            && $scheduledAt < new \DateTimeImmutable()
-        ) {
-            $this->errors['scheduledAt'] = 'admin.visits.create.scheduledAt.past';
-        }
-
-        $address = trim($this->address);
-        $addressChanged = $address !== (string) $visit->getAddress();
-        if ('' === $address) {
-            $this->errors['address'] = 'admin.visits.create.address.notBlank';
-        }
-
-        $listingUrl = trim($this->listingUrl);
-        if ('' !== $listingUrl && !filter_var($listingUrl, \FILTER_VALIDATE_URL)) {
-            $this->errors['listingUrl'] = 'admin.visits.create.listingUrl.invalid';
-        }
-
-        $duration = (int) $this->durationMinutes;
-        if (!\in_array($duration, [15, 30, 45, 60], true)) {
-            $this->errors['durationMinutes'] = 'admin.visits.create.duration.invalid';
-        }
-
-        $point = null;
-        if ($addressChanged && '' !== $address) {
-            $point = $this->geocoder->geocode($address);
-            $latitude = $point?->latitude;
-            $longitude = $point?->longitude;
-            // Île-de-France only: coordinates first, postal-code fallback.
-            $inIdf = null !== $latitude && null !== $longitude
-                ? ($latitude >= 48.12 && $latitude <= 49.242 && $longitude >= 1.446 && $longitude <= 3.559)
-                : 1 === preg_match('/\b(75|77|78|91|92|93|94|95)\d{3}\b/', $address);
-            if (!$inIdf) {
-                $this->errors['address'] = 'admin.visits.create.address.idf';
-            }
-        }
-
-        if ([] !== $this->errors) {
-            return;
-        }
-
-        $visit->setScheduledAt($scheduledAt)
-            ->setAddress($address)
-            ->setListingUrl('' !== $listingUrl ? $listingUrl : null)
-            ->setDurationMinutes($duration)
-            ->setNote('' !== trim($this->note) ? trim($this->note) : null);
-        if ($addressChanged) {
-            $visit->setLatitude($point?->latitude)
-                ->setLongitude($point?->longitude);
-        }
-        $this->em->flush();
-
-        // The page chrome (title, header, sticky map) lives outside the
-        // component: morph-refresh it.
-        $this->dispatchBrowserEvent('visit-details:changed');
-        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.saved')]);
-    }
-
-    private function entity(): Visit
-    {
-        return $this->visits->find($this->visitId)
-            ?? throw new BadRequestHttpException('Unknown visit.');
-    }
-
-    private function prefill(): void
-    {
-        $visit = $this->visits->find($this->visitId);
-        if (null === $visit) {
-            return;
-        }
-
-        $this->scheduledAt = $visit->getScheduledAt()?->format('Y-m-d\TH:i') ?? '';
-        $this->agentId = (string) ((int) $visit->getAgent()?->getId());
-        $this->address = (string) $visit->getAddress();
-        $this->listingUrl = (string) $visit->getListingUrl();
-        $this->durationMinutes = (string) $visit->getDurationMinutes();
-        $this->note = (string) $visit->getNote();
+        return $this->visits->findMatchingSummaries($address, trim((string) $visit->getListingUrl()), $this->visitId);
     }
 
     private function ensureAdmin(): void

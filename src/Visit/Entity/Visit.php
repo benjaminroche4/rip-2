@@ -50,9 +50,10 @@ class Visit
     #[Assert\Choice(choices: [15, 30, 45, 60], message: 'admin.visits.create.duration.invalid')]
     private int $durationMinutes = 30;
 
-    /** The tenant attends, or the agent visits on their behalf (proxy). */
-    #[ORM\Column(options: ['default' => true])]
-    private bool $clientPresent = true;
+    /** The tenant attends the visit; unticked by default (the team books
+        many visits where the client only sees the report). */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $clientPresent = false;
 
     /** Post-visit report, filled once the visit is done. */
     #[ORM\Column(type: \Doctrine\DBAL\Types\Types::TEXT, nullable: true)]
@@ -61,6 +62,84 @@ class Visit
     /** Client temperature after a done visit. */
     #[ORM\Column(length: 10, nullable: true, enumType: \App\Visit\Domain\ClientFeeling::class)]
     private ?\App\Visit\Domain\ClientFeeling $clientFeeling = null;
+
+    /** Note destinée au client après la visite, rédigée ou générée par IA. */
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $clientNote = null;
+
+    /** Horodatage du dernier changement de décision client (pour "en attente depuis"). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $clientDecisionAt = null;
+
+    /** Dernier envoi de la note client par email (null = jamais envoyée).
+        Volontairement conservé si la note est modifiée après coup. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $clientNoteSentAt = null;
+
+    /** Rappel staff "échéance de réflexion dépassée" déjà envoyé (idempotence
+        du cron app:visits:send-decision-reminders). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $decisionReminderSentAt = null;
+
+    /** Décision du client sur le bien (réfléchit / se positionne / refuse). */
+    #[ORM\Column(length: 20, nullable: true, enumType: \App\Visit\Domain\ClientDecision::class)]
+    private ?\App\Visit\Domain\ClientDecision $clientDecision = null;
+
+    /** Issue de la candidature déposée (bailleur/propriétaire/agence);
+        null = en attente. N'a de sens que si le client s'est positionné. */
+    #[ORM\Column(length: 20, nullable: true, enumType: \App\Visit\Domain\ApplicationOutcome::class)]
+    private ?\App\Visit\Domain\ApplicationOutcome $applicationOutcome = null;
+
+    /** Échéance de réflexion (date seule) quand le client réfléchit;
+        remise à null dès que la décision quitte "Réfléchit". */
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::DATE_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $decisionDeadline = null;
+
+    /** Origine du refus (bailleur/propriétaire/agence ou le client) quand la
+        décision est "Refuse"; remise à null dès qu'elle change. */
+    #[ORM\Column(length: 20, nullable: true, enumType: \App\Visit\Domain\RefusalOrigin::class)]
+    private ?\App\Visit\Domain\RefusalOrigin $refusalOrigin = null;
+
+    /**
+     * "Le bien en détail" section: optional descriptive facts about the
+     * visited property. All nullable, none required to book the visit.
+     */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'admin.visits.create.propertyDetails.surface.invalid')]
+    #[Assert\LessThanOrEqual(2000, message: 'admin.visits.create.propertyDetails.surface.invalid')]
+    private ?float $surface = null;
+
+    /** 0 = ground floor. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'admin.visits.create.propertyDetails.floor.invalid')]
+    private ?int $floor = null;
+
+    /** Same vocabulary as the dossier search chips (studio, t1, ...). */
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $propertyKind = null;
+
+    /** 'furnished' or 'unfurnished', same codes as the dossier search. */
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $furnishing = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: \App\Visit\Domain\LeaseType::class)]
+    private ?\App\Visit\Domain\LeaseType $leaseType = null;
+
+    /** Monthly rent excluding charges, in euros. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive(message: 'admin.visits.create.propertyDetails.amount.invalid')]
+    #[Assert\LessThanOrEqual(100000, message: 'admin.visits.create.propertyDetails.amount.invalid')]
+    private ?float $rentExcludingCharges = null;
+
+    /** Monthly charges, in euros. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'admin.visits.create.propertyDetails.amount.invalid')]
+    #[Assert\LessThanOrEqual(100000, message: 'admin.visits.create.propertyDetails.amount.invalid')]
+    private ?float $charges = null;
+
+    /** Loyer charges comprises (true) ou hors charges (false/null = HC). */
+    #[ORM\Column(nullable: true)]
+    private ?bool $rentChargesIncluded = null;
 
     /** Free note from the operator (access code, contact on site...). */
     #[ORM\Column(type: \Doctrine\DBAL\Types\Types::TEXT, nullable: true)]
@@ -100,10 +179,14 @@ class Visit
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?RealEstateAgent $agent = null;
 
-    /** Europe/Paris local time (form model timezone). */
+    /** Europe/Paris local time (form model timezone). Le refus du passé ne
+        vaut qu'à la création (groupe visit_create) : une visite passée doit
+        rester éditable, le déplacement vers le passé est regardé dans
+        VisitForm::create(). Même grâce de 10 minutes que la contrainte du
+        formulaire (VisitType), pour que "tout de suite" reste réservable. */
     #[ORM\Column]
     #[Assert\NotNull(message: 'admin.visits.create.scheduledAt.notNull')]
-    #[Assert\GreaterThanOrEqual('now', message: 'admin.visits.create.scheduledAt.past')]
+    #[Assert\GreaterThanOrEqual('-10 minutes', message: 'admin.visits.create.scheduledAt.past', groups: ['visit_create'])]
     private ?\DateTimeImmutable $scheduledAt = null;
 
     #[ORM\Column(length: 255)]
@@ -123,6 +206,34 @@ class Visit
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    /** Dernière modification depuis la fiche (null = jamais retouchée). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    /** Instantané du dernier modificateur (nom, sinon email) : survit à la
+        suppression du compte staff, comme sur les fiches agents. */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $updatedByName = null;
+
+    /** Instantané de la photo de profil du dernier modificateur. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $updatedByAvatar = null;
+
+    /**
+     * Google Calendar mirror (VisitCalendarSync): id of the event in the
+     * central agenda, id of the twin event in the assignee's own agenda,
+     * and the assignee email that personal event was created under (needed
+     * to delete it from the right agenda when the assignee changes).
+     */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $calendarCentralEventId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $calendarAssigneeEventId = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $calendarAssigneeEmail = null;
 
     public function getId(): ?int
     {
@@ -144,6 +255,102 @@ class Visit
     public function getAgent(): ?RealEstateAgent
     {
         return $this->agent;
+    }
+
+    public function getSurface(): ?float
+    {
+        return $this->surface;
+    }
+
+    public function setSurface(?float $surface): static
+    {
+        $this->surface = $surface;
+
+        return $this;
+    }
+
+    public function getFloor(): ?int
+    {
+        return $this->floor;
+    }
+
+    public function setFloor(?int $floor): static
+    {
+        $this->floor = $floor;
+
+        return $this;
+    }
+
+    public function getPropertyKind(): ?string
+    {
+        return $this->propertyKind;
+    }
+
+    public function setPropertyKind(?string $propertyKind): static
+    {
+        $this->propertyKind = $propertyKind;
+
+        return $this;
+    }
+
+    public function getFurnishing(): ?string
+    {
+        return $this->furnishing;
+    }
+
+    public function setFurnishing(?string $furnishing): static
+    {
+        $this->furnishing = $furnishing;
+
+        return $this;
+    }
+
+    public function getLeaseType(): ?\App\Visit\Domain\LeaseType
+    {
+        return $this->leaseType;
+    }
+
+    public function setLeaseType(?\App\Visit\Domain\LeaseType $leaseType): static
+    {
+        $this->leaseType = $leaseType;
+
+        return $this;
+    }
+
+    public function getRentExcludingCharges(): ?float
+    {
+        return $this->rentExcludingCharges;
+    }
+
+    public function setRentExcludingCharges(?float $rentExcludingCharges): static
+    {
+        $this->rentExcludingCharges = $rentExcludingCharges;
+
+        return $this;
+    }
+
+    public function getCharges(): ?float
+    {
+        return $this->charges;
+    }
+
+    public function setCharges(?float $charges): static
+    {
+        $this->charges = $charges;
+
+        return $this;
+    }
+
+    public function getRentChargesIncluded(): ?bool
+    {
+        return $this->rentChargesIncluded;
+    }
+
+    public function setRentChargesIncluded(?bool $rentChargesIncluded): static
+    {
+        $this->rentChargesIncluded = $rentChargesIncluded;
+
+        return $this;
     }
 
     public function getNote(): ?string
@@ -230,6 +437,18 @@ class Visit
         return $this;
     }
 
+    public function getClientNote(): ?string
+    {
+        return $this->clientNote;
+    }
+
+    public function setClientNote(?string $clientNote): static
+    {
+        $this->clientNote = $clientNote;
+
+        return $this;
+    }
+
     public function getClientFeeling(): ?\App\Visit\Domain\ClientFeeling
     {
         return $this->clientFeeling;
@@ -238,6 +457,90 @@ class Visit
     public function setClientFeeling(?\App\Visit\Domain\ClientFeeling $clientFeeling): static
     {
         $this->clientFeeling = $clientFeeling;
+
+        return $this;
+    }
+
+    public function getClientDecision(): ?\App\Visit\Domain\ClientDecision
+    {
+        return $this->clientDecision;
+    }
+
+    public function setClientDecision(?\App\Visit\Domain\ClientDecision $clientDecision): static
+    {
+        $this->clientDecision = $clientDecision;
+
+        return $this;
+    }
+
+    public function getClientDecisionAt(): ?\DateTimeImmutable
+    {
+        return $this->clientDecisionAt;
+    }
+
+    public function setClientDecisionAt(?\DateTimeImmutable $clientDecisionAt): static
+    {
+        $this->clientDecisionAt = $clientDecisionAt;
+
+        return $this;
+    }
+
+    public function getClientNoteSentAt(): ?\DateTimeImmutable
+    {
+        return $this->clientNoteSentAt;
+    }
+
+    public function setClientNoteSentAt(?\DateTimeImmutable $clientNoteSentAt): static
+    {
+        $this->clientNoteSentAt = $clientNoteSentAt;
+
+        return $this;
+    }
+
+    public function getDecisionReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->decisionReminderSentAt;
+    }
+
+    public function setDecisionReminderSentAt(?\DateTimeImmutable $decisionReminderSentAt): static
+    {
+        $this->decisionReminderSentAt = $decisionReminderSentAt;
+
+        return $this;
+    }
+
+    public function getDecisionDeadline(): ?\DateTimeImmutable
+    {
+        return $this->decisionDeadline;
+    }
+
+    public function setDecisionDeadline(?\DateTimeImmutable $decisionDeadline): static
+    {
+        $this->decisionDeadline = $decisionDeadline;
+
+        return $this;
+    }
+
+    public function getRefusalOrigin(): ?\App\Visit\Domain\RefusalOrigin
+    {
+        return $this->refusalOrigin;
+    }
+
+    public function setRefusalOrigin(?\App\Visit\Domain\RefusalOrigin $refusalOrigin): static
+    {
+        $this->refusalOrigin = $refusalOrigin;
+
+        return $this;
+    }
+
+    public function getApplicationOutcome(): ?\App\Visit\Domain\ApplicationOutcome
+    {
+        return $this->applicationOutcome;
+    }
+
+    public function setApplicationOutcome(?\App\Visit\Domain\ApplicationOutcome $applicationOutcome): static
+    {
+        $this->applicationOutcome = $applicationOutcome;
 
         return $this;
     }
@@ -358,6 +661,42 @@ class Visit
         return $this;
     }
 
+    public function getCalendarCentralEventId(): ?string
+    {
+        return $this->calendarCentralEventId;
+    }
+
+    public function setCalendarCentralEventId(?string $calendarCentralEventId): static
+    {
+        $this->calendarCentralEventId = $calendarCentralEventId;
+
+        return $this;
+    }
+
+    public function getCalendarAssigneeEventId(): ?string
+    {
+        return $this->calendarAssigneeEventId;
+    }
+
+    public function setCalendarAssigneeEventId(?string $calendarAssigneeEventId): static
+    {
+        $this->calendarAssigneeEventId = $calendarAssigneeEventId;
+
+        return $this;
+    }
+
+    public function getCalendarAssigneeEmail(): ?string
+    {
+        return $this->calendarAssigneeEmail;
+    }
+
+    public function setCalendarAssigneeEmail(?string $calendarAssigneeEmail): static
+    {
+        $this->calendarAssigneeEmail = $calendarAssigneeEmail;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -366,6 +705,31 @@ class Visit
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function getUpdatedByName(): ?string
+    {
+        return $this->updatedByName;
+    }
+
+    public function getUpdatedByAvatar(): ?string
+    {
+        return $this->updatedByAvatar;
+    }
+
+    /** Pose les trois champs d'un coup : le point d'entrée unique des mutations. */
+    public function touchBy(?string $name, ?string $avatar): static
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->updatedByName = $name;
+        $this->updatedByAvatar = $avatar;
 
         return $this;
     }

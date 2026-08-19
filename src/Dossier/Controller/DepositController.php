@@ -219,7 +219,7 @@ final class DepositController extends AbstractController
         // Validated = frozen. The template already hides the input, but the
         // rule must hold server-side: re-uploading would silently demote the
         // piece to "received" and unlock the delete of the validated file.
-        if (false === $document->getStatus()?->acceptsUpload()) {
+        if (!$document->getStatus()->acceptsUpload()) {
             return $this->documentsResponse($request, $dossier, $person, $id, 'deposit.documents.error.locked');
         }
 

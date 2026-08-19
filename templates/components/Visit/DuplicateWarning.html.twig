@@ -2,7 +2,7 @@
    une visite est déjà prévue sur ce bien, même adresse ou même annonce.
    Informatif, jamais bloquant : deux visites sur le même bien restent
    légitimes (deux dossiers, deux créneaux). #}
-{%- props visits, adminPrefix -%}
+{%- props visits, adminPrefix, currentDossierId = null -%}
 {% if visits is not empty %}
     <div
         class="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5"
@@ -18,7 +18,7 @@
                 {% for visit in visits %}
                     <li class="min-w-0 text-xs text-amber-800">
                         <a
-                            href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, id: visit.id}) }}"
+                            href="{{ path('admin_visit_show', {adminPrefix: adminPrefix, reference: visit.reference}) }}"
                             class="font-medium underline underline-offset-2 transition-colors duration-100 ease-out hover:text-amber-950"
                             data-testid="visit-duplicate-link"
                         >
@@ -28,6 +28,10 @@
                             '%date%': visit.scheduledAt|format_datetime(pattern='dd MMM yyyy, HH:mm'),
                             '%dossier%': visit.dossierName,
                         }) }}
+                        {% if currentDossierId and visit.dossierId == currentDossierId %}
+                            {# Même dossier = vrai double-booking : badge appuyé. #}
+                            <span class="ml-1 rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900" data-testid="visit-duplicate-same-dossier">{{ 'admin.visits.create.duplicate.sameDossier'|trans }}</span>
+                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>

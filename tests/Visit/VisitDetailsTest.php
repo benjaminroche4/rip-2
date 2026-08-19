@@ -6,22 +6,23 @@ namespace App\Tests\Visit;
 
 use App\Auth\Entity\User;
 use App\Dossier\Entity\Dossier;
-use App\Visit\Domain\VisitType;
 use App\Visit\Entity\Visit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\UX\LiveComponent\LiveResponder;
 use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 
 /**
- * Inline editor of the visit detail card: padlock gating, chip autosave,
- * per-field validation (future date only when moved, Île-de-France
- * address), and the relock-drops-draft behaviour.
+ * Read-only detail card of the visit page: the "..." menu carries the two
+ * mutations (Modifier -> dedicated edit page, Supprimer -> confirm modal),
+ * the card itself only displays the stored values. The inline editing
+ * (padlock + autosave) is gone.
  */
 final class VisitDetailsTest extends KernelTestCase
 {
     use InteractsWithTwigComponents;
+
+    private const PREFIX = 'test_admin_prefix_1234567890abcdef';
 
     private EntityManagerInterface $em;
 
@@ -35,119 +36,102 @@ final class VisitDetailsTest extends KernelTestCase
         $this->loginAsAdmin();
     }
 
-    public function testFieldsAreShieldedWhileLocked(): void
+    protected function tearDown(): void
+    {
+        $this->em->createQuery('DELETE FROM '.Visit::class)->execute();
+        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@visit-details-test.local')->execute();
+        parent::tearDown();
+    }
+
+    public function testTheCardIsReadOnly(): void
     {
         $visit = $this->persistVisit();
-        $component = $this->mount($visit);
+        $visit->setNote('Code 4812, gardien au rez-de-chaussée')
+            ->setListingUrl('https://www.seloger.com/annonce-123')
+            ->setClientPresent(true);
+        $this->em->flush();
 
-        // Locked by default: nothing mutates.
-        $component->chooseType('inventory');
-        $component->address = 'Autre adresse, 75002 Paris';
-        $component->save();
+        $rendered = $this->render($visit);
 
-        $this->em->clear();
-        $reloaded = $this->em->find(Visit::class, $visit->getId());
-        self::assertSame(VisitType::PropertyVisit, $reloaded->getType());
-        self::assertSame('12 rue de la Roquette, 75011 Paris', $reloaded->getAddress());
+        // Valeurs affichées en lecture.
+        self::assertStringContainsString('Code 4812, gardien au rez-de-chaussée', $rendered);
+        self::assertStringContainsString('data-testid="visit-show-listing"', $rendered);
+        self::assertStringContainsString('data-testid="visit-show-client-present"', $rendered);
+        self::assertStringContainsString('Famille Martin', $rendered);
+
+        // Plus aucun vestige de l'édition en place : ni cadenas, ni inputs.
+        self::assertStringNotContainsString('data-testid="visit-details-lock"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-details-address"', $rendered);
+        self::assertStringNotContainsString('data-model=', $rendered);
+        self::assertStringNotContainsString('data-live-action-param="save"', $rendered);
+        self::assertStringNotContainsString('data-testid="visit-details-note"', $rendered);
     }
 
-    public function testChipsAndFieldsAutosaveOnceUnlocked(): void
-    {
-        $visit = $this->persistVisit();
-        $component = $this->mount($visit);
-        $component->toggleLock();
-
-        $component->chooseType('technical_intervention');
-        $component->toggleClientPresent();
-        $component->note = 'Code 4812, gardien au rez-de-chaussée';
-        $component->durationMinutes = '60';
-        $component->save();
-
-        $this->em->clear();
-        $reloaded = $this->em->find(Visit::class, $visit->getId());
-        self::assertSame(VisitType::TechnicalIntervention, $reloaded->getType());
-        self::assertFalse($reloaded->isClientPresent());
-        self::assertSame('Code 4812, gardien au rez-de-chaussée', $reloaded->getNote());
-        self::assertSame(60, $reloaded->getDurationMinutes());
-    }
-
-    public function testAddressOutsideIleDeFranceIsRejected(): void
-    {
-        $visit = $this->persistVisit();
-        $component = $this->mount($visit);
-        $component->toggleLock();
-
-        $component->address = '12 rue de la République, 69001 Lyon';
-        $component->save();
-
-        self::assertArrayHasKey('address', $component->errors);
-        $this->em->clear();
-        self::assertSame('12 rue de la Roquette, 75011 Paris', $this->em->find(Visit::class, $visit->getId())->getAddress());
-    }
-
-    public function testUnchangedPastDateDoesNotBlockOtherEdits(): void
-    {
-        // Visite déjà passée : éditer la note ne doit pas buter sur la date.
-        $visit = $this->persistVisit(new \DateTimeImmutable('-2 days 10:00'));
-        $component = $this->mount($visit);
-        $component->toggleLock();
-
-        $component->note = 'Compte OK';
-        $component->save();
-
-        self::assertSame([], $component->errors);
-        $this->em->clear();
-        self::assertSame('Compte OK', $this->em->find(Visit::class, $visit->getId())->getNote());
-
-        // Mais déplacer la date VERS le passé reste refusé.
-        $component->scheduledAt = (new \DateTimeImmutable('-1 day'))->format('Y-m-d\TH:i');
-        $component->save();
-        self::assertArrayHasKey('scheduledAt', $component->errors);
-    }
-
-    public function testLockedBannerShowsOnlyWhileLocked(): void
+    public function testTheMenuLinksToTheEditPage(): void
     {
         $visit = $this->persistVisit();
 
-        $locked = (string) $this->renderTwigComponent('Visit:VisitDetails', [
+        $rendered = $this->render($visit);
+
+        self::assertStringContainsString('data-testid="visit-details-menu"', $rendered);
+        // L'entrée Modifier pointe vers la page d'édition dédiée.
+        $edit = $this->attribute($rendered, 'visit-details-edit', 'href');
+        self::assertStringContainsString(self::PREFIX.'/admin', $edit);
+        self::assertStringContainsString((string) $visit->getReference(), $edit);
+        self::assertMatchesRegularExpression('~/(modifier|edit)$~', $edit);
+    }
+
+    public function testTheMenuCarriesTheDeleteConfirmModal(): void
+    {
+        $visit = $this->persistVisit();
+
+        $rendered = $this->render($visit);
+
+        // Le déclencheur Supprimer vit dans le menu "..." et ouvre la modale
+        // de confirmation (AlertDialog), dont le POST cible la route delete.
+        self::assertStringContainsString('data-testid="visit-show-delete-trigger"', $rendered);
+        // Le menu ne se referme PAS à l'ouverture : la <dialog> vit dans le
+        // sous-arbre du <details>, un details fermé la rendrait invisible.
+        self::assertStringContainsString('data-action="click->alert-dialog#open"', $rendered);
+        self::assertStringNotContainsString('alert-dialog#open details-dropdown#close', $rendered);
+        self::assertStringContainsString('data-testid="visit-show-delete"', $rendered);
+        self::assertMatchesRegularExpression('~/(supprimer|delete)"~', $rendered);
+        // La card Actions latérale ne garde que les statuts.
+        $aside = (string) strstr($rendered, 'data-testid="visit-actions-card"');
+        self::assertStringContainsString('data-testid="visit-status-actions"', $aside);
+        self::assertStringNotContainsString('visit-show-delete-trigger', $aside, 'Delete left the side Actions card.');
+    }
+
+    public function testStatusChipsStayInTheSideActionsCard(): void
+    {
+        $visit = $this->persistVisit();
+
+        $rendered = $this->render($visit);
+
+        foreach (['planned', 'done', 'cancelled'] as $status) {
+            self::assertStringContainsString('data-testid="visit-status-'.$status.'"', $rendered);
+        }
+    }
+
+    private function render(Visit $visit): string
+    {
+        return (string) $this->renderTwigComponent('Visit:VisitDetails', [
             'visitId' => (int) $visit->getId(),
-            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
+            'adminPrefix' => self::PREFIX,
         ]);
-        self::assertStringContainsString('data-testid="visit-locked-banner"', $locked, 'Locked by default: the unlock banner shows.');
-
-        $unlocked = (string) $this->renderTwigComponent('Visit:VisitDetails', [
-            'visitId' => (int) $visit->getId(),
-            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
-            'locked' => false,
-        ]);
-        self::assertStringNotContainsString('data-testid="visit-locked-banner"', $unlocked);
     }
 
-    public function testRelockingDropsTheDraft(): void
+    /** Valeur d'un attribut sur l'élément portant le data-testid donné. */
+    private function attribute(string $html, string $testid, string $attribute): string
     {
-        $visit = $this->persistVisit();
-        $component = $this->mount($visit);
-        $component->toggleLock();
-        $component->address = 'Brouillon non sauvé';
+        preg_match('~<[^>]*data-testid="'.preg_quote($testid, '~').'"[^>]*>~', $html, $tag);
+        self::assertNotSame([], $tag, 'Element '.$testid.' not found.');
+        preg_match('~'.$attribute.'="([^"]*)"~', $tag[0], $value);
 
-        $component->toggleLock();
-
-        self::assertSame('12 rue de la Roquette, 75011 Paris', $component->address);
-        self::assertSame([], $component->errors);
+        return html_entity_decode($value[1] ?? '');
     }
 
-    private function mount(Visit $visit): object
-    {
-        $component = $this->mountTwigComponent('Visit:VisitDetails', [
-            'visitId' => (int) $visit->getId(),
-            'adminPrefix' => 'test_admin_prefix_1234567890abcdef',
-        ]);
-        $component->setLiveResponder(new LiveResponder());
-
-        return $component;
-    }
-
-    private function persistVisit(?\DateTimeImmutable $scheduledAt = null): Visit
+    private function persistVisit(): Visit
     {
         $dossier = (new Dossier())
             ->setName('Famille Martin')
@@ -159,7 +143,7 @@ final class VisitDetailsTest extends KernelTestCase
         $visit = (new Visit())
             ->setReference('VS-'.str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT))
             ->setDossier($dossier)
-            ->setScheduledAt($scheduledAt ?? new \DateTimeImmutable('+2 days 10:30'))
+            ->setScheduledAt(new \DateTimeImmutable('+2 days 10:30'))
             ->setAddress('12 rue de la Roquette, 75011 Paris')
             ->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($visit);

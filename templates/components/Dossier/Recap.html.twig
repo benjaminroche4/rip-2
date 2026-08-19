@@ -74,13 +74,13 @@
                     {% set points = recap.attentionPoints %}
                     <div class="space-y-4" data-testid="dossier-recap-content">
                         <div class="space-y-1.5">
-                            <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.summary'|trans }}</p>
+                            <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.recap.sections.summary'|trans }}</p>
                             <p class="text-sm leading-relaxed text-pretty text-gray-700">{{ recap.summary }}</p>
                         </div>
 
                         {% if points is not empty %}
                             <div class="space-y-1.5 border-t border-neutral-100 pt-4">
-                                <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.attention'|trans }}</p>
+                                <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.recap.sections.attention'|trans }}</p>
                                 <ul class="space-y-1.5">
                                     {% for point in points %}
                                         <li class="flex items-start gap-2 text-sm text-gray-700">
@@ -94,7 +94,7 @@
 
                         {% if recap.nextAction %}
                             <div class="space-y-1.5 border-t border-neutral-100 pt-4">
-                                <p class="text-xs font-semibold tracking-wide text-gray-400 uppercase">{{ 'admin.dossiers.show.recap.sections.nextAction'|trans }}</p>
+                                <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">{{ 'admin.dossiers.show.recap.sections.nextAction'|trans }}</p>
                                 <p class="text-sm font-medium text-gray-900">{{ recap.nextAction }}</p>
                             </div>
                         {% endif %}
