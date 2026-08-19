@@ -4,7 +4,7 @@
 /.env.local.php
 /.env.*.local
 # Env prod (secrets live, copie de référence du serveur) : jamais commité.
-/.env.prod
+/.env.o2switch
 /config/secrets/prod/prod.decrypt.private.php
 /config/reference.php
 /public/bundles/
