@@ -10,6 +10,7 @@ use App\Contact\Domain\ParisDistricts;
 use App\Contact\Domain\StayDuration;
 use App\Dossier\Domain\AffordableRent;
 use App\Dossier\Domain\CsvSelection;
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Domain\DossierStep;
 use App\Dossier\Domain\ImportantAddressList;
 use App\Dossier\Domain\LeaseCompatibility;
@@ -122,6 +123,15 @@ final class SearchEditor
     /** Minimum surface in m², '' = none (saved with the main autosave). */
     #[LiveProp(writable: true)]
     public string $minSurface = '';
+
+    /**
+     * "+N" équipements dépliés. L'état vit sur le serveur : chaque sélection
+     * re-rend la card, un dépliage purement DOM (controller reveal) serait
+     * refermé par le morph au premier clic. Déplié, le menu reste ouvert pour
+     * enchaîner les sélections.
+     */
+    #[LiveProp]
+    public bool $equipmentExpanded = false;
 
     public function __construct(
         private readonly DossierRepository $dossiers,
@@ -278,11 +288,15 @@ final class SearchEditor
         return GuarantorType::cases();
     }
 
-    public function getCurrentGuarantorType(): ?string
+    /**
+     * @return list<string>
+     */
+    public function getSelectedGuarantorTypes(): array
     {
-        return $this->dossier()->getSearch()?->getGuarantorType();
+        return $this->dossier()->getSearch()?->getGuarantorTypes() ?? [];
     }
 
+    /** Multi-select: a household can combine e.g. physical and Garantme. */
     #[LiveAction]
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
@@ -313,6 +327,29 @@ final class SearchEditor
         return $this->dossier()->getSearch()?->getOccupants();
     }
 
+    /**
+     * Alerte discrète sous le champ occupants : un nombre d'occupants
+     * renseigné mais inférieur au nombre de locataires de l'onglet Personnes
+     * est forcément incohérent (chaque locataire occupe le logement).
+     * Recalculée à chaque rendu, jamais bloquante.
+     */
+    public function getOccupantsMismatch(): bool
+    {
+        $occupants = $this->getCurrentOccupants();
+        if (null === $occupants) {
+            return false;
+        }
+
+        $tenants = 0;
+        foreach ($this->dossier()->getPersons() as $person) {
+            if (DossierPersonRole::TENANT === $person->getRole()) {
+                ++$tenants;
+            }
+        }
+
+        return $tenants > 0 && $occupants < $tenants;
+    }
+
     #[LiveAction]
     public function chooseOccupants(#[LiveArg] int $count): void
     {
@@ -341,6 +378,14 @@ final class SearchEditor
     public function chooseEquipment(#[LiveArg] string $equipment): void
     {
         $this->applyToggle(SearchCriterion::Equipment, $equipment);
+    }
+
+    /** Déplie la liste complète des équipements (pas de set* : hydratation). */
+    #[LiveAction]
+    public function revealEquipment(): void
+    {
+        $this->ensureAdmin();
+        $this->equipmentExpanded = true;
     }
 
     /**

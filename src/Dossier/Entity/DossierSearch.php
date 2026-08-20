@@ -44,8 +44,22 @@ class DossierSearch
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $furnishing = null;
 
+    /**
+     * Legacy single guarantor kind, kept as a read fallback and mirrored to
+     * the first selected type so pre-migration consumers stay coherent.
+     */
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $guarantorType = null;
+
+    /**
+     * Guarantor kinds the tenant can provide (multi-select since August
+     * 2026: a household can combine e.g. a physical guarantor and Garantme).
+     * GuarantorType string values.
+     *
+     * @var list<string>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $guarantorTypes = null;
 
     /** Progress of the guarantee: not_started, in_progress, obtained, refused. */
     #[ORM\Column(length: 20, nullable: true)]
@@ -106,7 +120,7 @@ class DossierSearch
     private ?string $parking = null;
 
     /**
-     * Up to 3 addresses that matter to the tenant (work, school, ...), each
+     * Up to 6 addresses that matter to the tenant (work, school, ...), each
      * as {address: string, type: string}. Optional.
      *
      * @var list<array{address: string, type: string}>|null
@@ -134,7 +148,7 @@ class DossierSearch
             && '' !== trim((string) $this->propertyType)
             && '' !== trim((string) $this->stayDuration)
             && '' !== trim((string) $this->furnishing)
-            && '' !== trim((string) $this->guarantorType);
+            && [] !== $this->getGuarantorTypes();
     }
 
     public function getDossier(): ?Dossier
@@ -229,6 +243,38 @@ class DossierSearch
     public function setGuarantorType(?string $guarantorType): static
     {
         $this->guarantorType = $guarantorType;
+        // The list is the source of truth: a single-value write (conversion
+        // from a lead, legacy code paths) lands in it too.
+        $this->guarantorTypes = null !== $guarantorType && '' !== $guarantorType ? [$guarantorType] : null;
+
+        return $this;
+    }
+
+    /**
+     * Selected guarantor kinds; falls back to the legacy single column for
+     * rows written before the multi-select existed.
+     *
+     * @return list<string>
+     */
+    public function getGuarantorTypes(): array
+    {
+        if (null !== $this->guarantorTypes) {
+            return $this->guarantorTypes;
+        }
+
+        return null !== $this->guarantorType && '' !== $this->guarantorType ? [$this->guarantorType] : [];
+    }
+
+    /**
+     * @param list<string>|null $guarantorTypes
+     */
+    public function setGuarantorTypes(?array $guarantorTypes): static
+    {
+        $guarantorTypes = null !== $guarantorTypes ? array_values(array_filter($guarantorTypes)) : [];
+        $this->guarantorTypes = [] !== $guarantorTypes ? $guarantorTypes : null;
+        // Mirror to the legacy column (first selected) so old readers and
+        // exports keep a value.
+        $this->guarantorType = $guarantorTypes[0] ?? null;
 
         return $this;
     }

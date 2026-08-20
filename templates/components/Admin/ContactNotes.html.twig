@@ -1,3 +1,98 @@
+{% macro noteEntry(row, live, isReply) %}
+    {#- Une note ou une réponse : avatar, meta, actions stylo direct,
+        texte ou éditeur inline. Même markup aux tailles près. -#}
+    {% set note = row.note %}
+    <div class="flex gap-3">
+        <twig:Avatar filename="{{ note.authorAvatar }}" name="{{ note.authorName }}" size="{{ isReply ? '6' : '8' }}" />
+        <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <p class="flex items-baseline gap-2 text-sm">
+                    <span class="font-medium text-gray-900">{{ note.authorName|title }}</span>
+                    {% set noteDay = note.createdAt|date('Y-m-d') %}
+                    <span class="text-xs text-gray-400 tabular-nums" title="{{ note.createdAt|format_datetime('medium', 'short') }}">
+                        {%- if noteDay == 'now'|date('Y-m-d') -%}
+                            {{ note.createdAt|format_datetime(pattern="HH'h'mm") }}
+                        {%- elseif noteDay == '-1 day'|date('Y-m-d') -%}
+                            {{ 'admin.contacts.notes.yesterday'|trans }} {{ note.createdAt|format_datetime(pattern="HH'h'mm") }}
+                        {%- else -%}
+                            {{ note.createdAt|format_datetime(pattern='dd.MM.yy') }}
+                        {%- endif -%}
+                    </span>
+                </p>
+                {% if live.editingNoteId != note.id and (row.canEdit or row.canDelete) %}
+                    {# Actions directes (convention stylo direct) :
+                       crayon et corbeille, sans menu intermédiaire. #}
+                    <span class="flex items-center gap-1" data-testid="contact-note-actions">
+                        {% if row.canEdit %}
+                            <button
+                                type="button"
+                                data-action="live#action"
+                                data-live-action-param="startEdit"
+                                data-live-id-param="{{ note.id }}"
+                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
+                                aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
+                                title="{{ 'admin.contacts.notes.edit'|trans }}"
+                                data-testid="contact-note-edit"
+                            >
+                                {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            </button>
+                        {% endif %}
+                        {% if row.canDelete %}
+                            <button
+                                type="button"
+                                data-action="fade-exit#run live#action"
+                                data-live-action-param="delete"
+                                data-live-id-param="{{ note.id }}"
+                                class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
+                                aria-label="{{ 'admin.contacts.notes.delete'|trans }}"
+                                title="{{ 'admin.contacts.notes.delete'|trans }}"
+                                data-testid="contact-note-delete"
+                            >
+                                {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            </button>
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if live.editingNoteId == note.id %}
+                <div class="mt-2 flex flex-col gap-2">
+                    <textarea
+                        data-model="norender|editingText"
+                        data-action="keydown.enter->live#action:prevent"
+                        data-live-action-param="saveEdit"
+                        rows="3"
+                        title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                        class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
+                    >{{ live.editingText }}</textarea>
+                    <div class="flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            data-action="live#action"
+                            data-live-action-param="cancelEdit"
+                            class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                        >
+                            {{ 'admin.contacts.notes.cancel'|trans }}
+                        </button>
+                        <twig:Button
+                            size="sm"
+                            data-action="live#action"
+                            data-live-action-param="saveEdit"
+                            data-loading="action(saveEdit)|addAttribute(disabled)"
+                        >
+                            <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(saveEdit)|removeClass(hidden)" />
+                            {{ 'admin.contacts.notes.save'|trans }}
+                        </twig:Button>
+                    </div>
+                </div>
+            {% else %}
+                <p class="mt-1 text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ note.text }}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+{% import _self as noteUi %}
 <div
     {{ attributes.defaults({
         class: 'contents',
@@ -25,93 +120,75 @@
                 <ul class="mt-3 divide-y divide-gray-950/5" role="list">
                     {% for row in noteRows %}
                         {% set note = row.note %}
-                        <li class="animate-slide-in flex gap-3 py-4 first:pt-1 last:pb-0" data-controller="fade-exit" data-testid="contact-note">
-                            <twig:Avatar filename="{{ note.authorAvatar }}" name="{{ note.authorName }}" size="8" />
-                            <div class="min-w-0 flex-1">
-                                <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                                    <p class="flex items-baseline gap-2 text-sm">
-                                        <span class="font-medium text-gray-900">{{ note.authorName|title }}</span>
-                                        {% set noteDay = note.createdAt|date('Y-m-d') %}
-                                        <span class="text-xs text-gray-400 tabular-nums" title="{{ note.createdAt|format_datetime('medium', 'short') }}">
-                                            {%- if noteDay == 'now'|date('Y-m-d') -%}
-                                                {{ note.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                            {%- elseif noteDay == '-1 day'|date('Y-m-d') -%}
-                                                {{ 'admin.contacts.notes.yesterday'|trans }} {{ note.createdAt|format_datetime(pattern="HH'h'mm") }}
-                                            {%- else -%}
-                                                {{ note.createdAt|format_datetime(pattern='dd.MM.yy') }}
-                                            {%- endif -%}
-                                        </span>
-                                    </p>
-                                    {% if this.editingNoteId != note.id and (row.canEdit or row.canDelete) %}
-                                        {# Actions directes (convention stylo direct) :
-                                           crayon et corbeille, sans menu intermédiaire. #}
-                                        <span class="flex items-center gap-1" data-testid="contact-note-actions">
-                                            {% if row.canEdit %}
+                        <li class="animate-slide-in py-4 first:pt-1 last:pb-0" data-controller="fade-exit" data-testid="contact-note">
+                            {{ noteUi.noteEntry(row, this, false) }}
+
+                            {# ── Fil de réponses : indenté sous la note mère,
+                                  ordre chronologique. ────────────────────── #}
+                            {% if row.replies is not empty or this.replyingToId == note.id %}
+                                <div class="mt-3 ml-11 space-y-3 border-l border-gray-950/5 pl-4">
+                                    {% for reply in row.replies %}
+                                        <div class="animate-slide-in" data-testid="contact-note-reply">
+                                            {{ noteUi.noteEntry(reply, this, true) }}
+                                        </div>
+                                    {% endfor %}
+
+                                    {# Composer de réponse inline (jamais de modale). #}
+                                    {% if this.replyingToId == note.id %}
+                                        <div class="flex flex-col gap-2" data-testid="contact-note-reply-composer">
+                                            <textarea
+                                                data-model="norender|replyText"
+                                                data-action="keydown.enter->live#action:prevent"
+                                                data-live-action-param="addReply"
+                                                rows="2"
+                                                placeholder="{{ 'admin.contacts.notes.replyPlaceholder'|trans }}"
+                                                aria-label="{{ 'admin.contacts.notes.replyPlaceholder'|trans }}"
+                                                title="{{ 'admin.contacts.notes.enterHint'|trans }}"
+                                                class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none"
+                                            >{{ this.replyText }}</textarea>
+                                            <div class="flex items-center justify-end gap-3">
                                                 <button
                                                     type="button"
                                                     data-action="live#action"
-                                                    data-live-action-param="startEdit"
-                                                    data-live-id-param="{{ note.id }}"
-                                                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
-                                                    aria-label="{{ 'admin.contacts.notes.edit'|trans }}"
-                                                    title="{{ 'admin.contacts.notes.edit'|trans }}"
-                                                    data-testid="contact-note-edit"
+                                                    data-live-action-param="cancelReply"
+                                                    class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
+                                                    data-testid="contact-note-reply-cancel"
                                                 >
-                                                    {{ ux_icon('lucide:pencil', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                                                    {{ 'admin.contacts.notes.cancel'|trans }}
                                                 </button>
-                                            {% endif %}
-                                            {% if row.canDelete %}
-                                                <button
-                                                    type="button"
-                                                    data-action="fade-exit#run live#action"
-                                                    data-live-action-param="delete"
-                                                    data-live-id-param="{{ note.id }}"
-                                                    class="flex size-7 cursor-pointer items-center justify-center rounded-lg text-gray-400 transition-colors duration-100 ease-out hover:bg-red-50 hover:text-red-600"
-                                                    aria-label="{{ 'admin.contacts.notes.delete'|trans }}"
-                                                    title="{{ 'admin.contacts.notes.delete'|trans }}"
-                                                    data-testid="contact-note-delete"
+                                                <twig:Button
+                                                    size="sm"
+                                                    data-action="live#action"
+                                                    data-live-action-param="addReply"
+                                                    data-loading="action(addReply)|addAttribute(disabled)"
+                                                    data-testid="contact-note-reply-send"
                                                 >
-                                                    {{ ux_icon('lucide:trash-2', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                </button>
-                                            {% endif %}
-                                        </span>
+                                                    <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(addReply)|removeClass(hidden)" />
+                                                    {{ 'admin.contacts.notes.replySend'|trans }}
+                                                </twig:Button>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                 </div>
+                            {% endif %}
 
-                                {% if this.editingNoteId == note.id %}
-                                    <div class="mt-2 flex flex-col gap-2">
-                                        <textarea
-                                            data-model="norender|editingText"
-                                            data-action="keydown.enter->live#action:prevent"
-                                            data-live-action-param="saveEdit"
-                                            rows="3"
-                                            title="{{ 'admin.contacts.notes.enterHint'|trans }}"
-                                            class="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors duration-100 focus:border-gray-400 focus:outline-none"
-                                        >{{ this.editingText }}</textarea>
-                                        <div class="flex items-center justify-end gap-3">
-                                            <button
-                                                type="button"
-                                                data-action="live#action"
-                                                data-live-action-param="cancelEdit"
-                                                class="cursor-pointer text-xs font-medium text-gray-500 transition-colors duration-100 hover:text-gray-900"
-                                            >
-                                                {{ 'admin.contacts.notes.cancel'|trans }}
-                                            </button>
-                                            <twig:Button
-                                                size="sm"
-                                                data-action="live#action"
-                                                data-live-action-param="saveEdit"
-                                                data-loading="action(saveEdit)|addAttribute(disabled)"
-                                            >
-                                                <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(saveEdit)|removeClass(hidden)" />
-                                                {{ 'admin.contacts.notes.save'|trans }}
-                                            </twig:Button>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <p class="mt-1 text-sm leading-relaxed text-pretty whitespace-pre-line text-gray-900">{{ note.text }}</p>
-                                {% endif %}
-                            </div>
+                            {# « Répondre » discret sous le fil, aligné sur
+                               l'indentation des réponses. #}
+                            {% if this.replyingToId != note.id %}
+                                <div class="mt-1.5 ml-11">
+                                    <button
+                                        type="button"
+                                        data-action="live#action"
+                                        data-live-action-param="startReply"
+                                        data-live-id-param="{{ note.id }}"
+                                        class="flex cursor-pointer items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-medium text-gray-400 transition-colors duration-100 ease-out hover:bg-neutral-100 hover:text-gray-600"
+                                        data-testid="contact-note-reply-button"
+                                    >
+                                        {{ ux_icon('lucide:corner-down-right', {class: 'size-3 shrink-0', 'aria-hidden': 'true'}) }}
+                                        {{ 'admin.contacts.notes.reply'|trans }}
+                                    </button>
+                                </div>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

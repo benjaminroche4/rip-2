@@ -254,11 +254,10 @@
                 </div>
             </div>
 
-            {# Un rendez-vous survit à la conversion (agenda et emails le
-               conservent) : la card reste visible pour qu'il ne devienne pas
-               invisible, mais seule l'annulation reste offerte. #}
-            {% set converted = contact.status.value == 'converted' %}
-            {% if (inProgress or converted) and contact.nextStep and not editingStep %}
+            {# La card « Prochaine étape » n'existe que pour un lead en
+               cours : converti ou clôturé, le pipeline est terminé, la
+               mention disparaît (décision client, août 2026). #}
+            {% if inProgress and contact.nextStep and not editingStep %}
                 {% set planned = contact.recallAt and contact.nextStep.needsDate %}
                 {% set overdue = planned and contact.recallAt < date() %}
                 {# Card récap deux niveaux : pastille icône ambre, micro-label,

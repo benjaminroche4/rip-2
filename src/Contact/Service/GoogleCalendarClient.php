@@ -52,7 +52,9 @@ final class GoogleCalendarClient
 
     /**
      * Creates (or reschedules) the visio event and returns its id and Meet
-     * link; null when the API is unavailable.
+     * link; null when the API is unavailable. With $impersonate, the event
+     * lives in that subject's primary agenda (the assigned closer) instead
+     * of the central organizer's.
      *
      * @param list<string> $attendees
      *
@@ -66,6 +68,7 @@ final class GoogleCalendarClient
         \DateTimeImmutable $end,
         array $attendees,
         bool $withMeet = true,
+        ?string $impersonate = null,
     ): ?array {
         if (!$this->isConfigured()) {
             return null;
@@ -85,7 +88,7 @@ final class GoogleCalendarClient
         try {
             // Reschedule first: same event id keeps the Meet link stable.
             if (null !== $existingEventId) {
-                $event = $this->request('PATCH', self::CALENDAR_URL.'/'.rawurlencode($existingEventId), $payload);
+                $event = $this->request('PATCH', self::CALENDAR_URL.'/'.rawurlencode($existingEventId), $payload, $impersonate);
                 if (null !== $event) {
                     $this->logger->info('Google Calendar event patched', ['eventId' => $existingEventId]);
 
@@ -102,7 +105,7 @@ final class GoogleCalendarClient
                     ],
                 ];
             }
-            $event = $this->request('POST', self::CALENDAR_URL, $payload);
+            $event = $this->request('POST', self::CALENDAR_URL, $payload, $impersonate);
             if (null !== $event) {
                 $this->logger->info('Google Calendar event created', ['eventId' => $event['id'] ?? null]);
             }
@@ -125,7 +128,7 @@ final class GoogleCalendarClient
      *
      * @return array<string, mixed>|null
      */
-    public function upsertEvent(array $payload, ?string $eventId = null, ?string $impersonate = null): ?array
+    public function upsertEvent(array $payload, ?string $eventId = null, ?string $impersonate = null, string $sendUpdates = 'none'): ?array
     {
         if (!$this->isConfigured()) {
             return null;
@@ -133,7 +136,7 @@ final class GoogleCalendarClient
 
         try {
             if (null !== $eventId) {
-                $event = $this->request('PATCH', self::CALENDAR_URL.'/'.rawurlencode($eventId), $payload, $impersonate);
+                $event = $this->request('PATCH', self::CALENDAR_URL.'/'.rawurlencode($eventId), $payload, $impersonate, $sendUpdates);
                 if (null !== $event) {
                     $this->logger->info('Google Calendar event patched', ['eventId' => $eventId, 'subject' => $impersonate ?? $this->impersonate]);
 
@@ -142,7 +145,7 @@ final class GoogleCalendarClient
                 // Event gone (deleted from the agenda): create a fresh one.
             }
 
-            $event = $this->request('POST', self::CALENDAR_URL, $payload, $impersonate);
+            $event = $this->request('POST', self::CALENDAR_URL, $payload, $impersonate, $sendUpdates);
             if (null !== $event) {
                 $this->logger->info('Google Calendar event created', ['eventId' => $event['id'] ?? null, 'subject' => $impersonate ?? $this->impersonate]);
             }
@@ -150,6 +153,43 @@ final class GoogleCalendarClient
             return $event;
         } catch (\Throwable $e) {
             $this->logger->error('Google Calendar event upsert failed: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Reads an event from the (optionally impersonated) subject's primary
+     * agenda, e.g. to learn who organizes it before patching or cancelling
+     * under the right identity. Best-effort: null on any failure, missing
+     * event included; callers fall back to their default identity.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getEvent(string $eventId, ?string $impersonate = null): ?array
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $token = $this->accessToken($impersonate);
+            if (null === $token) {
+                return null;
+            }
+            $response = $this->httpClient->request('GET', self::CALENDAR_URL.'/'.rawurlencode($eventId), [
+                'auth_bearer' => $token,
+                'timeout' => 5,
+                'max_duration' => 10,
+            ]);
+            if ($response->getStatusCode() >= 400) {
+                return null;
+            }
+
+            /* @var array<string, mixed> */
+            return $response->toArray();
+        } catch (\Throwable $e) {
+            $this->logger->warning('Google Calendar event lookup failed: '.$e->getMessage(), ['eventId' => $eventId]);
 
             return null;
         }
@@ -217,7 +257,7 @@ final class GoogleCalendarClient
      * longer existed: 404/410), false on any other failure so callers that
      * store the event id can keep it and retry on their next mutation.
      */
-    public function deleteEvent(string $eventId, ?string $impersonate = null): bool
+    public function deleteEvent(string $eventId, ?string $impersonate = null, string $sendUpdates = 'none'): bool
     {
         if (!$this->isConfigured()) {
             // Nothing is mirrored when the integration is off.
@@ -230,7 +270,7 @@ final class GoogleCalendarClient
                 return false;
             }
             $status = $this->httpClient->request('DELETE', self::CALENDAR_URL.'/'.rawurlencode($eventId), [
-                'query' => ['sendUpdates' => 'none'],
+                'query' => ['sendUpdates' => $sendUpdates],
                 'auth_bearer' => $token,
                 'timeout' => 5,
                 'max_duration' => 10,
@@ -279,7 +319,7 @@ final class GoogleCalendarClient
      *
      * @return array<string, mixed>|null
      */
-    private function request(string $method, string $url, array $payload, ?string $impersonate = null): ?array
+    private function request(string $method, string $url, array $payload, ?string $impersonate = null, string $sendUpdates = 'none'): ?array
     {
         $token = $this->accessToken($impersonate);
         if (null === $token) {
@@ -289,7 +329,7 @@ final class GoogleCalendarClient
         }
 
         $response = $this->httpClient->request($method, $url, [
-            'query' => ['conferenceDataVersion' => '1', 'sendUpdates' => 'none'],
+            'query' => ['conferenceDataVersion' => '1', 'sendUpdates' => $sendUpdates],
             'auth_bearer' => $token,
             'json' => $payload,
             // Called inside synchronous admin requests: fail fast rather

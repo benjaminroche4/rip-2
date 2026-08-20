@@ -104,6 +104,28 @@ final class AdminAccessTest extends WebTestCase
         self::assertStringEndsWith('/contacts', (string) parse_url($this->client->getRequest()->getUri(), \PHP_URL_PATH));
     }
 
+    public function testAdminPagesAreNeverCachedAtAnyLayer(): void
+    {
+        // LiteSpeed (o2switch) ignores "private" and would pin admin pages:
+        // a colleague's new visit would only show up after re-login.
+        $this->loginAs(self::ADMIN_EMAIL);
+        $this->client->request('GET', $this->adminUrl($this->adminPrefix).'/utilisateurs');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('no-store', (string) $this->client->getResponse()->headers->get('Cache-Control'));
+        self::assertResponseHeaderSame('X-LiteSpeed-Cache-Control', 'no-cache');
+    }
+
+    public function testPublicPagesKeepTheirCacheability(): void
+    {
+        $this->client->followRedirects();
+        $this->client->request('GET', '/fr');
+
+        self::assertResponseIsSuccessful();
+        self::assertNull($this->client->getResponse()->headers->get('X-LiteSpeed-Cache-Control'));
+        self::assertStringNotContainsString('no-store', (string) $this->client->getResponse()->headers->get('Cache-Control'));
+    }
+
     public function testAdminSeesUsersPage(): void
     {
         $this->loginAs(self::ADMIN_EMAIL);

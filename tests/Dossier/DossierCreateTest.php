@@ -83,7 +83,7 @@ final class DossierCreateTest extends KernelTestCase
 
         // Sans formule : la création est refusée, le flag d'erreur s'affiche.
         try {
-            $component->create($this->em, new DossierNumberGenerator($this->em->getRepository(Dossier::class)), self::getContainer()->get(DossierDriveProvisioner::class));
+            $component->create($this->em, new DossierNumberGenerator($this->em->getRepository(Dossier::class), new \Psr\Log\NullLogger()), self::getContainer()->get(DossierDriveProvisioner::class));
             self::fail('Expected an unprocessable-entity exception.');
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             self::assertSame(422, $e->getStatusCode());
@@ -312,7 +312,7 @@ final class DossierCreateTest extends KernelTestCase
             $component->chooseOffer('accompagne');
         }
 
-        return $component->create($this->em, new DossierNumberGenerator($repository), self::getContainer()->get(DossierDriveProvisioner::class));
+        return $component->create($this->em, new DossierNumberGenerator($repository, new \Psr\Log\NullLogger()), self::getContainer()->get(DossierDriveProvisioner::class));
     }
 
     private function mountComponent(): object

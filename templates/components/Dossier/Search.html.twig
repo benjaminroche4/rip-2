@@ -3,8 +3,16 @@
    la demande de contact). Coque repliable identique à la card Projet. #}
 {# Wrapper : la card et, dessous, le pied "Valider l'étape" (hors coque,
    décision utilisateur août 2026). #}
+{# id + data-turbo-permanent : les rafraîchissements Turbo de la page
+   (page-refresh sur dossier-persons:changed / dossier-progress:changed)
+   morphent le chrome sans remonter la card, sinon le composant repartirait
+   de ses props par défaut (cadenas refermé après chaque enregistrement).
+   L'id requis par data-turbo-permanent est celui, déterministe, posé par le
+   système Live sur la racine. Le verrou par défaut ne revient qu'au prochain
+   chargement de page. #}
 <div
     {{ attributes.defaults({
+        'data-turbo-permanent': '',
         class: 'flex min-w-0 flex-col gap-3',
         'data-controller': 'leave-guard',
         'data-leave-guard-clean-event-value': 'dossier-search:saved',
@@ -52,24 +60,28 @@
         {# Verrouillé : seuls les contrôles sont désactivés (fieldset), le
            contenu reste lisible, sans voile. #}
         {% set currentDuration = this.currentStayDuration %}
-        {% set currentGuarantor = this.currentGuarantorType %}
+        {% set selectedGuarantors = this.selectedGuarantorTypes %}
         {% set currentEarlyMoveIn = this.currentEarlyMoveIn %}
         <div class="mt-1 flex flex-col gap-1">
             {# Verrouillé : contenu grisé et désaturé + bandeau cliquable qui
                déverrouille (hors fieldset, donc actif). Même traitement que le
-               module Dossier (module-file-locked-banner). #}
-            {% if this.locked %}
-                <button
-                    type="button"
-                    data-action="live#action"
-                    data-live-action-param="toggleLock"
-                    class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
-                    data-testid="search-locked-banner"
-                >
-                    {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                    {{ 'admin.locked.notice'|trans }}
-                </button>
-            {% endif %}
+               module Dossier (module-file-locked-banner). Le bandeau est
+               TOUJOURS rendu (masqué via hidden) : un rendu conditionnel
+               ferait apparaître/disparaître un frère du bloc de champs, et le
+               morph, qui refuse de retirer un sous-arbre contenant
+               data-live-ignore (la carte), empilerait l'ancien bloc et le
+               nouveau (champs en double après déverrouillage). #}
+            <button
+                type="button"
+                {{ not this.locked ? 'hidden' }}
+                data-action="live#action"
+                data-live-action-param="toggleLock"
+                class="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
+                data-testid="search-locked-banner"
+            >
+                {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'admin.locked.notice'|trans }}
+            </button>
             {# Le wrapper reprend le flex gap du parent : le fieldset est en
                display: contents, ses bandes blanches restent donc espacées. #}
             <div class="flex flex-col gap-1 transition-[opacity,filter] duration-200 ease-out {{ this.locked ? 'opacity-70 saturate-50' : '' }}">
@@ -565,21 +577,33 @@
                             </button>
                         {% endfor %}
                     </div>
+                    {# Garde-fou recalculé à chaque rendu : moins d'occupants
+                       que de locataires (onglet Personnes) est incohérent. #}
+                    {% if this.occupantsMismatch %}
+                        <p class="flex items-center gap-1.5 text-xs text-amber-700" role="alert" data-testid="occupants-mismatch">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.dossiers.show.search.occupantsMismatch'|trans }}
+                        </p>
+                    {% endif %}
                 </div>
                 {# Équipements indispensables : même référentiel que "Déposer
                    mon bien" (enum Amenity). Les 10 premiers (plus tout ce qui
-                   est sélectionné) sont visibles, le reste derrière "+N". #}
+                   est sélectionné) sont visibles, le reste derrière "+N".
+                   L'état déplié vit sur le serveur (LiveProp) : chaque
+                   sélection re-rend la card, un dépliage DOM serait refermé
+                   par le morph. Déplié, le menu reste ouvert pour enchaîner. #}
                 {% set selectedEquipment = this.selectedEquipment %}
+                {% set equipmentExpanded = this.equipmentExpanded %}
                 {% set visibleAmenities = [] %}
                 {% set extraAmenities = [] %}
                 {% for amenity in this.equipmentOptions %}
-                    {% if loop.index <= 10 or amenity.value in selectedEquipment %}
+                    {% if equipmentExpanded or loop.index <= 10 or amenity.value in selectedEquipment %}
                         {% set visibleAmenities = visibleAmenities|merge([amenity]) %}
                     {% else %}
                         {% set extraAmenities = extraAmenities|merge([amenity]) %}
                     {% endif %}
                 {% endfor %}
-                <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="reveal">
+                <div class="min-w-0 space-y-2 sm:col-span-2">
                     <p class="text-gray-600">{{ 'admin.dossiers.show.search.equipment.label'|trans }}</p>
                     <div class="flex flex-wrap gap-2">
                         {% for amenity in visibleAmenities %}
@@ -596,25 +620,10 @@
                             </button>
                         {% endfor %}
                         {% if extraAmenities is not empty %}
-                            <div class="hidden" data-reveal-target="extra">
-                                {% for amenity in extraAmenities %}
-                                    <button
-                                        type="button"
-                                        data-action="live#action"
-                                        data-live-action-param="chooseEquipment"
-                                        data-live-equipment-param="{{ amenity.value }}"
-                                        aria-pressed="false"
-                                        class="flex cursor-pointer items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
-                                        data-testid="equipment-chip"
-                                    >
-                                        {{ ('listProperty.form.amenities.choice.' ~ amenity.value)|trans }}
-                                    </button>
-                                {% endfor %}
-                            </div>
                             <button
                                 type="button"
-                                data-reveal-target="button"
-                                data-action="reveal#show"
+                                data-action="live#action"
+                                data-live-action-param="revealEquipment"
                                 class="flex cursor-pointer items-center gap-1 rounded-full border border-dashed border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors duration-100 ease-out hover:border-gray-400 hover:text-gray-900"
                                 data-testid="equipment-show-more"
                             >
@@ -797,14 +806,16 @@
                 <div class="min-w-0 space-y-2">
                     <p class="text-gray-600">{{ 'admin.contacts.project.guarantor.label'|trans }} <span class="text-red-600" aria-hidden="true">*</span></p>
                     <div class="flex flex-wrap gap-2">
+                        {# Multi-sélection : un foyer peut cumuler plusieurs
+                           types de garants (ex. physique + Garantme). #}
                         {% for guarantor in this.guarantorTypes %}
                             <button
                                 type="button"
                                 data-action="live#action"
                                 data-live-action-param="chooseGuarantorType"
                                 data-live-guarantor-param="{{ guarantor.value }}"
-                                aria-pressed="{{ guarantor.value == currentGuarantor ? 'true' : 'false' }}"
-                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor.value == currentGuarantor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                aria-pressed="{{ guarantor.value in selectedGuarantors ? 'true' : 'false' }}"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor.value in selectedGuarantors ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
                                 data-testid="guarantor-chip"
                             >
                                 {{ ux_icon({'physical': 'lucide:user-check', 'garantme': 'lucide:shield-check', 'bank': 'lucide:landmark'}[guarantor.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
@@ -816,7 +827,7 @@
                 {# Avancement de l'obtention de la garantie : ne concerne
                    que Garantme. #}
                 {% set currentGuarantorStatus = this.currentGuarantorStatus %}
-                {% if currentGuarantor == 'garantme' %}
+                {% if 'garantme' in selectedGuarantors %}
                 <div class="min-w-0 space-y-2">
                     <p class="text-gray-600">{{ 'admin.dossiers.show.search.guarantorStatus.label'|trans }}</p>
                     <div class="flex flex-wrap gap-2">

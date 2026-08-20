@@ -400,7 +400,7 @@ class DossierRepository extends ServiceEntityRepository
             propertyType: $search->getPropertyType(),
             stayDuration: $search->getStayDuration(),
             furnishing: $search->getFurnishing(),
-            guarantorType: $search->getGuarantorType(),
+            guarantorType: [] !== $search->getGuarantorTypes() ? implode(',', $search->getGuarantorTypes()) : null,
             note: $search->getNote(),
         ) : null;
 

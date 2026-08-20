@@ -6,7 +6,9 @@ namespace App\Tests\Visit;
 
 use App\Auth\Entity\User;
 use App\Contact\Service\GoogleCalendarClient;
+use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
+use App\Dossier\Entity\DossierPerson;
 use App\RealEstateAgent\Entity\Agency;
 use App\RealEstateAgent\Entity\RealEstateAgent;
 use App\Visit\Domain\VisitStatus;
@@ -111,14 +113,91 @@ final class VisitCalendarSyncTest extends KernelTestCase
         self::assertStringContainsString('/test_admin_prefix_1234567890abcdef/admin/visites/'.$visit->getReference(), $description);
         self::assertStringStartsWith('http', substr($description, (int) strpos($description, 'Fiche visite : ') + 15), 'Absolute BO link.');
 
-        // Pas d'invités, pas de Meet : événements de travail internes.
-        self::assertArrayNotHasKey('attendees', $central);
+        // Dossier sans contact joignable : liste d'invités vide (toujours
+        // envoyée pour qu'un PATCH garde la liste en phase), pas de Meet, et
+        // jamais d'invités sur l'événement personnel.
+        self::assertSame([], $central['attendees']);
+        self::assertArrayNotHasKey('attendees', $personal);
         self::assertStringNotContainsString('hangoutsMeet', $this->apiCalls[0]['body']);
+
+        // Le central notifie ses invités (sendUpdates=all), le personnel non.
+        self::assertStringContainsString('sendUpdates=all', $this->apiCalls[0]['url']);
+        self::assertStringContainsString('sendUpdates=none', $this->apiCalls[1]['url']);
 
         // Ids stockés pour patcher ensuite.
         self::assertSame('evt-1', $visit->getCalendarCentralEventId());
         self::assertSame('evt-2', $visit->getCalendarAssigneeEventId());
         self::assertSame($visit->getAssignee()?->getEmail(), $visit->getCalendarAssigneeEmail());
+    }
+
+    public function testDossierContactsAreInvitedOnTheCentralEventOnly(): void
+    {
+        $visit = $this->persistVisit(
+            assignee: $this->makeAssignee('Marie', 'Curie'),
+            personEmails: ['alice@client-visit-test.local', 'ALICE@client-visit-test.local', 'not-an-email', 'bob@client-visit-test.local'],
+        );
+        $sync = $this->sync();
+
+        $sync->sync($visit);
+
+        $central = json_decode($this->apiCalls[0]['body'], true);
+        $personal = json_decode($this->apiCalls[1]['body'], true);
+
+        // Invités : les contacts du dossier avec email valide, dédupliqués,
+        // sur le central uniquement, et Google notifie (sendUpdates=all).
+        self::assertSame(
+            [['email' => 'alice@client-visit-test.local'], ['email' => 'bob@client-visit-test.local']],
+            $central['attendees'],
+        );
+        self::assertArrayNotHasKey('attendees', $personal);
+        self::assertStringContainsString('sendUpdates=all', $this->apiCalls[0]['url']);
+
+        // La description du central devient visible client : rien d'interne
+        // (préfixe admin caché, note, référence du dossier). L'événement
+        // personnel garde la version interne complète.
+        $centralDescription = (string) $central['description'];
+        self::assertStringNotContainsString('test_admin_prefix', $centralDescription);
+        self::assertStringNotContainsString('Note :', $centralDescription);
+        self::assertStringNotContainsString('Code 1234', $centralDescription);
+        self::assertStringNotContainsString((string) $visit->getDossier()?->getReference(), $centralDescription);
+        self::assertStringContainsString('Agent immobilier : Paul Agent (Agence Test) · 0611223344', $centralDescription);
+        self::assertStringContainsString('Annonce : https://www.seloger.com/annonce-1', $centralDescription);
+        self::assertStringContainsString('test_admin_prefix', (string) $personal['description']);
+        self::assertStringContainsString('Note : Code 1234', (string) $personal['description']);
+
+        // Une mutation ultérieure (PATCH) renvoie la liste d'invités : les
+        // attendees survivent aux updates et aux réassignations.
+        $this->resetCalls();
+        $visit->setAssignee($this->makeAssignee('Paul', 'Langevin'));
+        $sync->sync($visit);
+        $patch = $this->apiCalls[0];
+        self::assertSame('PATCH', $patch['method']);
+        self::assertStringContainsString('sendUpdates=all', $patch['url']);
+        $patched = json_decode($patch['body'], true);
+        self::assertSame(
+            [['email' => 'alice@client-visit-test.local'], ['email' => 'bob@client-visit-test.local']],
+            $patched['attendees'],
+        );
+    }
+
+    public function testNobodyIsInvitedWhenTheClientDoesNotAttend(): void
+    {
+        // Visite sans le client (état des lieux, repérage par l'agent) : pas
+        // d'invitation Google aux contacts du dossier, et la description du
+        // central garde sa version interne complète.
+        $visit = $this->persistVisit(
+            assignee: $this->makeAssignee('Marie', 'Curie'),
+            personEmails: ['alice@client-visit-test.local'],
+        );
+        $visit->setClientPresent(false);
+        $this->em->flush();
+
+        $this->sync()->sync($visit);
+
+        $central = json_decode($this->apiCalls[0]['body'], true);
+        self::assertSame([], $central['attendees']);
+        self::assertStringContainsString('Note : Code 1234', (string) $central['description']);
+        self::assertStringContainsString('test_admin_prefix', (string) $central['description']);
     }
 
     public function testAnAutonomousVisitOnlyFeedsTheCentralAgenda(): void
@@ -389,7 +468,10 @@ final class VisitCalendarSyncTest extends KernelTestCase
         return $user;
     }
 
-    private function persistVisit(?User $assignee): Visit
+    /**
+     * @param list<string> $personEmails
+     */
+    private function persistVisit(?User $assignee, array $personEmails = []): Visit
     {
         $agency = (new Agency())->setName('Agence Test')->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($agency);
@@ -405,6 +487,14 @@ final class VisitCalendarSyncTest extends KernelTestCase
             ->setReference('DS-'.random_int(100000, 999999))
             ->setPairingCode(substr(strtoupper(bin2hex(random_bytes(4))), 0, 6))
             ->setCreatedAt(new \DateTimeImmutable());
+        foreach ($personEmails as $i => $email) {
+            $dossier->addPerson((new DossierPerson())
+                ->setRole(0 === $i ? DossierPersonRole::TENANT : DossierPersonRole::FOLLOW_UP)
+                ->setFirstName('Client'.$i)
+                ->setLastName('Martin')
+                ->setEmail($email)
+                ->setPrimaryContact(0 === $i));
+        }
         $this->em->persist($dossier);
 
         $visit = (new Visit())

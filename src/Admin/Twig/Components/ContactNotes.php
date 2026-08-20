@@ -46,6 +46,13 @@ final class ContactNotes
     #[LiveProp(writable: true)]
     public string $editingText = '';
 
+    /** Note being answered (opens the inline reply composer under it). */
+    #[LiveProp]
+    public ?int $replyingToId = null;
+
+    #[LiveProp(writable: true)]
+    public string $replyText = '';
+
     /** Visible entries; grows via showMoreFeed(). */
     #[LiveProp]
     public int $feedLimit = self::FEED_PAGE;
@@ -76,11 +83,12 @@ final class ContactNotes
     }
 
     /**
-     * Notes thread, newest first, capped at feedLimit entries. The action
-     * history (status, motifs, recap emails) lives in the follow-up
-     * timeline, not here.
+     * Notes thread, newest first, capped at feedLimit top-level entries.
+     * Replies ride along under their parent note, oldest first (a
+     * conversation reads top to bottom). The action history (status,
+     * motifs, recap emails) lives in the follow-up timeline, not here.
      *
-     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>
+     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool, replies: list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>}>
      */
     public function getFeed(): array
     {
@@ -100,18 +108,44 @@ final class ContactNotes
     }
 
     /**
-     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>
+     * @return list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool, replies: list<array{note: ContactNoteItem, canEdit: bool, canDelete: bool}>}>
      */
     private function fullFeed(): array
     {
-        return array_map(
-            fn (ContactNoteItem $note): array => [
-                'note' => $note,
-                'canEdit' => $this->security->isGranted(ContactNoteVoter::EDIT, $note),
-                'canDelete' => $this->security->isGranted(ContactNoteVoter::DELETE, $note),
-            ],
-            $this->notes->listForContact($this->contactId),
-        );
+        $all = $this->notes->listForContact($this->contactId);
+
+        // Replies grouped under their parent, chronological (repo order is
+        // newest first, so reversed).
+        $repliesByParent = [];
+        foreach (array_reverse($all) as $note) {
+            if (null !== $note->parentId) {
+                $repliesByParent[$note->parentId][] = $this->toRow($note);
+            }
+        }
+
+        $rows = [];
+        foreach ($all as $note) {
+            if (null !== $note->parentId) {
+                continue;
+            }
+            $row = $this->toRow($note);
+            $row['replies'] = $repliesByParent[$note->id] ?? [];
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array{note: ContactNoteItem, canEdit: bool, canDelete: bool}
+     */
+    private function toRow(ContactNoteItem $note): array
+    {
+        return [
+            'note' => $note,
+            'canEdit' => $this->security->isGranted(ContactNoteVoter::EDIT, $note),
+            'canDelete' => $this->security->isGranted(ContactNoteVoter::DELETE, $note),
+        ];
     }
 
     #[LiveAction]
@@ -136,6 +170,63 @@ final class ContactNotes
         $this->newNote = '';
 
         // Clears the leave-guard dirty flag on the front.
+        $this->dispatchBrowserEvent('contact-notes:saved');
+        $this->dispatchBrowserEvent('contact-notes:count', [
+            'count' => \count($this->notes->listForContact($this->contactId)),
+        ]);
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteAdded')]);
+    }
+
+    /** Opens the inline reply composer under a note. */
+    #[LiveAction]
+    public function startReply(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+
+        // Silent no-op on a stale id or a note from another thread.
+        $parent = $this->notes->find($id);
+        if (null === $parent || (int) $parent->getContact()?->getId() !== $this->contactId) {
+            return;
+        }
+
+        $this->replyingToId = $id;
+        $this->replyText = '';
+    }
+
+    #[LiveAction]
+    public function cancelReply(): void
+    {
+        $this->ensureAdmin();
+        $this->replyingToId = null;
+        $this->replyText = '';
+    }
+
+    /** Persists the reply under its parent note (depth capped at one). */
+    #[LiveAction]
+    public function addReply(): void
+    {
+        $this->ensureAdmin();
+
+        $text = trim($this->replyText);
+        $contact = $this->contacts->find($this->contactId);
+        $parent = null !== $this->replyingToId ? $this->notes->find($this->replyingToId) : null;
+        if ('' === $text || null === $contact || null === $parent
+            || (int) $parent->getContact()?->getId() !== $this->contactId) {
+            return;
+        }
+
+        $author = $this->thread->currentAuthor();
+        $this->notes->add(
+            $contact,
+            $text,
+            $author->id,
+            $author->displayName,
+            $author->avatarFilename,
+            $parent,
+        );
+        $this->replyingToId = null;
+        $this->replyText = '';
+
         $this->dispatchBrowserEvent('contact-notes:saved');
         $this->dispatchBrowserEvent('contact-notes:count', [
             'count' => \count($this->notes->listForContact($this->contactId)),
@@ -196,6 +287,10 @@ final class ContactNotes
         if ($this->editingNoteId === $id) {
             $this->editingNoteId = null;
             $this->editingText = '';
+        }
+        if ($this->replyingToId === $id) {
+            $this->replyingToId = null;
+            $this->replyText = '';
         }
 
         $this->dispatchBrowserEvent('contact-notes:count', [

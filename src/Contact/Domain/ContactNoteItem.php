@@ -16,6 +16,8 @@ final readonly class ContactNoteItem
         public int $authorId,
         public string $authorName,
         public ?string $authorAvatar,
+        /** Id of the note this one answers (null = top-level note). */
+        public ?int $parentId = null,
     ) {
     }
 }

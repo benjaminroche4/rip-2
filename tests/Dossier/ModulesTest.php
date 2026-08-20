@@ -470,6 +470,49 @@ final class ModulesTest extends KernelTestCase
         self::assertContains('document_validated', $kinds);
     }
 
+    public function testPickerModalListsTheWholeCatalogueGroupedByCategory(): void
+    {
+        // La modale "Sélectionner les pièces" montre le catalogue complet,
+        // groupé par catégories avec les descriptions (même taxonomie que
+        // l'écran Outils > Demander des documents).
+        $dossier = $this->persistDossier();
+        $tenant = $dossier->getPersons()->first();
+
+        $rendered = (string) $this->renderTwigComponent('Dossier:Modules', [
+            'dossierId' => $dossier->getId(),
+            'pickerId' => (int) $tenant->getId(),
+            'fileLocked' => false,
+        ]);
+
+        self::assertStringContainsString('data-testid="module-file-types"', $rendered);
+        // Chaque type du catalogue est proposé, avec sa description.
+        foreach (\App\Dossier\Domain\DossierDocumentType::cases() as $type) {
+            self::assertStringContainsString(
+                'value="'.$type->value.'"',
+                $rendered,
+                \sprintf('The %s piece must be offered in the modal.', $type->value),
+            );
+        }
+        // Groupes par catégorie, dans la taxonomie partagée avec Outils.
+        foreach (\App\Dossier\Domain\DossierDocumentType::byCategory() as $category => $types) {
+            self::assertStringContainsString('data-testid="module-file-category-'.$category.'"', $rendered);
+        }
+        // Les descriptions sont visibles (échantillon).
+        self::assertStringContainsString('Carte d&#039;identité ou passeport en cours de validité', $rendered);
+    }
+
+    public function testEveryDocumentTypeHasACategoryAndFitsTheColumn(): void
+    {
+        foreach (\App\Dossier\Domain\DossierDocumentType::cases() as $type) {
+            // La colonne dossier_document.type est un VARCHAR(30).
+            self::assertLessThanOrEqual(30, \strlen($type->value));
+            self::assertNotNull($type->category());
+        }
+        // Le regroupement conserve tous les cas, sans doublon.
+        $grouped = array_merge(...array_values(\App\Dossier\Domain\DossierDocumentType::byCategory()));
+        self::assertSameSize(\App\Dossier\Domain\DossierDocumentType::cases(), $grouped);
+    }
+
     public function testDepositLinkShowsUpOnceARequestExists(): void
     {
         $dossier = $this->persistDossier();

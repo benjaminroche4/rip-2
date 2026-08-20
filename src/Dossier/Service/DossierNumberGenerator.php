@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dossier\Service;
 
 use App\Dossier\Repository\DossierRepository;
+use Psr\Log\LoggerInterface;
 
 /**
  * Random public identifiers for dossiers: the dossier number ("DS-087526")
@@ -20,6 +21,7 @@ final class DossierNumberGenerator
 
     public function __construct(
         private readonly DossierRepository $repository,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -30,6 +32,29 @@ final class DossierNumberGenerator
         } while (null !== $this->repository->findOneBy(['reference' => $reference]));
 
         return $reference;
+    }
+
+    /**
+     * Reference of a dossier created by converting a lead: the six digits of
+     * the contact reference carry over ("CT-123456" becomes "DS-123456") so
+     * both records read as one file. On a collision (a dossier already owns
+     * those digits) the random generation takes over, with a warning logged.
+     */
+    public function referenceFromContact(string $contactReference): string
+    {
+        if (1 === preg_match('/^CT-(\d{6})$/', $contactReference, $matches)) {
+            $reference = 'DS-'.$matches[1];
+            if (null === $this->repository->findOneBy(['reference' => $reference])) {
+                return $reference;
+            }
+
+            $this->logger->warning('Dossier reference {reference} already taken, falling back to a random one.', [
+                'reference' => $reference,
+                'contact' => $contactReference,
+            ]);
+        }
+
+        return $this->reference();
     }
 
     public function pairingCode(): string

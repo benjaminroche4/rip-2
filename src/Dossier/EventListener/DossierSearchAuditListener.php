@@ -45,8 +45,14 @@ final class DossierSearchAuditListener
             }
             $isInsertion = \in_array($entity, $uow->getScheduledEntityInsertions(), true);
 
-            foreach ($uow->getEntityChangeSet($entity) as $field => $change) {
+            $changeSet = $uow->getEntityChangeSet($entity);
+            foreach ($changeSet as $field => $change) {
                 if ('dossier' === $field) {
+                    continue;
+                }
+                // guarantorType n'est qu'un miroir (premier sélectionné) de
+                // guarantorTypes : une seule entrée d'audit pour le geste.
+                if ('guarantorType' === $field && isset($changeSet['guarantorTypes'])) {
                     continue;
                 }
                 // A fresh row initialises every column: only the fields the
@@ -81,6 +87,9 @@ final class DossierSearchAuditListener
         return match (true) {
             null === $value, '' === $value => '',
             $value instanceof \DateTimeInterface => $value->format('d.m.Y'),
+            // Scalar lists (guarantor types) read as a CSV so the audit entry
+            // shows the same labels as the chips; nested rows keep the count.
+            \is_array($value) && $value === array_filter($value, is_scalar(...)) => implode(',', array_map(strval(...), $value)),
             \is_array($value) => \sprintf('%d', \count($value)),
             \is_bool($value) => $value ? '1' : '0',
             default => mb_substr((string) $value, 0, 200),

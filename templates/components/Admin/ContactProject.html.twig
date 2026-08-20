@@ -13,9 +13,12 @@
                 <div>
                     <h2 class="font-medium text-gray-900">{{ 'admin.contacts.project.title'|trans }}</h2>
                 </div>
+                {% set closedLead = this.closedLead %}
                 <div class="flex shrink-0 items-center gap-3">
                     {# Cadenas anti-missclick : verrouillé par défaut à chaque
-                       chargement, les champs restent lisibles. #}
+                       chargement, les champs restent lisibles. Lead clôturé :
+                       pas de cadenas du tout, la section est en lecture seule. #}
+                    {% if not closedLead %}
                     <button
                         type="button"
                         data-action="live#action:prevent:stop"
@@ -28,13 +31,25 @@
                     >
                         {{ ux_icon(this.locked ? 'lucide:lock' : 'lucide:lock-open', {class: 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                     </button>
+                    {% endif %}
                     {{ ux_icon('lucide:chevron-down', {class: 'size-4 shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180', 'aria-hidden': 'true'}) }}
                 </div>
             </summary>
+            {# Lead clôturé : bandeau informatif non cliquable, la section ne
+               se déverrouille pas tant que le lead n'est pas rouvert. #}
+            {% if closedLead %}
+                <p
+                    class="mt-1 flex w-full items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500"
+                    data-testid="contact-project-closed-banner"
+                >
+                    {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                    {{ 'admin.contacts.project.closedNotice'|trans }}
+                </p>
+            {% endif %}
             {# Verrouillé : contenu grisé et désaturé + bandeau cliquable qui
                déverrouille (hors fieldset, donc actif). Même traitement que le
                module Dossier (module-file-locked-banner). #}
-            {% if this.locked %}
+            {% if this.locked and not closedLead %}
                 <button
                     type="button"
                     data-action="live#action"
@@ -46,9 +61,9 @@
                     {{ 'admin.locked.notice'|trans }}
                 </button>
             {% endif %}
-            <div class="transition-[opacity,filter] duration-200 ease-out {{ this.locked ? 'opacity-70 saturate-50' : '' }}">
+            <div class="transition-[opacity,filter] duration-200 ease-out {{ this.locked or closedLead ? 'opacity-70 saturate-50' : '' }}">
             <div class="mt-1 flex flex-col gap-4 rounded-xl bg-white px-5 py-4">
-                <fieldset {% if this.locked %}disabled{% endif %} class="contents">
+                <fieldset {% if this.locked or closedLead %}disabled{% endif %} class="contents">
                 <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                     <div class="min-w-0 space-y-2">
                         <div class="flex items-baseline justify-between gap-3">
@@ -102,7 +117,7 @@
                     {# Cadenas fermé : la carte reste consultable (pan, zoom,
                        plein écran) mais la sélection de quartiers est coupée
                        via la valeur locked (polygones non cliquables). #}
-                    <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-locked-value="{{ this.locked ? 'true' : 'false' }}">
+                    <div class="min-w-0 space-y-2 sm:col-span-2" data-controller="district-picker" data-action="keydown.esc@window->district-picker#collapse" data-district-picker-locked-value="{{ this.locked or closedLead ? 'true' : 'false' }}">
                         <div class="flex items-center justify-between gap-2">
                             <p class="text-gray-600">{{ 'admin.contacts.project.areas'|trans }}</p>
                             {# Raccourci : coche/décoche les 20 arrondissements

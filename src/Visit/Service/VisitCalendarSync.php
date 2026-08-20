@@ -19,6 +19,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * are rendered in French on purpose: the internal agendas are French-only,
  * like the recall mirror (RecallCalendarSync).
  *
+ * The dossier contacts are invited as guests on the central event
+ * (sendUpdates=all: Google mails them the invitation, every update and the
+ * cancellation), which then carries a client-safe description; the full
+ * internal one stays on the assignee's personal event.
+ *
  * Best-effort throughout: a Calendar hiccup never blocks a booking. The
  * caller flushes the entity after sync() so the stored event ids persist.
  */
@@ -153,6 +158,11 @@ final readonly class VisitCalendarSync
         $assigneeName = $this->assigneeName($visit);
 
         // (a) Central agenda: every planned visit, assignee in the title.
+        // The dossier contacts are invited on this event (Google mails the
+        // invitation and every update itself: sendUpdates=all), so its
+        // description switches to a client-safe one whenever guests are
+        // present; the internal details stay on the personal event.
+        $attendees = $this->clientAttendees($visit);
         $centralTitle = \sprintf(
             '%s · %s (%s) · %s',
             $this->typeLabel($visit),
@@ -160,9 +170,14 @@ final readonly class VisitCalendarSync
             (string) $visit->getReference(),
             $assigneeName ?? $this->translator->trans('admin.visits.calendar.autonomous', locale: 'fr'),
         );
+        $centralPayload = [...$payload, 'summary' => $centralTitle, 'attendees' => $attendees];
+        if ([] !== $attendees) {
+            $centralPayload['description'] = $this->clientSafeDescription($visit);
+        }
         $central = $this->calendar->upsertEvent(
-            [...$payload, 'summary' => $centralTitle],
+            $centralPayload,
             $visit->getCalendarCentralEventId(),
+            sendUpdates: 'all',
         );
         if (null !== $central && isset($central['id'])) {
             $visit->setCalendarCentralEventId((string) $central['id']);
@@ -213,7 +228,8 @@ final readonly class VisitCalendarSync
 
     /**
      * Shared event body: slot, address and the full French description.
-     * No attendees and no Meet link: these are internal working events.
+     * No Meet link, and no attendees here: the dossier contacts are only
+     * invited on the central event (doSync), never on the personal one.
      *
      * @return array<string, mixed>
      */
@@ -231,22 +247,75 @@ final readonly class VisitCalendarSync
         ];
     }
 
+    /**
+     * Guests to invite on the central event: every dossier contact with a
+     * valid email, deduplicated. Only when the client actually attends the
+     * visit; an agent-only visit (inspection, autonomous viewing) must not
+     * invite anyone. Always sent in the payload (even empty) so a PATCH
+     * keeps the guest list in sync with the dossier and with a toggled
+     * "client present" flag.
+     *
+     * @return list<array{email: string}>
+     */
+    private function clientAttendees(Visit $visit): array
+    {
+        if (!$visit->isClientPresent()) {
+            return [];
+        }
+
+        $emails = [];
+        foreach ($visit->getDossier()?->getPersons() ?? [] as $person) {
+            $address = trim((string) $person->getEmail());
+            if (false === filter_var($address, \FILTER_VALIDATE_EMAIL)) {
+                continue;
+            }
+            $emails[mb_strtolower($address)] ??= $address;
+        }
+
+        return array_map(static fn (string $email): array => ['email' => $email], array_values($emails));
+    }
+
+    /**
+     * Description of the central event when clients are invited on it: a
+     * Google event description is visible to every guest, so nothing
+     * internal may leak into it. In particular no back-office link (the
+     * admin path prefix stays secret), no internal note, and no dossier
+     * reference; the full internal description lives on the personal event.
+     */
+    private function clientSafeDescription(Visit $visit): string
+    {
+        $listingUrl = trim((string) $visit->getListingUrl());
+
+        return implode("\n", array_filter([
+            'Type : '.$this->typeLabel($visit),
+            $this->agentLine($visit),
+            '' !== $listingUrl ? 'Annonce : '.$listingUrl : null,
+        ]));
+    }
+
+    private function agentLine(Visit $visit): ?string
+    {
+        $agent = $visit->getAgent();
+        if (null === $agent) {
+            return null;
+        }
+
+        $agentParts = [trim($agent->getFirstName().' '.$agent->getLastName())];
+        $agency = trim((string) $agent->getAgency()?->getName());
+        if ('' !== $agency) {
+            $agentParts[] = '('.$agency.')';
+        }
+        $phone = trim((string) $agent->getPhone());
+        if ('' !== $phone) {
+            $agentParts[] = '· '.$phone;
+        }
+
+        return 'Agent immobilier : '.implode(' ', $agentParts);
+    }
+
     private function description(Visit $visit): string
     {
-        $agentLine = null;
-        $agent = $visit->getAgent();
-        if (null !== $agent) {
-            $agentParts = [trim($agent->getFirstName().' '.$agent->getLastName())];
-            $agency = trim((string) $agent->getAgency()?->getName());
-            if ('' !== $agency) {
-                $agentParts[] = '('.$agency.')';
-            }
-            $phone = trim((string) $agent->getPhone());
-            if ('' !== $phone) {
-                $agentParts[] = '· '.$phone;
-            }
-            $agentLine = 'Agent immobilier : '.implode(' ', $agentParts);
-        }
+        $agentLine = $this->agentLine($visit);
 
         $note = trim((string) $visit->getNote());
         $listingUrl = trim((string) $visit->getListingUrl());
@@ -296,7 +365,8 @@ final readonly class VisitCalendarSync
         if (null === $eventId) {
             return true;
         }
-        if (!$this->calendar->deleteEvent($eventId)) {
+        // sendUpdates=all: invited dossier contacts get the cancellation.
+        if (!$this->calendar->deleteEvent($eventId, sendUpdates: 'all')) {
             $this->logger->warning('Visit central agenda event could not be deleted, id kept for retry', ['visit' => $visit->getReference()]);
 
             return false;

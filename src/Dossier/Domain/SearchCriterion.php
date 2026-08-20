@@ -64,11 +64,11 @@ enum SearchCriterion: string
         };
     }
 
-    /** Multi-select criteria persist a CSV of values; a tenant can pick several. */
+    /** Multi-select criteria persist several values; a tenant can pick many. */
     public function isMulti(): bool
     {
         return match ($this) {
-            self::Furnishing, self::Equipment, self::LeaseTypes => true,
+            self::Furnishing, self::GuarantorType, self::Equipment, self::LeaseTypes => true,
             default => false,
         };
     }
@@ -79,7 +79,7 @@ enum SearchCriterion: string
         return match ($this) {
             self::StayDuration => (string) $search->getStayDuration(),
             self::Furnishing => (string) $search->getFurnishing(),
-            self::GuarantorType => (string) $search->getGuarantorType(),
+            self::GuarantorType => implode(',', $search->getGuarantorTypes()),
             self::GuarantorStatus => (string) $search->getGuarantorStatus(),
             self::Equipment => (string) $search->getEquipment(),
             self::LeaseTypes => (string) $search->getLeaseTypes(),
@@ -100,7 +100,7 @@ enum SearchCriterion: string
         match ($this) {
             self::StayDuration => $search->setStayDuration($value),
             self::Furnishing => $search->setFurnishing($value),
-            self::GuarantorType => $search->setGuarantorType($value),
+            self::GuarantorType => $search->setGuarantorTypes(null !== $value ? CsvSelection::values($value) : null),
             self::GuarantorStatus => $search->setGuarantorStatus($value),
             self::Equipment => $search->setEquipment($value),
             self::LeaseTypes => $search->setLeaseTypes($value),

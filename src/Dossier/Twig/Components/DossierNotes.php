@@ -570,6 +570,7 @@ final class DossierNotes
         'stayDuration' => 'admin.contacts.project.stayDuration.choice.',
         'furnishing' => 'admin.contacts.project.furnishing.choice.',
         'guarantorType' => 'admin.contacts.project.guarantor.choice.',
+        'guarantorTypes' => 'admin.contacts.project.guarantor.choice.',
         'guarantorStatus' => 'admin.dossiers.show.search.guarantorStatus.choice.',
         'propertyType' => 'listProperty.form.propertyType.choice.',
         'equipment' => 'listProperty.form.amenities.choice.',

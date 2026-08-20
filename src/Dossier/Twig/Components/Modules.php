@@ -432,6 +432,18 @@ final class Modules
     }
 
     /**
+     * Catalogue complet groupé par catégories (même taxonomie et mêmes
+     * libellés que l'écran Outils > Demander des documents), pour la modale
+     * de sélection des pièces.
+     *
+     * @return array<string, list<DossierDocumentType>>
+     */
+    public function getDocumentTypesByCategory(): array
+    {
+        return DossierDocumentType::byCategory();
+    }
+
+    /**
      * People of the dossier who can receive the request email.
      *
      * @return list<array{id: int, name: string, email: string, primary: bool}>

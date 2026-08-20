@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Contact\Service;
 
+use App\Admin\Service\ContactPdfRenderer;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ParisDistricts;
+use App\Shared\Pdf\PdfRenderException;
+use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -24,17 +27,17 @@ final readonly class ContactRecapMailer
      */
     public const PAYMENT_LINKS = [
         'fr' => [
-            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/00wfZh7hV2RLeeL6oH6kg05'],
+            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/dRm28teBlbCjgSH0767EQ0E'],
             'confie' => [
-                'full' => 'https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04',
-                'deposit' => 'https://payment.relocation-in-paris.fr/b/eVq4gz9q3akd8Ur4gz6kg01',
+                'full' => 'https://payment.relocation-in-paris.fr/b/4gMaEZ9h1dKrcCr7zy7EQ0N',
+                'deposit' => 'https://payment.relocation-in-paris.fr/b/aFa14p9h15dVfOD9HG7EQ0x',
             ],
         ],
         'en' => [
-            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/4gMbJ10Tx63X2w314n6kg02'],
+            'accompagne' => ['full' => 'https://payment.relocation-in-paris.fr/b/6oU9AVbp96hZbyn1ba7EQ0F'],
             'confie' => [
-                'full' => 'https://payment.relocation-in-paris.fr/b/4gM5kDgSv4ZTeeL3cv6kg00',
-                'deposit' => 'https://payment.relocation-in-paris.fr/b/aFa00j0Tx781b2z3cv6kg03',
+                'full' => 'https://payment.relocation-in-paris.fr/b/28EbJ3dxhbCjfODcTS7EQ0M',
+                'deposit' => 'https://payment.relocation-in-paris.fr/b/6oU00ldxhfSzauj3ji7EQ0u',
             ],
         ],
     ];
@@ -43,6 +46,8 @@ final readonly class ContactRecapMailer
         private MailerInterface $mailer,
         private TranslatorInterface $translator,
         private DistrictStaticMapUrl $staticMap,
+        private ContactPdfRenderer $contractPdf,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -63,6 +68,7 @@ final readonly class ContactRecapMailer
             ->context([
                 'locale' => $locale,
                 'contact' => $contact,
+                'moveInLabel' => $this->moveInLabel($contact->projectMoveInAt, $locale),
                 'areaLabels' => $this->areaLabels($contact),
                 'areasMapUrl' => $this->staticMap->build($this->areaCodes($contact), $locale),
                 'paymentUrl' => $this->paymentUrl($contact, $locale, $withPaymentLink, $withDeposit),
@@ -79,7 +85,59 @@ final readonly class ContactRecapMailer
                     : null,
             ]);
 
+        $this->attachContract($email, $contact, $locale);
+
         $this->mailer->send($email);
+    }
+
+    /**
+     * Attaches the generated contract PDF, best effort: a rendering
+     * failure (backend down, quota) never blocks the recap email, it
+     * just leaves without the attachment and logs a warning.
+     */
+    private function attachContract(TemplatedEmail $email, ContactListItem $contact, string $locale): void
+    {
+        try {
+            $email->attach(
+                $this->contractPdf->render($contact),
+                \sprintf('%s-%s.pdf', 'fr' === $locale ? 'contrat' : 'contract', $contact->reference),
+                'application/pdf',
+            );
+        } catch (PdfRenderException $e) {
+            $this->logger->warning('Contract PDF generation failed, recap email sent without attachment', [
+                'reference' => $contact->reference,
+                'exception_class' => $e::class,
+            ]);
+        }
+    }
+
+    /**
+     * Fuzzy move-in wording derived from the stored date (Paris time):
+     * no date or less than a month away reads "as soon as possible",
+     * otherwise early/mid/late + localized month and year (day 1-10,
+     * 11-20, 21+).
+     */
+    public function moveInLabel(?\DateTimeImmutable $moveInAt, string $locale): string
+    {
+        $paris = new \DateTimeZone('Europe/Paris');
+        $moveIn = $moveInAt?->setTimezone($paris);
+        $inLessThanAMonth = null === $moveIn
+            || $moveIn < new \DateTimeImmutable('now', $paris)->modify('+1 month');
+
+        if ($inLessThanAMonth) {
+            return $this->translator->trans('contact.recapEmail.moveIn.asap', locale: $locale);
+        }
+
+        $key = match (true) {
+            (int) $moveIn->format('j') <= 10 => 'contact.recapEmail.moveIn.early',
+            (int) $moveIn->format('j') <= 20 => 'contact.recapEmail.moveIn.mid',
+            default => 'contact.recapEmail.moveIn.late',
+        };
+
+        // Localized month name, never hardcoded.
+        $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, $paris, pattern: 'MMMM yyyy');
+
+        return $this->translator->trans($key, ['%month%' => (string) $formatter->format($moveIn)], locale: $locale);
     }
 
     private function paymentUrl(ContactListItem $contact, string $locale, bool $withPaymentLink, bool $withDeposit): ?string

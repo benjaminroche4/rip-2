@@ -5,6 +5,12 @@ date:
     today: Today
     inDays: '{1} In 1 day|]1,Inf] In %count% days'
 contact:
+    recapEmail:
+        moveIn:
+            asap: as soon as possible
+            early: 'early %month%'
+            mid: 'mid-%month%'
+            late: 'late %month%'
     title: Contact us
     subTitle: Let's talk about your move to Paris
     text: Your advisor will call you back within 30 minutes. A human conversation to understand your project and guide you every step of the way.
@@ -2104,6 +2110,7 @@ admin:
                         'yes': Accepted
                         'no': Excluded
                 budgetTooHigh: Budget above the household income (advised max %max% €, the 3x rule)
+                occupantsMismatch: Number of occupants inconsistent with the file's tenants
                 leaseMismatch:
                     mobilityLong: Mobility lease capped at 10 months, inconsistent with a long-term stay
                     alurShort: ALUR lease (1 year minimum) inconsistent with a short-term stay
@@ -2196,6 +2203,7 @@ admin:
                     stayDuration: Stay duration
                     furnishing: Furnishing
                     guarantorType: Guarantor
+                    guarantorTypes: Guarantors
                     guarantorStatus: Guarantee
                     pets: Pets
                     householdType: Household type
@@ -2295,14 +2303,46 @@ admin:
                         refused: Refused
                     type:
                         identity: ID document
+                        residence_permit: Residence permit or visa
                         employment_contract: Employment contract
                         payslips: Last 3 payslips
-                        tax_notice: Latest tax notice
+                        employer_letter: Employer letter
+                        company_registration: Company registration (Kbis)
                         rent_receipts: Last 3 rent receipts
                         proof_of_address: Proof of address
-                        employer_letter: Employer letter
+                        home_insurance: Home insurance certificate
+                        tax_notice: Latest tax notice
                         rib: Bank details (RIB)
+                        bank_statements: Last 3 bank statements
                         student_proof: Proof of enrolment
+                        scholarship_proof: Scholarship certificate
+                        guarantor_commitment: Guarantor commitment deed
+                        guarantor_id: Guarantor's ID document
+                        guarantor_tax_notice: Guarantor's tax notice
+                        guarantor_payslips: Guarantor's payslips
+                        garantme_certificate: Garantme certificate
+                        other: Other document
+                    typeDescription:
+                        identity: Valid ID card or passport, both sides.
+                        residence_permit: Valid residence permit or visa for a foreign tenant.
+                        employment_contract: Signed contract, or a job offer dated within the last 3 months.
+                        payslips: The tenant's last 3 payslips.
+                        employer_letter: Letter dated within 3 months confirming position and salary.
+                        company_registration: Kbis extract dated within 3 months for a freelancer or company director.
+                        rent_receipts: The last 3 receipts for the current home.
+                        proof_of_address: Energy, water or phone bill dated within the last 3 months.
+                        home_insurance: Insurance certificate for the current home.
+                        tax_notice: Latest full tax notice, all pages.
+                        rib: Bank account details in the tenant's name.
+                        bank_statements: The last 3 current account statements.
+                        student_proof: Enrolment certificate or student card for the current year.
+                        scholarship_proof: Scholarship award letter for the current year.
+                        guarantor_commitment: Commitment deed signed by the guarantor.
+                        guarantor_id: Guarantor's ID card or passport, both sides.
+                        guarantor_tax_notice: Guarantor's latest tax notice, all pages.
+                        guarantor_payslips: The guarantor's last 3 payslips.
+                        garantme_certificate: Guarantee certificate issued by Garantme.
+                        other: Additional document, add a note to describe it.
                 visit:
                     title: Visit
                     description: Visit scheduling and reports.
@@ -2449,6 +2489,7 @@ admin:
             recallOverdue: Recall overdue
             recallClear: Clear
         closure:
+            mission_accomplished: Mission accomplished
             budget_unrealistic: Unrealistic budget
             unreachable: Unreachable
             profile_mismatch: Profile not a fit for our services
@@ -2534,13 +2575,13 @@ admin:
             planner:
                 recontact: Recall planned for
                 visio: Video call planned for
-                quote_sent: Quote follow-up planned for
+                quote_sent: Contract follow-up planned for
             label: Next step
             choice:
                 recontact: To recontact
                 visio: Video call
-                quote_preparation: Quote in preparation
-                quote_sent: Quote sent
+                quote_preparation: Contract in preparation
+                quote_sent: Contract sent
                 other: Other
         project:
             expandMap: Expand the map
@@ -2548,6 +2589,7 @@ admin:
             title: Housing project
             lock: Lock the fields
             unlock: Unlock the fields
+            closedNotice: Lead closed, project is read-only. Reopen the lead to edit.
             budget: Monthly budget
             budgetUnit: €/month
             areas: Target areas
@@ -2588,8 +2630,8 @@ admin:
         events:
             step_recontact: Next step, recontact
             step_visio: Next step, video call
-            step_quote_preparation: Next step, quote preparation
-            step_quote_sent: Next step, quote sent
+            step_quote_preparation: Next step, contract preparation
+            step_quote_sent: Next step, contract sent
             step_other: Next step, other
             step_cleared: Next step cleared
             step_cancelled: Recall cancelled
@@ -2635,6 +2677,9 @@ admin:
             unsaved: Your follow-up note is not sent. Leave the page anyway?
             placeholder: Add a follow-up note...
             add: Add
+            reply: Reply
+            replyPlaceholder: Reply to this note...
+            replySend: Reply
             edit: Edit
             delete: Delete
             save: Save
@@ -2658,7 +2703,7 @@ admin:
             statusUpdated: Status updated
             recallAtText: Recall on %date% at %time%
             visioAtText: Video call on %date% at %time%
-            quoteSentAtText: Quote sent, follow-up on %date% at %time%
+            quoteSentAtText: Contract sent, follow-up on %date% at %time%
             treatedBy: Handled by
             updatedBy: Updated by
             viewMore: View more

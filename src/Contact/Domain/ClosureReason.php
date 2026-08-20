@@ -10,6 +10,9 @@ namespace App\Contact\Domain;
  */
 enum ClosureReason: string
 {
+    // First case on purpose: cases() drives the chip order in the closure
+    // block, and a successfully completed mission is the main outcome.
+    case MissionAccomplished = 'mission_accomplished';
     case BudgetUnrealistic = 'budget_unrealistic';
     case Unreachable = 'unreachable';
     case ProfileMismatch = 'profile_mismatch';

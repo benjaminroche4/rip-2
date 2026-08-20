@@ -39,14 +39,20 @@ class ContactNoteRepository extends ServiceEntityRepository
         return array_map($this->toItem(...), $notes);
     }
 
-    public function add(Contact $contact, string $text, int $authorId, string $authorName, ?string $authorAvatar): ContactNote
+    public function add(Contact $contact, string $text, int $authorId, string $authorName, ?string $authorAvatar, ?ContactNote $parent = null): ContactNote
     {
+        // Depth is capped at one: answering a reply attaches to its root.
+        if (null !== $parent?->getParentNote()) {
+            $parent = $parent->getParentNote();
+        }
+
         $note = (new ContactNote())
             ->setContact($contact)
             ->setText($text)
             ->setAuthorId($authorId)
             ->setAuthorName($authorName)
-            ->setAuthorAvatar($authorAvatar);
+            ->setAuthorAvatar($authorAvatar)
+            ->setParentNote($parent);
 
         $em = $this->getEntityManager();
         $em->persist($note);
@@ -77,6 +83,7 @@ class ContactNoteRepository extends ServiceEntityRepository
             authorId: $note->getAuthorId(),
             authorName: $note->getAuthorName(),
             authorAvatar: $note->getAuthorAvatar(),
+            parentId: $note->getParentNote()?->getId(),
         );
     }
 }

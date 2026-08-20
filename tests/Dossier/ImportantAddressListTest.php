@@ -43,15 +43,29 @@ final class ImportantAddressListTest extends TestCase
         self::assertNull(ImportantAddressList::add([], '   ', 'work'));
     }
 
+    public function testItAcceptsUpToSixRows(): void
+    {
+        $rows = [];
+        foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $address) {
+            $rows = ImportantAddressList::add($rows, $address, 'work');
+            self::assertNotNull($rows);
+        }
+
+        self::assertCount(6, $rows);
+    }
+
     public function testItRefusesToGrowBeyondTheCap(): void
     {
         $rows = [
             ['address' => 'A', 'type' => 'work'],
             ['address' => 'B', 'type' => 'school'],
             ['address' => 'C', 'type' => 'gym'],
+            ['address' => 'D', 'type' => 'daycare'],
+            ['address' => 'E', 'type' => 'family'],
+            ['address' => 'F', 'type' => 'other'],
         ];
 
-        self::assertNull(ImportantAddressList::add($rows, 'D', 'other'));
+        self::assertNull(ImportantAddressList::add($rows, 'G', 'other'));
     }
 
     public function testItTruncatesTheAddressAt255Characters(): void

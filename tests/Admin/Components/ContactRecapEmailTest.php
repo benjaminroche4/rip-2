@@ -7,6 +7,9 @@ namespace App\Tests\Admin\Components;
 use App\Auth\Entity\User;
 use App\Contact\Domain\StayDuration;
 use App\Contact\Entity\Contact;
+use App\Shared\Pdf\PdfOptions;
+use App\Shared\Pdf\PdfRenderer;
+use App\Shared\Pdf\PdfRenderException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Mailer\Envelope;
@@ -23,6 +26,7 @@ final class ContactRecapEmailTest extends KernelTestCase
 
     private EntityManagerInterface $em;
     private RecordingRecapMailer $mailer;
+    private StubRecapPdfRenderer $pdfRenderer;
 
     protected function setUp(): void
     {
@@ -33,6 +37,11 @@ final class ContactRecapEmailTest extends KernelTestCase
 
         $this->mailer = new RecordingRecapMailer();
         self::getContainer()->set(MailerInterface::class, $this->mailer);
+        // The recap now attaches the contract PDF: stub the renderer so
+        // the suite never reaches DocRaptor. Switchable to a failure via
+        // $this->pdfRenderer->fail (the container refuses a second set()).
+        $this->pdfRenderer = new StubRecapPdfRenderer();
+        self::getContainer()->set(PdfRenderer::class, $this->pdfRenderer);
     }
 
     public function testTwoStepConfirmSendsTheRecapWithProjectAndAdvisor(): void
@@ -107,11 +116,20 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertStringContainsString('path=', $html, 'District polygons are drawn on the static map.');
         self::assertStringContainsString('Jane', $html);
         self::assertStringNotContainsString('127.0.0.1', $html, 'No internal data in a client email.');
-        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/00wfZh7hV2RLeeL6oH6kg05', $html, 'The accompagne payment link is embedded.');
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/dRm28teBlbCjgSH0767EQ0E', $html, 'The accompagne payment link is embedded.');
         self::assertStringContainsString('Confirmer ma formule', $html);
         self::assertStringContainsString('Et ensuite ?', $html, 'The next-steps block is present.');
         self::assertStringContainsString('https://share.google/c8msBrKphxqVY03er', $html, 'The Google reviews proof is clickable.');
         self::assertStringContainsString('votre projet en un coup d', $html, 'The preheader is embedded.');
+        // Move-in wording is fuzzy: no stored date reads "asap", never a
+        // precise date.
+        self::assertStringContainsString('Emménagement souhaité', $html);
+        self::assertStringContainsString('le plus tôt possible', $html);
+
+        // The generated contract PDF rides along as an attachment.
+        $attachments = $email->getAttachments();
+        self::assertCount(1, $attachments);
+        self::assertStringContainsString('contrat-', (string) $attachments[0]->getPreparedHeaders()->get('content-disposition')?->getBodyAsString());
 
         // The send is traced in the follow-up thread with its author.
         $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)
@@ -158,7 +176,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         $html = (string) $email->getHtmlBody();
         // English prospect + deposit → the English deposit link.
-        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/aFa00j0Tx781b2z3cv6kg03', $html);
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/6oU00ldxhfSzauj3ji7EQ0u', $html);
         self::assertStringContainsString('50% deposit on', $html);
         self::assertStringContainsString('Your housing project', (string) $email->getSubject());
 
@@ -168,7 +186,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $email = $this->mailer->lastMessage;
         self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
-        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/4gM5kDgSv4ZTeeL3cv6kg00', (string) $email->getHtmlBody());
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/28EbJ3dxhbCjfODcTS7EQ0M', (string) $email->getHtmlBody());
 
         // French prospect, Confié + deposit → the French deposit link.
         $contact->setLang('fr');
@@ -181,7 +199,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
         $html = (string) $email->getHtmlBody();
-        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/eVq4gz9q3akd8Ur4gz6kg01', $html);
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/aFa14p9h15dVfOD9HG7EQ0x', $html);
         self::assertStringContainsString('Acompte de 50 % sur', $html);
 
         // French prospect, Confié full amount → the French full link.
@@ -191,7 +209,41 @@ final class ContactRecapEmailTest extends KernelTestCase
         $email = $this->mailer->lastMessage;
         self::assertInstanceOf(Email::class, $email);
         self::getContainer()->get('twig.mime_body_renderer')->render($email);
-        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/00w5kDcCf4ZT2w36oH6kg04', (string) $email->getHtmlBody());
+        self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/4gMaEZ9h1dKrcCr7zy7EQ0N', (string) $email->getHtmlBody());
+    }
+
+    public function testRecapStillLeavesWithoutAttachmentWhenThePdfBackendFails(): void
+    {
+        // Best effort: a DocRaptor failure must never block the recap.
+        $this->pdfRenderer->fail = true;
+
+        $admin = (new User())
+            ->setEmail('pdf-fail@recap-test.local')
+            ->setFirstName('Julien')->setLastName('Moreau')
+            ->setRoles(['ROLE_ADMIN'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($admin);
+        $contact = (new Contact())
+            ->setFirstName('jane')->setLastName('doe')
+            ->setEmail('jane3@example.com')
+            ->setHelpType('contact.contactForm.helpType.choice.1')
+            ->setMessage('Hello')->setLang('fr')->setIp('127.0.0.1')
+            ->setCreatedAt(new \DateTimeImmutable('now'));
+        $this->em->persist($contact);
+        $this->em->flush();
+
+        self::getContainer()->get('security.token_storage')
+            ->setToken(new UsernamePasswordToken($admin, 'main', $admin->getRoles()));
+
+        $component = $this->mountTwigComponent('Admin:ContactRecapEmail', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->openModal();
+        $component->send();
+
+        $email = $this->mailer->lastMessage;
+        self::assertInstanceOf(Email::class, $email, 'The recap email leaves even when the PDF backend is down.');
+        self::assertSame([], $email->getAttachments(), 'No attachment when the contract rendering failed.');
     }
 
     public function testCloseModalSendsNothingAndPaymentNeedsAPackage(): void
@@ -239,5 +291,22 @@ final class RecordingRecapMailer implements MailerInterface
     public function send(RawMessage $message, ?Envelope $envelope = null): void
     {
         $this->lastMessage = $message;
+    }
+}
+
+/**
+ * @internal
+ */
+final class StubRecapPdfRenderer implements PdfRenderer
+{
+    public bool $fail = false;
+
+    public function render(string $html, ?PdfOptions $options = null): string
+    {
+        if ($this->fail) {
+            throw new PdfRenderException('backend down');
+        }
+
+        return '%PDF-stub';
     }
 }

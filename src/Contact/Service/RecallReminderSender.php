@@ -117,7 +117,7 @@ final readonly class RecallReminderSender
                     '' !== $fullName ? $fullName : (string) $contact->getEmail(),
                     match ($contact->getNextStep()) {
                         \App\Contact\Domain\NextStep::Visio => 'en visio',
-                        \App\Contact\Domain\NextStep::QuoteSent => 'à relancer (devis)',
+                        \App\Contact\Domain\NextStep::QuoteSent => 'à relancer (contrat)',
                         default => 'à recontacter',
                     },
                     $recallAt?->format('d.m à H\hi') ?? '',

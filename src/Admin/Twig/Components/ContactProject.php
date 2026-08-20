@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Admin\Twig\Components;
 
 use App\Contact\Domain\ContactListItem;
+use App\Contact\Domain\ContactStatus;
 use App\Contact\Repository\ContactRepository;
 use App\PropertyListing\Domain\PropertyType;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -84,10 +85,32 @@ final class ContactProject
         $this->editingProjectNote = '' === $this->projectNote;
     }
 
+    /**
+     * A closed lead is read-only: the housing project freezes with it and
+     * only becomes editable again when the lead is reopened. Server-side
+     * guard mirrored in the template (fieldset disabled, padlock hidden).
+     */
+    public function isClosedLead(): bool
+    {
+        return ContactStatus::Closed === $this->getContact()?->status;
+    }
+
+    /** Single write-gate for every mutating action. */
+    private function isReadOnly(): bool
+    {
+        return $this->locked || $this->isClosedLead();
+    }
+
     #[LiveAction]
     public function toggleLock(): void
     {
         $this->ensureAdmin();
+        if ($this->isClosedLead()) {
+            // No unlocking a closed lead: the padlock stays shut.
+            $this->locked = true;
+
+            return;
+        }
         $this->locked = !$this->locked;
     }
 
@@ -95,7 +118,7 @@ final class ContactProject
     public function saveProjectNote(): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 
@@ -184,7 +207,7 @@ final class ContactProject
     public function togglePropertyType(#[LiveArg] string $type): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 
@@ -219,7 +242,7 @@ final class ContactProject
     public function chooseStayDuration(#[LiveArg] string $duration): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 
@@ -255,7 +278,7 @@ final class ContactProject
     public function chooseFurnishing(#[LiveArg] string $furnishing): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 
@@ -287,7 +310,7 @@ final class ContactProject
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 
@@ -306,7 +329,7 @@ final class ContactProject
     public function save(): void
     {
         $this->ensureAdmin();
-        if ($this->locked) {
+        if ($this->isReadOnly()) {
             return;
         }
 

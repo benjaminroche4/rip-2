@@ -5,6 +5,12 @@ date:
     today: Aujourd'hui
     inDays: '{1} Dans 1 jour|]1,Inf] Dans %count% jours'
 contact:
+    recapEmail:
+        moveIn:
+            asap: le plus tôt possible
+            early: 'début %month%'
+            mid: 'mi-%month%'
+            late: 'fin %month%'
     title: Contactez-nous
     subTitle: Parlons de votre installation à Paris
     text: Votre conseiller vous rappelle sous 30 minutes. Un échange humain pour comprendre votre projet et vous accompagner ensemble.
@@ -2106,6 +2112,7 @@ admin:
                         'yes': Accepté
                         'no': Exclu
                 budgetTooHigh: Budget au-dessus des revenus du foyer (max conseillé %max% €, règle des 3x)
+                occupantsMismatch: Nombre d'occupants incohérent avec les locataires du dossier
                 leaseMismatch:
                     mobilityLong: Bail mobilité limité à 10 mois, incohérent avec un séjour long terme
                     alurShort: Bail loi ALUR (1 an minimum) incohérent avec un séjour court terme
@@ -2198,6 +2205,7 @@ admin:
                     stayDuration: Durée de séjour
                     furnishing: Meublé
                     guarantorType: Garant
+                    guarantorTypes: Garants
                     guarantorStatus: Garantie
                     pets: Animaux
                     householdType: Typologie de foyer
@@ -2297,14 +2305,46 @@ admin:
                         refused: Refusée
                     type:
                         identity: Pièce d'identité
+                        residence_permit: Titre de séjour ou visa
                         employment_contract: Contrat de travail
                         payslips: 3 dernières fiches de paie
-                        tax_notice: Dernier avis d'imposition
+                        employer_letter: Attestation employeur
+                        company_registration: Extrait Kbis
                         rent_receipts: 3 dernières quittances de loyer
                         proof_of_address: Justificatif de domicile
-                        employer_letter: Attestation employeur
+                        home_insurance: Attestation d'assurance habitation
+                        tax_notice: Dernier avis d'imposition
                         rib: RIB
+                        bank_statements: 3 derniers relevés bancaires
                         student_proof: Certificat de scolarité
+                        scholarship_proof: Justificatif de bourse
+                        guarantor_commitment: Acte de cautionnement
+                        guarantor_id: Pièce d'identité du garant
+                        guarantor_tax_notice: Avis d'imposition du garant
+                        guarantor_payslips: Fiches de paie du garant
+                        garantme_certificate: Certificat Garantme
+                        other: Autre pièce
+                    typeDescription:
+                        identity: Carte d'identité ou passeport en cours de validité, recto verso.
+                        residence_permit: Titre de séjour ou visa en cours de validité pour un locataire étranger.
+                        employment_contract: Contrat signé, ou promesse d'embauche datée de moins de 3 mois.
+                        payslips: Les 3 dernières fiches de paie du locataire.
+                        employer_letter: Attestation datée de moins de 3 mois confirmant poste et salaire.
+                        company_registration: Extrait Kbis de moins de 3 mois pour un indépendant ou dirigeant.
+                        rent_receipts: Les 3 dernières quittances du logement actuel.
+                        proof_of_address: Facture d'énergie, d'eau ou de téléphone de moins de 3 mois.
+                        home_insurance: Attestation d'assurance du logement actuel.
+                        tax_notice: Dernier avis d'imposition complet, toutes les pages.
+                        rib: Relevé d'identité bancaire au nom du locataire.
+                        bank_statements: Les 3 derniers relevés de compte courant.
+                        student_proof: Certificat de scolarité ou carte étudiante de l'année en cours.
+                        scholarship_proof: Notification de bourse de l'année en cours.
+                        guarantor_commitment: Acte de cautionnement signé par le garant.
+                        guarantor_id: Carte d'identité ou passeport du garant, recto verso.
+                        guarantor_tax_notice: Dernier avis d'imposition du garant, toutes les pages.
+                        guarantor_payslips: Les 3 dernières fiches de paie du garant.
+                        garantme_certificate: Certificat de garantie délivré par Garantme.
+                        other: Pièce complémentaire, précisez-la avec une note.
                 visit:
                     title: Visite
                     description: Planification et comptes-rendus de visites.
@@ -2451,6 +2491,7 @@ admin:
             recallOverdue: Rappel échu
             recallClear: Effacer
         closure:
+            mission_accomplished: Mission réalisée avec succès
             budget_unrealistic: Budget irréaliste
             unreachable: Injoignable
             profile_mismatch: Profil inadapté à nos services
@@ -2536,13 +2577,13 @@ admin:
             planner:
                 recontact: Rappel prévu le
                 visio: Visio prévue le
-                quote_sent: Relance du devis prévue le
+                quote_sent: Relance du contrat prévue le
             label: Prochaine étape
             choice:
                 recontact: À recontacter
                 visio: Visio
-                quote_preparation: Préparation du devis
-                quote_sent: Devis envoyé
+                quote_preparation: Préparation du contrat
+                quote_sent: Contrat envoyé
                 other: Autre
         project:
             expandMap: Agrandir la carte
@@ -2550,6 +2591,7 @@ admin:
             title: Projet logement
             lock: Verrouiller les champs
             unlock: Déverrouiller les champs
+            closedNotice: Lead clôturé, projet en lecture seule. Rouvrez le lead pour modifier.
             budget: Budget mensuel
             budgetUnit: €/mois
             areas: Quartiers visés
@@ -2590,8 +2632,8 @@ admin:
         events:
             step_recontact: Prochaine étape, à recontacter
             step_visio: Prochaine étape, visio
-            step_quote_preparation: Prochaine étape, préparation du devis
-            step_quote_sent: Prochaine étape, devis envoyé
+            step_quote_preparation: Prochaine étape, préparation du contrat
+            step_quote_sent: Prochaine étape, contrat envoyé
             step_other: Prochaine étape, autre
             step_cleared: Prochaine étape effacée
             step_cancelled: Rappel annulé
@@ -2637,6 +2679,9 @@ admin:
             unsaved: La note de suivi n'est pas envoyée. Quitter la page quand même ?
             placeholder: Ajouter une note de suivi...
             add: Ajouter
+            reply: Répondre
+            replyPlaceholder: Répondre à cette note...
+            replySend: Répondre
             edit: Modifier
             delete: Supprimer
             save: Enregistrer
@@ -2660,7 +2705,7 @@ admin:
             statusUpdated: Statut mis à jour
             recallAtText: Rappel le %date% à %time%
             visioAtText: Visio le %date% à %time%
-            quoteSentAtText: Devis envoyé, relance le %date% à %time%
+            quoteSentAtText: Contrat envoyé, relance le %date% à %time%
             treatedBy: Traité par
             updatedBy: Mis à jour par
             viewMore: Voir plus

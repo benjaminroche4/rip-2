@@ -39,9 +39,9 @@
 
                                                     <h2 style="margin:0;padding:0.389em 0 0;font-size:1.8em;line-height:1.44;font-weight:600;text-align:center;text-wrap:balance">
                                                         {{ {
-                                                            scheduled: fr ? 'Votre visio est confirmée' : 'Your video call is confirmed',
-                                                            rescheduled: fr ? 'Votre visio est déplacée' : 'Your video call has been rescheduled',
-                                                            cancelled: fr ? 'Votre visio est annulée' : 'Your video call is cancelled',
+                                                            scheduled: fr ? 'Votre appel vidéo est confirmé' : 'Your video call is confirmed',
+                                                            rescheduled: fr ? 'Votre appel vidéo est déplacé' : 'Your video call has been rescheduled',
+                                                            cancelled: fr ? 'Votre appel vidéo est annulé' : 'Your video call is cancelled',
                                                         }[mode] }}
                                                     </h2>
 
@@ -49,11 +49,11 @@
                                                         {% if fr %}
                                                             Bonjour{% if firstName %} {{ firstName }}{% endif %},
                                                             {% if mode == 'cancelled' %}
-                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} prévue le {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ timeBig }} est annulée.
+                                                                votre appel vidéo avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} prévu le {{ visioAt|format_datetime(pattern='dd.MM.yyyy', locale='fr') }} à {{ timeBig }} est annulé.
                                                             {% elseif mode == 'rescheduled' %}
-                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} change de créneau. Voici le nouveau rendez-vous :
+                                                                votre appel vidéo avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} change de créneau. Voici le nouveau rendez-vous :
                                                             {% else %}
-                                                                votre visio avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} est bien planifiée. Voici l'essentiel :
+                                                                votre appel vidéo avec {% if agentName %}{{ agentName }}{% else %}notre équipe{% endif %} est bien planifié. Voici l'essentiel :
                                                             {% endif %}
                                                         {% else %}
                                                             Hello{% if firstName %} {{ firstName }}{% endif %},
@@ -78,7 +78,7 @@
                                                                 <tr>
                                                                     <td align="center" style="padding:24px 16px">
                                                                         <p style="margin:0;padding:0;font-size:0.8em;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280">
-                                                                            {{ fr ? 'Visio découverte' : 'Discovery call' }}
+                                                                            {{ fr ? 'Appel découverte' : 'Discovery call' }}
                                                                         </p>
                                                                         <p style="margin:0;padding:0.35em 0 0;font-size:1.9em;font-weight:700;line-height:1.2;color:#111827;text-wrap:balance">
                                                                             {{ dateBig }}
@@ -89,7 +89,7 @@
                                                                         </p>
                                                                         <p style="margin:0;padding:0.7em 0 0;font-size:0.9em;color:#525252">
                                                                             {{ fr ? 'Avec' : 'With' }} <strong style="color:#111827">{{ agentName ?: (fr ? 'notre équipe' : 'our team') }}</strong>
-                                                                            &middot; {{ durationMinutes|default(30) }} min &middot; Google Meet
+                                                                            &middot; {{ durationMinutes|default(20) }} min &middot; Google Meet
                                                                         </p>
                                                                     </td>
                                                                 </tr>
@@ -105,7 +105,7 @@
                                                                     <td align="center">
                                                                         <a href="{{ meetLink }}"
                                                                             style="display:inline-block;background-color:#71172e;color:#ffffff;text-decoration:none;font-weight:600;font-size:1em;padding:14px 28px;border-radius:8px">
-                                                                            {{ fr ? 'Rejoindre la visio' : 'Join the video call' }}
+                                                                            {{ fr ? "Rejoindre l'appel vidéo" : 'Join the video call' }}
                                                                         </a>
                                                                     </td>
                                                                 </tr>

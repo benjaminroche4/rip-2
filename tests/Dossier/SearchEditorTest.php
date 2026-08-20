@@ -257,7 +257,9 @@ final class SearchEditorTest extends KernelTestCase
 
         $facts = $this->mountTwigComponent('Dossier:Timeline', ['dossierId' => (int) $dossier->getId()])->getKeyFacts();
         self::assertSame(2200, $facts['budget']);
-        self::assertSame('garantme', $facts['guarantor']);
+        // Multi-select : le chip Garantme s'ajoute au garant physique du
+        // snapshot au lieu de le remplacer.
+        self::assertSame(['physical', 'garantme'], $facts['guarantors']);
         self::assertSame('couple', $facts['household']);
         self::assertFalse($facts['overBudget'], 'No income known yet: nothing to compare the rent to.');
 
@@ -357,11 +359,17 @@ final class SearchEditorTest extends KernelTestCase
         $locked = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
         self::assertStringContainsString('data-testid="search-locked-banner"', $locked, 'Locked by default: the unlock banner shows.');
 
+        // Déverrouillé, le bandeau reste rendu mais masqué (hidden) : la
+        // forme du DOM ne change pas entre les deux états, sinon le morph
+        // (qui préserve les sous-arbres data-live-ignore) empile l'ancien et
+        // le nouveau bloc de champs après un déverrouillage.
         $unlocked = (string) $this->renderTwigComponent('Dossier:Search', [
             'dossierId' => (int) $dossier->getId(),
             'locked' => false,
         ]);
-        self::assertStringNotContainsString('data-testid="search-locked-banner"', $unlocked);
+        self::assertStringContainsString('data-testid="search-locked-banner"', $unlocked);
+        $crawler = new \Symfony\Component\DomCrawler\Crawler($unlocked);
+        self::assertNotNull($crawler->filter('[data-testid="search-locked-banner"]')->attr('hidden'));
     }
 
     public function testLeaseMismatchFlagsInconsistentDurations(): void
@@ -418,23 +426,24 @@ final class SearchEditorTest extends KernelTestCase
         self::assertSame('10 rue de Rivoli, 75004 Paris', $rows[0]['address']);
         self::assertSame('work', $rows[0]['type']);
 
-        // Cap at 3 rows: the 4th is ignored.
-        foreach (['school', 'gym', 'other'] as $i => $type) {
+        // Cap at 6 rows (both parents' workplaces, daycares...): the 7th is
+        // ignored.
+        foreach (['school', 'gym', 'other', 'daycare', 'family', 'work'] as $i => $type) {
             $component->addressDraft = 'Adresse '.$i;
             $component->addressTypeDraft = $type;
             $component->addImportantAddress();
         }
-        self::assertCount(3, $component->getImportantAddresses());
+        self::assertCount(6, $component->getImportantAddresses());
 
         // Blank drafts are ignored.
         $component->addressDraft = '   ';
         $component->addImportantAddress();
-        self::assertCount(3, $component->getImportantAddresses());
+        self::assertCount(6, $component->getImportantAddresses());
 
         $component->removeImportantAddress(0);
         $this->em->clear();
         $rows = $this->em->find(Dossier::class, $dossier->getId())->getSearch()->getImportantAddresses();
-        self::assertCount(2, $rows);
+        self::assertCount(5, $rows);
         self::assertSame('Adresse 0', $rows[0]['address']);
     }
 
@@ -462,11 +471,14 @@ final class SearchEditorTest extends KernelTestCase
         self::assertSame(2, substr_count($rendered, 'data-testid="important-address-row"'));
         self::assertStringContainsString('data-testid="important-address-input"', $rendered);
 
-        // At the cap the field disappears: nothing left to add.
-        $component->addressDraft = 'Adresse gym';
-        $component->addressTypeDraft = 'gym';
-        $component->addImportantAddress();
+        // At the cap (6) the field disappears: nothing left to add.
+        foreach (['gym', 'other', 'daycare', 'family'] as $type) {
+            $component->addressDraft = 'Adresse '.$type;
+            $component->addressTypeDraft = $type;
+            $component->addImportantAddress();
+        }
         $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertSame(6, substr_count($rendered, 'data-testid="important-address-row"'));
         self::assertStringNotContainsString('data-testid="important-address-input"', $rendered);
     }
 
@@ -516,6 +528,76 @@ final class SearchEditorTest extends KernelTestCase
 
         $this->expectException(AccessDeniedException::class);
         $this->mountTwigComponent('Dossier:Search', ['dossierId' => 1]);
+    }
+
+    public function testGuarantorTypesAccumulateAndToggleOff(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        $component = $this->mountEditor($dossier);
+        // Complète le seul critère manquant du snapshot : la complétude ne
+        // dépend alors plus que du garant.
+        $component->chooseStayDuration('long');
+
+        // Multi-sélection : Garantme s'ajoute au garant physique du snapshot.
+        $component->chooseGuarantorType('garantme');
+        $this->em->clear();
+        $search = $this->em->find(Dossier::class, $dossier->getId())->getSearch();
+        self::assertSame(['physical', 'garantme'], $search->getGuarantorTypes());
+        // La colonne legacy suit le premier sélectionné (lecture-repli).
+        self::assertSame('physical', $search->getGuarantorType());
+
+        // Re-clic sur un chip actif : retiré, l'autre reste.
+        $component->chooseGuarantorType('physical');
+        $this->em->clear();
+        $search = $this->em->find(Dossier::class, $dossier->getId())->getSearch();
+        self::assertSame(['garantme'], $search->getGuarantorTypes());
+        self::assertSame('garantme', $search->getGuarantorType());
+        self::assertTrue($search->isComplete(), 'Un garant sélectionné suffit à la complétude.');
+
+        // Dernier retiré : critère vide, la complétude retombe.
+        $component->chooseGuarantorType('garantme');
+        $this->em->clear();
+        $search = $this->em->find(Dossier::class, $dossier->getId())->getSearch();
+        self::assertSame([], $search->getGuarantorTypes());
+        self::assertNull($search->getGuarantorType());
+        self::assertFalse($search->isComplete());
+    }
+
+    public function testLegacySingleGuarantorColumnStillReads(): void
+    {
+        // Ligne écrite avant la migration : la colonne JSON est vide, la
+        // valeur single sert de repli en lecture.
+        $search = new DossierSearch();
+        $reflection = new \ReflectionProperty(DossierSearch::class, 'guarantorType');
+        $reflection->setValue($search, 'bank');
+
+        self::assertSame(['bank'], $search->getGuarantorTypes());
+    }
+
+    public function testOccupantsBelowTenantCountShowsTheMismatchAlert(): void
+    {
+        $dossier = $this->persistDossier(withSearch: true);
+        // Second locataire : le foyer compte 2 locataires.
+        $dossier->addPerson((new DossierPerson())
+            ->setRole(DossierPersonRole::TENANT)
+            ->setFirstName('Marie')->setLastName('Dupont')
+            ->setEmail('marie@example.com'));
+        $this->em->flush();
+
+        $component = $this->mountEditor($dossier);
+        self::assertFalse($component->getOccupantsMismatch(), 'Occupants non renseignés : pas d\'alerte.');
+
+        $component->chooseOccupants(1);
+        self::assertTrue($component->getOccupantsMismatch(), '1 occupant pour 2 locataires est incohérent.');
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringContainsString('data-testid="occupants-mismatch"', $rendered);
+
+        // Autant (ou plus) d'occupants que de locataires : cohérent.
+        $component->chooseOccupants(1);
+        $component->chooseOccupants(3);
+        self::assertFalse($component->getOccupantsMismatch());
+        $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
+        self::assertStringNotContainsString('data-testid="occupants-mismatch"', $rendered);
     }
 
     public function testGuarantorStatusTogglesAndClears(): void

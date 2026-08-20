@@ -275,7 +275,15 @@
 
 {% import _self as m %}
 
-        <div {{ attributes.defaults({class: 'space-y-6'}) }} data-testid="dossier-show-modules">
+        {# id + data-turbo-permanent : le morph plein page (progression,
+           badges d'onglets) ne remonte pas les modules, sinon le cadenas du
+           module Dossier se refermerait après chaque validation d'étape.
+           L'id requis par data-turbo-permanent est celui, déterministe, posé
+           par le système Live sur la racine. #}
+        <div {{ attributes.defaults({
+            'data-turbo-permanent': '',
+            class: 'space-y-6',
+        }) }} data-testid="dossier-show-modules">
     {# Dépôt client verrouillé : bandeau d'alerte sous les onglets, au-dessus
        des cards (même famille visuelle que le bandeau de clôture, en ambré
        car l'état est réversible). Live : suit le toggle du verrou. #}
@@ -458,19 +466,21 @@
                         {% endset %}
                         {# Verrouillé : contenu grisé et désaturé + bandeau
                            cliquable qui déverrouille (hors fieldset, donc
-                           actif). Tout reprend ses couleurs à l'ouverture. #}
-                        {% if this.fileLocked %}
-                            <button
-                                type="button"
-                                data-action="live#action"
-                                data-live-action-param="toggleFileLock"
-                                class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
-                                data-testid="module-file-locked-banner"
-                            >
-                                {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                {{ 'admin.locked.notice'|trans }}
-                            </button>
-                        {% endif %}
+                           actif). Tout reprend ses couleurs à l'ouverture.
+                           Bandeau TOUJOURS rendu (masqué via hidden) : un
+                           rendu conditionnel ferait bouger les frères du bloc
+                           de pièces et le morph empilerait les deux versions. #}
+                        <button
+                            type="button"
+                            {{ not this.fileLocked ? 'hidden' }}
+                            data-action="live#action"
+                            data-live-action-param="toggleFileLock"
+                            class="mt-1 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-neutral-100 px-3 py-2 text-xs font-medium text-gray-500 transition-colors duration-100 ease-out hover:bg-neutral-200 hover:text-gray-700"
+                            data-testid="module-file-locked-banner"
+                        >
+                            {{ ux_icon('lucide:lock', {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.locked.notice'|trans }}
+                        </button>
                         <div class="transition-[opacity,filter] duration-200 ease-out {{ this.fileLocked ? 'opacity-70 saturate-50' : '' }}">
                             {{ fileBody }}
                         </div>
@@ -789,24 +799,39 @@
 
                         {% if this.pickerStep == 'select' %}
                             {% set requestedTypes = this.pickerRequestedTypes %}
-                            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="module-file-types">
-                                {% for type in this.documentTypes %}
-                                    {# Pièce déjà demandée : cochée et grisée, on
-                                       ne la redemande pas. #}
-                                    {% set already = type.value in requestedTypes %}
-                                    <label class="flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-colors duration-100 ease-out {{ already
-                                        ? 'cursor-default border-neutral-200 bg-neutral-50 text-gray-400'
-                                        : 'cursor-pointer border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5 has-[input:checked]:text-primary' }}">
-                                        <input
-                                            type="checkbox"
-                                            value="{{ type.value }}"
-                                            {% if not already %}data-model="norender|selectedTypes[]"{% endif %}
-                                            {% if already %}checked disabled{% elseif type.value in this.selectedTypes %}checked{% endif %}
-                                            class="{{ checkboxClass }}"
-                                            data-testid="module-file-type-checkbox"
-                                        >
-                                        {{ type.labelKey|trans }}
-                                    </label>
+                            {# Catalogue complet groupé par catégories, mêmes
+                               libellés et descriptions que l'écran Outils >
+                               Demander des documents (taxonomie partagée). #}
+                            <div class="space-y-4" data-testid="module-file-types">
+                                {% for category, types in this.documentTypesByCategory %}
+                                    <div data-testid="module-file-category-{{ category }}">
+                                        <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                                            {{ ('admin.tools.documents.category.' ~ category)|trans }}
+                                        </p>
+                                        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                            {% for type in types %}
+                                                {# Pièce déjà demandée : cochée et
+                                                   grisée, on ne la redemande pas. #}
+                                                {% set already = type.value in requestedTypes %}
+                                                <label class="flex h-full items-start gap-2.5 rounded-xl border px-3.5 py-2.5 transition-colors duration-100 ease-out {{ already
+                                                    ? 'cursor-default border-neutral-200 bg-neutral-50'
+                                                    : 'cursor-pointer border-neutral-200 bg-white hover:border-gray-400 has-[input:checked]:border-primary/40 has-[input:checked]:bg-primary/5' }}">
+                                                    <input
+                                                        type="checkbox"
+                                                        value="{{ type.value }}"
+                                                        {% if not already %}data-model="norender|selectedTypes[]"{% endif %}
+                                                        {% if already %}checked disabled{% elseif type.value in this.selectedTypes %}checked{% endif %}
+                                                        class="{{ checkboxClass }} mt-0.5 shrink-0"
+                                                        data-testid="module-file-type-checkbox"
+                                                    >
+                                                    <span class="min-w-0 flex-1">
+                                                        <span class="block text-sm font-medium {{ already ? 'text-gray-400' : 'text-gray-900' }}">{{ type.labelKey|trans }}</span>
+                                                        <span class="mt-0.5 block text-xs {{ already ? 'text-gray-300' : 'text-gray-500' }}">{{ type.descriptionKey|trans }}</span>
+                                                    </span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% else %}

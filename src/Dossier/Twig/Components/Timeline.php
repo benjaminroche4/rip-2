@@ -101,7 +101,7 @@ final class Timeline
      *     tenants: int,
      *     household: string|null,
      *     language: string|null,
-     *     guarantor: string|null,
+     *     guarantors: list<string>,
      *     guarantorStatus: string|null,
      * }
      */
@@ -139,7 +139,7 @@ final class Timeline
             'tenants' => $tenants,
             'household' => $search?->getHouseholdType(),
             'language' => $language,
-            'guarantor' => $search?->getGuarantorType(),
+            'guarantors' => $search?->getGuarantorTypes() ?? [],
             'guarantorStatus' => $search?->getGuarantorStatus(),
         ];
     }

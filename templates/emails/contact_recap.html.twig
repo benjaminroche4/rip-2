@@ -78,9 +78,9 @@
                                                                                     {% if contact.projectBudget %}
                                                                                         {{ _self.row(fr ? 'Budget mensuel' : 'Monthly budget', contact.projectBudget|format_number(locale=locale) ~ ' €' ~ (fr ? '/mois' : '/mo')) }}
                                                                                     {% endif %}
-                                                                                    {% if contact.projectMoveInAt %}
-                                                                                        {{ _self.row(fr ? 'Emménagement souhaité' : 'Desired move-in', contact.projectMoveInAt|format_date(pattern='dd MMMM yyyy', locale=locale)) }}
-                                                                                    {% endif %}
+                                                                                    {# Jamais de date précise : libellé flou dérivé
+                                                                                       de la date stockée (asap, début/mi-/fin de mois). #}
+                                                                                    {{ _self.row(fr ? 'Emménagement souhaité' : 'Desired move-in', moveInLabel) }}
                                                                                     {% if propertyTypeLabels is not empty %}
                                                                                         {{ _self.row(fr ? 'Type de bien' : 'Property type', propertyTypeLabels|join(', ')) }}
                                                                                     {% endif %}
@@ -246,8 +246,10 @@
                                                                                 ? 'Confirmer ma formule ' ~ paymentOfferTitle
                                                                                 : 'Confirm my ' ~ paymentOfferTitle ~ ' package' }}
                                                                         </a>
+                                                                        {# Pas d'icône cadenas : le PNG existant est blanc sur
+                                                                           fond transparent, il se rendait en carré blanc dans
+                                                                           les clients email. Le texte seul suffit. #}
                                                                         <p style="margin:0;padding:12px 0 0;font-size:0.85em;color:#9ca3af">
-                                                                            <img src="{{ site_url }}/medias/website/email-icons/lock.png" alt="" width="12" height="12" style="display:inline-block;vertical-align:-1px;margin-right:4px;border:none;outline:none" />
                                                                             {{ fr ? 'Paiement sécurisé via Stripe' : 'Secure payment via Stripe' }} · {{ paymentDeposit ? (fr ? 'Acompte de 50 % sur ' : '50% deposit on ') }}{{ paymentOfferPrice }}
                                                                         </p>
                                                                         <p style="margin:0;padding:26px 0 0;font-size:0.8em;color:#9ca3af;letter-spacing:0.01em">

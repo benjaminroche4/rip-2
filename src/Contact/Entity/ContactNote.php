@@ -41,6 +41,15 @@ class ContactNote
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $authorAvatar = null;
 
+    /**
+     * Thread parent: replies attach to a top-level note (depth capped at
+     * one, a reply never has replies). Deleting the parent removes its
+     * replies with it (DB cascade).
+     */
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?ContactNote $parentNote = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -119,6 +128,18 @@ class ContactNote
     public function setAuthorAvatar(?string $authorAvatar): static
     {
         $this->authorAvatar = $authorAvatar;
+
+        return $this;
+    }
+
+    public function getParentNote(): ?ContactNote
+    {
+        return $this->parentNote;
+    }
+
+    public function setParentNote(?ContactNote $parentNote): static
+    {
+        $this->parentNote = $parentNote;
 
         return $this;
     }

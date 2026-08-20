@@ -16,22 +16,30 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\CalendarLink\CalendarEvent;
 use Symfony\UX\CalendarLink\Registry\CalendarLinkProviderRegistry;
 
 /**
- * When a visio is planned on a lead, invites both sides by email with an
- * iCalendar attachment (METHOD:REQUEST): the prospect gets a confirmation
+ * When a video call is planned on a lead, invites both sides by email with
+ * an iCalendar attachment (METHOD:REQUEST): the prospect gets a confirmation
  * in their language, the assignee (plus the agency inbox) gets the invite
  * that calendar clients push straight into their agenda. Re-saving the
  * date re-sends the invite with the same UID and a higher SEQUENCE, so
  * calendars update the existing event instead of duplicating it.
+ *
+ * The Google event is created in the assigned closer's own agenda (they
+ * organize the meeting) and the confirmation email is sent from their
+ * address; without an assigned closer on the agency domain, everything
+ * falls back to the central contact address. The word "visio" never
+ * reaches the client: emails, event titles and the ICS fallback all say
+ * "appel vidéo" / "video call" (internal admin emails keep the jargon).
  */
 final readonly class VisioInvitationMailer
 {
-    private const DURATION_MINUTES = 30;
+    private const DURATION_MINUTES = 20;
 
     public function __construct(
         private MailerInterface $mailer,
@@ -62,18 +70,21 @@ final readonly class VisioInvitationMailer
         $clientName = '' !== $fullName ? $fullName : $clientEmail;
         $assigneeEmail = $contact->getAssignedTo()?->getEmail();
 
-        // Google Calendar first: event in the agent's agenda + auto Meet
-        // link, kept stable across reschedules. Falls back to a plain
-        // iCalendar invite when the API is unavailable.
+        // Google Calendar first: event in the closer's own agenda (central
+        // fallback without one) + auto Meet link, kept stable across
+        // reschedules. Falls back to a plain iCalendar invite when the API
+        // is unavailable.
         $meetLink = null;
         $ics = null;
+        $organizer = $this->organizerFor($contact);
         $event = $this->calendar->upsertVisioEvent(
             $contact->getVisioEventId(),
-            \sprintf('Visio Découverte | %s', $clientName),
+            self::eventTitle($contact, $fr, $clientName),
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
             array_values(array_unique(array_filter([$clientEmail, $assigneeEmail, EmailAddress::CONTACT->value]))),
+            impersonate: $organizer,
         );
         if (null !== $event) {
             $meetLink = $event['meetLink'];
@@ -85,7 +96,7 @@ final readonly class VisioInvitationMailer
         // Apple Mail) have no other way to add the meeting. With a Google
         // event, the UID matches its iCalUID so calendars merge instead of
         // duplicating; without one, the stable fallback UID applies.
-        $ics = $this->buildIcs($contact, $visioAt, $clientName, $clientEmail, $assigneeEmail, meetLink: $meetLink);
+        $ics = $this->buildIcs($contact, $visioAt, $clientName, $clientEmail, $assigneeEmail, $fr, organizerEmail: $organizer, meetLink: $meetLink);
 
         try {
             $mode = $rescheduled ? 'rescheduled' : 'scheduled';
@@ -93,14 +104,15 @@ final readonly class VisioInvitationMailer
             // info must be readable from the inbox list alone.
             $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', self::humanDate($visioAt, $fr), $visioAt->format($fr ? 'H\hi' : 'H:i'));
             $agentName = self::agentFirstName($contact);
+            ['from' => $from, 'replyTo' => $replyTo] = $this->clientSender($contact);
             $client = (new TemplatedEmail())
-                ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
+                ->from($from)
                 ->to($clientEmail)
                 // Aucun emoji dans les objets adressés au client : la marque
                 // se joue premium, et les filtres promotions les pénalisent.
                 ->subject(match ([$fr, $rescheduled]) {
-                    [true, false] => \sprintf('Votre visio est confirmée : %s', $dateText),
-                    [true, true] => \sprintf('Votre visio est déplacée au %s', $dateText),
+                    [true, false] => \sprintf('Votre appel vidéo est confirmé : %s', $dateText),
+                    [true, true] => \sprintf('Votre appel vidéo est déplacé au %s', $dateText),
                     [false, false] => \sprintf('Your video call is confirmed: %s', $dateText),
                     default => \sprintf('Your video call moved to %s', $dateText),
                 })
@@ -113,9 +125,12 @@ final readonly class VisioInvitationMailer
                     'mode' => $mode,
                     'agentName' => $agentName,
                     'durationMinutes' => self::DURATION_MINUTES,
-                    'addToCalendarLinks' => $this->addToCalendarLinks($clientName, $visioAt, $meetLink),
+                    'addToCalendarLinks' => $this->addToCalendarLinks($contact, $clientName, $fr, $visioAt, $meetLink),
                 ]);
-            $client->addPart(new DataPart($ics, 'visio.ics', 'text/calendar'));
+            if (null !== $replyTo) {
+                $client->replyTo($replyTo);
+            }
+            $client->addPart(new DataPart($ics, 'invitation.ics', 'text/calendar'));
 
             $recipients = [EmailAddress::CONTACT->value];
             if (null !== $assigneeEmail && '' !== $assigneeEmail && EmailAddress::CONTACT->value !== $assigneeEmail) {
@@ -193,9 +208,11 @@ final readonly class VisioInvitationMailer
     }
 
     /**
-     * Re-syncs the calendar event attendees after a reassignment: the new
-     * assignee gets the meeting in their agenda, the old one loses it.
-     * Emails are not re-sent (the meeting itself did not change).
+     * Re-syncs the calendar event attendees and title after a reassignment:
+     * the new assignee gets the meeting in their agenda, the old one loses
+     * it. Emails are not re-sent (the meeting itself did not change). The
+     * event stays in its original organizer's agenda so the Meet link and
+     * the UID clients already received survive the reassignment.
      */
     public function refreshAttendees(Contact $contact): void
     {
@@ -206,16 +223,18 @@ final readonly class VisioInvitationMailer
             return;
         }
 
+        $fr = 'en' !== $contact->getLang();
         $fullName = trim(((string) $contact->getFirstName()).' '.((string) $contact->getLastName()));
         $clientName = '' !== $fullName ? $fullName : $clientEmail;
         $assigneeEmail = $contact->getAssignedTo()?->getEmail();
         $event = $this->calendar->upsertVisioEvent(
             $eventId,
-            \sprintf('Visio Découverte | %s', $clientName),
+            self::eventTitle($contact, $fr, $clientName),
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
             array_values(array_unique(array_filter([$clientEmail, $assigneeEmail, EmailAddress::CONTACT->value]))),
+            impersonate: $this->organizerFor($contact),
         );
         if (null !== $event) {
             $contact->setVisioEventId($event['eventId'])
@@ -258,20 +277,132 @@ final readonly class VisioInvitationMailer
     }
 
     /**
+     * Client-facing meeting title: "{client} • {closer} - Votre nouvel
+     * appartement à Paris" (client locale, simple dash, closer part
+     * omitted when the lead is unassigned). Used for the Google event,
+     * the ICS fallback and the add-to-calendar links.
+     */
+    public static function eventTitle(Contact $contact, bool $fr, string $clientName): string
+    {
+        $clientFirst = trim((string) $contact->getFirstName());
+        $clientFirst = '' !== $clientFirst ? $clientFirst : $clientName;
+        $closerFirst = self::agentFirstName($contact);
+        $who = null !== $closerFirst ? \sprintf('%s • %s', $clientFirst, $closerFirst) : $clientFirst;
+
+        return \sprintf('%s - %s', $who, $fr ? 'Votre nouvel appartement à Paris' : 'Your new Home in Paris');
+    }
+
+    /**
+     * How the meeting is named in client-facing prose: "appel vidéo avec
+     * {prénom du closer}" / "video call with {first name}", without the
+     * closer part when the lead is unassigned. The word "visio" is banned
+     * from everything the client sees.
+     */
+    private static function videoCallPhrase(Contact $contact, bool $fr): string
+    {
+        $closerFirst = self::agentFirstName($contact);
+        if ($fr) {
+            return null !== $closerFirst ? 'appel vidéo avec '.$closerFirst : 'appel vidéo';
+        }
+
+        return null !== $closerFirst ? 'video call with '.$closerFirst : 'video call';
+    }
+
+    /**
+     * The assignee's email when it can act as organizer and sender, i.e. a
+     * valid address on the agency domain (the only one the Workspace
+     * delegation can impersonate and the transactional sender verifies);
+     * null otherwise.
+     */
+    private static function closerWorkspaceEmail(Contact $contact): ?string
+    {
+        $email = trim((string) $contact->getAssignedTo()?->getEmail());
+        if (false === filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+        $domain = substr((string) strrchr(EmailAddress::CONTACT->value, '@'), 1);
+
+        return str_ends_with(strtolower($email), '@'.$domain) ? $email : null;
+    }
+
+    /**
+     * Which agenda owns (or should own) the Google event. New event: the
+     * assigned closer's agenda (null, i.e. the central organizer, without
+     * one). Existing event: the actual organizer read from the API, so a
+     * reassigned or legacy lead keeps patching and cancelling the event
+     * where it really lives instead of orphaning it.
+     */
+    private function organizerFor(Contact $contact): ?string
+    {
+        $closerEmail = self::closerWorkspaceEmail($contact);
+        $eventId = $contact->getVisioEventId();
+        if (null === $eventId) {
+            return $closerEmail;
+        }
+
+        // The event is in the closer's agenda (organizer or attendee) and
+        // in the central one (always an attendee): probe both copies.
+        $subjects = null !== $closerEmail ? [$closerEmail, null] : [null];
+        foreach ($subjects as $subject) {
+            $event = $this->calendar->getEvent($eventId, $subject);
+            if (null === $event) {
+                continue;
+            }
+            $organizer = $event['organizer']['email'] ?? null;
+
+            return \is_string($organizer) && '' !== $organizer ? $organizer : $closerEmail;
+        }
+
+        return $closerEmail;
+    }
+
+    /**
+     * From / Reply-To of the client-facing emails: the assigned closer's
+     * own address and name when it lives on the agency domain (verified
+     * sender), the central address otherwise, with the closer kept
+     * reachable through Reply-To when their address is off-domain.
+     *
+     * @return array{from: Address, replyTo: ?Address}
+     */
+    private function clientSender(Contact $contact): array
+    {
+        $assignee = $contact->getAssignedTo();
+        $email = trim((string) $assignee?->getEmail());
+        if (false === filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            return ['from' => new Address(EmailAddress::CONTACT->value, 'Relocation in Paris'), 'replyTo' => null];
+        }
+
+        $name = trim(((string) $assignee?->getFirstName()).' '.((string) $assignee?->getLastName()));
+        $closer = new Address($email, '' !== $name ? $name : $email);
+        if (null !== self::closerWorkspaceEmail($contact)) {
+            return ['from' => $closer, 'replyTo' => null];
+        }
+
+        // Off-domain closer address: the transactional provider only sends
+        // from the verified agency domain, so the closer moves to Reply-To.
+        return ['from' => new Address(EmailAddress::CONTACT->value, 'Relocation in Paris'), 'replyTo' => $closer];
+    }
+
+    /**
      * "Add to calendar" links for the client email (Google / Outlook), a
      * complement to the attached invite for prospects who never open
      * attachments. Empty on failure: links must never block the send.
      *
      * @return array<string, string> label => url
      */
-    private function addToCalendarLinks(string $clientName, \DateTimeImmutable $visioAt, ?string $meetLink): array
+    private function addToCalendarLinks(Contact $contact, string $clientName, bool $fr, \DateTimeImmutable $visioAt, ?string $meetLink): array
     {
         try {
+            $phrase = self::videoCallPhrase($contact, $fr);
             $event = new CalendarEvent(
-                title: 'Visio Relocation in Paris',
+                title: self::eventTitle($contact, $fr, $clientName),
                 start: $visioAt,
                 end: $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
-                description: \sprintf('Visio Relocation in Paris avec %s.%s', $clientName, null !== $meetLink ? ' Rejoindre : '.$meetLink : ''),
+                description: \sprintf(
+                    '%s, Relocation in Paris.%s',
+                    ucfirst($phrase),
+                    null !== $meetLink ? ($fr ? ' Rejoindre : ' : ' Join: ').$meetLink : '',
+                ),
                 url: $meetLink,
             );
 
@@ -302,9 +433,12 @@ final readonly class VisioInvitationMailer
         // only a visio next step means a meeting actually exists.
         $visioAt = NextStep::Visio === $contact->getNextStep() ? $contact->getRecallAt() : null;
         $eventId = $contact->getVisioEventId();
+        $organizer = $this->organizerFor($contact);
 
         if (null !== $eventId) {
-            $this->calendar->deleteEvent($eventId);
+            // Deleted under its organizer's identity: an attendee-side
+            // deletion would only decline, not cancel the meeting.
+            $this->calendar->deleteEvent($eventId, $organizer);
             $contact->setVisioEventId(null)
                 ->setVisioMeetLink(null);
             $this->em->flush();
@@ -334,15 +468,16 @@ final readonly class VisioInvitationMailer
         // non-Google calendars too (the Google event itself was already
         // deleted API-side). Sent in every case: an invite ICS may have
         // reached the prospect at any earlier point.
-        $ics = $this->buildIcs($contact, $visioAt, $clientName, $clientEmail, $assigneeEmail, cancelled: true, googleEventId: $eventId);
+        $ics = $this->buildIcs($contact, $visioAt, $clientName, $clientEmail, $assigneeEmail, $fr, organizerEmail: $organizer, cancelled: true, googleEventId: $eventId);
 
         try {
             $dateText = \sprintf($fr ? '%s à %s' : '%s at %s', self::humanDate($visioAt, $fr), $visioAt->format($fr ? 'H\hi' : 'H:i'));
+            ['from' => $from, 'replyTo' => $replyTo] = $this->clientSender($contact);
             $client = (new TemplatedEmail())
-                ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
+                ->from($from)
                 ->to($clientEmail)
                 ->subject($fr
-                    ? \sprintf('Votre visio du %s est annulée', $dateText)
+                    ? \sprintf('Votre appel vidéo du %s est annulé', $dateText)
                     : \sprintf('Your video call on %s is cancelled', $dateText))
                 ->htmlTemplate('emails/contact_visio_client.html.twig')
                 ->context([
@@ -354,7 +489,10 @@ final readonly class VisioInvitationMailer
                     'agentName' => self::agentFirstName($contact),
                     'durationMinutes' => self::DURATION_MINUTES,
                 ]);
-            $client->addPart(new DataPart($ics, 'visio.ics', 'text/calendar'));
+            if (null !== $replyTo) {
+                $client->replyTo($replyTo);
+            }
+            $client->addPart(new DataPart($ics, 'invitation.ics', 'text/calendar'));
 
             $recipients = [EmailAddress::CONTACT->value];
             if (null !== $assigneeEmail && '' !== $assigneeEmail && EmailAddress::CONTACT->value !== $assigneeEmail) {
@@ -399,6 +537,8 @@ final readonly class VisioInvitationMailer
         string $clientName,
         string $clientEmail,
         ?string $assigneeEmail,
+        bool $fr,
+        ?string $organizerEmail = null,
         bool $cancelled = false,
         ?string $meetLink = null,
         ?string $googleEventId = null,
@@ -409,12 +549,22 @@ final readonly class VisioInvitationMailer
         $now = new \DateTimeImmutable('now', $utc);
 
         $description = \sprintf(
-            'Visio Relocation in Paris avec %s (%s)%s%s',
+            '%s, Relocation in Paris. %s (%s)%s%s',
+            ucfirst(self::videoCallPhrase($contact, $fr)),
             $clientName,
             $clientEmail,
             null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : '',
-            null !== $meetLink ? "\nRejoindre : ".$meetLink : '',
+            null !== $meetLink ? ($fr ? "\nRejoindre : " : "\nJoin: ").$meetLink : '',
         );
+
+        // The organizer matches the agenda hosting the Google event (the
+        // closer when they organize the meeting, the agency inbox as the
+        // fallback), so calendar clients merge instead of duplicating.
+        $organizerEmail ??= EmailAddress::CONTACT->value;
+        $assigneeName = trim(((string) $contact->getAssignedTo()?->getFirstName()).' '.((string) $contact->getAssignedTo()?->getLastName()));
+        $organizerName = ('' !== $assigneeName && $organizerEmail === trim((string) $contact->getAssignedTo()?->getEmail()))
+            ? $assigneeName
+            : 'Relocation in Paris';
 
         // Aligned with the Google event when one exists, so calendar
         // clients merge the attachment with the API-created invite.
@@ -424,7 +574,7 @@ final readonly class VisioInvitationMailer
 
         $lines = [
             'BEGIN:VCALENDAR',
-            'PRODID:-//Relocation in Paris//Visio//FR',
+            'PRODID:-//Relocation in Paris//VideoCall//FR',
             'VERSION:2.0',
             'CALSCALE:GREGORIAN',
             $cancelled ? 'METHOD:CANCEL' : 'METHOD:REQUEST',
@@ -435,9 +585,9 @@ final readonly class VisioInvitationMailer
             \sprintf('DTSTAMP:%s', $now->format('Ymd\THis\Z')),
             \sprintf('DTSTART:%s', $start->format('Ymd\THis\Z')),
             \sprintf('DTEND:%s', $end->format('Ymd\THis\Z')),
-            \sprintf('SUMMARY:%s', $this->escapeIcs(\sprintf('Visio Découverte | %s', $clientName))),
+            \sprintf('SUMMARY:%s', $this->escapeIcs(self::eventTitle($contact, $fr, $clientName))),
             \sprintf('DESCRIPTION:%s', $this->escapeIcs($description)),
-            \sprintf('ORGANIZER;CN=Relocation in Paris:mailto:%s', EmailAddress::CONTACT->value),
+            \sprintf('ORGANIZER;CN=%s:mailto:%s', $this->quoteIcsParam($organizerName), $organizerEmail),
             ...(null !== $meetLink ? ['URL:'.$meetLink] : []),
             ...($cancelled ? ['STATUS:CANCELLED'] : []),
             \sprintf(

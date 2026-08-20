@@ -538,7 +538,7 @@ final class ContactQualificationTest extends KernelTestCase
         self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'calendar.google.com');
         self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'outlook.live.com');
         // Subject and hero block: the essential info is readable at a glance.
-        self::assertStringContainsString('Votre visio est confirmée', (string) $byRecipient[(string) $contact->getEmail()]->getSubject());
+        self::assertStringContainsString('Votre appel vidéo est confirmé', (string) $byRecipient[(string) $contact->getEmail()]->getSubject());
         self::assertEmailHtmlBodyContains($byRecipient[(string) $contact->getEmail()], 'heure de Paris');
         $agent = $byRecipient['contact@relocation-in-paris.fr'];
         self::assertEmailAttachmentCount($agent, 1);

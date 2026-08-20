@@ -146,7 +146,7 @@ final readonly class DossierRecapGenerator
                 $search->getAreas() ? 'quartiers '.$search->getAreas() : null,
                 $search->getStayDuration(),
                 $search->getFurnishing(),
-                $search->getGuarantorType() ? 'garant '.$search->getGuarantorType() : null,
+                [] !== $search->getGuarantorTypes() ? 'garant '.implode(', ', $search->getGuarantorTypes()) : null,
             ]);
             if ([] !== $criteria) {
                 $lines[] = 'Recherche : '.implode(', ', $criteria);

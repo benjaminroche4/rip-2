@@ -2,6 +2,14 @@
 
 {% block title %}{{ dossier.name }} ({{ dossier.reference }}){% endblock %}
 
+{% block head %}
+    {# La page vit dans des LiveComponents et porte des cartes Google en
+       zones data-live-ignore : un snapshot Turbo restauré (retour, préview)
+       remonterait un état périmé avec des instances de carte mortes (écran
+       gris). Même correctif que les écrans Visites. #}
+    <meta name="turbo-cache-control" content="no-cache">
+{% endblock %}
+
 {% block page_header %}
     <twig:Admin:PageHeader
         title="{{ dossier.name }}"

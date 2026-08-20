@@ -119,9 +119,9 @@
                             {{ 'admin.dossiers.show.facts.guarantor'|trans }}
                         </p>
                         <p class="mt-1 text-sm font-medium text-gray-900" data-testid="fact-guarantor">
-                            {% if facts.guarantor %}
-                                {{ ('admin.contacts.project.guarantor.choice.' ~ facts.guarantor)|trans }}
-                                {% if facts.guarantorStatus and facts.guarantor == 'garantme' %}
+                            {% if facts.guarantors is not empty %}
+                                {{ facts.guarantors|map(g => ('admin.contacts.project.guarantor.choice.' ~ g)|trans)|join(', ') }}
+                                {% if facts.guarantorStatus and 'garantme' in facts.guarantors %}
                                     <span class="font-normal text-gray-500">{{ ('admin.dossiers.show.search.guarantorStatus.choice.' ~ facts.guarantorStatus)|trans|lower }}</span>
                                 {% endif %}
                             {% else %}

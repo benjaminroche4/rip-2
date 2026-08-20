@@ -14,7 +14,8 @@ final class ImportantAddressList
     /** Common destinations for the "important addresses" rows. */
     public const TYPES = ['work', 'school', 'daycare', 'family', 'gym', 'other'];
 
-    public const MAX = 3;
+    /** Both parents' workplaces, daycares, schools... 6 covers real households. */
+    public const MAX = 6;
 
     private function __construct()
     {

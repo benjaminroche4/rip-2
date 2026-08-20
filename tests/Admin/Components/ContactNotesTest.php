@@ -137,6 +137,130 @@ final class ContactNotesTest extends KernelTestCase
         self::assertSame(0, $component->getHiddenFeedCount());
     }
 
+    public function testAdminCanReplyToANote(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $parent = $this->persistNote($contact, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        $component->startReply((int) $parent->getId());
+        self::assertSame((int) $parent->getId(), $component->replyingToId);
+
+        $component->replyText = '  Première réponse.  ';
+        $component->addReply();
+
+        self::assertNull($component->replyingToId, 'The composer closes after sending.');
+        $feed = $component->getFeed();
+        self::assertCount(1, $feed, 'A reply never becomes a top-level entry.');
+        self::assertCount(1, $feed[0]['replies']);
+        self::assertSame('Première réponse.', $feed[0]['replies'][0]['note']->text);
+        self::assertSame((int) $parent->getId(), $feed[0]['replies'][0]['note']->parentId);
+    }
+
+    public function testRepliesReadChronologicallyUnderTheirParent(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $parent = $this->persistNote($contact, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactNoteRepository::class);
+        $first = $repo->add($contact, 'Réponse 1', (int) $admin->getId(), 'First Last', null, $parent);
+        $first->setCreatedAt(new \DateTimeImmutable('-2 hours'));
+        $second = $repo->add($contact, 'Réponse 2', (int) $admin->getId(), 'First Last', null, $parent);
+        $second->setCreatedAt(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+
+        $feed = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()])->getFeed();
+
+        self::assertCount(1, $feed);
+        self::assertSame(
+            ['Réponse 1', 'Réponse 2'],
+            array_map(static fn (array $row): string => $row['note']->text, $feed[0]['replies']),
+            'Replies read oldest first, like a conversation.',
+        );
+    }
+
+    public function testReplyingToAReplyAttachesToTheRootNote(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $parent = $this->persistNote($contact, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactNoteRepository::class);
+        $reply = $repo->add($contact, 'Réponse', (int) $admin->getId(), 'First Last', null, $parent);
+
+        // Depth is capped at one: a reply targeting a reply lands under the root.
+        $nested = $repo->add($contact, 'Réponse à la réponse', (int) $admin->getId(), 'First Last', null, $reply);
+        self::assertSame($parent->getId(), $nested->getParentNote()?->getId());
+    }
+
+    public function testReplyToAnotherThreadsNoteIsIgnored(): void
+    {
+        $contact = $this->persistContact();
+        $otherContact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $foreignNote = $this->persistNote($otherContact, (int) $admin->getId(), "Note d'un autre lead");
+        $this->loginAs($admin);
+
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        $component->startReply((int) $foreignNote->getId());
+        self::assertNull($component->replyingToId, 'A note from another lead never opens the composer.');
+
+        $component->replyingToId = (int) $foreignNote->getId();
+        $component->replyText = 'Tentative';
+        $component->addReply();
+        self::assertCount(0, $component->getFeed(), 'Nothing persists on a cross-thread reply.');
+    }
+
+    public function testDeletingTheParentRemovesItsReplies(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $parent = $this->persistNote($contact, (int) $admin->getId(), 'Note mère');
+        $repo = self::getContainer()->get(\App\Contact\Repository\ContactNoteRepository::class);
+        $repo->add($contact, 'Réponse', (int) $admin->getId(), 'First Last', null, $parent);
+        $this->loginAs($admin);
+
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->delete((int) $parent->getId());
+
+        $this->em->clear();
+        self::assertCount(0, $repo->listForContact((int) $contact->getId()), 'DB cascade removes the replies with the parent.');
+    }
+
+    public function testNonSectionMemberCannotReply(): void
+    {
+        $contact = $this->persistContact();
+        $admin = $this->seedUser('admin@notes-test.local', ['ROLE_ADMIN']);
+        $user = $this->seedUser('nobody@notes-test.local', []);
+        $this->em->flush();
+        $parent = $this->persistNote($contact, (int) $admin->getId(), 'Note mère');
+
+        $this->loginAs($admin);
+        $component = $this->mountTwigComponent('Admin:ContactNotes', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+
+        $this->loginAs($user);
+        $component->replyingToId = (int) $parent->getId();
+        $component->replyText = 'Interdit';
+        $this->expectException(AccessDeniedException::class);
+        $component->addReply();
+    }
+
     public function testNonAdminCannotMount(): void
     {
         $user = $this->seedUser('user@notes-test.local', []);

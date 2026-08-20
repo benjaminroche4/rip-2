@@ -71,6 +71,9 @@ final class ContactToDossierTest extends WebTestCase
         /** @var Dossier|null $dossier */
         $dossier = $this->em->getRepository(Dossier::class)->findOneBy([]);
         self::assertNotNull($dossier);
+        // Référence unique lead -> dossier : les 6 chiffres du lead sont
+        // repris tels quels (CT-123456 devient DS-123456).
+        self::assertSame('DS-'.substr($contact->getReference(), 3), $dossier->getReference());
         self::assertSame('Doe', $dossier->getName());
         self::assertCount(1, $dossier->getPersons());
         $person = $dossier->getPersons()->first();
@@ -91,6 +94,7 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('long', $search->getStayDuration());
         self::assertSame('furnished', $search->getFurnishing());
         self::assertSame('physical', $search->getGuarantorType());
+        self::assertSame(['physical'], $search->getGuarantorTypes());
         self::assertSame('Cherche proche métro.', $search->getNote());
 
         // The origin contact is referenced for the follow-up thread's origin entry.
@@ -289,6 +293,47 @@ final class ContactToDossierTest extends WebTestCase
         // "Voir le dossier" is offered, the conversion action is gone.
         self::assertSelectorExists('[data-testid="contact-view-dossier"]');
         self::assertSelectorNotExists('[data-testid="contact-to-dossier-trigger"]');
+    }
+
+    public function testReferenceCollisionFallsBackToARandomOne(): void
+    {
+        $contact = $this->persistContact();
+        $expected = 'DS-'.substr($contact->getReference(), 3);
+
+        // Un dossier sans lien avec le contact occupe déjà ces 6 chiffres.
+        $squatter = (new Dossier())
+            ->setName('Squatter')
+            ->setReference($expected)
+            ->setPairingCode('SQTT77')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->addPerson((new DossierPerson())
+                ->setRole(DossierPersonRole::TENANT)
+                ->setFirstName('Sam')->setLastName('Squatter')
+                ->setEmail('squatter@example.com')
+                ->setPrimaryContact(true));
+        $this->em->persist($squatter);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', $this->contactUrl($contact));
+        $this->client->submit($crawler->filter('[data-testid="contact-to-dossier"]')->closest('form')->form());
+        self::assertResponseStatusCodeSame(303);
+
+        /** @var Dossier|null $dossier */
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['sourceContactReference' => $contact->getReference()]);
+        self::assertNotNull($dossier);
+        // Repli : génération aléatoire, jamais les chiffres déjà pris.
+        self::assertMatchesRegularExpression('/^DS-\d{6}$/', (string) $dossier->getReference());
+        self::assertNotSame($expected, $dossier->getReference());
+    }
+
+    public function testDirectDossierReferencesStayRandom(): void
+    {
+        // Une création sans lead ne dérive d'aucun contact : la génération
+        // aléatoire reste inchangée (et un contact malformé retombe dessus).
+        $generator = static::getContainer()->get(\App\Dossier\Service\DossierNumberGenerator::class);
+
+        self::assertMatchesRegularExpression('/^DS-\d{6}$/', $generator->reference());
+        self::assertMatchesRegularExpression('/^DS-\d{6}$/', $generator->referenceFromContact('not-a-reference'));
     }
 
     private function persistContact(?string $offer = 'accompagne'): Contact
