@@ -4,3 +4,7 @@ doctrine_migrations:
         # as migrations classes should NOT be autoloaded
         'DoctrineMigrations': '%kernel.project_dir%/migrations'
     enable_profiler: false
+    # MySQL/MariaDB commits implicitly on every DDL statement, so wrapping
+    # migrations in a transaction is a lie (and deprecated by
+    # doctrine/migrations, see issue #1169): declare them non-transactional.
+    transactional: false
