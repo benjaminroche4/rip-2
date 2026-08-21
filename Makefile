@@ -25,6 +25,16 @@ fix-env:
 warm:
 	php bin/console cache:warmup --env=prod
 
+# Purge 2FA de TOUS les comptes (incident APP_SECRET d'août 2026) : secrets
+# TOTP, date d'activation et codes de secours effacés, tout le monde se
+# connecte au mot de passe seul. À lancer sur le serveur (env prod). Le
+# ré-enrôlement se fera depuis les profils une fois le coupe-circuit
+# two_factor_enrollment_enabled repassé à true.
+2fa-purge:
+	echo "→ Comptes avec 2FA actif :" && php bin/console dbal:run-sql "SELECT email FROM user WHERE totp_secret IS NOT NULL" --env=prod
+	php bin/console dbal:run-sql "UPDATE user SET totp_secret = NULL, totp_enabled_at = NULL, backup_codes = '[]' WHERE totp_secret IS NOT NULL" --env=prod
+	echo "✓ 2FA purgé : connexion au mot de passe seul pour tout le staff"
+
 deploy:
 	echo "→ Pull Git (main)" && git pull --ff-only origin main
 	echo "→ Install dependencies (prod)" && php composer.phar install --no-dev --optimize-autoloader
