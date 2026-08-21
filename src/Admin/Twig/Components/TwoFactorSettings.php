@@ -83,6 +83,8 @@ final class TwoFactorSettings
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly LoggerInterface $logger,
         private readonly \Symfony\Contracts\Translation\TranslatorInterface $translator,
+        #[\Symfony\Component\DependencyInjection\Attribute\Autowire('%two_factor_enrollment_enabled%')]
+        private readonly bool $enrollmentEnabled = true,
     ) {
     }
 
@@ -94,6 +96,12 @@ final class TwoFactorSettings
     public function isEnabled(): bool
     {
         return $this->user()->isTotpAuthenticationEnabled();
+    }
+
+    /** Coupe-circuit : l'enrôlement 2FA peut être gelé par configuration. */
+    public function isEnrollmentEnabled(): bool
+    {
+        return $this->enrollmentEnabled;
     }
 
     public function getEnabledAt(): ?\DateTimeImmutable
@@ -137,6 +145,11 @@ final class TwoFactorSettings
     public function startEnrollment(): void
     {
         $this->ensureStaff();
+        // Garde serveur du coupe-circuit : le bouton grisé ne suffit pas,
+        // l'endpoint /_components/ doit refuser aussi.
+        if (!$this->enrollmentEnabled) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('2FA enrollment is disabled.');
+        }
         if ($this->isEnabled()) {
             return;
         }

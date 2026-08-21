@@ -186,20 +186,32 @@
             {% endif %}
         {% else %}
             <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white px-5 py-4" data-testid="two-factor-idle">
-                <p class="max-w-[52ch] text-sm text-pretty text-gray-600">{{ 'admin.profile.twoFactor.disabledHint'|trans }}</p>
-                <twig:Button
-                    size="sm"
-                    data-action="live#action"
-                    data-live-action-param="startEnrollment"
-                    data-loading="action(startEnrollment)|addAttribute(disabled)"
-                    data-testid="two-factor-enable"
-                >
-                    <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(startEnrollment)|removeClass(hidden)" />
-                    <span class="flex items-center gap-2">
-                        {{ ux_icon('lucide:shield-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
-                        {{ 'admin.profile.twoFactor.enable'|trans }}
-                    </span>
-                </twig:Button>
+                {% if this.enrollmentEnabled %}
+                    <p class="max-w-[52ch] text-sm text-pretty text-gray-600">{{ 'admin.profile.twoFactor.disabledHint'|trans }}</p>
+                    <twig:Button
+                        size="sm"
+                        data-action="live#action"
+                        data-live-action-param="startEnrollment"
+                        data-loading="action(startEnrollment)|addAttribute(disabled)"
+                        data-testid="two-factor-enable"
+                    >
+                        <twig:Spinner class="hidden size-4 shrink-0" data-loading="action(startEnrollment)|removeClass(hidden)" />
+                        <span class="flex items-center gap-2">
+                            {{ ux_icon('lucide:shield-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.profile.twoFactor.enable'|trans }}
+                        </span>
+                    </twig:Button>
+                {% else %}
+                    {# Coupe-circuit actif : option visible mais grisée, non
+                       cliquable, avec la raison en clair. #}
+                    <p class="max-w-[52ch] text-sm text-pretty text-gray-500">{{ 'admin.profile.twoFactor.frozenHint'|trans }}</p>
+                    <twig:Button size="sm" disabled class="pointer-events-none opacity-50 saturate-50" data-testid="two-factor-enable-frozen">
+                        <span class="flex items-center gap-2">
+                            {{ ux_icon('lucide:shield-plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            {{ 'admin.profile.twoFactor.enable'|trans }}
+                        </span>
+                    </twig:Button>
+                {% endif %}
             </div>
         {% endif %}
     </div>

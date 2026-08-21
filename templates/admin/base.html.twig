@@ -189,7 +189,7 @@
                 {# Incitation 2FA : visible tant que le compte n'a pas activé
                    la double authentification, elle disparaît une fois faite.
                    Masquée quand la sidebar est repliée (plus de place). #}
-                {% if not app.user.totpAuthenticationEnabled %}
+                {% if two_factor_enrollment_enabled and not app.user.totpAuthenticationEnabled %}
                     <a
                         href="{{ path('admin_profile', {adminPrefix: adminPrefix}) }}#two-factor"
                         class="group/2fa mx-3 mb-1 block rounded-xl border border-amber-200 bg-amber-50 p-3 transition-colors duration-100 ease-out hover:border-amber-300 hover:bg-amber-100 group-data-collapsed/sidebar:hidden"

@@ -5,6 +5,10 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     site_url: 'https://relocation-in-paris.fr'
+    # Coupe-circuit 2FA (incident APP_SECRET d'août 2026) : enrôlement gelé
+    # tant que la situation prod n'est pas assainie. Repasser à true pour
+    # rouvrir l'activation depuis les profils.
+    two_factor_enrollment_enabled: false
     admin_path_prefix: '%env(string:ADMIN_PATH_PREFIX)%'
     # Deposited dossier documents live outside public/ and outside var/
     # (cache:clear / deploy safe). Served via authenticated controllers only.
@@ -60,3 +64,6 @@ when@test:
         # Keep test uploads under var/ so the suite never writes into the
         # real storage/ directory and leftovers vanish with cache:clear.
         dossier_storage_dir: '%kernel.project_dir%/var/test-storage/dossiers'
+        # La suite 2FA exerce le flux d'enrôlement complet : le coupe-circuit
+        # reste ouvert en test.
+        two_factor_enrollment_enabled: true

@@ -3383,6 +3383,7 @@ admin:
             enabledSince: Enabled since %date%.
             remainingCodes: '{0}No recovery codes left|{1}1 recovery code left|]1,Inf[%count% recovery codes left'
             disabledHint: Protect your account with an authenticator app (Google Authenticator, Authy, 1Password...). Even with your password, nobody can sign in without your phone.
+            frozenHint: 'Two-factor activation is temporarily paused for maintenance. It will reopen shortly.'
             enable: Enable
             enroll:
                 qrAlt: QR code to scan with your authenticator app

@@ -3385,6 +3385,7 @@ admin:
             enabledSince: Activée depuis le %date%.
             remainingCodes: '{0}Aucun code de récupération restant|{1}1 code de récupération restant|]1,Inf[%count% codes de récupération restants'
             disabledHint: Protégez votre compte avec une application d'authentification (Google Authenticator, Authy, 1Password...). Même avec votre mot de passe, personne ne pourra se connecter sans votre téléphone.
+            frozenHint: "L'activation de la double authentification est temporairement suspendue, le temps d'une maintenance. Elle rouvrira prochainement."
             enable: Activer
             enroll:
                 qrAlt: QR code à scanner avec votre application d'authentification
