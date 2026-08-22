@@ -577,11 +577,12 @@
                             </button>
                         {% endfor %}
                     </div>
-                    {# Garde-fou recalculé à chaque rendu : moins d'occupants
-                       que de locataires (onglet Personnes) est incohérent. #}
+                    {# Garde-fou recalculé à chaque rendu : un nombre
+                       d'occupants différent du nombre de locataires (onglet
+                       Personnes) mérite un regard. #}
                     {% if this.occupantsMismatch %}
-                        <p class="flex items-center gap-1.5 text-xs text-amber-700" role="alert" data-testid="occupants-mismatch">
-                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0 text-amber-600', 'aria-hidden': 'true'}) }}
+                        <p class="flex items-center gap-1.5 text-xs text-red-600" role="alert" data-testid="occupants-mismatch">
+                            {{ ux_icon('lucide:triangle-alert', {class: 'size-3.5 shrink-0 text-red-500', 'aria-hidden': 'true'}) }}
                             {{ 'admin.dossiers.show.search.occupantsMismatch'|trans }}
                         </p>
                     {% endif %}

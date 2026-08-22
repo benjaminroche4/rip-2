@@ -83,7 +83,7 @@ final readonly class VisioInvitationMailer
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
-            array_values(array_unique(array_filter([$clientEmail, $assigneeEmail, EmailAddress::CONTACT->value]))),
+            array_values(array_unique(array_filter([$clientEmail, $assigneeEmail]))),
             impersonate: $organizer,
         );
         if (null !== $event) {
@@ -233,7 +233,7 @@ final readonly class VisioInvitationMailer
             \sprintf('%s / %s%s', $clientName, $clientEmail, null !== $contact->getPhoneNumber() ? ' / '.$contact->getPhoneNumber() : ''),
             $visioAt,
             $visioAt->modify(\sprintf('+%d minutes', self::DURATION_MINUTES)),
-            array_values(array_unique(array_filter([$clientEmail, $assigneeEmail, EmailAddress::CONTACT->value]))),
+            array_values(array_unique(array_filter([$clientEmail, $assigneeEmail]))),
             impersonate: $this->organizerFor($contact),
         );
         if (null !== $event) {
@@ -316,13 +316,7 @@ final readonly class VisioInvitationMailer
      */
     private static function closerWorkspaceEmail(Contact $contact): ?string
     {
-        $email = trim((string) $contact->getAssignedTo()?->getEmail());
-        if (false === filter_var($email, \FILTER_VALIDATE_EMAIL)) {
-            return null;
-        }
-        $domain = substr((string) strrchr(EmailAddress::CONTACT->value, '@'), 1);
-
-        return str_ends_with(strtolower($email), '@'.$domain) ? $email : null;
+        return CloserSender::workspaceEmail($contact->getAssignedTo());
     }
 
     /**
@@ -340,8 +334,11 @@ final readonly class VisioInvitationMailer
             return $closerEmail;
         }
 
-        // The event is in the closer's agenda (organizer or attendee) and
-        // in the central one (always an attendee): probe both copies.
+        // The event lives in the closer's agenda (new events) or in the
+        // central one (legacy events, or leads without a closer): probe the
+        // closer's copy first, then the central agenda. contact@ is not an
+        // attendee anymore (its calendar must stay uncluttered), but legacy
+        // events still resolve through either probe.
         $subjects = null !== $closerEmail ? [$closerEmail, null] : [null];
         foreach ($subjects as $subject) {
             $event = $this->calendar->getEvent($eventId, $subject);
@@ -366,21 +363,7 @@ final readonly class VisioInvitationMailer
      */
     private function clientSender(Contact $contact): array
     {
-        $assignee = $contact->getAssignedTo();
-        $email = trim((string) $assignee?->getEmail());
-        if (false === filter_var($email, \FILTER_VALIDATE_EMAIL)) {
-            return ['from' => new Address(EmailAddress::CONTACT->value, 'Relocation in Paris'), 'replyTo' => null];
-        }
-
-        $name = trim(((string) $assignee?->getFirstName()).' '.((string) $assignee?->getLastName()));
-        $closer = new Address($email, '' !== $name ? $name : $email);
-        if (null !== self::closerWorkspaceEmail($contact)) {
-            return ['from' => $closer, 'replyTo' => null];
-        }
-
-        // Off-domain closer address: the transactional provider only sends
-        // from the verified agency domain, so the closer moves to Reply-To.
-        return ['from' => new Address(EmailAddress::CONTACT->value, 'Relocation in Paris'), 'replyTo' => $closer];
+        return CloserSender::senderFor($contact->getAssignedTo());
     }
 
     /**

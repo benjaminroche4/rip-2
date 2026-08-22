@@ -240,13 +240,18 @@ class Visit
     private ?string $updatedByAvatar = null;
 
     /**
-     * Google Calendar mirror (VisitCalendarSync): id of the event in the
-     * central agenda, id of the twin event in the assignee's own agenda,
-     * and the assignee email that personal event was created under (needed
-     * to delete it from the right agenda when the assignee changes).
+     * Google Calendar mirror (VisitCalendarSync): id of the central event,
+     * the Workspace email whose agenda hosts it (null: the default central
+     * agenda, where legacy events live), id of the twin event in the
+     * assignee's own agenda, and the assignee email that personal event
+     * was created under (needed to delete it from the right agenda when
+     * the assignee changes).
      */
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $calendarCentralEventId = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $calendarCentralOwner = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $calendarAssigneeEventId = null;
@@ -745,6 +750,18 @@ class Visit
     public function setCalendarCentralEventId(?string $calendarCentralEventId): static
     {
         $this->calendarCentralEventId = $calendarCentralEventId;
+
+        return $this;
+    }
+
+    public function getCalendarCentralOwner(): ?string
+    {
+        return $this->calendarCentralOwner;
+    }
+
+    public function setCalendarCentralOwner(?string $calendarCentralOwner): static
+    {
+        $this->calendarCentralOwner = $calendarCentralOwner;
 
         return $this;
     }

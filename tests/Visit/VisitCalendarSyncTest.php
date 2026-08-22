@@ -50,6 +50,7 @@ final class VisitCalendarSyncTest extends KernelTestCase
         $this->em->createQuery('DELETE FROM '.RealEstateAgent::class)->execute();
         $this->em->createQuery('DELETE FROM '.Agency::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@visit-calendar-test.local')->execute();
+        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', 'vcst-%@relocation-in-paris.fr')->execute();
 
         $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => \OPENSSL_KEYTYPE_RSA]);
         \assert(false !== $key);
@@ -380,6 +381,127 @@ final class VisitCalendarSyncTest extends KernelTestCase
         self::assertNull($sync->findAssigneeBusyInterval('marie@visit-calendar-test.local', new \DateTimeImmutable('2026-09-10 14:15'), 30));
     }
 
+    public function testCentralEventLivesInTheDossierManagersAgenda(): void
+    {
+        $manager = $this->makeManager('Lea', 'Closer');
+        $assignee = $this->makeAssignee('Marie', 'Curie');
+        $visit = $this->persistVisit(assignee: $assignee, manager: $manager);
+        $sync = $this->sync();
+
+        $sync->sync($visit);
+
+        // Central chez le closer du dossier, copie chez l'assignée.
+        $byMethod = array_map(static fn (array $c): string => $c['method'].' '.$c['sub'], $this->apiCalls);
+        self::assertSame(['POST '.$manager->getEmail(), 'POST '.$assignee->getEmail()], $byMethod);
+        self::assertSame($manager->getEmail(), $visit->getCalendarCentralOwner());
+        self::assertSame('evt-1', $visit->getCalendarCentralEventId());
+
+        // Mutation ultérieure : le PATCH central vise l'agenda du closer.
+        $this->resetCalls();
+        $sync->sync($visit);
+        self::assertSame('PATCH', $this->apiCalls[0]['method']);
+        self::assertSame($manager->getEmail(), $this->apiCalls[0]['sub']);
+
+        // Changement de gestionnaire : l'événement ne déménage pas, il
+        // continue de vivre chez son organisateur d'origine.
+        $this->resetCalls();
+        $visit->getDossier()?->setManager($this->makeManager('Paul', 'Nouveau'));
+        $sync->sync($visit);
+        self::assertSame($manager->getEmail(), $this->apiCalls[0]['sub']);
+        self::assertSame($manager->getEmail(), $visit->getCalendarCentralOwner());
+
+        // Annulation : le DELETE central impersonne le propriétaire stocké.
+        $this->resetCalls();
+        $visit->setStatus(VisitStatus::Cancelled);
+        $sync->sync($visit);
+        self::assertSame(['DELETE '.$manager->getEmail(), 'DELETE '.$assignee->getEmail()], array_map(static fn (array $c): string => $c['method'].' '.$c['sub'], $this->apiCalls));
+        self::assertNull($visit->getCalendarCentralOwner());
+        self::assertNull($visit->getCalendarCentralEventId());
+    }
+
+    public function testAnOffDomainManagerFallsBackToTheCentralAgenda(): void
+    {
+        // Gestionnaire hors domaine Workspace : impersonation impossible,
+        // l'événement central retombe dans l'agenda contact@.
+        $manager = $this->makeAssignee('Jean', 'Externe');
+        $visit = $this->persistVisit(assignee: null, manager: $manager);
+
+        $this->sync()->sync($visit);
+
+        self::assertSame('POST', $this->apiCalls[0]['method']);
+        self::assertSame(self::CENTRAL, $this->apiCalls[0]['sub']);
+        self::assertNull($visit->getCalendarCentralOwner());
+    }
+
+    public function testACloserWhoIsAlsoTheAssigneeGetsASingleEvent(): void
+    {
+        // Le closer réalise la visite lui-même : un seul événement (le
+        // central, dans son agenda), avec la description interne complète
+        // puisque aucun client n'y est invité.
+        $manager = $this->makeManager('Lea', 'Closer');
+        $visit = $this->persistVisit(assignee: $manager, manager: $manager);
+
+        $this->sync()->sync($visit);
+
+        self::assertCount(1, $this->apiCalls);
+        self::assertSame('POST', $this->apiCalls[0]['method']);
+        self::assertSame($manager->getEmail(), $this->apiCalls[0]['sub']);
+        $payload = json_decode($this->apiCalls[0]['body'], true);
+        self::assertStringContainsString('· Lea Closer', (string) $payload['summary']);
+        self::assertStringContainsString('Note : Code 1234', (string) $payload['description']);
+        self::assertStringContainsString('test_admin_prefix', (string) $payload['description']);
+        self::assertNull($visit->getCalendarAssigneeEventId());
+        self::assertNull($visit->getCalendarAssigneeEmail());
+    }
+
+    public function testReassigningTheVisitToTheCloserCleansTheStalePersonalCopy(): void
+    {
+        $manager = $this->makeManager('Lea', 'Closer');
+        $marie = $this->makeAssignee('Marie', 'Curie');
+        $visit = $this->persistVisit(assignee: $marie, manager: $manager);
+        $sync = $this->sync();
+        $sync->sync($visit);
+        $this->resetCalls();
+
+        // La visite passe au closer : la copie personnelle de Marie part,
+        // aucun doublon n'est créé dans l'agenda du closer (le central y
+        // vit déjà).
+        $visit->setAssignee($manager);
+        $sync->sync($visit);
+
+        $byMethod = array_map(static fn (array $c): string => $c['method'].' '.$c['sub'], $this->apiCalls);
+        self::assertSame(['PATCH '.$manager->getEmail(), 'DELETE '.$marie->getEmail()], $byMethod);
+        self::assertNull($visit->getCalendarAssigneeEventId());
+        self::assertNull($visit->getCalendarAssigneeEmail());
+        self::assertSame('evt-1', $visit->getCalendarCentralEventId());
+    }
+
+    public function testALegacyCentralEventStaysManagedInTheCentralAgenda(): void
+    {
+        // Événement créé avant la colonne owner (il vit dans contact@) sur
+        // un dossier qui a depuis un gestionnaire Workspace : PATCH et
+        // DELETE continuent de viser l'agenda contact@, jamais celui du
+        // gestionnaire (l'événement ne déménage pas).
+        $manager = $this->makeManager('Lea', 'Closer');
+        $visit = $this->persistVisit(assignee: null, manager: $manager);
+        $visit->setCalendarCentralEventId('evt-legacy');
+        $visit->setCalendarCentralOwner(null);
+        $this->em->flush();
+        $sync = $this->sync();
+
+        $sync->sync($visit);
+        self::assertSame('PATCH', $this->apiCalls[0]['method']);
+        self::assertSame(self::CENTRAL, $this->apiCalls[0]['sub']);
+        self::assertStringContainsString('evt-legacy', $this->apiCalls[0]['url']);
+        self::assertNull($visit->getCalendarCentralOwner());
+
+        $this->resetCalls();
+        $visit->setStatus(VisitStatus::Cancelled);
+        $sync->sync($visit);
+        self::assertSame('DELETE', $this->apiCalls[0]['method']);
+        self::assertSame(self::CENTRAL, $this->apiCalls[0]['sub']);
+    }
+
     /**
      * @param list<array{start: string, end: string}> $busy
      */
@@ -451,6 +573,24 @@ final class VisitCalendarSyncTest extends KernelTestCase
         );
     }
 
+    /**
+     * A dossier manager (the closer) on the agency Workspace domain: their
+     * own agenda hosts the central event of the dossier's visits.
+     */
+    private function makeManager(string $firstName, string $lastName): User
+    {
+        $user = (new User())
+            ->setEmail('vcst-'.strtolower($firstName).'-'.bin2hex(random_bytes(4)).'@relocation-in-paris.fr')
+            ->setFirstName($firstName)->setLastName($lastName)
+            ->setRoles(['ROLE_STAFF', 'ROLE_SECTION_DOSSIERS'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return $user;
+    }
+
     private function makeAssignee(string $firstName, string $lastName): User
     {
         $user = (new User())
@@ -471,7 +611,7 @@ final class VisitCalendarSyncTest extends KernelTestCase
     /**
      * @param list<string> $personEmails
      */
-    private function persistVisit(?User $assignee, array $personEmails = []): Visit
+    private function persistVisit(?User $assignee, array $personEmails = [], ?User $manager = null): Visit
     {
         $agency = (new Agency())->setName('Agence Test')->setCreatedAt(new \DateTimeImmutable());
         $this->em->persist($agency);
@@ -486,6 +626,7 @@ final class VisitCalendarSyncTest extends KernelTestCase
             ->setName('Famille Martin')
             ->setReference('DS-'.random_int(100000, 999999))
             ->setPairingCode(substr(strtoupper(bin2hex(random_bytes(4))), 0, 6))
+            ->setManager($manager)
             ->setCreatedAt(new \DateTimeImmutable());
         foreach ($personEmails as $i => $email) {
             $dossier->addPerson((new DossierPerson())

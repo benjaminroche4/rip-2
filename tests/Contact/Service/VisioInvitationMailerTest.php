@@ -118,6 +118,12 @@ final class VisioInvitationMailerTest extends KernelTestCase
         $payload = json_decode($created[0]['body'], true);
         self::assertSame('jane • Marc - Votre nouvel appartement à Paris', $payload['summary']);
 
+        // contact@ is NOT invited: the shared calendar must stay uncluttered
+        // (the dashboard already lists the video calls).
+        $attendeeEmails = array_column($payload['attendees'] ?? [], 'email');
+        self::assertNotContains('contact@relocation-in-paris.fr', $attendeeEmails);
+        self::assertNotContains(self::CENTRAL, $attendeeEmails);
+
         // The confirmation email comes from the closer, name included.
         $client = self::getMailerMessages()[0];
         self::assertInstanceOf(Email::class, $client);
@@ -176,6 +182,41 @@ final class VisioInvitationMailerTest extends KernelTestCase
         $client = self::getMailerMessages()[0];
         self::assertInstanceOf(Email::class, $client);
         self::assertStringContainsString('Your video call is confirmed', (string) $client->getSubject());
+    }
+
+    public function testTheClientEmailSaysWithTheCloserFirstName(): void
+    {
+        // Avec un closer assigné, le corps de l'email dit "avec {prénom}"
+        // (jamais "avec notre équipe"), en français comme en anglais.
+        $closer = $this->persistCloser('Marc', 'Dupont');
+        $this->mailer()->send($this->persistContact(assignee: $closer));
+        $client = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $client);
+        $html = (string) $client->getHtmlBody();
+        self::assertStringContainsString('avec Marc', $html);
+        self::assertStringNotContainsString('notre équipe', $html);
+
+        $this->clearMailerAndCalls();
+        $this->mailer()->send($this->persistContact(assignee: $closer, lang: 'en'));
+        $client = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $client);
+        $html = (string) $client->getHtmlBody();
+        self::assertStringContainsString('with Marc', $html);
+        self::assertStringNotContainsString('our team', $html);
+    }
+
+    public function testWithoutACloserTheClientEmailFallsBackToTheTeamWording(): void
+    {
+        $this->mailer()->send($this->persistContact(assigned: false));
+        $client = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $client);
+        self::assertStringContainsString('avec notre équipe', (string) $client->getHtmlBody());
+
+        $this->clearMailerAndCalls();
+        $this->mailer()->send($this->persistContact(assigned: false, lang: 'en'));
+        $client = self::getMailerMessages()[0];
+        self::assertInstanceOf(Email::class, $client);
+        self::assertStringContainsString('with our team', (string) $client->getHtmlBody());
     }
 
     public function testTheDefaultDurationIsTwentyMinutes(): void

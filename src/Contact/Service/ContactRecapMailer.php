@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Contact\Service;
 
-use App\Admin\Service\ContactPdfRenderer;
+use App\Auth\Entity\User;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ParisDistricts;
-use App\Shared\Pdf\PdfRenderException;
-use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -16,7 +14,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * Sends the housing-project recap to the prospect, in the transactional
  * email style: project details, their contact details, and the team
- * member following their file. Written in the prospect's language.
+ * member following their file. Written in the prospect's language, and
+ * sent from the assigned closer's own address when it lives on the
+ * agency domain (CloserSender rules, same as the visio invitation).
  */
 final readonly class ContactRecapMailer
 {
@@ -46,18 +46,17 @@ final readonly class ContactRecapMailer
         private MailerInterface $mailer,
         private TranslatorInterface $translator,
         private DistrictStaticMapUrl $staticMap,
-        private ContactPdfRenderer $contractPdf,
-        private LoggerInterface $logger,
     ) {
     }
 
-    public function send(ContactListItem $contact, bool $withPaymentLink = false, bool $withDeposit = false): void
+    public function send(ContactListItem $contact, bool $withPaymentLink = false, bool $withDeposit = false, ?User $closer = null): void
     {
         $locale = \in_array($contact->lang, ['fr', 'en'], true) ? $contact->lang : 'fr';
         $fr = 'fr' === $locale;
 
+        ['from' => $from, 'replyTo' => $replyTo] = CloserSender::senderFor($closer);
         $email = (new TemplatedEmail())
-            ->from('Contact <contact@relocation-in-paris.fr>')
+            ->from($from)
             ->to((string) $contact->email)
             // Le nom d'expéditeur porte déjà la marque : le suffixe la
             // répétait au prix des caractères visibles sur mobile.
@@ -85,30 +84,11 @@ final readonly class ContactRecapMailer
                     : null,
             ]);
 
-        $this->attachContract($email, $contact, $locale);
+        if (null !== $replyTo) {
+            $email->replyTo($replyTo);
+        }
 
         $this->mailer->send($email);
-    }
-
-    /**
-     * Attaches the generated contract PDF, best effort: a rendering
-     * failure (backend down, quota) never blocks the recap email, it
-     * just leaves without the attachment and logs a warning.
-     */
-    private function attachContract(TemplatedEmail $email, ContactListItem $contact, string $locale): void
-    {
-        try {
-            $email->attach(
-                $this->contractPdf->render($contact),
-                \sprintf('%s-%s.pdf', 'fr' === $locale ? 'contrat' : 'contract', $contact->reference),
-                'application/pdf',
-            );
-        } catch (PdfRenderException $e) {
-            $this->logger->warning('Contract PDF generation failed, recap email sent without attachment', [
-                'reference' => $contact->reference,
-                'exception_class' => $e::class,
-            ]);
-        }
     }
 
     /**

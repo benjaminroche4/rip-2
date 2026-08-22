@@ -34,6 +34,7 @@ final class ContactRecapEmailTest extends KernelTestCase
         $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
         $this->em->createQuery('DELETE FROM '.Contact::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@recap-test.local')->execute();
+        $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', 'recap-closer-%@relocation-in-paris.fr')->execute();
 
         $this->mailer = new RecordingRecapMailer();
         self::getContainer()->set(MailerInterface::class, $this->mailer);
@@ -126,10 +127,9 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertStringContainsString('Emménagement souhaité', $html);
         self::assertStringContainsString('le plus tôt possible', $html);
 
-        // The generated contract PDF rides along as an attachment.
-        $attachments = $email->getAttachments();
-        self::assertCount(1, $attachments);
-        self::assertStringContainsString('contrat-', (string) $attachments[0]->getPreparedHeaders()->get('content-disposition')?->getBodyAsString());
+        // No attachment: the contract PDF was withdrawn from this email
+        // (business decision, August 2026).
+        self::assertCount(0, $email->getAttachments());
 
         // The send is traced in the follow-up thread with its author.
         $events = self::getContainer()->get(\App\Contact\Repository\ContactEventRepository::class)
@@ -212,38 +212,65 @@ final class ContactRecapEmailTest extends KernelTestCase
         self::assertStringContainsString('https://payment.relocation-in-paris.fr/b/4gMaEZ9h1dKrcCr7zy7EQ0N', (string) $email->getHtmlBody());
     }
 
-    public function testRecapStillLeavesWithoutAttachmentWhenThePdfBackendFails(): void
+    public function testTheRecapLeavesFromTheClosersAddressWithTheUsualFallbacks(): void
     {
-        // Best effort: a DocRaptor failure must never block the recap.
-        $this->pdfRenderer->fail = true;
-
-        $admin = (new User())
-            ->setEmail('pdf-fail@recap-test.local')
-            ->setFirstName('Julien')->setLastName('Moreau')
+        // Closer sur le domaine Workspace : From = son adresse, nom inclus.
+        $closer = (new User())
+            ->setEmail('recap-closer-'.bin2hex(random_bytes(4)).'@relocation-in-paris.fr')
+            ->setFirstName('Marc')->setLastName('Dupont')
             ->setRoles(['ROLE_ADMIN'])->setPassword('x')
             ->setCreatedAt(new \DateTimeImmutable())
             ->setProfileComplete(true)->setVerified(true);
-        $this->em->persist($admin);
-        $contact = (new Contact())
-            ->setFirstName('jane')->setLastName('doe')
-            ->setEmail('jane3@example.com')
-            ->setHelpType('contact.contactForm.helpType.choice.1')
-            ->setMessage('Hello')->setLang('fr')->setIp('127.0.0.1')
-            ->setCreatedAt(new \DateTimeImmutable('now'));
-        $this->em->persist($contact);
+        $this->em->persist($closer);
         $this->em->flush();
 
         self::getContainer()->get('security.token_storage')
-            ->setToken(new UsernamePasswordToken($admin, 'main', $admin->getRoles()));
+            ->setToken(new UsernamePasswordToken($closer, 'main', $closer->getRoles()));
 
-        $component = $this->mountTwigComponent('Admin:ContactRecapEmail', ['contactId' => (int) $contact->getId()]);
-        $component->setLiveResponder(new LiveResponder());
-        $component->openModal();
-        $component->send();
+        $sendFor = function (?User $assignee): Email {
+            $contact = (new Contact())
+                ->setFirstName('jane')->setLastName('doe')
+                ->setEmail('jane+'.bin2hex(random_bytes(4)).'@example.com')
+                ->setHelpType('contact.contactForm.helpType.choice.1')
+                ->setMessage('Hello')->setLang('fr')->setIp('127.0.0.1')
+                ->setCreatedAt(new \DateTimeImmutable('now'))
+                ->setAssignedTo($assignee);
+            $this->em->persist($contact);
+            $this->em->flush();
 
-        $email = $this->mailer->lastMessage;
-        self::assertInstanceOf(Email::class, $email, 'The recap email leaves even when the PDF backend is down.');
-        self::assertSame([], $email->getAttachments(), 'No attachment when the contract rendering failed.');
+            $component = $this->mountTwigComponent('Admin:ContactRecapEmail', ['contactId' => (int) $contact->getId()]);
+            $component->setLiveResponder(new LiveResponder());
+            $component->openModal();
+            $component->send();
+
+            $email = $this->mailer->lastMessage;
+            self::assertInstanceOf(Email::class, $email);
+
+            return $email;
+        };
+
+        $email = $sendFor($closer);
+        self::assertSame($closer->getEmail(), $email->getFrom()[0]->getAddress());
+        self::assertSame('Marc Dupont', $email->getFrom()[0]->getName());
+        self::assertSame([], $email->getReplyTo());
+
+        // Closer hors domaine : From contact@, closer joignable en Reply-To.
+        $offDomain = (new User())
+            ->setEmail('off@recap-test.local')
+            ->setFirstName('Nina')->setLastName('Externe')
+            ->setRoles(['ROLE_ADMIN'])->setPassword('x')
+            ->setCreatedAt(new \DateTimeImmutable())
+            ->setProfileComplete(true)->setVerified(true);
+        $this->em->persist($offDomain);
+        $this->em->flush();
+        $email = $sendFor($offDomain);
+        self::assertSame('contact@relocation-in-paris.fr', $email->getFrom()[0]->getAddress());
+        self::assertSame('off@recap-test.local', $email->getReplyTo()[0]->getAddress());
+
+        // Lead non assigné : From contact@ tout seul.
+        $email = $sendFor(null);
+        self::assertSame('contact@relocation-in-paris.fr', $email->getFrom()[0]->getAddress());
+        self::assertSame([], $email->getReplyTo());
     }
 
     public function testCloseModalSendsNothingAndPaymentNeedsAPackage(): void

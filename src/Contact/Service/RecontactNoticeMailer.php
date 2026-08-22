@@ -57,8 +57,11 @@ final readonly class RecontactNoticeMailer
             default => $fr ? \sprintf('Nous revenons vers vous %s', $dateText) : \sprintf('We will get back to you %s', $dateText),
         };
 
+        // Sent from the closer's own address when it lives on the agency
+        // domain (CloserSender rules, same as the visio invitation).
+        ['from' => $from, 'replyTo' => $replyTo] = CloserSender::senderFor($contact->getAssignedTo());
         $email = (new TemplatedEmail())
-            ->from('Relocation in Paris <contact@relocation-in-paris.fr>')
+            ->from($from)
             ->to($clientEmail)
             ->subject($subject)
             ->htmlTemplate('emails/contact_recontact_client.html.twig')
@@ -70,6 +73,9 @@ final readonly class RecontactNoticeMailer
                 'channelLabel' => $channelLabel,
                 'agentName' => $agentName,
             ]);
+        if (null !== $replyTo) {
+            $email->replyTo($replyTo);
+        }
 
         try {
             $this->mailer->send($email);

@@ -39,6 +39,12 @@ final class VisitEditTest extends KernelTestCase
         $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
         $this->em->createQuery('DELETE FROM '.Visit::class)->execute();
         $this->em->createQuery('DELETE FROM '.Dossier::class)->execute();
+        // Des agents laissés par d'autres classes rendent le test du double
+        // montage (mount, em->clear(), re-mount) non déterministe : le
+        // choice loader mémoïsé du champ agent garde alors des entités
+        // détachées ("must be managed"). Base agents vide = liste vide.
+        $this->em->createQuery('DELETE FROM '.\App\RealEstateAgent\Entity\RealEstateAgent::class)->execute();
+        $this->em->createQuery('DELETE FROM '.\App\RealEstateAgent\Entity\Agency::class)->execute();
         $this->em->createQuery('DELETE FROM '.User::class.' u WHERE u.email LIKE :p')->setParameter('p', '%@visit-edit-test.local')->execute();
 
         $this->dossier = $this->persistDossier('Famille Martin');

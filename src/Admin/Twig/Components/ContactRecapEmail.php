@@ -125,10 +125,12 @@ final class ContactRecapEmail
 
         $withPayment = $this->includePayment && $this->getPaymentAvailable();
         $withDeposit = $withPayment && $this->includeDeposit && $this->getDepositAvailable();
-        $this->recapMailer->send($contact, $withPayment, $withDeposit);
+        // The recap leaves from the assigned closer's address when possible
+        // (same sender rules as the visio invitation).
+        $entity = $this->repository->find($this->contactId);
+        $this->recapMailer->send($contact, $withPayment, $withDeposit, $entity?->getAssignedTo());
 
         // Trace who sent what in the follow-up thread.
-        $entity = $this->repository->find($this->contactId);
         if (null !== $entity) {
             $user = $this->security->getUser();
             $fullName = null;

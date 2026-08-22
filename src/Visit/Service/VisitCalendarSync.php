@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Visit\Service;
 
+use App\Contact\Service\CloserSender;
 use App\Contact\Service\GoogleCalendarClient;
 use App\Visit\Domain\VisitStatus;
 use App\Visit\Entity\Visit;
@@ -13,11 +14,15 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Mirrors every planned visit into Google Calendar, twice: once in the
- * central agenda (the whole team sees the day at a glance) and once in the
- * assignee's personal agenda when the visit has one. Titles and description
- * are rendered in French on purpose: the internal agendas are French-only,
- * like the recall mirror (RecallCalendarSync).
+ * Mirrors every planned visit into Google Calendar, twice: a "central"
+ * event in the dossier manager's (the closer's) own Workspace agenda,
+ * falling back to the default central agenda when the dossier has no
+ * manager with an agency-domain address, and a copy in the assignee's
+ * personal agenda when the visit has one. When the closer IS the
+ * assignee, the central event in their agenda is enough: no personal
+ * twin is created (it would duplicate the event in the same agenda).
+ * Titles and description are rendered in French on purpose: the internal
+ * agendas are French-only, like the recall mirror (RecallCalendarSync).
  *
  * The dossier contacts are invited as guests on the central event
  * (sendUpdates=all: Google mails them the invitation, every update and the
@@ -157,11 +162,13 @@ final readonly class VisitCalendarSync
         $payload = $this->basePayload($visit, $scheduledAt);
         $assigneeName = $this->assigneeName($visit);
 
-        // (a) Central agenda: every planned visit, assignee in the title.
-        // The dossier contacts are invited on this event (Google mails the
-        // invitation and every update itself: sendUpdates=all), so its
-        // description switches to a client-safe one whenever guests are
-        // present; the internal details stay on the personal event.
+        // (a) Central event: every planned visit, assignee in the title, in
+        // the agenda resolved by centralOwner() (the dossier manager's, or
+        // the default central agenda). The dossier contacts are invited on
+        // this event (Google mails the invitation and every update itself:
+        // sendUpdates=all), so its description switches to a client-safe one
+        // whenever guests are present; the internal details stay on the
+        // personal event (or on this one when no client is invited).
         $attendees = $this->clientAttendees($visit);
         $centralTitle = \sprintf(
             '%s · %s (%s) · %s',
@@ -174,18 +181,31 @@ final readonly class VisitCalendarSync
         if ([] !== $attendees) {
             $centralPayload['description'] = $this->clientSafeDescription($visit);
         }
+        $centralOwner = $this->centralOwner($visit);
         $central = $this->calendar->upsertEvent(
             $centralPayload,
             $visit->getCalendarCentralEventId(),
+            $centralOwner,
             sendUpdates: 'all',
         );
         if (null !== $central && isset($central['id'])) {
             $visit->setCalendarCentralEventId((string) $central['id']);
+            $visit->setCalendarCentralOwner($centralOwner);
         }
 
         // (b) Personal agenda of the assignee, when there is one.
         $assigneeEmail = trim((string) $visit->getAssignee()?->getEmail());
         $assigneeEmail = '' !== $assigneeEmail ? $assigneeEmail : null;
+
+        // The closer does the visit themselves: the central event already
+        // lives in their agenda, a personal twin would duplicate it there.
+        // Any stale personal copy (created before the dossier had this
+        // manager, or before a reassignment to them) is cleaned up.
+        if (null !== $assigneeEmail && null !== $centralOwner && 0 === strcasecmp($centralOwner, $assigneeEmail)) {
+            $this->deleteAssignee($visit);
+
+            return;
+        }
 
         // Reassignment (or unassignment): the old assignee's agenda must
         // not keep an event for a visit that is no longer theirs. When the
@@ -224,6 +244,25 @@ final readonly class VisitCalendarSync
             // central event still stands.
             $this->logger->warning('Visit could not be mirrored to the assignee agenda', ['visit' => $visit->getReference(), 'assignee' => $assigneeEmail]);
         }
+    }
+
+    /**
+     * Whose agenda hosts (or should host) the central event. An existing
+     * event keeps living where it was created: the owner stored at creation
+     * wins (null = the default central agenda, which is also where every
+     * legacy event lives), so a manager change never moves the event and
+     * every PATCH/DELETE targets the right agenda without a network GET
+     * (same outcome as the visio organizer resolution, but deterministic
+     * and free even when the API is down). A new event goes to the dossier
+     * manager's Workspace agenda, default central agenda as the fallback.
+     */
+    private function centralOwner(Visit $visit): ?string
+    {
+        if (null !== $visit->getCalendarCentralEventId()) {
+            return $visit->getCalendarCentralOwner();
+        }
+
+        return CloserSender::workspaceEmail($visit->getDossier()?->getManager());
     }
 
     /**
@@ -365,13 +404,16 @@ final readonly class VisitCalendarSync
         if (null === $eventId) {
             return true;
         }
-        // sendUpdates=all: invited dossier contacts get the cancellation.
-        if (!$this->calendar->deleteEvent($eventId, sendUpdates: 'all')) {
+        // Deleted under its owner's identity (the agenda the event was
+        // created in), and sendUpdates=all so invited dossier contacts get
+        // the cancellation.
+        if (!$this->calendar->deleteEvent($eventId, $visit->getCalendarCentralOwner(), sendUpdates: 'all')) {
             $this->logger->warning('Visit central agenda event could not be deleted, id kept for retry', ['visit' => $visit->getReference()]);
 
             return false;
         }
         $visit->setCalendarCentralEventId(null);
+        $visit->setCalendarCentralOwner(null);
 
         return true;
     }

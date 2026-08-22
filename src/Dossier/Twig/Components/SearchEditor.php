@@ -329,9 +329,9 @@ final class SearchEditor
 
     /**
      * Alerte discrète sous le champ occupants : un nombre d'occupants
-     * renseigné mais inférieur au nombre de locataires de l'onglet Personnes
-     * est forcément incohérent (chaque locataire occupe le logement).
-     * Recalculée à chaque rendu, jamais bloquante.
+     * renseigné qui ne correspond pas au nombre de locataires de l'onglet
+     * Personnes mérite un regard (2 occupants pour 1 seul locataire ajouté,
+     * ou l'inverse). Recalculée à chaque rendu, jamais bloquante.
      */
     public function getOccupantsMismatch(): bool
     {
@@ -347,7 +347,7 @@ final class SearchEditor
             }
         }
 
-        return $tenants > 0 && $occupants < $tenants;
+        return $tenants > 0 && $occupants !== $tenants;
     }
 
     #[LiveAction]

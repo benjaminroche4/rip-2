@@ -574,7 +574,7 @@ final class SearchEditorTest extends KernelTestCase
         self::assertSame(['bank'], $search->getGuarantorTypes());
     }
 
-    public function testOccupantsBelowTenantCountShowsTheMismatchAlert(): void
+    public function testOccupantsDifferentFromTenantCountShowsTheMismatchAlert(): void
     {
         $dossier = $this->persistDossier(withSearch: true);
         // Second locataire : le foyer compte 2 locataires.
@@ -592,9 +592,15 @@ final class SearchEditorTest extends KernelTestCase
         $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
         self::assertStringContainsString('data-testid="occupants-mismatch"', $rendered);
 
-        // Autant (ou plus) d'occupants que de locataires : cohérent.
+        // Plus d'occupants que de locataires : incohérent aussi (le cas
+        // "2 occupants pour 1 seul locataire ajouté" doit alerter).
         $component->chooseOccupants(1);
         $component->chooseOccupants(3);
+        self::assertTrue($component->getOccupantsMismatch(), '3 occupants pour 2 locataires alerte aussi.');
+
+        // Autant d'occupants que de locataires : cohérent.
+        $component->chooseOccupants(3);
+        $component->chooseOccupants(2);
         self::assertFalse($component->getOccupantsMismatch());
         $rendered = (string) $this->renderTwigComponent('Dossier:Search', ['dossierId' => (int) $dossier->getId()]);
         self::assertStringNotContainsString('data-testid="occupants-mismatch"', $rendered);

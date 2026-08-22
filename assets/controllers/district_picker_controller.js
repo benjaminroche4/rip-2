@@ -41,6 +41,7 @@ export default class extends Controller {
 
     #polygons = new Map()
     #onMapConnect = null
+    #visibilityObserver = null
     #map = null
     #markers = []
     #renderSeq = 0
@@ -58,12 +59,27 @@ export default class extends Controller {
                 break
             }
         }
+        // La carte peut s'initialiser dans un conteneur masqué (onglet
+        // inactif de la fiche dossier, <details> replié) : Google Maps se
+        // met alors en page dans une boîte 0x0 et reste blanche à sa
+        // révélation, jusqu'à un refresh. On observe la visibilité réelle
+        // et on re-dimensionne/recadre l'instance à chaque (ré)apparition.
+        this.#visibilityObserver = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    this.#refreshMapViewport()
+                }
+            }
+        })
+        this.#visibilityObserver.observe(this.mapTarget)
     }
 
     disconnect() {
         if (this.#expanded) {
             this.collapse()
         }
+        this.#visibilityObserver?.disconnect()
+        this.#visibilityObserver = null
         this.mapTarget.removeEventListener('ux:map:connect', this.#onMapConnect)
         this.#polygons.forEach(p => p.setMap(null))
         this.#polygons.clear()
