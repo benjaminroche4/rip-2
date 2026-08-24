@@ -7,7 +7,6 @@ use App\Contact\Domain\ClosureReason;
 use App\Contact\Domain\ContactListItem;
 use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
-use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\NextStep;
 use App\Contact\Domain\RecontactChannel;
 use App\Contact\Domain\StayDuration;
@@ -264,7 +263,7 @@ class ContactRepository extends ServiceEntityRepository
             projectPropertyType: $c->getProjectPropertyType(),
             projectStayDuration: $c->getProjectStayDuration(),
             projectFurnishing: $c->getProjectFurnishing(),
-            projectGuarantorType: $c->getProjectGuarantorType(),
+            projectGuarantorTypes: $c->getProjectGuarantorTypes(),
             projectNote: $c->getProjectNote(),
             assigneeId: null !== $assignee ? (int) $assignee->getId() : null,
             assigneeName: $assigneeName,
@@ -469,14 +468,14 @@ class ContactRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function saveGuarantorType(int $id, ?GuarantorType $guarantorType): void
+    public function saveGuarantorTypes(int $id, ?string $guarantorTypes): void
     {
         $contact = $this->find($id);
         if (null === $contact) {
             return;
         }
 
-        $contact->setProjectGuarantorType($guarantorType);
+        $contact->setProjectGuarantorTypes(null !== $guarantorTypes && '' !== $guarantorTypes ? $guarantorTypes : null);
         $this->getEntityManager()->flush();
     }
 

@@ -228,8 +228,10 @@ final class DepositTest extends WebTestCase
         self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
     }
 
-    public function testUploadAcceptsAPhotographedDocument(): void
+    public function testUploadRejectsAPhotographedDocument(): void
     {
+        // PDF only (August 2026 decision): a phone photo of a document is
+        // refused with the same message as any other non-PDF format.
         $this->persistDossier();
         $this->pair('jean.dupont@example.com', 'ABE78L');
         $crawler = $this->client->followRedirect();
@@ -240,7 +242,7 @@ final class DepositTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertStringContainsString(
-            '<turbo-stream action="replace" target="deposit-documents">',
+            'Format non accepté. PDF uniquement.',
             (string) $this->client->getResponse()->getContent(),
         );
 
@@ -248,16 +250,8 @@ final class DepositTest extends WebTestCase
         /** @var Dossier $dossier */
         $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['reference' => 'DS-000042']);
         $document = $dossier->getPersons()->first()->getDocuments()->first();
-        self::assertSame(DossierDocumentStatus::Received, $document->getStatus());
-        self::assertCount(1, $document->getFiles());
-
-        /** @var DossierDocumentFile $file */
-        $file = $document->getFiles()->first();
-        // The photo is stored as-is (no server-side conversion), and the
-        // display name keeps the real extension via guessExtension().
-        self::assertSame('image/jpeg', $file->getMimeType());
-        self::assertSame("Pièce d'identité - Jean Dupont.jpg", $file->getOriginalName());
-        self::assertFileExists($this->storageDir.'/DS-000042/documents/'.$file->getStoredName());
+        self::assertSame(DossierDocumentStatus::Requested, $document->getStatus());
+        self::assertCount(0, $document->getFiles());
     }
 
     public function testUploadRejectsUnsupportedFileTypes(): void
@@ -274,7 +268,7 @@ final class DepositTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertStringContainsString(
-            'Format non accepté. PDF ou photo (JPG, PNG, WebP).',
+            'Format non accepté. PDF uniquement.',
             (string) $this->client->getResponse()->getContent(),
         );
 

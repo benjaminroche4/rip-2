@@ -54,7 +54,7 @@ final class DossierCreateTest extends KernelTestCase
         self::assertMatchesRegularExpression('~/'.self::PREFIX.'/admin/dossiers/DS-\d{6}$~', (string) $response->getTargetUrl());
 
         /** @var Dossier|null $dossier */
-        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Jean']);
         self::assertNotNull($dossier);
         self::assertCount(2, $dossier->getPersons());
 
@@ -89,13 +89,13 @@ final class DossierCreateTest extends KernelTestCase
             self::assertSame(422, $e->getStatusCode());
         }
         self::assertTrue($component->offerMissing);
-        self::assertNull($this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']));
+        self::assertNull($this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Jean']));
 
         $component->chooseOffer('confie');
         self::assertFalse($component->offerMissing);
         $this->createAction($component);
 
-        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Jean']);
         self::assertSame('confie', $dossier->getOffer());
     }
 
@@ -151,7 +151,7 @@ final class DossierCreateTest extends KernelTestCase
 
         self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
 
-        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Martin & Dupont']);
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Paul & Jean']);
         self::assertNotNull($dossier);
         $persons = $dossier->getPersons()->toArray();
         self::assertFalse($persons[0]->isPrimaryContact());
@@ -272,7 +272,7 @@ final class DossierCreateTest extends KernelTestCase
 
         self::assertInstanceOf(RedirectResponse::class, $this->createAction($component));
 
-        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Dupont']);
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy(['name' => 'Jean']);
         self::assertNotNull($dossier);
         $persons = $dossier->getPersons()->toArray();
         self::assertCount(2, $persons);

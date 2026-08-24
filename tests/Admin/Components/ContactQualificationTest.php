@@ -243,21 +243,25 @@ final class ContactQualificationTest extends KernelTestCase
         $this->em->clear();
         $reloaded = $this->em->find(Contact::class, $contact->getId());
         self::assertSame('furnished', $reloaded->getProjectFurnishing());
-        self::assertSame(\App\Contact\Domain\GuarantorType::Garantme, $reloaded->getProjectGuarantorType());
+        self::assertSame('garantme', $reloaded->getProjectGuarantorTypes());
 
-        // Multi-select: open to both.
+        // Multi-select: open to both (e.g. a physical guarantor + Garantme).
         $component->chooseFurnishing('unfurnished');
+        $component->chooseGuarantorType('physical');
         $this->em->clear();
-        self::assertSame('furnished,unfurnished', $this->em->find(Contact::class, $contact->getId())->getProjectFurnishing());
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame('furnished,unfurnished', $reloaded->getProjectFurnishing());
+        self::assertSame('garantme,physical', $reloaded->getProjectGuarantorTypes());
 
         // Clicking the selected chips again clears them.
         $component->chooseFurnishing('furnished');
         $component->chooseFurnishing('unfurnished');
         $component->chooseGuarantorType('garantme');
+        $component->chooseGuarantorType('physical');
         $this->em->clear();
         $reloaded = $this->em->find(Contact::class, $contact->getId());
         self::assertNull($reloaded->getProjectFurnishing());
-        self::assertNull($reloaded->getProjectGuarantorType());
+        self::assertNull($reloaded->getProjectGuarantorTypes());
 
         $this->expectException(BadRequestHttpException::class);
         $component->chooseGuarantorType('crypto');

@@ -306,6 +306,15 @@ final class ContactProject
         return \App\Contact\Domain\GuarantorType::cases();
     }
 
+    /**
+     * @return list<string>
+     */
+    public function getSelectedGuarantorTypes(): array
+    {
+        return array_values(array_filter(explode(',', (string) $this->getContact()?->projectGuarantorTypes)));
+    }
+
+    /** Multi-select: a household can combine e.g. physical + Garantme. */
     #[LiveAction]
     public function chooseGuarantorType(#[LiveArg] string $guarantor): void
     {
@@ -318,11 +327,16 @@ final class ContactProject
             return;
         }
 
-        $case = \App\Contact\Domain\GuarantorType::tryFrom($guarantor)
-            ?? throw new BadRequestHttpException(\sprintf('Unknown guarantor type "%s".', $guarantor));
+        if (null === \App\Contact\Domain\GuarantorType::tryFrom($guarantor)) {
+            throw new BadRequestHttpException(\sprintf('Unknown guarantor type "%s".', $guarantor));
+        }
 
-        $current = $this->getContact()?->projectGuarantorType;
-        $this->repository->saveGuarantorType($this->contactId, $current === $case ? null : $case);
+        $selected = $this->getSelectedGuarantorTypes();
+        $selected = \in_array($guarantor, $selected, true)
+            ? array_values(array_diff($selected, [$guarantor]))
+            : [...$selected, $guarantor];
+
+        $this->repository->saveGuarantorTypes($this->contactId, implode(',', $selected));
     }
 
     #[LiveAction]

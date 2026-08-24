@@ -251,9 +251,9 @@ final class DossierCreate extends AbstractController
     }
 
     /**
-     * Standard dossier name derived from the tenants' last names, primary
-     * tenant first: "Dupont", or "Dupont & Martin" for a couple. Falls back
-     * to any person's last name (a tenant-less dossier fails validation
+     * Standard dossier name derived from the tenants' first names, primary
+     * tenant first: "Bruno", or "Bruno & Charles" for a couple. Falls back
+     * to any person's first name (a tenant-less dossier fails validation
      * anyway), then to a generic label, so the entity's NotBlank never
      * produces an invisible root-form error.
      */
@@ -264,14 +264,14 @@ final class DossierCreate extends AbstractController
         $tenantNames = [];
         $fallback = null;
         foreach ($this->formValues['persons'] ?? [] as $key => $person) {
-            $lastName = trim((string) ($person['lastName'] ?? ''));
-            if ('' === $lastName) {
+            $name = trim((string) ($person['firstName'] ?? '')) ?: trim((string) ($person['lastName'] ?? ''));
+            if ('' === $name) {
                 continue;
             }
             if (DossierPersonRole::TENANT->value === ($person['role'] ?? null)) {
-                $tenantNames[(int) $key] = $lastName;
+                $tenantNames[(int) $key] = $name;
             } else {
-                $fallback ??= $lastName;
+                $fallback ??= $name;
             }
         }
 

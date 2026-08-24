@@ -127,8 +127,8 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertSame([], $component->errors);
         $this->em->clear();
         $fresh = $this->em->find(Dossier::class, $dossier->getId());
-        // Primary tenant (Dupont) leads the derived name.
-        self::assertSame('Dupont & Martin', $fresh->getName());
+        // Primary tenant (Jean) leads the derived name.
+        self::assertSame('Jean & Paul', $fresh->getName());
     }
 
     public function testEditsAPersonInPlace(): void
@@ -152,8 +152,8 @@ final class PersonsManagerTest extends KernelTestCase
         $person = $fresh->getPersons()->first();
         self::assertSame('Lefebvre', $person->getLastName());
         self::assertSame('+33711223344', $person->getPhone());
-        // Derived name follows the tenant's new last name.
-        self::assertSame('Lefebvre', $fresh->getName());
+        // Derived name sticks to the tenant's first name, untouched here.
+        self::assertSame('Jean', $fresh->getName());
     }
 
     public function testProfessionAndIncomePersistOnSave(): void
@@ -340,7 +340,7 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertSame($second->getId(), $remaining->getId());
         self::assertTrue($remaining->isPrimaryContact());
         self::assertSame(0, $remaining->getPosition());
-        self::assertSame('Martin', $fresh->getName());
+        self::assertSame('Paul', $fresh->getName());
     }
 
     public function testCannotRemoveTheLastPerson(): void
@@ -399,7 +399,7 @@ final class PersonsManagerTest extends KernelTestCase
         self::assertFalse($persons[0]->isPrimaryContact());
         self::assertTrue($persons[1]->isPrimaryContact());
         // Name re-derived with the new primary first.
-        self::assertSame('Martin & Dupont', $fresh->getName());
+        self::assertSame('Paul & Jean', $fresh->getName());
     }
 
     public function testInvalidFieldsBlockSave(): void

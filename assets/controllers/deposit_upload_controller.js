@@ -33,7 +33,7 @@ export default class extends Controller {
     static MAX_BYTES = 10_000_000;
 
     /* Mirrors the server-side Assert\File(mimeTypes) list exactly. */
-    static ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    static ACCEPTED_TYPES = ['application/pdf'];
 
     #xhr = null;
     #queue = [];

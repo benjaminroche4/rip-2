@@ -557,7 +557,7 @@ final class DossierController extends AbstractController
 
         $violations = $validator->validate($upload, new FileConstraint(
             maxSize: '10M',
-            mimeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            mimeTypes: ['application/pdf'],
             mimeTypesMessage: 'admin.dossiers.show.modules.file.upload.invalid',
             maxSizeMessage: 'admin.dossiers.show.modules.file.upload.invalid',
         ));

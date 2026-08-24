@@ -91,8 +91,9 @@
                                                                                         {% set furnishingLabels = contact.projectFurnishing|split(',')|filter(v => v != '')|map(v => ('admin.contacts.project.furnishing.choice.' ~ v)|trans([], 'messages', locale)) %}
                                                                                         {{ _self.row(fr ? 'Meublé / non meublé' : 'Furnishing', furnishingLabels|join(', ')) }}
                                                                                     {% endif %}
-                                                                                    {% if contact.projectGuarantorType %}
-                                                                                        {{ _self.row(fr ? 'Type de garant' : 'Guarantor', contact.projectGuarantorType.labelKey|trans([], 'messages', locale)) }}
+                                                                                    {% if contact.projectGuarantorTypes %}
+                                                                                        {% set guarantorLabels = contact.projectGuarantorTypes|split(',')|filter(v => v != '')|map(v => ('admin.contacts.project.guarantor.choice.' ~ v)|trans([], 'messages', locale)) %}
+                                                                                        {{ _self.row(fr ? 'Type de garant' : 'Guarantor', guarantorLabels|join(', ')) }}
                                                                                     {% endif %}
                                                                                 </td>
                                                                             </tr>

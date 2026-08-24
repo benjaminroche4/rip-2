@@ -1408,7 +1408,7 @@ videoStories:
     next: Vidéo suivante
     1:
         name: Sarah
-        caption: Installée dans le 11e
+        caption: Arrivée de Marseille
     2:
         name: David
         caption: Arrivé de San Francisco
@@ -2293,7 +2293,7 @@ admin:
                     upload:
                         button: Ajouter un fichier
                         noFile: Aucun fichier reçu, réessayez.
-                        invalid: 'Fichier refusé : PDF ou image, 10 Mo maximum.'
+                        invalid: 'Fichier refusé : PDF uniquement, 10 Mo maximum.'
                         storage: 'Stockage indisponible, réessayez dans un instant.'
                     table:
                         requestedAt: Demandée le
@@ -3771,10 +3771,10 @@ deposit:
         text: Déposez les pièces demandées ci-dessous, votre conseiller les vérifie au fur et à mesure.
         formats:
             formatLabel: Formats acceptés
-            formatValue: PDF ou photo (JPG, PNG)
+            formatValue: PDF uniquement
             sizeLabel: Taille maximale
             sizeValue: 10 Mo par fichier
-        dropError: Seuls les PDF et photos (JPG, PNG, WebP) sont acceptés.
+        dropError: Seuls les fichiers PDF sont acceptés.
         complete:
             title: Dossier complet
             text: Toutes vos pièces sont validées, votre conseiller prend le relais.
@@ -3782,7 +3782,6 @@ deposit:
         empty: Aucune pièce n'est attendue pour le moment.
         upload: Déposer
         uploadMore: Ajouter
-        takePhoto: Prendre une photo
         uploading: Envoi... %percent%
         uploadingMany: Fichier %index%/%count%... %percent%
         uploadFailed: Échec de l'envoi, réessayez

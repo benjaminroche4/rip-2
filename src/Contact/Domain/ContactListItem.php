@@ -44,7 +44,7 @@ final readonly class ContactListItem
         public ?string $projectPropertyType = null,
         public ?StayDuration $projectStayDuration = null,
         public ?string $projectFurnishing = null,
-        public ?GuarantorType $projectGuarantorType = null,
+        public ?string $projectGuarantorTypes = null,
         public ?string $projectNote = null,
         public ?int $assigneeId = null,
         public ?string $assigneeName = null,

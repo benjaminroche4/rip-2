@@ -150,29 +150,12 @@
                                                     <span data-deposit-upload-target="status">{{ (document.files is empty or document.status == 'refused' ? 'deposit.documents.upload' : 'deposit.documents.uploadMore')|trans }}</span>
                                                     <input type="file"
                                                            name="file"
-                                                           accept="application/pdf,image/jpeg,image/png,image/webp"
+                                                           accept="application/pdf"
                                                            multiple
                                                            class="sr-only"
                                                            data-deposit-upload-target="input"
                                                            data-action="change->deposit-upload#start"
                                                            data-testid="deposit-file-input">
-                                                </label>
-                                                {# Mobile : la caméra du téléphone directement, la photo
-                                                   est stockée telle quelle (pas de conversion). #}
-                                                <label data-deposit-upload-target="label" class="flex justify-center sm:hidden {{ uploadButtonClasses }}">
-                                                    {{ ux_icon('lucide:camera', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
-                                                    <span>{{ 'deposit.documents.takePhoto'|trans }}</span>
-                                                    {# Volontairement sans name : l'envoi passe par le XHR
-                                                       du controller (FormData.set('file', ...)); un name
-                                                       dupliqué écraserait le fichier de l'autre input sur
-                                                       le fallback natif. #}
-                                                    <input type="file"
-                                                           accept="image/*"
-                                                           capture="environment"
-                                                           class="sr-only"
-                                                           data-deposit-upload-target="input"
-                                                           data-action="change->deposit-upload#start"
-                                                           data-testid="deposit-photo-input">
                                                 </label>
                                             </div>
                                             <div class="mt-1.5 flex items-center gap-1.5">

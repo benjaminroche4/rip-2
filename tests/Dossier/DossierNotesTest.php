@@ -98,6 +98,100 @@ final class DossierNotesTest extends KernelTestCase
         self::assertCount(0, $component->getFeed());
     }
 
+    public function testAdminCanReplyToANote(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $parent = $this->persistNote($dossier, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->startReply((int) $parent->getId());
+        self::assertSame((int) $parent->getId(), $component->replyingToId);
+
+        $component->replyText = '  Première réponse.  ';
+        $component->addReply();
+
+        self::assertNull($component->replyingToId, 'The composer closes after sending.');
+        $feed = $component->getFeed();
+        self::assertCount(1, $feed, 'A reply never becomes a top-level entry.');
+        self::assertCount(1, $feed[0]['replies']);
+        self::assertSame('Première réponse.', $feed[0]['replies'][0]['note']->text);
+        self::assertSame((int) $parent->getId(), $feed[0]['replies'][0]['note']->parentId);
+    }
+
+    public function testRepliesReadChronologicallyUnderTheirParent(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $parent = $this->persistNote($dossier, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $repo = self::getContainer()->get(\App\Dossier\Repository\DossierNoteRepository::class);
+        $first = $repo->add($dossier, 'Réponse 1', (int) $admin->getId(), 'Admin Staff', null, $parent);
+        $first->setCreatedAt(new \DateTimeImmutable('-2 hours'));
+        $second = $repo->add($dossier, 'Réponse 2', (int) $admin->getId(), 'Admin Staff', null, $parent);
+        $second->setCreatedAt(new \DateTimeImmutable('-1 hour'));
+        $this->em->flush();
+
+        $feed = $this->mountNotes($dossier)->getFeed();
+
+        self::assertCount(1, $feed);
+        self::assertSame(
+            ['Réponse 1', 'Réponse 2'],
+            array_map(static fn (array $row): string => $row['note']->text, $feed[0]['replies']),
+            'Replies read oldest first, like a conversation.',
+        );
+    }
+
+    public function testReplyingToAReplyAttachesToTheRootNote(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $parent = $this->persistNote($dossier, (int) $admin->getId(), 'Note mère');
+        $this->loginAs($admin);
+
+        $repo = self::getContainer()->get(\App\Dossier\Repository\DossierNoteRepository::class);
+        $reply = $repo->add($dossier, 'Réponse', (int) $admin->getId(), 'Admin Staff', null, $parent);
+
+        // Depth is capped at one: a reply targeting a reply lands under the root.
+        $nested = $repo->add($dossier, 'Réponse à la réponse', (int) $admin->getId(), 'Admin Staff', null, $reply);
+        self::assertSame($parent->getId(), $nested->getParentNote()?->getId());
+    }
+
+    public function testReplyToAnotherThreadsNoteIsIgnored(): void
+    {
+        $dossier = $this->persistDossier();
+        $other = $this->persistDossier('DS-000043', 'ABE79L');
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $foreignNote = $this->persistNote($other, (int) $admin->getId(), "Note d'un autre dossier");
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->startReply((int) $foreignNote->getId());
+        self::assertNull($component->replyingToId, 'A note from another dossier never opens the composer.');
+
+        $component->replyingToId = (int) $foreignNote->getId();
+        $component->replyText = 'Tentative';
+        $component->addReply();
+        self::assertCount(0, $component->getFeed(), 'Nothing persists on a cross-thread reply.');
+    }
+
+    public function testDeletingTheParentRemovesItsReplies(): void
+    {
+        $dossier = $this->persistDossier();
+        $admin = $this->persistUser('admin', ['ROLE_ADMIN']);
+        $parent = $this->persistNote($dossier, (int) $admin->getId(), 'Note mère');
+        $repo = self::getContainer()->get(\App\Dossier\Repository\DossierNoteRepository::class);
+        $repo->add($dossier, 'Réponse', (int) $admin->getId(), 'Admin Staff', null, $parent);
+        $this->loginAs($admin);
+
+        $component = $this->mountNotes($dossier);
+        $component->delete((int) $parent->getId());
+
+        self::assertCount(0, $component->getFeed(), 'The DB cascade removes replies with their parent.');
+    }
+
     public function testLegacyStatusChangeEventsStillRenderTheirLabel(): void
     {
         $dossier = $this->persistDossier();
@@ -415,7 +509,7 @@ final class DossierNotesTest extends KernelTestCase
         self::assertTrue($checker->isGranted(DossierNoteVoter::DELETE, $note), 'Admin can always.');
     }
 
-    private function persistDossier(): Dossier
+    private function persistDossier(string $reference = 'DS-000042', string $pairingCode = 'ABE78L'): Dossier
     {
         $tenant = (new DossierPerson())
             ->setRole(DossierPersonRole::TENANT)
@@ -425,8 +519,8 @@ final class DossierNotesTest extends KernelTestCase
             ->setPrimaryContact(true);
         $dossier = (new Dossier())
             ->setName('Dupont')
-            ->setReference('DS-000042')
-            ->setPairingCode('ABE78L')
+            ->setReference($reference)
+            ->setPairingCode($pairingCode)
             ->setCreatedAt(new \DateTimeImmutable())
             ->addPerson($tenant);
         $this->em->persist($dossier);

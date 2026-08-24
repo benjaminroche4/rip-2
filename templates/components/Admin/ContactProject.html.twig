@@ -240,7 +240,7 @@
                     </div>
                     {% set projectContact = this.contact %}
                     {% set currentDuration = projectContact ? projectContact.projectStayDuration : null %}
-                    {% set currentGuarantor = projectContact ? projectContact.projectGuarantorType : null %}
+                    {% set selectedGuarantors = this.selectedGuarantorTypes %}
                     {# Durée + garant : toujours côte à côte, quelle que soit la largeur. #}
                     <div class="flex gap-6 sm:col-span-2">
                     <div class="min-w-0 flex-1 space-y-2">
@@ -271,8 +271,8 @@
                                     data-action="live#action"
                                     data-live-action-param="chooseGuarantorType"
                                     data-live-guarantor-param="{{ guarantor.value }}"
-                                    aria-pressed="{{ guarantor == currentGuarantor ? 'true' : 'false' }}"
-                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor == currentGuarantor ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
+                                    aria-pressed="{{ guarantor.value in selectedGuarantors ? 'true' : 'false' }}"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-100 ease-out {{ guarantor.value in selectedGuarantors ? 'border-primary/40 bg-primary/5 text-primary' : 'border-neutral-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900' }}"
                                     data-testid="guarantor-chip"
                                 >
                                     {{ ux_icon({'physical': 'lucide:user-check', 'garantme': 'lucide:shield-check', 'bank': 'lucide:landmark'}[guarantor.value], {class: 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}

@@ -230,9 +230,9 @@ final class DepositController extends AbstractController
 
         $violations = $validator->validate($upload, new FileConstraint(
             maxSize: '10M',
-            // Same list as the staff upload (DossierController): tenants
-            // photograph their documents, the image is stored as-is.
-            mimeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            // Same list as the staff upload (DossierController): PDF only,
+            // so every piece lands in a printable, non-editable format.
+            mimeTypes: ['application/pdf'],
             mimeTypesMessage: 'deposit.documents.error.mimeType',
             maxSizeMessage: 'deposit.documents.error.maxSize',
         ));

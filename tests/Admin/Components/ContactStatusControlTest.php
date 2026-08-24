@@ -11,6 +11,7 @@ use App\Contact\Domain\RecontactChannel;
 use App\Contact\Entity\Contact;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -20,6 +21,7 @@ use Symfony\UX\TwigComponent\Test\InteractsWithTwigComponents;
 final class ContactStatusControlTest extends KernelTestCase
 {
     use InteractsWithTwigComponents;
+    use MailerAssertionsTrait;
 
     private EntityManagerInterface $em;
 
@@ -164,6 +166,103 @@ final class ContactStatusControlTest extends KernelTestCase
             'The stored recall must survive a draft clear.',
         );
         self::assertSame(NextStep::Recontact, $reloaded->getNextStep());
+    }
+
+    public function testPlanningAVisioOnAnUnassignedLeadAssignsThePlannerAndNamesThemInTheEmail(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress);
+        $this->seedUser('closer@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('closer@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->pendingStep = NextStep::Visio->value;
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame('closer@statusctl-test.local', $reloaded->getAssignedTo()?->getEmail());
+
+        // The client confirmation names the closer, never "notre équipe".
+        $client = self::getMailerMessages()[0];
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $client);
+        $body = (string) $client->getHtmlBody();
+        self::assertStringContainsString('avec First', $body);
+        self::assertStringNotContainsString('notre équipe', $body);
+    }
+
+    public function testPlanningAVisioOnAnAssignedLeadKeepsItsCloser(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress);
+        $this->seedUser('closer@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->seedUser('planner@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $closer = $this->em->getRepository(User::class)->findOneBy(['email' => 'closer@statusctl-test.local']);
+        $contact->setAssignedTo($closer);
+        $this->em->flush();
+        $this->loginAs('planner@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->pendingStep = NextStep::Visio->value;
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame('closer@statusctl-test.local', $reloaded->getAssignedTo()?->getEmail());
+    }
+
+    public function testNotifyingARecontactOnAnUnassignedLeadAssignsThePlannerAsSender(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress);
+        $this->seedUser('closer@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('closer@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->pendingStep = NextStep::Recontact->value;
+        $component->pendingChannel = RecontactChannel::Phone->value;
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->notifyClient = true;
+        $component->confirmStep();
+
+        $this->em->clear();
+        $reloaded = $this->em->find(Contact::class, $contact->getId());
+        self::assertSame('closer@statusctl-test.local', $reloaded->getAssignedTo()?->getEmail());
+
+        // The notice names the planner and keeps them reachable (off-domain
+        // address, so CloserSender puts them in Reply-To; on-domain rules
+        // are covered by RecontactNoticeMailerTest).
+        $notice = self::getMailerMessages()[0];
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $notice);
+        self::assertStringContainsString('First vous rappelle', (string) $notice->getSubject());
+        self::assertSame('closer@statusctl-test.local', $notice->getReplyTo()[0]->getAddress());
+    }
+
+    public function testASilentRecontactLeavesTheLeadUnassigned(): void
+    {
+        $contact = $this->persistContact();
+        $contact->setStatus(ContactStatus::InProgress);
+        $this->seedUser('closer@statusctl-test.local', ['ROLE_ADMIN']);
+        $this->em->flush();
+        $this->loginAs('closer@statusctl-test.local');
+
+        $component = $this->mountTwigComponent('Admin:ContactStatusControl', ['contactId' => (int) $contact->getId()]);
+        $component->setLiveResponder(new LiveResponder());
+        $component->pendingStep = NextStep::Recontact->value;
+        $component->pendingChannel = RecontactChannel::Phone->value;
+        $component->recallAt = (new \DateTimeImmutable('+2 days'))->format('Y-m-d\TH:i');
+        $component->confirmStep();
+
+        $this->em->clear();
+        self::assertNull($this->em->find(Contact::class, $contact->getId())->getAssignedTo());
     }
 
     private function persistContact(): Contact

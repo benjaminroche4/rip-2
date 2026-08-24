@@ -66,6 +66,13 @@ final class DossierNotes
     #[LiveProp(writable: true)]
     public string $editingText = '';
 
+    /** Note being answered (opens the inline reply composer under it). */
+    #[LiveProp]
+    public ?int $replyingToId = null;
+
+    #[LiveProp(writable: true)]
+    public string $replyText = '';
+
     /** Visible notes; grows via showMoreFeed(). */
     #[LiveProp]
     public int $feedLimit = self::FEED_PAGE;
@@ -243,6 +250,12 @@ final class DossierNotes
         return max(0, \count($this->noteRows()) - $this->feedLimit);
     }
 
+    /** Total thread size (replies included), for the drawer badge. */
+    public function getNotesCount(): int
+    {
+        return \count($this->notes->listForDossier($this->dossierId));
+    }
+
     /** Fires alongside the native <details> toggle, to keep the state. */
     #[LiveAction]
     public function toggleHistory(): void
@@ -338,6 +351,59 @@ final class DossierNotes
         $this->newNote = '';
 
         // Clears the leave-guard dirty flag on the front.
+        $this->dispatchBrowserEvent('dossier-notes:saved');
+        $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteAdded')]);
+    }
+
+    /** Opens the inline reply composer under a note. */
+    #[LiveAction]
+    public function startReply(#[LiveArg] int $id): void
+    {
+        $this->ensureAdmin();
+
+        // Silent no-op on a stale id or a note from another thread.
+        $parent = $this->notes->find($id);
+        if (null === $parent || (int) $parent->getDossier()?->getId() !== $this->dossierId) {
+            return;
+        }
+
+        $this->replyingToId = $id;
+        $this->replyText = '';
+    }
+
+    #[LiveAction]
+    public function cancelReply(): void
+    {
+        $this->ensureAdmin();
+        $this->replyingToId = null;
+        $this->replyText = '';
+    }
+
+    /** Persists the reply under its parent note (depth capped at one). */
+    #[LiveAction]
+    public function addReply(): void
+    {
+        $this->ensureAdmin();
+
+        $text = trim($this->replyText);
+        $parent = null !== $this->replyingToId ? $this->notes->find($this->replyingToId) : null;
+        if ('' === $text || null === $parent
+            || (int) $parent->getDossier()?->getId() !== $this->dossierId) {
+            return;
+        }
+
+        $author = $this->thread->currentAuthor();
+        $this->notes->add(
+            $this->dossier(),
+            $text,
+            $author->id,
+            $author->displayName,
+            $author->avatarFilename,
+            $parent,
+        );
+        $this->replyingToId = null;
+        $this->replyText = '';
+
         $this->dispatchBrowserEvent('dossier-notes:saved');
         $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteAdded')]);
     }
@@ -475,28 +541,56 @@ final class DossierNotes
             $this->editingNoteId = null;
             $this->editingText = '';
         }
+        if ($this->replyingToId === $id) {
+            $this->replyingToId = null;
+            $this->replyText = '';
+        }
         $this->dispatchBrowserEvent('toast:show', ['message' => $this->translator->trans('admin.toast.noteDeleted')]);
     }
 
     /**
-     * Manual notes only, newest first.
+     * Manual notes only, top-level entries newest first. Replies ride
+     * along under their parent note, oldest first (a conversation reads
+     * top to bottom), exactly like the contact notes drawer.
      *
      * @return list<array<string, mixed>>
      */
     private function noteRows(): array
     {
-        $rows = array_map(
-            fn (DossierNoteView $note): array => [
-                'note' => $note,
-                'canEdit' => $this->security->isGranted(DossierNoteVoter::EDIT, $note),
-                'canDelete' => $this->security->isGranted(DossierNoteVoter::DELETE, $note),
-                'createdAt' => $note->createdAt,
-            ],
-            $this->notes->listForDossier($this->dossierId),
-        );
-        usort($rows, static fn (array $a, array $b): int => $b['createdAt'] <=> $a['createdAt']);
+        $all = $this->notes->listForDossier($this->dossierId);
+
+        // Replies grouped under their parent, chronological (repo order is
+        // newest first, so reversed).
+        $repliesByParent = [];
+        foreach (array_reverse($all) as $note) {
+            if (null !== $note->parentId) {
+                $repliesByParent[$note->parentId][] = $this->noteRow($note);
+            }
+        }
+
+        $rows = [];
+        foreach ($all as $note) {
+            if (null !== $note->parentId) {
+                continue;
+            }
+            $row = $this->noteRow($note);
+            $row['replies'] = $repliesByParent[$note->id] ?? [];
+            $rows[] = $row;
+        }
 
         return $rows;
+    }
+
+    /**
+     * @return array{note: DossierNoteView, canEdit: bool, canDelete: bool}
+     */
+    private function noteRow(DossierNoteView $note): array
+    {
+        return [
+            'note' => $note,
+            'canEdit' => $this->security->isGranted(DossierNoteVoter::EDIT, $note),
+            'canDelete' => $this->security->isGranted(DossierNoteVoter::DELETE, $note),
+        ];
     }
 
     /**

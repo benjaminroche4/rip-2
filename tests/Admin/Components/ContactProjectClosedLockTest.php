@@ -94,7 +94,7 @@ final class ContactProjectClosedLockTest extends KernelTestCase
         self::assertNull($reloaded->getProjectPropertyType());
         self::assertNull($reloaded->getProjectStayDuration());
         self::assertNull($reloaded->getProjectFurnishing());
-        self::assertNull($reloaded->getProjectGuarantorType());
+        self::assertNull($reloaded->getProjectGuarantorTypes());
         self::assertNull($reloaded->getProjectNote());
     }
 

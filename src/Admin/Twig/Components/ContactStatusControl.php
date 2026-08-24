@@ -286,6 +286,16 @@ final class ContactStatusControl
         // dropped when the step is no longer a dated recontact.
         $entity = $this->repository->find($this->contactId);
         if (null !== $entity) {
+            // The heads-up email leaves from the closer's address and names
+            // them: notifying a recontact on an unassigned lead assigns it
+            // to the planner first (same rule as planning a visio), so the
+            // recall also lands in their agenda.
+            if (NextStep::Recontact === $case && $this->notifyClient && null === $entity->getAssignedTo()) {
+                $currentUser = $this->security->getUser();
+                if ($currentUser instanceof User) {
+                    $this->repository->assign($this->contactId, $currentUser);
+                }
+            }
             $this->recallSync->apply($entity);
         }
 
@@ -309,6 +319,15 @@ final class ContactStatusControl
                 // "rescheduled" emails. Re-confirming as-is sends nothing.
                 $entity = $this->repository->find($this->contactId);
                 if (null !== $entity) {
+                    // A video call always has a named closer: planning one
+                    // on an unassigned lead assigns it to the planner, so
+                    // the client email says "avec {prénom}" (never "notre
+                    // équipe"), is sent from their address, and the event
+                    // lands in their agenda.
+                    $currentUser = $this->security->getUser();
+                    if (null === $entity->getAssignedTo() && $currentUser instanceof User) {
+                        $this->repository->assign($this->contactId, $currentUser);
+                    }
                     $this->visioMailer->send($entity, rescheduled: NextStep::Visio === $stored && null !== $storedRecallAt);
                 }
             }

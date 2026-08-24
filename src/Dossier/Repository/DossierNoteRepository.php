@@ -39,14 +39,20 @@ class DossierNoteRepository extends ServiceEntityRepository
         return array_map(self::toView(...), $notes);
     }
 
-    public function add(Dossier $dossier, string $text, int $authorId, string $authorName, ?string $authorAvatar): DossierNote
+    public function add(Dossier $dossier, string $text, int $authorId, string $authorName, ?string $authorAvatar, ?DossierNote $parent = null): DossierNote
     {
+        // Depth capped at one: replying to a reply attaches to its parent.
+        if (null !== $parent?->getParentNote()) {
+            $parent = $parent->getParentNote();
+        }
+
         $note = (new DossierNote())
             ->setDossier($dossier)
             ->setText($text)
             ->setAuthorId($authorId)
             ->setAuthorName($authorName)
-            ->setAuthorAvatar($authorAvatar);
+            ->setAuthorAvatar($authorAvatar)
+            ->setParentNote($parent);
 
         $em = $this->getEntityManager();
         $em->persist($note);
@@ -77,6 +83,7 @@ class DossierNoteRepository extends ServiceEntityRepository
             authorId: $note->getAuthorId(),
             authorName: $note->getAuthorName(),
             authorAvatar: $note->getAuthorAvatar(),
+            parentId: $note->getParentNote()?->getId(),
         );
     }
 }

@@ -1407,7 +1407,7 @@ videoStories:
     next: Next video
     1:
         name: Sarah
-        caption: Settled in the 11th
+        caption: Moved from Marseille
     2:
         name: David
         caption: Moved from San Francisco
@@ -2291,7 +2291,7 @@ admin:
                     upload:
                         button: Add a file
                         noFile: No file received, try again.
-                        invalid: 'File rejected: PDF or image, 10 MB max.'
+                        invalid: 'File rejected: PDF only, 10 MB max.'
                         storage: 'Storage unavailable, try again in a moment.'
                     table:
                         requestedAt: Requested on
@@ -3769,10 +3769,10 @@ deposit:
         text: Upload the requested documents below, your advisor reviews them as they arrive.
         formats:
             formatLabel: Accepted formats
-            formatValue: PDF or photo (JPG, PNG)
+            formatValue: PDF only
             sizeLabel: Maximum size
             sizeValue: 10 MB per file
-        dropError: Only PDF files and photos (JPG, PNG, WebP) are accepted.
+        dropError: Only PDF files are accepted.
         complete:
             title: File complete
             text: All your documents are validated, your advisor takes it from here.
@@ -3780,7 +3780,6 @@ deposit:
         empty: No document is expected at the moment.
         upload: Upload
         uploadMore: Add
-        takePhoto: Take a photo
         uploading: Uploading... %percent%
         uploadingMany: File %index%/%count%... %percent%
         uploadFailed: Upload failed, please retry

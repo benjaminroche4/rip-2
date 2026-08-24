@@ -6,7 +6,6 @@ use App\Auth\Entity\User;
 use App\Contact\Domain\ClosureReason;
 use App\Contact\Domain\ContactSource;
 use App\Contact\Domain\ContactStatus;
-use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\LeadSource;
 use App\Contact\Domain\NextStep;
 use App\Contact\Domain\RecontactChannel;
@@ -172,9 +171,9 @@ class Contact
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $projectFurnishing = null;
 
-    /** Kind of guarantor the prospect can provide. */
-    #[ORM\Column(length: 10, nullable: true, enumType: GuarantorType::class)]
-    private ?GuarantorType $projectGuarantorType = null;
+    /** Kinds of guarantor the prospect can provide, CSV of GuarantorType values (a household can combine e.g. physical + Garantme). */
+    #[ORM\Column(length: 40, nullable: true)]
+    private ?string $projectGuarantorTypes = null;
 
     /** Free-form note on the housing project. */
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -465,14 +464,14 @@ class Contact
         return $this;
     }
 
-    public function getProjectGuarantorType(): ?GuarantorType
+    public function getProjectGuarantorTypes(): ?string
     {
-        return $this->projectGuarantorType;
+        return $this->projectGuarantorTypes;
     }
 
-    public function setProjectGuarantorType(?GuarantorType $projectGuarantorType): static
+    public function setProjectGuarantorTypes(?string $projectGuarantorTypes): static
     {
-        $this->projectGuarantorType = $projectGuarantorType;
+        $this->projectGuarantorTypes = $projectGuarantorTypes;
 
         return $this;
     }

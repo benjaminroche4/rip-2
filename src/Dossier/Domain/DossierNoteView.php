@@ -16,6 +16,7 @@ final readonly class DossierNoteView
         public int $authorId,
         public string $authorName,
         public ?string $authorAvatar,
+        public ?int $parentId = null,
     ) {
     }
 }

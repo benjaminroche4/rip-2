@@ -628,10 +628,14 @@ final class PersonsManager
                 $tenant->setPrimaryContact($tenant === $primary);
             }
 
-            $names = [trim((string) $primary->getLastName())];
+            $names = [trim((string) $primary->getFirstName()) ?: trim((string) $primary->getLastName())];
             foreach ($tenants as $tenant) {
-                if ($tenant !== $primary && '' !== trim((string) $tenant->getLastName())) {
-                    $names[] = trim((string) $tenant->getLastName());
+                if ($tenant === $primary) {
+                    continue;
+                }
+                $name = trim((string) $tenant->getFirstName()) ?: trim((string) $tenant->getLastName());
+                if ('' !== $name) {
+                    $names[] = $name;
                 }
             }
             $dossier->setName(mb_substr(implode(' & ', array_filter($names)), 0, 100) ?: $dossier->getName());

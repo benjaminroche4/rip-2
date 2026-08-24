@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Dossier;
 
 use App\Auth\Entity\User;
-use App\Contact\Domain\GuarantorType;
 use App\Contact\Domain\StayDuration;
 use App\Contact\Entity\Contact;
 use App\Contact\Entity\ContactNote;
@@ -74,7 +73,7 @@ final class ContactToDossierTest extends WebTestCase
         // Référence unique lead -> dossier : les 6 chiffres du lead sont
         // repris tels quels (CT-123456 devient DS-123456).
         self::assertSame('DS-'.substr($contact->getReference(), 3), $dossier->getReference());
-        self::assertSame('Doe', $dossier->getName());
+        self::assertSame('jane', $dossier->getName());
         self::assertCount(1, $dossier->getPersons());
         $person = $dossier->getPersons()->first();
         self::assertSame(DossierPersonRole::TENANT, $person->getRole());
@@ -94,7 +93,7 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('long', $search->getStayDuration());
         self::assertSame('furnished', $search->getFurnishing());
         self::assertSame('physical', $search->getGuarantorType());
-        self::assertSame(['physical'], $search->getGuarantorTypes());
+        self::assertSame(['physical', 'garantme'], $search->getGuarantorTypes());
         self::assertSame('Cherche proche métro.', $search->getNote());
 
         // The origin contact is referenced for the follow-up thread's origin entry.
@@ -107,6 +106,33 @@ final class ContactToDossierTest extends WebTestCase
         self::assertSame('Alice Staff', $notes[0]->getAuthorName());
         self::assertSame('2026-07-01', $notes[0]->getCreatedAt()->format('Y-m-d'));
         self::assertSame('Relance par email.', $notes[1]->getText());
+    }
+
+    public function testConversionKeepsTheReplyThreads(): void
+    {
+        $contact = $this->persistContact();
+        /** @var ContactNote $parentNote */
+        $parentNote = $this->em->getRepository(ContactNote::class)->findOneBy(['text' => 'Premier appel, très motivée.']);
+        $this->em->persist((new ContactNote())
+            ->setContact($contact)
+            ->setText('Réponse au premier appel.')
+            ->setCreatedAt(new \DateTimeImmutable('2026-07-02 11:00'))
+            ->setAuthorId(2)->setAuthorName('Bob Staff')
+            ->setParentNote($parentNote));
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', $this->contactUrl($contact));
+        $this->client->submit($crawler->filter('[data-testid="contact-to-dossier"]')->closest('form')->form());
+        self::assertResponseStatusCodeSame(303);
+
+        // The reply stays attached to the copy of its parent, never flattened.
+        $dossier = $this->em->getRepository(Dossier::class)->findOneBy([]);
+        $notes = $dossier->getNotes()->toArray();
+        self::assertCount(3, $notes);
+        $byText = array_combine(array_map(static fn ($n): string => $n->getText(), $notes), $notes);
+        $copiedReply = $byText['Réponse au premier appel.'];
+        self::assertSame('Premier appel, très motivée.', $copiedReply->getParentNote()?->getText());
+        self::assertNull($byText['Relance par email.']->getParentNote());
     }
 
     public function testOfferPickedInTheModalLandsOnTheContactAndTheDossier(): void
@@ -352,7 +378,7 @@ final class ContactToDossierTest extends WebTestCase
             ->setProjectPropertyType('T2')
             ->setProjectStayDuration(StayDuration::Long)
             ->setProjectFurnishing('furnished')
-            ->setProjectGuarantorType(GuarantorType::Physical)
+            ->setProjectGuarantorTypes('physical,garantme')
             ->setProjectNote('Cherche proche métro.');
         $this->em->persist($contact);
 

@@ -7,6 +7,7 @@ namespace App\Dossier\Service;
 use App\Contact\Entity\Contact;
 use App\Contact\Entity\ContactNote;
 use App\Dossier\Domain\ContactLanguage;
+use App\Dossier\Domain\CsvSelection;
 use App\Dossier\Domain\DossierPersonRole;
 use App\Dossier\Entity\Dossier;
 use App\Dossier\Entity\DossierNote;
@@ -59,11 +60,12 @@ final class ContactDossierConverter
             return $existing;
         }
 
+        $firstName = trim((string) $contact->getFirstName());
         $lastName = trim((string) $contact->getLastName());
 
         $person = (new DossierPerson())
             ->setRole(DossierPersonRole::TENANT)
-            ->setFirstName(mb_substr(trim((string) $contact->getFirstName()), 0, 50))
+            ->setFirstName(mb_substr($firstName, 0, 50))
             ->setLastName(mb_substr($lastName, 0, 50))
             ->setEmail(mb_substr($email, 0, 180))
             ->setPhone(mb_substr(trim((string) $contact->getPhoneNumber()), 0, 30) ?: null)
@@ -71,7 +73,7 @@ final class ContactDossierConverter
             ->setPrimaryContact(true);
 
         $dossier = (new Dossier())
-            ->setName('' !== $lastName ? mb_substr($lastName, 0, 100) : 'Dossier')
+            ->setName(mb_substr('' !== $firstName ? $firstName : $lastName, 0, 100) ?: 'Dossier')
             ->setReference($this->numbers->referenceFromContact($contact->getReference()))
             ->setPairingCode($this->numbers->pairingCode())
             // A fresh code is armed: the deposit page refuses it 90 days
@@ -108,29 +110,37 @@ final class ContactDossierConverter
             ->setPropertyType($contact->getProjectPropertyType())
             ->setStayDuration($contact->getProjectStayDuration()?->value)
             ->setFurnishing($contact->getProjectFurnishing())
-            ->setGuarantorType($contact->getProjectGuarantorType()?->value)
+            ->setGuarantorTypes(CsvSelection::values($contact->getProjectGuarantorTypes()))
             ->setNote($contact->getProjectNote());
     }
 
     /**
      * Duplicates the contact's follow-up thread, oldest first, keeping the
-     * original timestamps and denormalised authors.
+     * original timestamps, denormalised authors and reply structure (a
+     * reply stays attached to its parent note, never flattened).
      */
     private function copyNotes(Contact $contact, Dossier $dossier): void
     {
         /** @var list<ContactNote> $notes */
         $notes = $this->em->getRepository(ContactNote::class)->findBy(
             ['contact' => $contact],
-            ['createdAt' => 'ASC'],
+            // Id tiebreak: on equal timestamps a parent (lower id) must
+            // still be copied before its replies.
+            ['createdAt' => 'ASC', 'id' => 'ASC'],
         );
 
+        // Oldest first: a reply's parent is always copied before it.
+        $copies = [];
         foreach ($notes as $note) {
-            $dossier->addNote((new DossierNote())
+            $copy = (new DossierNote())
                 ->setText($note->getText())
                 ->setCreatedAt($note->getCreatedAt())
                 ->setAuthorId($note->getAuthorId())
                 ->setAuthorName($note->getAuthorName())
-                ->setAuthorAvatar($note->getAuthorAvatar()));
+                ->setAuthorAvatar($note->getAuthorAvatar())
+                ->setParentNote($copies[$note->getParentNote()?->getId()] ?? null);
+            $copies[(int) $note->getId()] = $copy;
+            $dossier->addNote($copy);
         }
     }
 }
