@@ -8,3 +8,4 @@ framework:
             App\Contact\Message\SendContactEmailsMessage: async
             App\PropertyEstimation\Message\SendEstimationEmailMessage: async
             App\Shared\Webhook\NotifyMakeWebhookMessage: async
+            App\Shared\Webhook\NotifyDashboardMessage: async

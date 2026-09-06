@@ -31,3 +31,4 @@ framework:
             App\PropertyEstimation\Message\SendEstimationEmailMessage: sync
             App\PropertyListing\Message\SendListingEmailMessage: sync
             App\Shared\Webhook\NotifyMakeWebhookMessage: sync
+            App\Shared\Webhook\NotifyDashboardMessage: sync

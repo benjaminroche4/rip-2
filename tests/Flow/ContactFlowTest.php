@@ -4,6 +4,7 @@ namespace App\Tests\Flow;
 
 use App\Contact\Entity\Contact;
 use App\Contact\Message\SendContactEmailsMessage;
+use App\Shared\Webhook\NotifyDashboardMessage;
 use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -77,6 +78,14 @@ final class ContactFlowTest extends WebTestCase
 
         self::assertCount(1, $emailMessages, 'Expected exactly one SendContactEmailsMessage on the async bus.');
         self::assertCount(1, $webhookMessages, 'Expected exactly one NotifyMakeWebhookMessage on the async bus.');
+
+        $dashboardMessages = array_values(array_filter($messages, fn ($m) => $m instanceof NotifyDashboardMessage));
+        self::assertCount(1, $dashboardMessages, 'Expected exactly one NotifyDashboardMessage on the async bus.');
+        // The Dashboard gets raw values: the help type as a slug, the offer as its key.
+        self::assertSame('housing_search', $dashboardMessages[0]->payload['help_type']);
+        self::assertSame('accompagne', $dashboardMessages[0]->payload['offer']);
+        self::assertSame('john.doe@example.com', $dashboardMessages[0]->payload['email']);
+        self::assertStringStartsWith('CT-', $dashboardMessages[0]->payload['reference']);
 
         /** @var SendContactEmailsMessage $emailMsg */
         $emailMsg = array_values($emailMessages)[0];

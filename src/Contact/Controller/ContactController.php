@@ -5,7 +5,9 @@ namespace App\Contact\Controller;
 use App\Contact\Entity\Contact;
 use App\Contact\Form\ContactType;
 use App\Contact\Message\SendContactEmailsMessage;
+use App\Shared\Webhook\DashboardContactPayload;
 use App\Shared\Webhook\MakeWebhookTarget;
+use App\Shared\Webhook\NotifyDashboardMessage;
 use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -106,6 +108,9 @@ final class ContactController extends AbstractController
                 'lang' => $contact->getLang(),
                 'createdAt' => $now->format(\DateTimeInterface::ATOM),
             ], MakeWebhookTarget::CONTACT));
+
+            // Same request pushed to the Dashboard backoffice as a lead.
+            $this->bus->dispatch(new NotifyDashboardMessage(DashboardContactPayload::fromContact($contact)));
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
