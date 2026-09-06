@@ -12,9 +12,6 @@ when@dev: &dev
             autowire: true
             autoconfigure: true
 
-        App\Tests\Auth\Factory\:
-            resource: '%kernel.project_dir%/tests/Auth/Factory/'
-
         App\Tests\Contact\Factory\:
             resource: '%kernel.project_dir%/tests/Contact/Factory/'
 

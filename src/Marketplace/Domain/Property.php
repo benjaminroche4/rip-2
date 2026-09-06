@@ -6,7 +6,7 @@ namespace App\Marketplace\Domain;
  * Typed snapshot of a Sanity property document.
  *
  * Top-level fields are typed; sub-objects (address, mainPhoto, photos,
- * location, agent, tenant, faq, extraFees) stay as arrays for now —
+ * location, agent, faq) stay as arrays for now —
  * promoting them to DTOs is a follow-up if their schema stabilizes.
  * Twig still accesses them with `property.address.city` etc.
  *
@@ -28,7 +28,6 @@ final readonly class Property
         public ?bool $priceOnRequest = null,
         public ?bool $chargesIncludes = null,
         public ?int $chargesAmount = null,
-        public ?string $listingUrl = null,
         public ?bool $showCategoryOnCard = null,
         public ?string $status = null,
         /** @var array<int, string>|null */
@@ -46,8 +45,6 @@ final readonly class Property
         public ?\DateTimeImmutable $availableDate = null,
         public ?string $agentPhoto = null,
         public ?string $agentName = null,
-        /** @var array<string, mixed>|null */
-        public ?array $tenant = null,
         public ?int $photoCount = null,
         public ?string $categoryName = null,
         /** @var array<int, array{name?: string, slug?: string}>|null */
@@ -67,8 +64,6 @@ final readonly class Property
         public ?int $renovationYear = null,
         /** @var array<int, array<string, mixed>>|null */
         public ?array $faq = null,
-        /** @var array<int, array<string, mixed>>|null */
-        public ?array $extraFees = null,
         public ?string $furnished = null,
         public ?string $bedroomsLabel = null,
         public ?int $squareMeters = null,
@@ -81,7 +76,6 @@ final readonly class Property
         public ?array $rer = null,
         /** @var array<int, string>|null */
         public ?array $tags = null,
-        public ?string $internalNotes = null,
         public mixed $description = null,
         public ?self $alternateProperty = null,
     ) {

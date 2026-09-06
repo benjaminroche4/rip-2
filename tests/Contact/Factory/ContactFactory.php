@@ -2,7 +2,6 @@
 
 namespace App\Tests\Contact\Factory;
 
-use App\Contact\Domain\ContactStatus;
 use App\Contact\Entity\Contact;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 
@@ -37,7 +36,6 @@ final class ContactFactory extends PersistentProxyObjectFactory
             'lang' => self::faker()->randomElement(['fr', 'en']),
             'ip' => self::faker()->ipv4(),
             'createdAt' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime('-6 month')),
-            'status' => self::faker()->randomElement(ContactStatus::cases()),
         ];
     }
 

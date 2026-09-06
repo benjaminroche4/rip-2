@@ -33,7 +33,6 @@ final class PropertyRepository
         priceOnRequest,
         chargesIncludes,
         chargesAmount,
-        listingUrl,
         "showCategoryOnCard": showCategoryOnCard,
         status,
         leaseType,
@@ -53,16 +52,6 @@ final class PropertyRepository
         availableDate,
         "agentPhoto": agent->photo.asset->url,
         "agentName": agent->fullName,
-        "tenant": tenant->{
-            tenantType,
-            fullName,
-            companyName,
-            email,
-            phone,
-            website,
-            "logo": logo.asset->url,
-            "logoAlt": logo.alt
-        },
         "photoCount": count(photos),
         "categoryName": categories[0]->name,
         "categoryList": categories[]->{"name": name, "slug": slug.current},
@@ -76,7 +65,6 @@ final class PropertyRepository
         "constructionYear": buildingYears.constructionYear,
         "renovationYear": buildingYears.renovationYear,
         "faq": faq[]{_key, question, answer},
-        "extraFees": extraFees[]{_key, amount, feeType},
         "furnished": main.furnished,
         "bedroomsLabel": main.bedrooms,
         "squareMeters": main.squareMeters,
@@ -86,7 +74,6 @@ final class PropertyRepository
         "metro": metro,
         "rer": rer,
         tags,
-        internalNotes,
         description,
         "alternateProperty": *[_type == "translation.metadata" && references(^._id)]{
             translations[_key != $lang]{

@@ -2,8 +2,6 @@
 
 namespace App\Tests\DataFixtures;
 
-use App\Tests\Admin\Factory\DocumentFactory;
-use App\Tests\Auth\Factory\UserFactory;
 use App\Tests\Contact\Factory\ContactFactory;
 use App\Tests\Newsletter\Factory\NewsletterFactory;
 use App\Tests\PropertyEstimation\Factory\PropertyEstimationFactory;
@@ -17,11 +15,8 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        UserFactory::createMany(5);
         ContactFactory::createMany(5);
-
         PropertyEstimationFactory::createMany(20);
         NewsletterFactory::createMany(20);
-        DocumentFactory::createMany(10);
     }
 }

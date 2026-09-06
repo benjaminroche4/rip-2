@@ -1,12 +1,7 @@
 nelmio_security:
     # prevents framing of the entire site
     clickjacking:
-        # First match wins: the deposited-file routes are previewed in a
-        # same-origin iframe modal (deposit page + admin file module), the
-        # rest of the site stays DENY.
         paths:
-            '^/(fr|en)/(depot-de-pieces|document-upload)/(fichier|file)/\d+$': SAMEORIGIN
-            '^/(fr|en)/[a-zA-Z0-9_-]+/admin/(dossiers|files)/DS-\d{6}/(fichiers|files)/\d+$': SAMEORIGIN
             '^/.*': DENY
 
     # disables content type sniffing for script resources
@@ -27,7 +22,7 @@ nelmio_security:
     # CSP — enabled in REPORT-ONLY mode: the browser reports violations but
     # never blocks, so shipping this cannot break the site. The current stack
     # still relies on `'unsafe-inline'`/`'unsafe-eval'` on script-src (Stimulus
-    # / Turbo bootstrap + EasyAdmin). Address the reported violations one by one
+    # / Turbo bootstrap). Address the reported violations one by one
     # (switch to nonces, externalise inline scripts), then move these directives
     # under an `enforce:` block once the report stream goes quiet.
     csp:

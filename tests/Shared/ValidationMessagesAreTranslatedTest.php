@@ -28,7 +28,7 @@ final class ValidationMessagesAreTranslatedTest extends KernelTestCase
         $translator = self::getContainer()->get(TranslatorInterface::class);
 
         $keys = $this->constraintMessageKeys();
-        self::assertGreaterThan(50, \count($keys), 'The scanner found suspiciously few constraint messages.');
+        self::assertGreaterThan(40, \count($keys), 'The scanner found suspiciously few constraint messages.');
 
         $unresolved = [];
         foreach ($keys as $key) {

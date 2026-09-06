@@ -59,18 +59,6 @@
             ".php-cs-fixer.dist.php"
         ]
     },
-    "knplabs/knp-time-bundle": {
-        "version": "2.5.0"
-    },
-    "knpuniversity/oauth2-client-bundle": {
-        "version": "2.20",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.20",
-            "ref": "1ff300d8c030f55c99219cc55050b97a695af3f6"
-        }
-    },
     "nelmio/security-bundle": {
         "version": "3.6",
         "recipe": {
@@ -110,45 +98,8 @@
     "presta/sitemap-bundle": {
         "version": "v4.2.0"
     },
-    "scheb/2fa-bundle": {
-        "version": "8.6",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "6.0",
-            "ref": "1e6f68089146853a790b5da9946fc5974f6fcd49"
-        },
-        "files": [
-            "config/packages/scheb_2fa.yaml",
-            "config/routes/scheb_2fa.yaml"
-        ]
-    },
     "sensiolabs/minify-bundle": {
         "version": "v1.2.0"
-    },
-    "symfony/ai-anthropic-platform": {
-        "version": "0.12",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.1",
-            "ref": "169d966953a6b9aeca111cb7f0ac2da72e050159"
-        },
-        "files": [
-            "config/packages/ai_anthropic_platform.yaml"
-        ]
-    },
-    "symfony/ai-bundle": {
-        "version": "0.12",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.1",
-            "ref": "2be6ccd77335c2631fdf12d1680649b072efb8ad"
-        },
-        "files": [
-            "config/packages/ai.yaml"
-        ]
     },
     "symfony/asset-mapper": {
         "version": "7.3",
@@ -325,19 +276,6 @@
             "config/routes.yaml"
         ]
     },
-    "symfony/security-bundle": {
-        "version": "7.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "6.4",
-            "ref": "2ae08430db28c8eb4476605894296c82a642028f"
-        },
-        "files": [
-            "config/packages/security.yaml",
-            "config/routes/security.yaml"
-        ]
-    },
     "symfony/stimulus-bundle": {
         "version": "2.30",
         "recipe": {
@@ -387,9 +325,6 @@
             "version": "7.0",
             "ref": "0df5844274d871b37fc3816c57a768ffc60a43a5"
         }
-    },
-    "symfony/ux-calendar-link": {
-        "version": "v3.4.0"
     },
     "symfony/ux-google-map": {
         "version": "2.34",
@@ -500,18 +435,6 @@
             "config/packages/messenger.yaml"
         ]
     },
-    "symfonycasts/reset-password-bundle": {
-        "version": "1.24",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "1.0",
-            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
-        },
-        "files": [
-            "config/packages/reset_password.yaml"
-        ]
-    },
     "symfonycasts/tailwind-bundle": {
         "version": "0.11",
         "recipe": {
@@ -523,9 +446,6 @@
         "files": [
             "config/packages/symfonycasts_tailwind.yaml"
         ]
-    },
-    "symfonycasts/verify-email-bundle": {
-        "version": "v1.18.0"
     },
     "tales-from-a-dev/twig-tailwind-extra": {
         "version": "1.0",

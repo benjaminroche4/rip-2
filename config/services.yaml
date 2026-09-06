@@ -5,14 +5,6 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     site_url: 'https://relocation-in-paris.fr'
-    # Coupe-circuit 2FA (incident APP_SECRET d'août 2026) : enrôlement gelé
-    # tant que la situation prod n'est pas assainie. Repasser à true pour
-    # rouvrir l'activation depuis les profils.
-    two_factor_enrollment_enabled: false
-    admin_path_prefix: '%env(string:ADMIN_PATH_PREFIX)%'
-    # Deposited dossier documents live outside public/ and outside var/
-    # (cache:clear / deploy safe). Served via authenticated controllers only.
-    dossier_storage_dir: '%kernel.project_dir%/storage/dossiers'
 
 services:
     # default configuration for services in *this* file
@@ -34,22 +26,8 @@ services:
     TalesFromADev\Twig\Extra\Tailwind\TailwindRuntime:
         tags: ['twig.runtime']
 
-    # Deposited-documents storage: 'local' (disk) or 'gcs' (private Google
-    # Cloud Storage bucket) picked at runtime from DOSSIER_STORAGE.
-    App\Dossier\Service\DocumentStorage:
-        factory: ['@App\Dossier\Service\DocumentStorageFactory', 'create']
-
-    # Drive port used by the dossier storage and provisioner.
-    App\Shared\Google\DriveGateway: '@App\Shared\Google\GoogleDriveClient'
-
-    App\Auth\Storage\AvatarStorage:
-        factory: ['@App\Auth\Storage\AvatarStorageFactory', 'create']
-
     App\PropertyListing\Service\ListingPhotoStorage:
         factory: ['@App\PropertyListing\Service\ListingPhotoStorageFactory', 'create']
-
-    App\Visit\Storage\VisitPhotoStorage:
-        factory: ['@App\Visit\Storage\VisitPhotoStorageFactory', 'create']
 
     App\Shared\Sanity\SanityService:
         arguments:
@@ -58,12 +36,3 @@ services:
             $sanityApiVersion: '%env(SANITY_API_VERSION)%'
             $sanityToken: '%env(SANITY_TOKEN)%'
             $sanityUseCdn: '%env(bool:SANITY_USE_CDN)%'
-
-when@test:
-    parameters:
-        # Keep test uploads under var/ so the suite never writes into the
-        # real storage/ directory and leftovers vanish with cache:clear.
-        dossier_storage_dir: '%kernel.project_dir%/var/test-storage/dossiers'
-        # La suite 2FA exerce le flux d'enrôlement complet : le coupe-circuit
-        # reste ouvert en test.
-        two_factor_enrollment_enabled: true

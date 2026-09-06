@@ -39,14 +39,9 @@ templates/
 │   └── …
 ├── public/                  ← layouts + une vue = une route, côté grand public
 │   ├── base.html.twig         (layout principal des pages publiques)
-│   ├── base_auth.html.twig    (layout des pages auth — login / reset)
 │   ├── home/index.html.twig
 │   ├── marketplace/{list, show}.html.twig
-│   ├── auth/login.html.twig
 │   └── …
-└── admin/                   ← layout + vues de l'espace privé
-    ├── base.html.twig         (layout admin autonome, noindex,nofollow)
-    └── contacts/, dossiers/, users/, …  (une vue par section)
 ```
 
 ## Décider où va un nouveau fichier
@@ -89,7 +84,7 @@ Les `{# @prop … %#}` rendent les props auto-complétables dans l'IDE PhpStorm 
 Symfony Plugin et servent de doc minimale.
 
 **Inheritance vs composition**
-- `{% extends 'public/base.html.twig' %}` (ou `public/base_auth.html.twig`) → réservé aux **pages** dans `public/` ; pour l'espace privé, `{% extends 'admin/base.html.twig' %}`
+- `{% extends 'public/base.html.twig' %}` → réservé aux **pages** dans `public/`
 - `<twig:Foo>` → pour les **composants** (jamais `{% include %}` pour un composant)
 - `{% include '_partials/...' %}` → réservé aux **partials techniques**
 
@@ -97,8 +92,6 @@ Symfony Plugin et servent de doc minimale.
 - Les pages reçoivent des **DTOs typés** (`Property`, `Post`) ; Twig auto-resolve
   les getters publics. Évite l'accès `[]` côté PHP — c'est `->` désormais.
 - Les composants typent leurs props via `@prop` et `props {…}`.
-- **Pas d'`app.user` dans des composants potentiellement cacheables** — passer
-  par un fragment (futur ESI) si besoin d'auth-aware.
 
 ## Lint avant commit
 
