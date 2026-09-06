@@ -67,10 +67,12 @@ export default class extends Controller {
         if (this.form) {
             this.form.addEventListener('submit', this.boundSubmit, { capture: true });
         }
-        // Modal forms without a <form> (live action buttons) never fire a
-        // submit: sync the E.164 value when the field loses focus instead.
-        // Idempotent, so doing both never double-prefixes the dial code.
-        this.inputTarget.addEventListener('blur', this.boundSubmit);
+        // On blur the field keeps its NATIONAL form ("6 59 17 56 36"): the
+        // dial code already lives in the separate box, so writing the E.164
+        // value here would display "+33 | +33659…". The E.164 swap happens
+        // on submit only.
+        this.boundBlur = () => this.formatNational();
+        this.inputTarget.addEventListener('blur', this.boundBlur);
 
         // Tear down BEFORE Turbo caches the page so the snapshot doesn't include
         // the .iti wrapper. Without this, a back-nav restores a fossil wrapper
@@ -84,8 +86,30 @@ export default class extends Controller {
         document.addEventListener('turbo:before-cache', this.boundBeforeCache);
     }
 
+    // Re-render whatever was typed (national digits, or a pasted +33…) as a
+    // formatted national number under the selected dial code.
+    formatNational() {
+        if (!this.iti) {
+            return;
+        }
+
+        const e164 = this.iti.getNumber();
+        if (e164) {
+            this.iti.setNumber(e164);
+        }
+    }
+
     syncE164() {
         if (!this.iti) {
+            return;
+        }
+
+        // Preferred path: libphonenumber (bundled utils) builds the E.164
+        // value from the selected country + national digits.
+        const e164 = this.iti.getNumber();
+        if (e164) {
+            this.inputTarget.value = e164;
+
             return;
         }
 
@@ -94,12 +118,11 @@ export default class extends Controller {
             return;
         }
 
-        // Build E.164 from raw digits, idempotent across multiple submits.
-        // The visible input may already contain a previous E.164 value
-        // (server re-renders the canonical form on validation failure),
-        // so blindly prepending the dial code would yield "+33+33612...".
-        // Strip every leading occurrence of the current dial code, then any
-        // national leading zeros, then prefix once.
+        // Fallback without utils: build E.164 from raw digits, idempotent
+        // across multiple submits. The visible input may already contain a
+        // previous E.164 value (server re-renders the canonical form on
+        // validation failure), so strip every leading occurrence of the
+        // current dial code, then any national leading zeros, then prefix once.
         let digits = this.inputTarget.value.replace(/\D/g, '');
         while (digits.startsWith(data.dialCode)) {
             digits = digits.slice(data.dialCode.length);
@@ -108,10 +131,6 @@ export default class extends Controller {
 
         if (digits) {
             this.inputTarget.value = `+${data.dialCode}${digits}`;
-            // Inside a LiveComponent form the model syncs on `change`: without
-            // this dispatch the server would keep the raw national digits.
-            // No-op for classic Turbo form posts (value is read from the DOM).
-            this.inputTarget.dispatchEvent(new Event('change', { bubbles: true }));
         }
     }
 
@@ -122,8 +141,8 @@ export default class extends Controller {
         if (this.boundCountryChange && this.hasInputTarget) {
             this.inputTarget.removeEventListener('countrychange', this.boundCountryChange);
         }
-        if (this.boundSubmit && this.hasInputTarget) {
-            this.inputTarget.removeEventListener('blur', this.boundSubmit);
+        if (this.boundBlur && this.hasInputTarget) {
+            this.inputTarget.removeEventListener('blur', this.boundBlur);
         }
         clearTimeout(this.paddingTimer);
         if (this.form && this.boundSubmit) {
