@@ -37,4 +37,23 @@ final class HomeControllerTest extends WebTestCase
         self::assertSelectorExists('[data-controller="hero-video"] button[data-action="hero-video#toggleFullscreen"]');
         self::assertSelectorExists('[data-controller="hero-video"][data-playing="true"] button[data-action="hero-video#togglePlay"]');
     }
+
+    public function testItExposesTheHeroVideoAsSchemaOrgVideoObject(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+
+        $graph = json_decode($crawler->filter('script[type="application/ld+json"]')->text(), true, 512, \JSON_THROW_ON_ERROR)['@graph'];
+        $videos = array_values(array_filter($graph, static fn (array $node): bool => 'VideoObject' === $node['@type']));
+
+        self::assertCount(1, $videos);
+        self::assertStringEndsWith('/medias/videos/home-hero-poster.webp', $videos[0]['thumbnailUrl']);
+        self::assertStringEndsWith('/medias/videos/home-hero.mp4', $videos[0]['contentUrl']);
+        self::assertSame('PT1M15S', $videos[0]['duration']);
+        self::assertNotEmpty($videos[0]['name']);
+        self::assertNotEmpty($videos[0]['description']);
+        self::assertNotEmpty($videos[0]['uploadDate']);
+    }
 }

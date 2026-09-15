@@ -454,13 +454,14 @@ home:
         subTitle: Votre recherche d'appartement à Paris, confiée à des experts.
         video:
             label: "Présentation de Relocation In Paris, l'agence qui vous installe à Paris"
+            description: "Découvrez comment Relocation In Paris trouve et sécurise votre appartement à Paris en moins de 20 jours : recherche, visites et dossier pris en charge par nos experts."
             soundOn: "Activer le son"
             soundOff: "Couper le son"
             fullscreen: "Plein écran"
             play: "Lire la vidéo"
             pause: "Mettre en pause"
         button: On vous rappelle
-        google: 'sur +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">avis Google</a>'
+        google: 'sur +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out">avis Google</a>'
         service:
             1: Recherche rapide
             2: 100% à distance

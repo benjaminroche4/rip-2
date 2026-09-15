@@ -24,7 +24,20 @@
         "primaryImageOfPage": {
             "@type": "ImageObject",
             "url": "{{ site_url }}/medias/banner/relocation-in-paris-banner.webp"
-        }
+        },
+        "video": { "@id": "{{ site_url }}/{{ app.request.locale }}/#hero-video" }
+    },
+    {
+        "@type": "VideoObject",
+        "@id": "{{ site_url }}/{{ app.request.locale }}/#hero-video",
+        "name": "{{ 'home.heroSection.video.label'|trans|e('js') }}",
+        "description": "{{ 'home.heroSection.video.description'|trans|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "thumbnailUrl": "{{ site_url }}{{ asset('medias/videos/home-hero-poster.webp') }}",
+        "contentUrl": "{{ site_url }}{{ asset('medias/videos/home-hero.mp4') }}",
+        "uploadDate": "2026-09-15",
+        "duration": "PT1M15S",
+        "publisher": { "@id": "{{ site_url }}/#organization" }
     }
 {% endblock %}
 

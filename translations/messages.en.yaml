@@ -454,13 +454,14 @@ home:
         subTitle: Your apartment search in Paris, handled by experts.
         video:
             label: "Introducing Relocation In Paris, the agency that settles you in Paris"
+            description: "See how Relocation In Paris finds and secures your Paris apartment in under 20 days: search, viewings and paperwork handled by our experts."
             soundOn: "Turn sound on"
             soundOff: "Turn sound off"
             fullscreen: "Fullscreen"
             play: "Play the video"
             pause: "Pause the video"
         button: Get a callback
-        google: 'based on +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" class="underline underline-offset-4 hover:text-[#EB9CB0] transition duration-100">Google reviews</a>'
+        google: 'based on +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out">Google reviews</a>'
         service:
             1: Fast search
             2: 100% remote
