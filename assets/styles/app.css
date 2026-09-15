@@ -180,6 +180,19 @@ h1, h2, h3, h4, h5, h6 {
     animation: shimmer-border 12s linear infinite;
     pointer-events: none;
 }
+/* Soft variant (home hero video): same ring and animation, with a light
+   primary-tinted sweep over the neutral-200 border. */
+.shimmer-border-soft::before {
+    background: conic-gradient(
+        from var(--shimmer-angle),
+        #E5E5E5,
+        #F3CFD9 22%,
+        #E5E5E5 50%,
+        #F3CFD9 72%,
+        #E5E5E5
+    );
+    animation-duration: 24s;
+}
 @media (prefers-reduced-motion: reduce) {
     .shimmer-border::before {
         animation: none;
@@ -339,4 +352,45 @@ turbo-frame#blog-list[busy] {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* Hero video in fullscreen: the wrapper is the fullscreen element so the
+   overlay buttons stay visible; letterbox the video instead of cropping it. */
+[data-controller="hero-video"]:fullscreen {
+    background: #000;
+}
+[data-controller="hero-video"]:fullscreen video {
+    height: 100%;
+    object-fit: contain;
+}
+
+/* === Liquid glass (hero video controls) === */
+/* Translucent frosted disc: blurred and saturated backdrop, a thin white rim
+   and an inner top highlight that reads like a curved glass surface. */
+.liquid-glass {
+    background: rgba(255, 255, 255, 0.35);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.45),
+        0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.liquid-glass:hover {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.65),
+        0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+/* Gentle idle float (hero "turn sound on" badge): a 2px bob, slow enough to
+   draw the eye without distracting. Wrapped in motion-safe: in the markup. */
+@keyframes float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -3px; }
+}
+.animate-float {
+    animation: float 3s ease-in-out infinite;
 }

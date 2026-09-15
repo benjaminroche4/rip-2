@@ -2,5 +2,8 @@ symfonycasts_tailwind:
     # Specify the EXACT version of Tailwind CSS you want to use
     binary_version: 'v4.1.11'
 
-    # Alternatively, you can specify the path to the binary that you manage yourself
-    #binary: 'node_modules/.bin/tailwindcss'
+    # Optional path to a self-managed binary (takes precedence over the download).
+    # Dev macOS 27+: the downloaded standalone binary is killed (SIGKILL) because
+    # its ad-hoc signature is rejected. Point TAILWIND_BINARY (.env.local) to a
+    # copy re-signed with `codesign --force --sign -`. Unset in prod.
+    binary: '%env(default::TAILWIND_BINARY)%'
