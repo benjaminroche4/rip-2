@@ -1173,6 +1173,12 @@ videoStories:
     6:
         name: Kate
         caption: Moved from London
+    7:
+        name: Daniel
+        caption: Moved from Washington
+    8:
+        name: Martina
+        caption: Moved from Madrid
 pricing:
     title: Pricing
     subTitle: Settle in Paris, with complete peace of mind

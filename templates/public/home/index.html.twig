@@ -34,7 +34,7 @@
         "description": "{{ 'home.heroSection.video.description'|trans|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "thumbnailUrl": "{{ site_url }}{{ asset('medias/videos/home-hero-poster.webp') }}",
-        "contentUrl": "{{ site_url }}{{ asset('medias/videos/home-hero.mp4') }}",
+        "contentUrl": "{{ site_url }}{{ asset('medias/videos/home-hero-' ~ app.request.locale ~ '.mp4') }}",
         "uploadDate": "2026-09-15",
         "duration": "PT1M15S",
         "publisher": { "@id": "{{ site_url }}/#organization" }
@@ -114,8 +114,8 @@
                             poster="{{ asset('medias/videos/home-hero-poster.webp') }}"
                             aria-label="{{ 'home.heroSection.video.label'|trans }}"
                         >
-                            <source src="{{ asset('medias/videos/home-hero.webm') }}" type="video/webm">
-                            <source src="{{ asset('medias/videos/home-hero.mp4') }}" type="video/mp4">
+                            <source src="{{ asset('medias/videos/home-hero-' ~ app.request.locale ~ '.webm') }}" type="video/webm">
+                            <source src="{{ asset('medias/videos/home-hero-' ~ app.request.locale ~ '.mp4') }}" type="video/mp4">
                         </video>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <button

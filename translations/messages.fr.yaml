@@ -1174,6 +1174,12 @@ videoStories:
     6:
         name: Kate
         caption: Arrivée de Londres
+    7:
+        name: Daniel
+        caption: Arrivé de Washington
+    8:
+        name: Martina
+        caption: Arrivée de Madrid
 pricing:
     title: Tarifs
     subTitle: Installez-vous à Paris, en toute sérénité
