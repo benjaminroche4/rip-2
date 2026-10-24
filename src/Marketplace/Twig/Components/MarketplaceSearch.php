@@ -2,6 +2,7 @@
 
 namespace App\Marketplace\Twig\Components;
 
+use App\Marketplace\Domain\Property;
 use App\Marketplace\Filter\PropertyFilter;
 use App\Marketplace\Filter\PropertySearchCriteria;
 use App\Marketplace\Map\MapBuilder;
@@ -197,7 +198,7 @@ final class MarketplaceSearch
 
     /* ----------------- In-memory caches (per render) ----------------- */
 
-    /** @var array<int, \App\Marketplace\Domain\Property>|null */
+    /** @var array<int, Property>|null */
     private ?array $filteredCache = null;
     private ?string $filteredCacheKey = null;
 
@@ -211,6 +212,7 @@ final class MarketplaceSearch
     /**
      * @param array<int, int|string> $arrondissements
      * @param array<int, string>     $bedrooms
+     * @param array<int, string>     $furnished
      * @param array<int, string>     $features
      */
     public function mount(
@@ -605,6 +607,7 @@ final class MarketplaceSearch
 
     /* ----------------- Template accessors ----------------- */
 
+    /** @return array<int, Property> */
     public function getItems(): array
     {
         return array_slice($this->getFilteredProperties(), 0, $this->page * self::PER_PAGE);
@@ -686,13 +689,21 @@ final class MarketplaceSearch
         return $names;
     }
 
-    /** Bedroom values offered in the Layout group. */
+    /**
+     * Bedroom values offered in the Layout group.
+     *
+     * @return array<int, string>
+     */
     public function getBedroomOptions(): array
     {
         return self::ALLOWED_BEDROOMS;
     }
 
-    /** Equipment keys offered in the Apartment features section. */
+    /**
+     * Equipment keys offered in the Apartment features section.
+     *
+     * @return array<int, string>
+     */
     public function getFeatureOptions(): array
     {
         return self::ALLOWED_FEATURES;
@@ -729,7 +740,7 @@ final class MarketplaceSearch
         return $draft
             ? new PropertySearchCriteria(
                 q: $this->draftQ,
-                arrondissements: $this->draftArrondissements,
+                arrondissements: $this->normalizeArrondissements($this->draftArrondissements),
                 bedrooms: $this->draftBedrooms,
                 furnished: $this->draftFurnished,
                 longTerm: $this->draftLongTerm,
@@ -755,6 +766,7 @@ final class MarketplaceSearch
             );
     }
 
+    /** @return array<int, Property> */
     private function getFilteredProperties(): array
     {
         $key = implode('||', [implode(',', $this->arrondissements), $this->filterKey()]);

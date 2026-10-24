@@ -5,22 +5,13 @@ redirect_fr:
         route: app_home
         permanent: true
 
-controllers:
-    requirements:
-        _locale: en|fr
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
-
-# Bounded-context controllers (e.g. App\Newsletter\Controller, App\Contact\Controller, …).
+# Bounded-context controllers (App\Marketing\Controller, App\Contact\Controller, App\Newsletter\Controller, …).
 # Discovered by attribute scan; the namespace stays generic so future modules are picked up automatically.
-controllers_modules:
+controllers:
     requirements:
         _locale: en|fr
     resource:
         path: ../src/
         namespace: App
-        exclude: ../src/Controller/
     type: attribute
 

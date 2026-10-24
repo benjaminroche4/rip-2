@@ -461,7 +461,9 @@ home:
             play: "Lire la vidéo"
             pause: "Mettre en pause"
         button: On vous rappelle
-        google: 'sur +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out">avis Google</a>'
+        google:
+            prefix: sur +%count%
+            link: avis %google%
         service:
             1: Recherche rapide
             2: 100% à distance

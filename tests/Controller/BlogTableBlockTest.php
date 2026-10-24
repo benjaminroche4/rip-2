@@ -18,6 +18,7 @@ final class BlogTableBlockTest extends WebTestCase
      */
     private string $slug;
 
+    /** @param array<string, mixed> $tableBlock */
     private function createClientWithPost(array $tableBlock, string $slug): KernelBrowser
     {
         $client = static::createClient();
@@ -45,6 +46,7 @@ final class BlogTableBlockTest extends WebTestCase
         return $client;
     }
 
+    /** @return array<string, mixed> */
     private static function baseTableBlock(): array
     {
         return [

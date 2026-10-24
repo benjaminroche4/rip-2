@@ -4,6 +4,15 @@
 {% block description %}{{ 'meta.privacyPolicy.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_privacy_policy') }}{% endblock %}
 
+{% block schema_page %}
+    {% include '_partials/schema/webpage.html.twig' with {
+        id: 'privacypolicypage',
+        url: path('app_privacy_policy')|replace({('/' ~ app.request.locale): ''}),
+        name: 'meta.privacyPolicy.title'|trans,
+        description: 'meta.privacyPolicy.description'|trans
+    } %}
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-2xl mx-auto flex flex-col justify-center text-center space-y-4">

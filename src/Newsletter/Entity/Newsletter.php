@@ -16,20 +16,20 @@ class Newsletter
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
+    private string $email;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    private ?bool $subscribe = null;
+    private bool $subscribe;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -41,7 +41,7 @@ class Newsletter
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -53,7 +53,7 @@ class Newsletter
         return $this;
     }
 
-    public function isSubscribe(): ?bool
+    public function isSubscribe(): bool
     {
         return $this->subscribe;
     }

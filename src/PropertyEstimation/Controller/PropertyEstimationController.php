@@ -10,6 +10,7 @@ use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -24,6 +25,7 @@ final class PropertyEstimationController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
         private readonly TranslatorInterface $translator,
+        #[Target('form_estimation')]
         private readonly RateLimiterFactoryInterface $formEstimationLimiter,
     ) {
     }
@@ -82,13 +84,9 @@ final class PropertyEstimationController extends AbstractController
                 createdAt: $now,
             ));
 
-            $propertyCondition = $data->getPropertyCondition();
-
             $this->bus->dispatch(new NotifyMakeWebhookMessage([
                 'address' => $data->getAddress(),
-                'propertyCondition' => null !== $propertyCondition
-                    ? $this->translator->trans($propertyCondition, locale: $data->getLang())
-                    : null,
+                'propertyCondition' => $this->translator->trans($data->getPropertyCondition(), locale: $data->getLang()),
                 'surface' => $data->getSurface(),
                 'bedroom' => $data->getBedroom(),
                 'bathroom' => $data->getBathroom(),

@@ -26,10 +26,10 @@ class Contact
     private string $reference;
 
     #[ORM\Column(length: 100)]
-    private ?string $firstName = null;
+    private string $firstName;
 
     #[ORM\Column(length: 100)]
-    private ?string $lastName = null;
+    private string $lastName;
 
     #[ORM\Column(length: 254, nullable: true)]
     #[Assert\Email]
@@ -42,7 +42,7 @@ class Contact
     private ?string $company = null;
 
     #[ORM\Column(length: 100)]
-    private ?string $helpType = null;
+    private string $helpType;
 
     /**
      * Package chosen on the public form ("accompagne" or "confie"), only
@@ -55,13 +55,13 @@ class Contact
     private ?string $message = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $ip = null;
 
     #[ORM\Column(length: 5)]
-    private ?string $lang = null;
+    private string $lang;
 
     public function __construct()
     {
@@ -85,7 +85,7 @@ class Contact
         return $this;
     }
 
-    public function getFirstName(): ?string
+    public function getFirstName(): string
     {
         return $this->firstName;
     }
@@ -97,7 +97,7 @@ class Contact
         return $this;
     }
 
-    public function getLastName(): ?string
+    public function getLastName(): string
     {
         return $this->lastName;
     }
@@ -145,7 +145,7 @@ class Contact
         return $this;
     }
 
-    public function getHelpType(): ?string
+    public function getHelpType(): string
     {
         return $this->helpType;
     }
@@ -181,7 +181,7 @@ class Contact
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -205,7 +205,7 @@ class Contact
         return $this;
     }
 
-    public function getLang(): ?string
+    public function getLang(): string
     {
         return $this->lang;
     }

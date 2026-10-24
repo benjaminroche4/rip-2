@@ -35,9 +35,11 @@ final class SanityExtension extends AbstractExtension
 
     public function slugify(string $text): string
     {
-        $text = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $text);
-        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+        $ascii = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $text);
+        if (false === $ascii) {
+            $ascii = mb_strtolower($text);
+        }
 
-        return trim($text, '-');
+        return trim(preg_replace('/[^a-z0-9]+/', '-', $ascii) ?? '', '-');
     }
 }

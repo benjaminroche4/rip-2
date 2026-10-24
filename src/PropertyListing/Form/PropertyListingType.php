@@ -32,6 +32,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Range;
 
+/**
+ * @extends AbstractType<PropertyListingSubmission>
+ */
 class PropertyListingType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

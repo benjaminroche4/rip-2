@@ -12,6 +12,7 @@ use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -26,6 +27,7 @@ final class ContactController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
         private readonly TranslatorInterface $translator,
+        #[Target('form_contact')]
         private readonly RateLimiterFactoryInterface $formContactLimiter,
     ) {
     }
@@ -84,22 +86,18 @@ final class ContactController extends AbstractController
                 helpType: $contact->getHelpType(),
                 message: $contact->getMessage(),
                 company: $contact->getCompany(),
-                lang: $contact->getLang() ?? $request->getLocale(),
+                lang: $contact->getLang(),
                 ip: $contact->getIp(),
                 createdAt: $now,
                 offer: $offer,
             ));
-
-            $helpType = $contact->getHelpType();
 
             $this->bus->dispatch(new NotifyMakeWebhookMessage([
                 'firstName' => $contact->getFirstName(),
                 'lastName' => $contact->getLastName(),
                 'email' => $contact->getEmail(),
                 'phone' => $contact->getPhoneNumber(),
-                'helpType' => null !== $helpType
-                    ? $this->translator->trans($helpType, locale: $contact->getLang())
-                    : null,
+                'helpType' => $this->translator->trans($contact->getHelpType(), locale: $contact->getLang()),
                 'offer' => null !== $offer
                     ? $this->translator->trans('contact.contactForm.offer.'.$offer.'.title', locale: $contact->getLang())
                     : null,

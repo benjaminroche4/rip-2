@@ -88,7 +88,7 @@
                 </div>
                 {% if post.mainPhoto %}
                     <div class="mt-4">
-                        <img src="{{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80" srcset="{{ post.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w, {{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80 1200w, {{ post.mainPhoto }}?w=1800&h=1200&fit=crop&auto=format&fm=webp&q=80 1800w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ post.mainPhotoAlt }}" decoding="async" width="1200" height="800" class="w-full aspect-3/2 rounded-2xl object-cover">
+                        <img loading="eager" src="{{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80" srcset="{{ post.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w, {{ post.mainPhoto }}?w=1200&h=800&fit=crop&auto=format&fm=webp&q=80 1200w, {{ post.mainPhoto }}?w=1800&h=1200&fit=crop&auto=format&fm=webp&q=80 1800w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ post.mainPhotoAlt }}" decoding="async" width="1200" height="800" class="w-full aspect-3/2 rounded-2xl object-cover">
                     </div>
                 {% endif %}
             </section>
@@ -261,9 +261,9 @@
                                 <div aria-hidden="true" class="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.9)_1px,transparent_1px)] bg-[size:70px_70px] [mask-image:radial-gradient(ellipse_60%_80%_at_50%_50%,black_30%,transparent_100%)] pointer-events-none"></div>
                                 <div class="relative max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
                                     <div class="flex -space-x-2 mb-6">
-                                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                        <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                        <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                        <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                     </div>
                                     {% if block.title %}
                                         <p class="text-2xl font-semibold text-pretty text-gray-950">{{ block.title }}</p>
@@ -402,7 +402,7 @@
                                 </div>
                                 <div class="pt-5 mt-auto">
                                     <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                        {{ 'blog.list.readArticle'|trans|default('Lire l\'article') }}
+                                        {{ 'blog.list.readArticle'|trans }}
                                         {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                                     </span>
                                 </div>

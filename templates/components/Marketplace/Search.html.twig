@@ -24,7 +24,7 @@
 {% set sectionHead = 'flex items-center gap-2 px-1 text-sm font-medium text-gray-900' %}
 {% set sectionIcon = 'size-[18px] shrink-0 text-primary' %}
 {% set checkboxClass = 'size-3.5 shrink-0 rounded-[4px] border-slate-300 text-primary focus:ring-primary/40' %}
-{% set optionRow = 'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-600' %}
+{% set optionRow = 'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 transition-colors duration-100 ease-out text-sm text-gray-600' %}
 
 {# Property type pill summary (built from draft selections) #}
 {% set typeLabels = [] %}
@@ -159,7 +159,7 @@
                                     {% set arrondissementNames = this.arrondissementNames %}
                                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
                                         {% for i in 1..20 %}
-                                            <label class="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 text-sm text-gray-600">
+                                            <label class="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-50 transition-colors duration-100 ease-out text-sm text-gray-600 transition-colors duration-100 ease-out">
                                                 <input type="checkbox" data-model="norender|draftArrondissements" value="{{ i }}" {{ i in draftArrondissements ? 'checked' }} class="{{ checkboxClass }}" />
                                                 <span class="truncate">{{ ui.arrondissementShort(i, locale) }} · {{ arrondissementNames[i] }}</span>
                                             </label>
@@ -360,7 +360,7 @@
                 <div data-loading="action(search)|addClass(hidden)">
                     {% if this.items is empty %}
                         <div class="flex flex-col items-center justify-center py-16 text-center">
-                            <img src="{{ asset('medias/svg/no-results.svg') }}" alt="{{ 'marketplace.list.properties.noResults'|trans }}" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
+                            <img loading="lazy" src="{{ asset('medias/svg/no-results.svg') }}" alt="{{ 'marketplace.list.properties.noResults'|trans }}" width="184" height="136" draggable="false" class="mb-6 select-none pointer-events-none" />
                             <p class="text-gray-600 text-lg font-medium mb-4">
                                 {{ 'marketplace.list.properties.noResults'|trans }}
                             </p>
@@ -410,7 +410,7 @@
                 <button
                     type="button"
                     data-action="map-teleport#close"
-                    aria-label="{{ 'marketplace.list.properties.closeMap'|trans|raw }}"
+                    aria-label="{{ 'marketplace.list.properties.closeMap'|trans }}"
                     class="lg:hidden cursor-pointer absolute top-4 right-4 z-20 size-10 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-neutral-100 transition duration-100 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
                 >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">

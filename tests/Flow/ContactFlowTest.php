@@ -9,6 +9,7 @@ use App\Shared\Webhook\NotifyMakeWebhookMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 /**
@@ -48,7 +49,9 @@ final class ContactFlowTest extends WebTestCase
         $form['contact[offer]'] = 'accompagne';
         $form['contact[message]'] = 'I would like a 2-bedroom apartment.';
         $form['contact[company]'] = 'Acme Inc.';
-        $form['contact[accept]']->tick();
+        $accept = $form['contact[accept]'];
+        self::assertInstanceOf(ChoiceFormField::class, $accept);
+        $accept->tick();
 
         $this->client->submit($form);
 
@@ -65,7 +68,7 @@ final class ContactFlowTest extends WebTestCase
         self::assertSame('john.doe@example.com', $contact->getEmail());
         self::assertSame('Acme Inc.', $contact->getCompany());
         self::assertSame('fr', $contact->getLang());
-        self::assertNotNull($contact->getCreatedAt());
+        self::assertEqualsWithDelta(time(), $contact->getCreatedAt()->getTimestamp(), 5);
 
         // 3. Two messages on the async transport (in-memory in tests):
         //    SendContactEmailsMessage (admin + client emails)

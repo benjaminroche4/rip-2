@@ -34,7 +34,7 @@ final class DashboardContactPayload
             'offer' => $contact->getOffer(),
             'message' => $contact->getMessage(),
             'lang' => $contact->getLang(),
-            'created_at' => $contact->getCreatedAt()?->format(\DateTimeInterface::ATOM),
+            'created_at' => $contact->getCreatedAt()->format(\DateTimeInterface::ATOM),
         ];
     }
 

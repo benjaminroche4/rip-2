@@ -3,8 +3,11 @@
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Field\ChoiceFormField;
+use Symfony\Component\DomCrawler\Form;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Mime\Email;
 
 final class PropertyListingControllerTest extends WebTestCase
 {
@@ -45,8 +48,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[placeId]' => 'ChIJTestRivoli75001',
             'property_listing[note]' => 'Le bien est disponible à partir de septembre.',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertResponseRedirects('/fr/proposer-un-bien', 303);
@@ -56,6 +59,7 @@ final class PropertyListingControllerTest extends WebTestCase
         // Messenger transport), so pick messages by recipient instead of index.
         $byRecipient = [];
         foreach ($this->getMailerMessages() as $mail) {
+            self::assertInstanceOf(Email::class, $mail);
             $byRecipient[$mail->getTo()[0]->getAddress()] = $mail;
         }
         self::assertArrayHasKey('contact@relocation-in-paris.fr', $byRecipient);
@@ -93,8 +97,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[deposit]' => '1500',
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertContains($client->getResponse()->getStatusCode(), [200, 422]);
@@ -169,8 +173,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[floor]' => '',
             'property_listing[buildingFloors]' => '',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertResponseRedirects('/fr/proposer-un-bien', 303);
@@ -197,8 +201,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[floor]' => '',
             'property_listing[buildingFloors]' => '',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertContains($client->getResponse()->getStatusCode(), [200, 422]);
@@ -245,9 +249,9 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[placeId]' => 'ChIJTestRivoli75001',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
         // "airbnb" only: rent, charges and deposit stay empty on purpose.
-        $form['property_listing[leaseTypes]'][3]->tick();
+        self::tick($form, 'property_listing[leaseTypes]', 3);
         $client->submit($form);
 
         self::assertResponseRedirects('/fr/proposer-un-bien', 303);
@@ -269,8 +273,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[placeId]' => 'ChIJTestRivoli75001',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertContains($client->getResponse()->getStatusCode(), [200, 422]);
@@ -295,8 +299,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[website]' => 'https://spam.example',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         // The bot sees the exact same response as a legitimate success, but
@@ -335,8 +339,8 @@ final class PropertyListingControllerTest extends WebTestCase
                 'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
                 'property_listing[placeId]' => 'ChIJTestRivoli75001',
             ]);
-            $form['property_listing[orientations]'][1]->tick();
-            $form['property_listing[leaseTypes]'][0]->tick();
+            self::tick($form, 'property_listing[orientations]', 1);
+            self::tick($form, 'property_listing[leaseTypes]', 0);
             $client->submit($form);
 
             self::assertResponseStatusCodeSame(429);
@@ -367,8 +371,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[placeId]' => 'ChIJTestRivoli75001',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
 
         // The confirmation travels on the POST response itself: no redirect,
@@ -402,8 +406,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[deposit]' => '1500',
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
 
         // Status 200 on purpose: o2switch intercepts 4xx with its own error
@@ -435,8 +439,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[website]' => 'https://spam.example',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
 
         // The bot sees the exact same stream as a legitimate success, but no
@@ -474,8 +478,8 @@ final class PropertyListingControllerTest extends WebTestCase
                 'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
                 'property_listing[placeId]' => 'ChIJTestRivoli75001',
             ]);
-            $form['property_listing[orientations]'][1]->tick();
-            $form['property_listing[leaseTypes]'][0]->tick();
+            self::tick($form, 'property_listing[orientations]', 1);
+            self::tick($form, 'property_listing[leaseTypes]', 0);
             $client->submit($form, [], ['HTTP_ACCEPT' => 'text/vnd.turbo-stream.html, text/html']);
 
             // 200 + stream (not 429): o2switch intercepts 4xx responses.
@@ -509,8 +513,8 @@ final class PropertyListingControllerTest extends WebTestCase
             'property_listing[address]' => '12 rue de Rivoli, 75001 Paris',
             'property_listing[placeId]' => 'ChIJTestRivoli75001',
         ]);
-        $form['property_listing[orientations]'][1]->tick();
-        $form['property_listing[leaseTypes]'][0]->tick();
+        self::tick($form, 'property_listing[orientations]', 1);
+        self::tick($form, 'property_listing[leaseTypes]', 0);
         $client->submit($form);
 
         self::assertResponseRedirects('/fr/proposer-un-bien', 303);
@@ -582,6 +586,7 @@ final class PropertyListingControllerTest extends WebTestCase
         // owner's confirmation just mentions the count.
         $byRecipient = [];
         foreach ($this->getMailerMessages() as $mail) {
+            self::assertInstanceOf(Email::class, $mail);
             $byRecipient[$mail->getTo()[0]->getAddress()] = $mail;
         }
         self::assertCount(1, $byRecipient['contact@relocation-in-paris.fr']->getAttachments());
@@ -645,5 +650,15 @@ final class PropertyListingControllerTest extends WebTestCase
         ]);
 
         self::assertContains($client->getResponse()->getStatusCode(), [200, 422]);
+    }
+
+    /** Ticks the n-th checkbox of a multi-choice field (orientations, leaseTypes). */
+    private static function tick(Form $form, string $field, int $index): void
+    {
+        $choices = $form[$field];
+        self::assertIsArray($choices);
+        $choice = $choices[$index] ?? null;
+        self::assertInstanceOf(ChoiceFormField::class, $choice);
+        $choice->tick();
     }
 }

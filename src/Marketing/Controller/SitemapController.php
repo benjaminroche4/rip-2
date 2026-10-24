@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Marketing\Controller;
 
 use App\Marketplace\Repository\PropertyRepository;
 use App\Shared\Sanity\SanityService;

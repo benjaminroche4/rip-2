@@ -16,6 +16,9 @@ use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
+/**
+ * @extends AbstractType<PropertyEstimation>
+ */
 class PropertyEstimationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void

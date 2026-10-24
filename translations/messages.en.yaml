@@ -461,7 +461,9 @@ home:
             play: "Play the video"
             pause: "Pause the video"
         button: Get a callback
-        google: 'based on +%count% <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out">Google reviews</a>'
+        google:
+            prefix: based on +%count%
+            link: '%google% reviews'
         service:
             1: Fast search
             2: 100% remote

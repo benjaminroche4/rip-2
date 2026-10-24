@@ -6,9 +6,8 @@ use App\Newsletter\Entity\Newsletter;
 use App\Newsletter\Form\NewsletterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
-use Psr\Log\LoggerInterface;
-use Resend;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
@@ -21,7 +20,7 @@ final class NewsletterController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
-        private readonly LoggerInterface $logger,
+        #[Target('form_newsletter')]
         private readonly RateLimiterFactoryInterface $formNewsletterLimiter,
     ) {
     }
@@ -42,8 +41,6 @@ final class NewsletterController extends AbstractController
     )]
     public function index(Request $request): Response
     {
-        // $resend = Resend::client($_ENV['RESEND_API_KEY']);
-
         $newsletter = new Newsletter();
         $form = $this->createForm(NewsletterType::class, $newsletter);
         $form->handleRequest($request);
@@ -65,19 +62,6 @@ final class NewsletterController extends AbstractController
 
             $this->entityManager->persist($newsletter);
             $this->entityManager->flush();
-
-            /*            try {
-                            $resend->contacts->create([
-                                'email' => $newsletter->getEmail(),
-                                'segments' => [
-                                    ['id' => '52a39bfb-e0fe-4aa6-8838-4555bc24f108'],
-                                ],
-                            ]);
-                        } catch (\Exception $e) {
-                            $this->logger->error('Resend API error while adding contact: ' . $e->getMessage(), [
-                                'email' => $newsletter->getEmail(),
-                            ]);
-                        }*/
 
             if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
                 $request->setRequestFormat(TurboBundle::STREAM_FORMAT);

@@ -4,6 +4,15 @@
 {% block description %}{{ 'meta.newsletter.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_newsletter') }}{% endblock %}
 
+{% block schema_page %}
+    {% include '_partials/schema/webpage.html.twig' with {
+        id: 'newsletterpage',
+        url: path('app_newsletter')|replace({('/' ~ app.request.locale): ''}),
+        name: 'meta.newsletter.title'|trans,
+        description: 'meta.newsletter.description'|trans
+    } %}
+{% endblock %}
+
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
         <div class="max-w-xl mx-auto flex flex-col justify-center text-center space-y-4">
@@ -23,7 +32,7 @@
             <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
                 <div class="flex items-center flex-col gap-3">
                     <div class="p-3 bg-gray-100 block rounded-lg w-fit">
-                        {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class':'size-7 text-primary shrink-0 group-hover:text-white transition-colors duration-100 ease-out'}) }}
                     </div>
                     <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.1.title'|trans }}</h3>
                 </div>
@@ -34,7 +43,7 @@
             <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
                 <div class="flex items-center flex-col gap-3">
                     <div class="p-3 bg-gray-100 block rounded-lg w-fit">
-                        {{ ux_icon('solar:city-linear', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                        {{ ux_icon('solar:city-linear', {'class':'size-7 text-primary shrink-0 group-hover:text-white transition-colors duration-100 ease-out'}) }}
                     </div>
                     <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.2.title'|trans }}</h3>
                 </div>
@@ -45,7 +54,7 @@
             <div class="flex flex-col items-center space-y-2 px-6 py-6 lg:py-0 w-full">
                 <div class="flex items-center flex-col gap-3">
                     <div class="p-3 bg-gray-100 block rounded-lg w-fit">
-                        {{ ux_icon('mdi:paris', {'class':'size-7 text-primary shrink-0 group-hover:text-white'}) }}
+                        {{ ux_icon('mdi:paris', {'class':'size-7 text-primary shrink-0 group-hover:text-white transition-colors duration-100 ease-out'}) }}
                     </div>
                     <h3 class="font-medium text-lg text-center text-pretty">{{ 'newsletter.card.3.title'|trans }}</h3>
                 </div>

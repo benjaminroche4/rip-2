@@ -14,31 +14,31 @@ class PropertyEstimation
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $address = null;
+    private string $address;
 
     #[ORM\Column]
-    private ?int $surface = null;
+    private int $surface;
 
     #[ORM\Column(length: 60)]
-    private ?string $propertyCondition = null;
+    private string $propertyCondition;
 
     #[ORM\Column]
-    private ?int $bedroom = null;
+    private int $bedroom;
 
     #[ORM\Column]
-    private ?int $bathroom = null;
+    private int $bathroom;
 
     #[ORM\Column(length: 60)]
-    private ?string $phoneNumber = null;
+    private string $phoneNumber;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
+    private string $email;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(length: 255)]
-    private ?string $ip = null;
+    private string $ip;
 
     #[ORM\Column(length: 5, nullable: true)]
     private ?string $lang = null;
@@ -48,7 +48,7 @@ class PropertyEstimation
         return $this->id;
     }
 
-    public function getAddress(): ?string
+    public function getAddress(): string
     {
         return $this->address;
     }
@@ -60,7 +60,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getSurface(): ?int
+    public function getSurface(): int
     {
         return $this->surface;
     }
@@ -72,7 +72,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getPropertyCondition(): ?string
+    public function getPropertyCondition(): string
     {
         return $this->propertyCondition;
     }
@@ -84,7 +84,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getBedroom(): ?int
+    public function getBedroom(): int
     {
         return $this->bedroom;
     }
@@ -96,7 +96,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getBathroom(): ?int
+    public function getBathroom(): int
     {
         return $this->bathroom;
     }
@@ -108,7 +108,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getPhoneNumber(): ?string
+    public function getPhoneNumber(): string
     {
         return $this->phoneNumber;
     }
@@ -120,7 +120,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -132,7 +132,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -144,7 +144,7 @@ class PropertyEstimation
         return $this;
     }
 
-    public function getIp(): ?string
+    public function getIp(): string
     {
         return $this->ip;
     }

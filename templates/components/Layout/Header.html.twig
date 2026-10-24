@@ -21,23 +21,25 @@
 {% endif %}
 
 <header class="relative z-10 bg-white" role="banner">
-    <nav aria-label="{{ 'header.nav.ariaLabel'|trans|default('Navigation principale') }}" class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 gap-x-3">
+    <nav aria-label="{{ 'header.nav.ariaLabel'|trans }}" class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 gap-x-3">
         <div class="flex lg:flex-2 items-center justify-start gap-x-4">
-            <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5" aria-label="{{ 'header.logo.ariaLabel'|trans|default('Retour à l accueil - Relocation In Paris') }}">
+            <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5 rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" aria-label="{{ 'header.logo.ariaLabel'|trans }}">
                 <span class="sr-only">Relocation In Paris</span>
                 <img
                     src="{{ asset('medias/logos/logo_red.svg') }}"
                     width="300"
                     height="68"
                     loading="eager"
-                    alt="{{ 'header.logo.alt'|trans|raw }}"
+                    alt="{{ 'header.logo.alt'|trans }}"
                     class="shrink-0 h-8 w-auto"
                 />
             </a>
-            <el-popover-group class="hidden lg:flex lg:gap-x-3">
+            <span class="hidden lg:block h-6 w-px bg-neutral-200" aria-hidden="true"></span>
+            <el-popover-group class="hidden lg:flex lg:gap-x-3 lg:-ml-3">
                 <a
                     href="{{ path('app_service_find_accommodation') }}"
-                    class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                    {% if currentRoute == 'app_service_find_accommodation' %}aria-current="page"{% endif %}
+                    class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                     {{ 'header.menu.findAccommodation'|trans|raw }}
                 </a>
@@ -46,16 +48,17 @@
                     data-popover-popover-id-value="desktop-menu-solutions"
                     popovertarget="desktop-menu-solutions"
                     aria-haspopup="true"
-                    class="{% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} aria-expanded:bg-neutral-100 aria-expanded:text-primary text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary cursor-pointer py-2.5 px-3 rounded-lg transition duration-100 inline-flex items-center gap-x-1"
+                    class="{% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} aria-expanded:bg-neutral-100 aria-expanded:text-primary text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary cursor-pointer py-2.5 px-3 rounded-lg transition duration-100 inline-flex items-center gap-x-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                     {{ 'header.menu.propertyManagement'|trans|raw }}
-                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 transition-transform duration-200">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 transition-transform duration-200 [[aria-expanded='true']_&]:rotate-180">
                         <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd"/>
                     </svg>
                 </button>
                 <a
                     href="{{ path('app_pricing') }}"
-                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100"
+                    {% if currentRoute == 'app_pricing' %}aria-current="page"{% endif %}
+                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} text-sm/6 font-medium text-gray-900 hover:bg-neutral-100 hover:text-primary py-2.5 px-3 rounded-lg transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                     {{ 'header.menu.pricing'|trans|raw }}
                 </a>
@@ -74,7 +77,8 @@
                     <div class="mx-auto grid max-w-7xl grid-cols-3 gap-x-4 px-6 pb-10 lg:px-8 xl:gap-x-8">
                         <a
                             href="{{ path('app_service_landlords') }}"
-                            class="{% if currentRoute == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                            {% if currentRoute == 'app_service_landlords' %}aria-current="page"{% endif %}
+                            class="{% if currentRoute == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                         >
                             <div class="flex items-start justify-start gap-x-4">
                                 <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_landlords' %}bg-white{% endif %}">
@@ -85,7 +89,7 @@
                                         <p class="block font-semibold text-gray-900">
                                             {{ 'header.menu.management.title'|trans|raw }}
                                         </p>
-                                        <div class="flex -space-x-1" aria-label="{{ 'header.text.partners'|trans|raw }}">
+                                        <div class="flex -space-x-1" aria-label="{{ 'header.text.partners'|trans }}">
                                             <div class="inline-flex size-6 rounded-full outline outline-1 -outline-offset-1 outline-black/5 ring-2 ring-white bg-[#2446FF] items-center justify-center">
                                                 {{ ux_icon('simple-icons:tripdotcom', {'class': 'size-4 brightness-0 invert', 'aria-hidden': 'true'}) }}
                                             </div>
@@ -105,7 +109,8 @@
                         </a>
                         <a
                             href="{{ path('app_service_find_tenant') }}"
-                            class="{% if currentRoute == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                            {% if currentRoute == 'app_service_find_tenant' %}aria-current="page"{% endif %}
+                            class="{% if currentRoute == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                         >
                             <div class="flex items-start justify-start gap-x-4">
                                 <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_find_tenant' %}bg-white{% endif %}">
@@ -122,7 +127,7 @@
                                             </span>
                                             <img
                                                 src="{{ asset('medias/team/team_1.webp') }}"
-                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans }}"
                                                 loading="lazy"
                                                 width="24"
                                                 height="24"
@@ -138,7 +143,8 @@
                         </a>
                         <a
                             href="{{ path('app_service_companies') }}"
-                            class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100"
+                            {% if currentRoute == 'app_service_companies' %}aria-current="page"{% endif %}
+                            class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                         >
                             <div class="flex items-start justify-start gap-x-4">
                                 <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_companies' %}bg-white{% endif %}">
@@ -162,14 +168,16 @@
                             <div class="grid grid-cols-2 divide-x divide-gray-900/5 border-x border-gray-900/5">
                                 <a
                                     href="{{ path('app_contact') }}"
-                                    class="{% if currentRoute == 'app_contact' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100"
+                                    {% if currentRoute == 'app_contact' %}aria-current="page"{% endif %}
+                                    class="{% if currentRoute == 'app_contact' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                 >
                                     {{ ux_icon('lucide:phone-call', {'class': 'size-5 flex-none text-gray-400', 'aria-hidden': 'true'}) }}
                                     {{ 'header.menu.contactExpert'|trans|raw }}
                                 </a>
                                 <a
                                     href="{{ path('app_blog') }}"
-                                    class="{% if currentRoute == 'app_blog' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100"
+                                    {% if currentRoute == 'app_blog' %}aria-current="page"{% endif %}
+                                    class="{% if currentRoute == 'app_blog' %}bg-gray-100{% endif %} flex items-center justify-center gap-x-2.5 p-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                 >
                                     {{ ux_icon('lucide:newspaper', {'class': 'size-5 flex-none text-gray-400', 'aria-hidden': 'true'}) }}
                                     {{ 'header.menu.blog'|trans|raw }}
@@ -185,8 +193,8 @@
                 type="button"
                 command="show-modal"
                 commandfor="mobile-menu"
-                aria-label="{{ 'header.action'|trans|raw  }}"
-                class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100"
+                aria-label="{{ 'header.action'|trans }}"
+                class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
                 <span class="sr-only">{{ 'header.action'|trans|raw }}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
@@ -199,7 +207,7 @@
                 variant="outline"
                 popovertarget="desktop-lang"
                 size="icon-lg"
-                aria-label="{{ 'header.lang.select'|trans|raw }}"
+                aria-label="{{ 'header.lang.select'|trans }}"
                 class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
             >
                 {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
@@ -215,7 +223,7 @@
                         href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                         hreflang="fr"
                         lang="fr"
-                        class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                     >
                         <span class="flex items-center gap-x-3">
                             {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
@@ -226,7 +234,7 @@
                         href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                         hreflang="en"
                         lang="en"
-                        class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center"
+                        class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                     >
                         <span class="flex items-center gap-x-3">
                             {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
@@ -243,19 +251,19 @@
         </div>
     </nav>
     <el-dialog>
-        <dialog id="mobile-menu" class="m-0 p-0 backdrop:bg-transparent lg:hidden" aria-label="{{ 'header.menu.mobile'|trans|default('Menu mobile') }}">
+        <dialog id="mobile-menu" class="m-0 p-0 backdrop:bg-transparent lg:hidden" aria-label="{{ 'header.menu.mobile'|trans }}">
             <div tabindex="0" class="fixed inset-0 focus:outline focus:outline-0">
                 <el-dialog-panel class="fixed inset-y-0 right-0 z-10 flex w-full flex-col justify-between overflow-y-auto bg-white sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
                     <div class="px-6 py-4">
                         <div class="flex items-center justify-between">
-                            <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5" aria-label="{{ 'header.logo.ariaLabel'|trans|default('Retour à l accueil') }}">
+                            <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5 rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" aria-label="{{ 'header.logo.ariaLabel'|trans }}">
                                 <span class="sr-only">Relocation In Paris</span>
                                 <img
                                     src="{{ asset('medias/logos/logo_red.svg') }}"
                                     width="153"
                                     height="150"
                                     loading="eager"
-                                    alt="{{ 'header.logo.alt'|trans|raw }}"
+                                    alt="{{ 'header.logo.alt'|trans }}"
                                     class="h-8 w-auto"
                                 />
                             </a>
@@ -264,8 +272,8 @@
                                     type="button"
                                     command="close"
                                     commandfor="mobile-menu"
-                                    aria-label="{{ 'header.actionClose'|trans|raw }}"
-                                    class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100"
+                                    aria-label="{{ 'header.actionClose'|trans }}"
+                                    class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                 >
                                     <span class="sr-only">{{ 'header.actionClose'|trans|raw }}</span>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
@@ -280,7 +288,8 @@
                                 <div class="py-3 space-y-3">
                                     <a
                                         href="{{ path('app_service_find_accommodation') }}"
-                                        class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center justify-between"
+                                        {% if currentRoute == 'app_service_find_accommodation' %}aria-current="page"{% endif %}
+                                        class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center justify-between outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                     >
                                         {{ 'header.menu.findAccommodation'|trans|raw }}
                                         <div class="max-[328px]:hidden px-2 py-0.5 rounded-lg font-medium border border-gray-200 text-xs flex items-center gap-x-2 text-gray-600 bg-white">
@@ -293,7 +302,8 @@
                                     </a>
                                     <a
                                         href="{{ path('app_pricing') }}"
-                                        class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                        {% if currentRoute == 'app_pricing' %}aria-current="page"{% endif %}
+                                        class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                     >
                                         {{ 'header.menu.pricing'|trans|raw }}
                                     </a>
@@ -303,7 +313,7 @@
                                             command="--toggle"
                                             commandfor="services"
                                             aria-expanded="false"
-                                            class="aria-expanded:bg-neutral-100 {% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} flex w-full items-center text-start justify-between rounded-lg py-2 pl-3 pr-3.5 font-medium text-gray-900 hover:bg-gray-50 text-base"
+                                            class="aria-expanded:bg-neutral-100 {% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} flex w-full items-center text-start justify-between rounded-lg py-2 pl-3 pr-3.5 font-medium text-gray-900 hover:bg-gray-50 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                         >
                                             {{ 'header.menu.propertyManagement'|trans|raw }}
                                             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 flex-none shrink-0 transition-transform duration-200 [[aria-expanded='true']_&]:rotate-180">
@@ -313,7 +323,8 @@
                                         <el-disclosure id="services" hidden class="mt-2 space-y-2 [&:not([hidden])]:block">
                                             <a
                                                 href="{{ path('app_service_landlords') }}"
-                                                class="{% if currentRoute == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block"
+                                                {% if currentRoute == 'app_service_landlords' %}aria-current="page"{% endif %}
+                                                class="{% if currentRoute == 'app_service_landlords' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                             >
                                                 <div class="flex items-start justify-start gap-x-4">
                                                     <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_landlords' %}bg-white{% endif %}">
@@ -344,7 +355,8 @@
                                             </a>
                                             <a
                                                 href="{{ path('app_service_find_tenant') }}"
-                                                class="{% if currentRoute == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block"
+                                                {% if currentRoute == 'app_service_find_tenant' %}aria-current="page"{% endif %}
+                                                class="{% if currentRoute == 'app_service_find_tenant' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                             >
                                                 <div class="flex items-start justify-start gap-x-4">
                                                     <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_find_tenant' %}bg-white{% endif %}">
@@ -361,7 +373,7 @@
                                                                 </span>
                                                                 <img
                                                                     src="{{ asset('medias/team/team_1.webp') }}"
-                                                                    alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                                                    alt="{{ 'header.menu.findTenant.imgAlt'|trans }}"
                                                                     loading="lazy"
                                                                     width="24"
                                                                     height="24"
@@ -377,7 +389,8 @@
                                             </a>
                                             <a
                                                 href="{{ path('app_service_companies') }}"
-                                                class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block"
+                                                {% if currentRoute == 'app_service_companies' %}aria-current="page"{% endif %}
+                                                class="{% if currentRoute == 'app_service_companies' %}bg-neutral-100{% endif %} group relative rounded-lg p-3 text-sm/6 hover:bg-neutral-100 transition duration-100 block outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                             >
                                                 <div class="flex items-start justify-start gap-x-4">
                                                     <div class="bg-neutral-100 p-2 rounded-lg group-hover:bg-white transition duration-100 {% if currentRoute == 'app_service_companies' %}bg-white{% endif %}">
@@ -399,7 +412,8 @@
                                     </div>
                                     <a
                                         href="{{ path('app_about_us') }}"
-                                        class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                        {% if currentRoute == 'app_about_us' %}aria-current="page"{% endif %}
+                                        class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                     >
                                         {{ 'header.menu.aboutUs'|trans|raw }}
                                     </a>
@@ -412,7 +426,7 @@
                                             command="--toggle"
                                             commandfor="lang"
                                             aria-expanded="false"
-                                            class="flex aria-expanded:bg-neutral-100 cursor-pointer w-full items-center justify-between rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 transition duration-100"
+                                            class="flex aria-expanded:bg-neutral-100 cursor-pointer w-full items-center justify-between rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 transition duration-100 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                                         >
                                             <span class="flex items-center gap-x-4">
                                                 {% if app.request.locale == 'fr' %}
@@ -432,7 +446,7 @@
                                                 href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                                                 hreflang="fr"
                                                 lang="fr"
-                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"
+                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                             >
                                                 <span class="flex items-center gap-x-4">
                                                     {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
@@ -448,7 +462,7 @@
                                                 href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                                                 hreflang="en"
                                                 lang="en"
-                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"
+                                                class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
                                             >
                                                 <span class="flex items-center gap-x-4">
                                                     {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}

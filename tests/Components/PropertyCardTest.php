@@ -167,6 +167,7 @@ final class PropertyCardTest extends KernelTestCase
         $this->assertStringContainsString('bg-white/80', $html);
     }
 
+    /** @param array<int, array{name?: string, slug?: string}>|null $categoryList */
     private function property(
         string $id = 'abc123',
         ?string $slug = 'sample-slug',

@@ -33,7 +33,7 @@ final class MarkerBuilder
         $hoverSvg = $this->renderPriceSvg($svgWidth, $svgHeight, $cx, $cy, $label, true);
 
         return new Marker(
-            position: $positionOverride ?? new Point((float) $property->location['lat'], (float) $property->location['lng']),
+            position: $positionOverride ?? $this->propertyPosition($property),
             title: $property->address['street'] ?? $property->title ?? '',
             icon: $icon,
             extra: ['hoverSvg' => $hoverSvg, 'propertyId' => $property->id],
@@ -115,6 +115,19 @@ final class MarkerBuilder
         return $onRequest;
     }
 
+    private function propertyPosition(Property $property): Point
+    {
+        $lat = $property->location['lat'] ?? null;
+        $lng = $property->location['lng'] ?? null;
+
+        if (null === $lat || null === $lng) {
+            throw new \InvalidArgumentException(sprintf('Property "%s" has no coordinates, cannot build its marker.', $property->id));
+        }
+
+        return new Point($lat, $lng);
+    }
+
+    /** @return non-empty-string */
     private function renderPriceSvg(int $w, int $h, int $cx, int $cy, string $label, bool $hover): string
     {
         $fill = $hover ? '#71172e' : 'white';
@@ -122,8 +135,8 @@ final class MarkerBuilder
         $textFill = $hover ? 'white' : '#111827';
         $shadow = $hover ? '#00000030' : '#00000018';
 
-        return sprintf(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="'.($w + 1).'" height="'.($h + 1).'">'.sprintf(
+            '
                 <defs>
                     <filter id="s" x="-20%%" y="-20%%" width="140%%" height="160%%">
                         <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="%s"/>
@@ -132,8 +145,6 @@ final class MarkerBuilder
                 <rect x="0.5" y="0.5" width="%d" height="%d" rx="15" fill="%s" stroke="%s" stroke-width="1" filter="url(#s)"/>
                 <text x="%d" y="%d" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="600" fill="%s">%s</text>
             </svg>',
-            $w + 1,
-            $h + 1,
             $shadow,
             $w - 1,
             $h - 1,

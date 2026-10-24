@@ -8,9 +8,11 @@ use App\PropertyListing\Message\SendListingEmailMessage;
 use App\PropertyListing\Service\ListingPhotoStorage;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,6 +23,7 @@ final class PropertyListingController extends AbstractController
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
+        #[Target('form_listing')]
         private readonly RateLimiterFactoryInterface $formListingLimiter,
         private readonly ListingPhotoStorage $photoStorage,
         private readonly MessageBusInterface $bus,
@@ -149,8 +152,9 @@ final class PropertyListingController extends AbstractController
         // Non-Turbo fallback only: the confirmation GET after the PRG redirect
         // must never be cached, or the shared host's LiteSpeed cache keeps
         // serving the confirmation on refresh instead of the fresh form.
-        $showsConfirmation = $request->hasPreviousSession()
-            && $request->getSession()->getFlashBag()->has('listingSuccess');
+        $session = $request->hasPreviousSession() ? $request->getSession() : null;
+        $showsConfirmation = $session instanceof FlashBagAwareSessionInterface
+            && $session->getFlashBag()->has('listingSuccess');
 
         $response = $this->render('public/property_listing/index.html.twig', [
             'form' => $form,

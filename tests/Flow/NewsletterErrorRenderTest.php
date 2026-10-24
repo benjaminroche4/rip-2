@@ -42,7 +42,7 @@ final class NewsletterErrorRenderTest extends WebTestCase
         $this->client->submit($form);
 
         self::assertSame(422, $this->client->getResponse()->getStatusCode());
-        $html = $this->client->getResponse()->getContent();
+        $html = $this->responseHtml();
         self::assertStringContainsString('déjà inscrite', $html);
         self::assertStringContainsString('role="alert"', $html);
     }
@@ -56,7 +56,7 @@ final class NewsletterErrorRenderTest extends WebTestCase
         $this->client->submit($form);
 
         self::assertSame(422, $this->client->getResponse()->getStatusCode());
-        $html = $this->client->getResponse()->getContent();
+        $html = $this->responseHtml();
         self::assertStringContainsString('pas valide', $html);
         self::assertCount(0, $this->em->getRepository(Newsletter::class)->findAll());
     }
@@ -70,7 +70,15 @@ final class NewsletterErrorRenderTest extends WebTestCase
         $this->client->submit($form);
 
         self::assertSame(422, $this->client->getResponse()->getStatusCode());
-        $html = $this->client->getResponse()->getContent();
+        $html = $this->responseHtml();
         self::assertStringContainsString('Veuillez renseigner votre adresse email', $html);
+    }
+
+    private function responseHtml(): string
+    {
+        $html = $this->client->getResponse()->getContent();
+        self::assertIsString($html);
+
+        return $html;
     }
 }

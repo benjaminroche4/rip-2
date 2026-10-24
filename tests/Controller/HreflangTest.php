@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 final class HreflangTest extends WebTestCase
 {
     /**
-     * @return iterable<string, array{string, string, string}>
+     * @return iterable<string, array{string, non-empty-string, non-empty-string}>
      */
     public static function localizedPathProvider(): iterable
     {
@@ -21,6 +21,10 @@ final class HreflangTest extends WebTestCase
         yield 'pricing' => ['/fr/tarifs', '/fr/tarifs', '/en/pricing'];
     }
 
+    /**
+     * @param non-empty-string $expectedFrPath
+     * @param non-empty-string $expectedEnPath
+     */
     #[\PHPUnit\Framework\Attributes\DataProvider('localizedPathProvider')]
     public function testItEmitsLocalizedHreflangAlternates(string $requestPath, string $expectedFrPath, string $expectedEnPath): void
     {

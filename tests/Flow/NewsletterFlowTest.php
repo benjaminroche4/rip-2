@@ -46,7 +46,7 @@ final class NewsletterFlowTest extends WebTestCase
         $sub = $rows[0];
         self::assertSame('subscriber@example.com', $sub->getEmail());
         self::assertTrue($sub->isSubscribe(), 'Newsletter subscribe flag must default to true.');
-        self::assertNotNull($sub->getCreatedAt());
+        self::assertEqualsWithDelta(time(), $sub->getCreatedAt()->getTimestamp(), 5);
     }
 
     public function testEmptyEmailReturnsFormWithoutPersist(): void

@@ -5,7 +5,7 @@
                 <div class="flex justify-center md:justify-between items-center gap-2">
                     <div class="flex items-center justify-center gap-6 sm:flex-row flex-col">
                         <a href="{{ path('app_home') }}" class="hidden md:block">
-                            <img src="{{ asset('medias/logos/logo_white.svg') }}" width="192" height="44" loading="eager" alt="{{ 'footer.logo.alt'|trans|raw }}" class="w-48"/>
+                            <img src="{{ asset('medias/logos/logo_white.svg') }}" width="192" height="44" loading="eager" alt="{{ 'footer.logo.alt'|trans }}" class="w-48"/>
                         </a>
                         <div class="flex items-center justify-center space-x-1.5" aria-hidden="true">
                             <svg width="29" height="50" viewBox="0 0 29 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-10">
@@ -72,7 +72,7 @@
                             </defs>
                         </svg>
                         <div>
-                            <a href="https://share.google/DuM7reAcGSrmXQ65I" rel="noopener noreferrer" target="_blank" aria-label="{{ 'footer.google.ariaLabel'|trans|raw }}" class="p-3 font-semibold flex items-center gap-x-3.5">
+                            <a href="https://share.google/DuM7reAcGSrmXQ65I" rel="noopener noreferrer" target="_blank" aria-label="{{ 'footer.google.ariaLabel'|trans }}" class="p-3 font-semibold flex items-center gap-x-3.5">
                                 {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
                                 <div class="flex flex-col justify-start -space-y-1">
                                     <div class="test-base font-bold flex items-center text-white gap-x-2">
@@ -105,9 +105,9 @@
                     <div class="flex items-center space-x-3 md:flex-row flex-col space-y-6 md:space-y-0">
                         <div class="flex items-center max-[375px]:flex-col gap-3">
                             <div class="flex -space-x-1.5">
-                                <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                                <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
-                                <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans|raw }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans }}" loading="lazy" width="28" height="28" class="inline-block size-7 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                             </div>
                             <div>
                                 <p class="text-base md:text-lg font-semibold text-white text-gray-200 text-center">
@@ -125,7 +125,7 @@
                                 </linearGradient>
                             </defs>
                         </svg>
-                        <a href="tel:+(33)184804344" aria-label="{{ 'footer.phone.ariaLabel'|trans|raw }}" class="flex max-[214px]:text-xs max-[230px]:text-sm max-[365px]:text-base  items-center gap-x-4 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white transition duration-100 text-lg font-normal py-2 px-4">
+                        <a href="tel:+(33)184804344" aria-label="{{ 'footer.phone.ariaLabel'|trans }}" class="flex max-[214px]:text-xs max-[230px]:text-sm max-[365px]:text-base  items-center gap-x-4 rounded-full border bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-white transition duration-100 text-lg font-normal py-2 px-4">
                             +(33) 1 84 80 43 44
                             {% set currentDay = "now"|date("N", "Europe/Paris") %}
                             {% set currentHour = "now"|date("G", "Europe/Paris") %}

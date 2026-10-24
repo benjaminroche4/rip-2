@@ -1,30 +1,30 @@
 <?php
 
-namespace App\Controller\Public;
+namespace App\Marketing\Controller;
 
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class AboutUsController extends AbstractController
+final class PricingController extends AbstractController
 {
     #[Route(
         path: [
-            'fr' => '/{_locale}/a-propos',
-            'en' => '/{_locale}/about-us',
+            'fr' => '/{_locale}/tarifs',
+            'en' => '/{_locale}/pricing',
         ],
-        name: 'app_about_us',
+        name: 'app_pricing',
         options: [
             'sitemap' => [
-                'priority' => 0.6,
+                'priority' => 0.8,
                 'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                'lastmod' => new \DateTime('2025-10-30'),
+                'lastmod' => new \DateTime('2026-03-23'),
             ],
         ]
     )]
     public function index(): Response
     {
-        return $this->render('public/about_us/index.html.twig');
+        return $this->render('public/pricing/index.html.twig');
     }
 }

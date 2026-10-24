@@ -20,7 +20,11 @@ final class PropertyFilterTest extends TestCase
         $this->filter = new PropertyFilter();
     }
 
-    /** @return array<int, string> */
+    /**
+     * @param array<int, Property> $result
+     *
+     * @return array<int, string>
+     */
     private function ids(array $result): array
     {
         return array_map(static fn (Property $p) => $p->id, $result);

@@ -32,6 +32,7 @@ final class ParisMetroLines
         'E' => ['name' => 'RER E', 'color' => '#E04DA7', 'textColor' => '#fff', 'type' => 'rer'],
     ];
 
+    /** @return array{name: string, color: string, textColor: string, type: 'metro'|'rer'}|null */
     public static function getLine(string $id): ?array
     {
         return self::LINES[$id] ?? null;

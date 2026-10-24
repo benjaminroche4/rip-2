@@ -78,14 +78,14 @@
                             </div>
                             <div class="pt-5 mt-auto">
                                 <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                    {{ 'blog.list.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ 'blog.list.readArticle'|trans }}
                                     {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                                 </span>
                             </div>
                         </div>
                         <div class="col-span-3 lg:order-2 order-1 p-2 relative">
                             {% if hero.mainPhoto %}
-                                <img src="{{ hero.mainPhoto }}?w=1200&h=900&fit=crop&auto=format&fm=webp&q=80" srcset="{{ hero.mainPhoto }}?w=600&h=450&fit=crop&auto=format&fm=webp&q=80 600w, {{ hero.mainPhoto }}?w=1200&h=900&fit=crop&auto=format&fm=webp&q=80 1200w, {{ hero.mainPhoto }}?w=1800&h=1350&fit=crop&auto=format&fm=webp&q=80 1800w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ hero.mainPhotoAlt }}" width="1200" height="900" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
+                                <img loading="eager" src="{{ hero.mainPhoto }}?w=1200&h=900&fit=crop&auto=format&fm=webp&q=80" srcset="{{ hero.mainPhoto }}?w=600&h=450&fit=crop&auto=format&fm=webp&q=80 600w, {{ hero.mainPhoto }}?w=1200&h=900&fit=crop&auto=format&fm=webp&q=80 1200w, {{ hero.mainPhoto }}?w=1800&h=1350&fit=crop&auto=format&fm=webp&q=80 1800w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ hero.mainPhotoAlt }}" width="1200" height="900" class="w-full h-[200px] lg:h-[450px] rounded-xl object-cover">
                             {% endif %}
                             {% if hero.category is defined and hero.category %}
                                 <div class="absolute top-5 left-5">
@@ -161,7 +161,7 @@
                             </div>
                             <div class="pt-5 mt-auto">
                                 <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
-                                    {{ 'blog.list.readArticle'|trans|default('Lire l\'article') }}
+                                    {{ 'blog.list.readArticle'|trans }}
                                     {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
                                 </span>
                             </div>

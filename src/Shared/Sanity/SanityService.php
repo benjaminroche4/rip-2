@@ -29,6 +29,7 @@ class SanityService
         return $this->client;
     }
 
+    /** @param array<string, mixed> $params */
     public function query(string $query, array $params = []): mixed
     {
         return $this->client->fetch($query, $params);

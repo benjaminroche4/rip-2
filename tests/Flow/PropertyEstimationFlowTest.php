@@ -60,7 +60,7 @@ final class PropertyEstimationFlowTest extends WebTestCase
         self::assertSame(2, $estimation->getBedroom());
         self::assertSame('landlord@example.com', $estimation->getEmail());
         self::assertSame('fr', $estimation->getLang());
-        self::assertNotNull($estimation->getCreatedAt());
+        self::assertEqualsWithDelta(time(), $estimation->getCreatedAt()->getTimestamp(), 5);
 
         // Two messages on the async transport (in-memory in tests):
         //   SendEstimationEmailMessage (admin email)

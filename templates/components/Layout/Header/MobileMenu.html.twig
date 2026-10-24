@@ -5,19 +5,19 @@
 {%- props currentRoute, currentParameters = {}, blogSwitchParams = null, propertySwitchParams = null -%}
 
 <el-dialog>
-    <dialog id="mobile-menu" class="m-0 p-0 backdrop:bg-transparent lg:hidden" aria-label="{{ 'header.menu.mobile'|trans|default('Menu mobile') }}">
+    <dialog id="mobile-menu" class="m-0 p-0 backdrop:bg-transparent lg:hidden" aria-label="{{ 'header.menu.mobile'|trans }}">
         <div tabindex="0" class="fixed inset-0 focus:outline focus:outline-0">
             <el-dialog-panel class="fixed inset-y-0 right-0 z-10 flex w-full flex-col justify-between overflow-y-auto bg-white sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
                 <div class="px-6 py-4">
                     <div class="flex items-center justify-between">
-                        <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5" aria-label="{{ 'header.logo.ariaLabel'|trans|default('Retour à l accueil') }}">
+                        <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5" aria-label="{{ 'header.logo.ariaLabel'|trans }}">
                             <span class="sr-only">Relocation In Paris</span>
                             <img
                                 src="{{ asset('medias/logos/logo_red.svg') }}"
                                 width="153"
                                 height="150"
                                 loading="eager"
-                                alt="{{ 'header.logo.alt'|trans|raw }}"
+                                alt="{{ 'header.logo.alt'|trans }}"
                                 class="h-8 w-auto"
                             />
                         </a>
@@ -26,7 +26,7 @@
                                 type="button"
                                 command="close"
                                 commandfor="mobile-menu"
-                                aria-label="{{ 'header.actionClose'|trans|raw }}"
+                                aria-label="{{ 'header.actionClose'|trans }}"
                                 class="size-10 flex items-center justify-center rounded-lg text-gray-700 hover:bg-neutral-100 transition duration-100"
                             >
                                 <span class="sr-only">{{ 'header.actionClose'|trans|raw }}</span>
@@ -42,7 +42,7 @@
                             <div class="py-3 space-y-3">
                                 <a
                                     href="{{ path('app_service_find_accommodation') }}"
-                                    class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center justify-between"
+                                    class="{% if currentRoute == 'app_service_find_accommodation' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 flex items-center justify-between transition-colors duration-100 ease-out"
                                 >
                                     {{ 'header.menu.findAccommodation'|trans|raw }}
                                     <div class="max-[328px]:hidden px-2 py-0.5 rounded-lg font-medium border border-gray-200 text-xs flex items-center gap-x-2 text-gray-600 bg-white">
@@ -55,7 +55,7 @@
                                 </a>
                                 <a
                                     href="{{ path('app_pricing') }}"
-                                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                    class="{% if currentRoute == 'app_pricing' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors duration-100 ease-out"
                                 >
                                     {{ 'header.menu.pricing'|trans|raw }}
                                 </a>
@@ -65,7 +65,7 @@
                                         command="--toggle"
                                         commandfor="services"
                                         aria-expanded="false"
-                                        class="aria-expanded:bg-neutral-100 {% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} flex w-full items-center text-start justify-between rounded-lg py-2 pl-3 pr-3.5 font-medium text-gray-900 hover:bg-gray-50 text-base"
+                                        class="aria-expanded:bg-neutral-100 {% if currentRoute in ['app_service_landlords', 'app_service_find_tenant'] %}bg-neutral-100 text-primary{% endif %} flex w-full items-center text-start justify-between rounded-lg py-2 pl-3 pr-3.5 font-medium text-gray-900 hover:bg-gray-50 text-base transition-colors duration-100 ease-out"
                                     >
                                         {{ 'header.menu.propertyManagement'|trans|raw }}
                                         <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 flex-none shrink-0 transition-transform duration-200 [[aria-expanded='true']_&]:rotate-180">
@@ -123,7 +123,7 @@
                                                             </span>
                                                             <img
                                                                 src="{{ asset('medias/team/team_1.webp') }}"
-                                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans|raw }}"
+                                                                alt="{{ 'header.menu.findTenant.imgAlt'|trans }}"
                                                                 loading="lazy"
                                                                 width="24"
                                                                 height="24"
@@ -161,7 +161,7 @@
                                 </div>
                                 <a
                                     href="{{ path('app_about_us') }}"
-                                    class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50"
+                                    class="{% if currentRoute == 'app_about_us' %}bg-neutral-100 text-primary{% endif %} -mx-3 block rounded-lg px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors duration-100 ease-out"
                                 >
                                     {{ 'header.menu.aboutUs'|trans|raw }}
                                 </a>
@@ -194,7 +194,7 @@
                                             href="{{ path(currentRoute, blogSwitchParams ? blogSwitchParams.fr : (propertySwitchParams ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                                             hreflang="fr"
                                             lang="fr"
-                                            class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"
+                                            class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center transition-colors duration-100 ease-out"
                                         >
                                             <span class="flex items-center gap-x-4">
                                                 {{ ux_icon('circle-flags:fr', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
@@ -210,7 +210,7 @@
                                             href="{{ path(currentRoute, blogSwitchParams ? blogSwitchParams.en : (propertySwitchParams ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                                             hreflang="en"
                                             lang="en"
-                                            class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center"
+                                            class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center transition-colors duration-100 ease-out"
                                         >
                                             <span class="flex items-center gap-x-4">
                                                 {{ ux_icon('circle-flags:en', {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}

@@ -4,18 +4,33 @@
 
 # General rules (routes are locale-prefixed: /fr/..., /en/...)
 User-agent: *
-Disallow: /fr/connexion
-Disallow: /en/login
-Disallow: /fr/deconnexion
-Disallow: /en/logout
-Disallow: /fr/inscription
-Disallow: /en/register
-Disallow: /fr/reinitialiser-mot-de-passe
-Disallow: /en/reset-password
-Disallow: /*/admin
+Disallow: /_components/
+Disallow: /_marketplace/
+Disallow: /_fragment
+Disallow: /_profiler/
+Disallow: /_wdt/
+
+# AI crawlers and answer engines are welcome (same rules as above)
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bingbot
+User-agent: CCBot
+Allow: /
+Disallow: /_components/
 Disallow: /_marketplace/
 Disallow: /_fragment
 Disallow: /_profiler/
 Disallow: /_wdt/
 
 Sitemap: https://relocation-in-paris.fr/sitemap.xml
+
+# Machine-readable summary of the site for LLMs
+# https://relocation-in-paris.fr/llms.txt

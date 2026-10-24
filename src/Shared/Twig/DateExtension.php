@@ -45,6 +45,9 @@ class DateExtension extends AbstractExtension
         );
 
         $formatted = $formatter->format($nextMonday);
+        if (false === $formatted) {
+            throw new \RuntimeException('Unable to format the next Monday date: '.$formatter->getErrorMessage());
+        }
 
         // Capitalise la première lettre
         return mb_convert_case($formatted, MB_CASE_TITLE, 'UTF-8');

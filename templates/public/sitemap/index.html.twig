@@ -4,6 +4,15 @@
 {% block description %}{{ 'meta.sitemap.description'|trans }}{% endblock %}
 {% block url %}{{ path('app_sitemap') }}{% endblock %}
 
+{% block schema_page %}
+    {% include '_partials/schema/webpage.html.twig' with {
+        id: 'sitemappage',
+        url: path('app_sitemap')|replace({('/' ~ app.request.locale): ''}),
+        name: 'meta.sitemap.title'|trans,
+        description: 'meta.sitemap.description'|trans
+    } %}
+{% endblock %}
+
 {% set isFr = app.request.locale == 'fr' %}
 
 {% block body %}
