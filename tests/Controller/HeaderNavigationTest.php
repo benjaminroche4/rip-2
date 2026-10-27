@@ -65,4 +65,13 @@ final class HeaderNavigationTest extends WebTestCase
         self::assertStringContainsString('lg:hidden', (string) $banner->attr('class'), 'The banner is mobile-only.');
         self::assertStringContainsString('On vous rappelle', $banner->text());
     }
+
+    public function testMobileCallbackBannerIsHiddenOnContactPage(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/contact');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(0, $crawler->filter('[data-testid="callback-banner"]'), 'No call-back banner on the page it links to.');
+    }
 }

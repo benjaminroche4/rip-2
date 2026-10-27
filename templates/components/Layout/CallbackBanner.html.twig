@@ -1,5 +1,7 @@
 {# Mobile-only strip above the header: one tap to the contact page.
-   Hidden on lg+ where the header already exposes the contact CTA. #}
+   Hidden on lg+ where the header already exposes the contact CTA,
+   and on the contact page itself where it would link to the current page. #}
+{% if app.request.attributes.get('_route') != 'app_contact' %}
 <a
     href="{{ path('app_contact') }}"
     class="flex lg:hidden items-center justify-center gap-x-2 bg-primary px-6 py-2 text-[0.8125rem] font-medium text-white hover:bg-primary/90 transition-colors duration-100 ease-out outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-white/60"
@@ -9,3 +11,4 @@
     <span>{{ 'header.callbackBanner.text'|trans }}</span>
     {{ ux_icon('lucide:arrow-right', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
 </a>
+{% endif %}
