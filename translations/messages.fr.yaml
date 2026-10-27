@@ -152,6 +152,8 @@ footer:
         ariaLabel: Appelez-nous au +33 1 84 80 43 44
 header:
     action: Ouvrir le menu
+    callbackBanner:
+        text: On vous rappelle
     actionClose: Fermer le menu
     lang:
         select: Choisir une langue

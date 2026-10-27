@@ -51,4 +51,18 @@ final class HeaderNavigationTest extends WebTestCase
         self::assertGreaterThan(0, $popover->filter('a[href="/fr/services/trouver-un-locataire"]')->count());
         self::assertGreaterThan(0, $popover->filter('a[href="/fr/services/pour-les-entreprises"]')->count());
     }
+
+    public function testMobileCallbackBannerLinksToContactPage(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+
+        $banner = $crawler->filter('[data-testid="callback-banner"]');
+        self::assertCount(1, $banner, 'The call-back banner must be rendered once above the header.');
+        self::assertSame('/fr/contact', $banner->attr('href'));
+        self::assertStringContainsString('lg:hidden', (string) $banner->attr('class'), 'The banner is mobile-only.');
+        self::assertStringContainsString('On vous rappelle', $banner->text());
+    }
 }
