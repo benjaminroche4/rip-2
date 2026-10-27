@@ -150,11 +150,11 @@ export default class extends Controller {
                 const isActive = idx === this.activeIndex;
                 const isFeatured = this.featuredValue !== '' && opt.value === this.featuredValue;
                 const base = 'cursor-pointer select-none flex items-center gap-2 rounded-md px-3 py-2 text-sm';
-                // Featured option: subtle permanent grey tint + a discreet trailing
-                // marker so it stays recognisable at a glance without shouting.
+                // Featured option: same layout as the others (star on the right,
+                // only when not selected), just stronger colours so it stands out.
                 const state = isFeatured
-                    ? `text-gray-900 ${isActive ? 'bg-gray-100' : 'bg-gray-50'} hover:bg-gray-100`
-                    : `text-gray-900 hover:bg-neutral-100 ${isActive || isSelected ? 'bg-neutral-100' : ''}`;
+                    ? `font-semibold text-primary ${isActive ? 'bg-primary/10' : 'bg-primary/5'} hover:bg-primary/10 transition-colors duration-100 ease-out`
+                    : `text-gray-900 hover:bg-neutral-100 transition-colors duration-100 ease-out ${isActive || isSelected ? 'bg-neutral-100' : ''}`;
                 const hint = isFeatured && this.featuredLabelValue
                     ? `<span class="sr-only"> (${this.#escape(this.featuredLabelValue)})</span>`
                     : '';
@@ -176,7 +176,7 @@ export default class extends Controller {
     }
 
     #featuredIcon() {
-        return `<svg aria-hidden="true" class="size-3.5 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>`;
+        return `<svg aria-hidden="true" class="size-3.5 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" /></svg>`;
     }
 
     #checkIcon() {
