@@ -78,6 +78,9 @@ contact:
                     info: Durant les heures d'ouverture.
                 number:
                     text: "Nous vous appelons au :"
+                offer:
+                    text: Votre formule souhaitée
+                    link: Voir le détail de la formule
             goodToKnow:
                 text: Si vous n'êtes pas disponible, il vous laissera un SMS ou un email.
         subButtonText: Vous serez rappelé sous 30 minutes, aux heures d'ouverture.

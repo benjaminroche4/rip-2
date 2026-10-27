@@ -61,6 +61,7 @@
 
                                                     <p style="margin:0;padding:0.5em 0;text-align:center"><br /></p>
 
+
                                                     <table class="box-gray" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                         style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;padding:10px">
                                                         <tbody>
@@ -138,6 +139,45 @@
                                                     </table>
 
                                                     <p style="margin:0;padding:0.5em 0;text-align:center"><br /></p>
+
+                                                    {% if offer is defined and offer %}
+                                                        {% set n = offer == 'confie' ? 2 : 1 %}
+                                                        {# Chosen package, same layout as the pricing page cards #}
+                                                        <table class="email-card" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                            style="background-color:#FFF4F6;border:1px solid #EB9CB0;border-radius:16px;padding:8px">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>
+                                                                        <p style="margin:0;padding:4px 0 8px;font-size:0.85em;text-align:center;color:#71172e">
+                                                                            {{ fr ? 'Votre formule souhaitée' : 'Your preferred package' }}
+                                                                        </p>
+                                                                        <table class="box-gray" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
+                                                                            style="background-color:#ffffff;border-radius:12px;padding:16px 20px">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <h3 style="margin:0;padding:0;font-size:1.4em;line-height:1.3;font-weight:600">{{ ('pricing.package.' ~ n ~ '.title')|trans(locale=lang)|striptags }}</h3>
+                                                                                        <p class="text-muted" style="margin:0;padding:6px 0 0;font-size:0.95em;color:#525252">{{ ('pricing.package.' ~ n ~ '.text')|trans(locale=lang)|striptags }}</p>
+                                                                                        <p style="margin:0;padding:16px 0 0;font-size:1.8em;line-height:1.2;font-weight:600;color:#71172e">{{ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans(locale=lang) }}</p>
+                                                                                        <hr style="width:100%;border:none;border-top:1px solid #e2e2e2;margin:16px 0" />
+                                                                                        <p style="margin:0;padding:0 0 8px;font-size:1em;font-weight:600">{{ ('pricing.package.' ~ n ~ '.listing.include')|trans(locale=lang)|striptags }}</p>
+                                                                                        {% for i in 1..6 %}
+                                                                                            <p style="margin:0;padding:4px 0;font-size:0.95em"><span style="color:#71172e;font-weight:700">&#10003;</span>&nbsp;&nbsp;{{ ('pricing.package.' ~ n ~ '.listing.' ~ i)|trans(locale=lang)|striptags }}</p>
+                                                                                        {% endfor %}
+                                                                                        <p style="margin:0;padding:12px 0 0;font-size:0.9em">
+                                                                                            <a href="{{ url('app_pricing', {'_locale': lang}) }}" class="text-muted" style="color:#525252;text-decoration:underline" rel="noopener noreferrer" target="_blank">{{ fr ? 'Voir le détail de la formule' : 'See what is included' }}</a>
+                                                                                        </p>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+                                                        <p style="margin:0;padding:0.5em 0;text-align:center"><br /></p>
+                                                    {% endif %}
 
                                                     <table class="box-gray" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation"
                                                         style="background-color:#F7F7F7;border:1px solid #E5E5E5;border-radius:12px;padding:10px">

@@ -1,7 +1,8 @@
 {# Confirmation block shown on GET /contact?success=1 right after a successful
    submission (PRG redirect). Never rendered on a cacheable response.
-   @prop phoneNumber  Submitted phone number, null when unknown (e.g. page reload) #}
-{%- props phoneNumber = null -%}
+   @prop phoneNumber  Submitted phone number, null when unknown (e.g. page reload)
+   @prop offer        Chosen package key (accompagne|confie), null when none or unknown #}
+{%- props phoneNumber = null, offer = null -%}
 
 <div id="contact-form" data-controller="scroll-into-view" class="scroll-mt-6 p-3 lg:p-8 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0" role="status" aria-live="polite">
     <div class="flex justify-center flex-col items-center">
@@ -81,6 +82,12 @@
 
                     </div>
                 </div>
+
+                {% if offer %}
+                    <div class="mt-4">
+                        <twig:Contact:OfferCard :offer="offer" />
+                    </div>
+                {% endif %}
             </div>
         </div>
 

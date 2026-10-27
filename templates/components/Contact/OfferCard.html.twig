@@ -1,0 +1,51 @@
+{# Recap of the chosen package, same look as the pricing page cards.
+   @prop offer  Package key: accompagne (pricing.package.1) or confie (pricing.package.2) #}
+{%- props offer -%}
+{% set n = offer == 'confie' ? 2 : 1 %}
+{% set featured = (n == 2) %}
+
+<div class="shimmer-border rounded-2xl p-2 border border-[#EB9CB0] bg-linear-to-b from-[#FFE5EB] to-[#FFE5EB]/0 w-full text-left">
+    <div class="mb-1.5 mt-0.5 text-center text-primary">
+        <p class="text-sm flex items-center justify-center gap-x-1.5">
+            {% if featured %}{{ ux_icon('akar-icons:thunder', {'class': 'size-3 text-primary', 'aria-hidden': 'true'}) }}{% endif %}
+            {{ ('pricing.package.' ~ n ~ '.eyebrow')|trans|raw }}
+        </p>
+    </div>
+    <div class="rounded-xl {{ featured ? 'bg-white' : 'bg-linear-to-b from-neutral-100 to-neutral-100/0' }} flex flex-col">
+        <div class="p-4 lg:p-6">
+            <div class="flex items-start justify-between gap-x-4">
+                <div class="rounded-full p-3 {{ featured ? 'bg-[#FFF4F6]' : 'bg-white' }} inline-block">
+                    {% if featured %}
+                        {{ ux_icon('tabler:crown-filled', {'class': 'size-7 text-primary', 'aria-hidden': 'true'}) }}
+                    {% else %}
+                        {{ ux_icon('material-symbols:star-rounded', {'class': 'size-7 text-gray-900', 'aria-hidden': 'true'}) }}
+                    {% endif %}
+                </div>
+                <p class="text-xs text-slate-600 pt-1">{{ 'contact.contactForm.success.box.offer.text'|trans|raw }}</p>
+            </div>
+            <div class="pt-2 space-y-2">
+                <h3 class="text-2xl font-semibold">{{ ('pricing.package.' ~ n ~ '.title')|trans|raw }}</h3>
+                <p class="text-pretty font-light text-slate-600">{{ ('pricing.package.' ~ n ~ '.text')|trans|raw }}</p>
+                <p class="text-3xl font-semibold text-primary font-primary mt-6">{{ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans }}</p>
+            </div>
+        </div>
+        <div class="h-[1px] bg-linear-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+        <div class="p-4 lg:p-6 space-y-3.5">
+            <p class="text-base font-semibold text-pretty">{{ ('pricing.package.' ~ n ~ '.listing.include')|trans|raw }}</p>
+            <ul class="space-y-3.5" role="list">
+                {% for i in 1..6 %}
+                    <li class="flex items-center gap-x-2">
+                        <div class="bg-gray-100 rounded-full p-0.5 shrink-0" aria-hidden="true">
+                            {{ ux_icon('material-symbols:check-small-rounded', {'class': 'size-5 text-primary'}) }}
+                        </div>
+                        <p class="text-slate-800 font-light">{{ ('pricing.package.' ~ n ~ '.listing.' ~ i)|trans|raw }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+            <a href="{{ path('app_pricing') }}" class="inline-flex items-center gap-x-1 text-sm text-slate-600 underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out pt-2">
+                {{ 'contact.contactForm.success.box.offer.link'|trans }}
+                {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0', 'aria-hidden': 'true'}) }}
+            </a>
+        </div>
+    </div>
+</div>

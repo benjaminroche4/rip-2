@@ -78,6 +78,9 @@ contact:
                     info: During opening hours.
                 number:
                     text: "We will call you at:"
+                offer:
+                    text: Your preferred package
+                    link: See what is included
             goodToKnow:
                 text: If you are unavailable, he will leave you an SMS or an email.
         subButtonText: You will be called back within 30 minutes, during opening hours.

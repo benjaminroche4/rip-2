@@ -25,6 +25,7 @@ use Symfony\UX\Turbo\TurboBundle;
 final class ContactController extends AbstractController
 {
     private const FLASH_PHONE = 'contactSuccessPhone';
+    private const FLASH_OFFER = 'contactSuccessOffer';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -66,6 +67,7 @@ final class ContactController extends AbstractController
                 'contactForm' => $form->createView(),
                 'success' => false,
                 'successPhoneNumber' => null,
+                'successOffer' => null,
             ]);
             $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
 
@@ -122,6 +124,9 @@ final class ContactController extends AbstractController
             // conversion on a real page view. The flash only carries the phone
             // number for the confirmation copy, never the confirmation itself.
             $this->addFlash(self::FLASH_PHONE, $contact->getPhoneNumber());
+            if (null !== $offer) {
+                $this->addFlash(self::FLASH_OFFER, $offer);
+            }
 
             return $this->redirectToRoute('app_contact', ['success' => 1], Response::HTTP_SEE_OTHER);
         }
@@ -146,11 +151,15 @@ final class ContactController extends AbstractController
         // the shared host's LiteSpeed cache ignores Cache-Control: private.
         $success = !$form->isSubmitted() && $request->query->getBoolean('success');
         $phoneNumber = null;
+        $offer = null;
         if ($success) {
             $session = $request->hasPreviousSession() ? $request->getSession() : null;
             if ($session instanceof FlashBagAwareSessionInterface) {
-                $phones = $session->getFlashBag()->get(self::FLASH_PHONE);
+                $flashes = $session->getFlashBag();
+                $phones = $flashes->get(self::FLASH_PHONE);
                 $phoneNumber = \is_string($phones[0] ?? null) ? $phones[0] : null;
+                $offers = $flashes->get(self::FLASH_OFFER);
+                $offer = \is_string($offers[0] ?? null) ? $offers[0] : null;
             }
         }
 
@@ -158,6 +167,7 @@ final class ContactController extends AbstractController
             'contactForm' => $form->createView(),
             'success' => $success,
             'successPhoneNumber' => $phoneNumber,
+            'successOffer' => $offer,
         ]);
 
         if ($success) {
