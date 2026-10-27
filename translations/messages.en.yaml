@@ -71,6 +71,7 @@ contact:
                 advisor: Your advisor has been assigned
                 altPhoto: Photo of a Relocation in Paris expert who will call you back
                 expertJob: International Mobility Consultant
+                languages: "Languages spoken: English, Spanish, French"
                 callBack:
                     text: "He will contact you within:"
                     time: 30 minutes maximum

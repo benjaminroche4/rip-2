@@ -24,20 +24,6 @@
 
 {{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate', 'data-controller': 'form-loader'}}) }}
 
-{% for message in app.flashes('contactSuccess') %}
-    <div role="alert" aria-live="polite" class="rounded-xl bg-green-50 p-4">
-        <div class="flex items-start gap-x-3">
-            <div class="flex-shrink-0" aria-hidden="true">
-                {{ ux_icon('lucide:circle-check', {'class': 'text-green-600 size-5'}) }}
-            </div>
-            <div class="space-y-0.5">
-                <p class="text-base font-medium text-green-800">{{ message }}</p>
-                <p class="text-sm text-slate-600">{{ 'contact.contactForm.success.text'|trans }}</p>
-            </div>
-        </div>
-    </div>
-{% endfor %}
-
 <div class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>

@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Field\ChoiceFormField;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 /**
@@ -57,7 +58,7 @@ final class ContactFlowTest extends WebTestCase
 
         // 1. Controller redirected (the success path — Turbo stream is only
         //    emitted when the request advertises that format).
-        self::assertResponseRedirects(self::CONTACT_PATH);
+        self::assertResponseRedirects(self::CONTACT_PATH.'?success=1', Response::HTTP_SEE_OTHER);
 
         // 2. Contact row persisted with the form payload + server-side fields
         //    (locale, ip, createdAt) attached by the controller.

@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,6 +24,8 @@ use Symfony\UX\Turbo\TurboBundle;
 
 final class ContactController extends AbstractController
 {
+    private const FLASH_PHONE = 'contactSuccessPhone';
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
@@ -59,7 +62,11 @@ final class ContactController extends AbstractController
                 $this->translator->trans('contact.contactForm.error.tooManyRequests'),
             ));
 
-            $response = $this->render('public/contact/index.html.twig', ['contactForm' => $form->createView()]);
+            $response = $this->render('public/contact/index.html.twig', [
+                'contactForm' => $form->createView(),
+                'success' => false,
+                'successPhoneNumber' => null,
+            ]);
             $response->setStatusCode(Response::HTTP_TOO_MANY_REQUESTS);
 
             return $response;
@@ -110,17 +117,13 @@ final class ContactController extends AbstractController
             // Same request pushed to the Dashboard backoffice as a lead.
             $this->bus->dispatch(new NotifyDashboardMessage(DashboardContactPayload::fromContact($contact)));
 
-            if (TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
-                $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
+            // PRG on purpose (also for Turbo, which follows the 303 as a visit):
+            // the landing URL carries ?success=1 so analytics can count the
+            // conversion on a real page view. The flash only carries the phone
+            // number for the confirmation copy, never the confirmation itself.
+            $this->addFlash(self::FLASH_PHONE, $contact->getPhoneNumber());
 
-                return $this->render('public/contact/success.stream.html.twig', [
-                    'success' => $contact,
-                ]);
-            }
-
-            $this->addFlash('contactSuccess', $this->translator->trans('contact.contactForm.success.title'));
-
-            return $this->redirectToRoute('app_contact');
+            return $this->redirectToRoute('app_contact', ['success' => 1], Response::HTTP_SEE_OTHER);
         }
 
         // For Turbo-driven invalid submissions, return a Turbo Stream that
@@ -137,8 +140,31 @@ final class ContactController extends AbstractController
             ]);
         }
 
-        return $this->render('public/contact/index.html.twig', [
+        // ?success=1 is only meant to be reached through the redirect above.
+        // Anyone reloading or typing it still sees the confirmation (accepted
+        // tracking noise), but the response must never be cached or indexed:
+        // the shared host's LiteSpeed cache ignores Cache-Control: private.
+        $success = !$form->isSubmitted() && $request->query->getBoolean('success');
+        $phoneNumber = null;
+        if ($success) {
+            $session = $request->hasPreviousSession() ? $request->getSession() : null;
+            if ($session instanceof FlashBagAwareSessionInterface) {
+                $phones = $session->getFlashBag()->get(self::FLASH_PHONE);
+                $phoneNumber = \is_string($phones[0] ?? null) ? $phones[0] : null;
+            }
+        }
+
+        $response = $this->render('public/contact/index.html.twig', [
             'contactForm' => $form->createView(),
+            'success' => $success,
+            'successPhoneNumber' => $phoneNumber,
         ]);
+
+        if ($success) {
+            $response->headers->set('Cache-Control', 'no-store, private');
+            $response->headers->set('X-LiteSpeed-Cache-Control', 'no-cache');
+        }
+
+        return $response;
     }
 }
