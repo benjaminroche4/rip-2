@@ -123,7 +123,7 @@ final class ContactControllerTest extends WebTestCase
         $client->followRedirect();
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('#contact-form', 'Accompagné');
-        self::assertSelectorTextContains('#contact-form', '1 190 €');
+        self::assertSelectorTextContains('#contact-form', '1 490 €');
 
         $em->clear();
         $contact = $em->getRepository(Contact::class)->findOneBy(['lastName' => 'Doe']);
