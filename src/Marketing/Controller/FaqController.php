@@ -2,6 +2,7 @@
 
 namespace App\Marketing\Controller;
 
+use App\Marketing\Service\FaqCatalog;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,6 +10,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class FaqController extends AbstractController
 {
+    public function __construct(
+        private readonly FaqCatalog $faqCatalog,
+    ) {
+    }
+
     #[Route(
         path: [
             'fr' => '/{_locale}/faq',
@@ -25,6 +31,8 @@ final class FaqController extends AbstractController
     )]
     public function index(): Response
     {
-        return $this->render('public/faq/index.html.twig');
+        return $this->render('public/faq/index.html.twig', [
+            'categories' => $this->faqCatalog->categories(),
+        ]);
     }
 }

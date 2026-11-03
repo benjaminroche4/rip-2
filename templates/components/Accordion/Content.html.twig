@@ -14,7 +14,7 @@
     }).without('class') }}
 >
     <div class="min-h-0 min-w-0 overflow-hidden">
-        <div class="text-neutral-600 {{ 'pt-0 pb-2.5 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4 ' ~ attributes.render('class')|tailwind_merge }} transition-colors duration-100 ease-out">
+        <div class="text-neutral-600 {{ 'pt-0 pb-2.5 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3 [&_a]:transition-colors [&_a]:duration-100 [&_a]:ease-out [&_strong]:font-semibold [&_strong]:text-gray-900 [&_p:not(:last-child)]:mb-4 ' ~ attributes.render('class')|tailwind_merge }} transition-colors duration-100 ease-out">
             {%- block content %}{% endblock -%}
         </div>
     </div>

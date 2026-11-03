@@ -157,7 +157,7 @@
                     </div>
                     <div class="inline-flex items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm">
                         <img loading="lazy" src="{{ asset('medias/svg/laurel-left.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0 rotate-180 -scale-y-100" />
-                        <p class="max-w-[10rem] text-center text-sm text-slate-700">{{ 'findAccommodation.story.award'|trans|raw }}</p>
+                        <p class="max-w-[10rem] text-center text-sm text-slate-700">{{ 'findAccommodation.story.award'|trans({'%year%': site_award_year})|raw }}</p>
                         <img loading="lazy" src="{{ asset('medias/svg/laurel-right.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0" />
                     </div>
                 </div>

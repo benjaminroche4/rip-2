@@ -20,6 +20,13 @@ final readonly class SendContactEmailsMessage
         public ?string $ip,
         public \DateTimeImmutable $createdAt,
         public ?string $offer = null,
+        /**
+         * Call-back form only (null on the contact form): answers as field => enum value,
+         * e.g. ['situation' => 'family', 'contactSlot' => 'morning']. Selects the dedicated emails.
+         *
+         * @var array<string, string>|null
+         */
+        public ?array $callbackAnswers = null,
     ) {
     }
 }

@@ -5,7 +5,9 @@
    Pages keep their own surrounding heading/layout; this component owns
    only the accordion innards.
 
-   Used by home/index, faq/index, pricing/index, services/findAccommodation. #}
+   Answers may link to other pages through the internal_link_params() placeholders.
+
+   Used by home/index, property_estimation/index, pricing/index, services/*. #}
 
 {# @prop keyPrefix string Translation namespace, e.g. 'home.faq.question' #}
 {# @prop keys      array Suffixes to render, in order — e.g. [1,2,3] or 1..14 or [7,8,3,4,9,6] #}
@@ -17,7 +19,7 @@
         <twig:Accordion:Item value="item-{{ loop.index }}">
             <twig:Accordion:Trigger>{{ (keyPrefix ~ '.' ~ i ~ '.title')|trans|raw }}</twig:Accordion:Trigger>
             <twig:Accordion:Content>
-                {{ (keyPrefix ~ '.' ~ i ~ '.text')|trans|raw }}
+                {{ (keyPrefix ~ '.' ~ i ~ '.text')|trans(internal_link_params())|raw }}
             </twig:Accordion:Content>
         </twig:Accordion:Item>
     {% endfor %}

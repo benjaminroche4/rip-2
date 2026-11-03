@@ -86,6 +86,14 @@ export default class extends Controller {
         document.addEventListener('turbo:before-cache', this.boundBeforeCache);
     }
 
+    // Called when a hidden ancestor is revealed (form steps): the dial-code
+    // box measured 0px wide while hidden, so the padding is recomputed.
+    refreshPadding() {
+        if (this.boundPaddingFix) {
+            requestAnimationFrame(this.boundPaddingFix);
+        }
+    }
+
     // Re-render whatever was typed (national digits, or a pasted +33…) as a
     // formatted national number under the selected dial code.
     formatNational() {

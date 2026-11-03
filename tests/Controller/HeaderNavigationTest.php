@@ -2,12 +2,16 @@
 
 namespace App\Tests\Controller;
 
+use App\Blog\Repository\BlogRepository;
+use App\Shared\Sanity\SanityService;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
- * Desktop header navigation. Guards the structure of the main nav:
- *  - direct links to "Property search" and "Pricing"
- *  - a "Management & services" dropdown exposing the three service pages.
+ * Header navigation. Guards the structure of the main nav, desktop and mobile:
+ *  - "Property search", "Pricing", then a "Resources" dropdown
+ *  - the dropdown exposes blog, FAQ and about only (service pages are not in the header).
  */
 final class HeaderNavigationTest extends WebTestCase
 {
@@ -30,48 +34,165 @@ final class HeaderNavigationTest extends WebTestCase
         );
     }
 
-    public function testDesktopNavHasSolutionsDropdownWithServiceLinks(): void
+    public function testTopLevelEntriesAreInOrderOnDesktop(): void
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
+        $entries = $crawler->filter('header el-popover-group > a, header el-popover-group > button')
+            ->each(static fn ($node): string => trim(preg_replace('/\s+/', ' ', $node->text())));
+        self::assertSame(['Recherche de logement', 'Tarifs', 'Ressources'], $entries);
+    }
 
-        // The dropdown trigger and its popover are present.
-        self::assertGreaterThan(
-            0,
-            $crawler->filter('header button[popovertarget="desktop-menu-solutions"]')->count(),
-            'Header must expose the solutions dropdown trigger.'
+    public function testHeaderPopoversAreClosedWhenStickyHeaderScrollsAway(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(1, $crawler->filter('header[data-controller~="sticky-header"]'));
+        foreach (['#desktop-menu-solutions', '#desktop-lang'] as $popover) {
+            self::assertCount(
+                1,
+                $crawler->filter('header[data-controller~="sticky-header"] '.$popover.'[data-sticky-header-target="popover"]'),
+                $popover.' must be a sticky-header target, otherwise it stays on screen alone once the header scrolls away near the footer.'
+            );
+        }
+    }
+
+    public function testResourcesDropdownListsBlogFaqAndAboutOnDesktopAndMobile(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+        $expected = [
+            '/fr/blog',
+            '/fr/faq',
+            '/fr/a-propos',
+        ];
+        foreach (['#desktop-menu-solutions', '#mobile-menu el-disclosure#resources'] as $panel) {
+            $links = $crawler->filter($panel.' a')->each(static fn ($a): string => (string) $a->attr('href'));
+            self::assertSame($expected, $links, $panel);
+        }
+
+        // Mobile: same top-level order, "About" now lives inside Resources only
+        $mobileTop = $crawler->filter('#mobile-menu a[href="/fr/services/trouver-un-logement"], #mobile-menu a[href="/fr/tarifs"], #mobile-menu button[commandfor="resources"]')
+            ->each(static fn ($node): string => trim(preg_replace('/\s+/', ' ', $node->text())));
+        self::assertSame(['Recherche de logement Sur-mesure', 'Tarifs', 'Ressources'], $mobileTop);
+        self::assertCount(1, $crawler->filter('#mobile-menu a[href="/fr/a-propos"]'));
+
+        // Service pages are no longer in the header (desktop nor mobile); the footer still links them
+        foreach (['gestion-locative-paris', 'pour-les-entreprises'] as $service) {
+            self::assertCount(0, $crawler->filter(sprintf('header a[href="/fr/services/%1$s"], #mobile-menu a[href="/fr/services/%1$s"]', $service)));
+            self::assertCount(1, $crawler->filter(sprintf('footer a[href="/fr/services/%s"]', $service)));
+        }
+    }
+
+    public function testResourcesTriggerIsHighlightedOnTheFaq(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/faq');
+
+        self::assertStringContainsString('text-primary', (string) $crawler->filter('header button[popovertarget="desktop-menu-solutions"]')->attr('class'));
+        self::assertSame('page', $crawler->filter('#desktop-menu-solutions a[href="/fr/faq"]')->attr('aria-current'));
+    }
+
+    public function testMobileHeaderHasACallbackBubbleNextToTheMenuButton(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/faq');
+
+        self::assertResponseIsSuccessful();
+        $bubble = $crawler->filter('header [data-testid="callback-bubble"]');
+        self::assertCount(1, $bubble);
+        self::assertSame('/fr/contact', $bubble->attr('href'));
+        self::assertStringContainsString('rounded-full', (string) $bubble->attr('class'));
+        self::assertStringContainsString('bg-primary/10', (string) $bubble->attr('class'), 'Soft primary tint, not the solid brand color');
+        self::assertStringContainsString('max-[359px]:hidden', (string) $bubble->attr('class'), 'Hidden on very narrow screens');
+        self::assertSame('On vous rappelle', trim($bubble->filter('.sr-only')->text()), 'Accessible name of the icon-only link');
+        // Placed right before the menu button, in the mobile-only group
+        self::assertCount(1, $crawler->filter('header .lg\\:hidden > [data-testid="callback-bubble"] + button[commandfor="mobile-menu"]'));
+        // The former red banner above the header is gone
+        self::assertCount(0, $crawler->filter('[data-testid="callback-banner"]'));
+    }
+
+    private function createClientWithBlogTotal(int $total): KernelBrowser
+    {
+        $client = static::createClient();
+        // countAll() is cached under a fixed key: start from a clean blog cache
+        static::getContainer()->get(TagAwareCacheInterface::class)->invalidateTags([BlogRepository::CACHE_TAG]);
+
+        $sanity = $this->createStub(SanityService::class);
+        $sanity->method('query')->willReturnCallback(
+            static fn (string $query): mixed => str_starts_with($query, 'count(*[_type == "blog"') ? $total : []
         );
-        self::assertSelectorExists('#desktop-menu-solutions');
+        static::getContainer()->set(SanityService::class, $sanity);
 
-        // The dropdown links to the three service pages.
-        $popover = $crawler->filter('#desktop-menu-solutions');
-        self::assertGreaterThan(0, $popover->filter('a[href="/fr/services/gestion-locative-paris"]')->count());
-        self::assertGreaterThan(0, $popover->filter('a[href="/fr/services/trouver-un-locataire"]')->count());
-        self::assertGreaterThan(0, $popover->filter('a[href="/fr/services/pour-les-entreprises"]')->count());
+        return $client;
     }
 
-    public function testMobileCallbackBannerLinksToContactPage(): void
+    public function testBlogCardShowsThePostCountBadgeOnDesktopAndMobile(): void
     {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/');
+        $client = $this->createClientWithBlogTotal(163);
+        $crawler = $client->request('GET', '/fr/faq');
 
         self::assertResponseIsSuccessful();
-
-        $banner = $crawler->filter('[data-testid="callback-banner"]');
-        self::assertCount(1, $banner, 'The call-back banner must be rendered once above the header.');
-        self::assertSame('/fr/contact', $banner->attr('href'));
-        self::assertStringContainsString('lg:hidden', (string) $banner->attr('class'), 'The banner is mobile-only.');
-        self::assertStringContainsString('On vous rappelle', $banner->text());
+        foreach (['#desktop-menu-solutions', '#mobile-menu el-disclosure#resources'] as $panel) {
+            self::assertSelectorTextContains($panel.' a[href="/fr/blog"] p.rounded-full', '163 guides');
+        }
+        // The FAQ card has its own pill (questions), never the blog count
+        self::assertSelectorTextNotContains('#desktop-menu-solutions a[href="/fr/faq"] p.rounded-full', 'guides');
     }
 
-    public function testMobileCallbackBannerIsHiddenOnContactPage(): void
+    public function testBlogCardHidesTheBadgeWithoutPosts(): void
     {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/fr/contact');
+        $client = $this->createClientWithBlogTotal(0);
+        $crawler = $client->request('GET', '/fr/faq');
 
         self::assertResponseIsSuccessful();
-        self::assertCount(0, $crawler->filter('[data-testid="callback-banner"]'), 'No call-back banner on the page it links to.');
+        self::assertSelectorNotExists('#desktop-menu-solutions a[href="/fr/blog"] p.rounded-full');
+    }
+
+    public function testFaqCardShowsTheQuestionCountAndThePanelHasNoRepeatedTitle(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/blog');
+
+        self::assertResponseIsSuccessful();
+        $count = static::getContainer()->get(\App\Marketing\Twig\FaqExtension::class)->questionCount();
+        foreach (['#desktop-menu-solutions', '#mobile-menu el-disclosure#resources'] as $panel) {
+            self::assertSelectorTextSame($panel.' a[href="/fr/faq"] p.rounded-full', $count.' questions');
+        }
+        // The panel no longer repeats the "Ressources" label of the button that opened it
+        self::assertSelectorTextNotContains('#desktop-menu-solutions', 'Ressources');
+    }
+
+    public function testAwardYearIsTheSameOnEveryPage(): void
+    {
+        $client = static::createClient();
+        $year = (string) static::getContainer()->get('twig')->getGlobals()['site_award_year'];
+
+        foreach (['/', '/fr/a-propos', '/fr/services/trouver-un-logement', '/fr/services/gestion-locative-paris'] as $page) {
+            $client->request('GET', $page);
+            $html = (string) $client->getResponse()->getContent();
+            self::assertStringContainsString('Paris en '.$year, $html, $page);
+            self::assertDoesNotMatchRegularExpression('/Paris (?:en )?20(?!'.substr($year, 2).')\d\d</', $html, $page);
+        }
+    }
+
+    public function testHeaderIsStickyButBoundedSoItNeverCoversTheFooter(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/fr/faq');
+
+        self::assertResponseIsSuccessful();
+        $header = $crawler->filter('header[role="banner"]');
+        self::assertStringContainsString('sticky', (string) $header->attr('class'));
+        // Sticky is bounded by its parent: header and <main> share a wrapper, the footer stays outside it
+        self::assertCount(1, $crawler->filter('body > div > header[role="banner"] ~ main#main-content'));
+        self::assertCount(0, $crawler->filter('body > div > header[role="banner"] ~ footer'));
+        self::assertCount(1, $crawler->filter('body > footer'));
     }
 }

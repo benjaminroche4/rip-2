@@ -4,11 +4,7 @@ namespace App\Contact\Controller;
 
 use App\Contact\Entity\Contact;
 use App\Contact\Form\ContactType;
-use App\Contact\Message\SendContactEmailsMessage;
-use App\Shared\Webhook\DashboardContactPayload;
-use App\Shared\Webhook\MakeWebhookTarget;
-use App\Shared\Webhook\NotifyDashboardMessage;
-use App\Shared\Webhook\NotifyMakeWebhookMessage;
+use App\Contact\Service\ContactNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +12,6 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -29,7 +24,7 @@ final class ContactController extends AbstractController
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly MessageBusInterface $bus,
+        private readonly ContactNotifier $notifier,
         private readonly TranslatorInterface $translator,
         #[Target('form_contact')]
         private readonly RateLimiterFactoryInterface $formContactLimiter,
@@ -84,40 +79,13 @@ final class ContactController extends AbstractController
             $offer = \is_string($form->get('offer')->getData()) ? $form->get('offer')->getData() : null;
             $contact->setOffer($offer);
 
+            $contact->setSource(Contact::SOURCE_CONTACT);
+
             $this->entityManager->persist($contact);
             $this->entityManager->flush();
 
-            $this->bus->dispatch(new SendContactEmailsMessage(
-                firstName: $contact->getFirstName(),
-                lastName: $contact->getLastName(),
-                email: $contact->getEmail(),
-                phoneNumber: $contact->getPhoneNumber(),
-                helpType: $contact->getHelpType(),
-                message: $contact->getMessage(),
-                company: $contact->getCompany(),
-                lang: $contact->getLang(),
-                ip: $contact->getIp(),
-                createdAt: $now,
-                offer: $offer,
-            ));
-
-            $this->bus->dispatch(new NotifyMakeWebhookMessage([
-                'firstName' => $contact->getFirstName(),
-                'lastName' => $contact->getLastName(),
-                'email' => $contact->getEmail(),
-                'phone' => $contact->getPhoneNumber(),
-                'helpType' => $this->translator->trans($contact->getHelpType(), locale: $contact->getLang()),
-                'offer' => null !== $offer
-                    ? $this->translator->trans('contact.contactForm.offer.'.$offer.'.title', locale: $contact->getLang())
-                    : null,
-                'message' => $contact->getMessage(),
-                'company' => $contact->getCompany(),
-                'lang' => $contact->getLang(),
-                'createdAt' => $now->format(\DateTimeInterface::ATOM),
-            ], MakeWebhookTarget::CONTACT));
-
-            // Same request pushed to the Dashboard backoffice as a lead.
-            $this->bus->dispatch(new NotifyDashboardMessage(DashboardContactPayload::fromContact($contact)));
+            // Emails, Make scenario and Dashboard lead
+            $this->notifier->notify($contact);
 
             // PRG on purpose (also for Turbo, which follows the 303 as a visit):
             // the landing URL carries ?success=1 so analytics can count the

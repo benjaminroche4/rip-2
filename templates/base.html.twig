@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}" class="h-full">
+<html lang="{{ app.request.locale }}" class="h-full scroll-pt-20">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,10 +53,14 @@
             {{ 'a11y.skipToContent'|trans }}
         </a>
         <twig:Section:GridBackground />
-        <twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />
-        <main id="main-content" class="relative z-20" tabindex="-1">
-            {% block body %}{% endblock %}
-        </main>
+        {# The sticky header is bounded by this wrapper: once the footer comes into view,
+           the header scrolls away with the content instead of covering the footer. #}
+        <div>
+            <twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />
+            <main id="main-content" class="relative z-20" tabindex="-1">
+                {% block body %}{% endblock %}
+            </main>
+        </div>
         <twig:Layout:Footer />
     </body>
 </html>

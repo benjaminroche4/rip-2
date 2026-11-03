@@ -6,6 +6,13 @@
     --breakpoint-3xl: 2100px;
 
     --color-primary: #71172e;
+    /* Figma palette (Primary/25, Primary/600, Grey/50, Warning/600, Success/600):
+       selected cards, inline status pills and reassurance icons of the call-back form */
+    --color-primary-25: #fff4f6;
+    --color-primary-600: #9b203f;
+    --color-grey-50: #f7f7f7;
+    --color-warning-600: #f88d00;
+    --color-success-600: #21b758;
     /* Actions destructives (bg-destructive des boutons de confirmation) :
        sans ce token la classe ne peint rien et le bouton reste blanc. */
     --color-destructive: oklch(0.577 0.245 27.325);
@@ -229,7 +236,7 @@ turbo-frame#blog-list[busy] {
 }
 
 .iti__selected-dial-code {
-    color: #9ca3af; /* text-gray-400 */
+    color: #6b7280; /* text-gray-500: placeholder look, still WCAG AA (4.8:1 on white) */
     font-size: inherit;
     line-height: inherit;
 }

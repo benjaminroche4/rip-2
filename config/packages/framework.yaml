@@ -35,10 +35,6 @@ framework:
             policy: fixed_window
             limit: 5
             interval: '1 minute'
-        form_listing:
-            policy: fixed_window
-            limit: 5
-            interval: '1 minute'
 
 when@test:
     framework:
@@ -54,6 +50,4 @@ when@test:
             form_estimation:
                 limit: 1000
             form_newsletter:
-                limit: 1000
-            form_listing:
                 limit: 1000

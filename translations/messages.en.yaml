@@ -76,11 +76,14 @@ contact:
                     text: "He will contact you within:"
                     time: 30 minutes maximum
                     info: During opening hours.
+                    slotText: "He will call you:"
                 number:
                     text: "We will call you at:"
+                    whatsapp: "We will call you on WhatsApp at:"
                 offer:
                     text: Your preferred package
                     link: See what is included
+            homeButton: Back to home page
             goodToKnow:
                 text: If you are unavailable, he will leave you an SMS or an email.
         subButtonText: You will be called back within 30 minutes, during opening hours.
@@ -106,9 +109,9 @@ sitemap:
         findAccommodation: Property search
         companies: Corporate services
         management: Property management
-        findTenant: Find a tenant
         blog: Blog
         contact: Contact us
+        callback: Request a callback
         aboutUs: About us
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
@@ -127,12 +130,11 @@ footer:
     menu:
         findAccommodation: Property search
         companies: Corporate services
-        findTenant: Find a tenant
         management: Property management
         ourProperty: Our properties
-        listProperty: List your property
         blog: Blog
         contact: Contact us
+        callback: Request a callback
         aboutUs: About us
         legalNotice: Legal notice
         privacyPolicy: Privacy policy
@@ -156,8 +158,6 @@ footer:
         ariaLabel: Call us at +33 1 84 80 43 44
 header:
     action: Open menu
-    callbackBanner:
-        text: We call you back
     actionClose: Close menu
     lang:
         select: Select language
@@ -168,6 +168,19 @@ header:
         ariaLabel: Back to home - Relocation In Paris
         alt: Relocation In Paris logo, relocation agency in Paris.
     menu:
+        resource:
+            blog:
+                title: Blog
+                count: "{1} 1 guide|]1,Inf[ %count% guides"
+                text: Guides and tips for finding a home and living in Paris.
+            faq:
+                title: FAQ
+                count: "{1} 1 question|]1,Inf[ %count% questions"
+                text: "Housing, paperwork, plans: all your questions answered."
+            aboutUs:
+                title: About
+                text: Our relocation agency in Paris and the team behind it.
+        resources: Resources
         mobile: Mobile menu
         findAccommodation: Property search
         propertyManagement: Management & services
@@ -177,21 +190,14 @@ header:
             title: Property management
             text: Tailor-made management for your short-, medium- and long-term rentals in Paris.
         findTenant:
-            title: Find a tenant
-            text: We find the ideal tenant and secure your rental process.
             imgAlt: Expert tenant search services
         companies:
             title: Corporate Solutions
             text: Easily house your employees in Paris with our all-inclusive service.
-        contactExpert: Talk to an expert
-        blog: Blog
     nav:
         ariaLabel: Main navigation
     cta:
         title: Get a callback
-        whatsapp:
-            title: WhatsApp
-            text: Message us on WhatsApp
     badge:
         tailorMade: Tailor-made
     text:
@@ -257,7 +263,7 @@ companies:
                 text: "Yes. We support both French and international companies, with recognized expertise in employee mobility and relocation in Paris."
             4:
                 title: How long does it take to relocate an employee?
-                text: "The timeline primarily depends on the employee’s specific needs (family situation, profile, preferred neighborhoods, etc.). In most cases, relocation can be completed within 2 to 4 weeks."
+                text: "The timeline primarily depends on the employee’s specific needs (family situation, profile, preferred neighborhoods, etc.). In most cases, relocation can be completed <strong>within 2 to 4 weeks</strong>."
             5:
                 title: How is HR follow-up handled?
                 text: "At every stage, you are kept informed by your dedicated consultant via email, WhatsApp, or phone. You benefit from transparent and continuous HR follow-up, just like your employee."
@@ -282,7 +288,7 @@ findAccommodation:
         title: 'Trust & peace of mind'
         subTitle: Your search, our commitment
         text: "For over ten years, Relocation in Paris has supported everyone settling in the capital. From selecting the right homes to building your application file, we handle every step with care and precision. Our commitment: to find the home that fits you, secure your process and give you a smooth move-in, even from abroad."
-        award: 'Best agency<br>in <span class="font-semibold">Paris 2025</span>'
+        award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     trust:
         1: 5.0 based on
         2: reviews
@@ -380,6 +386,9 @@ findAccommodation:
                 title: Key Handover and Ongoing Support
                 description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
 meta:
+    callback:
+        title: "Request a Callback from an Expert"
+        description: Leave your details and a relocation expert will call you back, by phone or WhatsApp, to discuss your move to Paris. No commitment.
     marketplace:
         title: Our Apartments for Rent in Paris
         description: Find your apartment for rent in Paris, across all arrondissements. Handpicked and verified, from studios to family apartments, furnished or unfurnished.
@@ -397,9 +406,6 @@ meta:
     home:
         title: Relocation Agency in Paris
         description: "Turnkey apartment search services in Paris for individuals and companies. Access exclusive properties and benefit from tailored support."
-    findTenant:
-        title: Find a Tenant in Paris
-        description: "Premium service to find a tenant in Paris: rigorous selection, exclusive network, verified applications, and tailored support through to move-in."
     companies:
         title: House Your Employees in Paris
         description: "Easily house your employees in Paris. End-to-end relocation, tailored property search, administrative support and expert guidance."
@@ -409,9 +415,6 @@ meta:
     findAccommodation:
         title: Property Search in Paris
         description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
-    listProperty:
-        title: List Your Property for Rent in Paris
-        description: "Landlords, entrust your Paris apartment to Relocation In Paris: quick and simple submission, expert assessment and secure rental management."
     landlords:
         title: Property Management in Paris
         description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your investment with dedicated expertise."
@@ -431,8 +434,8 @@ meta:
         title: Privacy Policy
         description: "Relocation In Paris privacy policy: how we collect, use, and protect your personal data in accordance with the GDPR."
     faq:
-        title: Frequently Asked Questions (FAQ)
-        description: Discover answers to the most common questions about relocation in Paris for tenants, companies, and landlords.
+        title: "FAQ: Relocation and Housing in Paris"
+        description: "All our answers about relocating to Paris: home search, application, plans, companies, property management and finding a tenant."
     newsletter:
         title: Subscribe to Our Newsletter
         description: "Receive our latest listings, Paris news, and practical guides each week to help you settle in Paris."
@@ -461,7 +464,7 @@ home:
     heroSection:
         top:
             1: Best agency
-            2: 'in <span class="font-semibold">Paris in 2026</span>'
+            2: 'in <span class="font-semibold">Paris in %year%</span>'
         title: Settle in Paris in under 20 days
         subTitle: Your apartment search in Paris, handled by experts.
         video:
@@ -518,7 +521,7 @@ home:
         question:
             1:
                 title: What is a relocation service in Paris?
-                text: A relocation service supports individuals and professionals in finding accommodation and settling in Paris through a seamless, turnkey approach.
+                text: A relocation service supports individuals and professionals in <a href="%findAccommodationUrl%">finding accommodation</a> and settling in Paris through a seamless, turnkey approach.
             2:
                 title: Who are your relocation services for?
                 text: Our services are designed for professionals, companies, and individuals looking to move or settle in Paris.
@@ -816,15 +819,214 @@ blog:
             title: Other articles
             subTitle: You may also like
             button: Explore the blog
+callback:
+    trust:
+        score: "4.9/5"
+        reviews: "Based on %count%+ Google reviews"
+    hero:
+        expertTime: 20 min with an expert
+        noCommitment: No commitment required
+        title: Book a call with an expert
+        text: Get personalized guidance to find the right home in Paris, quickly and stress-free.
+    form:
+        steps:
+            counter: "Step %current% of %total%"
+            project: Your project
+            search: Your search
+            details: Your details
+            next: Continue
+            back: Back
+        firstName:
+            label: First name
+            placeholder: Alex
+        lastName:
+            label: Last name
+            placeholder: Martin
+        situation:
+            label: What is your situation?
+            choice:
+                expat: Expat on assignment
+                family: Family
+                professional: Professional or young graduate
+                student: Student
+                entrepreneur: Entrepreneur
+                other: Other situation
+        offer:
+            label: Choose your package
+            hint:
+                accompagne: You visit, we handle the rest
+                confie: We handle everything, up to the keys
+        settleTiming:
+            label: When do you want to settle in Paris?
+            urgent: Urgent
+            choice:
+                asap: As soon as possible
+                two_to_four_weeks: In 2 to 4 weeks
+                one_to_two_months: In 1 to 2 months
+                over_three_months: In more than 3 months
+            card:
+                asap: ASAP
+                two_to_four_weeks:
+                    value: 2-4
+                    unit: weeks
+                one_to_two_months:
+                    value: 1-2
+                    unit: months
+                over_three_months:
+                    value: ">3"
+                    unit: months
+        furnishing:
+            label: What type of home are you looking for?
+            choice:
+                furnished: Furnished
+                unfurnished: Unfurnished
+                either: No preference
+        rooms:
+            label: How many bedrooms do you need?
+            choice:
+                studio: Studio
+                two: 1 bedroom
+                three: 2 bedrooms
+                four: 3 bedrooms
+                five_plus: 4 bedrooms or more
+            card:
+                studio: Studio
+                two: 1 bedroom
+                three: 2 bedrooms
+                four: 3 bedrooms
+                five_plus: 4+ bedrooms
+        guarantor:
+            label: Do you have a guarantor?
+            reassurance: No worries, we will point you to guarantee solutions landlords accept (Visale, paid guarantor services…).
+            choice:
+                france: Yes, in France
+                abroad: Yes, abroad
+                none: No
+        rentBudget:
+            label: What is your maximum rent (charges included)?
+            choice:
+                up_to_1500: Up to €1,500
+                up_to_2500: Up to €2,500
+                up_to_4000: Up to €4,000
+                over_4000: Over €4,000
+        contactMethod:
+            label: How would you like us to call you?
+            choice:
+                whatsapp: WhatsApp call
+                phone: Regular phone call
+            hint:
+                whatsapp: We call you on WhatsApp
+                phone: We call your phone number
+        email:
+            label: Email
+            placeholder: Enter your email
+        phoneNumber:
+            label: Phone number
+        contactSlot:
+            label: When can we call you?
+            openingHours: We call back Monday to Friday from 8am to 8pm, and on Saturday from 8am to noon.
+            choice:
+                asap: As soon as possible
+                morning: In the morning (8am - 12pm)
+                afternoon: In the afternoon (12pm - 5pm)
+                evening: Early evening (5pm - 8pm)
+            card:
+                morning:
+                    title: Morning
+                    hours: 8am - 12pm
+                afternoon:
+                    title: Afternoon
+                    hours: 12pm - 5pm
+                evening:
+                    title: Early evening
+                    hours: 5pm - 8pm
+        accept:
+            label: 'I agree to be contacted by a relocation expert regarding my request, in line with our <a href="%privacyUrl%" target="_blank" rel="noopener" class="underline underline-offset-4 transition-colors duration-100 ease-out hover:text-primary-600">privacy policy</a>.'
+        submit: Book my call
+        dataNote: We take care of your data.
+    summary:
+        title: Callback request
+        situation: "Situation:"
+        settleTiming: "Moving in:"
+        furnishing: "Home:"
+        rooms: "Bedrooms:"
+        guarantor: "Guarantor:"
+        rentBudget: "Maximum rent:"
+        contactMethod: "Call via:"
+        contactSlot: "Time slot:"
 faq:
     title: FAQ
-    subTitle: Need More Information?
+    subTitle: Frequently Asked Questions About Relocating to Paris
+    intro: "Relocation, home search, application, plans, companies and landlords: all our answers, sorted by topic."
+    nav:
+        title: Topics
+        label: FAQ topics
+    help:
+        title: Can't find your answer?
+        text: Ask us directly, one of our experts will get back to you.
+        button: Ask my question
+    categories:
+        relocation: Relocating to Paris
+        homeSearch: Finding a home
+        rentingRules: "Renting in Paris: the rules"
+        application: Application and paperwork
+        plansAndFees: Plans and fees
+        companies: Companies
+        propertyManagement: Property management
+    more:
+        beyondHousing:
+            title: Can you help with visas, schooling or concierge services?
+            text: "Yes. Beyond housing, we support you with visa procedures, discovering neighbourhoods, your children's schooling and concierge services, so that nothing is left to chance when you settle in Paris. These services are presented on our <a href=\"%pricingUrl%\">pricing page</a>."
+        languages:
+            title: Which languages do you work in?
+            text: Our team supports clients in French and English, from the first conversation to the handover of the keys.
+        contact:
+            title: How can I contact you or request a callback?
+            text: "By phone or through our <a href=\"%contactUrl%\">contact form</a>. You can also <a href=\"%callbackUrl%\">request a callback</a>: pick a time slot and an expert will call you to discuss your project."
+        whenToStart:
+            title: How long before my arrival should I start my search?
+            text: <strong>As early as possible.</strong> Starting early lets us show you as many properties as possible and spot the best offers before they are gone, in a Paris market where good homes are let very quickly. <a href="%contactUrl%">Contact us</a> as soon as your plans take shape.
+        temporaryHousing:
+            title: Do you offer temporary housing during the search?
+            text: "Yes, absolutely. If you arrive in Paris before finding your home, <strong>we offer temporary housing for the duration of the search</strong>, so you can settle in calmly from day one."
+        ourProperties:
+            title: How can I visit a property listed on your site?
+            text: "The properties on our <a href=\"%propertiesUrl%\">Our properties</a> page are homes for rent in Paris from our network. Contact us with the property you are interested in: we organise the visit, in person or remotely."
+        guarantor:
+            title: Do I need a guarantor to rent in Paris?
+            text: "Not necessarily. Landlords often ask for a guarantor, but there are alternatives: <strong>the Visale guarantee</strong>, free and provided by Action Logement subject to eligibility, a bank guarantee, or rent default insurance taken out by the landlord. For expats without a guarantor in France, <a href=\"%findAccommodationUrl%\">we build a strong application</a> and champion it with our network of landlords."
+        furnishedVsUnfurnished:
+            title: "Furnished or unfurnished rental: what are the differences?"
+            text: "An unfurnished lease runs for <strong>at least 3 years</strong> with a private landlord, a furnished lease for <strong>1 year (9 months for a student)</strong>. The security deposit is capped at 1 month's rent excluding charges for an unfurnished rental and 2 months for a furnished one. In Paris, a high-demand area, tenants can leave with <strong>one month's notice in both cases</strong>. Find detailed advice on <a href=\"%blogUrl%\">our blog</a>."
+        mobilityLease:
+            title: What is a mobility lease (bail mobilité)?
+            text: "The mobility lease is a <strong>furnished lease of 1 to 10 months</strong>, non-renewable, reserved for people in vocational training, higher education, apprenticeship, internship, civic service, professional transfer or temporary assignment. <strong>No security deposit can be requested</strong> and the tenant can leave at any time with one month's notice. A good fit for an assignment or a temporary stay in Paris: to relocate your employees, discover our <a href=\"%companiesUrl%\">corporate offer</a>."
+        rentControl:
+            title: How does rent control work in Paris?
+            text: "In Paris, the rent excluding charges cannot exceed an <strong>increased reference rent</strong>, set every year by prefectoral order according to the neighbourhood, the number of rooms, the construction period and the type of rental (furnished or unfurnished). A rent supplement is only allowed for exceptional features of the home, and the lease must state the reference rent and the increased reference rent."
+        moveInCosts:
+            title: What costs should I expect when moving in?
+            text: "Plan for the first month's rent and charges, <strong>the security deposit</strong> (1 month's rent excluding charges for an unfurnished rental, 2 months for a furnished one), any fees from the landlord's agency, capped by law according to the surface area, and <strong>your home insurance</strong>, usually required from the key handover. <a href=\"%pricingUrl%\">Our relocation fees</a> are separate from these costs."
+        prices:
+            title: How much do your plans cost?
+            text: "The Guided plan costs <strong>€1,490</strong> and the Entrusted plan <strong>€2,190</strong>. See what each plan includes on our <a href=\"%pricingUrl%\">pricing page</a>."
+        rentEstimate:
+            title: How can I estimate the rent of my property?
+            text: "Fill in our <a href=\"%landlordsUrl%\">estimation form</a> in a few minutes: an expert analyses your property (location, surface area, amenities, rental type) and gets back to you with an estimate of your rental income."
+    notes:
+        propertyManagement:
+            title: Property management in partnership with TheKonciergerie
+            text: "Our property management is provided in collaboration with our partner <a href=\"%partnerUrl%\" rel=\"noopener noreferrer\" target=\"_blank\">TheKonciergerie</a>."
+    plans:
+        difference:
+            title: What is the difference between the Guided and Entrusted plans?
+            text: "With the Guided plan, you save weeks of searching: <strong>you visit, we handle everything else</strong> (tailored search, access to off-market properties, application optimisation, handling of applications and follow-ups). With the Entrusted plan, <strong>we handle everything from search to full installation</strong>: your agent attends the visits, sends you a video report after each one and supports you until the keys are handed over. You just have to approve."
     1:
         title: What happens if you don't find me an apartment?
-        text: We never take on a mission without being confident we can deliver. With over 900 successful relocations and a unique partner network across Paris, we have never left a client without keys.
+        text: We never take on a mission without being confident we can deliver. With <strong>over 900 successful relocations</strong> and a unique partner network across Paris, we have never left a client without keys.
     2:
         title: How quickly can you find an apartment?
-        text: On average, our clients sign their lease in under 20 days. In a market as competitive as Paris, that's the difference between searching alone and searching with us.
+        text: On average, our clients sign their lease in <strong>under 20 days</strong>. In a market as competitive as Paris, that's the difference between searching alone and searching with us.
     3:
         title: My profile is atypical, can you still help me?
         text: That's exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor. Our network of partner landlords trusts us, and that trust gets your application through.
@@ -839,13 +1041,13 @@ faq:
         text: Our service is for anyone looking to settle in Paris. Expats on assignment, relocating families, executives, young professionals, students, entrepreneurs. Anyone who wants to move in without losing time.
     7:
         title: How does the apartment search work?
-        text: We handle everything you don't have time to manage, from shortlisting properties to handing over the keys, based on your criteria and your situation. Every search is unique, built entirely around you.
+        text: We handle everything you don't have time to manage, <a href="%findAccommodationUrl%">from shortlisting properties to handing over the keys</a>, based on your criteria and your situation. Every search is unique, built entirely around you.
     8:
         title: Can I find an apartment in Paris without travelling there?
-        text: Yes, that's exactly what we're here for. Most of our clients are abroad or outside Paris when they begin their search. We handle viewings, landlord negotiations, and application files on your behalf. You approve from a distance, we handle the rest.
+        text: Yes, that's exactly what we're here for. Most of our clients are abroad or outside Paris when they begin their search. We handle viewings, landlord negotiations, and application files on your behalf. <strong>You approve from a distance, we handle the rest.</strong>
     9:
         title: Are your fees included in the rent?
-        text: No. Our fees are independent of the rent and any agency fees. And thanks to our exclusive network and direct relationships with landlords, many properties come with no agency fees at all, significantly reducing your total move-in cost.
+        text: No. Our fees are <strong>independent of the rent and any agency fees</strong>. And thanks to our exclusive network and direct relationships with landlords, many properties come with no agency fees at all, significantly reducing your total move-in cost.
     10:
         title: What documents do I need for a rental application?
         text: No need to worry, we send you a full document checklist as soon as your mission contract is signed. Every file is different, and your dedicated expert will guide you personally based on your situation to build the strongest possible application.
@@ -975,7 +1177,7 @@ propertyManagement:
         title: 'Trust & discretion'
         subTitle: Your property, our standards
         text: "For over ten years, Relocation in Paris has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimizing your income and delivering exceptional management, with complete peace of mind."
-        award: 'Best agency<br>in <span class="font-semibold">Paris 2025</span>'
+        award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     faq:
         title: FAQ
         subTitle: Your questions, our answers
@@ -1001,10 +1203,10 @@ propertyManagement:
                 text: Yes. You benefit from clear and regular income tracking, with full visibility on your property’s performance.
             7:
                 title: Is there a minimum commitment period?
-                text: No. Our service comes with no minimum commitment, within a partnership built on trust and transparency.
+                text: No. Our service comes with <strong>no minimum commitment</strong>, within a partnership built on trust and transparency.
             8:
                 title: Do I need to pay any upfront fees?
-                text: No. There are no setup fees or upfront costs. Our remuneration is aligned with your property’s performance.
+                text: No. There are <strong>no setup fees or upfront costs</strong>. Our remuneration is aligned with your property’s performance.
 newsletter:
     title: Newsletter
     subTitle: Join our newsletter
@@ -1043,93 +1245,6 @@ termsConditions:
             text2: Last Updated
             updatedAt: October 11, 2026
             button: Download
-findTenant:
-    title: Find a Tenant
-    imageAlt: Finding a tenant in Paris with Relocation In Paris
-    subTitle: Delegate The Search For Your Next Tenant
-    text: "Find the right tenant in Paris with complete peace of mind thanks to our turnkey service."
-    steps:
-        1:
-            title: Property assessment
-            text: Rental valuation, property positioning, and definition of the ideal tenant profile to ensure a coherent and attractive listing, perfectly aligned with market expectations.
-        2:
-            title: Property showcasing
-            text: Professional photography, home staging, and presentation optimization. We take care of everything to maximize its appeal.
-            cards:
-                1:
-                    text: Pro photos
-                2:
-                    text: Home staging
-                3:
-                    text: Photo editing
-        3:
-            title: Targeted exposure
-            text: Presentation to our exclusive network of qualified clients, followed by distribution on premium platforms in France and internationally.
-            cards:
-                1:
-                    text: Private candidate network
-                2:
-                    text: Premium listing platforms
-        4:
-            title: Screening & approval
-            text: "Pre-screening, file verification, and presentation of the best candidates. <span class='underline underline-offset-4'>Final approval remains in your hands</span>."
-        5:
-            title: Tenant move-in
-            text: "Support through move-in: coordination of key handover, follow-up on final administrative steps, and organization of practical details for a smooth and stress-free installation."
-    solution:
-        title: A controlled letting process
-        subTitle: Our solutions to find the right tenant
-        1:
-            title: Assessment & strategy
-            text: Rent valuation and positioning to attract the right profiles.
-        2:
-            title: Property showcasing
-            text: Pro photos, home staging, and polished presentation to maximize impact.
-        3:
-            title: Premium exposure
-            text: Maximum visibility through multi-posting across international property portals.
-        4:
-            title: Qualified candidate network
-            text: Access to our exclusive network of relocating executives and international clients.
-        5:
-            title: Viewings & selection
-            text: Viewings organized and the best application shortlisted. You approve with confidence.
-        6:
-            title: Move-in coordination
-            text: Coordination through key handover and move-in.
-    advantage:
-        title: Wealth & property expertise
-        subTitle: Exceptional tenant selection
-        text: Delegate the rigorous search for your next tenant to an expert partner and enjoy a smooth, secure letting process with zero hassle.
-        1:
-            title: Real time savings
-            text: We handle calls, screen enquiries, and organize viewings so you stay free of constraints. You avoid time-consuming tasks while keeping the final say.
-        2:
-            title: Protect your asset
-            text: We review every supporting document to reduce the risk of non-payment. We target profiles with proven strong financial capacity.
-        3:
-            title: Respect for your property
-            text: We prioritize tenants known for their care and stability, ensuring your asset is well maintained.
-        4:
-            title: Exclusive network
-            text: We share your listing with our private network and international relocation agencies, giving you access to premium candidates often absent from traditional portals.
-    faq:
-        question:
-            1:
-                title: Do I still have the final say in choosing the tenant?
-                text: Absolutely. Our role is to screen, pre-qualify, and present the 2 or 3 strongest applications. We share our analysis, but the final decision to sign the lease remains entirely yours.
-            2:
-                title: What is the average time to find the right tenant?
-                text: "Thanks to our pool of already qualified candidates, we typically find the ideal tenant <span class='font-semibold'>in under 10 days</span>."
-            3:
-                title: What exactly is included in your “turnkey” service?
-                text: "We handle everything: valuation, professional photography, targeted distribution, viewings, and rigorous screening. You simply approve the final candidate and prepare your lease."
-            4:
-                title: What do you need to get started?
-                text: "It’s very simple: we only need the signed search mandate and a set of keys."
-            5:
-                title: Do you require an exclusivity mandate on the property?
-                text: "Our service includes a 15-day exclusivity period to ensure immediate action and maximum mobilization of our network."
 reviews:
     title: Testimonials
     subTitle: Real moves, Real stories
@@ -1245,10 +1360,10 @@ pricing:
         subTitle: Your questions, our answers
         1:
             title: What happens if you don't find an apartment?
-            text: We never take on a mission without being certain we can deliver. With over 900 successful relocations and an unmatched network of partners in Paris, we have never left a client without keys.
+            text: We never take on a mission without being certain we can deliver. With <strong>over 900 successful relocations</strong> and an unmatched network of partners in Paris, we have never left a client without keys.
         2:
             title: How quickly can I be settled in?
-            text: On average, our clients sign their lease in under 20 days. In a market as competitive as Paris, that is the difference between searching alone and searching with us.
+            text: On average, our clients sign their lease in <strong>under 20 days</strong>. In a market as competitive as Paris, that is the difference between searching alone and searching with us.
         3:
             title: My profile is atypical, can you still help me?
             text: That is exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor... our network of partner landlords trusts us, and that trust is what gets your application through.
@@ -1557,163 +1672,6 @@ a11y:
     previous: Previous
     next: Next
     close: Close
-listProperty:
-    hero:
-        eyebrow: Landlords
-        title: List your property for rent
-    section:
-        1:
-            title: Your contact details
-            text: So we can get back to you about your property.
-        2:
-            title: Property details
-            text: Start by entering your property's address.
-        3:
-            title: Rental terms
-            text: Preferred lease, rent and amenities.
-        4:
-            title: Photos and details
-            text: Add a few photos and anything we should know about your property.
-    form:
-        fullName:
-            label: Full name
-            placeholder: Full name
-        email:
-            label: Email
-            placeholder: "Email: john@doe.com"
-        phoneNumber:
-            label: Phone
-        photos:
-            label: Property photos
-            hint: Click or drop your photos here
-            help: JPG, PNG or WebP, 8 MB max per photo
-            selected: "%count%/%max% photos"
-            reorder: Drag photos to reorder them.
-            remove: Remove photo
-            moveLeft: Move photo left
-            moveRight: Move photo right
-            clientTooLarge: "%name% exceeds 8 MB and was skipped."
-            clientInvalidType: "%name% is not an accepted format (JPG, PNG or WebP)."
-            clientTooMany: "Maximum 15 photos, the extra ones were skipped."
-            uploading: "Uploading photos: %percent%"
-            optimizing: "Optimizing photos..."
-        address:
-            label: Property address
-            placeholder: 12 rue de Rivoli, Paris
-            outside: "We could not find this address in Paris. We mainly operate within Paris city limits."
-            pick: "Select an address from the suggestions list."
-        propertyType:
-            label: Property type
-            choice:
-                studio: Studio
-                t1: T1
-                t2: T2
-                t3: T3
-                t4: T4
-                large_apartment: Large apartment
-                duplex: Duplex
-                loft: Loft
-                house: House
-        propertyStatus:
-            label: Property status
-            choice:
-                available: Available
-                rented: Rented
-                under_renovation: Under renovation
-        bedrooms:
-            label: Bedrooms
-        bathrooms:
-            label: Bathrooms
-        surface:
-            label: Surface area
-        furnishing:
-            label: Furnished or unfurnished
-            choice:
-                furnished: Furnished
-                unfurnished: Unfurnished
-        floor:
-            label: Property floor
-            of: of
-            floors: floors
-        buildingFloors:
-            label: Building floors
-        orientations:
-            label: Property orientation
-            choice:
-                north: North
-                south: South
-                east: East
-                west: West
-        amenities:
-            label: Amenities
-            showMore: Show more
-            choice:
-                cellar: Cellar
-                balcony: Balcony
-                terrace: Terrace
-                garden: Garden
-                elevator: Elevator
-                parking: Parking
-                wifi: Wifi
-                air_conditioning: Air conditioning
-                tv: TV
-                dryer: Dryer
-                washing_machine: Washing machine
-                dishwasher: Dishwasher
-                oven: Oven
-                microwave: Microwave
-                bathtub: Bathtub
-                concierge: Concierge
-                intercom: Intercom
-                natural_light: Natural light
-                double_glazing: Double glazing
-                wheelchair_access: Wheelchair access
-                bike_storage: Bike storage
-                workspace: Workspace
-                gym: Gym
-                pool: Swimming pool
-        note:
-            label: Free note (optional)
-            placeholder: "Details about the property, constraints, availability for a visit..."
-            help: Anything that helps us better understand your property.
-        rent:
-            label: Rent excluding charges
-            help: Monthly rent, excluding charges.
-        charges:
-            label: Charges
-        deposit:
-            label: Security deposit
-            help: "Legal maximum: 1 month's rent unfurnished, 2 months furnished."
-        leaseType:
-            label: Preferred lease type
-            choice:
-                alur: Alur law lease
-                civil_code: Civil code lease
-                mobility: Mobility lease
-                airbnb: Airbnb
-                no_idea: Not sure yet
-        button: List my property
-        subButtonText: Our team replies within 24 business hours.
-        success:
-            title: Thank you, your property has been submitted.
-            text: Our team will get back to you within 24 business hours.
-            photosCount: "{0} No photo|{1} 1 photo attached|]1,Inf[ %count% photos attached"
-            emailRecap: "The full summary has been sent to %email%."
-            cta: Discover our rental management
-        error:
-            tooManyRequests: Too many attempts. Please try again in a few moments.
-        leaveGuard: "Your details have not been sent yet. Leave the page?"
-        recap: "%done%/%total% sections completed"
-        recapDone: "All set, you can send it."
-        trust:
-            1: Reply within 24h
-            2: Secure data
-            3: No commitment
-    email:
-        admin:
-            subject: "🏡 Nouveau bien proposé (%details%) | Relocation In Paris"
-        client:
-            subject: "Your property is under review, reply within 24h"
 propertyEstimation:
     form:
         success:

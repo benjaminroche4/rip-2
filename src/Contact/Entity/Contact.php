@@ -2,6 +2,14 @@
 
 namespace App\Contact\Entity;
 
+use App\Contact\Domain\ContactMethod;
+use App\Contact\Domain\ContactSlot;
+use App\Contact\Domain\Furnishing;
+use App\Contact\Domain\Guarantor;
+use App\Contact\Domain\RentBudget;
+use App\Contact\Domain\Rooms;
+use App\Contact\Domain\SettleTiming;
+use App\Contact\Domain\Situation;
 use App\Contact\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,6 +20,10 @@ class Contact
 {
     /** Toutes les formules connues, seule source de vérité du champ offer. */
     public const OFFERS = ['accompagne', 'confie'];
+
+    /** Which public form produced the row (filled by the form path, never edited afterwards). */
+    public const SOURCE_CONTACT = 'contact';
+    public const SOURCE_CALLBACK = 'callback';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -62,6 +74,35 @@ class Contact
 
     #[ORM\Column(length: 5)]
     private string $lang;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $source = null;
+
+    // Call-back form ("On vous rappelle") answers, null for the contact form
+
+    #[ORM\Column(length: 20, nullable: true, enumType: Situation::class)]
+    private ?Situation $situation = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: SettleTiming::class)]
+    private ?SettleTiming $settleTiming = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: Furnishing::class)]
+    private ?Furnishing $furnishing = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: Rooms::class)]
+    private ?Rooms $rooms = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: Guarantor::class)]
+    private ?Guarantor $guarantor = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: RentBudget::class)]
+    private ?RentBudget $rentBudget = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: ContactMethod::class)]
+    private ?ContactMethod $contactMethod = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: ContactSlot::class)]
+    private ?ContactSlot $contactSlot = null;
 
     public function __construct()
     {
@@ -213,6 +254,114 @@ class Contact
     public function setLang(string $lang): static
     {
         $this->lang = $lang;
+
+        return $this;
+    }
+
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+
+    public function setSource(?string $source): static
+    {
+        $this->source = $source;
+
+        return $this;
+    }
+
+    public function getSituation(): ?Situation
+    {
+        return $this->situation;
+    }
+
+    public function setSituation(?Situation $situation): static
+    {
+        $this->situation = $situation;
+
+        return $this;
+    }
+
+    public function getSettleTiming(): ?SettleTiming
+    {
+        return $this->settleTiming;
+    }
+
+    public function setSettleTiming(?SettleTiming $settleTiming): static
+    {
+        $this->settleTiming = $settleTiming;
+
+        return $this;
+    }
+
+    public function getFurnishing(): ?Furnishing
+    {
+        return $this->furnishing;
+    }
+
+    public function setFurnishing(?Furnishing $furnishing): static
+    {
+        $this->furnishing = $furnishing;
+
+        return $this;
+    }
+
+    public function getRooms(): ?Rooms
+    {
+        return $this->rooms;
+    }
+
+    public function setRooms(?Rooms $rooms): static
+    {
+        $this->rooms = $rooms;
+
+        return $this;
+    }
+
+    public function getGuarantor(): ?Guarantor
+    {
+        return $this->guarantor;
+    }
+
+    public function setGuarantor(?Guarantor $guarantor): static
+    {
+        $this->guarantor = $guarantor;
+
+        return $this;
+    }
+
+    public function getRentBudget(): ?RentBudget
+    {
+        return $this->rentBudget;
+    }
+
+    public function setRentBudget(?RentBudget $rentBudget): static
+    {
+        $this->rentBudget = $rentBudget;
+
+        return $this;
+    }
+
+    public function getContactMethod(): ?ContactMethod
+    {
+        return $this->contactMethod;
+    }
+
+    public function setContactMethod(?ContactMethod $contactMethod): static
+    {
+        $this->contactMethod = $contactMethod;
+
+        return $this;
+    }
+
+    public function getContactSlot(): ?ContactSlot
+    {
+        return $this->contactSlot;
+    }
+
+    public function setContactSlot(?ContactSlot $contactSlot): static
+    {
+        $this->contactSlot = $contactSlot;
 
         return $this;
     }

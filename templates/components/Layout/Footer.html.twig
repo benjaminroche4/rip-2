@@ -34,7 +34,7 @@
                             </svg>
                             <div class="flex flex-col text-center text-sm text-white">
                                 <p class="font-normal">{{ 'home.heroSection.top.1'|trans|raw }}</p>
-                                <p class="font-medium">{{ 'home.heroSection.top.2'|trans|raw }}</p>
+                                <p class="font-medium">{{ 'home.heroSection.top.2'|trans({'%year%': site_award_year})|raw }}</p>
                             </div>
                             <svg width="29" height="50" viewBox="0 0 29 50" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-10">
                                 <path d="M3.96397 8.76642C4.73886 5.27811 6.65683 2.13254 7.89858 0.541938C8.11058 0.270387 8.52259 0.314194 8.68431 0.618383C9.54535 2.23801 11.0338 5.38925 11.4156 9.20474C11.852 13.5662 10.1004 17.9712 7.03238 17.5328C4.33705 17.1478 2.91409 13.4926 3.96397 8.76642Z" fill="url(#paint0_linear_998_3368)"/>
@@ -151,31 +151,31 @@
                         <a href="{{ path('app_service_find_accommodation') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_accommodation' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findAccommodation'|trans|raw }}</a>
                         <a href="{{ path('app_service_companies') }}" class="{% if app.request.attributes.get('_route') == 'app_service_companies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.companies'|trans|raw }}</a>
                         <a href="{{ path('app_service_landlords') }}" class="{% if app.request.attributes.get('_route') == 'app_service_landlords' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.management'|trans|raw }}</a>
-                        <a href="{{ path('app_service_find_tenant') }}" class="{% if app.request.attributes.get('_route') == 'app_service_find_tenant' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.findTenant'|trans|raw }}</a>
-                        <a href="{{ path('app_list_property') }}" class="{% if app.request.attributes.get('_route') == 'app_list_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.listProperty'|trans|raw }}</a>
-                        <a href="{{ path('app_property') }}" class="{% if app.request.attributes.get('_route') == 'app_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">
-                            {{ 'footer.menu.ourProperty'|trans|raw }}
-                            {% set propertyCount = available_property_count() %}
-                            {% if propertyCount > 0 %}
-                            <twig:Badge variant="primary" class="ml-0.5 rounded-full">
-                                {{ propertyCount }}
-                            </twig:Badge>
-                            {% endif %}
-                        </a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
                     <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.2'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-2 text-sm/6">
-                        <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
                         <a href="{{ path('app_pricing') }}" class="{% if app.request.attributes.get('_route') == 'app_pricing' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.pricing'|trans|raw }}</a>
                         <a href="{{ path('app_newsletter') }}" class="{% if app.request.attributes.get('_route') == 'app_newsletter' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.newsletter'|trans|raw }}</a>
                         <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
+                        <a href="{{ path('app_property') }}" class="{% if app.request.attributes.get('_route') == 'app_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">
+                            {{ 'footer.menu.ourProperty'|trans|raw }}
+                        </a>
+                        <a href="{{ path('app_about_us') }}" class="{% if app.request.attributes.get('_route') == 'app_about_us' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.aboutUs'|trans|raw }}</a>
                     </nav>
                 </div>
                 <div class="space-y-4 text-sm">
                     <h2 class="text-white uppercase font-semibold">{{ 'footer.menuTitle.3'|trans|raw }}</h2>
                     <nav class="flex flex-col space-y-2 text-sm/6">
+                        <a href="{{ path('app_callback') }}" class="{% if app.request.attributes.get('_route') == 'app_callback' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100 flex items-center gap-x-2 self-start">
+                            {{ 'footer.menu.callback'|trans }}
+                            {# Soft "available" ping to nudge the call-back; still under prefers-reduced-motion #}
+                            <span class="relative flex size-1.5" aria-hidden="true">
+                                <span class="absolute inline-flex size-full rounded-full bg-green-400 opacity-40 motion-safe:animate-ping motion-safe:[animation-duration:2s]"></span>
+                                <span class="relative inline-flex size-1.5 rounded-full bg-green-500/80"></span>
+                            </span>
+                        </a>
                         <a href="{{ path('app_contact') }}" class="{% if app.request.attributes.get('_route') == 'app_contact' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.contact'|trans|raw }}</a>
                         <a href="{{ path('app_faq') }}" class="{% if app.request.attributes.get('_route') == 'app_faq' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.faq'|trans|raw }}</a>
                     </nav>

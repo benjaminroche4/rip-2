@@ -14,7 +14,8 @@
             'aria-controls': _accordion_item_content_id,
         }) }}
     >
-        <h3 class="text-base/7 font-semibold text-pretty transition-colors duration-100 group-data-[open=true]:text-primary">{%- block content %}{% endblock -%}</h3>
+        {# The wrapping <h3> is the heading: a heading inside it (or inside a <button>) is invalid HTML #}
+        <span class="block text-base/7 font-semibold text-pretty transition-colors duration-100 group-data-[open=true]:text-primary">{%- block content %}{% endblock -%}</span>
         <twig:ux:icon name="lucide:chevron-down" data-slot="accordion-trigger-icon" class="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
         <twig:ux:icon name="lucide:chevron-up" data-slot="accordion-trigger-icon" class="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
     </button>

@@ -1,0 +1,123 @@
+{% extends 'public/base.html.twig' %}
+
+{% block title %}{{ 'meta.callback.title'|trans }}{% endblock %}
+{% block description %}{{ 'meta.callback.description'|trans }}{% endblock %}
+{% block url %}{{ path('app_callback') }}{% endblock %}
+{# ?success=1 only exists for conversion tracking: never index the confirmation #}
+{% block meta_robots %}<meta name="robots" content="{{ success ? 'noindex, follow' : 'index, follow' }}">{% endblock %}
+
+{% block schema_page %}
+    ,{
+        "@type": "WebPage",
+        "@id": "{{ site_url }}{{ path('app_callback') }}#webpage",
+        "url": "{{ site_url }}{{ path('app_callback') }}",
+        "name": "{{ 'meta.callback.title'|trans|e('js') }}",
+        "description": "{{ 'meta.callback.description'|trans|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" }
+    }
+{% endblock %}
+
+{# Focused page: no site header nor footer #}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block body %}
+    {% set _locale = app.request.locale %}
+    <div class="mx-auto max-w-[640px] lg:max-w-[800px] px-6 pt-8 pb-16 sm:pt-12">
+        <div class="flex items-center justify-between gap-4">
+            <a href="{{ path('app_home') }}" class="rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" aria-label="{{ 'header.logo.ariaLabel'|trans }}">
+                <img src="{{ asset('medias/logos/logo_red.svg') }}" width="300" height="68" loading="eager" alt="{{ 'header.logo.alt'|trans }}" class="h-8 w-auto shrink-0" />
+            </a>
+            {# Language switch: same style as the site header #}
+            <div class="flex items-center">
+                <twig:Button
+                    variant="outline"
+                    popovertarget="callback-lang"
+                    size="icon-lg"
+                    aria-label="{{ 'header.lang.select'|trans }}"
+                    class="aria-expanded:bg-neutral-100 aria-expanded:text-primary hover:text-primary rounded-lg shadow-none border-none hover:bg-neutral-100 transition duration-100 flex items-center gap-x-2"
+                >
+                    {{ ux_icon('proicons:globe', {'class': 'size-6', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+                <el-popover
+                    id="callback-lang"
+                    anchor="bottom end"
+                    popover
+                    class="m-0 w-screen max-w-max overflow-visible bg-transparent p-0 transition [--anchor-gap:theme(spacing.5)] [transition-behavior:allow-discrete] backdrop:bg-transparent open:flex data-[closed]:translate-y-1 data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                >
+                    <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
+                        {% for locale in ['fr', 'en'] %}
+                            <a
+                                href="{{ path('app_callback', {'_locale': locale}) }}"
+                                hreflang="{{ locale }}"
+                                lang="{{ locale }}"
+                                {% if locale == _locale %}aria-current="true"{% endif %}
+                                class="{% if locale == _locale %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
+                            >
+                                <span class="flex items-center gap-x-3">
+                                    {{ ux_icon('circle-flags:' ~ locale, {'class': 'size-5 rounded-full', 'aria-hidden': 'true'}) }}
+                                    {{ ('header.lang.type.' ~ locale)|trans|raw }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </el-popover>
+            </div>
+        </div>
+
+        <div class="mt-12 sm:px-10">
+            {% if success %}
+                {# Same card as the form (border + background) #}
+                <div class="rounded-2xl p-2 border border-neutral-200 shadow-lg">
+                    <twig:Contact:ContactSuccess :phoneNumber="confirmation.phoneNumber" :contactSlot="confirmation.contactSlot" :contactMethod="confirmation.contactMethod" />
+                </div>
+            {% else %}
+                <div class="flex flex-col items-center gap-4 text-center">
+                    {# "No commitment" from sm only: on mobile the line keeps the expert promise alone #}
+                    <div class="flex items-center justify-center gap-4 text-xs font-medium whitespace-nowrap text-black">
+                        <div class="flex items-center gap-2">
+                            <div class="flex shrink-0 -space-x-2" aria-hidden="true">
+                                {% for i in [1, 5, 3] %}
+                                    <img src="{{ asset('medias/team/thumb/team_' ~ i ~ '.webp') }}" alt="" width="24" height="24" loading="eager" class="inline-block size-6 rounded-full bg-white outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+                                {% endfor %}
+                            </div>
+                            <p>{{ 'callback.hero.expertTime'|trans }}</p>
+                        </div>
+                        <span class="hidden h-6 w-px bg-linear-to-b from-black/0 via-black to-black/0 opacity-20 sm:block" aria-hidden="true"></span>
+                        <div class="hidden items-center gap-2 sm:flex">
+                            <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-25" aria-hidden="true">
+                                {{ ux_icon('ph:seal-check-fill', {'class': 'size-3.5 text-primary'}) }}
+                            </span>
+                            <p>{{ 'callback.hero.noCommitment'|trans }}</p>
+                        </div>
+                    </div>
+                    <h1 class="max-w-[24ch] text-3xl font-medium tracking-tight text-balance text-black sm:text-4xl">{{ 'callback.hero.title'|trans }}</h1>
+                    <p class="max-w-[48ch] text-base font-light text-pretty text-slate-600">{{ 'callback.hero.text'|trans }}</p>
+                </div>
+
+                {# Same card as the contact page form #}
+                <div class="mt-10 rounded-2xl p-2 border border-neutral-200 shadow-lg">
+                    <div id="callback-form" class="p-3 lg:p-8 rounded-xl bg-linear-to-b from-neutral-100 to-neutral-100/0">
+                        <twig:Contact:CallbackForm :form="callbackForm" />
+                    </div>
+                </div>
+
+                {# Real figures: same 4.9/5 as the schema.org aggregateRating, count from GOOGLE_REVIEWS_COUNT #}
+                <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" rel="noopener noreferrer" data-testid="callback-trust" class="group mx-auto mt-8 flex w-fit items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm transition-colors duration-100 ease-out hover:border-neutral-200">
+                    {{ ux_icon('logos:google-icon', {'class': 'size-7 shrink-0', 'aria-hidden': 'true'}) }}
+                    <span class="flex flex-col items-start">
+                        <span class="flex items-center gap-1.5">
+                            <span class="flex items-center -space-x-0.5" aria-hidden="true">
+                                {% for i in 1..5 %}{{ ux_icon('material-symbols:star-rounded', {'class': 'size-4 shrink-0 text-yellow-500'}) }}{% endfor %}
+                            </span>
+                            <span class="text-sm font-semibold text-slate-900">{{ 'callback.trust.score'|trans }}</span>
+                        </span>
+                        <span class="text-xs text-slate-600 underline decoration-slate-400/80 decoration-dotted underline-offset-4 transition-colors duration-100 ease-out group-hover:text-primary group-hover:decoration-primary">{{ 'callback.trust.reviews'|trans({'%count%': google_reviews_count}) }}</span>
+                    </span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

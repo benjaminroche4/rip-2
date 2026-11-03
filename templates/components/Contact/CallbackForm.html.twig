@@ -1,0 +1,342 @@
+{# "On vous rappelle" call-back form (Figma "Booking (new)" 4259:69148).
+   Three steps (project, contact preferences, details) paged client-side by
+   form_steps_controller: one form, one POST; without JS the steps stack.
+   Card choices are real radios (sr-only) inside labels: the selected state is pure CSS
+   (has-[:checked]), keyboard and screen readers keep the native radio behaviour.
+   @prop form  Symfony form view (CallbackType) #}
+{%- props form -%}
+
+{% set inputClass = 'block h-11 w-full rounded-lg border border-neutral-200 bg-white px-4 text-base text-black placeholder:text-neutral-400 transition-colors duration-100 ease-out focus:border-primary-600 focus:ring-primary-600' %}
+{% set cardClass = 'group relative flex cursor-pointer rounded-[10px] border border-neutral-200 bg-white p-4 transition-colors duration-100 ease-out hover:border-neutral-300 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-25 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-600/40' %}
+{% set pillClass = 'group relative flex cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white px-3 py-2.5 text-sm font-medium whitespace-nowrap text-black tabular-nums transition-colors duration-100 ease-out hover:border-neutral-300 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-25 has-[:checked]:text-primary-600 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-600/40' %}
+
+{% macro label(field, required = false) %}
+    <div class="flex items-center gap-0.5 text-sm">
+        {{ form_label(field, null, {'label_attr': {'class': 'font-medium text-black'}}) }}
+        {% if required %}<span class="text-red-600" aria-hidden="true">*</span>{% endif %}
+    </div>
+{% endmacro %}
+
+{# Inline asterisk: it stays glued to the last word when a long question wraps #}
+{% macro legend(field, required = false) %}
+    <legend class="text-sm">
+        <span class="font-medium text-black">{{ field.vars.label|trans }}</span>{% if required %}<span class="ml-0.5 text-red-600" aria-hidden="true">*</span>{% endif %}
+    </legend>
+{% endmacro %}
+
+{% macro errors(field) %}
+    {% for error in field.vars.errors %}
+        <p class="text-sm text-red-600" role="alert" data-form-steps-target="error">{{ error.message }}</p>
+    {% endfor %}
+{% endmacro %}
+
+{# Client-side "required" message, shown by form_steps when "Continue" finds the question empty #}
+{% macro requiredHint(messageKey) %}
+    <p class="hidden text-sm text-red-600" role="alert" data-form-steps-target="hint">{{ messageKey|trans({}, 'validators') }}</p>
+{% endmacro %}
+
+{# Step header, screen readers only: the progress bar shows the position and each step starts
+   straight on its first question. The heading remains the focus target on step change. #}
+{% macro stepHeader(index, total, key) %}
+    <div class="sr-only">
+        <div>
+            <p class="sr-only" data-testid="step-counter">{{ 'callback.form.steps.counter'|trans({'%current%': index, '%total%': total}) }}</p>
+            <h2 id="callback-step-{{ index }}" tabindex="-1" class="text-lg font-semibold text-black outline-none" data-form-steps-target="heading">{{ ('callback.form.steps.' ~ key)|trans }}</h2>
+        </div>
+    </div>
+{% endmacro %}
+
+{# Round white arrow before the main action. JS only: hidden until form_steps runs #}
+{% macro backButton() %}
+    <div class="hidden flex-none" data-form-steps-target="jsOnly">
+        <button type="button" class="flex size-11 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black transition-colors duration-100 ease-out hover:border-neutral-300 hover:bg-neutral-50 outline-none focus-visible:ring-[3px] focus-visible:ring-primary-600/30" data-action="form-steps#previous" aria-label="{{ 'callback.form.steps.back'|trans }}">
+            {{ ux_icon('lucide:arrow-left', {'class': 'size-5 shrink-0', 'aria-hidden': 'true'}) }}
+        </button>
+    </div>
+{% endmacro %}
+
+{% import _self as ui %}
+
+{# gap, not space-y: hidden steps and the trailing CSRF input must not leave a margin under the visible step #}
+{{ form_start(form, {'attr': {
+    'class': 'flex flex-col gap-8',
+    'novalidate': 'novalidate',
+    'data-controller': 'form-loader form-steps',
+    'data-action': 'pointerdown->form-steps#markPointer keydown->form-steps#markKeyboard change->form-steps#changed input->form-steps#save',
+    'data-form-steps-storage-key-value': 'rip:callback-form',
+    'data-form-steps-skip-fields-value': [form.website.vars.full_name, form._token.vars.full_name]|json_encode,
+    'data-form-steps-segment-done-class': 'bg-primary-600',
+    'data-form-steps-segment-todo-class': 'bg-neutral-200',
+}}) }}
+    {{ form_widget(form.website) }}
+
+    {# Progress bar: only meaningful once the steps are paged by JS #}
+    <div class="hidden flex items-center justify-center gap-2" data-form-steps-target="jsOnly" aria-hidden="true">
+        {% for i in 1..3 %}
+            <span class="h-1.5 w-12 rounded-full bg-neutral-200 transition-colors duration-200 ease-out" data-form-steps-target="segment"></span>
+        {% endfor %}
+    </div>
+
+    <div class="space-y-6" data-form-steps-target="step" role="group" aria-labelledby="callback-step-1">
+        {{ ui.stepHeader(1, 3, 'project') }}
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.situation.vars.full_name }}" data-required>
+            {{ ui.legend(form.situation, true) }}
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {% for choice in form.situation %}
+                    <label class="{{ cardClass }} items-center justify-center px-3 py-3.5 text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        <span class="text-sm font-medium text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.situation.notBlank') }}
+            {{ ui.errors(form.situation) }}
+        </fieldset>
+
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.settleTiming.vars.full_name }}" data-required>
+            {{ ui.legend(form.settleTiming, true) }}
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {% for choice in form.settleTiming %}
+                    <label class="{{ cardClass }} flex-col items-center justify-center gap-2 text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {% if choice.vars.value == 'asap' %}
+                            <span class="rounded-full bg-warning-600/10 px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wide text-amber-800">{{ 'callback.form.settleTiming.urgent'|trans }}</span>
+                            <span class="text-sm font-semibold text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ 'callback.form.settleTiming.card.asap'|trans }}</span>
+                        {% else %}
+                            <span class="flex flex-col text-sm text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">
+                                <span class="font-semibold">{{ ('callback.form.settleTiming.card.' ~ choice.vars.value ~ '.value')|trans }}</span>
+                                <span>{{ ('callback.form.settleTiming.card.' ~ choice.vars.value ~ '.unit')|trans }}</span>
+                            </span>
+                        {% endif %}
+                        <span class="sr-only">{{ choice.vars.label|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.settleTiming.notBlank') }}
+            {{ ui.errors(form.settleTiming) }}
+        </fieldset>
+
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.offer.vars.full_name }}" data-required>
+            {{ ui.legend(form.offer, true) }}
+            <div class="divide-y divide-neutral-200 overflow-hidden rounded-[10px] border border-neutral-200 bg-white">
+                {% for choice in form.offer %}
+                    <label class="group flex cursor-pointer items-center gap-3 p-4 transition-colors duration-100 ease-out hover:bg-neutral-50 has-[:checked]:bg-primary-25 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-inset has-[:focus-visible]:ring-primary-600/40">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        <span class="grid size-5 shrink-0 place-items-center rounded-full border border-neutral-300 bg-white transition-colors duration-100 ease-out group-has-[:checked]:border-primary-600 group-has-[:checked]:bg-primary-600 sm:size-4" aria-hidden="true">
+                            <span class="size-2 rounded-full bg-white group-not-has-[:checked]:opacity-0 sm:size-1.5"></span>
+                        </span>
+                        {# Same icons as the pricing page; white with a soft ring once selected so it stands out from the row tint #}
+                        <span class="flex size-10 shrink-0 items-center justify-center rounded-full {{ choice.vars.value == 'confie' ? 'bg-[#FFF4F6]' : 'bg-neutral-100' }} ring-1 ring-transparent transition-colors duration-100 ease-out group-has-[:checked]:bg-white group-has-[:checked]:ring-primary-600/15">
+                            {% if choice.vars.value == 'confie' %}{{ ux_icon('tabler:crown-filled', {'class': 'size-5 text-primary', 'aria-hidden': 'true'}) }}{% else %}{{ ux_icon('material-symbols:star-rounded', {'class': 'size-5 text-gray-900', 'aria-hidden': 'true'}) }}{% endif %}
+                        </span>
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span class="text-sm font-medium text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                            <span class="text-xs text-neutral-600">{{ ('callback.form.offer.hint.' ~ choice.vars.value)|trans }}</span>
+                        </span>
+                        <span class="text-base font-semibold text-primary font-primary tabular-nums">{{ ('contact.contactForm.offer.' ~ choice.vars.value ~ '.price')|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.offer.notBlank') }}
+            {{ ui.errors(form.offer) }}
+        </fieldset>
+        <div class="hidden pt-4" data-form-steps-target="jsOnly">
+            <twig:Button type="button" size="lg" class="h-11 w-full cursor-pointer text-base" data-action="form-steps#next">
+                {{ 'callback.form.steps.next'|trans }}
+                {{ ux_icon('lucide:arrow-right', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+            </twig:Button>
+        </div>
+    </div>
+
+    <div class="space-y-6" data-form-steps-target="step" role="group" aria-labelledby="callback-step-2">
+        {{ ui.stepHeader(2, 3, 'search') }}
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.furnishing.vars.full_name }}" data-required>
+            {{ ui.legend(form.furnishing, true) }}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {% for choice in form.furnishing %}
+                    <label class="{{ cardClass }} items-center justify-center gap-2 px-3 py-3.5 text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {{ ux_icon({'furnished': 'ph:armchair', 'unfurnished': 'ph:house-line', 'either': 'ph:arrows-left-right'}[choice.vars.value], {'aria-hidden': 'true', 'class': choice.vars.value == 'france' ? 'size-4 shrink-0 rounded-full' : 'size-4 shrink-0 text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600'}) }}
+                        <span class="text-sm font-medium text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.furnishing.notBlank') }}
+            {{ ui.errors(form.furnishing) }}
+        </fieldset>
+
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.rooms.vars.full_name }}" data-required>
+            {{ ui.legend(form.rooms, true) }}
+            <div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {% for choice in form.rooms %}
+                    <label class="{{ pillClass }}">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        <span aria-hidden="true">{{ ('callback.form.rooms.card.' ~ choice.vars.value)|trans }}</span>
+                        <span class="sr-only">{{ choice.vars.label|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.rooms.notBlank') }}
+            {{ ui.errors(form.rooms) }}
+        </fieldset>
+
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.rentBudget.vars.full_name }}" data-required>
+            {{ ui.legend(form.rentBudget, true) }}
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {% for choice in form.rentBudget %}
+                    <label class="{{ pillClass }}">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {{ choice.vars.label|trans }}
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.requiredHint('callback.form.rentBudget.notBlank') }}
+            {{ ui.errors(form.rentBudget) }}
+        </fieldset>
+
+        <fieldset class="group/guarantor space-y-2" data-form-steps-target="question" data-name="{{ form.guarantor.vars.full_name }}" data-required>
+            {{ ui.legend(form.guarantor, true) }}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {% for choice in form.guarantor %}
+                    <label class="{{ cardClass }} items-center justify-center gap-2 px-3 py-3.5 text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {{ ux_icon({'france': 'circle-flags:fr', 'abroad': 'ph:globe-hemisphere-west', 'none': 'ph:user-circle-dashed'}[choice.vars.value], {'aria-hidden': 'true', 'class': choice.vars.value == 'france' ? 'size-4 shrink-0 rounded-full' : 'size-4 shrink-0 text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600'}) }}
+                        <span class="text-sm font-medium text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {# Shown (CSS only) when the visitor has no guarantor or one abroad; those answers hold the auto-advance #}
+            <p class="hidden items-start gap-2 rounded-lg bg-success-600/10 px-3 py-2.5 text-sm text-neutral-800 group-has-[[value=none]:checked]/guarantor:flex group-has-[[value=abroad]:checked]/guarantor:flex" data-testid="guarantor-reassurance">
+                {{ ux_icon('ph:shield-check-fill', {'class': 'mt-0.5 size-4 shrink-0 text-success-600', 'aria-hidden': 'true'}) }}
+                {{ 'callback.form.guarantor.reassurance'|trans }}
+            </p>
+            {{ ui.requiredHint('callback.form.guarantor.notBlank') }}
+            {{ ui.errors(form.guarantor) }}
+        </fieldset>
+        <div class="hidden flex gap-3 pt-4" data-form-steps-target="jsOnly">
+            {{ ui.backButton() }}
+            <div class="min-w-0 flex-1">
+                <twig:Button type="button" size="lg" class="h-11 w-full cursor-pointer text-base" data-action="form-steps#next">
+                    {{ 'callback.form.steps.next'|trans }}
+                    {{ ux_icon('lucide:arrow-right', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                </twig:Button>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6" data-form-steps-target="step" role="group" aria-labelledby="callback-step-3">
+        {{ ui.stepHeader(3, 3, 'details') }}
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.contactMethod.vars.full_name }}">
+            {{ ui.legend(form.contactMethod) }}
+            {# Same row layout as the package list: round icon, title + hint #}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {% for choice in form.contactMethod %}
+                    <label class="{{ cardClass }} items-center gap-3 px-4 py-3.5">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {% if choice.vars.value == 'whatsapp' %}
+                            {# Light WhatsApp green; white once selected so it does not muddy the pink row tint #}
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 ring-1 ring-transparent transition-colors duration-100 ease-out group-has-[:checked]:bg-white group-has-[:checked]:ring-[#25D366]/30" aria-hidden="true">
+                                {{ ux_icon('ph:whatsapp-logo', {'class': 'size-5 text-[#25D366]'}) }}
+                            </span>
+                        {% else %}
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 ring-1 ring-transparent transition-colors duration-100 ease-out group-has-[:checked]:bg-white group-has-[:checked]:ring-primary-600/15" aria-hidden="true">
+                                {{ ux_icon('ph:phone', {'class': 'size-5 text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600'}) }}
+                            </span>
+                        {% endif %}
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span class="text-sm font-medium text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                            <span class="text-xs text-neutral-600">{{ ('callback.form.contactMethod.hint.' ~ choice.vars.value)|trans }}</span>
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.errors(form.contactMethod) }}
+        </fieldset>
+
+        <fieldset class="space-y-2" data-form-steps-target="question" data-name="{{ form.contactSlot.vars.full_name }}">
+            {{ ui.legend(form.contactSlot) }}
+            <p class="text-xs text-neutral-600">{{ 'callback.form.contactSlot.openingHours'|trans }}</p>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {% for choice in form.contactSlot %}
+                    <label class="{{ cardClass }} flex-col items-center justify-center text-center">
+                        {{ form_widget(choice, {'attr': {'class': 'sr-only'}}) }}
+                        {% if choice.vars.value == 'asap' %}
+                            <span class="text-sm font-semibold text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600">{{ choice.vars.label|trans }}</span>
+                        {% else %}
+                            <span class="flex flex-col text-sm text-black transition-colors duration-100 ease-out group-has-[:checked]:text-primary-600" aria-hidden="true">
+                                <span class="font-semibold">{{ ('callback.form.contactSlot.card.' ~ choice.vars.value ~ '.title')|trans }}</span>
+                                <span>{{ ('callback.form.contactSlot.card.' ~ choice.vars.value ~ '.hours')|trans }}</span>
+                            </span>
+                            <span class="sr-only">{{ choice.vars.label|trans }}</span>
+                        {% endif %}
+                    </label>
+                {% endfor %}
+            </div>
+            {{ ui.errors(form.contactSlot) }}
+        </fieldset>
+
+        <div class="grid grid-cols-1 gap-x-3 gap-y-6 sm:grid-cols-2">
+            {% for field in [form.firstName, form.lastName] %}
+                <div class="space-y-2">
+                    {{ ui.label(field, true) }}
+                    {{ form_widget(field, {'attr': {
+                        'class': inputClass,
+                        'placeholder': ('callback.form.' ~ field.vars.name ~ '.placeholder')|trans,
+                        'autocomplete': field.vars.name == 'firstName' ? 'given-name' : 'family-name',
+                        'aria-required': 'true',
+                    }}) }}
+                    {{ ui.errors(field) }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Same international phone field as the contact form #}
+        <div class="space-y-2" data-controller="phone-input" data-action="form-steps:show@window->phone-input#refreshPadding" data-phone-input-initial-country-value="{{ app.request.locale == 'en' ? 'gb' : 'fr' }}" data-phone-input-search-placeholder-value="{{ 'phoneInput.searchPlaceholder'|trans }}">
+            {{ ui.label(form.phoneNumber, true) }}
+            {{ form_widget(form.phoneNumber, {'attr': {
+                'class': inputClass,
+                'placeholder': ' ',
+                'autocomplete': 'tel',
+                'aria-required': 'true',
+                'data-phone-input-target': 'input',
+            }}) }}
+            {{ ui.errors(form.phoneNumber) }}
+        </div>
+
+        <div class="space-y-2">
+            {{ ui.label(form.email, true) }}
+            {{ form_widget(form.email, {'attr': {
+                'class': inputClass,
+                'placeholder': 'callback.form.email.placeholder'|trans,
+                'autocomplete': 'email',
+                'aria-required': 'true',
+            }}) }}
+            {{ ui.errors(form.email) }}
+        </div>
+
+        <div class="space-y-1.5">
+            <label class="flex cursor-pointer items-start gap-2 text-sm text-black">
+                {{ form_widget(form.accept, {'attr': {'class': 'mt-0.5 size-4 shrink-0 rounded border-neutral-300 text-primary transition-colors duration-100 ease-out focus:ring-primary-600'}}) }}
+                {# A link inside a label does not tick the box; new tab keeps the form open #}
+                <span>{{ 'callback.form.accept.label'|trans({'%privacyUrl%': path('app_privacy_policy')})|raw }}</span>
+            </label>
+            {{ ui.errors(form.accept) }}
+        </div>
+
+        <div class="flex flex-col items-center gap-5 pt-4">
+            <div class="flex w-full gap-3">
+                {{ ui.backButton() }}
+                <div class="min-w-0 flex-1">
+                    <twig:Button type="submit" size="lg" class="h-11 w-full cursor-pointer text-base" data-form-loader-target="submit">
+                        <span data-form-loader-target="label">{{ 'callback.form.submit'|trans }}</span>
+                        <span class="hidden items-center justify-center" data-form-loader-target="spinner"><twig:Spinner /></span>
+                    </twig:Button>
+                </div>
+            </div>
+            <p class="flex items-center gap-1.5 text-sm text-neutral-600">
+                {{ ux_icon('ph:shield-check-fill', {'class': 'size-3.5 shrink-0 text-success-600', 'aria-hidden': 'true'}) }}
+                {{ 'callback.form.dataNote'|trans }}
+            </p>
+        </div>
+    </div>
+{{ form_end(form) }}

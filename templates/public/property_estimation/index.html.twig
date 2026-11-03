@@ -22,23 +22,8 @@
             "bestRating": "5",
             "reviewCount": "{{ google_reviews_count }}"
         }
-    },
-    {
-        "@type": "FAQPage",
-        "@id": "{{ site_url }}{{ path('app_service_landlords') }}/#faq",
-        "mainEntity": [
-            {% for i in 1..8 %}
-            {
-                "@type": "Question",
-                "name": "{{ ('propertyManagement.faq.question.' ~ i ~ '.title')|trans|e('js') }}",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "{{ ('propertyManagement.faq.question.' ~ i ~ '.text')|trans|e('js') }}"
-                }
-            }{{ not loop.last ? ',' }}
-            {% endfor %}
-        ]
     }
+    {# Its FAQ questions are marked up once, on the FAQ page (Google: one FAQPage instance per question) #}
 {% endblock %}
 
 {% block body %}
@@ -228,7 +213,7 @@
                     </div>
                     <div class="inline-flex items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm">
                         <img loading="lazy" src="{{ asset('medias/svg/laurel-left.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0 rotate-180 -scale-y-100" />
-                        <p class="max-w-[10rem] text-center text-sm text-slate-700">{{ 'propertyManagement.story.award'|trans|raw }}</p>
+                        <p class="max-w-[10rem] text-center text-sm text-slate-700">{{ 'propertyManagement.story.award'|trans({'%year%': site_award_year})|raw }}</p>
                         <img loading="lazy" src="{{ asset('medias/svg/laurel-right.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0" />
                     </div>
                 </div>

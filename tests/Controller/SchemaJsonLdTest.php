@@ -25,8 +25,6 @@ final class SchemaJsonLdTest extends WebTestCase
         yield 'find accommodation' => ['/fr/services/trouver-un-logement', 'Service'];
         yield 'companies' => ['/fr/services/pour-les-entreprises', 'Service'];
         yield 'landlords' => ['/fr/services/gestion-locative-paris', 'Service'];
-        yield 'find tenant' => ['/fr/services/trouver-un-locataire', 'Service'];
-        yield 'list property' => ['/fr/proposer-un-bien', 'Service'];
         yield 'newsletter' => ['/fr/newsletter/rejoindre', 'WebPage'];
         yield 'legal notice' => ['/fr/mentions-legales', 'WebPage'];
         yield 'privacy policy' => ['/fr/politique-de-confidentialite', 'WebPage'];

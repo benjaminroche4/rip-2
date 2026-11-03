@@ -26,9 +26,6 @@ services:
     TalesFromADev\Twig\Extra\Tailwind\TailwindRuntime:
         tags: ['twig.runtime']
 
-    App\PropertyListing\Service\ListingPhotoStorage:
-        factory: ['@App\PropertyListing\Service\ListingPhotoStorageFactory', 'create']
-
     App\Shared\Sanity\SanityService:
         arguments:
             $sanityProjectId: '%env(SANITY_PROJECT_ID)%'

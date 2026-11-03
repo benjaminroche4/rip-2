@@ -15,75 +15,30 @@
         "isPartOf": { "@id": "{{ site_url }}/#website" },
         "about": { "@id": "{{ site_url }}/#organization" },
         "mainEntity": [
+            {% for category in categories %}
+                {% for entry in category.entries %}
+                    {
+                        "@type": "Question",
+                        "name": "{{ entry.questionKey|trans|striptags|e('js') }}",
+                        "acceptedAnswer": { "@type": "Answer", "text": "{{ entry.answerKey|trans(internal_link_params())|striptags|e('js') }}" }
+                    }{% if not (loop.last and loop.parent.loop.last) %},{% endif %}
+                {% endfor %}
+            {% endfor %}
+        ]
+    }
+    ,{
+        "@type": "BreadcrumbList",
+        "itemListElement": [
             {
-                "@type": "Question",
-                "name": "{{ 'faq.1.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.1.text'|trans|striptags|e('js') }}" }
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+                "item": "{{ site_url }}{{ path('app_home') }}"
             },
             {
-                "@type": "Question",
-                "name": "{{ 'faq.2.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.2.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.3.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.3.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.4.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.4.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.5.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.5.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.6.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.6.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.7.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.7.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.8.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.8.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.9.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.9.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.10.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.10.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.11.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.11.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.12.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.12.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.13.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.13.text'|trans|striptags|e('js') }}" }
-            },
-            {
-                "@type": "Question",
-                "name": "{{ 'faq.14.title'|trans|striptags|e('js') }}",
-                "acceptedAnswer": { "@type": "Answer", "text": "{{ 'faq.14.text'|trans|striptags|e('js') }}" }
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'faq.title'|trans|e('js') }}"
             }
         ]
     }
@@ -91,12 +46,67 @@
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pt-16 pt-12 lg:pb-10 pb-6">
-        <twig:Section:PageHeader caption="faq.title" subtitle="faq.subTitle" />
+        <twig:Section:PageHeader caption="faq.title" subtitle="faq.subTitle" intro="faq.intro" />
     </section>
-    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 mt-8">
-        <div class="max-w-3xl mx-auto">
-            <twig:Section:FaqAccordion keyPrefix="faq" :keys="1..14" />
+
+    <div class="max-w-6xl mx-auto lg:px-8 px-6 lg:pb-16 pb-12 mt-8 grid lg:grid-cols-12 gap-8 lg:gap-16">
+        {# Topic card: first on mobile, sticky on the left on desktop (same card + toc controller as blog articles) #}
+        <aside class="lg:col-span-4 min-w-0">
+            <div class="rounded-2xl border border-neutral-200 p-4 space-y-6 lg:sticky lg:top-24">
+                <p class="font-semibold text-lg font-secondary">{{ 'faq.nav.title'|trans }}</p>
+                <nav aria-label="{{ 'faq.nav.label'|trans }}" class="space-y-3" data-controller="toc">
+                    {% for category in categories %}
+                        <a href="#{{ category.slug }}" data-toc-target="link" class="flex items-center justify-between gap-3 pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100">
+                            <span class="min-w-0 break-words">{{ category.titleKey|trans }}</span>
+                            <span class="shrink-0 text-xs text-neutral-400 tabular-nums" aria-hidden="true">{{ '%02d'|format(category.entries|length) }}</span>
+                        </a>
+                    {% endfor %}
+                </nav>
+                <div class="h-px bg-linear-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <p class="font-semibold">{{ 'faq.help.title'|trans }}</p>
+                        <p class="text-sm text-neutral-600">{{ 'faq.help.text'|trans }}</p>
+                    </div>
+                    <twig:Button variant="outline" size="sm" as="a" href="{{ path('app_contact') }}">
+                        {{ 'faq.help.button'|trans }}
+                    </twig:Button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="lg:col-span-8 min-w-0 space-y-12 lg:space-y-16">
+            {% for category in categories %}
+                <section id="{{ category.slug }}" aria-labelledby="{{ category.slug }}-title" class="scroll-mt-6 space-y-5">
+                    <h2 id="{{ category.slug }}-title" class="text-xl sm:text-2xl font-medium tracking-tight text-balance text-gray-900">{{ category.titleKey|trans }}</h2>
+                    {% if category.noteKey %}
+                        <div class="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-slate-50 p-4 sm:p-5">
+                            {# Line-height box: centers the icon on the title's first line #}
+                            <span class="flex h-6 shrink-0 items-center">
+                                {{ ux_icon('lucide:handshake', {'class': 'size-5 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                            </span>
+                            <div class="min-w-0 space-y-1">
+                                <p class="font-medium text-gray-900">{{ (category.noteKey ~ '.title')|trans }}</p>
+                                <p class="text-sm text-neutral-600 text-pretty [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-3 [&_a]:transition-colors [&_a]:duration-100 [&_a]:ease-out [&_a]:hover:text-primary/70">
+                                    {{ (category.noteKey ~ '.text')|trans({'%partnerUrl%': partner_konciergerie_url})|raw }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {# Closed answers stay in the HTML (hidden in CSS): crawlers read every answer, not only the JSON-LD #}
+                    <twig:Accordion id="faq-{{ category.slug }}" defaultValue="{{ loop.first ? ['item-1'] : [] }}">
+                        {% for entry in category.entries %}
+                            <twig:Accordion:Item value="item-{{ loop.index }}">
+                                <twig:Accordion:Trigger>{{ entry.questionKey|trans|raw }}</twig:Accordion:Trigger>
+                                <twig:Accordion:Content>
+                                    {{ entry.answerKey|trans(internal_link_params())|raw }}
+                                </twig:Accordion:Content>
+                            </twig:Accordion:Item>
+                        {% endfor %}
+                    </twig:Accordion>
+                </section>
+            {% endfor %}
         </div>
-    </section>
+    </div>
     <twig:Section:CtaFooter />
 {% endblock %}
