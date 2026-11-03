@@ -12,6 +12,9 @@ final class BlogController extends AbstractController
 {
     private const PER_PAGE = 9;
 
+    /** Below this many posts, "More than N guides" is not worth saying: keep the generic copy. */
+    private const GUIDES_COUNT_MIN = 10;
+
     public function __construct(
         private readonly BlogRepository $blogRepository,
     ) {
@@ -52,6 +55,7 @@ final class BlogController extends AbstractController
             'totalPages' => $totalPages,
             'totalCount' => $totalCount,
             'totalArticles' => $totalArticles,
+            'guidesCount' => self::roundedGuidesCount($totalArticles),
             'categories' => $categories,
             'activeCategory' => $activeCategory,
         ]);
@@ -75,5 +79,14 @@ final class BlogController extends AbstractController
             'post' => $post,
             'latestPosts' => $this->blogRepository->findLatest($_locale, $slug, 3),
         ]);
+    }
+
+    /**
+     * Rounded down to the ten, so "More than N guides" never overstates and
+     * the copy does not change with every new post; null = use the generic copy.
+     */
+    private static function roundedGuidesCount(int $total): ?int
+    {
+        return $total >= self::GUIDES_COUNT_MIN ? intdiv($total, 10) * 10 : null;
     }
 }

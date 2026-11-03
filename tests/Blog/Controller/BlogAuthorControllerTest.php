@@ -183,6 +183,30 @@ final class BlogAuthorControllerTest extends WebTestCase
         self::assertSelectorTextSame('title', 'Relocation In Paris - Jane Doe : articles sur Paris (page 2)');
         self::assertStringEndsWith('(page 2)', (string) $crawler->filter('meta[name="description"]')->attr('content'));
         self::assertStringEndsWith('/fr/blog/auteur/'.$this->authorSlug.'?page=2', (string) $crawler->filter('link[rel="canonical"]')->attr('href'));
+        self::assertCanonicalMatchesSelfHreflang($crawler, 'fr');
+        self::assertStringEndsWith('/en/blog/author/'.$this->authorSlug.'?page=2', (string) $crawler->filter('link[hreflang="en"]')->attr('href'));
+    }
+
+    public function testFilteredViewsKeepHreflangOnTheUnfilteredCanonical(): void
+    {
+        $author = $this->authorRow(10);
+        $posts = array_map(fn (int $i): array => $this->postRow('post-'.$i, 'Post '.$i, 'logement'), range(1, 10));
+        $client = $this->createClientWithSanity($author, $posts, null, [['name' => 'Logement', 'slug' => 'logement', 'count' => 10]]);
+
+        $crawler = $client->request('GET', '/fr/blog/auteur/'.$this->authorSlug.'?category=logement&page=2');
+
+        self::assertResponseIsSuccessful();
+        self::assertStringEndsWith('/fr/blog/auteur/'.$this->authorSlug, (string) $crawler->filter('link[rel="canonical"]')->attr('href'));
+        self::assertCanonicalMatchesSelfHreflang($crawler, 'fr');
+    }
+
+    /** Google ignores hreflang when the page's own alternate contradicts its canonical. */
+    private static function assertCanonicalMatchesSelfHreflang(Crawler $crawler, string $locale): void
+    {
+        self::assertSame(
+            $crawler->filter('link[rel="canonical"]')->attr('href'),
+            $crawler->filter(sprintf('link[rel="alternate"][hreflang="%s"]', $locale))->attr('href'),
+        );
     }
 
     /** @return list<array<string, mixed>> */
@@ -306,6 +330,8 @@ final class BlogAuthorControllerTest extends WebTestCase
         $authorPath = '/fr/blog/auteur/'.$this->authorSlug;
         self::assertSelectorExists(sprintf('a[rel="author"][href="%s"]', $authorPath));
         self::assertSelectorTextContains(sprintf('a[rel="author"][href="%s"]', $authorPath), 'Chasseuse immobilière');
+        // Built from site_url like the canonical, never from the request host
+        self::assertCanonicalMatchesSelfHreflang($crawler, 'fr');
 
         $article = array_values(array_filter(self::jsonLdNodes($crawler), static fn (array $n): bool => 'BlogPosting' === ($n['@type'] ?? null)))[0];
         self::assertStringEndsWith($authorPath.'#person', $article['author'][0]['@id']);

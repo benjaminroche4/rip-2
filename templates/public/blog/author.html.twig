@@ -3,6 +3,8 @@
 {% set authorPath = path('app_blog_author', {'slug': author.slug}) %}
 {# Category-filtered views canonicalize to the unfiltered author page (no duplicate listings) #}
 {% set pageSuffix = not activeCategory and currentPage > 1 ? '?page=' ~ currentPage : '' %}
+{# Must mirror the query string of the canonical URL (pageSuffix) #}
+{% set hreflangQuery = pageSuffix ? {page: currentPage} : {} %}
 
 {# Paginated pages get a distinct title/description (no duplicate meta across ?page=N) #}
 {% set pageLabel = currentPage > 1 ? 'blog.pagination.pageSuffix'|trans({'%page%': currentPage}) : '' %}

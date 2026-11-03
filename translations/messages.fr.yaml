@@ -389,6 +389,8 @@ meta:
     blog:
         title: "Blog : Vivre et S’installer à Paris"
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
+        withCount:
+            description: "Plus de %count% guides pour vivre, travailler et s’installer à Paris : logement, quartiers, démarches, bons plans et vie quotidienne."
     blogAuthor:
         title: "%name% : articles sur Paris"
         description: "Tous les articles signés %name% pour Relocation In Paris : logement, quartiers, démarches et conseils pour s’installer à Paris."
@@ -783,6 +785,7 @@ blog:
         title: blog
         subTitle: Le blog pour vivre et s’installer à Paris
         text: Découvrez nos guides et conseils pour vous informer et vous accompagner à chaque étape de vos projets à Paris.
+        textWithCount: Plus de %count% guides et conseils pour vous informer et vous accompagner à chaque étape de vos projets à Paris.
         lastArticle: Dernier article
         readArticle: Lire l'article
         allArticles: Tous les articles

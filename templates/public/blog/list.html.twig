@@ -1,9 +1,12 @@
 {% extends 'public/base.html.twig' %}
 
 {% set pageLabel = currentPage > 1 ? 'blog.pagination.pageSuffix'|trans({'%page%': currentPage}) : '' %}
+{# Must mirror the query string of the canonical URL (block url) #}
+{% set hreflangQuery = currentPage > 1 ? {page: currentPage} : {} %}
 
 {% block title %}{{ 'meta.blog.title'|trans }}{{ pageLabel }}{% endblock %}
-{% block description %}{{ 'meta.blog.description'|trans }}{{ pageLabel }}{% endblock %}
+{% set metaDescription = guidesCount ? 'meta.blog.withCount.description'|trans({'%count%': guidesCount}) : 'meta.blog.description'|trans %}
+{% block description %}{{ metaDescription }}{{ pageLabel }}{% endblock %}
 {% block url %}{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}{% endblock %}
 
 {% block schema_page %}
@@ -12,7 +15,7 @@
         "@id": "{{ site_url }}{{ path('app_blog') }}/#bloglist",
         "url": "{{ site_url }}{{ path('app_blog') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}",
         "name": "{{ 'meta.blog.title'|trans|e('js') }}",
-        "description": "{{ 'meta.blog.description'|trans|e('js') }}",
+        "description": "{{ metaDescription|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "isPartOf": { "@id": "{{ site_url }}/#website" },
         "about": { "@id": "{{ site_url }}/#organization" },
@@ -41,7 +44,8 @@
         <twig:Section:PageHeader
             caption="blog.list.title"
             subtitle="blog.list.subTitle"
-            intro="blog.list.text"
+            :intro="guidesCount ? 'blog.list.textWithCount' : 'blog.list.text'"
+            :introParams="{'%count%': guidesCount}"
             captionClass="capitalize"
         />
     </section>

@@ -8,6 +8,10 @@
     {# Keep only real route params: internal attributes (_canonical_route, ...)
        would leak into the query string, but _locale must stay overridable. #}
     {% set _hreflangParams = (app.request.attributes.get('_route_params') ?? [])|filter((v, k) => '_locale' == k or not (k starts with '_')) %}
+    {# Query params that are part of the canonical URL (e.g. ?page=2): pages set
+       `hreflangQuery` to exactly what their canonical carries, otherwise the
+       self-referencing hreflang would contradict the canonical. #}
+    {% set _hreflangParams = _hreflangParams|merge(hreflangQuery|default({})) %}
     <link rel="alternate" hreflang="fr" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'fr'})) }}" />
     <link rel="alternate" hreflang="en" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'en'})) }}" />
     <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path(_hreflangRoute, _hreflangParams|merge({'_locale': 'fr'})) }}" />

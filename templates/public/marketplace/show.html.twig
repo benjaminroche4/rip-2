@@ -38,9 +38,9 @@
 {% block hreflang %}
     {% set _frParams = locale == 'fr' ? property_show_path_params(property, 'fr') : (property.alternateProperty ? property_show_path_params(property.alternateProperty, 'fr') : property_show_path_params(property, 'fr')) %}
     {% set _enParams = locale == 'en' ? property_show_path_params(property, 'en') : (property.alternateProperty ? property_show_path_params(property.alternateProperty, 'en') : property_show_path_params(property, 'en')) %}
-    <link rel="alternate" hreflang="fr" href="{{ url('app_property_show', _frParams) }}" />
-    <link rel="alternate" hreflang="en" href="{{ url('app_property_show', _enParams) }}" />
-    <link rel="alternate" hreflang="x-default" href="{{ url('app_property_show', _frParams) }}" />
+    <link rel="alternate" hreflang="fr" href="{{ site_url }}{{ path('app_property_show', _frParams) }}" />
+    <link rel="alternate" hreflang="en" href="{{ site_url }}{{ path('app_property_show', _enParams) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path('app_property_show', _frParams) }}" />
 {% endblock %}
 
 {% block schema_page %}

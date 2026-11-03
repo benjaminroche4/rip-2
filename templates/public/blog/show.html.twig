@@ -11,10 +11,10 @@
         {% set localizedSlugs = localizedSlugs|merge({ (otherLocale): post.alternateSlug.slug }) %}
     {% endif %}
     {% for hreflangLocale, hreflangSlug in localizedSlugs %}
-        <link rel="alternate" hreflang="{{ hreflangLocale }}" href="{{ url('app_blog_show', {'_locale': hreflangLocale, 'slug': hreflangSlug}) }}" />
+        <link rel="alternate" hreflang="{{ hreflangLocale }}" href="{{ site_url }}{{ path('app_blog_show', {'_locale': hreflangLocale, 'slug': hreflangSlug}) }}" />
     {% endfor %}
     {% set xDefaultLocale = localizedSlugs.fr is defined ? 'fr' : app.request.locale %}
-    <link rel="alternate" hreflang="x-default" href="{{ url('app_blog_show', {'_locale': xDefaultLocale, 'slug': localizedSlugs[xDefaultLocale]}) }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path('app_blog_show', {'_locale': xDefaultLocale, 'slug': localizedSlugs[xDefaultLocale]}) }}" />
 {% endblock %}
 {% block og_image %}{{ post.mainPhoto }}?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80{% endblock %}
 

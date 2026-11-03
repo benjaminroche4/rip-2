@@ -389,6 +389,8 @@ meta:
     blog:
         title: "Blog: Living and Settling in Paris"
         description: "The essential blog for living, working, and settling in Paris: practical tips, neighborhoods, housing, paperwork, and everyday life insights."
+        withCount:
+            description: "Over %count% guides to living, working, and settling in Paris: housing, neighborhoods, paperwork, tips, and everyday life."
     blogAuthor:
         title: "%name%: Guides to Paris"
         description: "All articles by %name% for Relocation In Paris: housing, neighborhoods, paperwork, and tips for settling in Paris."
@@ -783,6 +785,7 @@ blog:
         title: blog
         subTitle: The Blog for Living and Settling in Paris
         text: Discover our guides and expert advice to inform and support you at every stage of your projects in Paris.
+        textWithCount: Over %count% guides and expert tips to inform and support you at every stage of your projects in Paris.
         lastArticle: Latest article
         readArticle: Read the article
         allArticles: All articles
