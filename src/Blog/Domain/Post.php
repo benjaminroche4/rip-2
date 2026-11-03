@@ -30,7 +30,7 @@ final readonly class Post
         public ?\DateTimeImmutable $publishedAt = null,
         /** @var array{name?: string, slug?: string, color?: string}|null */
         public ?array $category = null,
-        /** @var array<int, array{fullName?: string, photo?: string}>|null */
+        /** @var array<int, array{fullName?: string, slug?: string, photo?: string}>|null */
         public ?array $authors = null,
         /** @var array<int, string>|null */
         public ?array $tags = null,

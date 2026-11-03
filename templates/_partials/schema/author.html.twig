@@ -1,0 +1,79 @@
+{# JSON-LD nodes for a blog author profile, included from blog/author.html.twig's
+   {% block schema_page %}.
+   Caller passes via {% include … with %}: author, posts, authorPath, pageSuffix, metaDescription.
+   The Person @id is the one referenced by each BlogPosting's `author`
+   (see article.html.twig), so search engines merge both into one entity.
+   Caller is responsible for the leading comma (emitted here). #}
+{% set authorUrl = site_url ~ authorPath %}
+,{
+    "@type": "ProfilePage",
+    "@id": "{{ authorUrl }}#profilepage",
+    "url": "{{ authorUrl }}{{ pageSuffix }}",
+    "name": "{{ 'meta.blogAuthor.title'|trans({'%name%': author.fullName})|e('js') }}",
+    "description": "{{ metaDescription|e('js') }}",
+    "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+    "isPartOf": { "@id": "{{ site_url }}/#website" },
+    "mainEntity": { "@id": "{{ authorUrl }}#person" },
+    "breadcrumb": { "@id": "{{ authorUrl }}#breadcrumb" }
+}
+,{
+    "@type": "Person",
+    "@id": "{{ authorUrl }}#person",
+    "name": "{{ author.fullName|e('js') }}",
+    "url": "{{ authorUrl }}",
+    "jobTitle": "{{ (author.role ?? 'blog.show.menu.job'|trans)|e('js') }}",
+    {% if author.description %}
+    "description": "{{ author.description|e('js') }}",
+    {% endif %}
+    "knowsLanguage": [
+        { "@type": "Language", "name": "French", "alternateName": "fr" },
+        { "@type": "Language", "name": "English", "alternateName": "en" }
+    ],
+    {# The company LinkedIn identifies the employer, not the person: it goes through
+       worksFor (the Organization node carries it in sameAs), never in Person.sameAs #}
+    "worksFor": { "@id": "{{ site_url }}/#organization" }
+    {% if author.photo %}
+    ,"image": "{{ author.photo }}?w=400&h=400&fit=crop&auto=format&fm=webp&q=80"
+    {% endif %}
+}
+{% if posts|length > 0 %}
+,{
+    "@type": "ItemList",
+    "@id": "{{ authorUrl }}#posts",
+    "name": "{{ 'blog.author.postsTitle'|trans({'%name%': author.fullName})|e('js') }}",
+    "numberOfItems": {{ author.postCount }},
+    "itemListElement": [
+        {% for post in posts %}
+        {
+            "@type": "ListItem",
+            "position": {{ loop.index }},
+            "url": "{{ site_url }}{{ path('app_blog_show', {'slug': post.slug}) }}",
+            "name": "{{ post.title|e('js') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+{% endif %}
+,{
+    "@type": "BreadcrumbList",
+    "@id": "{{ authorUrl }}#breadcrumb",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+            "item": "{{ site_url }}/{{ app.request.locale }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "{{ 'blog.show.breadcrumb.blog'|trans|e('js') }}",
+            "item": "{{ site_url }}{{ path('app_blog') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "{{ author.fullName|e('js') }}"
+        }
+    ]
+}

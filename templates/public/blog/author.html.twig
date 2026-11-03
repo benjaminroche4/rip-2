@@ -1,0 +1,116 @@
+{% extends 'public/base.html.twig' %}
+
+{% set authorPath = path('app_blog_author', {'slug': author.slug}) %}
+{# Category-filtered views canonicalize to the unfiltered author page (no duplicate listings) #}
+{% set pageSuffix = not activeCategory and currentPage > 1 ? '?page=' ~ currentPage : '' %}
+
+{# Paginated pages get a distinct title/description (no duplicate meta across ?page=N) #}
+{% set pageLabel = currentPage > 1 ? 'blog.pagination.pageSuffix'|trans({'%page%': currentPage}) : '' %}
+
+{% block title %}{{ 'meta.blogAuthor.title'|trans({'%name%': author.fullName}) }}{{ pageLabel }}{% endblock %}
+{# The author's own bio is unique per page: prefer it over the generic template #}
+{% set metaDescription = author.description ? author.description|u.truncate(157, '...', false) : 'meta.blogAuthor.description'|trans({'%name%': author.fullName}) %}
+{% block description %}{{ metaDescription }}{{ pageLabel }}{% endblock %}
+{% block url %}{{ authorPath }}{{ pageSuffix }}{% endblock %}
+{% block og_image %}{% if author.photo %}{{ author.photo }}?w=1200&h=630&fit=crop&auto=format&fm=webp&q=80{% else %}{{ parent() }}{% endif %}{% endblock %}
+
+{% block schema_page %}
+    {% include '_partials/schema/author.html.twig' with { author: author, posts: posts, authorPath: authorPath, pageSuffix: pageSuffix, metaDescription: metaDescription } only %}
+{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto lg:px-8 px-6">
+        <nav aria-label="Breadcrumb" class="flex lg:pt-8 pt-6">
+            <ol role="list" class="flex items-center space-x-3 min-w-0">
+                <li>
+                    <a href="{{ path('app_home') }}" class="text-neutral-500 hover:text-primary transition duration-100">
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class': 'size-5'}) }}
+                        <span class="sr-only">{{ 'blog.show.breadcrumb.home'|trans }}</span>
+                    </a>
+                </li>
+                <li class="flex items-center">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
+                        <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                    </svg>
+                    <a href="{{ path('app_blog') }}" class="ml-4 text-sm font-medium text-neutral-500 hover:text-primary transition duration-100">
+                        {{ 'blog.show.breadcrumb.blog'|trans }}
+                    </a>
+                </li>
+                <li class="flex items-center">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
+                        <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                    </svg>
+                    <span class="ml-4 text-sm font-medium text-neutral-500">{{ 'blog.author.breadcrumb'|trans }}</span>
+                </li>
+                <li class="flex items-center min-w-0">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
+                        <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                    </svg>
+                    <span aria-current="page" class="ml-4 text-sm font-normal text-neutral-400 truncate">{{ author.fullName }}</span>
+                </li>
+            </ol>
+        </nav>
+
+        <header aria-labelledby="author-name" class="flex flex-col items-center text-center gap-6 lg:py-16 py-12">
+            {% if author.photo %}
+                <img src="{{ author.photo }}?w=256&h=256&fit=crop&auto=format&fm=webp&q=80" alt="{{ author.fullName }}" loading="eager" width="128" height="128" class="size-32 rounded-full object-cover border border-neutral-100">
+            {% endif %}
+            <div class="space-y-3 max-w-2xl">
+                <p class="text-sm text-primary uppercase font-semibold">{{ author.role ?? 'blog.show.menu.job'|trans }}</p>
+                <h1 id="author-name" class="text-4xl lg:text-5xl font-medium text-balance">{{ author.fullName }}</h1>
+                <p class="text-neutral-600 leading-7 text-pretty">{{ author.description ?? 'blog.author.intro'|trans({'%name%': author.fullName}) }}</p>
+            </div>
+            {# Same chip-group pattern as the article meta pill (category / read time) #}
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs">
+                <div class="flex items-center gap-1 rounded-md bg-gray-50 p-1">
+                    <p class="px-2 text-neutral-500">{{ 'blog.author.languagesLabel'|trans }}</p>
+                    <ul role="list" class="flex items-center gap-1 rounded-sm bg-white p-1">
+                        <li class="flex">
+                            {{ ux_icon('circle-flags:lang-fr', {'class': 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="sr-only">{{ 'blog.author.languageFr'|trans }}</span>
+                        </li>
+                        <li class="flex">
+                            {{ ux_icon('circle-flags:lang-en', {'class': 'size-4 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="sr-only">{{ 'blog.author.languageEn'|trans }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <a href="{{ site_linkedin_url }}" rel="noopener noreferrer" target="_blank" aria-label="{{ 'blog.author.linkedin'|trans }}" title="{{ 'blog.author.linkedin'|trans }}" class="relative flex rounded-md bg-gray-50 p-1 transition-colors duration-100 ease-out hover:bg-gray-100">
+                    <span class="flex rounded-sm bg-white p-1">
+                        {{ ux_icon('uil:linkedin', {'class': 'size-4 shrink-0 text-[#0A66C2]', 'aria-hidden': 'true'}) }}
+                    </span>
+                    {# 48px touch target on touch screens #}
+                    <span class="absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2 pointer-fine:hidden" aria-hidden="true"></span>
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <section class="max-w-6xl mx-auto lg:px-8 px-6 mb-12 lg:mb-16" aria-labelledby="author-posts-heading">
+        <turbo-frame id="blog-author-list" data-turbo-action="advance" autoscroll data-autoscroll-block="start">
+            <h2 id="author-posts-heading" class="sr-only">{{ 'blog.author.postsTitle'|trans({'%name%': author.fullName}) }}</h2>
+            <div class="pb-7 lg:pb-12">
+                <twig:Blog:CategoryTabs
+                    :categories="categories"
+                    :activeCategory="activeCategory"
+                    :total="author.postCount"
+                    route="app_blog_author"
+                    :routeParams="{slug: author.slug}"
+                />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for post in posts %}
+                    <twig:Blog:PostCard :post="post" />
+                {% endfor %}
+            </div>
+
+            <twig:Pagination
+                :currentPage="currentPage"
+                :totalPages="totalPages"
+                route="app_blog_author"
+                :routeParams="activeCategory ? {slug: author.slug, category: activeCategory} : {slug: author.slug}"
+            />
+        </turbo-frame>
+    </section>
+    <twig:Section:CtaFooter />
+{% endblock %}

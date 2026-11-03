@@ -100,6 +100,7 @@ sitemap:
     subTitle: Découvrez nos services
     general: Général
     blog: Blog
+    blogAuthors: Auteurs du blog
     property: Nos biens
     menu:
         findAccommodation: Recherche de logement
@@ -388,6 +389,9 @@ meta:
     blog:
         title: "Blog : Vivre et S’installer à Paris"
         description: "Le blog essentiel pour vivre, travailler et s’installer à Paris : conseils pratiques, quartiers, logement, démarches, bons plans et vie quotidienne."
+    blogAuthor:
+        title: "%name% : articles sur Paris"
+        description: "Tous les articles signés %name% pour Relocation In Paris : logement, quartiers, démarches et conseils pour s’installer à Paris."
     home:
         title: Agence de Relocation à Paris
         description: "Service clé en main de recherche de logement à Paris pour particuliers et professionnels. Biens exclusifs et accompagnement sur mesure."
@@ -782,6 +786,16 @@ blog:
         lastArticle: Dernier article
         readArticle: Lire l'article
         allArticles: Tous les articles
+    author:
+        breadcrumb: Auteur
+        languagesLabel: Langues parlées
+        languageFr: Français
+        languageEn: Anglais
+        linkedin: Relocation In Paris sur LinkedIn
+        intro: "Au sein de l’équipe Relocation In Paris, %name% partage ses conseils terrain pour trouver un logement, choisir son quartier et réussir son installation à Paris."
+        postsTitle: "Articles signés %name%"
+    pagination:
+        pageSuffix: " (page %page%)"
     show:
         tableRegion: Tableau de données, défilement horizontal possible
         breadcrumb:

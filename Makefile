@@ -34,6 +34,8 @@ deploy:
 	php bin/console tailwind:build --minify
 	echo "→ Compile AssetMapper" && php bin/console asset-map:compile --env=prod
 	echo "→ Clear cache (prod)" && php bin/console cache:clear --env=prod
+	echo "→ Invalidate Sanity data cache (cache.app survives cache:clear; GROQ projections may have changed)" && \
+	php bin/console cache:pool:invalidate-tags blog marketplace --env=prod
 	echo "✓ Cache warmup (prod, compiles all Twig templates ahead of first request)" && php bin/console cache:warmup --env=prod
 	echo "✓ Déploiement terminé"
 

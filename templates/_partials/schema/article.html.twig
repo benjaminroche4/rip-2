@@ -24,10 +24,19 @@
     }
     {% endif %}
     {% if post.authors is defined and post.authors|length > 0 %}
-    ,"author": {
-        "@type": "Person",
-        "name": "{{ post.authors[0].fullName|e('js') }}"
-    }
+    ,"author": [
+        {% for author in post.authors %}
+        {
+            "@type": "Person",
+            {% if author.slug ?? false %}
+            {% set authorUrl = site_url ~ path('app_blog_author', {'slug': author.slug}) %}
+            "@id": "{{ authorUrl }}#person",
+            "url": "{{ authorUrl }}",
+            {% endif %}
+            "name": "{{ (author.fullName ?? '')|e('js') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
     {% endif %}
 }
 {% set faqItems = [] %}

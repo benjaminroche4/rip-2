@@ -1,0 +1,53 @@
+{# @prop post  App\Blog\Domain\Post  post rendered with the LIST_FIELDS projection #}
+{%- props post -%}
+
+{% set postDate = post.publishedAt ?: post.createdAt %}
+<a href="{{ path('app_blog_show', {'slug': post.slug}) }}" data-turbo-frame="_top" class="group flex flex-col border border-slate-100 hover:border-primary/20 transition duration-100 p-2 rounded-2xl space-y-2">
+    {% if post.mainPhoto %}
+        <div class="relative rounded-lg overflow-hidden">
+            <img src="{{ post.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80" srcset="{{ post.mainPhoto }}?w=400&h=267&fit=crop&auto=format&fm=webp&q=80 400w, {{ post.mainPhoto }}?w=600&h=400&fit=crop&auto=format&fm=webp&q=80 600w, {{ post.mainPhoto }}?w=900&h=600&fit=crop&auto=format&fm=webp&q=80 900w" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" alt="{{ post.mainPhotoAlt }}" loading="lazy" decoding="async" width="600" height="400" class="w-full aspect-3/2 object-cover rounded-lg"/>
+            {% if post.category %}
+                <div class="absolute top-3 left-3">
+                    <twig:Badge variant="secondary" class="gap-x-1.5">
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+                            <circle cx="4" cy="4" r="3" fill="{{ post.category.color|e('html_attr') }}"/>
+                        </svg>
+                        {{ post.category.name }}
+                    </twig:Badge>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    <div class="p-3 flex flex-col flex-1">
+        <div class="flex min-[359px]:items-center min-[359px]:flex-row flex-col gap-x-2 text-sm text-neutral-600">
+            {% if post.authors|length > 0 %}
+                <div class="flex items-center gap-x-2">
+                    {% if post.authors[0].photo ?? false %}
+                        <img src="{{ post.authors[0].photo }}?w=48&h=48&fit=crop&auto=format&fm=webp&q=70" alt="{{ post.authors[0].fullName }}" loading="lazy" width="24" height="24" class="size-6 rounded-full object-cover"/>
+                    {% endif %}
+                    <p class="truncate">{{ post.authors[0].fullName }}</p>
+                </div>
+                <svg width="4" height="4" viewBox="0 0 4 4" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0 min-[359px]:block hidden">
+                    <circle cx="2" cy="2" r="2" fill="#525252"/>
+                </svg>
+            {% endif %}
+            {% if postDate %}
+                <div class="min-[359px]:mt-0 mt-2">
+                    <time class="truncate" datetime="{{ postDate|date('c') }}">{{ postDate|date('d F Y')|format_date(locale=app.request.locale) }}</time>
+                </div>
+            {% endif %}
+        </div>
+        <div class="mt-4 space-y-2">
+            <h2 class="font-medium text-xl break-words" title="{{ post.title }}">{{ post.title }}</h2>
+            {% if post.shortDescription %}
+                <p class="text-neutral-600 font-light">{{ post.shortDescription|u.truncate(120, '...') }}</p>
+            {% endif %}
+        </div>
+        <div class="pt-5 mt-auto">
+            <span class="font-medium text-primary flex items-center gap-x-2.5 transition duration-100 group-hover:text-primary/70">
+                {{ 'blog.list.readArticle'|trans }}
+                {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+            </span>
+        </div>
+    </div>
+</a>

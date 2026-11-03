@@ -2,6 +2,7 @@
 
 namespace App\Marketing\Controller;
 
+use App\Blog\Repository\BlogRepository;
 use App\Marketplace\Repository\PropertyRepository;
 use App\Shared\Sanity\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -14,6 +15,7 @@ final class SitemapController extends AbstractController
     public function __construct(
         private readonly SanityService $sanityService,
         private readonly PropertyRepository $propertyRepository,
+        private readonly BlogRepository $blogRepository,
     ) {
     }
 
@@ -48,6 +50,7 @@ final class SitemapController extends AbstractController
 
         return $this->render('public/sitemap/index.html.twig', [
             'posts' => $posts,
+            'authors' => $this->blogRepository->findAuthorsWithPosts($_locale),
             'properties' => $properties,
         ]);
     }

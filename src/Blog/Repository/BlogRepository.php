@@ -2,6 +2,7 @@
 
 namespace App\Blog\Repository;
 
+use App\Blog\Domain\Author;
 use App\Blog\Domain\Post;
 use App\Blog\Domain\PostMapper;
 use App\Shared\Sanity\SanityService;
@@ -30,7 +31,7 @@ final class BlogRepository
         _createdAt,
         publishedAt,
         "category": category->{name, "slug": slug.current, "color": color.hex},
-        "authors": authors[]->{fullName, "photo": photo.asset->url}
+        "authors": authors[]->{fullName, "slug": slug.current, "photo": photo.asset->url, "role": role[$locale]}
     }';
 
     public function __construct(
@@ -79,11 +80,11 @@ final class BlogRepository
                         "slug": slug.current,
                         "color": color.hex,
                         "count": count(*[_type == "blog" && language == $locale && references(^._id) && !(_id in path("drafts.**"))])
-                    } [count > 0] | order(name asc)',
+                    } [count > 0]',
                     ['locale' => $locale]
                 );
 
-                return is_array($results) ? $results : [];
+                return is_array($results) ? self::sortByName($results, $locale) : [];
             }
         );
     }
@@ -153,6 +154,138 @@ final class BlogRepository
         ];
     }
 
+    /**
+     * Author profile with the number of published posts in this locale.
+     */
+    public function findAuthorBySlug(string $slug, string $locale): ?Author
+    {
+        $row = $this->cache->get(
+            'blog_author_'.$locale.'_'.md5($slug),
+            function (ItemInterface $item) use ($slug, $locale): ?array {
+                $item->expiresAfter(self::TTL_POSTS);
+                $item->tag(self::CACHE_TAG);
+
+                $result = $this->sanityService->query(
+                    '*[_type == "author" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+                        fullName,
+                        "slug": slug.current,
+                        "photo": photo.asset->url,
+                        "role": role[$locale],
+                        "description": description[$locale],
+                        "postCount": count(*[_type == "blog" && language == $locale && references(^._id) && !(_id in path("drafts.**"))])
+                    }',
+                    ['locale' => $locale, 'slug' => $slug]
+                );
+
+                return is_array($result) ? $result : null;
+            }
+        );
+
+        return null !== $row ? Author::fromGroqArray($row) : null;
+    }
+
+    /**
+     * Authors with at least one published post in this locale (sitemaps), by name.
+     *
+     * @return list<Author>
+     */
+    public function findAuthorsWithPosts(string $locale): array
+    {
+        $rows = $this->cache->get(
+            'blog_authors_'.$locale,
+            function (ItemInterface $item) use ($locale): array {
+                $item->expiresAfter(self::TTL_POSTS);
+                $item->tag(self::CACHE_TAG);
+
+                $results = $this->sanityService->query(
+                    '*[_type == "author" && defined(slug.current) && !(_id in path("drafts.**"))] {
+                        fullName,
+                        "slug": slug.current,
+                        "photo": photo.asset->url,
+                        "role": role[$locale],
+                        "description": description[$locale],
+                        "postCount": count(*[_type == "blog" && language == $locale && references(^._id) && !(_id in path("drafts.**"))]),
+                        "lastPostAt": *[_type == "blog" && language == $locale && references(^._id) && !(_id in path("drafts.**"))] | order(_createdAt desc)[0]._createdAt
+                    } [postCount > 0] | order(fullName asc)',
+                    ['locale' => $locale]
+                );
+
+                return is_array($results) ? $results : [];
+            }
+        );
+
+        return array_values(array_filter(array_map(Author::fromGroqArray(...), $rows)));
+    }
+
+    /**
+     * Categories the author has written in (this locale), with their post count for that author.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function findCategoriesWithCountByAuthor(string $locale, string $authorSlug): array
+    {
+        return $this->cache->get(
+            'blog_author_categories_'.$locale.'_'.md5($authorSlug),
+            function (ItemInterface $item) use ($locale, $authorSlug): array {
+                $item->expiresAfter(self::TTL_CATEGORIES);
+                $item->tag(self::CACHE_TAG);
+
+                $results = $this->sanityService->query(
+                    '*[_type == "category"] {
+                        name,
+                        "slug": slug.current,
+                        "color": color.hex,
+                        "count": count(*[_type == "blog" && language == $locale && references(^._id) && $authorSlug in authors[]->slug.current && !(_id in path("drafts.**"))])
+                    } [count > 0]',
+                    ['locale' => $locale, 'authorSlug' => $authorSlug]
+                );
+
+                return is_array($results) ? self::sortByName($results, $locale) : [];
+            }
+        );
+    }
+
+    /**
+     * Paginated posts written by one author (matched on the author slug), optionally filtered by category.
+     *
+     * @return array{posts: array<int, Post>, total: int}
+     */
+    public function findPaginatedByAuthor(string $locale, string $authorSlug, int $page, int $perPage, ?string $category = null): array
+    {
+        $cached = $this->cache->get(
+            sprintf('blog_author_list_%s_%s_%s_%d_%d', $locale, md5($authorSlug), $category ?? 'all', $page, $perPage),
+            function (ItemInterface $item) use ($locale, $authorSlug, $page, $perPage, $category): array {
+                $item->expiresAfter(self::TTL_POSTS);
+                $item->tag(self::CACHE_TAG);
+
+                $categoryFilter = null !== $category ? ' && category->slug.current == $category' : '';
+                $baseFilter = '*[_type == "blog" && language == $locale && !(_id in path("drafts.**")) && $authorSlug in authors[]->slug.current'.$categoryFilter.']';
+                $params = ['locale' => $locale, 'authorSlug' => $authorSlug];
+                if (null !== $category) {
+                    $params['category'] = $category;
+                }
+
+                $total = $this->sanityService->query('count('.$baseFilter.')', $params);
+
+                $offset = ($page - 1) * $perPage;
+                $posts = $this->sanityService->query(
+                    $baseFilter.' | order(_createdAt desc) [$offset...$end] '.self::LIST_FIELDS,
+                    array_merge($params, ['offset' => $offset, 'end' => $offset + $perPage])
+                );
+
+                return [
+                    'posts' => is_array($posts) ? $posts : [],
+                    'total' => is_int($total) ? $total : 0,
+                ];
+            }
+        );
+
+        return [
+            'posts' => $this->mapper->fromGroqArrayList($cached['posts']),
+            'total' => $cached['total'],
+        ];
+    }
+
     public function findOneBySlug(string $slug, string $locale): ?Post
     {
         $row = $this->cache->get(
@@ -187,7 +320,7 @@ final class BlogRepository
                         _updatedAt,
                         publishedAt,
                         "category": category->{name, "color": color.hex},
-                        "authors": authors[]->{fullName, "photo": photo.asset->url},
+                        "authors": authors[]->{fullName, "slug": slug.current, "photo": photo.asset->url, "role": role[$locale]},
                         "tags": tags[],
                         "alternateSlug": *[_type == "translation.metadata" && references(^._id)]{
                             translations[_key != $locale]{
@@ -230,7 +363,7 @@ final class BlogRepository
                         _updatedAt,
                         publishedAt,
                         "category": category->{name, "color": color.hex},
-                        "authors": authors[]->{fullName, "photo": photo.asset->url}
+                        "authors": authors[]->{fullName, "slug": slug.current, "photo": photo.asset->url, "role": role[$locale]}
                     }',
                     ['locale' => $locale, 'slug' => $excludeSlug, 'end' => $end]
                 );
@@ -240,5 +373,21 @@ final class BlogRepository
         );
 
         return $this->mapper->fromGroqArrayList($rows);
+    }
+
+    /**
+     * Locale-aware alphabetical sort: GROQ orders by code point, which pushes
+     * accented initials ("Étudiants") after "Z".
+     *
+     * @param array<int, array<string, mixed>> $rows
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function sortByName(array $rows, string $locale): array
+    {
+        $collator = new \Collator($locale);
+        usort($rows, static fn (array $a, array $b): int => (int) $collator->compare((string) ($a['name'] ?? ''), (string) ($b['name'] ?? '')));
+
+        return $rows;
     }
 }

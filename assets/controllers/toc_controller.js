@@ -45,6 +45,23 @@ export default class extends Controller {
         if (active) {
             active.link.classList.remove('text-neutral-600', 'font-light', 'border-transparent');
             active.link.classList.add('text-primary', 'font-medium', 'border-primary');
+
+            if (this.activeId !== id) {
+                this.activeId = id;
+                this.revealInList(active.link);
+            }
         }
+    }
+
+    // Scrolls the nav itself (never the page) so the active link stays visible when the list overflows.
+    revealInList(link) {
+        const nav = this.element;
+        if (nav.scrollHeight <= nav.clientHeight) return;
+
+        const linkTop = link.offsetTop - nav.offsetTop;
+        nav.scrollTo({
+            top: linkTop - (nav.clientHeight - link.offsetHeight) / 2,
+            behavior: 'smooth',
+        });
     }
 }

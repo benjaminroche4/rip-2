@@ -114,7 +114,7 @@
                                             {{ 'blog.show.menu.table'|trans|raw }}
                                         </span>
                                     </div>
-                                    <nav class="space-y-3" data-controller="toc">
+                                    <nav class="space-y-3 md:max-h-[35vh] md:overflow-y-auto md:overscroll-contain md:pr-2" data-controller="toc">
                                         {% for block in post.body %}
                                             {% if block._type in ['wysiwygBlock', 'faqBlock', 'quickAnswerBlock', 'tableBlock'] and (block.title ?? false) %}
                                                 <a href="#{{ block.title|slugify }}" data-toc-target="link" class="block pl-3 border-l-2 border-transparent text-neutral-600 font-light hover:text-primary transition duration-100 break-words">
@@ -132,17 +132,18 @@
                                         </span>
                                     </div>
                                     {% for author in post.authors %}
-                                        <div class="flex items-center space-x-3">
-                                            {% if author.photo %}
+                                        {% set authorTag = (author.slug ?? false) ? 'a' : 'div' %}
+                                        <{{ authorTag }} {% if author.slug ?? false %}href="{{ path('app_blog_author', {'slug': author.slug}) }}" rel="author"{% endif %} class="group/author flex items-center space-x-3 rounded-lg">
+                                            {% if author.photo ?? false %}
                                                 <div>
                                                     <img src="{{ author.photo }}?w=80&h=80&fit=crop&auto=format&fm=webp&q=75" alt="{{ author.fullName }}" loading="lazy" width="40" height="40" class="w-10 h-10 rounded-full border border-neutral-100 object-cover">
                                                 </div>
                                             {% endif %}
                                             <div class="flex flex-col text-sm">
-                                                <p class="font-semibold">{{ author.fullName }}</p>
-                                                <p class="flex-auto text-neutral-800/70">{{ 'blog.show.menu.job'|trans|raw }}</p>
+                                                <p class="font-semibold transition-colors duration-100 ease-out group-hover/author:text-primary">{{ author.fullName }}</p>
+                                                <p class="flex-auto text-neutral-800/70">{{ author.role ?? 'blog.show.menu.job'|trans }}</p>
                                             </div>
-                                        </div>
+                                        </{{ authorTag }}>
                                     {% endfor %}
                                 </div>
                                 <div>
@@ -156,14 +157,14 @@
                 <div class="md:col-span-4 min-w-0 lg:space-y-12 space-y-8">
                     {% for block in post.body %}
                         {% if block._type == 'wysiwygBlock' %}
-                            {% if block.background %}
-                                <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-slate-100 rounded-2xl scroll-mt-6">
-                                    {% if block.title %}
+                            {% if block.background ?? false %}
+                                <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-slate-100 rounded-2xl scroll-mt-6">
+                                    {% if block.title ?? false %}
                                         <div class="py-3 px-6">
                                             <h2 class="text-2xl font-semibold">{{ block.title }}</h2>
                                         </div>
                                     {% endif %}
-                                    {% for segment in sanity_segments(block.content) %}
+                                    {% for segment in sanity_segments(block.content ?? []) %}
                                         {% if segment.type == 'text' %}
                                             <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
                                                 {{ segment.html|raw }}
@@ -188,11 +189,11 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
-                                    {% if block.title %}
+                                <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                                    {% if block.title ?? false %}
                                         <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
                                     {% endif %}
-                                    {% for segment in sanity_segments(block.content) %}
+                                    {% for segment in sanity_segments(block.content ?? []) %}
                                         {% if segment.type == 'text' %}
                                             <div class="text-neutral-600 font-normal leading-7 break-words">
                                                 {{ segment.html|raw }}
@@ -224,12 +225,12 @@
                                 </div>
                             {% endif %}
                         {% elseif block._type == 'faqBlock' %}
-                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
-                                {% if block.title %}
+                            <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                                {% if block.title ?? false %}
                                     <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
                                 {% endif %}
                                 <twig:Accordion id="blog-faq-{{ block._key|default(loop.index) }}" defaultValue="{{ ['item-1'] }}">
-                                    {% for item in block.items %}
+                                    {% for item in block.items ?? [] %}
                                         <twig:Accordion:Item value="item-{{ loop.index }}">
                                             <twig:Accordion:Trigger>{{ item.question }}</twig:Accordion:Trigger>
                                             <twig:Accordion:Content class="break-words">
@@ -240,13 +241,13 @@
                                 </twig:Accordion>
                             </div>
                         {% elseif block._type == 'quickAnswerBlock' %}
-                            <div {% if block.title %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-[#FFEEF2] rounded-2xl scroll-mt-6">
-                                {% if block.title %}
+                            <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-[#FFEEF2] rounded-2xl scroll-mt-6">
+                                {% if block.title ?? false %}
                                     <div class="py-3 px-6">
                                         <h2 class="text-2xl font-semibold text-primary">{{ block.title }}</h2>
                                     </div>
                                 {% endif %}
-                                {% for segment in sanity_segments(block.content) %}
+                                {% for segment in sanity_segments(block.content ?? []) %}
                                     {% if segment.type == 'text' %}
                                         <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
                                             {{ segment.html|raw }}
@@ -265,13 +266,13 @@
                                         <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                         <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                                     </div>
-                                    {% if block.title %}
+                                    {% if block.title ?? false %}
                                         <p class="text-2xl font-semibold text-pretty text-gray-950">{{ block.title }}</p>
                                     {% endif %}
-                                    {% if block.description %}
+                                    {% if block.description ?? false %}
                                         <p class="text-neutral-600 text-balance">{{ block.description }}</p>
                                     {% endif %}
-                                    {% if block.btnText %}
+                                    {% if block.btnText ?? false %}
                                         <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
                                             {{ 'home.heroSection.button'|trans|raw }}
                                         </twig:Button>

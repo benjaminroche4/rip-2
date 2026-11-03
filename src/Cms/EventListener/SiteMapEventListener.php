@@ -2,6 +2,7 @@
 
 namespace App\Cms\EventListener;
 
+use App\Blog\Repository\BlogRepository;
 use App\Marketplace\Repository\PropertyRepository;
 use App\Marketplace\Twig\Extension\PropertyUrlExtension;
 use App\Shared\Sanity\SanityService;
@@ -15,6 +16,7 @@ readonly class SiteMapEventListener
 {
     public function __construct(
         private SanityService $sanityService,
+        private BlogRepository $blogRepository,
         private PropertyRepository $propertyRepository,
         private PropertyUrlExtension $propertyUrlExtension,
     ) {
@@ -63,6 +65,23 @@ readonly class SiteMapEventListener
                     $url->setLastmod(new \DateTime($post['_createdAt']));
                 }
                 $urlContainer->addUrl($url, 'blog');
+            }
+
+            // Blog author pages: own section (sitemap.blog_author.xml), only authors with posts in this locale
+            foreach ($this->blogRepository->findAuthorsWithPosts($locale) as $author) {
+                $url = new UrlConcrete(
+                    $urlGenerator->generate(
+                        'app_blog_author',
+                        ['_locale' => $locale, 'slug' => $author->slug],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    )
+                );
+                $url->setChangefreq(UrlConcrete::CHANGEFREQ_WEEKLY);
+                $url->setPriority(0.5);
+                if (null !== $author->lastPostAt) {
+                    $url->setLastmod(\DateTime::createFromImmutable($author->lastPostAt));
+                }
+                $urlContainer->addUrl($url, 'blog_author');
             }
 
             // Property list page

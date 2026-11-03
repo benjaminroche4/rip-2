@@ -53,7 +53,7 @@ final class SanityWebhookController extends AbstractController
             $invalidatedTags[] = PropertyRepository::CACHE_TAG;
         }
 
-        if (in_array($type, ['blog', 'category'], true)) {
+        if (in_array($type, ['blog', 'category', 'author'], true)) {
             $this->cache->invalidateTags([BlogRepository::CACHE_TAG]);
             $invalidatedTags[] = BlogRepository::CACHE_TAG;
         }
