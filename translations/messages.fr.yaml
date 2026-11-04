@@ -897,7 +897,7 @@ callback:
                 five_plus: 5+ pièces
         guarantor:
             label: Avez-vous un garant ?
-            reassurance: Pas d'inquiétude, nous vous orientons vers des solutions de garantie reconnues par les propriétaires (Visale, garant payant…).
+            reassurance: "Pas d'inquiétude, nous prenons tout en main pour vous obtenir une solution de garantie reconnue et parfaitement sécurisante pour les bailleurs."
             choice:
                 france: Oui, en France
                 abroad: Oui, à l'étranger

@@ -897,7 +897,7 @@ callback:
                 five_plus: 4+ bedrooms
         guarantor:
             label: Do you have a guarantor?
-            reassurance: No worries, we will point you to guarantee solutions landlords accept (Visale, paid guarantor services…).
+            reassurance: No worries, we take care of everything to get you a recognized guarantee solution that fully reassures landlords.
             choice:
                 france: Yes, in France
                 abroad: Yes, abroad

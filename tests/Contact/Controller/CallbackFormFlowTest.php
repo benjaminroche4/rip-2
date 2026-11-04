@@ -112,6 +112,8 @@ final class CallbackFormFlowTest extends WebTestCase
         );
         // Reassurance (CSS only) under the guarantor question; answers without a French guarantor hold the auto-advance
         self::assertSelectorExists('fieldset[data-name="callback[guarantor]"] [data-testid="guarantor-reassurance"].hidden');
+        // "We do it for you", not "we point you to"
+        self::assertSelectorTextContains('[data-testid="guarantor-reassurance"]', 'nous prenons tout en main pour vous obtenir une solution de garantie');
         self::assertSame(
             ['abroad', 'none'],
             $crawler->filter('input[name="callback[guarantor]"][data-form-steps-hold]')->each(static fn ($radio): string => (string) $radio->attr('value')),
