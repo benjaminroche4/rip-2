@@ -19,6 +19,26 @@
     /* Override the default `ring` color (blue) used by shadcn-style components
        (Button, Accordion, …) so `focus-visible:ring-ring` adopts the brand. */
     --color-ring: var(--color-primary);
+
+    /* About page hero: the side photos start stacked behind the middle one and fan out.
+       Keyframes drive the `translate`/`rotate` properties (not `transform`) so the end
+       state matches the static `-rotate-6 translate-x-[14%] translate-y-4` utilities on the images. */
+    --animate-fan-left: fan-left 800ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
+    --animate-fan-right: fan-right 800ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both;
+    --animate-fan-center: fan-center 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    @keyframes fan-left {
+        from { translate: 60% 1rem; rotate: 0deg; opacity: 0; }
+        to { translate: 14% 1rem; rotate: -6deg; opacity: 1; }
+    }
+    @keyframes fan-right {
+        from { translate: -60% 1rem; rotate: 0deg; opacity: 0; }
+        to { translate: -14% 1rem; rotate: 6deg; opacity: 1; }
+    }
+    @keyframes fan-center {
+        from { translate: 0 1.5rem; opacity: 0; }
+        to { translate: 0 0; opacity: 1; }
+    }
 }
 
 .turbo-progress-bar {

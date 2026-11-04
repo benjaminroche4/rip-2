@@ -287,7 +287,7 @@ findAccommodation:
     story:
         title: 'Confiance & sérénité'
         subTitle: Votre recherche, notre engagement
-        text: "Depuis plus de dix ans, Relocation in Paris accompagne celles et ceux qui s'installent dans la capitale. De la sélection des biens à la constitution de votre dossier, nous prenons en charge chaque étape avec rigueur et bienveillance. Notre engagement : vous trouver le logement qui vous ressemble, sécuriser vos démarches et vous offrir une installation sereine, même à distance."
+        text: "Depuis %year%, notre équipe accompagne celles et ceux qui s'installent dans la capitale. De la sélection des biens à la constitution de votre dossier, nous prenons en charge chaque étape avec rigueur et bienveillance. Notre engagement : vous trouver le logement qui vous ressemble, sécuriser vos démarches et vous offrir une installation sereine, même à distance."
         award: 'Meilleure agence<br>à <span class="font-semibold">Paris en %year%</span>'
     trust:
         1: 5.0 basé sur
@@ -422,8 +422,8 @@ meta:
         title: Plan du Site
         description: "Explorez l’ensemble de nos services de relocation à Paris : accompagnement sur mesure pour particuliers, entreprises et propriétaires."
     aboutUs:
-        title: À Propos de Nous
-        description: Découvrez l’histoire et les valeurs de Relocation in Paris, une agence de relocation haut de gamme dédiée à la confiance et à l’excellence de ses clients.
+        title: "Notre agence de relocation à Paris"
+        description: "Agence de relocation fondée en %year% par des agents immobiliers parisiens : nous trouvons votre logement et vous accompagnons jusqu'aux clés."
     termsConditions:
         title: Conditions Générales de Vente
         description: "Conditions générales de vente de Relocation In Paris : modalités applicables à nos prestations de services."
@@ -597,34 +597,90 @@ phoneInput:
     searchPlaceholder: Rechercher un indicatif
 aboutUs:
     title: À propos de nous
-    subTitle: Ensemble depuis 10 ans
-    galleryAlt: Paris, cadre de vie de nos clients
+    subTitle: "Votre agence de relocation à Paris"
+    intro: "Une équipe de Parisiens à vos côtés, de la recherche de logement jusqu'à la remise des clés."
+    heroPhotos:
+        1: "Statues dorées du Trocadéro face à la tour Eiffel"
+        2: "Le Panthéon à Paris"
+        3: "Statue dorée de Jeanne d'Arc et drapeau français, place des Pyramides"
+    mission:
+        caption: Notre mission
+        title: "Trouver votre logement à Paris, l'esprit tranquille."
+        text: "Appartements vérifiés, dossier solide, visites organisées : nous menons votre recherche de location à Paris pour que vous arriviez serein."
+        reviews: "Basé sur +%count% avis"
+        stats:
+            relocations:
+                value: "+900"
+                label: Installations réussies
+            expertise:
+                value: "+25"
+                label: Années d'expertise cumulées
+            partners:
+                value: "+80"
+                label: "Partenaires immobiliers à Paris"
+    story:
+        caption: Notre histoire
+        title: "Née d'une passion pour Paris"
+        imageAlt: Statue équestre et immeubles haussmanniens à Paris
+        text: "Collectif d'agents immobiliers indépendants réunis à Paris depuis %since%, nous avons fondé <strong class=\"font-semibold text-neutral-800\">Relocation in Paris, agence de relocation à Paris</strong>, en %year% pour accompagner <strong class=\"font-semibold text-neutral-800\">expatriés, familles et entreprises</strong> de A à Z. Une agence à taille humaine, où chaque client est suivi personnellement. Nous connaissons chaque quartier, visitons pour vous et restons à vos côtés jusqu'à votre emménagement, pour que Paris devienne vite chez vous."
+        journey:
+            title: Notre parcours
+            independent:
+                title: "Un collectif d'agents indépendants"
+                text: "Des agents indépendants unissent leur expertise à Paris."
+            founded:
+                title: Création de Relocation in Paris
+                text: Nous unissons nos expertises pour rendre chaque installation simple et sereine.
+            corporate:
+                title: Ouverture aux entreprises
+                text: La relocation de vos collaborateurs, clés en main.
+            award:
+                title: Meilleure agence à Paris
+                text: "Reconnue parmi les meilleures agences de relocation de la capitale."
+    languages: "Langues parlées"
+    language:
+        fr: Français
+        gb: Anglais
+        es: Espagnol
+        de: Allemand
     team:
-        1: Consultant logement
-        2: Consultante mobilité internationale
-        3: Consultante logement
-        4: Consultante mobilité internationale
-        5: Responsable relation clients
-        6: Consultant logement
-        7: Consultant logement
-        8: Consultante logement
+        1:
+            role: "Consultant logement"
+            bio: "Spécialiste des locations très demandées à Paris."
+        2:
+            role: "Consultant mobilité internationale"
+            bio: "Accompagne expatriés et familles jusqu'à l'installation."
+        3:
+            role: "Consultante logement"
+            bio: "Sélectionne vos appartements et organise les visites."
+        4:
+            role: "Consultante mobilité internationale"
+            bio: "Facilite l'arrivée des talents internationaux à Paris."
+        5:
+            role: "Responsable relation clients"
+            bio: "Votre premier contact, du projet jusqu'aux clés."
+        6:
+            role: "Consultant logement"
+            bio: "Fin connaisseur des quartiers parisiens, il cible les bonnes adresses."
+        7:
+            role: "Consultant logement"
+            bio: "Négocie pour sécuriser les biens les plus convoités."
+        8:
+            role: "Consultante logement"
+            bio: "Monte des dossiers solides qui rassurent les bailleurs."
     ourValues:
         title: Nos valeurs
         subTitle: Une approche humaine, fondée sur la confiance
-        text: Nous plaçons le confort et la sérénité de nos clients au cœur de chaque accompagnement. Un service discret, attentif et exigeant.
+        text: "Vous nous confiez une étape importante de votre vie. Nous en prenons soin comme si c'était la nôtre."
         1:
-            title: Excellence et discrétion
-            text: Nous garantissons un accompagnement sur mesure, mené avec rigueur et confidentialité, pour offrir une expérience unique.
+            title: "Un accompagnement sur mesure"
+            text: "Un conseiller dédié qui vous écoute, comprend votre projet et vous répond en français ou en anglais."
         2:
-            title: Confiance et transparence
-            text: Chaque échange repose sur la clarté, l’écoute et la sincérité. Nos clients savent qu’ils peuvent compter sur un service fiable.
+            title: "Transparence à chaque étape"
+            text: "Des tarifs clairs, des biens vérifiés et des nouvelles régulières : vous savez toujours où en est votre recherche."
         3:
-            title: Confort et sérénité
-            text: De la recherche au jour de l’installation, nous prenons soin de chaque détail pour que nos clients se sentent chez eux dès leur arrivée.
-    ourStory:
-        title: Notre histoire
-        subTitle: Née d'une passion
-        text: "Depuis plus d’une décennie, Relocation in Paris accompagne celles et ceux qui choisissent de s’installer dans la capitale. Née d’une passion pour le service et d’une parfaite connaissance du marché parisien, notre équipe a su bâtir une réputation fondée sur la confiance, la discrétion et l’excellence. Aujourd’hui, nous continuons d’évoluer avec la même exigence : offrir à chaque client une expérience fluide, élégante et sans compromis sur le confort."
+            title: "Confort et sérénité"
+            text: "Visites, dossier, démarches : nous nous occupons de tout pour que vous vous sentiez chez vous dès votre arrivée."
 legal:
     title: Mentions légales
     subTitle: Transparence et conformité
@@ -821,7 +877,6 @@ blog:
             button: Explorer le blog
 callback:
     trust:
-        score: "4,9/5"
         reviews: "Basé sur +%count% avis Google"
     hero:
         expertTime: 20 min avec un expert
@@ -1073,7 +1128,6 @@ propertyManagement:
             2: Locataires fiables
             3: Valeur optimisée
         rating:
-            score: '5.0'
             label: basé sur
             reviews: avis
         team:
@@ -1166,7 +1220,7 @@ propertyManagement:
                 text: biens gérés à Paris et en Île-de-France.
             3:
                 number: 25
-                text: ans d’expertise en gestion locative.
+                text: ans d’expertise cumulée en gestion locative.
             4:
                 number: 12
                 text: experts engagés dans la gestion de votre patrimoine.
@@ -1176,7 +1230,7 @@ propertyManagement:
     story:
         title: 'Confiance & discrétion'
         subTitle: Votre patrimoine, notre exigence
-        text: "Depuis plus de dix ans, Relocation in Paris gère les biens des propriétaires les plus exigeants de la capitale. De la valorisation de votre appartement à la sélection rigoureuse des locataires, nous prenons en charge chaque détail avec discrétion et savoir-faire. Notre exigence : préserver la valeur de votre patrimoine, optimiser vos revenus et vous offrir une gestion d'exception, en toute sérénité."
+        text: "Depuis %year%, notre équipe gère les biens des propriétaires les plus exigeants de la capitale. De la valorisation de votre appartement à la sélection rigoureuse des locataires, nous prenons en charge chaque détail avec discrétion et savoir-faire. Notre exigence : préserver la valeur de votre patrimoine, optimiser vos revenus et vous offrir une gestion d'exception, en toute sérénité."
         award: 'Meilleure agence<br>à <span class="font-semibold">Paris en %year%</span>'
     faq:
         title: FAQ

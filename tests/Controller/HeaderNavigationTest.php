@@ -56,7 +56,7 @@ final class HeaderNavigationTest extends WebTestCase
             self::assertCount(
                 1,
                 $crawler->filter('header[data-controller~="sticky-header"] '.$popover.'[data-sticky-header-target="popover"]'),
-                $popover.' must be a sticky-header target, otherwise it stays on screen alone once the header scrolls away near the footer.'
+                $popover.' must be a sticky-header target, otherwise it could stay on screen alone if the header ever scrolls away.'
             );
         }
     }
@@ -182,17 +182,19 @@ final class HeaderNavigationTest extends WebTestCase
         }
     }
 
-    public function testHeaderIsStickyButBoundedSoItNeverCoversTheFooter(): void
+    public function testHeaderStaysStickyInFrontOfTheContentAndTheFooter(): void
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/fr/faq');
 
         self::assertResponseIsSuccessful();
         $header = $crawler->filter('header[role="banner"]');
-        self::assertStringContainsString('sticky', (string) $header->attr('class'));
-        // Sticky is bounded by its parent: header and <main> share a wrapper, the footer stays outside it
-        self::assertCount(1, $crawler->filter('body > div > header[role="banner"] ~ main#main-content'));
-        self::assertCount(0, $crawler->filter('body > div > header[role="banner"] ~ footer'));
-        self::assertCount(1, $crawler->filter('body > footer'));
+        $classes = explode(' ', (string) $header->attr('class'));
+        self::assertContains('sticky', $classes);
+        // Direct child of <body>: sticky over the whole page, footer included
+        self::assertCount(1, $crawler->filter('body > header[role="banner"] ~ main#main-content ~ footer'));
+        // Above <main> and the footer (both z-20), so photos or cards never slide over it
+        self::assertContains('z-50', $classes);
+        self::assertStringContainsString('z-20', (string) $crawler->filter('body > footer')->attr('class'));
     }
 }

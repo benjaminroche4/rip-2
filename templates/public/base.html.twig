@@ -51,14 +51,11 @@
         </a>
         <twig:Section:GridBackground />
         {# Focused pages (e.g. "On vous rappelle") override header/footer with an empty block #}
-        {# The sticky header is bounded by this wrapper: once the footer comes into view,
-           the header scrolls away with the content instead of covering the footer. #}
-        <div>
-            {% block header %}<twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />{% endblock %}
-            <main id="main-content" class="relative z-20" tabindex="-1">
-                {% block body %}{% endblock %}
-            </main>
-        </div>
+        {# The sticky header is a direct child of <body>: it stays on top over the whole page, footer included #}
+        {% block header %}<twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />{% endblock %}
+        <main id="main-content" class="relative z-20" tabindex="-1">
+            {% block body %}{% endblock %}
+        </main>
         {% block footer %}<twig:Layout:Footer />{% endblock %}
     </body>
 </html>

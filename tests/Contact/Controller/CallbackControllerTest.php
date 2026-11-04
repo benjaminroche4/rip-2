@@ -31,7 +31,7 @@ final class CallbackControllerTest extends WebTestCase
         $client = static::createClient();
         $crawler = $client->request('GET', '/fr/on-vous-rappelle');
 
-        self::assertSelectorTextContains('[data-testid="callback-trust"]', '4,9/5');
+        self::assertSelectorTextContains('[data-testid="callback-trust"]', '5.0/5');
         self::assertSelectorTextContains('[data-testid="callback-trust"]', 'avis Google');
         self::assertSelectorExists('a[data-testid="callback-trust"][href^="https://share.google/"][target="_blank"][rel~="noopener"]');
         $privacy = $crawler->filter('form[name="callback"] a[href="/fr/politique-de-confidentialite"]');

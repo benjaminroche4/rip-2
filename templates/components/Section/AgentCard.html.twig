@@ -1,0 +1,39 @@
+{# Team member card (About page): photo, name, spoken languages, role and a short bio.
+   @prop name      Displayed name (proper noun, not translated)
+   @prop photo     Index of medias/team/card/team_{photo}.webp (640px, about 2x the card width)
+   @prop role      Translation key of the job title
+   @prop bio       Translation key of the short bio
+   @prop languages circle-flags codes of the spoken languages (fr, gb, es, de…)
+   @prop eager     Above the fold: load the photo eagerly #}
+{%- props name, photo, role, bio, languages = ['fr', 'gb'], eager = false -%}
+
+<article class="mx-auto flex w-full max-w-xs flex-col gap-2 rounded-2xl border border-neutral-200 bg-white p-2" data-testid="agent-card">
+    <div class="h-[300px] overflow-hidden rounded-xl bg-linear-to-b from-black/20 from-55% to-[#131313]/8">
+        <img
+            src="{{ asset('medias/team/card/team_' ~ photo ~ '.webp') }}"
+            alt="{{ name }}, {{ role|trans }}"
+            width="640" height="640"
+            loading="{{ eager ? 'eager' : 'lazy' }}"
+            draggable="false"
+            class="size-full rounded-xl object-cover"
+        />
+    </div>
+    <div class="flex flex-col gap-3 p-3">
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center justify-between gap-3">
+                <h3 class="text-2xl font-medium text-black">{{ name }}</h3>
+                <ul class="flex shrink-0 items-center gap-1.5" aria-label="{{ 'aboutUs.languages'|trans }}">
+                    {% for language in languages %}
+                        <li>
+                            {{ ux_icon('circle-flags:' ~ language, {'class': 'size-5 shrink-0 rounded-full', 'aria-hidden': 'true'}) }}
+                            <span class="sr-only">{{ ('aboutUs.language.' ~ language)|trans }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <p class="text-sm text-slate-700">{{ role|trans }}</p>
+        </div>
+        <div class="h-px w-full bg-neutral-200" aria-hidden="true"></div>
+        <p class="text-sm font-light text-pretty text-slate-600">{{ bio|trans }}</p>
+    </div>
+</article>

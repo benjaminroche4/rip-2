@@ -1,7 +1,7 @@
 {% extends 'public/base.html.twig' %}
 
 {% block title %}{{ 'meta.aboutUs.title'|trans }}{% endblock %}
-{% block description %}{{ 'meta.aboutUs.description'|trans }}{% endblock %}
+{% block description %}{{ 'meta.aboutUs.description'|trans({'%year%': site_founding_year}) }}{% endblock %}
 {% block url %}{{ path('app_about_us') }}{% endblock %}
 
 {% block schema_page %}
@@ -10,7 +10,7 @@
         "@id": "{{ site_url }}{{ path('app_about_us') }}/#aboutpage",
         "url": "{{ site_url }}{{ path('app_about_us') }}",
         "name": "{{ 'meta.aboutUs.title'|trans|e('js') }}",
-        "description": "{{ 'meta.aboutUs.description'|trans|e('js') }}",
+        "description": "{{ 'meta.aboutUs.description'|trans({'%year%': site_founding_year})|e('js') }}",
         "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
         "isPartOf": { "@id": "{{ site_url }}/#website" },
         "about": { "@id": "{{ site_url }}/#organization" }
@@ -19,227 +19,135 @@
 
 {% block body %}
     <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
-        <twig:Section:PageHeader caption="aboutUs.title" subtitle="aboutUs.subTitle" />
+        <twig:Section:PageHeader caption="aboutUs.title" subtitle="aboutUs.subTitle" intro="aboutUs.intro" />
+        {# Three photos in a fan: the middle one is taller and in front (z-10), the sides tilt outwards and tuck behind it.
+           They open on page load (CSS only, app.css `fan-*`), never for reduced-motion visitors. #}
+        <div class="mx-auto mt-10 grid max-w-[860px] grid-cols-[26fr_34fr_26fr] items-center lg:mt-16" data-testid="about-hero-photos">
+            {% for photo in [
+                {file: 1, small: 260, width: 520, height: 640, ratio: 'aspect-[260/320]', fan: 'relative z-0 -rotate-6 translate-x-[14%] translate-y-4 shadow-lg shadow-black/5 animate-fan-left'},
+                {file: 2, small: 340, width: 680, height: 840, ratio: 'aspect-[340/420]', fan: 'relative z-10 shadow-xl shadow-black/10 animate-fan-center'},
+                {file: 3, small: null, width: 347, height: 427, ratio: 'aspect-[260/320]', fan: 'relative z-0 rotate-6 -translate-x-[14%] translate-y-4 shadow-lg shadow-black/5 animate-fan-right'},
+            ] %}
+                {# Small 1x version for phones, full size for retina and desktop (photo 3 is already small) #}
+                <img src="{{ asset('medias/website/about_hero_' ~ photo.file ~ '.webp') }}"{% if photo.small %} srcset="{{ asset('medias/website/about_hero_' ~ photo.file ~ '-' ~ photo.small ~ '.webp') }} {{ photo.small }}w, {{ asset('medias/website/about_hero_' ~ photo.file ~ '.webp') }} {{ photo.width }}w" sizes="(min-width: 908px) {{ photo.small }}px, {{ photo.file == 2 ? '40vw' : '30vw' }}"{% endif %} alt="{{ ('aboutUs.heroPhotos.' ~ photo.file)|trans }}" width="{{ photo.width }}" height="{{ photo.height }}" loading="eager" class="{{ photo.ratio }} {{ photo.fan }} w-full rounded-xl border-4 border-white bg-[#f7f7f7] object-cover motion-reduce:animate-none sm:rounded-2xl" />
+            {% endfor %}
+        </div>
     </section>
+    {# Mission + Google rating + key figures (same rating card as the service pages) #}
+    {# Same block as the "story" section of the service pages: dotted grey card, centered text, rating + award badges #}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 mb-12 lg:mb-16" data-testid="about-mission">
+    <div class="relative overflow-hidden rounded-3xl bg-[#f7f7f7] px-6 py-12 sm:px-12 lg:py-16">
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:18px_18px] opacity-40" aria-hidden="true"></div>
+        <div class="relative mx-auto max-w-2xl text-center">
+            <p class="font-semibold text-primary font-secondary">{{ 'aboutUs.mission.caption'|trans }}</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'aboutUs.mission.title'|trans }}</h2>
+            <p class="mt-6 text-neutral-600 text-balance font-light">{{ 'aboutUs.mission.text'|trans }}</p>
+            <dl class="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:items-stretch sm:gap-4">
+                {% for stat in ['relocations', 'expertise', 'partners'] %}
+                    {% if not loop.first %}
+                        <div class="h-px w-24 bg-linear-to-r from-transparent via-neutral-400 to-transparent opacity-30 sm:h-auto sm:w-px sm:self-stretch sm:bg-linear-to-b" aria-hidden="true"></div>
+                    {% endif %}
+                    <div class="flex flex-1 flex-col-reverse">
+                        <dt class="mt-1 text-sm text-[#525252] text-balance">{{ ('aboutUs.mission.stats.' ~ stat ~ '.label')|trans }}</dt>
+                        <dd class="text-2xl sm:text-3xl font-semibold text-primary">{{ ('aboutUs.mission.stats.' ~ stat ~ '.value')|trans }}</dd>
+                    </div>
+                {% endfor %}
+            </dl>
+            <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm transition-colors duration-100 ease-out hover:border-neutral-200">
+                    {{ ux_icon('logos:google-icon', {'class': 'size-7 shrink-0', 'aria-hidden': 'true'}) }}
+                    <span class="flex flex-col text-left">
+                        <span class="flex items-center gap-1.5">
+                            <span class="flex items-center -space-x-0.5" aria-hidden="true">
+                                {% for i in 1..5 %}{{ ux_icon('material-symbols:star-rounded', {'class': 'size-4 shrink-0 text-yellow-500'}) }}{% endfor %}
+                            </span>
+                            <span class="text-sm font-semibold text-slate-900">{{ google_rating }}</span>
+                        </span>
+                        <span class="text-xs text-slate-500 transition-colors duration-100 ease-out group-hover:text-primary">{{ 'aboutUs.mission.reviews'|trans({'%count%': google_reviews_count}) }}</span>
+                    </span>
+                </a>
+                <div class="inline-flex items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm">
+                    <img loading="lazy" src="{{ asset('medias/svg/laurel-left.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0 rotate-180 -scale-y-100" />
+                    <p class="max-w-[10rem] text-center text-sm text-slate-700">{{ 'findAccommodation.story.award'|trans({'%year%': site_award_year})|raw }}</p>
+                    <img loading="lazy" src="{{ asset('medias/svg/laurel-right.svg') }}" alt="" aria-hidden="true" width="24" height="43" class="h-10 w-auto shrink-0" />
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+    {# Photo, name and languages are facts about the person; role and bio are translated #}
+    {% set team = [
+        {name: 'Julien L.', photo: 1, languages: ['fr', 'gb']},
+        {name: 'Eva B.', photo: 3, languages: ['fr', 'gb']},
+        {name: 'Charles M.', photo: 2, languages: ['fr', 'gb', 'es']},
+        {name: 'Sophie B.', photo: 4, languages: ['fr', 'gb', 'de']},
+        {name: 'Élodie G.', photo: 5, languages: ['fr', 'gb', 'es']},
+        {name: 'Jean-Pierre A.', photo: 6, languages: ['fr', 'gb']},
+        {name: 'David K.', photo: 7, languages: ['fr', 'gb', 'de']},
+        {name: 'Laura P.', photo: 8, languages: ['fr', 'gb']},
+    ] %}
     <section class="max-w-5xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
-        <div class="grid grid-cols-2 max-[330px]:grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-            <div class="group max-w-sm mx-auto">
-               <img src="{{ asset('medias/team/team_1.webp') }}" alt="Julien L." width="1024" height="1024" loading="eager" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Julien L.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.1'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
+        {# Desktop: 6 tracks, 2 per card, so an incomplete last row of 2 can start half a card in and sit centered #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+            {% for member in team %}
+                {% set centerLastRow = loop.length % 3 == 2 and loop.index == loop.length - 1 %}
+                <div class="lg:col-span-2 {{ centerLastRow ? 'lg:col-start-2' }}">
+                    <twig:Section:AgentCard
+                        name="{{ member.name }}"
+                        :photo="member.photo"
+                        role="aboutUs.team.{{ member.photo }}.role"
+                        bio="aboutUs.team.{{ member.photo }}.bio"
+                        :languages="member.languages"
+                        :eager="loop.index <= 3"
+                    />
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {# Our story: photo + text, then the journey timeline #}
+    {# Founding and award years come from the twig.yaml globals, shared with the badges and schema.org #}
+    {% set storyYears = {independent: site_experience_since, founded: site_founding_year, corporate: 2024, award: site_award_year} %}
+    <section class="max-w-7xl mx-auto px-6 lg:px-8 lg:py-16 py-12" data-testid="about-story">
+        <div class="relative overflow-hidden rounded-3xl bg-[#f7f7f7] px-6 py-10 sm:px-10 lg:p-16">
+            <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:18px_18px] opacity-40" aria-hidden="true"></div>
+            <div class="relative grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+                <img src="{{ asset('medias/website/paris_2_story.webp') }}" srcset="{{ asset('medias/website/paris_2_story-640.webp') }} 640w, {{ asset('medias/website/paris_2_story.webp') }} 1100w" sizes="(min-width: 1024px) 560px, 100vw" alt="{{ 'aboutUs.story.imageAlt'|trans }}" width="1100" height="733" loading="lazy" class="aspect-3/2 w-full rounded-xl border-6 border-white object-cover" />
+                <div class="flex flex-col gap-8">
+                    <div>
+                        <p class="font-semibold text-primary font-secondary">{{ 'aboutUs.story.caption'|trans }}</p>
+                        <h2 class="mt-3 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'aboutUs.story.title'|trans }}</h2>
+                        <p class="mt-6 text-neutral-600 font-light text-pretty">{{ 'aboutUs.story.text'|trans({'%year%': site_founding_year, '%since%': site_experience_since})|raw }}</p>
                     </div>
                 </div>
             </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_3.webp') }}" alt="Eva B." width="1024" height="1024" loading="eager" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Eva B.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.3'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_2.webp') }}" alt="Charles M." width="1024" height="1024" loading="eager" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Charles M.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.2'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:es-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_4.webp') }}" alt="Sophie B." width="1024" height="1024" loading="lazy" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Sophie B.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.4'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:de-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_5.webp') }}" alt="Élodie G." width="1024" height="1024" loading="lazy" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Élodie G.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.5'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:es-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_6.webp') }}" alt="Jean-Pierre A." width="1024" height="1024" loading="lazy" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Jean-Pierre A.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.6'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_7.webp') }}" alt="David K." width="1024" height="1024" loading="lazy" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">David K.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.7'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:de-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
-            </div>
-            <div class="group max-w-sm mx-auto">
-                <img src="{{ asset('medias/team/team_8.webp') }}" alt="Laura P." width="1024" height="1024" loading="lazy" draggable="false" class="rounded-xl object-cover w-full">
-                <div class="bg-neutral-100 mt-3 rounded-lg p-4 group-hover:bg-primary/10 transition duration-100">
-                    <h3 class="text-lg text-center">Laura P.</h3>
-                    <p class="text-center text-slate-700 text-sm">{{ 'aboutUs.team.8'|trans|raw }}</p>
-                    <div class="flex items-center justify-center mt-2 space-x-2">
-                        {{ ux_icon('flag:bl-4x3', {'class':'size-4'}) }}
-                        {{ ux_icon('flag:gb-4x3', {'class':'size-4'}) }}
-                    </div>
-                </div>
+
+            <div class="relative mt-12 lg:mt-16">
+                <h3 class="text-2xl font-medium text-black">{{ 'aboutUs.story.journey.title'|trans }}</h3>
+                <ol class="mt-6 grid gap-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+                    {% for step, year in storyYears %}
+                        <li class="flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                <p class="flex items-center gap-2 text-xl font-semibold text-primary">
+                                    <span class="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                                    {{ year }}
+                                </p>
+                                <span class="h-px flex-1 bg-neutral-300" aria-hidden="true"></span>
+                            </div>
+                            <div class="flex flex-col gap-1 pl-3.5 pr-3">
+                                <p class="text-base font-semibold text-black">{{ ('aboutUs.story.journey.' ~ step ~ '.title')|trans }}</p>
+                                <p class="text-sm font-light text-[#525252]">{{ ('aboutUs.story.journey.' ~ step ~ '.text')|trans }}</p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
             </div>
         </div>
     </section>
-    <section class="bg-white py-12 lg:py-16">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-xl lg:mx-0 space-y-4">
-                <h2 class="font-semibold text-primary font-secondary">{{ 'aboutUs.ourValues.title'|trans|raw }}</h2>
-                <h3 class="text-balance text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">{{ 'aboutUs.ourValues.subTitle'|trans|raw }}</h3>
-                <p class="text-lg/8 text-gray-600">{{ 'aboutUs.ourValues.text'|trans|raw }}</p>
-            </div>
-            <div class="mx-auto mt-16 max-w-2xl lg:max-w-none">
-                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-                    <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20 p-6 rounded-2xl shadow-lg shadow-gray-300/30 transition-colors duration-100 ease-out">
-                        <dt class="text-base/7 font-semibold text-gray-900">
-                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
-                                {{ ux_icon('material-symbols:workspace-premium-outline-rounded', {'class':'size-6 text-white'}) }}
-                            </div>
-                            {{ 'aboutUs.ourValues.1.title'|trans|raw }}
-                        </dt>
-                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
-                            <p class="flex-auto">{{ 'aboutUs.ourValues.1.text'|trans|raw }}</p>
-                        </dd>
-                    </div>
-                    <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20 p-6 rounded-2xl shadow-lg shadow-gray-300/30 transition-colors duration-100 ease-out">
-                        <dt class="text-base/7 font-semibold text-gray-900">
-                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
-                                {{ ux_icon('icon-park-outline:eyes', {'class':'size-6 text-white'}) }}
-                            </div>
-                            {{ 'aboutUs.ourValues.2.title'|trans|raw }}
-                        </dt>
-                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
-                            <p class="flex-auto">{{ 'aboutUs.ourValues.2.text'|trans|raw }}</p>
-                        </dd>
-                    </div>
-                    <div class="flex flex-col bg-white border border-neutral-100 hover:border-primary/20 p-6 rounded-2xl shadow-lg shadow-gray-300/30 transition-colors duration-100 ease-out">
-                        <dt class="text-base/7 font-semibold text-gray-900">
-                            <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-primary">
-                                {{ ux_icon('ri:diamond-line', {'class':'size-6 text-white'}) }}
-                            </div>
-                            {{ 'aboutUs.ourValues.3.title'|trans|raw }}
-                        </dt>
-                        <dd class="mt-1 flex flex-auto flex-col text-base/7 text-neutral-600">
-                            <p class="flex-auto">{{ 'aboutUs.ourValues.3.text'|trans|raw }}</p>
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
-    </section>
-    <section class="bg-white py-12 lg:py-16">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8 justify-center items-center">
-            <twig:Section:PageHeader caption="aboutUs.ourStory.title" subtitle="aboutUs.ourStory.subTitle" as="h3" />
-            <div class="max-w-2xl mx-auto mt-6">
-                <p class="text-neutral-600 text-center text-lg">{{ 'aboutUs.ourStory.text'|trans|raw }}</p>
-            </div>
-            <div class="grid grid-cols-1 max-w-xs lg:max-w-lg lg:grid-cols-2 gap-6 mt-10 mx-auto">
-                <div class="border border-neutral-100 rounded-lg p-4">
-                    <div class="font-semibold text-gray-900 flex items-center justify-center gap-x-3.5">
-                        {{ ux_icon('devicon:google', {'class':'size-6 shrink-0'}) }}
-                        <div class="flex flex-col justify-start -space-y-1">
-                            <div class="test-base font-bold flex items-center gap-x-2">
-                                5.0
-                                <div class="flex items-center">
-                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                    {{ ux_icon('material-symbols:star-rounded', {'class':'size-4 text-orange-500'}) }}
-                                </div>
-                            </div>
-                            <span class="font-medium text-xs">{{ 'header.google.basedOn'|trans|raw }} <a href="https://share.google/wyn170gOFsNysiTz1" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-primary transition-colors duration-100 ease-out">+{{ google_reviews_count }} {{ 'header.google.reviews'|trans|raw }}</a></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="border border-neutral-100 rounded-lg p-4">
-                    <div class="flex items-center justify-center space-x-3 lg:justify-start" aria-hidden="true">
-                        <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
-                            <path d="M25.536 8.76642C24.7611 5.27811 22.8432 2.13254 21.6014 0.541938C21.3894 0.270387 20.9774 0.314194 20.8157 0.618383C19.9547 2.23801 18.4662 5.38925 18.0844 9.20474C17.648 13.5662 19.3996 17.9712 22.4676 17.5328C25.1629 17.1478 26.5859 13.4926 25.536 8.76642Z" fill="url(#g1)" />
-                            <path d="M16.016 15.6551C13.6008 13.0216 10.367 11.2564 8.49628 10.4998C8.17691 10.3706 7.842 10.6146 7.85404 10.9589C7.91818 12.792 8.20471 16.2653 9.78184 19.7605C11.5846 23.7558 15.3041 26.6949 17.7419 24.7813C19.8836 23.1001 19.2883 19.2232 16.016 15.6551Z" fill="url(#g2)" />
-                            <path d="M12.4043 26.6068C9.38973 24.6881 5.80926 23.8201 3.80649 23.5734C3.46457 23.5313 3.20421 23.8536 3.30495 24.183C3.84136 25.9371 5.01709 29.2179 7.44509 32.1858C10.2205 35.5784 14.5739 37.4546 16.4334 34.9753C18.067 32.7971 16.4886 29.2063 12.4043 26.6068Z" fill="url(#g3)" />
-                            <path d="M21.1784 39.5443C17.6471 38.9983 14.0195 39.6417 12.0863 40.2203C11.7563 40.3191 11.6473 40.7189 11.8719 40.9801C13.0678 42.3709 15.4625 44.9031 18.8782 46.6456C22.7827 48.6375 27.523 48.6068 28.2299 45.5893C28.8509 42.9384 25.963 40.2842 21.1784 39.5443Z" fill="url(#g4)" />
-                            <defs>
-                                <linearGradient id="g1" x1="21.0613" y1="0" x2="21.9505" y2="17.5631" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/>
-                                </linearGradient>
-                                <linearGradient id="g2" x1="7.75754" y1="10.3005" x2="17.3092" y2="25.066" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/>
-                                </linearGradient>
-                                <linearGradient id="g3" x1="3.04135" y1="23.5721" x2="16.0891" y2="35.3623" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/>
-                                </linearGradient>
-                                <linearGradient id="g4" x1="11.3851" y1="40.5265" x2="28.0701" y2="46.0821" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div class="flex flex-col text-center text-sm font-medium text-gray-900">
-                            <p>{{ 'home.heroSection.top.1'|trans|raw }}</p>
-                            <p>{{ 'home.heroSection.top.2'|trans({'%year%': site_award_year})|raw }}</p>
-                        </div>
-                        <svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" class="size-9">
-                            <path d="M4.46397 8.76642C5.23886 5.27811 7.15683 2.13254 8.39858 0.541938C8.61058 0.270387 9.02259 0.314194 9.18431 0.618383C10.0453 2.23801 11.5338 5.38925 11.9156 9.20474C12.352 13.5662 10.6004 17.9712 7.53238 17.5328C4.83705 17.1478 3.41409 13.4926 4.46397 8.76642Z" fill="url(#g1b)" />
-                            <path d="M13.984 15.6551C16.3992 13.0216 19.633 11.2564 21.5037 10.4998C21.8231 10.3706 22.158 10.6146 22.146 10.9589C22.0818 12.792 21.7953 16.2653 20.2182 19.7605C18.4154 23.7558 14.6959 26.6949 12.2581 24.7813C10.1164 23.1001 10.7117 19.2232 13.984 15.6551Z" fill="url(#g2b)" />
-                            <path d="M17.5957 26.6068C20.6103 24.6881 24.1907 23.8201 26.1935 23.5734C26.5354 23.5313 26.7958 23.8536 26.695 24.183C26.1586 25.9371 24.9829 29.2179 22.5549 32.1858C19.7795 35.5784 15.4261 37.4546 13.5666 34.9753C11.933 32.7971 13.5114 29.2063 17.5957 26.6068Z" fill="url(#g3b)" />
-                            <path d="M8.82157 39.5443C12.3529 38.9983 15.9805 39.6417 17.9137 40.2203C18.2437 40.3191 18.3527 40.7189 18.1281 40.9801C16.9322 42.3709 14.5375 44.9031 11.1218 46.6456C7.21732 48.6375 2.47695 48.6068 1.77011 45.5893C1.14913 42.9384 4.03702 40.2842 8.82157 39.5443Z" fill="url(#g4b)" />
-                            <defs>
-                                <linearGradient id="g1b" x1="8.93872" y1="0" x2="8.04949" y2="17.5631"><stop stop-color="#FDF193"/><stop offset="1" stop-color="#FF8554"/></linearGradient>
-                                <linearGradient id="g2b" x1="22.2425" y1="10.3005" x2="12.6908" y2="25.066"><stop stop-color="#FFEF79"/><stop offset="1" stop-color="#FF743D"/></linearGradient>
-                                <linearGradient id="g3b" x1="26.9587" y1="23.5721" x2="13.9109" y2="35.3623"><stop stop-color="#FFEB56"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
-                                <linearGradient id="g4b" x1="18.6149" y1="40.5265" x2="1.92991" y2="46.0821"><stop stop-color="#FFE940"/><stop offset="1" stop-color="#FA692F"/></linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="bg-white py-12 lg:py-16">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8 justify-center items-center">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <img src="{{ asset('medias/website/paris_1.webp') }}" alt="{{ 'aboutUs.galleryAlt'|trans }}" width="1720" height="1161" loading="lazy" class="aspect-square sm:aspect-3/2 rounded-lg object-cover"/>
-                <img src="{{ asset('medias/website/paris_2.webp') }}" alt="{{ 'aboutUs.galleryAlt'|trans }}" width="1752" height="1168" loading="lazy" class="aspect-square sm:aspect-3/2 rounded-lg object-cover"/>
-                <img src="{{ asset('medias/website/paris_3.webp') }}" alt="{{ 'aboutUs.galleryAlt'|trans }}" width="1216" height="811" loading="lazy" class="aspect-square sm:aspect-3/2 rounded-lg object-cover"/>
-                <img src="{{ asset('medias/website/paris_4.webp') }}" alt="{{ 'aboutUs.galleryAlt'|trans }}" width="1497" height="922" loading="lazy" class="aspect-square sm:aspect-3/2 rounded-lg object-cover"/>
-            </div>
-        </div>
-    </section>
+    <twig:Section:SolutionGrid
+        keyPrefix="aboutUs.ourValues"
+        :icons="['material-symbols:workspace-premium-outline-rounded', 'icon-park-outline:eyes', 'ri:diamond-line']"
+        :withText="true"
+        align="start"
+    />
     <twig:Section:CtaFooter />
 {% endblock %}

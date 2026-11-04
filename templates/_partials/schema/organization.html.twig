@@ -6,6 +6,7 @@
     "@id": "{{ site_url }}/#organization",
     "name": "Relocation in Paris",
     "legalName": "Bridgeline Group Sàrl",
+    "foundingDate": "{{ site_founding_year }}",
     "url": "{{ site_url }}",
     "description": "{{ 'schema.description'|trans|e('js') }}",
     "telephone": "{{ site_phone }}",
@@ -52,7 +53,7 @@
     "priceRange": "À partir de 1490€",
     "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.9",
+        "ratingValue": "{{ google_rating }}",
         "bestRating": "5",
         "worstRating": "1",
         "ratingCount": "{{ google_reviews_count }}",

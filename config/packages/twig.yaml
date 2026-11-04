@@ -13,9 +13,15 @@ twig:
         site_phone_display: '+(33) 1 84 80 43 44'
         # Year of the "Meilleure agence à Paris" award: one value for every page (home, footer, about, services)
         site_award_year: 2026
+        # Relocation in Paris was founded in this year (About page, schema.org foundingDate)...
+        site_founding_year: 2023
+        # ...by agents working independently in Paris since this year (About timeline, service pages)
+        site_experience_since: 2015
         site_linkedin_url: 'https://www.linkedin.com/company/relocation-in-paris/'
         # Property management is provided with this partner (FAQ, "Gestion locative" topic)
         partner_konciergerie_url: 'https://thekonciergerie.com/'
+        # Google rating shown everywhere (badges, schema.org aggregateRating): one value for the whole site
+        google_rating: '5.0'
         google_reviews_count: '%env(int:GOOGLE_REVIEWS_COUNT)%'
 when@test:
     twig:

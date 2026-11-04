@@ -287,7 +287,7 @@ findAccommodation:
     story:
         title: 'Trust & peace of mind'
         subTitle: Your search, our commitment
-        text: "For over ten years, Relocation in Paris has supported everyone settling in the capital. From selecting the right homes to building your application file, we handle every step with care and precision. Our commitment: to find the home that fits you, secure your process and give you a smooth move-in, even from abroad."
+        text: "Since %year%, our team has supported everyone settling in the capital. From selecting the right homes to building your application file, we handle every step with care and precision. Our commitment: to find the home that fits you, secure your process and give you a smooth move-in, even from abroad."
         award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     trust:
         1: 5.0 based on
@@ -422,8 +422,8 @@ meta:
         title: Sitemap
         description: "Explore all our relocation services in Paris: personalized support for individuals, companies, and property owners."
     aboutUs:
-        title: About Us
-        description: Discover the story and values of Relocation in Paris, a high-end relocation agency dedicated to comfort, trust, and excellence for its clients.
+        title: "Paris Relocation Agency: Meet Our Team"
+        description: "Relocation in Paris is a relocation agency founded in %year% by Paris real estate agents: we find your home and support you until you get the keys."
     termsConditions:
         title: Terms & Conditions
         description: "Relocation In Paris Terms & Conditions: terms governing the sale and provision of our services."
@@ -597,34 +597,90 @@ phoneInput:
     searchPlaceholder: Search for a dial code
 aboutUs:
     title: About Us
-    subTitle: Together For 10 Years
-    galleryAlt: Paris, where our clients live
+    subTitle: "Your relocation agency in Paris"
+    intro: "A team of Parisians by your side, from the home search to the day you get your keys."
+    heroPhotos:
+        1: "Golden statues of the Trocadéro facing the Eiffel Tower"
+        2: "The Panthéon in Paris"
+        3: "Golden statue of Joan of Arc and French flag, place des Pyramides"
+    mission:
+        caption: Our mission
+        title: "Finding your home in Paris, with peace of mind."
+        text: "Verified apartments, a strong application, organized viewings: we handle your Paris rental search so you can arrive stress-free."
+        reviews: "Based on %count%+ reviews"
+        stats:
+            relocations:
+                value: "900+"
+                label: Successful relocations
+            expertise:
+                value: "25+"
+                label: Years of combined expertise
+            partners:
+                value: "80+"
+                label: "Real estate partners in Paris"
+    story:
+        caption: Our story
+        title: Born from a passion for Paris
+        imageAlt: Equestrian statue and Haussmann buildings in Paris
+        text: "A collective of independent real estate agents working together in Paris since %since%, we founded <strong class=\"font-semibold text-neutral-800\">Relocation in Paris, a relocation agency in Paris</strong>, in %year% to support <strong class=\"font-semibold text-neutral-800\">expats, families and companies</strong> from start to finish. A boutique agency where every client gets personal follow-up. We know every neighborhood, visit homes for you and stay by your side until you move in, so Paris quickly feels like home."
+        journey:
+            title: Our journey
+            independent:
+                title: "A collective of independent agents"
+                text: "Independent agents join forces in Paris."
+            founded:
+                title: Relocation in Paris is founded
+                text: We joined forces to make every move to Paris simple and stress-free.
+            corporate:
+                title: Expansion to corporate
+                text: Turnkey relocation for your employees.
+            award:
+                title: Best agency in Paris
+                text: Recognized among the best relocation agencies in the capital.
+    languages: "Languages spoken"
+    language:
+        fr: French
+        gb: English
+        es: Spanish
+        de: German
     team:
-        1: Housing Consultant
-        2: International Mobility Consultant
-        3: Housing Consultant
-        4: International Mobility Consultant
-        5: Client Relations Manager
-        6: Housing Consultant
-        7: Housing Consultant
-        8: Housing Consultant
+        1:
+            role: "Housing Consultant"
+            bio: "Specialized in securing the most competitive rentals in Paris."
+        2:
+            role: "International Mobility Consultant"
+            bio: "Supports expats and families until they settle in."
+        3:
+            role: "Housing Consultant"
+            bio: "Shortlists your apartments and organizes viewings."
+        4:
+            role: "International Mobility Consultant"
+            bio: "Eases the move of international talent to Paris."
+        5:
+            role: "Client Relations Manager"
+            bio: "Your first point of contact, from your project to the keys."
+        6:
+            role: "Housing Consultant"
+            bio: "Knows Paris neighborhoods inside out to target the right addresses."
+        7:
+            role: "Housing Consultant"
+            bio: "Negotiates to secure the most sought-after homes."
+        8:
+            role: "Housing Consultant"
+            bio: "Builds strong applications that reassure landlords."
     ourValues:
         title: Our Values
         subTitle: A human approach built on trust
-        text: We place our clients’ comfort and peace of mind at the heart of every service. A discreet, attentive, and refined approach, designed for an effortless experience.
+        text: "You are trusting us with an important step in your life. We take care of it as if it were our own."
         1:
-            title: Excellence & Discretion
-            text: We guarantee personalized support carried out with precision and confidentiality, to deliver a truly unique experience.
+            title: "Tailored support"
+            text: "A dedicated advisor who listens, understands your project and answers you in French or English."
         2:
-            title: Trust & Transparency
-            text: Every interaction is based on clarity, listening, and sincerity. Our clients know they can rely on a dependable and honest service.
+            title: "Transparency at every step"
+            text: "Clear pricing, verified listings and regular updates: you always know where your search stands."
         3:
-            title: Comfort & Serenity
-            text: From the first search to the day of arrival, we take care of every detail to ensure our clients feel at home from the moment they arrive.
-    ourStory:
-        title: Our Story
-        subTitle: Born from a passion
-        text: "For over a decade, Relocation in Paris has been supporting those who choose to make the French capital their home. Born from a passion for service and a deep understanding of the Parisian market, our team has built a reputation founded on trust, discretion, and excellence. Today, we continue to grow with the same dedication: offering every client a seamless, elegant, and uncompromising relocation experience focused on comfort and peace of mind."
+            title: "Comfort & peace of mind"
+            text: "Viewings, application, paperwork: we take care of everything so you feel at home from the day you arrive."
 legal:
     title: Legal Notice
     subTitle: Transparency and Compliance
@@ -821,7 +877,6 @@ blog:
             button: Explore the blog
 callback:
     trust:
-        score: "4.9/5"
         reviews: "Based on %count%+ Google reviews"
     hero:
         expertTime: 20 min with an expert
@@ -1073,7 +1128,6 @@ propertyManagement:
             2: Reliable tenants
             3: Optimized value
         rating:
-            score: '5.0'
             label: based on
             reviews: reviews
         team:
@@ -1166,7 +1220,7 @@ propertyManagement:
                 text: properties managed in Paris and the Île-de-France region.
             3:
                 number: 25
-                text: years of expertise in property management.
+                text: years of combined expertise in property management.
             4:
                 number: 12
                 text: experts dedicated to managing your assets.
@@ -1176,7 +1230,7 @@ propertyManagement:
     story:
         title: 'Trust & discretion'
         subTitle: Your property, our standards
-        text: "For over ten years, Relocation in Paris has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimizing your income and delivering exceptional management, with complete peace of mind."
+        text: "Since %year%, our team has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimizing your income and delivering exceptional management, with complete peace of mind."
         award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     faq:
         title: FAQ

@@ -57,7 +57,7 @@
                                     {{ ux_icon('iconamoon:star-fill', {'class': 'size-4 fill-yellow-400 text-yellow-400 srhink-0'}) }}
                                 {% endfor %}
                             </div>
-                            <p class="font-semibold" aria-hidden="true">5.0</p>
+                            <p class="font-semibold" aria-hidden="true">{{ google_rating }}</p>
                         </div>
                         <p class="text-neutral-900 text-pretty leading-relaxed flex-1">{{ ('reviews.' ~ i ~ '.text')|trans|raw }}</p>
                     </div>

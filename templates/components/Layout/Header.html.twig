@@ -20,8 +20,8 @@
     } %}
 {% endif %}
 
-{# Sticky: stays on top while scrolling (above <main>, which is z-20). Sticky offsets elsewhere use top-24 #}
-<header class="sticky top-0 z-40 bg-white" role="banner" data-controller="sticky-header">
+{# Sticky: stays on top while scrolling, above <main> and the footer (both z-20). Sticky offsets elsewhere use top-24 #}
+<header class="sticky top-0 z-50 bg-white" role="banner" data-controller="sticky-header">
     <nav aria-label="{{ 'header.nav.ariaLabel'|trans }}" class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 gap-x-3">
         <div class="flex lg:flex-2 items-center justify-start gap-x-4">
             <a href="{{ path('app_home') }}" class="-m-1.5 p-1.5 rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50" aria-label="{{ 'header.logo.ariaLabel'|trans }}">
@@ -93,7 +93,7 @@
                                             <p class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium text-neutral-600 tabular-nums transition-colors duration-100 group-hover:bg-white {% if currentRoute in ['app_blog', 'app_blog_show', 'app_blog_author'] %}bg-white{% else %}bg-neutral-100{% endif %}">{{ 'header.menu.resource.blog.count'|trans({'%count%': _blogPostCount}) }}</p>
                                         {% endif %}
                                     </div>
-                                    <p class="mt-2 text-neutral-600">
+                                    <p class="mt-0.5 text-sm/5 text-neutral-600">
                                         {{ 'header.menu.resource.blog.text'|trans }}
                                     </p>
                                 </div>
@@ -115,7 +115,7 @@
                                         </p>
                                         <p class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium text-neutral-600 tabular-nums transition-colors duration-100 group-hover:bg-white {% if currentRoute == 'app_faq' %}bg-white{% else %}bg-neutral-100{% endif %}">{{ 'header.menu.resource.faq.count'|trans({'%count%': faq_question_count()}) }}</p>
                                     </div>
-                                    <p class="mt-2 text-neutral-600">
+                                    <p class="mt-0.5 text-sm/5 text-neutral-600">
                                         {{ 'header.menu.resource.faq.text'|trans }}
                                     </p>
                                 </div>
@@ -136,7 +136,7 @@
                                             {{ 'header.menu.resource.aboutUs.title'|trans }}
                                         </p>
                                     </div>
-                                    <p class="mt-2 text-neutral-600">
+                                    <p class="mt-0.5 text-sm/5 text-neutral-600">
                                         {{ 'header.menu.resource.aboutUs.text'|trans }}
                                     </p>
                                 </div>
@@ -310,7 +310,7 @@
                                                                 <p class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium text-neutral-600 tabular-nums transition-colors duration-100 group-hover:bg-white {% if currentRoute in ['app_blog', 'app_blog_show', 'app_blog_author'] %}bg-white{% else %}bg-neutral-100{% endif %}">{{ 'header.menu.resource.blog.count'|trans({'%count%': _blogPostCount}) }}</p>
                                                             {% endif %}
                                                         </div>
-                                                        <p class="mt-2 text-neutral-600">
+                                                        <p class="mt-0.5 text-sm/5 text-neutral-600">
                                                             {{ 'header.menu.resource.blog.text'|trans }}
                                                         </p>
                                                     </div>
@@ -332,7 +332,7 @@
                                                             </p>
                                                             <p class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium text-neutral-600 tabular-nums transition-colors duration-100 group-hover:bg-white {% if currentRoute == 'app_faq' %}bg-white{% else %}bg-neutral-100{% endif %}">{{ 'header.menu.resource.faq.count'|trans({'%count%': faq_question_count()}) }}</p>
                                                         </div>
-                                                        <p class="mt-2 text-neutral-600">
+                                                        <p class="mt-0.5 text-sm/5 text-neutral-600">
                                                             {{ 'header.menu.resource.faq.text'|trans }}
                                                         </p>
                                                     </div>
@@ -353,7 +353,7 @@
                                                                 {{ 'header.menu.resource.aboutUs.title'|trans }}
                                                             </p>
                                                         </div>
-                                                        <p class="mt-2 text-neutral-600">
+                                                        <p class="mt-0.5 text-sm/5 text-neutral-600">
                                                             {{ 'header.menu.resource.aboutUs.text'|trans }}
                                                         </p>
                                                     </div>

@@ -104,7 +104,7 @@
                     </div>
                 </div>
 
-                {# Real figures: same 4.9/5 as the schema.org aggregateRating, count from GOOGLE_REVIEWS_COUNT #}
+                {# Real figures: google_rating (also the schema.org aggregateRating), count from GOOGLE_REVIEWS_COUNT #}
                 <a href="https://share.google/oE0GyLX8xNnTNdX84" target="_blank" rel="noopener noreferrer" data-testid="callback-trust" class="group mx-auto mt-8 flex w-fit items-center gap-3 rounded-xl border border-neutral-100 bg-white px-4 py-2.5 shadow-sm transition-colors duration-100 ease-out hover:border-neutral-200">
                     {{ ux_icon('logos:google-icon', {'class': 'size-7 shrink-0', 'aria-hidden': 'true'}) }}
                     <span class="flex flex-col items-start">
@@ -112,7 +112,7 @@
                             <span class="flex items-center -space-x-0.5" aria-hidden="true">
                                 {% for i in 1..5 %}{{ ux_icon('material-symbols:star-rounded', {'class': 'size-4 shrink-0 text-yellow-500'}) }}{% endfor %}
                             </span>
-                            <span class="text-sm font-semibold text-slate-900">{{ 'callback.trust.score'|trans }}</span>
+                            <span class="text-sm font-semibold text-slate-900">{{ google_rating }}/5</span>
                         </span>
                         <span class="text-xs text-slate-600 underline decoration-slate-400/80 decoration-dotted underline-offset-4 transition-colors duration-100 ease-out group-hover:text-primary group-hover:decoration-primary">{{ 'callback.trust.reviews'|trans({'%count%': google_reviews_count}) }}</span>
                     </span>

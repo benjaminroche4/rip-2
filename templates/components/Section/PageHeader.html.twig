@@ -22,7 +22,8 @@
     {% endif %}
     <{{ as }} class="text-4xl lg:text-5xl/16 font-medium text-balance">{{ subtitle|trans|raw }}</{{ as }}>
     {% if intro %}
-        <p class="text-center max-w-lg mx-auto text-neutral-600 text-pretty">
+        {# Same subtitle style as the contact and pricing page headers #}
+        <p class="text-center max-w-lg mx-auto text-slate-600 font-light text-pretty">
             {{ intro|trans(introParams)|raw }}
         </p>
     {% endif %}

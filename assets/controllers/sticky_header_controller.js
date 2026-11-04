@@ -2,9 +2,9 @@
 import { Controller } from '@hotwired/stimulus';
 
 /**
- * The header is sticky only within its wrapper: when the footer comes into view it scrolls away.
- * Its popovers live in the top layer (position: fixed), so they would stay stuck on screen alone.
- * Close them as soon as the header starts leaving the viewport.
+ * Safety net for the header popovers: they live in the top layer (position: fixed), so if the
+ * header ever leaves the viewport (sticky disabled, very short viewport) they would stay stuck on
+ * screen alone. Close them as soon as the header starts leaving the viewport.
  */
 export default class extends Controller {
     static targets = ['popover'];

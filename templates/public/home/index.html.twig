@@ -171,7 +171,7 @@
                         <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans }}" loading="eager" width="28" height="28" class="inline-block size-6 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
                     </div>
                     <p class="text-gray-600 font-light text-sm text-center">
-                        <span class="font-semibold">4.9/5</span> {{ 'home.heroSection.google.prefix'|trans({'%count%': google_reviews_count}) }}
+                        <span class="font-semibold">{{ google_rating }}/5</span> {{ 'home.heroSection.google.prefix'|trans({'%count%': google_reviews_count}) }}
                         {% set googleWord %}<span aria-hidden="true">{{ ux_icon('devicon:google', {'class': 'inline-block size-[0.9em] align-[-0.1em]'}) }}oogle</span><span class="sr-only">Google</span>{% endset %}
                         <a href="https://share.google/0s1NpwCRsqIJjeuqT" target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out">
                             {{ 'home.heroSection.google.link'|trans({'%google%': googleWord})|raw }}
