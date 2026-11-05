@@ -1,0 +1,119 @@
+{# Content blocks of a long text, from Sanity (Portable Text + custom blocks): paragraphs with images and
+   videos (wysiwygBlock), FAQ, CTA, quick answer and table. Shared by blog articles and case studies so
+   both render the same blocks with the same markup.
+   @prop blocks        list Sanity blocks (projection with image urls, see BlogRepository / SanityCaseStudyRepository)
+   @prop fallbackTitle string Title of the page, used for embedded videos without their own description #}
+{%- props blocks = [], fallbackTitle = '' -%}
+{% for block in blocks %}
+    {% if block._type == 'wysiwygBlock' %}
+        {% if block.background ?? false %}
+            <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-slate-100 rounded-2xl scroll-mt-6">
+                {% if block.title ?? false %}
+                    <div class="py-3 px-6">
+                        <h2 class="text-2xl font-semibold">{{ block.title }}</h2>
+                    </div>
+                {% endif %}
+                {% for segment in sanity_segments(block.content ?? []) %}
+                    {% if segment.type == 'text' %}
+                        <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
+                            {{ segment.html|raw }}
+                        </div>
+                    {% elseif segment.type == 'image' and segment.url %}
+                        <figure class="p-6 bg-white rounded-lg">
+                            <img src="{{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80" srcset="{{ segment.url }}?w=600&fit=max&auto=format&fm=webp&q=80 600w, {{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80 1200w" sizes="(max-width: 768px) 100vw, 66vw" alt="{{ segment.alt }}" loading="lazy" decoding="async" class="rounded-2xl w-full" />
+                            {% if segment.alt %}
+                                <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.alt }}</figcaption>
+                            {% endif %}
+                        </figure>
+                    {% elseif segment.type == 'youtube' and segment.videoId %}
+                        <figure class="p-6 bg-white rounded-lg">
+                            <div class="relative w-full aspect-video">
+                                <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? fallbackTitle }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
+                            </div>
+                            {% if segment.shortDescription %}
+                                <figcaption class="text-sm text-neutral-500 mt-2">{{ segment.shortDescription }}</figcaption>
+                            {% endif %}
+                        </figure>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+                {% if block.title ?? false %}
+                    <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
+                {% endif %}
+                {% for segment in sanity_segments(block.content ?? []) %}
+                    {% if segment.type == 'text' %}
+                        <div class="text-neutral-600 font-normal leading-7 break-words">
+                            {{ segment.html|raw }}
+                        </div>
+                    {% elseif segment.type == 'image' and segment.url %}
+                        <figure class="my-6">
+                            <img src="{{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80" srcset="{{ segment.url }}?w=600&fit=max&auto=format&fm=webp&q=80 600w, {{ segment.url }}?w=1200&fit=max&auto=format&fm=webp&q=80 1200w" sizes="(max-width: 768px) 100vw, 66vw" alt="{{ segment.alt }}" loading="lazy" decoding="async" class="rounded-2xl w-full" />
+                            {% if segment.alt %}
+                                <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
+                                    {{ ux_icon('meteor-icons:link', {'class': 'size-4 shrink-0'}) }}
+                                    {{ segment.alt }}
+                                </figcaption>
+                            {% endif %}
+                        </figure>
+                    {% elseif segment.type == 'youtube' and segment.videoId %}
+                        <figure class="my-6">
+                            <div class="relative w-full aspect-video">
+                                <iframe src="https://www.youtube.com/embed/{{ segment.videoId }}" title="{{ segment.shortDescription ?? fallbackTitle }}" loading="lazy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full rounded-2xl"></iframe>
+                            </div>
+                            {% if segment.shortDescription %}
+                                <figcaption class="text-sm text-neutral-500 mt-4 flex items-start gap-x-2">
+                                    {{ ux_icon('tabler:video', {'class': 'size-4 shrink-0'}) }}
+                                    {{ segment.shortDescription }}
+                                </figcaption>
+                            {% endif %}
+                        </figure>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% elseif block._type == 'faqBlock' %}
+        <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="scroll-mt-6">
+            {% if block.title ?? false %}
+                <h2 class="text-3xl font-semibold mb-6">{{ block.title }}</h2>
+            {% endif %}
+            <twig:Accordion id="blog-faq-{{ block._key|default(loop.index) }}" defaultValue="{{ ['item-1'] }}">
+                {% for item in block.items ?? [] %}
+                    <twig:Accordion:Item value="item-{{ loop.index }}">
+                        <twig:Accordion:Trigger>{{ item.question }}</twig:Accordion:Trigger>
+                        <twig:Accordion:Content class="break-words">
+                            {{ item.answer }}
+                        </twig:Accordion:Content>
+                    </twig:Accordion:Item>
+                {% endfor %}
+            </twig:Accordion>
+        </div>
+    {% elseif block._type == 'quickAnswerBlock' %}
+        <div {% if block.title ?? false %}id="{{ block.title|slugify }}"{% endif %} class="p-2 bg-[#FFEEF2] rounded-2xl scroll-mt-6">
+            {% if block.title ?? false %}
+                <div class="py-3 px-6">
+                    <h2 class="text-2xl font-semibold text-primary">{{ block.title }}</h2>
+                </div>
+            {% endif %}
+            {% for segment in sanity_segments(block.content ?? []) %}
+                {% if segment.type == 'text' %}
+                    <div class="text-neutral-600 font-normal leading-7 p-6 bg-white rounded-lg break-words">
+                        {{ segment.html|raw }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% elseif block._type == 'ctaBlock' %}
+        <twig:Section:InlineCta :title="block.title ?? null" :description="block.description ?? null" :withButton="(block.btnText ?? false) ? true : false" />
+    {% elseif block._type == 'tableBlock' %}
+        {# Absent toggles must be treated as true (Studio defaults) #}
+        <twig:Section:DataTable
+            :rows="(block.table.rows ?? [])|map(row => row.cells ?? [])"
+            :title="block.title ?? null"
+            :caption="block.caption ?? null"
+            :firstRowIsHeader="block.firstRowIsHeader ?? true"
+            :firstColumnIsHeader="block.firstColumnIsHeader ?? true"
+        />
+    {% endif %}
+{% endfor %}
