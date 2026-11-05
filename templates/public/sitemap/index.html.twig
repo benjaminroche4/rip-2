@@ -34,7 +34,6 @@
                         <li><a href="{{ path('app_privacy_policy') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.privacyPolicy'|trans }}</a></li>
                         <li><a href="{{ path('app_terms_and_conditions') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.termsConditions'|trans }}</a></li>
                         <li><a href="{{ path('app_about_us') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.aboutUs'|trans }}</a></li>
-                        <li><a href="{{ path('app_case_studies') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.caseStudies'|trans }}</a></li>
                         <li><a href="{{ path('app_sitemap') }}" class="hover:text-primary transition duration-100">Sitemap</a></li>
                         <li><a href="{{ path('app_faq') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.faq'|trans }}</a></li>
                         <li><a href="{{ path('app_newsletter') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.newsletter'|trans }}</a></li>
@@ -48,6 +47,18 @@
                         <li><a href="{{ path('app_blog') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.blogMenu.blog'|trans }}</a></li>
                         {% for post in posts %}
                             <li><a href="{{ path('app_blog_show', {'slug': post.slug}) }}" class="hover:text-primary transition duration-100">{{ post.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {# Case studies: the listing, then every published case study (like the blog posts above) #}
+            <div class="space-y-6">
+                <h3 class="bg-neutral-100 inline-block text-lg font-medium font-secondary px-3 py-2.5 rounded-lg">{{ 'sitemap.caseStudies'|trans }}</h3>
+                <div>
+                    <ul class="list list-disc ml-12 space-y-3">
+                        <li><a href="{{ path('app_case_studies') }}" class="hover:text-primary transition duration-100">{{ 'sitemap.menu.caseStudies'|trans }}</a></li>
+                        {% for caseStudy in caseStudies|default([]) %}
+                            <li><a href="{{ path('app_case_study_show', {'slug': caseStudy.slug}) }}" class="hover:text-primary transition duration-100">{{ caseStudy.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>

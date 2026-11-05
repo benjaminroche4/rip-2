@@ -3,6 +3,7 @@
 namespace App\Marketing\Controller;
 
 use App\Blog\Repository\BlogRepository;
+use App\CaseStudy\Repository\CaseStudyRepositoryInterface;
 use App\Marketplace\Repository\PropertyRepository;
 use App\Shared\Sanity\SanityService;
 use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
@@ -16,6 +17,7 @@ final class SitemapController extends AbstractController
         private readonly SanityService $sanityService,
         private readonly PropertyRepository $propertyRepository,
         private readonly BlogRepository $blogRepository,
+        private readonly CaseStudyRepositoryInterface $caseStudyRepository,
     ) {
     }
 
@@ -51,6 +53,7 @@ final class SitemapController extends AbstractController
         return $this->render('public/sitemap/index.html.twig', [
             'posts' => $posts,
             'authors' => $this->blogRepository->findAuthorsWithPosts($_locale),
+            'caseStudies' => $this->caseStudyRepository->findAll($_locale),
             'properties' => $properties,
         ]);
     }

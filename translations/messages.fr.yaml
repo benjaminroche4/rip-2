@@ -104,13 +104,14 @@ sitemap:
     general: Général
     blog: Blog
     blogAuthors: Auteurs du blog
+    caseStudies: Études de cas
     property: Nos biens
     menu:
         findAccommodation: Recherche de logement
         companies: Solutions entreprises
         management: Gestion locative
         blog: Blog
-        caseStudies: Études de cas
+        caseStudies: Toutes les études de cas
         contact: Contactez-nous
         callback: On vous rappelle
         aboutUs: À propos

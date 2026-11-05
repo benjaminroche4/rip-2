@@ -138,12 +138,18 @@ final class CaseStudyControllerTest extends WebTestCase
         self::assertSelectorExists('nav[aria-labelledby="footer-menu-2"] a[href="/fr/etudes-de-cas"]');
     }
 
-    public function testItIsListedInTheHtmlSitemap(): void
+    public function testTheHtmlSitemapHasACaseStudiesSectionListingEachOfThem(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/fr/sitemap');
+        $crawler = $client->request('GET', '/fr/sitemap');
 
-        self::assertSelectorExists('a[href="/fr/etudes-de-cas"]');
+        $section = $crawler->filter('h3')->reduce(static fn ($h): bool => 'Études de cas' === trim($h->text()));
+        self::assertCount(1, $section, 'A dedicated "Études de cas" section, like the blog one');
+        $links = $section->closest('div')->filter('a')->each(static fn ($a): string => (string) $a->attr('href'));
+        self::assertSame('/fr/etudes-de-cas', $links[0]);
+        // Every case study, the featured one included
+        self::assertCount(1 + 7, $links);
+        self::assertContains('/fr/etudes-de-cas/famille-londonienne-installee-paris-16', $links);
     }
 
     public function testTheDetailPageShowsTheProjectCardAndEveryStoryBlock(): void

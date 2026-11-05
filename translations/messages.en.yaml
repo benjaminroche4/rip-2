@@ -104,13 +104,14 @@ sitemap:
     general: General
     blog: Blog
     blogAuthors: Blog authors
+    caseStudies: Case studies
     property: Our properties
     menu:
         findAccommodation: Property search
         companies: Corporate services
         management: Property management
         blog: Blog
-        caseStudies: Case studies
+        caseStudies: All case studies
         contact: Contact us
         callback: Request a callback
         aboutUs: About us
