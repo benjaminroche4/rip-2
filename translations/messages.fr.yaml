@@ -287,7 +287,7 @@ companies:
     useCases:
         caption: Pour quelles situations
         title: Une solution pour chaque type de mobilité
-        text: "Transfert depuis l'étranger, recrutement, mission courte ou arrivée en famille : nous adaptons la recherche à chaque situation."
+        text: "Transfert depuis l'étranger, recrutement, arrivée en famille ou plusieurs collaborateurs à la fois : nous adaptons la recherche à chaque situation."
         1:
             title: Mutation internationale
             text: "Votre collaborateur arrive de l'étranger : nous gérons tout à distance, pour qu'il ait un logement dès son arrivée."
@@ -295,8 +295,8 @@ companies:
             title: Nouveau recrutement
             text: "Un candidat hésite à rejoindre Paris ? Proposer l'accompagnement au logement fait souvent la différence."
         3:
-            title: Mission de quelques mois
-            text: "Pour une mission temporaire, nous ciblons les locations meublées et le bail mobilité, de 1 à 10 mois."
+            title: Plusieurs arrivées à la fois
+            text: "Vous installez une équipe à Paris : nous logeons chaque collaborateur, avec un seul interlocuteur pour vos RH."
         4:
             title: Cadres et familles
             text: "Quartiers familiaux, proximité des écoles, surfaces adaptées : nous trouvons le logement qui convient à toute la famille."
@@ -310,7 +310,7 @@ companies:
         question:
             1:
                 title: Quelles démarches prenez-vous en charge pour nos collaborateurs ?
-                text: "Tout ce qu’implique une installation à Paris : <strong>logement</strong> (y compris temporaire), dossier et bail, <strong>visa</strong>, <strong>scolarité des enfants</strong> et ouverture des contrats d’énergie et d’internet. Le détail de chaque offre est sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
+                text: "Tout ce qu’implique une installation à Paris : <strong>logement</strong> (et hébergement temporaire pendant la recherche si besoin), dossier et bail, <strong>visa</strong>, <strong>scolarité des enfants</strong> et ouverture des contrats d’énergie et d’internet. Le détail de chaque offre est sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
             2:
                 title: Comment se déroule la prise en charge d’un collaborateur ?
                 text: "Tout commence par un brief avec votre équipe RH pour définir le besoin. Un conseiller dédié pilote ensuite la recherche, les visites et le dossier, jusqu’à la remise des clés."
@@ -331,7 +331,7 @@ companies:
                 text: "Non. La plupart des démarches se font à distance : nous visitons pour lui, il suit les visites en vidéo et signe en ligne. Il peut ainsi arriver à Paris avec un logement déjà prêt."
             8:
                 title: Quelle solution pour une mission de quelques mois ?
-                text: "Pour une mission temporaire, nous ciblons les locations meublées, notamment le <strong>bail mobilité</strong>, d’une durée de 1 à 10 mois, réservé entre autres aux personnes en mutation professionnelle ou en mission temporaire."
+                text: "Notre spécialité, c’est la <strong>location longue durée</strong>, avec un vrai bail au nom du collaborateur ou de l’entreprise. Pour une mission de quelques mois, nous trouvons aussi des logements en <strong>courte et moyenne durée</strong>, meublés ou en bail mobilité de 1 à 10 mois, avec le même accompagnement, de la recherche à la remise des clés."
             9:
                 title: Combien coûte l’accompagnement d’un collaborateur ?
                 text: "Deux offres, selon le niveau d’accompagnement souhaité : <strong>Accompagné à 1 490 €</strong> et <strong>Confié à 2 190 €</strong>. Le détail de chaque offre est présenté sur notre <a href=\"%pricingUrl%\">page tarifs</a>."

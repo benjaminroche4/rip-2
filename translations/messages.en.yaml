@@ -287,7 +287,7 @@ companies:
     useCases:
         caption: Which situations
         title: A solution for every kind of mobility
-        text: "Transfer from abroad, new hire, short assignment or a family move: we tailor the search to each situation."
+        text: "Transfer from abroad, new hire, a family move or several employees at once: we tailor the search to each situation."
         1:
             title: International transfer
             text: "Your employee is coming from abroad: we handle everything remotely, so they have a home when they land."
@@ -295,8 +295,8 @@ companies:
             title: New hire
             text: "A candidate is hesitant about moving to Paris? Offering housing support often makes the difference."
         3:
-            title: Assignment of a few months
-            text: "For a temporary assignment, we focus on furnished rentals and the mobility lease, from 1 to 10 months."
+            title: Several arrivals at once
+            text: "You are setting up a team in Paris: we house each employee, with a single contact for your HR."
         4:
             title: Executives and families
             text: "Family-friendly neighborhoods, nearby schools, the right floor area: we find the home that suits the whole family."
@@ -310,7 +310,7 @@ companies:
         question:
             1:
                 title: Which steps do you handle for our employees?
-                text: "Everything a move to Paris involves: <strong>housing</strong> (temporary too), application and lease, <strong>visa</strong>, <strong>children’s schooling</strong> and setting up energy and internet. See our <a href=\"%pricingUrl%\">pricing page</a> for what each plan includes."
+                text: "Everything a move to Paris involves: <strong>housing</strong> (and temporary accommodation during the search if needed), application and lease, <strong>visa</strong>, <strong>children’s schooling</strong> and setting up energy and internet. See our <a href=\"%pricingUrl%\">pricing page</a> for what each plan includes."
             2:
                 title: How is an employee’s relocation handled?
                 text: "It all starts with a brief with your HR team to define the need. A dedicated advisor then manages the search, viewings and application, all the way to the key handover."
@@ -331,7 +331,7 @@ companies:
                 text: "No. Most of the process happens remotely: we visit on their behalf, they follow viewings on video and sign online. They can arrive in Paris with a home already waiting."
             8:
                 title: What solution for an assignment of a few months?
-                text: "For a temporary assignment, we focus on furnished rentals, including the <strong>mobility lease</strong> (bail mobilité), lasting 1 to 10 months and available, among others, to people on a professional transfer or temporary assignment."
+                text: "Our speciality is <strong>long-term rentals</strong>, with a real lease in the employee’s or the company’s name. For an assignment of a few months, we also find <strong>short and medium-term</strong> homes, furnished or on a 1 to 10-month mobility lease, with the same support from the search to the key handover."
             9:
                 title: How much does relocating an employee cost?
                 text: "Two plans, depending on the level of support you need: <strong>Guided at €1,490</strong> and <strong>Entrusted at €2,190</strong>. What each plan includes is detailed on our <a href=\"%pricingUrl%\">pricing page</a>."
