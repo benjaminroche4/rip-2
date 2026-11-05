@@ -1206,7 +1206,7 @@ propertyManagement:
     galleryAlt: Paris apartment managed by Relocation In Paris
     hero:
         title: Your Property, Perfectly Managed
-        text: "Tailored property management in Paris, for short, medium and long-term rentals. Thanks to our relocation business, we place premium tenants in your property (executives, expatriates, corporate employees): you collect your income, worry-free."
+        text: "We place premium tenants in your property (executives, expatriates, corporate employees): you collect your income, worry-free."
         service:
             1: Seamless care
             2: Premium tenants
@@ -1272,7 +1272,7 @@ propertyManagement:
     tenants:
         caption: Our edge
         title: Premium tenants, straight from our relocation business
-        text: "Since %year%, we have settled <strong class=\"font-semibold text-neutral-800\">more than 900 tenants in Paris</strong>, many of them executives, expatriates and corporate employees. These profiles look for quality homes and bring strong applications: <strong class=\"font-semibold text-neutral-800\">we offer them your property first</strong>."
+        text: "<strong class=\"font-semibold text-neutral-800\">More than 900 tenants settled in Paris</strong> since %year%, with strong applications: <strong class=\"font-semibold text-neutral-800\">we offer them your property first</strong>."
         1:
             title: Executives and expatriates
             text: "Professionals on the move, with stable incomes, looking for a well-located apartment ready to live in."
@@ -1327,8 +1327,8 @@ propertyManagement:
             button: Speak with an expert
     story:
         title: 'Trust & discretion'
-        subTitle: Your property, our standards
-        text: "Since %year%, our Paris agents have managed apartments for short, medium and long-term rentals. We showcase your property, <strong class=\"font-semibold text-neutral-800\">select every tenant rigorously</strong> and give you <strong class=\"font-semibold text-neutral-800\">clear, regular reporting on your income</strong>. All <strong class=\"font-semibold text-neutral-800\">with no minimum term and no upfront costs</strong>: our fee depends on how well your property performs."
+        subTitle: A contact who knows your property
+        text: "Entrusting your apartment is a real decision. With us, you are not just a number: <strong class=\"font-semibold text-neutral-800\">a dedicated Paris agent</strong> looks after your property, <strong class=\"font-semibold text-neutral-800\">answers you directly</strong> and keeps you informed at every key step. Our team speaks French, English, Spanish and German, <strong class=\"font-semibold text-neutral-800\">wherever you live</strong>."
         award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     faq:
         title: FAQ

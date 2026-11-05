@@ -1206,7 +1206,7 @@ propertyManagement:
     galleryAlt: Appartement à Paris géré par Relocation In Paris
     hero:
         title: Confiez-nous la gestion de votre bien
-        text: "Gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Grâce à notre activité de relocation, nous plaçons dans votre bien des locataires premium (cadres, expatriés, collaborateurs d'entreprises) : vous percevez vos revenus, en toute tranquillité."
+        text: "Nous plaçons dans votre bien des locataires premium (cadres, expatriés, collaborateurs d'entreprises) : vous percevez vos revenus, en toute tranquillité."
         service:
             1: Gestion sereine
             2: Locataires premium
@@ -1272,7 +1272,7 @@ propertyManagement:
     tenants:
         caption: Notre avantage
         title: Des locataires premium, issus de notre activité de relocation
-        text: "Depuis %year%, nous avons installé <strong class=\"font-semibold text-neutral-800\">plus de 900 locataires à Paris</strong>, dont de nombreux cadres, expatriés et collaborateurs d'entreprises. Ces profils recherchent un logement de qualité et présentent des dossiers solides : <strong class=\"font-semibold text-neutral-800\">nous les proposons en priorité pour votre bien</strong>."
+        text: "<strong class=\"font-semibold text-neutral-800\">Plus de 900 locataires installés à Paris</strong> depuis %year%, aux dossiers solides : <strong class=\"font-semibold text-neutral-800\">nous les proposons en priorité pour votre bien</strong>."
         1:
             title: Cadres et expatriés
             text: "Des professionnels en mobilité, aux revenus stables, qui recherchent un appartement bien situé et prêt à vivre."
@@ -1327,8 +1327,8 @@ propertyManagement:
             button: Contactez un expert
     story:
         title: 'Confiance & discrétion'
-        subTitle: Votre patrimoine, notre exigence
-        text: "Depuis %year%, nos agents parisiens gèrent des appartements en courte, moyenne et longue durée. Nous valorisons votre bien, <strong class=\"font-semibold text-neutral-800\">sélectionnons chaque locataire avec rigueur</strong> et vous offrons <strong class=\"font-semibold text-neutral-800\">un suivi clair et régulier de vos revenus</strong>. Le tout <strong class=\"font-semibold text-neutral-800\">sans engagement de durée ni frais à avancer</strong> : notre rémunération dépend de la performance de votre bien."
+        subTitle: Un interlocuteur qui connaît votre bien
+        text: "Confier son appartement est une vraie décision. Chez nous, vous n'êtes pas un numéro : <strong class=\"font-semibold text-neutral-800\">un agent parisien dédié</strong> suit votre bien, <strong class=\"font-semibold text-neutral-800\">vous répond directement</strong> et vous tient informé à chaque étape importante. Notre équipe échange avec vous en français, en anglais, en espagnol ou en allemand, <strong class=\"font-semibold text-neutral-800\">où que vous viviez</strong>."
         award: 'Meilleure agence<br>à <span class="font-semibold">Paris en %year%</span>'
     faq:
         title: FAQ
