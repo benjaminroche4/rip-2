@@ -68,6 +68,8 @@ final class FaqCatalog
             'companies.faq.question.4',
             'companies.faq.question.5',
             'companies.faq.question.6',
+            'companies.faq.question.7',
+            'companies.faq.question.8',
         ]],
         'property-management' => ['faq.categories.propertyManagement', [
             'propertyManagement.faq.question.1',
@@ -78,6 +80,7 @@ final class FaqCatalog
             'propertyManagement.faq.question.6',
             'propertyManagement.faq.question.7',
             'propertyManagement.faq.question.8',
+            'propertyManagement.faq.question.9',
             'faq.more.rentEstimate',
         ]],
     ];

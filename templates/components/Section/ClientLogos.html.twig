@@ -1,0 +1,32 @@
+{# Brands we have relocated employees for, as a looping marquee (logos from the local "brands" icon set).
+   The marquee controller clones the row; the keyframe moves by -50%, so the row and its clone must have
+   the same width: each row carries its own trailing padding equal to the gap.
+   Logos are decorative (aria-hidden): the caption carries the meaning. Reduced motion stops the loop.
+   @prop caption Translation key of the caption above the logos #}
+{%- props caption -%}
+
+{# Heights balance the visual weight of each mark: wide wordmarks lower, compact ones taller #}
+{% set logos = [
+    {name: 'baxter', size: 'h-5'},
+    {name: 'disney', size: 'h-8'},
+    {name: 'stripe', size: 'h-7'},
+    {name: 'twitch', size: 'h-6'},
+    {name: 'medium', size: 'h-5'},
+    {name: 'facebook', size: 'h-5'},
+    {name: 'airbnb', size: 'h-7'},
+] %}
+
+<section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16" data-testid="client-logos">
+    <p class="text-center font-semibold text-primary font-secondary text-balance">{{ caption|trans|raw }}</p>
+    <div data-controller="marquee" class="relative mt-8 overflow-hidden" aria-hidden="true">
+        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-32 bg-linear-to-r from-white to-transparent"></div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-linear-to-l from-white to-transparent"></div>
+        <div data-marquee-target="content" class="flex w-max animate-marquee motion-reduce:animate-none">
+            <div data-marquee-target="item" class="flex w-max shrink-0 items-center gap-x-12 pr-12 sm:gap-x-16 sm:pr-16">
+                {% for logo in logos %}
+                    {{ ux_icon('brands:' ~ logo.name, {'class': logo.size ~ ' w-auto shrink-0 text-neutral-400'}) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>

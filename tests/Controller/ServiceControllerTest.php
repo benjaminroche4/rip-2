@@ -90,7 +90,7 @@ final class ServiceControllerTest extends WebTestCase
     public function testWordingIsConsistentWithTheRestOfTheSite(): void
     {
         $client = static::createClient();
-        foreach (['/', '/fr/services/trouver-un-logement', '/fr/a-propos', '/fr/faq', '/fr/tarifs'] as $page) {
+        foreach (['/', '/fr/services/trouver-un-logement', '/fr/services/pour-les-entreprises', '/fr/a-propos', '/fr/faq', '/fr/tarifs'] as $page) {
             $client->request('GET', $page);
             $text = (string) $client->getResponse()->getContent();
             // One delay promise (under 20 days), one word for the count (installations), one spelling of off-market

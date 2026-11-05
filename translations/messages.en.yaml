@@ -206,70 +206,144 @@ header:
         basedOn: Based on
         reviews: reviews
 companies:
-    title: Corporate Services
-    subTitle: Corporate Housing in Paris, Made Simple
-    text: "A turnkey service to relocate your talent to Paris: search, viewings, applications, and move-in support with dedicated assistance."
-    trust:
-        1: 5.0 based on
-        2: reviews
-    service:
-        title: Our services
-        subTitle: Solutions designed for your talent
+    hero:
+        caption: Corporate relocation in Paris
+        title: House your employees in Paris without tying up your HR team
+        text: "A dedicated advisor handles every arrival, from the housing search to the key handover, in under 20 days on average."
+        rating: "<strong class=\"font-semibold text-neutral-900\">%rating%</strong> from %count%+ %google% reviews"
+    cta:
+        button: Talk to an advisor
+    logos:
+        title: "They trusted us to relocate their employees"
+    why:
+        caption: Why entrust us with your arrivals
+        title: Housing should no longer hold back your hiring
+        stats:
+            relocations: successful relocations in Paris
+            partners: real estate partners across the city
+            reviews: "From %count%+ %google% reviews"
         1:
-            title: Tailored housing search
-            text: A curated selection of premium properties aligned with your talent’s needs.
+            title: Your HR team saves time
+            text: "One brief is all it takes. We handle the search, viewings, application and move-in: you only approve the key steps."
         2:
-            title: Dedicated HR coordination and reporting
-            text: A single point of contact providing real-time tracking of your cases.
+            title: Your hires say yes faster
+            text: "Finding a home before arrival removes the first barrier to mobility. Your offer stands out against other employers."
         3:
-            title: Administrative support
-            text: All services and subscriptions activated from day one.
+            title: Access to off-market listings
+            text: "Through more than 80 partners, your employees access properties that never appear on listing websites."
+        4:
+            title: Secure applications
+            text: "Complete rental application, lease review, supervised check-in: your employee moves in with no bad surprises."
+    service:
+        title: What is included
+        subTitle: Everything your employee needs to settle in
+        text: A turnkey service designed for companies welcoming talent to Paris, from elsewhere in France or abroad.
+        1:
+            title: Tailored search
+            text: "A selection of homes matching your employee’s budget, preferred neighborhood and family situation."
+        2:
+            title: Dedicated HR follow-up
+            text: "A single point of contact for your company, who keeps you posted on the progress of each file."
+        3:
+            title: Application and lease
+            text: "Rental application, negotiation with the landlord and lease review before signing."
         4:
             title: Turnkey move-in
-            text: A seamless setup ensuring your talent is operational from day one.
+            text: "Check-in, electricity, gas and internet: your employee is ready from day one."
         5:
-            title: Logistics coordination
-            text: We orchestrate every service provider for a smooth and stress-free move-in.
+            title: Remote viewings
+            text: "Is your employee still abroad? We visit on their behalf, live on video, and they sign online."
         6:
-            title: Local immersion
-            text: Successful local integration through fast orientation and city familiarization.
-    advantage:
-        title: A unique experience
-        subTitle: Make Paris a key asset in your recruitment strategy
-        text: Delegate the complexity of geographic mobility to an expert partner.
+            title: Getting to know Paris
+            text: "Neighborhoods, transport, schools, everyday paperwork: our advice for a fast integration into the city."
+    process:
+        caption: Our method
+        title: A simple process, managed end to end
+        text: "You share the need, we orchestrate the rest. At every step, you know where your employee’s file stands."
+        eyebrow: Step by step
+        subTitle: From your brief to the key handover
+        steps:
+            1:
+                title: Brief with your HR team
+                description: "Together we define the need: arrival date, budget, lease length, neighborhoods and the employee’s family situation."
+            2:
+                title: Targeted search
+                description: "We activate our network and shortlist the homes that meet the brief, including off-market ones."
+                chips:
+                    1: Off-market listings
+                    2: Furnished or unfurnished
+            3:
+                title: On-site or video viewings
+                description: "We visit every property and share our feedback. Your employee can join the viewing live, wherever they are."
+            4:
+                title: Application, negotiation and lease
+                description: "We build a strong application, negotiate the terms and review the lease before signing."
+            5:
+                title: Move-in and follow-up
+                description: "Check-in, key handover, essential contracts opened: your employee arrives in a home ready to live in."
+    useCases:
+        caption: Which situations
+        title: A solution for every kind of mobility
+        text: "Transfer from abroad, new hire, short assignment or a family move: we tailor the search to each situation."
         1:
-            title: Strategic time savings
-            text: "Delegate logistical complexity and stay focused on what matters most: successful recruitment."
+            title: International transfer
+            text: "Your employee is coming from abroad: we handle everything remotely, so they have a home when they land."
         2:
-            title: Enhanced employer attractiveness
-            text: Increase your chances of securing top talent with an exceptional onboarding experience.
+            title: New hire
+            text: "A candidate is hesitant about moving to Paris? Offering housing support often makes the difference."
         3:
-            title: Real estate expertise
-            text: Benefit from privileged access to the Parisian market (off-market) and full security in building your files.
+            title: Assignment of a few months
+            text: "For a temporary assignment, we focus on furnished rentals and the mobility lease, from 1 to 10 months."
         4:
-            title: Peace of mind and trust
-            text: Tailored support and a dedicated point of contact to ensure a smooth and immediate integration.
+            title: Executives and families
+            text: "Family-friendly neighborhoods, nearby schools, the right floor area: we find the home that suits the whole family."
+    reporting:
+        caption: Transparent follow-up
+        title: You always know where each file stands
+        text: "Since %year%, our Paris agents have supported individuals and companies. Your <strong class=\"font-semibold text-neutral-800\">dedicated advisor</strong> keeps you updated by <strong class=\"font-semibold text-neutral-800\">email, WhatsApp or phone</strong>, just like your employee."
     faq:
         title: Your questions, our answers
+        subTitle: Questions from HR teams
         question:
             1:
-                title: What relocation services do you offer for our employees?
-                text: "We provide end-to-end support, including housing search, administrative procedures, and move-in coordination. Each assignment is fully tailored to ensure a smooth and stress-free arrival in Paris for your employees."
+                title: Which steps do you handle for our employees?
+                text: "Everything a move to Paris involves: <strong>housing</strong> (temporary too), application and lease, <strong>visa</strong>, <strong>children’s schooling</strong> and setting up energy and internet. See our <a href=\"%pricingUrl%\">pricing page</a> for what each plan includes."
             2:
-                title: How does the employee onboarding process work?
-                text: "A dedicated consultant manages each case through to key handover. The process begins with a needs assessment, followed by file preparation and the selection of suitable apartments."
+                title: How is an employee’s relocation handled?
+                text: "It all starts with a brief with your HR team to define the need. A dedicated advisor then manages the search, viewings and application, all the way to the key handover."
             3:
                 title: Do you work with international companies?
-                text: "Yes. We support both French and international companies, with recognized expertise in employee mobility and relocation in Paris."
+                text: "Yes. We support French and international companies, and our advisors work with your teams and your employees in French, English, Spanish or German."
             4:
-                title: How long does it take to relocate an employee?
-                text: "The timeline primarily depends on the employee’s specific needs (family situation, profile, preferred neighborhoods, etc.). In most cases, relocation can be completed <strong>within 2 to 4 weeks</strong>."
+                title: How quickly can an employee be settled in?
+                text: On average, our clients sign their lease <strong>in under 20 days</strong>. The timeline depends on the employee’s profile (family situation, budget, preferred neighborhood).
             5:
-                title: How is HR follow-up handled?
-                text: "At every stage, you are kept informed by your dedicated consultant via email, WhatsApp, or phone. You benefit from transparent and continuous HR follow-up, just like your employee."
+                title: How is HR kept informed?
+                text: "At every step, your dedicated advisor updates you by email, WhatsApp or phone. You get transparent, continuous follow-up, just like your employee."
             6:
-                title: Why work with a relocation agency?
-                text: "Working with a relocation agency simplifies employee relocation, strengthens your employer brand, and saves valuable time. We collaborate with over 80 partners in Paris and provide access to a unique off-market housing network across the city."
+                title: Why use a relocation agency?
+                text: "A relocation agency saves your teams valuable time, secures your employees’ move and makes you more attractive to top talent. We work with more than 80 partners in Paris and have a network of off-market homes."
+            7:
+                title: Our employee is still abroad, is that a problem?
+                text: "No. Most of the process happens remotely: we visit on their behalf, they follow viewings on video and sign online. They can arrive in Paris with a home already waiting."
+            8:
+                title: What solution for an assignment of a few months?
+                text: "For a temporary assignment, we focus on furnished rentals, including the <strong>mobility lease</strong> (bail mobilité), lasting 1 to 10 months and available, among others, to people on a professional transfer or temporary assignment."
+            9:
+                title: How much does relocating an employee cost?
+                text: "Two plans, depending on the level of support you need: <strong>Guided at €1,490</strong> and <strong>Entrusted at €2,190</strong>. What each plan includes is detailed on our <a href=\"%pricingUrl%\">pricing page</a>."
+            10:
+                title: Our employee has no guarantor in France, is that a problem?
+                text: "No. There are alternatives to a guarantor, such as the <strong>Visale guarantee</strong> (subject to eligibility) or a bank guarantee. For an expatriate employee with no guarantor or French payslips, we build a strong application and defend it with our network of landlords."
+            11:
+                title: Can they be housed during the search?
+                text: "Yes. If your employee arrives in Paris before finding a home, we offer them <strong>temporary housing during the search</strong>, so they are ready to work from day one."
+            12:
+                title: Do you also help with visas or children’s schooling?
+                text: "Yes. Beyond housing, we help with visa procedures, children’s schooling, discovering neighborhoods and concierge services. These services are listed on our <a href=\"%pricingUrl%\">pricing page</a>."
+            13:
+                title: What happens if you do not find a home?
+                text: "We never take on an assignment unless we are sure we can succeed. With <strong>more than 900 successful relocations</strong> and more than 80 partners in Paris, we have never left a client without keys."
 findAccommodation:
     title: Property Search
     imageAlt: Finding a home in Paris with Relocation In Paris
@@ -412,8 +486,8 @@ meta:
         title: Relocation Agency in Paris
         description: "Turnkey apartment search services in Paris for individuals and companies. Access exclusive properties and benefit from tailored support."
     companies:
-        title: House Your Employees in Paris
-        description: "Easily house your employees in Paris. End-to-end relocation, tailored property search, administrative support and expert guidance."
+        title: "Corporate Relocation in Paris"
+        description: "Corporate relocation in Paris: a dedicated advisor settles your employees in under 20 days. Search, viewings, application and move-in, even remotely."
     contact:
         title: Contact Relocation Experts in Paris
         description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
@@ -1127,10 +1201,10 @@ propertyManagement:
     galleryAlt: Paris apartment managed by Relocation In Paris
     hero:
         title: Your Property, Perfectly Managed
-        text: "Tailored property management in Paris for short-, medium- and long-term rentals. We select your tenants, secure your rent and enhance your property, so you earn your income with complete peace of mind."
+        text: "Tailored property management in Paris, for short, medium and long-term rentals. Thanks to our relocation business, we place premium tenants in your property (executives, expatriates, corporate employees): you collect your income, worry-free."
         service:
             1: Seamless care
-            2: Reliable tenants
+            2: Premium tenants
             3: Optimized value
         rating:
             label: based on
@@ -1190,6 +1264,20 @@ propertyManagement:
                     text: "We will call you at:"
             goodToKnow:
                 text: If you are unavailable, he will leave you an SMS or an email.
+    tenants:
+        caption: Our edge
+        title: Premium tenants, straight from our relocation business
+        text: "Since %year%, we have settled <strong class=\"font-semibold text-neutral-800\">more than 900 tenants in Paris</strong>, many of them executives, expatriates and corporate employees. These profiles look for quality homes and bring strong applications: <strong class=\"font-semibold text-neutral-800\">we offer them your property first</strong>."
+        1:
+            title: Executives and expatriates
+            text: "Professionals on the move, with stable incomes, looking for a well-located apartment ready to live in."
+        2:
+            title: Corporate employees
+            text: "Employees relocated by their company and supported by our advisors, from the search to the key handover."
+            link: Our corporate offer
+        3:
+            title: Verified applications
+            text: "Every candidate is supported by our agents: complete application and solid guarantees before any signature."
     service:
         title: Our expertise
         subTitle: Management and enhancement of your property
@@ -1201,7 +1289,7 @@ propertyManagement:
             text: A professional photo shoot and staging to attract the best applicants.
         3:
             title: Tenant Selection
-            text: Verified applications and solid guarantees for a fully secured tenancy.
+            text: "Executives, expatriates and corporate employees from our relocation business, with verified applications."
         4:
             title: Full Management
             text: From the inventory of fixtures to rent collection, we take care of everything.
@@ -1235,12 +1323,12 @@ propertyManagement:
     story:
         title: 'Trust & discretion'
         subTitle: Your property, our standards
-        text: "Since %year%, our team has managed the homes of the capital's most discerning owners. From showcasing your apartment to the rigorous selection of tenants, we handle every detail with discretion and expertise. Our standard: protecting the value of your property, optimizing your income and delivering exceptional management, with complete peace of mind."
+        text: "Since %year%, our Paris agents have managed apartments for short, medium and long-term rentals. We showcase your property, <strong class=\"font-semibold text-neutral-800\">select every tenant rigorously</strong> and give you <strong class=\"font-semibold text-neutral-800\">clear, regular reporting on your income</strong>. All <strong class=\"font-semibold text-neutral-800\">with no minimum term and no upfront costs</strong>: our fee depends on how well your property performs."
         award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     faq:
         title: FAQ
         subTitle: Your questions, our answers
-        text: "Our answers to the most common questions about property management."
+        text: "The questions property owners ask most. Find all our answers in our <a href='%url%#property-management' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>general FAQ</a>."
         question:
             1:
                 title: Do you manage short-, medium- and long-term rentals?
@@ -1253,7 +1341,7 @@ propertyManagement:
                 text: "Absolutely. We take care of the entire management process: strategy, listing, tenant relations, operational follow-up and income management. You stay in control, we handle the rest."
             4:
                 title: Do you develop a strategy to optimize my income?
-                text: Yes. Each property is analyzed individually to define the most relevant rental strategy, based on its location, market demand and your objectives.
+                text: "Yes. Each property is analyzed individually to define the most relevant rental strategy, based on its location, market demand and your objectives. To get started, <a href=\"%landlordsUrl%#estimation-card\">estimate your property’s rent</a>."
             5:
                 title: Do you manage communication with tenants or guests?
                 text: Yes. We handle all communication before, during and after the stay or rental, ensuring professional and responsive follow-up.
@@ -1265,7 +1353,10 @@ propertyManagement:
                 text: No. Our service comes with <strong>no minimum commitment</strong>, within a partnership built on trust and transparency.
             8:
                 title: Do I need to pay any upfront fees?
-                text: No. There are <strong>no setup fees or upfront costs</strong>. Our remuneration is aligned with your property’s performance.
+                text: "No. There are <strong>no setup fees or upfront costs</strong>: our remuneration is aligned with your property’s performance. <a href=\"%contactUrl%\">Contact us</a> to discuss it."
+            9:
+                title: What tenant profiles do you offer?
+                text: "Through our relocation business, we support executives, expatriates and <a href=\"%companiesUrl%\">corporate employees</a> looking for a home in Paris. We offer these <strong>premium profiles</strong> your property first, with verified applications and solid guarantees."
 newsletter:
     title: Newsletter
     subTitle: Join our newsletter

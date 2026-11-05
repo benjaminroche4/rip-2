@@ -206,70 +206,144 @@ header:
         basedOn: Basé sur
         reviews: avis
 companies:
-    title: Solutions pour les entreprises
-    subTitle: Loger vos collaborateurs facilement à Paris
-    text: "Un service clé en main pour loger vos talents à Paris : recherche, visites, dossiers et installation, avec un accompagnement dédié."
-    trust:
-        1: 5.0 basé sur
-        2: avis
+    hero:
+        caption: Relocation d'entreprise à Paris
+        title: Logez vos collaborateurs à Paris, sans mobiliser vos équipes RH
+        text: "Un conseiller dédié prend en charge chaque arrivée, de la recherche du logement à la remise des clés, en moins de 20 jours en moyenne."
+        rating: "<strong class=\"font-semibold text-neutral-900\">%rating%</strong> sur +%count% avis %google%"
+    cta:
+        button: Parler à un conseiller
+    logos:
+        title: "Ils nous ont confié l'installation de leurs collaborateurs"
+    why:
+        caption: Pourquoi nous confier vos arrivées
+        title: Le logement ne doit plus freiner vos recrutements
+        stats:
+            relocations: installations réussies à Paris
+            partners: partenaires immobiliers dans la capitale
+            reviews: "Sur +%count% avis %google%"
+        1:
+            title: Vos RH gagnent du temps
+            text: "Un seul brief suffit. Nous gérons la recherche, les visites, le dossier et l'installation : vous validez uniquement les étapes clés."
+        2:
+            title: Vos recrues disent oui plus vite
+            text: "Un logement trouvé avant l'arrivée lève le premier frein à la mobilité. Votre offre gagne en attractivité face aux autres employeurs."
+        3:
+            title: Un accès au marché off-market
+            text: "Grâce à plus de 80 partenaires, vos collaborateurs accèdent à des biens qui ne sont jamais publiés sur les portails d'annonces."
+        4:
+            title: Des dossiers sécurisés
+            text: "Dossier locatif complet, bail relu, état des lieux encadré : votre collaborateur s'installe sans mauvaise surprise."
     service:
-        title: Nos services
-        subTitle: Nos solutions pour vos talents
+        title: Ce qui est inclus
+        subTitle: Tout ce dont votre collaborateur a besoin pour s'installer
+        text: Une prestation clé en main, pensée pour les entreprises qui accueillent des talents à Paris, depuis la France ou l'étranger.
         1:
             title: Recherche sur-mesure
-            text: Une sélection de biens premium adaptée aux besoins de vos talents.
+            text: "Une sélection de logements adaptés au budget, au quartier et à la situation familiale de votre collaborateur."
         2:
-            title: Pilotage et reporting RH dédié
-            text: Un interlocuteur unique pour un suivi de vos dossiers en temps réel.
+            title: Suivi RH dédié
+            text: "Un interlocuteur unique pour votre entreprise, qui vous informe de l'avancement de chaque dossier."
         3:
-            title: Support administratif
-            text: Vos services et abonnements activés dès le premier jour.
+            title: Dossier et bail
+            text: "Montage du dossier locatif, négociation avec le propriétaire et relecture du bail avant signature."
         4:
             title: Installation clés en main
-            text: Installation fluide pour des talents opérationnels dès le premier jour.
+            text: "État des lieux, électricité, gaz et internet : votre collaborateur est opérationnel dès son arrivée."
         5:
-            title: Coordination logistique
-            text: Nous orchestrons chaque prestataire pour un emménagement sans accroc.
+            title: Visites à distance
+            text: "Votre collaborateur est encore à l'étranger ? Nous visitons pour lui, en direct par vidéo, et il signe en ligne."
         6:
-            title: Immersion locale
-            text: Une intégration locale réussie grâce à une prise de marques rapide.
-    advantage:
-        title: Une expérience unique
-        subTitle: Faites de Paris l'atout majeur de vos recrutements
-        text: Déléguez la complexité de la mobilité géographique à un partenaire expert.
+            title: Prise de repères à Paris
+            text: "Quartiers, transports, écoles, démarches du quotidien : nos conseils pour une intégration rapide dans la ville."
+    process:
+        caption: Notre méthode
+        title: Un processus simple, piloté de bout en bout
+        text: "Vous nous confiez le besoin, nous orchestrons le reste. À chaque étape, vous savez où en est le dossier de votre collaborateur."
+        eyebrow: Étape par étape
+        subTitle: De votre brief à la remise des clés
+        steps:
+            1:
+                title: Brief avec votre équipe RH
+                description: "Nous définissons ensemble le besoin : date d'arrivée, budget, durée de location, quartiers et situation familiale du collaborateur."
+            2:
+                title: Recherche ciblée
+                description: "Nous activons notre réseau et présélectionnons les logements qui correspondent au cahier des charges, y compris hors marché."
+                chips:
+                    1: Biens off-market
+                    2: Meublé ou vide
+            3:
+                title: Visites sur place ou en vidéo
+                description: "Nous visitons chaque bien et partageons nos retours. Votre collaborateur peut suivre la visite en direct, où qu'il soit."
+            4:
+                title: Dossier, négociation et bail
+                description: "Nous montons un dossier solide, négocions les conditions et relisons le bail avant la signature."
+            5:
+                title: Installation et suivi
+                description: "État des lieux, remise des clés, ouverture des contrats essentiels : votre collaborateur arrive dans un logement prêt à vivre."
+    useCases:
+        caption: Pour quelles situations
+        title: Une solution pour chaque type de mobilité
+        text: "Transfert depuis l'étranger, recrutement, mission courte ou arrivée en famille : nous adaptons la recherche à chaque situation."
         1:
-            title: Gain de temps stratégique
-            text: "Déléguez la complexité logistique et restez concentrés sur l’essentiel : la réussite de votre recrutement."
+            title: Mutation internationale
+            text: "Votre collaborateur arrive de l'étranger : nous gérons tout à distance, pour qu'il ait un logement dès son arrivée."
         2:
-            title: Attractivité renforcée
-            text: Augmentez vos chances de convaincre les meilleurs profils grâce à une expérience d'accueil d'exception.
+            title: Nouveau recrutement
+            text: "Un candidat hésite à rejoindre Paris ? Proposer l'accompagnement au logement fait souvent la différence."
         3:
-            title: Expertise immobilière
-            text: Bénéficiez d’un accès privilégié au marché parisien (off-market) et d’une sécurité totale dans la constitution de vos dossiers.
+            title: Mission de quelques mois
+            text: "Pour une mission temporaire, nous ciblons les locations meublées et le bail mobilité, de 1 à 10 mois."
         4:
-            title: Sérénité et confiance
-            text: Un accompagnement sur-mesure et un interlocuteur dédié pour garantir une intégration sereine et immédiate.
+            title: Cadres et familles
+            text: "Quartiers familiaux, proximité des écoles, surfaces adaptées : nous trouvons le logement qui convient à toute la famille."
+    reporting:
+        caption: Un suivi transparent
+        title: Vous savez toujours où en est chaque dossier
+        text: "Depuis %year%, nos agents parisiens accompagnent particuliers et entreprises. Votre <strong class=\"font-semibold text-neutral-800\">conseiller dédié</strong> vous tient informés par <strong class=\"font-semibold text-neutral-800\">e-mail, WhatsApp ou téléphone</strong>, au même titre que votre collaborateur."
     faq:
         title: Vos questions, nos réponses
+        subTitle: Les questions des équipes RH
         question:
             1:
-                title: Quels services proposez-vous pour la relocation de nos collaborateurs ?
-                text:  "Nous assurons un accompagnement complet, recherche de logement, démarches administratives et installation. Chaque mission est personnalisée pour garantir une arrivée fluide et en toute sérénité à Paris pour vos collaborateurs."
+                title: Quelles démarches prenez-vous en charge pour nos collaborateurs ?
+                text: "Tout ce qu’implique une installation à Paris : <strong>logement</strong> (y compris temporaire), dossier et bail, <strong>visa</strong>, <strong>scolarité des enfants</strong> et ouverture des contrats d’énergie et d’internet. Le détail de chaque offre est sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
             2:
                 title: Comment se déroule la prise en charge d’un collaborateur ?
-                text: "Un conseiller dédié pilote chaque dossier jusqu’à la remise des clés. Le processus débute par l’analyse des besoins, le montage du dossier et la sélection des appartements."
+                text: "Tout commence par un brief avec votre équipe RH pour définir le besoin. Un conseiller dédié pilote ensuite la recherche, les visites et le dossier, jusqu’à la remise des clés."
             3:
                 title: Travaillez-vous avec des entreprises internationales ?
-                text: Oui. Nous accompagnons des entreprises françaises et internationales, avec une expertise reconnue en mobilité et relocation à Paris.
+                text: "Oui. Nous accompagnons des entreprises françaises et internationales, et nos conseillers échangent avec vos équipes comme avec vos collaborateurs en français, en anglais, en espagnol ou en allemand."
             4:
                 title: Sous quel délai un collaborateur peut-il être installé ?
-                text: Le délai dépend avant tout des besoins spécifiques du collaborateur (situation familiale, profil, quartier souhaité, etc.). En général, l’installation peut être réalisée <strong>sous 2 à 4 semaines</strong>.
+                text: En moyenne, nos clients signent leur bail <strong>en moins de 20 jours</strong>. Le délai dépend du profil du collaborateur (situation familiale, budget, quartier souhaité).
             5:
                 title: Comment est assuré le suivi RH ?
-                text: À chaque étape, vous êtes informés par votre conseiller dédié, par e-mail, WhatsApp ou téléphone. Vous bénéficiez d’un suivi transparent et continu, au même titre que votre collaborateur.
+                text: "À chaque étape, votre conseiller dédié vous informe par e-mail, WhatsApp ou téléphone. Vous bénéficiez d’un suivi transparent et continu, au même titre que votre collaborateur."
             6:
                 title: Pourquoi passer par une agence de relocation ?
-                text: Faire appel à une agence de relocation facilite l’installation de vos collaborateurs, renforce votre attractivité auprès des meilleurs profils et vous fait gagner un temps précieux. Nous travaillons avec plus de 80 partenaires à Paris et disposons d’un réseau unique de logements off-market sur la capitale.
+                text: "Une agence de relocation fait gagner un temps précieux à vos équipes, sécurise l’installation de vos collaborateurs et renforce votre attractivité auprès des meilleurs profils. Nous travaillons avec plus de 80 partenaires à Paris et disposons d’un réseau de logements off-market."
+            7:
+                title: Notre collaborateur est encore à l’étranger, est-ce un problème ?
+                text: "Non. La plupart des démarches se font à distance : nous visitons pour lui, il suit les visites en vidéo et signe en ligne. Il peut ainsi arriver à Paris avec un logement déjà prêt."
+            8:
+                title: Quelle solution pour une mission de quelques mois ?
+                text: "Pour une mission temporaire, nous ciblons les locations meublées, notamment le <strong>bail mobilité</strong>, d’une durée de 1 à 10 mois, réservé entre autres aux personnes en mutation professionnelle ou en mission temporaire."
+            9:
+                title: Combien coûte l’accompagnement d’un collaborateur ?
+                text: "Deux offres, selon le niveau d’accompagnement souhaité : <strong>Accompagné à 1 490 €</strong> et <strong>Confié à 2 190 €</strong>. Le détail de chaque offre est présenté sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
+            10:
+                title: Notre collaborateur n’a pas de garant en France, est-ce bloquant ?
+                text: "Non. Il existe des alternatives au garant, comme la <strong>garantie Visale</strong> (sous conditions d’éligibilité) ou une caution bancaire. Pour un collaborateur expatrié sans garant ni fiches de paie françaises, nous construisons un dossier solide et le défendons auprès de notre réseau de propriétaires."
+            11:
+                title: Peut-il être logé le temps de la recherche ?
+                text: "Oui. Si votre collaborateur arrive à Paris avant d’avoir trouvé son logement, nous lui proposons <strong>un logement temporaire le temps de la recherche</strong>, pour qu’il soit opérationnel dès son arrivée."
+            12:
+                title: Accompagnez-vous aussi le visa ou la scolarité des enfants ?
+                text: "Oui. Au-delà du logement, nous accompagnons les démarches liées au visa, la scolarité des enfants, la découverte des quartiers et des services de conciergerie. Ces services sont présentés sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
+            13:
+                title: Que se passe-t-il si vous ne trouvez pas de logement ?
+                text: "Nous n’acceptons pas une mission sans être certains de la réussir. Avec <strong>plus de 900 installations réussies</strong> et plus de 80 partenaires à Paris, nous n’avons jamais laissé un client sans clés."
 findAccommodation:
     title: Recherche de logement
     imageAlt: Recherche de logement à Paris avec Relocation In Paris
@@ -412,8 +486,8 @@ meta:
         title: Agence de Relocation à Paris
         description: "Service clé en main de recherche de logement à Paris pour particuliers et professionnels. Biens exclusifs et accompagnement sur mesure."
     companies:
-        title: Logez Vos Collaborateurs à Paris
-        description: "Logez vos collaborateurs à Paris facilement. Relocation clé-en-main, recherche sur-mesure, support administratif et accompagnement expert."
+        title: "Relocation d'Entreprise à Paris"
+        description: "Relocation d'entreprise à Paris : un conseiller dédié installe vos collaborateurs en moins de 20 jours. Recherche, visites et dossier, même à distance."
     contact:
         title: Contacter un Expert Relocation à Paris
         description: "Échangez avec nos experts en relocation à Paris. Nous accompagnons particuliers et entreprises dans leurs projets d’installation dans la capitale."
@@ -1127,10 +1201,10 @@ propertyManagement:
     galleryAlt: Appartement à Paris géré par Relocation In Paris
     hero:
         title: Confiez-nous la gestion de votre bien
-        text: "Gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Nous sélectionnons vos locataires, sécurisons vos loyers et valorisons votre bien : vous percevez vos revenus, en toute tranquillité."
+        text: "Gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Grâce à notre activité de relocation, nous plaçons dans votre bien des locataires premium (cadres, expatriés, collaborateurs d'entreprises) : vous percevez vos revenus, en toute tranquillité."
         service:
             1: Gestion sereine
-            2: Locataires fiables
+            2: Locataires premium
             3: Valeur optimisée
         rating:
             label: basé sur
@@ -1190,6 +1264,20 @@ propertyManagement:
                     text: "Nous vous appelons au :"
             goodToKnow:
                 text: Si vous n'êtes pas disponible, il vous laissera un SMS ou un email.
+    tenants:
+        caption: Notre avantage
+        title: Des locataires premium, issus de notre activité de relocation
+        text: "Depuis %year%, nous avons installé <strong class=\"font-semibold text-neutral-800\">plus de 900 locataires à Paris</strong>, dont de nombreux cadres, expatriés et collaborateurs d'entreprises. Ces profils recherchent un logement de qualité et présentent des dossiers solides : <strong class=\"font-semibold text-neutral-800\">nous les proposons en priorité pour votre bien</strong>."
+        1:
+            title: Cadres et expatriés
+            text: "Des professionnels en mobilité, aux revenus stables, qui recherchent un appartement bien situé et prêt à vivre."
+        2:
+            title: Collaborateurs d'entreprises
+            text: "Des salariés relogés par leur employeur et accompagnés par nos conseillers, de la recherche à la remise des clés."
+            link: Notre offre entreprises
+        3:
+            title: Dossiers vérifiés
+            text: "Chaque candidat est accompagné par nos agents : dossier complet et garanties solides avant toute signature."
     service:
         title: Nos expertises
         subTitle: Gestion et valorisation de votre bien
@@ -1201,7 +1289,7 @@ propertyManagement:
             text: Reportage photo professionnel et mise en valeur pour attirer les meilleurs profils.
         3:
             title: Sélection locataire
-            text: Dossiers vérifiés et garanties solides pour une location en toute sécurité.
+            text: "Des cadres, expatriés et collaborateurs d'entreprises issus de notre activité de relocation, aux dossiers vérifiés."
         4:
             title: Gestion intégrale
             text: De l'état des lieux à la perception des loyers, nous prenons tout en charge.
@@ -1235,12 +1323,12 @@ propertyManagement:
     story:
         title: 'Confiance & discrétion'
         subTitle: Votre patrimoine, notre exigence
-        text: "Depuis %year%, notre équipe gère les biens des propriétaires les plus exigeants de la capitale. De la valorisation de votre appartement à la sélection rigoureuse des locataires, nous prenons en charge chaque détail avec discrétion et savoir-faire. Notre exigence : préserver la valeur de votre patrimoine, optimiser vos revenus et vous offrir une gestion d'exception, en toute sérénité."
+        text: "Depuis %year%, nos agents parisiens gèrent des appartements en courte, moyenne et longue durée. Nous valorisons votre bien, <strong class=\"font-semibold text-neutral-800\">sélectionnons chaque locataire avec rigueur</strong> et vous offrons <strong class=\"font-semibold text-neutral-800\">un suivi clair et régulier de vos revenus</strong>. Le tout <strong class=\"font-semibold text-neutral-800\">sans engagement de durée ni frais à avancer</strong> : notre rémunération dépend de la performance de votre bien."
         award: 'Meilleure agence<br>à <span class="font-semibold">Paris en %year%</span>'
     faq:
         title: FAQ
         subTitle: Vos questions, nos réponses
-        text: "Nos réponses aux questions les plus fréquentes sur la gestion locative."
+        text: "Les questions les plus fréquentes des propriétaires. Retrouvez toutes nos réponses dans notre <a href='%url%#property-management' class='underline underline-offset-4 decoration-dotted decoration-slate-500 hover:decoration-primary hover:text-primary transition duration-100'>FAQ générale</a>."
         question:
             1:
                 title: Gérez-vous les biens en courte, moyenne et longue durée ?
@@ -1253,7 +1341,7 @@ propertyManagement:
                 text: "Absolument. Nous prenons en charge l’intégralité de la gestion : stratégie, diffusion, relation locataire, suivi opérationnel et gestion des revenus. Vous conservez le contrôle, nous gérons le reste."
             4:
                 title: Étudiez-vous une stratégie pour optimiser mes revenus ?
-                text: Oui. Chaque bien fait l’objet d’une analyse personnalisée afin de définir la stratégie locative la plus pertinente, en fonction de sa localisation, de la demande et de vos objectifs.
+                text: "Oui. Chaque bien fait l’objet d’une analyse personnalisée afin de définir la stratégie locative la plus pertinente, en fonction de sa localisation, de la demande et de vos objectifs. Pour commencer, <a href=\"%landlordsUrl%#estimation-card\">estimez le loyer de votre bien</a>."
             5:
                 title: Gérez-vous la communication avec les voyageurs ou locataires ?
                 text: Oui. Nous assurons l’ensemble des échanges avant, pendant et après le séjour ou la location, avec un suivi professionnel et réactif.
@@ -1265,7 +1353,10 @@ propertyManagement:
                 text: Non. Notre accompagnement est <strong>sans engagement de durée</strong>, dans une logique de partenariat basé sur la confiance et la transparence.
             8:
                 title: Dois-je avancer des frais ?
-                text: Non. <strong>Aucun frais de mise en place</strong> ni de coût à avancer. Notre rémunération est alignée sur la performance de votre bien.
+                text: "Non. <strong>Aucun frais de mise en place</strong> ni de coût à avancer : notre rémunération est alignée sur la performance de votre bien. <a href=\"%contactUrl%\">Contactez-nous</a> pour en parler."
+            9:
+                title: Quels profils de locataires proposez-vous ?
+                text: "Grâce à notre activité de relocation, nous accompagnons des cadres, des expatriés et des <a href=\"%companiesUrl%\">collaborateurs d'entreprises</a> à la recherche d'un logement à Paris. Nous proposons ces <strong>profils premium</strong> en priorité pour votre bien, avec des dossiers vérifiés et des garanties solides."
 newsletter:
     title: Newsletter
     subTitle: Rejoindre la newsletter

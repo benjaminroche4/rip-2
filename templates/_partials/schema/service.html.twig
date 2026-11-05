@@ -1,7 +1,8 @@
 {# JSON-LD Service node — included from a service-landing page's
    {% block schema_page %}.
    Caller passes via {% include … with %}: routeName, metaPrefix, image (optional),
-   offers (optional: package keys of contact.contactForm.offer, e.g. ['accompagne', 'confie']).
+   offers (optional: package keys of contact.contactForm.offer, e.g. ['accompagne', 'confie']),
+   serviceType (optional: plain category, e.g. 'Corporate relocation'), audience (optional: schema.org Audience type, e.g. 'BusinessAudience').
    Caller is responsible for the leading comma. #}
 
 ,{
@@ -15,6 +16,12 @@
         "@type": "City",
         "name": "Paris"
     }
+    {% if serviceType is defined and serviceType %}
+    ,"serviceType": "{{ serviceType|e('js') }}"
+    {% endif %}
+    {% if audience is defined and audience %}
+    ,"audience": { "@type": "{{ audience|e('js') }}" }
+    {% endif %}
     {% if image is defined and image %}
     ,"image": "{{ site_url }}/{{ image }}"
     {% endif %}

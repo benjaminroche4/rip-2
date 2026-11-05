@@ -17,9 +17,10 @@
 {# @prop icons     array  Iconify icon names; the array length determines the card count #}
 {# @prop withText  bool   Show the {keyPrefix}.text intro paragraph under the heading #}
 {# @prop align     string Heading alignment: 'center' (default) or 'start' #}
-{%- props keyPrefix, icons, withText = false, align = 'center' -%}
+{# @prop container string Max width of the section, to line up with the other blocks of the page #}
+{%- props keyPrefix, icons, withText = false, align = 'center', container = 'max-w-6xl' -%}
 
-<section class="max-w-6xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+<section class="{{ container }} mx-auto lg:px-8 px-6 lg:py-16 py-12">
     <div class="{{ align == 'start' ? 'max-w-2xl text-left' : 'mx-auto max-w-2xl text-center' }} pb-12 lg:pb-16">
         <p class="font-semibold text-primary font-secondary">{{ (keyPrefix ~ '.title')|trans|raw }}</p>
         <h2 class="mt-3 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ (keyPrefix ~ '.subTitle')|trans|raw }}</h2>
