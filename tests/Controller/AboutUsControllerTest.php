@@ -123,7 +123,7 @@ final class AboutUsControllerTest extends WebTestCase
         foreach (['/fr/services/trouver-un-logement', '/fr/services/gestion-locative-paris'] as $page) {
             $client->request('GET', $page);
             $html = (string) $client->getResponse()->getContent();
-            self::assertStringContainsString('Depuis 2015, notre équipe', $html, $page);
+            self::assertStringContainsString('Depuis 2015, no', $html, $page);
             self::assertStringNotContainsString('dix ans', $html, $page);
             self::assertStringNotContainsString('%year%', $html, $page);
         }

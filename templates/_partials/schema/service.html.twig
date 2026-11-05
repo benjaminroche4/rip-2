@@ -1,6 +1,7 @@
 {# JSON-LD Service node — included from a service-landing page's
    {% block schema_page %}.
-   Caller passes via {% include … with %}: routeName, metaPrefix, image (optional).
+   Caller passes via {% include … with %}: routeName, metaPrefix, image (optional),
+   offers (optional: package keys of contact.contactForm.offer, e.g. ['accompagne', 'confie']).
    Caller is responsible for the leading comma. #}
 
 ,{
@@ -16,5 +17,18 @@
     }
     {% if image is defined and image %}
     ,"image": "{{ site_url }}/{{ image }}"
+    {% endif %}
+    {% if offers is defined and offers %}
+    ,"offers": [
+        {% for offer in offers %}
+        {
+            "@type": "Offer",
+            "name": "{{ ('contact.contactForm.offer.' ~ offer ~ '.title')|trans|e('js') }}",
+            "price": "{{ ('contact.contactForm.offer.' ~ offer ~ '.price')|trans|replace({' ': '', ' ': '', '€': ''}) }}",
+            "priceCurrency": "EUR",
+            "url": "{{ site_url }}{{ path('app_pricing') }}"
+        }{{ loop.last ? '' : ',' }}
+        {% endfor %}
+    ]
     {% endif %}
 }

@@ -89,75 +89,7 @@
                 <p class="mx-auto mt-5 max-w-lg text-center font-light text-slate-800 lg:mx-0 text-pretty">
                     {{ 'home.heroSection.subTitle'|trans|raw }}
                 </p>
-                <div class="shimmer-border shimmer-border-soft mt-8 w-full max-w-3xl lg:max-w-4xl mx-auto rounded-2xl border border-neutral-200 bg-white p-2">
-                    <div
-                        data-controller="hero-video"
-                        data-playing="true"
-                        data-hero-video-play-label-value="{{ 'home.heroSection.video.play'|trans }}"
-                        data-hero-video-pause-label-value="{{ 'home.heroSection.video.pause'|trans }}"
-                        data-hero-video-sound-on-label-value="{{ 'home.heroSection.video.soundOn'|trans }}"
-                        data-hero-video-sound-off-label-value="{{ 'home.heroSection.video.soundOff'|trans }}"
-                        class="group/video relative rounded-xl overflow-hidden bg-neutral-100"
-                    >
-                        <video
-                            data-hero-video-target="video"
-                            data-action="click->hero-video#togglePlay play->hero-video#syncPlay pause->hero-video#syncPlay"
-                            class="w-full aspect-video object-cover cursor-pointer"
-                            tabindex="-1"
-                            width="1280"
-                            height="720"
-                            autoplay
-                            muted
-                            loop
-                            playsinline
-                            preload="metadata"
-                            poster="{{ asset('medias/videos/home-hero-poster.webp') }}"
-                            aria-label="{{ 'home.heroSection.video.label'|trans }}"
-                        >
-                            <source src="{{ asset('medias/videos/home-hero-' ~ app.request.locale ~ '.webm') }}" type="video/webm">
-                            <source src="{{ asset('medias/videos/home-hero-' ~ app.request.locale ~ '.mp4') }}" type="video/mp4">
-                        </video>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <button
-                                type="button"
-                                data-action="hero-video#togglePlay"
-                                class="liquid-glass shimmer-border shimmer-border-soft flex size-16 md:size-20 items-center justify-center rounded-full text-gray-900 opacity-0 scale-90 pointer-events-none transition-[opacity,scale,background-color,box-shadow] duration-200 ease-out group-data-[playing=false]/video:opacity-100 group-data-[playing=false]/video:scale-100 group-data-[playing=false]/video:pointer-events-auto focus-visible:opacity-100 focus-visible:scale-100 focus-visible:pointer-events-auto hover:bg-white/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
-                                data-hero-video-target="playButton"
-                                aria-label="{{ 'home.heroSection.video.play'|trans }}"
-                            >
-                                {{ ux_icon('iconoir:play-solid', {'class': 'size-7 md:size-8 translate-x-0.5'}) }}
-                            </button>
-                        </div>
-                        <div class="absolute top-3 right-3 flex items-center gap-2">
-                            <button
-                                type="button"
-                                data-action="hero-video#toggleFullscreen"
-                                class="liquid-glass shimmer-border shimmer-border-soft flex size-9 items-center justify-center rounded-full text-gray-900 transition-[transform,background-color,box-shadow] duration-200 ease-out hover:scale-105 hover:bg-white/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer group/fs"
-                                aria-label="{{ 'home.heroSection.video.fullscreen'|trans }}"
-                            >
-                                <span data-hero-video-target="enterFullscreen" class="flex transition-transform duration-200 ease-out group-hover/fs:scale-110">{{ ux_icon('lucide:maximize', {'class': 'size-4'}) }}</span>
-                                <span data-hero-video-target="exitFullscreen" class="flex hidden transition-transform duration-200 ease-out group-hover/fs:scale-90">{{ ux_icon('lucide:minimize', {'class': 'size-4'}) }}</span>
-                            </button>
-                            <button
-                                type="button"
-                                data-action="hero-video#toggleSound"
-                                data-hero-video-target="soundButton"
-                                aria-pressed="false"
-                                aria-label="{{ 'home.heroSection.video.soundOn'|trans }}"
-                                class="liquid-glass shimmer-border shimmer-border-soft motion-safe:animate-float flex h-11 items-center gap-2 rounded-full px-3 sm:pl-3 sm:pr-4 text-sm font-medium text-gray-900 transition-[transform,background-color,box-shadow] duration-200 ease-out hover:scale-105 hover:bg-white/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer group/sound"
-                            >
-                                <span data-hero-video-target="soundOff" class="flex items-center gap-2">
-                                    <span class="flex transition-transform duration-200 ease-out group-hover/sound:scale-110 motion-safe:animate-pulse">{{ ux_icon('iconoir:sound-off', {'class': 'size-5'}) }}</span>
-                                    <span class="hidden sm:inline" aria-hidden="true">{{ 'home.heroSection.video.soundOn'|trans }}</span>
-                                </span>
-                                <span data-hero-video-target="soundOn" class="flex hidden items-center gap-2">
-                                    <span class="flex transition-transform duration-200 ease-out group-hover/sound:scale-110 motion-safe:animate-pulse">{{ ux_icon('iconoir:sound-high', {'class': 'size-5'}) }}</span>
-                                    <span class="hidden sm:inline" aria-hidden="true">{{ 'home.heroSection.video.soundOff'|trans }}</span>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <twig:Section:HeroVideo />
                 <div class="mt-7 lg:mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6">
                     <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}" class="text-base">
                         {{ 'home.heroSection.button'|trans|raw }}

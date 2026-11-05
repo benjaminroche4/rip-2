@@ -10,16 +10,18 @@
    Used by home/index, property_estimation/index, pricing/index, services/*. #}
 
 {# @prop keyPrefix string Translation namespace, e.g. 'home.faq.question' #}
-{# @prop keys      array Suffixes to render, in order — e.g. [1,2,3] or 1..14 or [7,8,3,4,9,6] #}
+{# @prop keys      array Suffixes to render, in order (e.g. [1,2,3] or 1..14); an item containing a dot is a full
+                         prefix instead, to mix questions written elsewhere (e.g. ['faq.4', 'home.faq.question.7']) #}
 {# @prop accordionId string Unique accordion id (default: 'accordion-1'); useful when two FAQs coexist on a page #}
-{%- props keyPrefix, keys, accordionId = 'accordion-1' -%}
+{%- props keyPrefix = '', keys, accordionId = 'accordion-1' -%}
 
 <twig:Accordion id="{{ accordionId }}" defaultValue="{{ ['item-1'] }}">
     {% for i in keys %}
+        {% set base = '.' in (i ~ '') ? i : keyPrefix ~ '.' ~ i %}
         <twig:Accordion:Item value="item-{{ loop.index }}">
-            <twig:Accordion:Trigger>{{ (keyPrefix ~ '.' ~ i ~ '.title')|trans|raw }}</twig:Accordion:Trigger>
+            <twig:Accordion:Trigger>{{ (base ~ '.title')|trans|raw }}</twig:Accordion:Trigger>
             <twig:Accordion:Content>
-                {{ (keyPrefix ~ '.' ~ i ~ '.text')|trans(internal_link_params())|raw }}
+                {{ (base ~ '.text')|trans(internal_link_params())|raw }}
             </twig:Accordion:Content>
         </twig:Accordion:Item>
     {% endfor %}

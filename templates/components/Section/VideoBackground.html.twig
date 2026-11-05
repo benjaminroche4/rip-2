@@ -1,0 +1,37 @@
+{# Hero card with a decorative background video (muted autoplay loop, no controls, dark veil) and the
+   content passed as the component body on top, centered and in white.
+   A single rounded-2xl card, no border frame around it.
+   The phone version of the video is lighter; visitors who prefer reduced motion only get the poster.
+   @prop video  Path prefix of the files, completed with '-1280|-960' and '.webm|.mp4'
+   @prop poster Poster image (also the LCP image: preload it in the page head) #}
+{%- props video = 'medias/videos/bg-relocation', poster = 'medias/videos/bg-relocation-poster.webp' -%}
+
+{# clip-path + translateZ: the <video> layer otherwise ignores overflow-hidden + border-radius at times (square corners) #}
+<div data-controller="background-video" class="relative isolate flex min-h-[30rem] items-center justify-center overflow-hidden rounded-2xl [clip-path:inset(0_round_var(--radius-2xl))] [transform:translateZ(0)] bg-neutral-900 px-6 py-16 sm:px-10 lg:min-h-[32rem]">
+    <video
+        data-background-video-target="video"
+        class="absolute inset-0 -z-20 size-full rounded-2xl object-cover"
+        width="1280"
+        height="604"
+        autoplay
+        muted
+        loop
+        playsinline
+        disablepictureinpicture
+        preload="metadata"
+        poster="{{ asset(poster) }}"
+        aria-hidden="true"
+        tabindex="-1"
+    >
+        <source src="{{ asset(video ~ '-960.webm') }}" type="video/webm" media="(max-width: 767px)">
+        <source src="{{ asset(video ~ '-960.mp4') }}" type="video/mp4" media="(max-width: 767px)">
+        <source src="{{ asset(video ~ '-1280.webm') }}" type="video/webm">
+        <source src="{{ asset(video ~ '-1280.mp4') }}" type="video/mp4">
+    </video>
+    {# Dark veil so the white text stays readable on any frame #}
+    <div class="absolute inset-0 -z-10 bg-black/60" aria-hidden="true"></div>
+
+    <div class="w-full max-w-[43.5rem] text-center text-white">
+        {% block content %}{% endblock %}
+    </div>
+</div>

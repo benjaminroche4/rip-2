@@ -273,11 +273,17 @@ companies:
 findAccommodation:
     title: Recherche de logement
     imageAlt: Recherche de logement à Paris avec Relocation In Paris
-    subTitle: Votre logement clé en main à Paris
-    text: "Confiez-nous la recherche de votre logement à Paris : un service clé en main, simple et sur-mesure."
+    subTitle: "Recherche d'appartement à Paris, clé en main"
+    text: "Nous trouvons votre appartement et gérons tout pour vous, de la première visite à la remise des clés."
+    hero:
+        reviews: '<span class="font-semibold text-white">+%count%</span> avis Google'
+    pricing:
+        caption: Nos formules
+        title: Un tarif clair, sans surprise
+        text: Deux formules au forfait, selon le niveau d'accompagnement que vous souhaitez.
+        link: Voir le détail des formules
     badge:
-        1: Logements off-market
-        2: Installation sous 20 jours
+        2: "Installé en moins de 20 jours"
     process:
         approach: Notre approche
         title: Une recherche de logement personnalisée, pensée pour vous
@@ -287,7 +293,7 @@ findAccommodation:
     story:
         title: 'Confiance & sérénité'
         subTitle: Votre recherche, notre engagement
-        text: "Depuis %year%, notre équipe accompagne celles et ceux qui s'installent dans la capitale. De la sélection des biens à la constitution de votre dossier, nous prenons en charge chaque étape avec rigueur et bienveillance. Notre engagement : vous trouver le logement qui vous ressemble, sécuriser vos démarches et vous offrir une installation sereine, même à distance."
+        text: "Depuis %year%, nos agents immobiliers parisiens ont accompagné <strong class=\"font-semibold text-neutral-800\">plus de 900 installations à Paris</strong>, de l'étudiant au cadre expatrié. Notre promesse est simple : un seul conseiller, des biens vérifiés et une recherche menée <strong class=\"font-semibold text-neutral-800\">même à distance</strong>, pour que vous arriviez à Paris l'esprit tranquille."
         award: 'Meilleure agence<br>à <span class="font-semibold">Paris en %year%</span>'
     trust:
         1: 5.0 basé sur
@@ -317,22 +323,21 @@ findAccommodation:
         title: Une expérience sur-mesure
         subTitle: Faites de votre installation à Paris une transition fluide et maîtrisée
         1:
-            title: Gain de temps immédiat
-            text: "Recherche, visites, démarches : nous prenons tout en charge pendant que vous restez concentré sur l’essentiel. Vous ne courez plus après les annonces."
+            title: "Gagnez des semaines de recherche"
+            text: "Nous trions les annonces, visitons et relançons à votre place. Vous ne voyez que les biens qui vous correspondent vraiment."
         2:
-            title: Un dossier qui inspire confiance
-            text: Sur un marché où les refus sont fréquents, nous construisons un dossier solide et rassurant pour les propriétaires, même sans garant français.
+            title: "Un dossier que les propriétaires acceptent"
+            text: "Pas de fiche de paie française ni de garant en France ? Nous montons un dossier solide et le défendons auprès des bailleurs."
         3:
-            title: Accès à des logements exclusifs
-            text: Notre réseau de partenaires vous ouvre les portes de biens off-market, souvent avant qu’ils n’arrivent sur les plateformes. Vous voyez ce que les autres ne voient pas.
+            title: "Des biens avant tout le monde"
+            text: "Grâce à nos 80 partenaires, vous visitez des appartements off-market avant leur mise en ligne sur les plateformes."
         4:
-            title: Un interlocuteur unique, à vos côtés
-            text: "Fini le sentiment d’être seul face aux démarches : un conseiller dédié vous guide à chaque étape, en français comme en anglais, jusqu’à la remise des clés."
+            title: "Un expert qui parle votre langue"
+            text: "Le même conseiller vous suit du premier appel à la remise des clés, en français, en anglais, en espagnol ou en allemand."
         stats:
             relocations: Installations réussies
             partners: Partenaires immobiliers
-            reviewsPrefix: Sur +
-            reviews: avis Google
+            reviews: "Sur +%count% avis %google%"
     faq:
         title: Vos questions, nos réponses
         question:
@@ -347,7 +352,7 @@ findAccommodation:
                 text: Oui. Nous accompagnons régulièrement des clients à distance, avec un processus entièrement réalisable en ligne (visites virtuelles, signatures et démarches administratives).
             4:
                 title: En combien de temps puis-je m'installer à Paris ?
-                text: En moyenne, nous finalisons une installation complète en quelques semaines seulement. Les délais peuvent varier selon vos besoins, la disponibilité des biens et vos critères. Grâce à notre réseau exclusif et notre parfaite connaissance du marché local, nous assurons une installation rapide.
+                text: "En moyenne, nos clients signent leur bail en moins de 20 jours. Les délais peuvent varier selon vos besoins, la disponibilité des biens et vos critères. Grâce à notre réseau exclusif et notre parfaite connaissance du marché local, nous assurons une installation rapide."
             5:
                 title: Quels types de profils accompagnez-vous ?
                 text: "Nous accompagnons tous types de profils : familles, expatriés, cadres, étudiants et jeunes actifs. Nos services s’adressent à une clientèle française et internationale."
@@ -357,34 +362,34 @@ findAccommodation:
     timeline:
         steps:
             1:
-                title: Premier échange
-                description: Nous prenons le temps de comprendre vos besoins, vos délais et vos priorités pour bâtir un accompagnement sur-mesure.
+                title: "Un premier appel pour faire connaissance"
+                description: "En 20 minutes, sans engagement, nous parlons de votre projet, de vos délais et de ce qui compte vraiment pour vous."
             2:
-                title: Définition du projet
-                description: Ensemble, nous définissons votre budget, la localisation idéale et vos critères essentiels pour cibler uniquement les biens qui vous correspondent.
+                title: "Votre recherche, cadrée ensemble"
+                description: "Budget, quartiers, type de logement : nous fixons des critères réalistes, pour ne vous proposer que des biens qui vous ressemblent."
                 cards:
-                    1: Paris intra/extra muros
+                    1: "Paris et proche banlieue"
                     2: Courte ou longue durée
                     3: Meublé ou non meublé
             3:
-                title: Recherche ciblée
-                description: Grâce à notre réseau exclusif de partenaires immobiliers, nous identifions rapidement les meilleures opportunités, souvent avant leur mise en ligne (off market).
-                badge: Off market
+                title: "Nous cherchons pour vous"
+                description: "Nous activons notre réseau de partenaires pour repérer les bons biens, souvent avant leur mise en ligne."
+                badge: "Off-market"
             4:
-                title: Organisation des visites
-                description: Nous planifions les visites selon votre emploi du temps, en présentiel ou virtuellement, et vous conseillons à chaque étape de votre sélection.
+                title: "Vous visitez, sur place ou en vidéo"
+                description: "Nous organisons les visites selon votre agenda et vous donnons un avis franc sur chaque bien."
                 cards:
                     1: Visioconférence
                     2: Sur place
             5:
-                title: Préparation et finalisation du dossier
-                description: Nous préparons votre dossier locatif dès le début du processus afin d'être réactifs sur le marché. Après sélection du bien, nous finalisons les pièces nécessaires, négocions les meilleures conditions et gérons les formalités administratives.
+                title: "Un dossier prêt avant les autres"
+                description: "Votre dossier est prêt dès le départ, pour vous positionner en premier. Le bon bien trouvé, nous négocions et gérons les formalités."
             6:
-                title: Signature du bail
-                description: Nous restons à vos côtés lors de la signature et vous accompagnons dans la relecture des documents.
+                title: "Vous signez en confiance"
+                description: "Nous relisons le bail avec vous et répondons à toutes vos questions avant de signer."
             7:
-                title: Remise des clés et suivi
-                description: Nous organisons la remise des clés, l'état des lieux d'entrée, et restons à vos côtés pour toute assistance post-installation.
+                title: "Bienvenue chez vous"
+                description: "Remise des clés, état des lieux d'entrée : nous sommes là le jour J, et après si vous avez besoin de nous."
 meta:
     callback:
         title: "On vous rappelle : parlez à un expert"
@@ -413,8 +418,8 @@ meta:
         title: Contacter un Expert Relocation à Paris
         description: "Échangez avec nos experts en relocation à Paris. Nous accompagnons particuliers et entreprises dans leurs projets d’installation dans la capitale."
     findAccommodation:
-        title: Recherche de Logement à Paris
-        description: "Bénéficiez d’un accompagnement pour trouver votre logement à Paris : recherche sur mesure, visites privées et installation facilitée."
+        title: "Recherche d'appartement à Paris"
+        description: "Recherche d'appartement à Paris clé en main : agents parisiens depuis 2015, +900 installations, visites et dossier gérés pour vous, même à distance."
     landlords:
         title: Gestion Locative à Paris
         description: "Service de gestion locative sur mesure à Paris, en courte, moyenne et longue durée. Sécurisez et optimisez votre investissement avec une expertise dédiée."
@@ -527,7 +532,7 @@ home:
                 text: Nos services s’adressent aux particuliers, aux entreprises et aux professionnels souhaitant s’installer ou déménager à Paris.
             3:
                 title: Combien de temps faut-il pour trouver un logement à Paris ?
-                text: Le délai dépend du budget et des critères, mais en moyenne la recherche prend entre quelques jours et quelques semaines.
+                text: "En moyenne, nos clients signent leur bail en moins de 20 jours. Le délai dépend de votre budget et de vos critères : pour une estimation adaptée à votre projet, <a href=\"%callbackUrl%\" class=\"underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out\">demandez à être rappelé</a>."
             4:
                 title: Comment se déroule la recherche d'appartement ?
                 text: Nous prenons en charge tout ce que vous n'avez pas le temps de gérer, de la sélection des biens jusqu'à la remise des clés, en fonction de vos critères et de votre situation. Chaque accompagnement est unique, pensé sur mesure pour vous.
@@ -554,7 +559,7 @@ home:
             text: Nous présentons votre dossier à nos partenaires exclusifs et vous accédez à des biens avant leur mise sur le marché.
             altImage: Expert en recherche de logement à Paris
         2:
-            title: À Paris en 4 semaines. Depuis n'importe où.
+            title: "À Paris en moins de 20 jours. Depuis n'importe où."
         3:
             title: Votre appartement. Vos critères.
             text: Un interlocuteur unique, une sélection sur mesure.
@@ -674,7 +679,7 @@ aboutUs:
         text: "Vous nous confiez une étape importante de votre vie. Nous en prenons soin comme si c'était la nôtre."
         1:
             title: "Un accompagnement sur mesure"
-            text: "Un conseiller dédié qui vous écoute, comprend votre projet et vous répond en français ou en anglais."
+            text: "Un conseiller dédié qui vous écoute, comprend votre projet et vous répond dans votre langue (français, anglais, espagnol ou allemand)."
         2:
             title: "Transparence à chaque étape"
             text: "Des tarifs clairs, des biens vérifiés et des nouvelles régulières : vous savez toujours où en est votre recherche."
@@ -1034,7 +1039,7 @@ faq:
             text: "Oui. Au-delà du logement, nous vous accompagnons sur les démarches liées au visa, la découverte des quartiers, la scolarité de vos enfants et des services de conciergerie, pour que votre installation à Paris ne laisse rien au hasard. Ces services sont présentés sur notre <a href=\"%pricingUrl%\">page tarifs</a>."
         languages:
             title: Dans quelles langues travaillez-vous ?
-            text: Notre équipe accompagne ses clients en français et en anglais, du premier échange jusqu'à la remise des clés.
+            text: "Notre équipe accompagne ses clients en français, en anglais, en espagnol et en allemand, du premier échange jusqu'à la remise des clés."
         contact:
             title: Comment vous contacter ou être rappelé ?
             text: "Par téléphone ou via notre <a href=\"%contactUrl%\">formulaire de contact</a>. Vous pouvez aussi <a href=\"%callbackUrl%\">demander à être rappelé</a> : choisissez votre créneau, et un expert vous appelle pour faire le point sur votre projet."
@@ -1078,7 +1083,7 @@ faq:
             text: "Avec l'offre Accompagné, vous gagnez des semaines de recherche : <strong>vous visitez, nous gérons tout le reste</strong> (recherche sur mesure, accès aux biens off-market, optimisation de votre dossier, gestion des candidatures et des relances). Avec l'offre Confié, <strong>nous gérons tout, de la recherche à l'installation complète</strong> : votre agent assure les visites, vous envoie un compte-rendu vidéo après chacune d'elles et vous suit jusqu'à la remise des clés. Vous n'avez plus qu'à valider."
     1:
         title: Que se passe-t-il si vous ne trouvez pas de logement ?
-        text: Nous ne prenons pas une mission sans être certains de la réussir. Avec <strong>plus de 900 relocations réussies</strong> et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
+        text: "Nous ne prenons pas une mission sans être certains de la réussir. Avec <strong>plus de 900 installations réussies</strong> et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés."
     2:
         title: Sous combien de temps trouvez-vous un logement ?
         text: En moyenne, nos clients signent leur bail en <strong>moins de 20 jours</strong>. Sur un marché aussi tendu que Paris, c'est ce qui fait la différence entre chercher seul et chercher avec nous.
@@ -1087,7 +1092,7 @@ faq:
         text: C'est exactement pourquoi nous existons. Expatriés sans fiches de paie françaises, freelances, étrangers sans garant... notre réseau de propriétaires partenaires nous fait confiance, et cette confiance fait passer votre dossier.
     4:
         title: Mon loyer est-il suffisant pour trouver un bon appartement à Paris ?
-        text: Nous commençons toujours par un échange approfondi pour comprendre vos besoins. Ensemble, nous définissons un cahier des charges réaliste et cohérent avec le marché parisien pour que votre recherche parte sur les bonnes bases dès le premier jour.
+        text: "Nous accompagnons les recherches <strong>à partir de 1 000 € de loyer par mois</strong>. Nous commençons toujours par un échange approfondi pour comprendre vos besoins, puis nous définissons ensemble un cahier des charges réaliste et cohérent avec le marché parisien, pour que votre recherche parte sur les bonnes bases dès le premier jour."
     5:
         title: Puis-je changer d'offre en cours de mission ?
         text: Oui, tout à fait. Si votre situation évolue en cours de recherche, vous pouvez basculer de l'offre Accompagné vers l'offre Confié à tout moment. Nous nous adaptons à vous, pas l'inverse.
@@ -1102,7 +1107,7 @@ faq:
         text: Oui, c'est exactement pour ça que nous existons. La plupart de nos clients sont à l'étranger ou en dehors de Paris au moment où ils commencent leur recherche. Nous gérons les visites, les échanges avec les propriétaires et le montage du dossier à votre place. <strong>Vous validez à distance, on s'occupe du reste.</strong>
     9:
         title: Est-ce que vos honoraires sont inclus dans le loyer ?
-        text: Non. Nos honoraires sont <strong>indépendants du loyer et des frais d'agence</strong>. Grâce à notre réseau exclusif et nos contacts directs avec les propriétaires, certains biens sont proposés sans frais d'agence, ce qui réduit significativement votre coût d'installation.
+        text: "Non. Nos honoraires sont <strong>indépendants du loyer et des frais d'agence</strong>. Grâce à notre réseau exclusif et nos contacts directs avec les propriétaires, certains biens sont proposés sans frais d'agence, ce qui réduit significativement votre coût d'installation. <a href=\"%pricingUrl%\" class=\"underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out\">Découvrez nos formules et leurs tarifs</a>."
     10:
         title: Quels documents faut-il préparer pour un dossier locatif ?
         text: Pas d'inquiétude, nous vous envoyons la liste complète des documents à préparer dès la signature de votre contrat de mission. Chaque dossier est unique, votre expert vous guide personnellement selon votre situation pour constituer le dossier le plus solide possible.
@@ -1414,7 +1419,7 @@ pricing:
         subTitle: Vos questions, nos réponses
         1:
             title: Que se passe-t-il si vous ne trouvez pas de logement ?
-            text: Nous ne prenons pas une mission sans être certains de la réussir. Avec <strong>plus de 900 relocations réussies</strong> et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés.
+            text: "Nous ne prenons pas une mission sans être certains de la réussir. Avec <strong>plus de 900 installations réussies</strong> et un réseau de partenaires unique sur Paris, nous n'avons jamais rendu un client sans clés."
         2:
             title: Sous combien de temps trouvez-vous un logement ?
             text: En moyenne, nos clients signent leur bail en <strong>moins de 20 jours</strong>. Sur un marché aussi tendu que Paris, c'est ce qui fait la différence entre chercher seul et chercher avec nous.

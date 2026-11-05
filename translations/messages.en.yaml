@@ -273,11 +273,17 @@ companies:
 findAccommodation:
     title: Property Search
     imageAlt: Finding a home in Paris with Relocation In Paris
-    subTitle: Your Turnkey Housing Solution in Paris
-    text: "Let us handle your home search in Paris: a turnkey service that is simple and tailored to you."
+    subTitle: "Turnkey apartment search in Paris"
+    text: "We find your apartment and handle everything for you, from the first viewing to the handover of the keys."
+    hero:
+        reviews: '<span class="font-semibold text-white">%count%+</span> Google reviews'
+    pricing:
+        caption: Our packages
+        title: Clear pricing, no surprises
+        text: Two flat-fee packages, depending on how much support you want.
+        link: See what each package includes
     badge:
-        1: Off-market homes
-        2: Move-in within 20 days
+        2: "Settled in under 20 days"
     process:
         approach: Our approach
         title: A personalized housing search, built around you
@@ -287,7 +293,7 @@ findAccommodation:
     story:
         title: 'Trust & peace of mind'
         subTitle: Your search, our commitment
-        text: "Since %year%, our team has supported everyone settling in the capital. From selecting the right homes to building your application file, we handle every step with care and precision. Our commitment: to find the home that fits you, secure your process and give you a smooth move-in, even from abroad."
+        text: "Since %year%, our Paris real estate agents have supported <strong class=\"font-semibold text-neutral-800\">more than 900 relocations to Paris</strong>, from students to expat executives. Our promise is simple: one dedicated advisor, verified homes and a search carried out <strong class=\"font-semibold text-neutral-800\">even remotely</strong>, so you arrive in Paris with peace of mind."
         award: 'Best agency<br>in <span class="font-semibold">Paris in %year%</span>'
     trust:
         1: 5.0 based on
@@ -317,22 +323,21 @@ findAccommodation:
         title: A tailored experience
         subTitle: Make your move to Paris a smooth and well-managed transition
         1:
-            title: Immediate time savings
-            text: "Search, viewings, paperwork: we handle it all while you stay focused on what matters. No more chasing listings."
+            title: "Save weeks of searching"
+            text: "We sort through listings, visit homes and follow up for you. You only see the homes that truly match your needs."
         2:
-            title: An application that inspires confidence
-            text: In a market where rejections are common, we build a solid, reassuring application for landlords, even without a French guarantor.
+            title: "An application landlords accept"
+            text: "No French payslip or guarantor in France? We build a strong application and champion it with landlords."
         3:
-            title: Access to exclusive properties
-            text: Our partner network opens the doors to off-market properties, often before they reach the platforms. You see what others don't.
+            title: "Homes before anyone else"
+            text: "Thanks to our 80 partners, you visit off-market apartments before they are listed on the platforms."
         4:
-            title: A single point of contact, by your side
-            text: "No more feeling alone with the paperwork: a dedicated advisor guides you at every step, in French and English, right up to the handover of the keys."
+            title: "An expert who speaks your language"
+            text: "The same advisor follows you from the first call to the handover of the keys, in French, English, Spanish or German."
         stats:
             relocations: Successful relocations
             partners: Real estate partners
-            reviewsPrefix: From +
-            reviews: Google reviews
+            reviews: "%count%+ %google% reviews"
     faq:
         title: Your questions, our answers
         question:
@@ -347,7 +352,7 @@ findAccommodation:
                 text: Yes. We regularly support clients remotely, with a fully online process including virtual viewings, signatures, and administrative procedures.
             4:
                 title: How long does it take to settle in Paris?
-                text: On average, we complete a full relocation within just a few weeks. Timelines may vary depending on your needs, property availability, and criteria. Thanks to our exclusive network and deep local market knowledge, we ensure a fast and smooth installation.
+                text: "On average, our clients sign their lease in under 20 days. Timelines may vary depending on your needs, property availability, and criteria. Thanks to our exclusive network and deep local market knowledge, we ensure a fast and smooth installation."
             5:
                 title: What types of profiles do you support?
                 text: "We support all types of profiles: families, expatriates, executives, students, and young professionals. Our services are available to both French and international clients."
@@ -357,34 +362,34 @@ findAccommodation:
     timeline:
         steps:
             1:
-                title: Initial Consultation
-                description: We take the time to understand your needs, timelines, and priorities in order to build a tailor-made relocation plan.
+                title: "A first call to get to know you"
+                description: "In 20 minutes, with no commitment, we talk about your project, your timing and what really matters to you."
             2:
-                title: Project Definition
-                description: Together, we define your budget, ideal location, and key criteria to focus only on properties that truly match your expectations.
+                title: "Your search, defined together"
+                description: "Budget, neighborhoods, type of home: we set realistic criteria so we only show you homes that suit you."
                 cards:
-                    1: Paris and surrounding areas
+                    1: "Paris and nearby suburbs"
                     2: Short or long-term rental
                     3: Furnished or unfurnished
             3:
-                title: Targeted Search
-                description: Thanks to our exclusive network of real estate partners, we quickly identify the best opportunities, often before they go public (off market).
-                badge: Off market
+                title: "We search for you"
+                description: "We activate our partner network to find the right homes, often before they are listed."
+                badge: "Off-market"
             4:
-                title: Visit Coordination
-                description: We schedule property visits at your convenience, either in person or virtually, and advise you throughout your selection process.
+                title: "You visit, in person or by video"
+                description: "We schedule viewings around your agenda and give you an honest opinion on every home."
                 cards:
                     1: Video call
                     2: In person
             5:
-                title: File Preparation and Finalization
-                description: We prepare your rental file early in the process to ensure quick reactivity. Once you select a property, we finalize all required documents, negotiate the best terms, and manage all administrative formalities.
+                title: "An application ready before others"
+                description: "Your application is ready from day one, so you are first in line. Once the right home is found, we negotiate and handle the paperwork."
             6:
-                title: Lease Signing
-                description: We assist you during the lease signing, review all documents, and ensure the contract fully complies with your interests.
+                title: "You sign with confidence"
+                description: "We review the lease with you and answer all your questions before you sign."
             7:
-                title: Key Handover and Ongoing Support
-                description: We organize the key handover, carry out the move-in inspection, and remain available for any post-relocation assistance you may need.
+                title: "Welcome home"
+                description: "Key handover, move-in inspection: we are there on the day, and afterwards whenever you need us."
 meta:
     callback:
         title: "Request a Callback from an Expert"
@@ -413,8 +418,8 @@ meta:
         title: Contact Relocation Experts in Paris
         description: "Get in touch with our relocation experts in Paris. We assist individuals and companies with their relocation projects in the capital."
     findAccommodation:
-        title: Property Search in Paris
-        description: "Benefit from personalized support to find your home in Paris: tailored search, private viewings, and simplified installation."
+        title: "Apartment Search in Paris"
+        description: "Turnkey apartment search in Paris: local agents since 2015, 900+ relocations, viewings and application handled for you, even remotely."
     landlords:
         title: Property Management in Paris
         description: "Tailored property management services in Paris for short-, medium- and long-term rentals. Secure and optimize your investment with dedicated expertise."
@@ -527,7 +532,7 @@ home:
                 text: Our services are designed for professionals, companies, and individuals looking to move or settle in Paris.
             3:
                 title: How long does it take to find an apartment in Paris?
-                text: The timeline depends on your budget and criteria, but on average the search takes anywhere from a few days to several weeks.
+                text: "On average, our clients sign their lease in under 20 days. The timeline depends on your budget and criteria: for an estimate tailored to your project, <a href=\"%callbackUrl%\" class=\"underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out\">request a callback</a>."
             4:
                 title: How does the apartment search work?
                 text: We handle everything you don't have time to manage, from shortlisting properties to handing over the keys, based on your criteria and your situation. Every search is unique, built entirely around you.
@@ -566,7 +571,7 @@ home:
             text: We connect you directly with our exclusive partners, giving you access to off-market properties before anyone else.
             altImage: Expert support to find an apartment in Paris
         2:
-            title: Settled in Paris in 4 weeks. From anywhere.
+            title: "Settled in Paris in under 20 days. From anywhere."
         3:
             title: Your apartment. Your criteria.
             text: One advisor. End to end.
@@ -674,7 +679,7 @@ aboutUs:
         text: "You are trusting us with an important step in your life. We take care of it as if it were our own."
         1:
             title: "Tailored support"
-            text: "A dedicated advisor who listens, understands your project and answers you in French or English."
+            text: "A dedicated advisor who listens, understands your project and answers you in your language (French, English, Spanish or German)."
         2:
             title: "Transparency at every step"
             text: "Clear pricing, verified listings and regular updates: you always know where your search stands."
@@ -1034,7 +1039,7 @@ faq:
             text: "Yes. Beyond housing, we support you with visa procedures, discovering neighbourhoods, your children's schooling and concierge services, so that nothing is left to chance when you settle in Paris. These services are presented on our <a href=\"%pricingUrl%\">pricing page</a>."
         languages:
             title: Which languages do you work in?
-            text: Our team supports clients in French and English, from the first conversation to the handover of the keys.
+            text: "Our team supports clients in French, English, Spanish and German, from the first conversation to the handover of the keys."
         contact:
             title: How can I contact you or request a callback?
             text: "By phone or through our <a href=\"%contactUrl%\">contact form</a>. You can also <a href=\"%callbackUrl%\">request a callback</a>: pick a time slot and an expert will call you to discuss your project."
@@ -1087,7 +1092,7 @@ faq:
         text: That's exactly why we exist. Expats without French payslips, freelancers, foreigners without a guarantor. Our network of partner landlords trusts us, and that trust gets your application through.
     4:
         title: Is my budget realistic for finding a good apartment in Paris?
-        text: We always start with an in-depth conversation to understand your needs. Together, we define a realistic brief aligned with the Paris market, so your search starts on the right footing from day one.
+        text: "We take on searches <strong>from a monthly rent of €1,000</strong>. We always start with an in-depth conversation to understand your needs, then define together a realistic brief aligned with the Paris market, so your search starts on the right footing from day one."
     5:
         title: Can I switch plans during my mission?
         text: Yes, absolutely. If your situation changes during the search, you can move from the Guided offer to the Entrusted offer at any time. We adapt to you, not the other way around.
@@ -1102,7 +1107,7 @@ faq:
         text: Yes, that's exactly what we're here for. Most of our clients are abroad or outside Paris when they begin their search. We handle viewings, landlord negotiations, and application files on your behalf. <strong>You approve from a distance, we handle the rest.</strong>
     9:
         title: Are your fees included in the rent?
-        text: No. Our fees are <strong>independent of the rent and any agency fees</strong>. And thanks to our exclusive network and direct relationships with landlords, many properties come with no agency fees at all, significantly reducing your total move-in cost.
+        text: "No. Our fees are <strong>independent of the rent and any agency fees</strong>. And thanks to our exclusive network and direct relationships with landlords, many properties come with no agency fees at all, significantly reducing your total move-in cost. <a href=\"%pricingUrl%\" class=\"underline underline-offset-4 hover:text-primary transition-colors duration-100 ease-out\">See our packages and prices</a>."
     10:
         title: What documents do I need for a rental application?
         text: No need to worry, we send you a full document checklist as soon as your mission contract is signed. Every file is different, and your dedicated expert will guide you personally based on your situation to build the strongest possible application.

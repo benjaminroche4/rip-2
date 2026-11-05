@@ -9,43 +9,133 @@
         routeName: 'app_service_find_accommodation',
         metaPrefix: 'findAccommodation',
         image: 'medias/website/rip-find-accomodation.webp',
+        offers: ['accompagne', 'confie'],
     } only %}
 {% endblock %}
 
 {% block head_preload %}
-    <link rel="preload" as="image" href="{{ asset('medias/website/rip-find-accomodation.webp') }}" fetchpriority="high">
+    {# The hero video poster is the first large image painted (LCP) #}
+    <link rel="preload" as="image" href="{{ asset('medias/videos/bg-relocation-poster.webp') }}" fetchpriority="high">
 {% endblock %}
 
 {% block body %}
-    <section class="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-16">
-        <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
-            <div class="text-center lg:text-left">
-                <p class="font-semibold font-secondary text-primary">{{ 'findAccommodation.title'|trans|raw }}</p>
-                <h1 class="mt-3 text-4xl sm:text-5xl font-medium text-gray-900 text-balance leading-[1.15]">{{ 'findAccommodation.subTitle'|trans|raw }}</h1>
-                <p class="mt-5 max-w-lg mx-auto lg:mx-0 text-base sm:text-lg font-light text-slate-600 text-pretty">{{ 'findAccommodation.text'|trans|raw }}</p>
-                {% set heroBadges = [
-                    { icon: 'lucide:gem',   key: 1 },
-                    { icon: 'lucide:clock', key: 2 },
-                ] %}
-                <div class="mt-6 flex flex-wrap gap-3 justify-center lg:justify-start">
-                    {% for b in heroBadges %}
-                        <div class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#f7f7f7] px-4 py-2">
-                            {{ ux_icon(b.icon, {'class':'size-4 text-primary shrink-0'}) }}
-                            <p class="text-sm text-black">{{ ('findAccommodation.badge.' ~ b.key)|trans|raw }}</p>
+    {# Background video hero: a compressed Paris loop plays behind the text, no controls #}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10 lg:pt-6 lg:pb-16">
+        <twig:Section:VideoBackground>
+            {# Same type scale as Section:PageHeader (caption, h1, intro), in light colors on the video #}
+            <div class="flex flex-col items-center space-y-4">
+                <p class="font-semibold font-secondary text-[#f3c7d2]">{{ 'findAccommodation.title'|trans|raw }}</p>
+                <h1 class="text-4xl lg:text-5xl/16 font-medium text-white text-balance">{{ 'findAccommodation.subTitle'|trans|raw }}</h1>
+                <p class="max-w-lg font-light text-white/85 text-pretty">{{ 'findAccommodation.text'|trans|raw }}</p>
+            </div>
+            <div class="mt-8 flex flex-col items-center gap-6">
+                <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                    {{ 'home.heroSection.button'|trans|raw }}
+                    {{ ux_icon('lucide:arrow-right', {'class':'size-4 shrink-0'}) }}
+                </twig:Button>
+                {# One quiet reassurance line instead of boxed badges: the button stays the only filled element #}
+                <ul role="list" class="flex flex-col items-center justify-center gap-y-1.5 text-sm text-white/80 sm:flex-row sm:flex-wrap sm:gap-x-3">
+                    <li class="flex items-center gap-2">
+                        <span class="flex -space-x-2" aria-hidden="true">
+                            {% for i in [1, 5, 3] %}
+                                <img src="{{ asset('medias/team/thumb/team_' ~ i ~ '.webp') }}" alt="" width="24" height="24" loading="eager" class="size-6 rounded-full bg-white ring-2 ring-black/40" />
+                            {% endfor %}
+                        </span>
+                        {{ 'findAccommodation.hero.reviews'|trans({'%count%': google_reviews_count})|raw }}
+                    </li>
+                    {% for key in [2] %}
+                        <li class="flex items-center gap-3">
+                            <span class="size-1 rounded-full bg-white/40 max-sm:hidden" aria-hidden="true"></span>
+                            {{ ('findAccommodation.badge.' ~ key)|trans|raw }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </twig:Section:VideoBackground>
+    </section>
+    <section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
+        {# Header: title (left) + intro + stats (right) #}
+        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:gap-16 mb-12 lg:mb-16">
+            <div class="lg:flex-1">
+                <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.advantage.title'|trans|raw }}</p>
+                <h2 class="mt-2 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'findAccommodation.advantage.subTitle'|trans|raw }}</h2>
+            </div>
+            <div class="flex flex-col gap-6 lg:w-[560px]">
+                <div class="flex items-stretch gap-4">
+                    <div class="flex-1">
+                        <p class="text-2xl sm:text-3xl font-semibold text-primary">+900</p>
+                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.relocations'|trans|raw }}</p>
+                    </div>
+                    <div class="w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
+                    <div class="flex-1">
+                        <p class="text-2xl sm:text-3xl font-semibold text-primary">+80</p>
+                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.partners'|trans|raw }}</p>
+                    </div>
+                    <div class="hidden sm:block w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
+                    <div class="hidden sm:block flex-1">
+                        <div class="flex items-center gap-1.5">
+                            {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-yellow-500 shrink-0'}) }}
+                            <p class="text-2xl sm:text-3xl font-semibold text-primary">{{ google_rating }}</p>
+                        </div>
+                        {# The Google logo stands for the "G" of "Google" (same as the home hero); screen readers read "Google" #}
+                        {% set googleWord %}<span aria-hidden="true">{{ ux_icon('devicon:google', {'class': 'inline-block size-[0.9em] align-[-0.1em]'}) }}oogle</span><span class="sr-only">Google</span>{% endset %}
+                        <p class="mt-1 text-sm text-[#525252]">
+                            {{ 'findAccommodation.advantage.stats.reviews'|trans({'%count%': google_reviews_count, '%google%': googleWord})|raw }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 4 image cards — editorial overlay slider (finger + mouse + buttons), like the home services block #}
+        {# Original (already well compressed) + a 640 px version for phones; width = real width of the original #}
+        {% set advImages = [{src: 'medias/website/rip-card-1.webp', width: 1282}, {src: 'medias/website/rip-card-2.webp', width: 2397}, {src: 'medias/website/rip-card-3.webp', width: 1707}, {src: 'medias/website/rip-card-4.webp', width: 1404}] %}
+        <div
+            data-controller="slider"
+            data-slider-autoplay-value="true"
+            data-slider-autoplay-delay-value="2500"
+            data-action="mouseenter->slider#pause mouseleave->slider#resume"
+        >
+            <div class="overflow-hidden -mx-6 px-6 md:mx-0 md:px-0">
+                <div data-slider-target="track" class="flex gap-4 md:gap-6 cursor-grab touch-pan-y">
+                    {% for img in advImages %}
+                        {% set n = loop.index %}
+                        <div class="w-[85%] sm:w-[calc(50%-8px)] md:w-[calc(50%-12px)] shrink-0 rounded-2xl border border-neutral-200 p-2">
+                            <div class="group relative overflow-hidden rounded-xl">
+                                <img src="{{ asset(img.src|replace({'.webp': '-640.webp'})) }}" srcset="{{ asset(img.src|replace({'.webp': '-640.webp'})) }} 640w, {{ asset(img.src) }} {{ img.width }}w" sizes="(min-width: 768px) 50vw, 85vw" alt="" aria-hidden="true" draggable="false" width="640" height="360" loading="lazy" class="w-full aspect-[3/4] sm:aspect-[4/3] object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 from-10% via-black/40 to-black/5" aria-hidden="true"></div>
+                                <div class="absolute inset-0 flex flex-col p-5">
+                                    <div class="mt-auto flex flex-col gap-2.5">
+                                        <div class="h-px w-10 bg-gradient-to-r from-white/70 to-transparent" aria-hidden="true"></div>
+                                        <h3 class="text-xl sm:text-2xl font-semibold text-white text-balance leading-snug">{{ ('findAccommodation.advantage.' ~ n ~ '.title')|trans|raw }}</h3>
+                                        <p class="hidden sm:block text-sm font-light text-white/90 text-pretty">{{ ('findAccommodation.advantage.' ~ n ~ '.text')|trans|raw }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
-                <div class="mt-6 flex justify-center lg:justify-start">
-                    <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                        {{ 'home.heroSection.button'|trans|raw }}
-                        {{ ux_icon('lucide:arrow-right', {'class':'size-4 shrink-0'}) }}
-                    </twig:Button>
-                </div>
             </div>
-            <div>
-                <div class="rounded-3xl border border-neutral-200 p-2">
-                    <img src="{{ asset('medias/website/rip-find-accomodation.webp') }}" alt="{{ 'findAccommodation.imageAlt'|trans }}" width="640" height="520" loading="eager" fetchpriority="high" class="w-full aspect-4/3 lg:aspect-square object-cover rounded-2xl" />
-                </div>
+
+            <div class="mt-6 flex justify-start gap-3">
+                <button
+                    type="button"
+                    data-slider-target="prev"
+                    data-action="click->slider#prev"
+                    aria-label="{{ 'a11y.previous'|trans }}"
+                    class="size-11 rounded-full border border-neutral-200 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
+                >
+                    {{ ux_icon('lucide:arrow-left', {'class':'size-4 shrink-0'}) }}
+                </button>
+                <button
+                    type="button"
+                    data-slider-target="next"
+                    data-action="click->slider#next"
+                    aria-label="{{ 'a11y.next'|trans }}"
+                    class="size-11 rounded-full border border-neutral-200 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
+                >
+                    {{ ux_icon('lucide:arrow-right', {'class':'size-4 shrink-0'}) }}
+                </button>
             </div>
         </div>
     </section>
@@ -62,7 +152,7 @@
         </div>
 
         {# Animated process stepper #}
-        <div class="rounded-[28px] border border-neutral-200 p-2">
+        <div class="mx-auto max-w-5xl rounded-[28px] border border-neutral-200 p-2">
             <div class="rounded-3xl bg-linear-to-b from-[#f7f7f7] to-[#f7f7f7]/0 px-5 py-10 sm:px-10 lg:px-16 lg:py-14">
                 <div class="text-center mb-10 lg:mb-14">
                     <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.process.eyebrow'|trans|raw }}</p>
@@ -122,17 +212,13 @@
 
                 <div class="mt-10 lg:mt-14 flex justify-center">
                     <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
-                        <img loading="lazy" src="{{ asset('medias/team/team_2.webp') }}" alt="" aria-hidden="true" width="20" height="20" class="size-5 rounded-full object-cover" />
+                        <img loading="lazy" src="{{ asset('medias/team/thumb/team_2.webp') }}" alt="" aria-hidden="true" width="20" height="20" class="size-5 rounded-full object-cover" />
                         {{ 'home.heroSection.button'|trans|raw }}
                     </twig:Button>
                 </div>
             </div>
         </div>
     </section>
-    <twig:Section:SolutionGrid
-        keyPrefix="findAccommodation.solution"
-        :icons="['gg:search', 'hugeicons:diamond-02', 'mdi:paper-check-outline', 'humbleicons:key', 'icon-park-outline:people', 'mdi:paris']"
-    />
     <section class="max-w-7xl mx-auto px-6 lg:px-8 lg:py-16 py-12">
         <div class="relative overflow-hidden rounded-3xl bg-[#f7f7f7] px-6 py-12 sm:px-12 lg:py-16">
             <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:18px_18px] opacity-40" aria-hidden="true"></div>
@@ -164,89 +250,46 @@
             </div>
         </div>
     </section>
-    <section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-16">
-        {# Header: title (left) + intro + stats (right) #}
-        <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:gap-16 mb-12 lg:mb-16">
-            <div class="lg:flex-1">
-                <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.advantage.title'|trans|raw }}</p>
-                <h2 class="mt-2 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'findAccommodation.advantage.subTitle'|trans|raw }}</h2>
-            </div>
-            <div class="flex flex-col gap-6 lg:w-[560px]">
-                <div class="flex items-stretch gap-4">
-                    <div class="flex-1">
-                        <p class="text-2xl sm:text-3xl font-semibold text-primary">+900</p>
-                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.relocations'|trans|raw }}</p>
-                    </div>
-                    <div class="w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
-                    <div class="flex-1">
-                        <p class="text-2xl sm:text-3xl font-semibold text-primary">+80</p>
-                        <p class="mt-1 text-sm text-[#525252] text-balance">{{ 'findAccommodation.advantage.stats.partners'|trans|raw }}</p>
-                    </div>
-                    <div class="hidden sm:block w-px self-stretch bg-gradient-to-b from-transparent via-neutral-400 to-transparent opacity-30" aria-hidden="true"></div>
-                    <div class="hidden sm:block flex-1">
-                        <div class="flex items-center gap-1.5">
-                            {{ ux_icon('material-symbols:star-rounded', {'class':'size-6 text-yellow-500 shrink-0'}) }}
-                            <p class="text-2xl sm:text-3xl font-semibold text-primary">{{ google_rating }}</p>
-                        </div>
-                        <p class="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-[#525252]">
-                            {{ 'findAccommodation.advantage.stats.reviewsPrefix'|trans }}{{ google_reviews_count }}
-                            {{ ux_icon('logos:google-icon', {'class':'size-3.5 shrink-0'}) }}
-                            {{ 'findAccommodation.advantage.stats.reviews'|trans|raw }}
+    {# Prices shown upfront: the first question of a visitor (details on the pricing page) #}
+    <section class="max-w-5xl mx-auto px-6 lg:px-8 lg:py-16 py-12" data-testid="find-accommodation-pricing">
+        <div class="mx-auto max-w-2xl text-center">
+            <p class="font-semibold text-primary font-secondary">{{ 'findAccommodation.pricing.caption'|trans }}</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl font-medium text-black text-balance leading-[1.3]">{{ 'findAccommodation.pricing.title'|trans }}</h2>
+            <p class="mt-4 font-light text-slate-600 text-pretty">{{ 'findAccommodation.pricing.text'|trans }}</p>
+        </div>
+        {# Same cards as the pricing page (eyebrow band, round icon, title, text, price), without the feature list #}
+        <div class="mt-10 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+            {% for n in [1, 2] %}
+                {% set featured = n == 2 %}
+                <div class="{{ featured ? 'shimmer-border border-[#EB9CB0] bg-linear-to-b from-[#FFE5EB] to-[#FFE5EB]/0' : 'border-slate-100 bg-white' }} group rounded-2xl p-2 border flex flex-col">
+                    <div class="mb-1.5 mt-0.5 text-center {{ featured ? 'text-primary' }}">
+                        <p class="text-sm flex items-center gap-x-2 justify-center">
+                            {% if featured %}{{ ux_icon('akar-icons:thunder', {'class':'size-3 text-primary', 'aria-hidden':'true'}) }}{% endif %}
+                            {{ ('pricing.package.' ~ n ~ '.eyebrow')|trans|raw }}
                         </p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        {# 4 image cards — editorial overlay slider (finger + mouse + buttons), like the home services block #}
-        {% set advImages = ['medias/website/rip-card-1.webp', 'medias/website/rip-card-2.webp', 'medias/website/rip-card-3.webp', 'medias/website/rip-card-4.webp'] %}
-        <div
-            data-controller="slider"
-            data-slider-autoplay-value="true"
-            data-slider-autoplay-delay-value="2500"
-            data-action="mouseenter->slider#pause mouseleave->slider#resume"
-        >
-            <div class="overflow-hidden -mx-6 px-6 md:mx-0 md:px-0">
-                <div data-slider-target="track" class="flex gap-4 md:gap-6 cursor-grab touch-pan-y">
-                    {% for img in advImages %}
-                        {% set n = loop.index %}
-                        <div class="w-[85%] sm:w-[calc(50%-8px)] md:w-[calc(50%-12px)] shrink-0 rounded-2xl border border-neutral-200 p-2">
-                            <div class="group relative overflow-hidden rounded-xl">
-                                <img src="{{ asset(img) }}" alt="" aria-hidden="true" draggable="false" width="640" height="360" loading="lazy" class="w-full aspect-[3/4] sm:aspect-[4/3] object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 from-10% via-black/40 to-black/5" aria-hidden="true"></div>
-                                <div class="absolute inset-0 flex flex-col p-5">
-                                    <div class="mt-auto flex flex-col gap-2.5">
-                                        <div class="h-px w-10 bg-gradient-to-r from-white/70 to-transparent" aria-hidden="true"></div>
-                                        <h3 class="text-xl sm:text-2xl font-semibold text-white text-balance leading-snug">{{ ('findAccommodation.advantage.' ~ n ~ '.title')|trans|raw }}</h3>
-                                        <p class="hidden sm:block text-sm font-light text-white/90 text-pretty">{{ ('findAccommodation.advantage.' ~ n ~ '.text')|trans|raw }}</p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="rounded-xl {{ featured ? 'bg-white' : 'bg-linear-to-b from-neutral-100 to-neutral-100/0' }} flex flex-1 flex-col p-4 lg:p-6">
+                        <div class="rounded-full p-3 {{ featured ? 'bg-[#FFF4F6]' : 'bg-white' }} self-start">
+                            {% if featured %}
+                                {{ ux_icon('tabler:crown-filled', {'class':'size-7 text-primary', 'aria-hidden':'true'}) }}
+                            {% else %}
+                                {{ ux_icon('material-symbols:star-rounded', {'class':'size-7 text-gray-900 group-hover:text-primary transition duration-100', 'aria-hidden':'true'}) }}
+                            {% endif %}
                         </div>
-                    {% endfor %}
+                        <div class="pt-2 space-y-2">
+                            <h3 class="text-2xl font-semibold">{{ ('pricing.package.' ~ n ~ '.title')|trans|raw }}</h3>
+                            <p class="text-pretty font-light text-slate-600">{{ ('pricing.package.' ~ n ~ '.text')|trans|raw }}</p>
+                            <p class="text-3xl font-semibold text-primary mt-6">{{ ('contact.contactForm.offer.' ~ (featured ? 'confie' : 'accompagne') ~ '.price')|trans }}</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="mt-6 flex justify-start gap-3">
-                <button
-                    type="button"
-                    data-slider-target="prev"
-                    data-action="click->slider#prev"
-                    aria-label="{{ 'a11y.previous'|trans }}"
-                    class="size-11 rounded-full border border-neutral-200 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary opacity-30 cursor-not-allowed pointer-events-none"
-                >
-                    {{ ux_icon('lucide:arrow-left', {'class':'size-4 shrink-0'}) }}
-                </button>
-                <button
-                    type="button"
-                    data-slider-target="next"
-                    data-action="click->slider#next"
-                    aria-label="{{ 'a11y.next'|trans }}"
-                    class="size-11 rounded-full border border-neutral-200 flex items-center justify-center transition-all duration-200 hover:bg-primary hover:text-white hover:border-primary"
-                >
-                    {{ ux_icon('lucide:arrow-right', {'class':'size-4 shrink-0'}) }}
-                </button>
-            </div>
+            {% endfor %}
+        </div>
+        <div class="mt-8 flex justify-center">
+            <twig:Button variant="outline" as="a" href="{{ path('app_pricing') }}">
+                {{ 'findAccommodation.pricing.link'|trans }}
+                {{ ux_icon('lucide:arrow-right', {'class': 'size-4 shrink-0'}) }}
+            </twig:Button>
         </div>
     </section>
     <section class="max-w-2xl mx-auto lg:max-w-7xl px-6 lg:px-8 lg:py-16 py-12">
@@ -259,7 +302,8 @@
                 </div>
             </div>
             <div class="mt-10 lg:col-span-7 lg:mt-0">
-                <twig:Section:FaqAccordion keyPrefix="home.faq.question" :keys="[7, 8, 3, 4, 9, 6]" />
+                {# The decision blockers of a home search client: remote, timing, profile, budget, fees, risk #}
+                <twig:Section:FaqAccordion :keys="['findAccommodation.faq.question.3', 'home.faq.question.3', 'home.faq.question.7', 'faq.4', 'faq.9', 'faq.1']" />
             </div>
         </div>
     </section>
