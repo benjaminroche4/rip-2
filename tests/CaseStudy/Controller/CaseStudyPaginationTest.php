@@ -111,7 +111,7 @@ final class CaseStudyPaginationTest extends WebTestCase
             'clientProfile' => '', 'housingType' => '', 'stayType' => '', 'origin' => '', 'summary' => '',
             'locationText' => '', 'applicationText' => '', 'securingText' => '', 'quote' => '', 'quoteAuthor' => '',
             'criteria' => [], 'applicationDocuments' => [], 'visits' => [], 'body' => [], 'process' => [],
-            'table' => null, 'offer' => null, 'homesVisited' => null, 'featured' => false,
+            'offer' => null, 'homesVisited' => null, 'featured' => false,
         ]));
         static::getContainer()->set(CaseStudyRepositoryInterface::class, new class([$minimal]) implements CaseStudyRepositoryInterface {
             /** @param list<CaseStudy> $items */
@@ -137,7 +137,7 @@ final class CaseStudyPaginationTest extends WebTestCase
             self::assertSelectorNotExists('section[aria-labelledby="case-study-'.$section.'"]', $section);
         }
         self::assertSelectorNotExists('[data-testid="case-study-summary"]');
-        self::assertSelectorNotExists('[data-testid="case-study-table"]');
+        self::assertSelectorNotExists('article table');
         // Always there: method (standard steps), area map, delivered card, key facts without empty rows
         self::assertCount(3, $crawler->filter('section[aria-labelledby="case-study-process"] li'));
         self::assertSelectorExists('[data-testid="case-study-map"]');

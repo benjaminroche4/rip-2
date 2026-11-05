@@ -62,10 +62,8 @@ final readonly class CaseStudy
         /** @var list<array{title: string, text: string, photos: list<array{src: string, alt: string}>}> */
         public array $visits,
         public string $securingText,
-        /** @var list<array<string, mixed>> Free blocks after the map, the same Sanity blocks as a blog article body. */
+        /** @var list<array<string, mixed>> Free blocks after the map (text, FAQ, CTA, quick answer, table), the same Sanity blocks as a blog article body. */
         public array $body,
-        /** @var array{title: string, caption: ?string, rows: list<list<string>>}|null First row = column headers, first column = row headers. */
-        public ?array $table,
         /** The client's own words and who said them (first name, or role for a company). */
         public string $quote,
         public string $quoteAuthor,

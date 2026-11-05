@@ -96,7 +96,6 @@ final class CaseStudyMapper
             visits: self::visits($row['visits'] ?? null),
             securingText: self::string($row, 'securingText'),
             body: self::body($row['body'] ?? null),
-            table: self::table($row['figures'] ?? null),
             quote: self::string($row, 'quote'),
             quoteAuthor: self::string($row, 'quoteAuthor'),
             featured: true === ($row['featured'] ?? null),
@@ -264,30 +263,5 @@ final class CaseStudyMapper
         }
 
         return $body;
-    }
-
-    /** @return array{title: string, caption: ?string, rows: list<list<string>>}|null */
-    private static function table(mixed $figures): ?array
-    {
-        if (!is_array($figures)) {
-            return null;
-        }
-        $rows = [];
-        foreach (is_array($figures['table']['rows'] ?? null) ? $figures['table']['rows'] : [] as $row) {
-            $cells = array_map(static fn (mixed $cell): string => is_string($cell) ? $cell : '', is_array($row['cells'] ?? null) ? $row['cells'] : []);
-            if ([] !== array_filter($cells, static fn (string $cell): bool => '' !== trim($cell))) {
-                $rows[] = array_values($cells);
-            }
-        }
-
-        if (\count($rows) < 2 || '' === self::string($figures, 'title')) {
-            return null;
-        }
-
-        return [
-            'title' => self::string($figures, 'title'),
-            'caption' => '' !== self::string($figures, 'caption') ? self::string($figures, 'caption') : null,
-            'rows' => $rows,
-        ];
     }
 }

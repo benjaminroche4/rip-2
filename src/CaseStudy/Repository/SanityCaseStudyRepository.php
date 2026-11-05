@@ -65,7 +65,6 @@ final class SanityCaseStudyRepository implements CaseStudyRepositoryInterface, R
         applicationDocuments,
         visits[]{title, text, "photos": photos[]{"url": asset->url, alt, hotspot, crop, "dims": asset->metadata.dimensions}},
         securingText,
-        figures{title, caption, table},
         quote,
         quoteAuthor,
         "alternateSlug": *[_type == "translation.metadata" && references(^._id)][0].translations[_key != $locale][0].value->slug.current

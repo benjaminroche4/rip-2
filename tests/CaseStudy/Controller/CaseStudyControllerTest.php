@@ -165,7 +165,8 @@ final class CaseStudyControllerTest extends WebTestCase
 
         self::assertSame(
             // The story in reading order: what the client wanted first, the generic method is gone
-            ['Notre méthode', 'La demande', 'Le quartier', 'Le dossier locatif', 'Les visites', 'La sécurisation du logement', 'Le projet en chiffres', 'Projet livré', 'Ils nous recommandent'],
+            // (the figures table is a free block, so it comes right after the area)
+            ['Notre méthode', 'La demande', 'Le quartier', 'Le projet en chiffres', 'Le dossier locatif', 'Les visites', 'La sécurisation du logement', 'Projet livré', 'Ils nous recommandent'],
             $crawler->filter('article section[aria-labelledby] h2, article section[id] > h2')->each(static fn ($h): string => trim($h->text())),
         );
         // Our generic method stays short
@@ -189,15 +190,14 @@ final class CaseStudyControllerTest extends WebTestCase
         self::assertSelectorNotExists('[data-testid="case-study-quote"] img');
         self::assertSelectorTextContains('[data-testid="case-study-quote"] figcaption', 'Emma');
         self::assertSelectorTextContains('[data-testid="case-study-quote"] figcaption', 'Londres → Paris 16e');
-        // Free text and a table, the same blocks as in blog articles
-        // Free blocks from Sanity, rendered like a blog article body (here a text block)
+        // Free blocks from Sanity, rendered like a blog article body: a text block and a table block
         $why = $crawler->filter('article h2')->reduce(static fn ($h): bool => 'Pourquoi Paris 16e ?' === trim($h->text()));
         self::assertCount(1, $why);
         self::assertStringContainsString('Le quartier a été choisi avec le client', $crawler->filter('article')->text());
-        self::assertSelectorTextContains('[data-testid="case-study-table"] thead', 'Poste');
-        self::assertSame(['Loyer', 'Dépôt de garantie', 'Délai'], $crawler->filter('[data-testid="case-study-table"] tbody th[scope="row"]')->each(static fn ($th): string => trim($th->text())));
-        self::assertSelectorTextContains('[data-testid="case-study-table"] tbody', '1 mois de loyer');
-        self::assertSelectorTextContains('[data-testid="case-study-table"] caption', 'Montants indicatifs');
+        self::assertSelectorTextContains('section#le-projet-en-chiffres thead', 'Poste');
+        self::assertSame(['Loyer', 'Dépôt de garantie', 'Délai'], $crawler->filter('section#le-projet-en-chiffres tbody th[scope="row"]')->each(static fn ($th): string => trim($th->text())));
+        self::assertSelectorTextContains('section#le-projet-en-chiffres tbody', '1 mois de loyer');
+        self::assertSelectorTextContains('section#le-projet-en-chiffres caption', 'Montants indicatifs');
 
         // Call to action inside the story, same card as in blog articles
         self::assertSelectorTextContains('[data-testid="case-study-cta"]', 'Vous aussi, installez-vous à Paris sereinement');

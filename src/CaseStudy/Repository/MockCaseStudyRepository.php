@@ -461,8 +461,7 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
                             $shared['text']['paragraphs'],
                             array_keys($shared['text']['paragraphs']),
                         ),
-                    ]],
-                    table: self::figures($shared['table'], $story['budget'], $item['days'], $locale, str_contains(strtolower($item['en']['housingType']), 'unfurnished')),
+                    ], self::tableBlock(self::figures($shared['table'], $story['budget'], $item['days'], $locale, str_contains(strtolower($item['en']['housingType']), 'unfurnished')))],
                     quote: $story[$locale]['quote'],
                     quoteAuthor: $story[$locale]['quoteAuthor'],
                     featured: $story['featured'],
@@ -507,6 +506,26 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
                 array_map(static fn (string $cell): string => strtr($cell, $values), $labels['deposit']),
                 array_map(static fn (string $cell): string => strtr($cell, $values), $labels['delay']),
             ],
+        ];
+    }
+
+    /**
+     * The figures as a free "tableBlock", the shape Sanity returns for a table in the free blocks.
+     *
+     * @param array{title: string, caption: string, rows: list<list<string>>} $figures
+     *
+     * @return array<string, mixed>
+     */
+    private static function tableBlock(array $figures): array
+    {
+        return [
+            '_type' => 'tableBlock',
+            '_key' => 'figures',
+            'title' => $figures['title'],
+            'caption' => $figures['caption'],
+            'firstRowIsHeader' => true,
+            'firstColumnIsHeader' => true,
+            'table' => ['rows' => array_map(static fn (array $cells): array => ['cells' => $cells], $figures['rows'])],
         ];
     }
 

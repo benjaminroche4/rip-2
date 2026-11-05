@@ -199,10 +199,6 @@
                         </section>
                     {% endif %}
 
-                    {% if caseStudy.table %}
-                        <twig:Section:DataTable :rows="caseStudy.table.rows" :title="caseStudy.table.title" :caption="caseStudy.table.caption" data-testid="case-study-table" />
-                    {% endif %}
-
                     <section aria-labelledby="case-study-delivered">
                         <h2 id="case-study-delivered" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.delivered.title'|trans }}</h2>
                         <twig:CaseStudy:DeliveredCard :days="caseStudy.daysToSettle" :homesVisited="caseStudy.homesVisited" :budget="caseStudy.budget" />

@@ -64,11 +64,6 @@ final class CaseStudyMapperTest extends TestCase
             'applicationDocuments' => ['employer', 'unknown', 'income', 'employer'],
             'visits' => [['title' => 'Première visite', 'text' => 'Sélection.', 'photos' => [['url' => 'https://cdn.sanity.io/images/p/d/v1.jpg', 'alt' => 'Rue'], ['alt' => 'no asset']]]],
             'securingText' => 'Nous sécurisons.',
-            'figures' => ['title' => 'Le projet en chiffres', 'caption' => 'Indicatif.', 'table' => ['rows' => [
-                ['cells' => ['Poste', 'Détail']],
-                ['cells' => ['Loyer', '4 200 €/mois']],
-                ['cells' => ['', '']],
-            ]]],
             'quote' => 'Tout était prêt.',
             'quoteAuthor' => 'Emma',
             'alternateSlug' => 'london-family-paris-16',
@@ -105,17 +100,14 @@ final class CaseStudyMapperTest extends TestCase
         self::assertSame('caseStudy.profile.family', $caseStudy->clientProfile);
         self::assertSame('caseStudy.housing.unfurnished', $caseStudy->housingType);
         self::assertSame('Paris 16e', $caseStudy->district);
-        // Empty table rows are skipped
-        self::assertSame([['Poste', 'Détail'], ['Loyer', '4 200 €/mois']], $caseStudy->table['rows'] ?? null);
     }
 
     public function testOptionalBlocksAndTranslationMayBeMissing(): void
     {
-        $caseStudy = self::mapper()->fromGroqArray(self::row(['body' => null, 'figures' => null, 'alternateSlug' => null]));
+        $caseStudy = self::mapper()->fromGroqArray(self::row(['body' => null, 'alternateSlug' => null]));
 
         self::assertNotNull($caseStudy);
         self::assertSame([], $caseStudy->body);
-        self::assertNull($caseStudy->table);
         self::assertNull($caseStudy->alternateSlug);
     }
 
@@ -262,7 +254,6 @@ final class CaseStudyMapperTest extends TestCase
         self::assertNull($caseStudy->budget);
         self::assertNull($caseStudy->offer);
         self::assertNull($caseStudy->homesVisited);
-        self::assertNull($caseStudy->table);
         self::assertNull($caseStudy->alternateSlug);
         self::assertFalse($caseStudy->featured);
         foreach (['clientProfile', 'housingType', 'stayType', 'origin', 'summary', 'locationText', 'applicationText', 'securingText', 'quote', 'quoteAuthor'] as $text) {
