@@ -33,3 +33,12 @@ services:
             $sanityApiVersion: '%env(SANITY_API_VERSION)%'
             $sanityToken: '%env(SANITY_TOKEN)%'
             $sanityUseCdn: '%env(bool:SANITY_USE_CDN)%'
+
+    # Case studies come from Sanity; the test suite uses the in-repo data set (no network)
+    App\CaseStudy\Repository\CaseStudyRepositoryInterface: '@App\CaseStudy\Repository\SanityCaseStudyRepository'
+
+when@test:
+    services:
+        App\CaseStudy\Repository\CaseStudyRepositoryInterface:
+            alias: App\CaseStudy\Repository\MockCaseStudyRepository
+            public: true

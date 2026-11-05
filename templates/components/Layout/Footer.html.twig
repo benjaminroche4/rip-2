@@ -131,7 +131,7 @@
                             {% set currentHour = "now"|date("G", "Europe/Paris") %}
                             {% set isOpen = (currentDay >= 1 and currentDay <= 5 and currentHour >= 8 and currentHour < 20) or (currentDay == 6 and currentHour >= 8 and currentHour < 12) %}
                             {% if isOpen %}
-                            <div class="max-[330px]:hidden bg-[#ECFDF5] text-[#059669] py-1.5 px-2 rounded-full text-xs font-medium flex items-center gap-x-1 justify-center">
+                            <div class="max-[330px]:hidden bg-[#ECFDF5] text-[#047857] py-1.5 px-2 rounded-full text-xs font-medium flex items-center gap-x-1 justify-center">
                                 <span class="relative flex size-2">
                                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                                     <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
@@ -159,6 +159,7 @@
                         <a href="{{ path('app_pricing') }}" class="{% if app.request.attributes.get('_route') == 'app_pricing' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.pricing'|trans|raw }}</a>
                         <a href="{{ path('app_newsletter') }}" class="{% if app.request.attributes.get('_route') == 'app_newsletter' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.newsletter'|trans|raw }}</a>
                         <a href="{{ path('app_blog') }}" class="{% if app.request.attributes.get('_route') == 'app_blog' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.blog'|trans|raw }}</a>
+                        <a href="{{ path('app_case_studies') }}" class="{% if app.request.attributes.get('_route') == 'app_case_studies' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">{{ 'footer.menu.caseStudies'|trans|raw }}</a>
                         <a href="{{ path('app_property') }}" class="{% if app.request.attributes.get('_route') == 'app_property' %}text-slate-400{% else %}text-slate-200{% endif %} hover:text-slate-400 transition duration-100">
                             {{ 'footer.menu.ourProperty'|trans|raw }}
                         </a>

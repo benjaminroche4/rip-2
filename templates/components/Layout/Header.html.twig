@@ -2,9 +2,17 @@
 {% set currentParameters = app.request.attributes.get('_route_params') %}
 
 {% if currentRoute == 'app_blog_show' and post is defined and post is not null %}
-    {% set blogSwitchParams = {
+    {% set contentSwitchParams = {
         'fr': {'_locale': 'fr', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug},
         'en': {'_locale': 'en', 'slug': post.alternateSlug is defined and post.alternateSlug ? post.alternateSlug.slug : post.slug}
+    } %}
+{% endif %}
+
+{# Case studies: same content, a different slug per locale #}
+{% if currentRoute == 'app_case_study_show' and caseStudy is defined and caseStudy is not null %}
+    {% set contentSwitchParams = {
+        (app.request.locale): {'_locale': app.request.locale, 'slug': caseStudy.slug},
+        (app.request.locale == 'fr' ? 'en' : 'fr'): {'_locale': app.request.locale == 'fr' ? 'en' : 'fr', 'slug': caseStudy.alternateSlug ?? caseStudy.slug}
     } %}
 {% endif %}
 
@@ -190,7 +198,7 @@
             >
                 <div class="w-screen max-w-[142px] flex-auto rounded-2xl space-y-1.5 bg-white p-3 text-sm/6 shadow-lg outline outline-1 outline-gray-900/5">
                     <a
-                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
+                        href="{{ path(currentRoute, contentSwitchParams is defined ? contentSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                         hreflang="fr"
                         lang="fr"
                         class="{% if app.request.locale == 'fr' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
@@ -201,7 +209,7 @@
                         </span>
                     </a>
                     <a
-                        href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
+                        href="{{ path(currentRoute, contentSwitchParams is defined ? contentSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                         hreflang="en"
                         lang="en"
                         class="{% if app.request.locale == 'en' %}bg-neutral-100 text-primary font-semibold{% endif %} relative rounded-lg px-4 py-2 hover:bg-neutral-100 block text-sm/7 text-gray-900 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
@@ -387,7 +395,7 @@
                                         </button>
                                         <el-disclosure id="lang" hidden class="mt-2 [&:not([hidden])]:block">
                                             <a
-                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
+                                                href="{{ path(currentRoute, contentSwitchParams is defined ? contentSwitchParams.fr : (propertySwitchParams is defined ? propertySwitchParams.fr : (currentParameters ?? {})|merge({'_locale': 'fr'}))) }}"
                                                 hreflang="fr"
                                                 lang="fr"
                                                 class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"
@@ -403,7 +411,7 @@
                                                 {% endif %}
                                             </a>
                                             <a
-                                                href="{{ path(currentRoute, blogSwitchParams is defined ? blogSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
+                                                href="{{ path(currentRoute, contentSwitchParams is defined ? contentSwitchParams.en : (propertySwitchParams is defined ? propertySwitchParams.en : (currentParameters ?? {})|merge({'_locale': 'en'}))) }}"
                                                 hreflang="en"
                                                 lang="en"
                                                 class="block rounded-lg py-2 px-3.5 text-sm/7 font-semibold text-gray-900 hover:bg-neutral-100 cursor-pointer flex justify-between items-center outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 transition-colors duration-100 ease-out"

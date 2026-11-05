@@ -110,6 +110,7 @@ sitemap:
         companies: Solutions entreprises
         management: Gestion locative
         blog: Blog
+        caseStudies: Études de cas
         contact: Contactez-nous
         callback: On vous rappelle
         aboutUs: À propos
@@ -133,6 +134,7 @@ footer:
         management: Gestion locative
         ourProperty: Nos biens
         blog: Blog
+        caseStudies: Études de cas
         contact: Contactez-nous
         callback: On vous rappelle
         aboutUs: À propos
@@ -465,6 +467,9 @@ findAccommodation:
                 title: "Bienvenue chez vous"
                 description: "Remise des clés, état des lieux d'entrée : nous sommes là le jour J, et après si vous avez besoin de nous."
 meta:
+    caseStudies:
+        title: "Études de cas de relocation à Paris"
+        description: "Familles, actifs, collaborateurs mutés : découvrez comment nous avons trouvé leur logement à Paris, d’où ils venaient et en combien de jours."
     callback:
         title: "On vous rappelle : parlez à un expert"
         description: Un expert en relocation vous rappelle par téléphone ou WhatsApp pour faire le point sur votre installation à Paris. Sans engagement.
@@ -1828,3 +1833,85 @@ propertyEstimation:
             title: Votre demande d'estimation a bien été envoyée. Nous revenons vers vous rapidement.
         error:
             tooManyRequests: Trop de demandes envoyées. Merci de réessayer dans quelques minutes.
+caseStudy:
+    segment:
+        private: Particuliers
+        company: Entreprises
+    list:
+        featured: "À la une"
+        stats:
+            averageDays: "Délai moyen : %count% jours"
+            origins: "{1} 1 ville de départ|]1,Inf[ %count% villes de départ"
+            audiences: "Particuliers et entreprises"
+        caption: Études de cas
+        subTitle: Ils se sont installés à Paris avec nous
+        text: "Derrière chaque bail signé, une histoire. Découvrez comment familles, actifs et collaborateurs mutés ont trouvé leur logement à Paris."
+        all: Toutes les études
+        breadcrumb: Études de cas
+        handledBy: Suivi par %name%
+        route: De %from% à %to%
+        daysToSettle: "{1} Bail signé en 1 jour|]1,Inf[ Bail signé en %count% jours"
+        empty: Aucune étude de cas dans cette catégorie pour le moment.
+    show:
+        readingTime: "%count% min de lecture"
+        process:
+            title: "Notre méthode"
+            1:
+                title: "Cadrer le projet"
+                text: "Nous partons de vos besoins, de votre calendrier et de votre budget pour définir une stratégie de relocation claire."
+            2:
+                title: "Chercher et sécuriser"
+                text: "Nos experts gèrent la recherche, les visites, la négociation et le dossier pour obtenir le bon logement."
+            3:
+                title: "S'installer sereinement"
+                text: "Nous prenons en charge les démarches et l’installation pour une arrivée en toute confiance à Paris."
+        recap:
+            offer: "Formule"
+            title: "L'essentiel"
+            year: "Année"
+            client: "Client"
+            service: "Service"
+            household: "Foyer"
+            budget: "Budget"
+            housing: "Logement"
+            route: "Trajet"
+            agentRole: "Conseil en relocation"
+        stats:
+            household: "{1} 1 personne|]1,Inf[ %count% personnes"
+            budget: "%amount% €/mois"
+        location: "Le quartier"
+        mapAlt: "Carte du quartier recherché, %district%"
+        request: "La demande"
+        application:
+            title: "Le dossier locatif"
+            built: "Ce que nous avons constitué"
+        visits: "Les visites"
+        gallery:
+            prev: "Photos précédentes"
+            next: "Photos suivantes"
+        securing: "La sécurisation du logement"
+        delivered:
+            perMonth: "/mois"
+            homes: "{1} logement visité|]1,Inf[ logements visités"
+            budget: "Budget tenu"
+            title: "Projet livré"
+            days: "{1} jour pour trouver et signer le bail|]1,Inf[ jours pour trouver et signer le bail"
+        testimonial: "Ils nous recommandent"
+        cta:
+            title: "Vous aussi, installez-vous à Paris sereinement"
+            text: "Un conseiller dédié s'occupe de votre recherche, de la première visite à la signature du bail."
+        others:
+            caption: "Études de cas"
+            title: "Ils se sont aussi installés avec nous"
+            button: "Toutes les études"
+    document:
+        employer: "Employeur"
+        guarantor: "Garant"
+        international: "International"
+        income: "Salaire"
+        scholarship: "Bourse"
+        employerText: "Attestation d'emploi et garantie de l'entreprise"
+        guarantorText: "Un garant ou une garantie locative reconnue"
+        internationalText: "Pièces étrangères traduites et mises en forme"
+        incomeText: "Bulletins de salaire et avis d'imposition"
+        scholarshipText: "Attestation de bourse et justificatifs"

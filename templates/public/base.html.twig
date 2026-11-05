@@ -13,6 +13,7 @@
 
         {# OG image is captured here so meta partial can receive the resolved value #}
         {% set pageOgImage %}{% block og_image %}{{ asset('medias/banner/relocation-in-paris-banner.webp') }}{% endblock %}{% endset %}
+        {% set pageOgType %}{% block og_type %}website{% endblock %}{% endset %}
 
         {% block hreflang %}{% include '_partials/hreflang.html.twig' %}{% endblock %}
 
@@ -21,6 +22,7 @@
             pageDescription: block('description'),
             pageUrl: block('url'),
             pageOgImage: pageOgImage|trim,
+            pageOgType: pageOgType|trim,
         } only %}
 
         {% block stylesheets %}{% endblock %}
@@ -52,7 +54,7 @@
         <twig:Section:GridBackground />
         {# Focused pages (e.g. "On vous rappelle") override header/footer with an empty block #}
         {# The sticky header is a direct child of <body>: it stays on top over the whole page, footer included #}
-        {% block header %}<twig:Layout:Header :post="post|default(null)" :property="property|default(null)" />{% endblock %}
+        {% block header %}<twig:Layout:Header :post="post|default(null)" :property="property|default(null)" :caseStudy="caseStudy|default(null)" />{% endblock %}
         <main id="main-content" class="relative z-20" tabindex="-1">
             {% block body %}{% endblock %}
         </main>

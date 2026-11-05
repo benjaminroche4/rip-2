@@ -1,0 +1,54 @@
+{# Case study card (Figma "Website" 2953:27170), with the type scale, colors, badge,
+   author line and hover of Blog:PostCard so both listings read the same.
+   The date is left out on purpose: on a case study the adviser matters, not when it was published.
+   @prop caseStudy    App\CaseStudy\Domain\CaseStudy
+   @prop headingLevel '2' on the listing, '3' under a section heading (detail page) #}
+{%- props caseStudy, headingLevel = '2' -%}
+<a href="{{ path('app_case_study_show', {slug: caseStudy.slug}) }}" data-turbo-frame="_top" aria-labelledby="case-study-{{ caseStudy.slug }}" {{ attributes.defaults({class: 'group flex flex-col space-y-2 rounded-2xl border border-slate-100 p-2 transition duration-100 hover:border-primary/20'}) }} data-testid="case-study-card">
+    <div class="relative overflow-hidden rounded-lg">
+        <img src="{{ asset(caseStudy.photo) }}" srcset="{{ asset(caseStudy.photoSmall) }} 600w, {{ asset(caseStudy.photo) }} 1200w" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" alt="{{ caseStudy.photoAlt }}" loading="lazy" decoding="async" width="600" height="400" class="aspect-3/2 w-full rounded-lg object-cover"/>
+        <div class="absolute top-3 left-3">
+            <twig:Badge variant="secondary" class="gap-x-1.5">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0" aria-hidden="true">
+                    <circle cx="4" cy="4" r="3" fill="{{ caseStudy.segment.color|e('html_attr') }}"/>
+                </svg>
+                {{ caseStudy.relocationType }}
+            </twig:Badge>
+        </div>
+    </div>
+    <div class="flex flex-1 flex-col p-3">
+        <div class="flex items-center gap-x-2 text-sm text-neutral-600">
+            <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
+            <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
+        </div>
+        <div class="mt-4 space-y-2">
+            <h{{ headingLevel }} id="case-study-{{ caseStudy.slug }}" class="line-clamp-2 text-xl font-medium break-words" title="{{ caseStudy.title }}">{{ caseStudy.title }}</h{{ headingLevel }}>
+            <ul class="space-y-1.5 font-light text-neutral-600">
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:user', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    <span class="min-w-0 truncate">{{ caseStudy.clientProfile }} · {{ caseStudy.housingType }}</span>
+                </li>
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:calendar', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    <span class="min-w-0 truncate">{{ caseStudy.stayType }}</span>
+                </li>
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': caseStudy.origin, '%to%': caseStudy.district}) }}</span>
+                    <span class="flex min-w-0 items-center gap-x-1.5" aria-hidden="true">
+                        <span class="truncate">{{ caseStudy.origin }}</span>
+                        {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }}
+                        <span class="shrink-0">{{ caseStudy.district }}</span>
+                    </span>
+                </li>
+            </ul>
+        </div>
+        {# Key result: how fast the lease was signed #}
+        <div class="mt-auto pt-5">
+            <p class="flex items-center gap-x-2 rounded-lg bg-primary-25 px-3 py-2.5 text-sm font-medium text-primary" data-testid="case-study-result">
+                {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'caseStudy.list.daysToSettle'|trans({'%count%': caseStudy.daysToSettle}) }}
+            </p>
+        </div>
+    </div>
+</a>

@@ -1,0 +1,55 @@
+{# Table section of a long text (blog article tableBlock, case study figures): optional title,
+   horizontally scrollable bordered table, optional caption with an info icon.
+   @prop rows                list<list<string>> Cells, row by row
+   @prop title               ?string            Section title (h2), also labels the scroll region
+   @prop caption             ?string            Note under the table
+   @prop firstRowIsHeader    bool               First row = column headers (default true)
+   @prop firstColumnIsHeader bool               First cell of each row = row header (default true) #}
+{%- props rows = [], title = null, caption = null, firstRowIsHeader = true, firstColumnIsHeader = true -%}
+{% if rows is not empty %}
+    {% set headingId = title ? title|slugify ~ '-heading' : null %}
+    <section {% if title %}id="{{ title|slugify }}"{% endif %} {{ attributes.defaults({class: 'scroll-mt-6'}) }}>
+        {% if title %}
+            <h2 id="{{ headingId }}" class="text-3xl font-semibold mb-6">{{ title }}</h2>
+        {% endif %}
+        <div
+            tabindex="0"
+            role="region"
+            {% if headingId %}aria-labelledby="{{ headingId }}"{% else %}aria-label="{{ 'blog.show.tableRegion'|trans }}"{% endif %}
+            class="overflow-x-auto rounded-2xl border border-neutral-200 focus-visible:outline-2 focus-visible:outline-primary"
+        >
+            <table class="w-full text-left text-sm">
+                {% if caption %}
+                    <caption class="caption-bottom border-t border-neutral-200 px-6 py-3 text-left text-xs text-neutral-500">
+                        <span class="flex items-start gap-x-2">
+                            {{ ux_icon('lucide:info', {'class': 'size-4 shrink-0'}) }}
+                            {{ caption }}
+                        </span>
+                    </caption>
+                {% endif %}
+                {% if firstRowIsHeader %}
+                    <thead>
+                        <tr class="bg-neutral-50 divide-x divide-neutral-200 border-b border-neutral-200">
+                            {% for cell in rows[0] %}
+                                <th scope="col" class="px-6 py-3 text-xs font-semibold text-neutral-600 whitespace-nowrap">{{ cell }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                {% endif %}
+                <tbody class="divide-y divide-neutral-200">
+                    {% for row in firstRowIsHeader ? rows[1:] : rows %}
+                        <tr class="divide-x divide-neutral-200">
+                            {% for cell in row %}
+                                {% if firstColumnIsHeader and loop.first %}
+                                    <th scope="row" class="px-6 py-4 bg-neutral-50 font-semibold text-neutral-600 align-top">{{ cell }}</th>
+                                {% else %}
+                                    <td class="px-6 py-4 text-neutral-600 align-top">{{ cell }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endif %}

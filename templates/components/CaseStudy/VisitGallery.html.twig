@@ -1,0 +1,29 @@
+{# One visit of a case study: title with a primary rule, a sliding strip of photos
+   (slider controller, buttons + drag/swipe) and what happened during that visit.
+   @prop visit array{title: string, text: string, photos: list<array{src: string, alt: string}>} #}
+{%- props visit -%}
+<div class="space-y-4" data-controller="slider">
+    <div class="flex items-center justify-between gap-4">
+        <h3 class="border-l-2 border-primary pl-3 text-xl font-semibold">{{ visit.title }}</h3>
+        {% if visit.photos|length > 3 %}
+            <div class="hidden gap-2 sm:flex">
+                <button type="button" data-slider-target="prev" data-action="click->slider#prev" aria-label="{{ 'caseStudy.show.gallery.prev'|trans }}" class="flex size-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white transition-colors duration-100 hover:border-primary hover:bg-primary hover:text-white">
+                    {{ ux_icon('lucide:chevron-left', {'class': 'size-4', 'aria-hidden': 'true'}) }}
+                </button>
+                <button type="button" data-slider-target="next" data-action="click->slider#next" aria-label="{{ 'caseStudy.show.gallery.next'|trans }}" class="flex size-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white transition-colors duration-100 hover:border-primary hover:bg-primary hover:text-white">
+                    {{ ux_icon('lucide:chevron-right', {'class': 'size-4', 'aria-hidden': 'true'}) }}
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    <div class="overflow-hidden">
+        <ul data-slider-target="track" class="flex cursor-grab touch-pan-y gap-4">
+            {% for photo in visit.photos %}
+                <li class="w-[70%] shrink-0 sm:w-[calc((100%-2rem)/3)]">
+                    <img src="{{ asset(photo.src) }}" alt="{{ photo.alt }}" loading="lazy" decoding="async" draggable="false" width="450" height="600" class="aspect-3/4 w-full rounded-2xl object-cover select-none">
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <p class="leading-7 text-neutral-600">{{ visit.text }}</p>
+</div>

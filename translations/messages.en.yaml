@@ -110,6 +110,7 @@ sitemap:
         companies: Corporate services
         management: Property management
         blog: Blog
+        caseStudies: Case studies
         contact: Contact us
         callback: Request a callback
         aboutUs: About us
@@ -133,6 +134,7 @@ footer:
         management: Property management
         ourProperty: Our properties
         blog: Blog
+        caseStudies: Case studies
         contact: Contact us
         callback: Request a callback
         aboutUs: About us
@@ -465,6 +467,9 @@ findAccommodation:
                 title: "Welcome home"
                 description: "Key handover, move-in inspection: we are there on the day, and afterwards whenever you need us."
 meta:
+    caseStudies:
+        title: "Paris Relocation Case Studies"
+        description: "Families, professionals, transferred employees: see how we found their home in Paris, where they came from and how many days it took."
     callback:
         title: "Request a Callback from an Expert"
         description: Leave your details and a relocation expert will call you back, by phone or WhatsApp, to discuss your move to Paris. No commitment.
@@ -1828,3 +1833,85 @@ propertyEstimation:
             title: Your estimation request has been sent. We will get back to you shortly.
         error:
             tooManyRequests: Too many requests sent. Please try again in a few minutes.
+caseStudy:
+    segment:
+        private: Individuals
+        company: Companies
+    list:
+        featured: "Featured"
+        stats:
+            averageDays: "Average timeline: %count% days"
+            origins: "{1} 1 home city|]1,Inf[ %count% home cities"
+            audiences: "Individuals and companies"
+        caption: Case studies
+        subTitle: They settled in Paris with us
+        text: "Behind every signed lease, there is a story. See how families, professionals and transferred employees found their home in Paris."
+        all: All case studies
+        breadcrumb: Case studies
+        handledBy: Handled by %name%
+        route: From %from% to %to%
+        daysToSettle: "{1} Lease signed in 1 day|]1,Inf[ Lease signed in %count% days"
+        empty: No case study in this category yet.
+    show:
+        readingTime: "%count% min read"
+        process:
+            title: "Our process"
+            1:
+                title: "Assess and plan"
+                text: "We start from your needs, timeline and budget to define a clear relocation strategy."
+            2:
+                title: "Search and secure"
+                text: "Our experts handle the search, viewings, negotiation and paperwork to secure the right home."
+            3:
+                title: "Settle in with confidence"
+                text: "We take care of the admin and the move-in for a smooth, confident arrival in Paris."
+        recap:
+            offer: "Package"
+            title: "At a glance"
+            year: "Year"
+            client: "Client"
+            service: "Service"
+            household: "Household"
+            budget: "Budget"
+            housing: "Housing"
+            route: "Route"
+            agentRole: "Relocation adviser"
+        stats:
+            household: "{1} 1 person|]1,Inf[ %count% people"
+            budget: "€%amount%/month"
+        location: "The area"
+        mapAlt: "Map of the target area, %district%"
+        request: "The brief"
+        application:
+            title: "The tenant application"
+            built: "What we put together"
+        visits: "Viewings"
+        gallery:
+            prev: "Previous photos"
+            next: "Next photos"
+        securing: "Securing the home"
+        delivered:
+            perMonth: "/month"
+            homes: "{1} home viewed|]1,Inf[ homes viewed"
+            budget: "Within budget"
+            title: "Project delivered"
+            days: "{1} day to find and sign the lease|]1,Inf[ days to find and sign the lease"
+        testimonial: "They recommend us"
+        cta:
+            title: "Settle in Paris with the same peace of mind"
+            text: "A dedicated adviser handles your search, from the first viewing to the signed lease."
+        others:
+            caption: "Case studies"
+            title: "They also settled with us"
+            button: "All case studies"
+    document:
+        employer: "Employer"
+        guarantor: "Guarantor"
+        international: "International"
+        income: "Salary"
+        scholarship: "Scholarship"
+        employerText: "Employment letter and company guarantee"
+        guarantorText: "A guarantor or a recognised rent guarantee"
+        internationalText: "Foreign documents translated and formatted"
+        incomeText: "Payslips and tax notices"
+        scholarshipText: "Scholarship certificate and proof"

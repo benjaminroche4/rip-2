@@ -1,0 +1,29 @@
+{# Call-to-action card placed inside a long text (blog article ctaBlock, case study story):
+   three advisers, a title, a line of text and the contact button, on a soft pink gradient.
+   @prop title       ?string Already translated / CMS text (null = no title)
+   @prop description ?string Already translated / CMS text (null = no text)
+   @prop withButton  bool    Show the contact button (default true) #}
+{%- props title = null, description = null, withButton = true -%}
+<div {{ attributes.defaults({class: 'relative overflow-hidden bg-[linear-gradient(104deg,#FBECF0_0%,#FFF7F9_60%)] rounded-2xl mx-auto p-8 text-center'}) }}>
+    <div aria-hidden="true" class="absolute -bottom-1/2 -left-1/4 w-2/3 aspect-square rounded-full bg-[radial-gradient(circle,rgba(244,175,195,0.55)_0%,rgba(244,175,195,0)_65%)] pointer-events-none"></div>
+    <div aria-hidden="true" class="absolute -top-1/3 -right-1/4 w-2/3 aspect-square rounded-full bg-[radial-gradient(circle,rgba(248,203,216,0.5)_0%,rgba(248,203,216,0)_65%)] pointer-events-none"></div>
+    <div aria-hidden="true" class="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.9)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.9)_1px,transparent_1px)] bg-[size:70px_70px] [mask-image:radial-gradient(ellipse_60%_80%_at_50%_50%,black_30%,transparent_100%)] pointer-events-none"></div>
+    <div class="relative max-w-lg mx-auto space-y-5 text-center flex flex-col items-center">
+        <div class="flex -space-x-2 mb-6">
+            <img src="{{ asset('medias/team/team_1.webp') }}" alt="{{ 'ctaFooter.image.1.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+            <img src="{{ asset('medias/team/team_5.webp') }}" alt="{{ 'ctaFooter.image.2.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+            <img src="{{ asset('medias/team/team_3.webp') }}" alt="{{ 'ctaFooter.image.3.alt'|trans }}" loading="lazy" width="40" height="40" class="inline-block size-10 rounded-full outline outline-1 -outline-offset-1 outline-gray-700/10 ring-2 ring-white" />
+        </div>
+        {% if title %}
+            <p class="text-2xl font-semibold text-pretty text-gray-950">{{ title }}</p>
+        {% endif %}
+        {% if description %}
+            <p class="text-neutral-600 text-balance">{{ description }}</p>
+        {% endif %}
+        {% if withButton %}
+            <twig:Button variant="default" as="a" size="lg" href="{{ path('app_contact') }}">
+                {{ 'home.heroSection.button'|trans|raw }}
+            </twig:Button>
+        {% endif %}
+    </div>
+</div>

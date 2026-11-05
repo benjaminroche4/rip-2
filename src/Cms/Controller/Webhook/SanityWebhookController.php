@@ -3,6 +3,7 @@
 namespace App\Cms\Controller\Webhook;
 
 use App\Blog\Repository\BlogRepository;
+use App\CaseStudy\Repository\SanityCaseStudyRepository;
 use App\Marketplace\Repository\PropertyRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -58,10 +59,16 @@ final class SanityWebhookController extends AbstractController
             $invalidatedTags[] = BlogRepository::CACHE_TAG;
         }
 
-        // Type inconnu/non filtré → on flush par sécurité les deux tags.
+        // A case study shows its adviser (agent name and photo): an agent change refreshes them too
+        if (in_array($type, ['caseStudy', 'agent'], true)) {
+            $this->cache->invalidateTags([SanityCaseStudyRepository::CACHE_TAG]);
+            $invalidatedTags[] = SanityCaseStudyRepository::CACHE_TAG;
+        }
+
+        // Type inconnu/non filtré → on flush par sécurité tous les tags.
         if (empty($invalidatedTags)) {
-            $this->cache->invalidateTags([PropertyRepository::CACHE_TAG, BlogRepository::CACHE_TAG]);
-            $invalidatedTags = [PropertyRepository::CACHE_TAG, BlogRepository::CACHE_TAG];
+            $invalidatedTags = [PropertyRepository::CACHE_TAG, BlogRepository::CACHE_TAG, SanityCaseStudyRepository::CACHE_TAG];
+            $this->cache->invalidateTags($invalidatedTags);
         }
 
         return new JsonResponse(['ok' => true, 'invalidated' => $invalidatedTags]);

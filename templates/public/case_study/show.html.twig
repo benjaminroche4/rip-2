@@ -1,0 +1,258 @@
+{% extends 'public/base.html.twig' %}
+
+{# Case study detail (Figma "Website" 1633:45563): banner, then the project card on the left
+   (sticky callback card) and the story blocks on the right. #}
+
+{# The site prefixes the brand: seoTitle stays short so the whole title fits in Google (60 chars) #}
+{% block title %}{{ caseStudy.seoTitle }}{% endblock %}
+{% block description %}{{ (caseStudy.excerpt ~ ' ' ~ 'caseStudy.list.daysToSettle'|trans({'%count%': caseStudy.daysToSettle}) ~ '.')|u.truncate(157, '...') }}{% endblock %}
+{% block url %}{{ path('app_case_study_show', {slug: caseStudy.slug}) }}{% endblock %}
+{% block og_image %}{{ asset(caseStudy.photo) }}{% endblock %}
+{% block og_type %}article{% endblock %}
+
+{% block hreflang %}
+    {% set otherLocale = app.request.locale == 'fr' ? 'en' : 'fr' %}
+    {# The other language only once the case study is translated #}
+    {% set localizedSlugs = caseStudy.alternateSlug ? {(app.request.locale): caseStudy.slug, (otherLocale): caseStudy.alternateSlug} : {(app.request.locale): caseStudy.slug} %}
+    {% for hreflangLocale, hreflangSlug in localizedSlugs %}
+        <link rel="alternate" hreflang="{{ hreflangLocale }}" href="{{ site_url }}{{ path('app_case_study_show', {'_locale': hreflangLocale, 'slug': hreflangSlug}) }}" />
+    {% endfor %}
+    {% if localizedSlugs.fr is defined %}
+        <link rel="alternate" hreflang="x-default" href="{{ site_url }}{{ path('app_case_study_show', {'_locale': 'fr', 'slug': localizedSlugs.fr}) }}" />
+    {% endif %}
+{% endblock %}
+
+{% block head_preload %}
+    <link rel="preload" as="image" href="{{ asset(caseStudy.photo) }}" imagesrcset="{{ asset(caseStudy.photoSmall) }} 600w, {{ asset(caseStudy.photo) }} 1200w" imagesizes="(max-width: 1024px) 100vw, 50vw" fetchpriority="high">
+{% endblock %}
+
+{% block schema_page %}
+    {% include '_partials/schema/case_study.html.twig' with {caseStudy: caseStudy} only %}
+{% endblock %}
+
+{% block body %}
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <nav aria-label="Breadcrumb" class="flex pt-6 lg:pt-8">
+            <ol role="list" class="flex min-w-0 items-center space-x-3">
+                <li>
+                    <a href="{{ path('app_home') }}" class="text-neutral-500 transition duration-100 hover:text-primary">
+                        {{ ux_icon('material-symbols:home-outline-rounded', {'class': 'size-5'}) }}
+                        <span class="sr-only">{{ 'blog.show.breadcrumb.home'|trans }}</span>
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
+                            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                        </svg>
+                        <a href="{{ path('app_case_studies') }}" class="ml-4 text-sm font-medium whitespace-nowrap text-neutral-500 transition duration-100 hover:text-primary">{{ 'caseStudy.list.breadcrumb'|trans }}</a>
+                    </div>
+                </li>
+                <li class="min-w-0">
+                    <div class="flex min-w-0 items-center">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5 shrink-0 text-gray-300">
+                            <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                        </svg>
+                        <span aria-current="page" class="ml-4 truncate text-sm text-neutral-400">{{ caseStudy.title }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        {# Hero, grid, typography and spacing follow the blog article (blog/show.html.twig): h1 4xl/5xl medium,
+           section h2 3xl semibold, sub-headings 2xl semibold, body neutral-600 leading-7, side card p-4. #}
+        <article>
+            {# Same hero as a blog article: badge, title and summary next to the cover #}
+            <section class="grid grid-cols-1 items-center gap-4 pt-12 lg:grid-cols-2">
+                <header class="flex flex-col items-center space-y-4 text-center lg:items-start lg:text-left">
+                    <div class="inline-block rounded-md bg-gray-50 p-1 text-xs">
+                        <div class="flex items-center gap-1 max-[300px]:flex-col">
+                            <span class="flex items-center gap-x-1.5 rounded-sm bg-white px-2.5 py-1 font-medium text-neutral-600">
+                                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0" aria-hidden="true">
+                                    <circle cx="4" cy="4" r="3" fill="{{ caseStudy.segment.color|e('html_attr') }}"/>
+                                </svg>
+                                {{ caseStudy.relocationType }}
+                            </span>
+                            <span class="px-2.5 py-1 text-neutral-600">{{ 'caseStudy.show.readingTime'|trans({'%count%': caseStudy.readingMinutes}) }}</span>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl font-medium text-balance break-words lg:text-5xl/16">{{ caseStudy.title }}</h1>
+                    <div class="max-w-lg">
+                        <p class="leading-7 text-pretty text-neutral-600">{{ caseStudy.excerpt }}</p>
+                    </div>
+                </header>
+                <div class="mt-4">
+                    <img loading="eager" fetchpriority="high" src="{{ asset(caseStudy.photo) }}" srcset="{{ asset(caseStudy.photoSmall) }} 600w, {{ asset(caseStudy.photo) }} 1200w" sizes="(max-width: 1024px) 100vw, 50vw" alt="{{ caseStudy.photoAlt }}" decoding="async" width="1200" height="800" class="aspect-3/2 w-full rounded-2xl object-cover" data-testid="case-study-banner">
+                </div>
+            </section>
+
+            {# Same grid as a blog article: side card (sticky) and the story #}
+            <section class="grid gap-8 py-8 lg:grid-cols-6 lg:gap-20 lg:py-16">
+                {# Two columns from lg only: below, the side card would be too narrow for its values #}
+                <div class="min-w-0 lg:col-span-2">
+                    <div class="lg:sticky lg:top-24">
+                        <twig:CaseStudy:RecapCard :caseStudy="caseStudy" />
+                    </div>
+                </div>
+
+                <div class="min-w-0 space-y-8 lg:col-span-4 lg:space-y-12">
+                    {# Lead paragraph: the whole project in a few lines #}
+                    <p class="text-lg/8 text-pretty text-neutral-700" data-testid="case-study-summary">{{ caseStudy.summary }}</p>
+
+                    {# Generic method, kept short: the story below is what makes each case study unique #}
+                    <section aria-labelledby="case-study-process" class="rounded-2xl bg-slate-100 p-2">
+                        <div class="px-6 py-3">
+                            <h2 id="case-study-process" class="text-2xl font-semibold">{{ 'caseStudy.show.process.title'|trans }}</h2>
+                        </div>
+                        <ol class="divide-y divide-neutral-100 rounded-lg bg-white">
+                            {# Steps written in the CMS for this case study, or our standard three #}
+                            {% set steps = caseStudy.process is not empty ? caseStudy.process : (1..3)|map(n => {title: ('caseStudy.show.process.' ~ n ~ '.title')|trans, text: ('caseStudy.show.process.' ~ n ~ '.text')|trans}) %}
+                            {% for step in steps %}
+                                <li class="flex gap-4 p-5 sm:p-6">
+                                    <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-25 text-sm font-semibold text-primary" aria-hidden="true">{{ loop.index }}</span>
+                                    <div class="space-y-1">
+                                        <h3 class="font-semibold text-neutral-900">{{ step.title }}</h3>
+                                        <p class="text-sm leading-6 text-neutral-600">{{ step.text }}</p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+
+                    <section aria-labelledby="case-study-request">
+                        <h2 id="case-study-request" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.request'|trans }}</h2>
+                        {# Every criterion was met: a checklist reads at a glance, no click needed #}
+                        <ul class="grid gap-4 sm:grid-cols-2" data-testid="case-study-criteria">
+                            {% for criterion in caseStudy.criteria %}
+                                <li class="flex items-start gap-x-3 rounded-2xl border border-neutral-200 p-4">
+                                    {{ ux_icon('lucide:circle-check', {'class': 'size-5 h-lh shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                                    <div class="space-y-1">
+                                        <p class="font-semibold text-neutral-900">{{ criterion.title }}</p>
+                                        <p class="text-sm text-neutral-600">{{ criterion.text }}</p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+
+                    <section aria-labelledby="case-study-location">
+                        <h2 id="case-study-location" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.location'|trans }}</h2>
+                        <p class="leading-7 text-neutral-600">{{ caseStudy.locationText }}</p>
+                        {# Real Google map, only loaded near the viewport (lazy-map); it shows the area as a circle (map-area), never the address #}
+                        <div class="mt-6" data-controller="lazy-map map-area" data-action="ux:map:circle:before-create->map-area#style" role="region" aria-label="{{ 'caseStudy.show.mapAlt'|trans({'%district%': caseStudy.district}) }}" data-testid="case-study-map">
+                            <div data-lazy-map-target="placeholder" class="h-80 w-full animate-pulse rounded-2xl bg-neutral-100 sm:h-96" aria-hidden="true"></div>
+                            <template data-lazy-map-target="content">
+                                {{ ux_map(map, {'class': 'h-80 w-full overflow-hidden rounded-2xl sm:h-96'}) }}
+                            </template>
+                        </div>
+                    </section>
+
+                    {% if caseStudy.textBlock %}
+                        {# Free text section, styled like a blog article paragraph block #}
+                        <section aria-labelledby="case-study-text" data-testid="case-study-text">
+                            <h2 id="case-study-text" class="mb-6 text-3xl font-semibold">{{ caseStudy.textBlock.title }}</h2>
+                            <div class="space-y-4 leading-7 break-words text-neutral-600">
+                                {% for paragraph in caseStudy.textBlock.paragraphs %}
+                                    <p>{{ paragraph }}</p>
+                                {% endfor %}
+                            </div>
+                        </section>
+                    {% endif %}
+
+                    <section aria-labelledby="case-study-application">
+                        <h2 id="case-study-application" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.application.title'|trans }}</h2>
+                        <p class="leading-7 text-neutral-600">{{ caseStudy.applicationText }}</p>
+                        <h3 class="mt-8 text-xl font-semibold">{{ 'caseStudy.show.application.built'|trans }}</h3>
+                        <dl class="mt-4 divide-y divide-primary/10 rounded-2xl border border-primary/20 px-5">
+                            {% for document in caseStudy.applicationDocuments %}
+                                <div class="py-4 sm:flex sm:items-baseline sm:justify-between sm:gap-x-6">
+                                    <dt class="flex items-start gap-x-3 font-semibold text-neutral-900">
+                                        {{ ux_icon(document.icon, {'class': 'size-4 h-lh shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                        {{ document.labelKey|trans }}
+                                    </dt>
+                                    <dd class="mt-1 pl-7 text-sm text-neutral-600 sm:mt-0 sm:pl-0">{{ document.descriptionKey|trans }}</dd>
+                                </div>
+                            {% endfor %}
+                        </dl>
+                    </section>
+
+                    <section aria-labelledby="case-study-visits">
+                        <h2 id="case-study-visits" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.visits'|trans }}</h2>
+                        <div class="space-y-8">
+                            {% for visit in caseStudy.visits %}
+                                <twig:CaseStudy:VisitGallery :visit="visit" />
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <twig:Section:InlineCta title="{{ 'caseStudy.show.cta.title'|trans }}" description="{{ 'caseStudy.show.cta.text'|trans }}" data-testid="case-study-cta" />
+
+                    <section aria-labelledby="case-study-securing">
+                        <h2 id="case-study-securing" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.securing'|trans }}</h2>
+                        <p class="leading-7 text-neutral-600">{{ caseStudy.securingText }}</p>
+                    </section>
+
+                    {% if caseStudy.table %}
+                        <twig:Section:DataTable :rows="caseStudy.table.rows" :title="caseStudy.table.title" :caption="caseStudy.table.caption" data-testid="case-study-table" />
+                    {% endif %}
+
+                    <section aria-labelledby="case-study-delivered">
+                        <h2 id="case-study-delivered" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.delivered.title'|trans }}</h2>
+                        <twig:CaseStudy:DeliveredCard :days="caseStudy.daysToSettle" :homesVisited="caseStudy.homesVisited" :budget="caseStudy.budget" />
+                    </section>
+
+                    {# Same boxed style as "Notre méthode" and the blog quick answer: title inside the grey frame #}
+                    <section aria-labelledby="case-study-testimonial" class="rounded-2xl bg-slate-100 p-2">
+                        <div class="px-6 py-3">
+                            <h2 id="case-study-testimonial" class="text-2xl font-semibold">{{ 'caseStudy.show.testimonial'|trans }}</h2>
+                        </div>
+                        <figure class="space-y-6 rounded-lg bg-white p-6 sm:p-8" data-testid="case-study-quote">
+                            <blockquote class="text-lg/8 text-pretty text-neutral-900">
+                                <p class="relative before:absolute before:inline before:-translate-x-full before:content-['\201C'] after:inline after:content-['\201D']">{{ caseStudy.quote }}</p>
+                            </blockquote>
+                            <figcaption class="border-t border-neutral-100 pt-4">
+                                <div class="flex items-center gap-x-3">
+                                    <img src="{{ asset(caseStudy.quotePhoto) }}" alt="" loading="lazy" decoding="async" width="40" height="40" class="size-10 rounded-full object-cover">
+                                    <div class="text-sm">
+                                        <p class="font-semibold text-neutral-900">{{ caseStudy.quoteAuthor }}</p>
+                                        <p class="text-neutral-600">{{ caseStudy.origin }} → {{ caseStudy.district }}</p>
+                                    </div>
+                                </div>
+                            </figcaption>
+                        </figure>
+                    </section>
+                </div>
+            </section>
+        </article>
+
+        {% if otherCaseStudies is not empty %}
+            <div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>
+            <section class="py-8 lg:py-16" aria-labelledby="other-case-studies-heading">
+                <div class="space-y-8 lg:space-y-16">
+                    <div class="flex flex-row items-end justify-between gap-5">
+                        <div class="space-y-3">
+                            <p class="font-secondary font-semibold text-primary">{{ 'caseStudy.show.others.caption'|trans }}</p>
+                            <h2 id="other-case-studies-heading" class="text-3xl font-medium text-pretty">{{ 'caseStudy.show.others.title'|trans }}</h2>
+                        </div>
+                        <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_case_studies') }}" class="hidden sm:inline-flex">
+                            {{ 'caseStudy.show.others.button'|trans }}
+                            {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                        </twig:Button>
+                    </div>
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {% for other in otherCaseStudies %}
+                            <twig:CaseStudy:Card :caseStudy="other" headingLevel="3" class="{{ loop.index == 3 ? 'sm:hidden lg:flex' : '' }}" />
+                        {% endfor %}
+                    </div>
+                    <div class="flex justify-center sm:hidden">
+                        <twig:Button variant="secondary" as="a" size="lg" href="{{ path('app_case_studies') }}">
+                            {{ 'caseStudy.show.others.button'|trans }}
+                            {{ ux_icon('streamline-ultimate:arrow-right', {'class': 'size-3 shrink-0'}) }}
+                        </twig:Button>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+    </div>
+    <twig:Section:CtaFooter />
+{% endblock %}

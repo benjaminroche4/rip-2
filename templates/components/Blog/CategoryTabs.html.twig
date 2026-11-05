@@ -3,19 +3,21 @@
 {# @prop total           int     number of posts behind the "All articles" tab #}
 {# @prop route           string  route the tabs link to #}
 {# @prop routeParams     array   extra route params kept on every tab (e.g. author slug) #}
-{%- props categories = [], activeCategory = null, total = 0, route = 'app_blog', routeParams = {} -%}
+{# @prop allLabel        string  translation key of the first tab #}
+{# @prop translateNames  bool    category names are translation keys (static tabs) rather than CMS names #}
+{%- props categories = [], activeCategory = null, total = 0, route = 'app_blog', routeParams = {}, allLabel = 'blog.list.allArticles', translateNames = false -%}
 
 <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide whitespace-nowrap">
     <a href="{{ path(route, routeParams) }}"
        {% if not activeCategory %}aria-current="page"{% endif %}
        class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ not activeCategory ? 'text-primary bg-slate-100' : 'text-neutral-600' }}">
-        {{ 'blog.list.allArticles'|trans|raw }} ({{ total }})
+        {{ allLabel|trans|raw }} ({{ total }})
     </a>
     {% for cat in categories %}
         <a href="{{ path(route, routeParams|merge({category: cat.slug})) }}"
            {% if activeCategory == cat.slug %}aria-current="page"{% endif %}
            class="rounded-lg px-4 py-2 text-sm font-medium transition duration-100 {{ activeCategory == cat.slug ? 'text-primary bg-slate-100' : 'text-neutral-600' }}">
-            {{ cat.name }} ({{ cat.count }})
+            {{ translateNames ? cat.name|trans : cat.name }} ({{ cat.count }})
         </a>
     {% endfor %}
 </div>

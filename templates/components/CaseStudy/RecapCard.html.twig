@@ -1,0 +1,60 @@
+{# Side card of a case study, styled like the blog article's side card (rounded-2xl border p-4,
+   titles in font-secondary, gradient dividers): the key facts and the adviser.
+   It opens and closes like the blog menu (menu-toggle): open on desktop, closed on phones.
+   @prop caseStudy App\CaseStudy\Domain\CaseStudy #}
+{%- props caseStudy -%}
+{% set divider %}<div class="h-[1px] bg-gradient-to-r from-slate-400/20 via-slate-500 to-slate-400/20 opacity-20"></div>{% endset %}
+<div data-controller="menu-toggle" class="rounded-2xl border border-neutral-200 p-4" data-testid="case-study-recap">
+    <button type="button" data-action="click->menu-toggle#toggle" data-menu-toggle-target="button" aria-expanded="true" aria-controls="case-study-recap-content" class="group w-full cursor-pointer">
+        <span class="flex items-center justify-between gap-x-2">
+            <span class="font-secondary text-lg font-semibold">{{ 'caseStudy.show.recap.title'|trans }}</span>
+            <span class="rounded-full p-1 transition duration-200 group-hover:bg-slate-100">
+                {{ ux_icon('iconamoon:arrow-down-2', {'class': 'size-5 shrink-0 transition duration-200', 'data-menu-toggle-target': 'icon', 'aria-hidden': 'true'}) }}
+            </span>
+        </span>
+    </button>
+    <div id="case-study-recap-content" data-menu-toggle-target="content" class="overflow-clip transition-all duration-300">
+        <div class="space-y-6 pt-6">
+            {{ divider }}
+            <dl class="space-y-3 text-sm">
+                {% for fact in [
+                    {icon: 'lucide:calendar', label: 'caseStudy.show.recap.year', value: caseStudy.publishedAt|date('Y')},
+                    {icon: 'lucide:user', label: 'caseStudy.show.recap.client', value: caseStudy.clientProfile},
+                    {icon: 'lucide:briefcase', label: 'caseStudy.show.recap.service', value: caseStudy.relocationType, href: path(caseStudy.segment.serviceRoute)},
+                    {icon: 'lucide:users', label: 'caseStudy.show.recap.household', value: 'caseStudy.show.stats.household'|trans({'%count%': caseStudy.householdSize})},
+                    {icon: 'lucide:wallet', label: 'caseStudy.show.recap.budget', value: 'caseStudy.show.stats.budget'|trans({'%amount%': caseStudy.budget|format_number(locale=app.request.locale)})},
+                    {icon: 'lucide:sofa', label: 'caseStudy.show.recap.housing', value: caseStudy.housingType},
+                    {icon: 'lucide:map-pin', label: 'caseStudy.show.recap.route', value: caseStudy.origin ~ ' → ' ~ caseStudy.district},
+                ]|merge(caseStudy.offer ? [
+                    {icon: 'lucide:badge-check', label: 'caseStudy.show.recap.offer', value: caseStudy.offer.labelKey|trans, href: path('app_pricing')},
+                ] : []) %}
+                    <div class="flex items-start gap-x-3">
+                        <dt class="flex w-[6.5rem] shrink-0 items-start gap-x-3 text-neutral-500">
+                            {{ ux_icon(fact.icon, {'class': 'size-4 h-lh shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                            {{ fact.label|trans }}
+                        </dt>
+                        <dd class="min-w-0 font-semibold text-neutral-900">
+                            {%- if fact.href is defined -%}
+                                <a href="{{ fact.href }}" class="text-primary underline decoration-primary/30 underline-offset-4 transition-colors duration-100 hover:decoration-primary">{{ fact.value }}</a>
+                            {%- else -%}
+                                {{ fact.value }}
+                            {%- endif -%}
+                        </dd>
+                    </div>
+                {% endfor %}
+            </dl>
+            <p class="flex items-center gap-x-2 rounded-lg bg-primary-25 px-3 py-2.5 text-sm font-medium text-primary">
+                {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                {{ 'caseStudy.list.daysToSettle'|trans({'%count%': caseStudy.daysToSettle}) }}
+            </p>
+            {{ divider }}
+            <div class="flex items-center gap-x-3">
+                <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="40" height="40" class="size-10 rounded-full border border-neutral-100 object-cover">
+                <div class="flex flex-col text-sm">
+                    <p class="font-semibold">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
+                    <p class="text-neutral-800/70">{{ 'caseStudy.show.recap.agentRole'|trans }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

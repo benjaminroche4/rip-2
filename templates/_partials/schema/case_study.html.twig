@@ -1,0 +1,41 @@
+{# JSON-LD of a case study page: an Article about one client relocation, plus its breadcrumb.
+   Caller passes caseStudy (App\CaseStudy\Domain\CaseStudy). The leading comma is included.
+   dateModified = datePublished until the CMS provides an update date. #}
+,{
+    "@type": "Article",
+    "@id": "{{ site_url }}{{ path('app_case_study_show', {slug: caseStudy.slug}) }}/#article",
+    "headline": "{{ caseStudy.title|e('js') }}",
+    "description": "{{ caseStudy.excerpt|e('js') }}",
+    "image": "{{ site_url }}{{ asset(caseStudy.photo) }}",
+    "datePublished": "{{ caseStudy.publishedAt|date('c') }}",
+    "dateModified": "{{ caseStudy.publishedAt|date('c') }}",
+    "articleSection": "{{ 'caseStudy.list.breadcrumb'|trans|e('js') }}",
+    "about": { "@type": "Place", "name": "{{ caseStudy.district|e('js') }}" },
+    "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+    "author": { "@id": "{{ site_url }}/#organization" },
+    "publisher": { "@id": "{{ site_url }}/#organization" },
+    "isPartOf": { "@id": "{{ site_url }}/#website" },
+    "mainEntityOfPage": "{{ site_url }}{{ path('app_case_study_show', {slug: caseStudy.slug}) }}"
+}
+,{
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+            "item": "{{ site_url }}{{ path('app_home') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "{{ 'caseStudy.list.breadcrumb'|trans|e('js') }}",
+            "item": "{{ site_url }}{{ path('app_case_studies') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "{{ caseStudy.title|e('js') }}"
+        }
+    ]
+}

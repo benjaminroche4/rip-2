@@ -1,0 +1,155 @@
+{% extends 'public/base.html.twig' %}
+
+{% set pageLabel = currentPage > 1 ? 'blog.pagination.pageSuffix'|trans({'%page%': currentPage}) : '' %}
+{# Must mirror the query string of the canonical URL (block url) #}
+{% set hreflangQuery = currentPage > 1 ? {page: currentPage} : {} %}
+
+{% block title %}{{ 'meta.caseStudies.title'|trans }}{{ pageLabel }}{% endblock %}
+{% block description %}{{ 'meta.caseStudies.description'|trans }}{{ pageLabel }}{% endblock %}
+{% block url %}{{ path('app_case_studies') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}{% endblock %}
+
+{% block schema_page %}
+    ,{
+        "@type": "CollectionPage",
+        "@id": "{{ site_url }}{{ path('app_case_studies') }}/#casestudies",
+        "url": "{{ site_url }}{{ path('app_case_studies') }}{% if currentPage > 1 %}?page={{ currentPage }}{% endif %}",
+        "name": "{{ 'meta.caseStudies.title'|trans|e('js') }}",
+        "description": "{{ 'meta.caseStudies.description'|trans|e('js') }}",
+        "inLanguage": "{{ app.request.locale == 'fr' ? 'fr-FR' : 'en-GB' }}",
+        "isPartOf": { "@id": "{{ site_url }}/#website" },
+        "about": { "@id": "{{ site_url }}/#organization" },
+        "numberOfItems": {{ totalCount }},
+        "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": [
+                {% for caseStudy in caseStudies %}
+                {
+                    "@type": "ListItem",
+                    "position": {{ loop.index }},
+                    "url": "{{ site_url }}{{ path('app_case_study_show', {slug: caseStudy.slug}) }}",
+                    "name": "{{ caseStudy.title|e('js') }}"
+                }{{ loop.last ? '' : ',' }}
+                {% endfor %}
+            ]
+        }
+    }
+    ,{
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'blog.show.breadcrumb.home'|trans|e('js') }}",
+                "item": "{{ site_url }}{{ path('app_home') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'caseStudy.list.breadcrumb'|trans|e('js') }}"
+            }
+        ]
+    }
+{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto lg:px-8 px-6 lg:py-16 py-12">
+        <twig:Section:PageHeader
+            caption="caseStudy.list.caption"
+            subtitle="caseStudy.list.subTitle"
+            intro="caseStudy.list.text"
+        />
+        {% if stats %}
+            {# Figures computed from the published case studies, always up to date #}
+            <ul class="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-neutral-600" data-testid="case-study-stats">
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    {{ 'caseStudy.list.stats.averageDays'|trans({'%count%': stats.averageDays}) }}
+                </li>
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:globe', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    {{ 'caseStudy.list.stats.origins'|trans({'%count%': stats.origins}) }}
+                </li>
+                <li class="flex items-center gap-x-2">
+                    {{ ux_icon('lucide:users', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                    {{ 'caseStudy.list.stats.audiences'|trans }}
+                </li>
+            </ul>
+        {% endif %}
+    </section>
+    <section class="max-w-6xl mx-auto lg:px-8 px-6 mt-4 mb-12 lg:mb-16">
+        {% if featured %}
+            {# The featured case study, same card as the featured blog article #}
+            <a href="{{ path('app_case_study_show', {slug: featured.slug}) }}" class="group block rounded-3xl border border-primary/20 bg-linear-to-b from-[#FFE5EB] to-[#FFF7F9] p-2 transition duration-100 hover:border-primary/40" data-testid="case-study-featured">
+                <div class="pb-2">
+                    <p class="text-center text-sm font-semibold tracking-normal text-primary uppercase">{{ 'caseStudy.list.featured'|trans }}</p>
+                </div>
+                <div class="grid grid-cols-1 rounded-2xl bg-white lg:grid-cols-5 lg:gap-4">
+                    <div class="order-2 col-span-2 flex flex-col justify-between space-y-6 p-6 lg:order-1">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-x-2 text-sm text-neutral-600">
+                                <img src="{{ asset(featured.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
+                                <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': featured.agentName}) }}</p>
+                            </div>
+                            <h2 class="mt-4 text-xl font-semibold text-pretty lg:mt-8 lg:text-3xl">{{ featured.title }}</h2>
+                            <p class="font-light text-neutral-600">{{ featured.excerpt }}</p>
+                        </div>
+                        <div class="mt-auto space-y-3 pt-5">
+                            <p class="flex items-center gap-x-2 text-sm font-light text-neutral-600">
+                                {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': featured.origin, '%to%': featured.district}) }}</span>
+                                <span class="flex items-center gap-x-1.5" aria-hidden="true">{{ featured.origin }} {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }} {{ featured.district }}</span>
+                            </p>
+                            <p class="flex items-center gap-x-2 rounded-lg bg-primary-25 px-3 py-2.5 text-sm font-medium text-primary">
+                                {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
+                                {{ 'caseStudy.list.daysToSettle'|trans({'%count%': featured.daysToSettle}) }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="relative order-1 col-span-3 p-2 lg:order-2">
+                        <img loading="eager" fetchpriority="high" src="{{ asset(featured.photo) }}" srcset="{{ asset(featured.photoSmall) }} 600w, {{ asset(featured.photo) }} 1200w" sizes="(max-width: 1024px) 100vw, 66vw" alt="{{ featured.photoAlt }}" width="1200" height="800" class="h-[200px] w-full rounded-xl object-cover lg:h-[450px]">
+                        <div class="absolute top-5 left-5">
+                            <twig:Badge variant="secondary" class="gap-x-1.5">
+                                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0" aria-hidden="true">
+                                    <circle cx="4" cy="4" r="3" fill="{{ featured.segment.color|e('html_attr') }}"/>
+                                </svg>
+                                {{ featured.relocationType }}
+                            </twig:Badge>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        {% endif %}
+        {# Only the featured one so far: no tabs and no empty grid under it #}
+        {% if caseStudies is not empty or activeCategory or not featured %}
+            <turbo-frame id="case-study-list" data-turbo-action="advance" autoscroll data-autoscroll-block="start">
+                <section class="{{ featured ? 'py-7 lg:py-12' : 'pb-7 lg:pb-12' }}">
+                    <twig:Blog:CategoryTabs
+                        :categories="categories"
+                        :activeCategory="activeCategory"
+                        :total="totalCount"
+                        route="app_case_studies"
+                        allLabel="caseStudy.list.all"
+                        :translateNames="true"
+                    />
+                </section>
+                {% if caseStudies is empty %}
+                    <p class="py-12 text-center font-light text-neutral-600">{{ 'caseStudy.list.empty'|trans }}</p>
+                {% else %}
+                    <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {% for caseStudy in caseStudies %}
+                            <twig:CaseStudy:Card :caseStudy="caseStudy" />
+                        {% endfor %}
+                    </section>
+                {% endif %}
+
+                <twig:Pagination
+                    :currentPage="currentPage"
+                    :totalPages="totalPages"
+                    route="app_case_studies"
+                    :routeParams="activeCategory ? {category: activeCategory} : {}"
+                />
+            </turbo-frame>
+        {% endif %}
+    </section>
+    <twig:Section:CtaFooter />
+{% endblock %}

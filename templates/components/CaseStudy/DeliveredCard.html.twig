@@ -1,0 +1,43 @@
+{# "Project successfully delivered" card (Figma 1633:45734): the number of days on a raspberry
+   gradient with a fading grid, inside a folder of a fixed colour (the desktop look): a see-through
+   folder turned too light on phones, where the light spots sit behind it.
+   @prop days         int  Days to find and sign the lease (the big number)
+   @prop homesVisited ?int Homes visited before signing
+   @prop budget       ?int Monthly rent, shown as "within budget" #}
+{%- props days, homesVisited = null, budget = null -%}
+<div class="relative isolate flex min-h-72 items-center py-8 justify-center overflow-hidden rounded-2xl bg-[#c62851]" data-testid="case-study-delivered">
+    {# Soft light spots, top left and bottom right #}
+    <div class="absolute -top-40 -left-32 -z-10 h-96 w-[30rem] -rotate-[34deg] rounded-full bg-white/70 blur-3xl" aria-hidden="true"></div>
+    <div class="absolute -right-24 -bottom-48 -z-10 h-80 w-[26rem] rounded-full bg-white/60 blur-3xl" aria-hidden="true"></div>
+    {# Grid pattern, faded towards the edges #}
+    <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgb(255_255_255/0.25)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.25)_1px,transparent_1px)] bg-[size:2.35rem_2.35rem] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" aria-hidden="true"></div>
+
+    {# Folder: a tab on top of a card, both in the fixed folder colour #}
+    <div class="relative w-[21rem] max-w-[90%] pt-5">
+        <div class="absolute top-0 left-0 h-6 w-30 rounded-t-xl border border-b-0 border-white/50 bg-[#b52e51]" aria-hidden="true"></div>
+        <div class="flex flex-col items-center gap-2 rounded-xl rounded-tl-none border border-white/50 bg-[#b52e51] px-4 py-8 text-center text-white sm:px-6 sm:py-10">
+            <p class="text-4xl font-semibold sm:text-5xl">{{ days }}</p>
+            <p class="text-sm text-balance text-white">{{ 'caseStudy.show.delivered.days'|trans({'%count%': days}) }}</p>
+            {% if homesVisited or budget %}
+                {# Label (dt) before the figure (dd) in the markup, figure shown on top. One column on phones (easier to read), two from sm #}
+                <dl class="mt-4 grid w-full items-start gap-y-3 border-t border-white/30 pt-4 text-white {{ homesVisited and budget ? 'sm:grid-cols-2 sm:divide-x sm:divide-white/30 sm:gap-y-0' }}">
+                    {% if homesVisited %}
+                        <div class="flex flex-col-reverse justify-end gap-0.5 px-2">
+                            <dt class="text-xs text-balance">{{ 'caseStudy.show.delivered.homes'|trans({'%count%': homesVisited}) }}</dt>
+                            <dd class="text-xl font-semibold sm:text-2xl">{{ homesVisited }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if budget %}
+                        <div class="flex flex-col-reverse justify-end gap-0.5 px-2">
+                            <dt class="text-xs text-balance">{{ 'caseStudy.show.delivered.budget'|trans }}</dt>
+                            <dd class="flex flex-wrap items-baseline justify-center gap-x-0.5 text-xl font-semibold sm:text-2xl">
+                                <span class="whitespace-nowrap">{{ budget|format_currency('EUR', {fraction_digit: 0}, locale=app.request.locale) }}</span>
+                                <span class="text-xs font-medium text-white/80 sm:text-sm">{{ 'caseStudy.show.delivered.perMonth'|trans }}</span>
+                            </dd>
+                        </div>
+                    {% endif %}
+                </dl>
+            {% endif %}
+        </div>
+    </div>
+</div>
