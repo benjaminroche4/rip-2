@@ -42,7 +42,7 @@ final class PropertyEstimationControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/fr/services/gestion-locative-paris');
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1 + p, main', 'locataires premium');
+        self::assertSelectorTextContains('main', 'locataires premium');
         $block = $crawler->filter('[data-testid="premium-tenants"]');
         self::assertCount(1, $block);
         self::assertCount(3, $block->filter('h3'));
