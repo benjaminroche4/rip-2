@@ -96,8 +96,10 @@
                 </div>
 
                 <div class="min-w-0 space-y-8 lg:col-span-4 lg:space-y-12">
-                    {# Lead paragraph: the whole project in a few lines #}
-                    <p class="text-lg/8 text-pretty text-neutral-700" data-testid="case-study-summary">{{ caseStudy.summary }}</p>
+                    {% if caseStudy.summary %}
+                        {# Lead paragraph: the whole project in a few lines #}
+                        <p class="text-lg/8 text-pretty text-neutral-700" data-testid="case-study-summary">{{ caseStudy.summary }}</p>
+                    {% endif %}
 
                     {# Generic method, kept short: the story below is what makes each case study unique #}
                     <section aria-labelledby="case-study-process" class="rounded-2xl bg-slate-100 p-2">
@@ -119,27 +121,31 @@
                         </ol>
                     </section>
 
-                    <section aria-labelledby="case-study-request">
-                        <h2 id="case-study-request" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.request'|trans }}</h2>
-                        {# Every criterion was met: a checklist reads at a glance, no click needed #}
-                        <ul class="grid gap-4 sm:grid-cols-2" data-testid="case-study-criteria">
-                            {% for criterion in caseStudy.criteria %}
-                                <li class="flex items-start gap-x-3 rounded-2xl border border-neutral-200 p-4">
-                                    {{ ux_icon('lucide:circle-check', {'class': 'size-5 h-lh shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
-                                    <div class="space-y-1">
-                                        <p class="font-semibold text-neutral-900">{{ criterion.title }}</p>
-                                        <p class="text-sm text-neutral-600">{{ criterion.text }}</p>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </section>
+                    {% if caseStudy.criteria is not empty %}
+                        <section aria-labelledby="case-study-request">
+                            <h2 id="case-study-request" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.request'|trans }}</h2>
+                            {# Every criterion was met: a checklist reads at a glance, no click needed #}
+                            <ul class="grid gap-4 sm:grid-cols-2" data-testid="case-study-criteria">
+                                {% for criterion in caseStudy.criteria %}
+                                    <li class="flex items-start gap-x-3 rounded-2xl border border-neutral-200 p-4">
+                                        {{ ux_icon('lucide:circle-check', {'class': 'size-5 h-lh shrink-0 text-green-600', 'aria-hidden': 'true'}) }}
+                                        <div class="space-y-1">
+                                            <p class="font-semibold text-neutral-900">{{ criterion.title }}</p>
+                                            <p class="text-sm text-neutral-600">{{ criterion.text }}</p>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </section>
+                    {% endif %}
 
                     <section aria-labelledby="case-study-location">
                         <h2 id="case-study-location" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.location'|trans }}</h2>
-                        <p class="leading-7 text-neutral-600">{{ caseStudy.locationText }}</p>
+                        {% if caseStudy.locationText %}
+                            <p class="mb-6 leading-7 text-neutral-600">{{ caseStudy.locationText }}</p>
+                        {% endif %}
                         {# Real Google map, only loaded near the viewport (lazy-map); it shows the area as a circle (map-area), never the address #}
-                        <div class="mt-6" data-controller="lazy-map map-area" data-action="ux:map:circle:before-create->map-area#style" role="region" aria-label="{{ 'caseStudy.show.mapAlt'|trans({'%district%': caseStudy.district}) }}" data-testid="case-study-map">
+                        <div data-controller="lazy-map map-area" data-action="ux:map:circle:before-create->map-area#style" role="region" aria-label="{{ 'caseStudy.show.mapAlt'|trans({'%district%': caseStudy.district}) }}" data-testid="case-study-map">
                             <div data-lazy-map-target="placeholder" class="h-80 w-full animate-pulse rounded-2xl bg-neutral-100 sm:h-96" aria-hidden="true"></div>
                             <template data-lazy-map-target="content">
                                 {{ ux_map(map, {'class': 'h-80 w-full overflow-hidden rounded-2xl sm:h-96'}) }}
@@ -147,50 +153,51 @@
                         </div>
                     </section>
 
-                    {% if caseStudy.textBlock %}
-                        {# Free text section, styled like a blog article paragraph block #}
-                        <section aria-labelledby="case-study-text" data-testid="case-study-text">
-                            <h2 id="case-study-text" class="mb-6 text-3xl font-semibold">{{ caseStudy.textBlock.title }}</h2>
-                            <div class="space-y-4 leading-7 break-words text-neutral-600">
-                                {% for paragraph in caseStudy.textBlock.paragraphs %}
-                                    <p>{{ paragraph }}</p>
+                    {# Free blocks written in Sanity, rendered exactly like a blog article body #}
+                    <twig:Section:ContentBlocks :blocks="caseStudy.body" :fallbackTitle="caseStudy.title" />
+
+                    {% if caseStudy.applicationText or caseStudy.applicationDocuments is not empty %}
+                        <section aria-labelledby="case-study-application">
+                            <h2 id="case-study-application" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.application.title'|trans }}</h2>
+                            {% if caseStudy.applicationText %}
+                                <p class="mb-8 leading-7 text-neutral-600">{{ caseStudy.applicationText }}</p>
+                            {% endif %}
+                            {% if caseStudy.applicationDocuments is not empty %}
+                            <h3 class="text-xl font-semibold">{{ 'caseStudy.show.application.built'|trans }}</h3>
+                            <dl class="mt-4 divide-y divide-primary/10 rounded-2xl border border-primary/20 px-5">
+                                {% for document in caseStudy.applicationDocuments %}
+                                    <div class="py-4 sm:flex sm:items-baseline sm:justify-between sm:gap-x-6">
+                                        <dt class="flex items-start gap-x-3 font-semibold text-neutral-900">
+                                            {{ ux_icon(document.icon, {'class': 'size-4 h-lh shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                                            {{ document.labelKey|trans }}
+                                        </dt>
+                                        <dd class="mt-1 pl-7 text-sm text-neutral-600 sm:mt-0 sm:pl-0">{{ document.descriptionKey|trans }}</dd>
+                                    </div>
+                                {% endfor %}
+                            </dl>
+                            {% endif %}
+                        </section>
+                    {% endif %}
+
+                    {% if caseStudy.visits is not empty %}
+                        <section aria-labelledby="case-study-visits">
+                            <h2 id="case-study-visits" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.visits'|trans }}</h2>
+                            <div class="space-y-8">
+                                {% for visit in caseStudy.visits %}
+                                    <twig:CaseStudy:VisitGallery :visit="visit" />
                                 {% endfor %}
                             </div>
                         </section>
                     {% endif %}
 
-                    <section aria-labelledby="case-study-application">
-                        <h2 id="case-study-application" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.application.title'|trans }}</h2>
-                        <p class="leading-7 text-neutral-600">{{ caseStudy.applicationText }}</p>
-                        <h3 class="mt-8 text-xl font-semibold">{{ 'caseStudy.show.application.built'|trans }}</h3>
-                        <dl class="mt-4 divide-y divide-primary/10 rounded-2xl border border-primary/20 px-5">
-                            {% for document in caseStudy.applicationDocuments %}
-                                <div class="py-4 sm:flex sm:items-baseline sm:justify-between sm:gap-x-6">
-                                    <dt class="flex items-start gap-x-3 font-semibold text-neutral-900">
-                                        {{ ux_icon(document.icon, {'class': 'size-4 h-lh shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                        {{ document.labelKey|trans }}
-                                    </dt>
-                                    <dd class="mt-1 pl-7 text-sm text-neutral-600 sm:mt-0 sm:pl-0">{{ document.descriptionKey|trans }}</dd>
-                                </div>
-                            {% endfor %}
-                        </dl>
-                    </section>
-
-                    <section aria-labelledby="case-study-visits">
-                        <h2 id="case-study-visits" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.visits'|trans }}</h2>
-                        <div class="space-y-8">
-                            {% for visit in caseStudy.visits %}
-                                <twig:CaseStudy:VisitGallery :visit="visit" />
-                            {% endfor %}
-                        </div>
-                    </section>
-
                     <twig:Section:InlineCta title="{{ 'caseStudy.show.cta.title'|trans }}" description="{{ 'caseStudy.show.cta.text'|trans }}" data-testid="case-study-cta" />
 
-                    <section aria-labelledby="case-study-securing">
-                        <h2 id="case-study-securing" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.securing'|trans }}</h2>
-                        <p class="leading-7 text-neutral-600">{{ caseStudy.securingText }}</p>
-                    </section>
+                    {% if caseStudy.securingText %}
+                        <section aria-labelledby="case-study-securing">
+                            <h2 id="case-study-securing" class="mb-6 text-3xl font-semibold">{{ 'caseStudy.show.securing'|trans }}</h2>
+                            <p class="leading-7 text-neutral-600">{{ caseStudy.securingText }}</p>
+                        </section>
+                    {% endif %}
 
                     {% if caseStudy.table %}
                         <twig:Section:DataTable :rows="caseStudy.table.rows" :title="caseStudy.table.title" :caption="caseStudy.table.caption" data-testid="case-study-table" />
@@ -201,26 +208,23 @@
                         <twig:CaseStudy:DeliveredCard :days="caseStudy.daysToSettle" :homesVisited="caseStudy.homesVisited" :budget="caseStudy.budget" />
                     </section>
 
-                    {# Same boxed style as "Notre méthode" and the blog quick answer: title inside the grey frame #}
-                    <section aria-labelledby="case-study-testimonial" class="rounded-2xl bg-slate-100 p-2">
-                        <div class="px-6 py-3">
-                            <h2 id="case-study-testimonial" class="text-2xl font-semibold">{{ 'caseStudy.show.testimonial'|trans }}</h2>
-                        </div>
-                        <figure class="space-y-6 rounded-lg bg-white p-6 sm:p-8" data-testid="case-study-quote">
-                            <blockquote class="text-lg/8 text-pretty text-neutral-900">
-                                <p class="relative before:absolute before:inline before:-translate-x-full before:content-['\201C'] after:inline after:content-['\201D']">{{ caseStudy.quote }}</p>
-                            </blockquote>
-                            <figcaption class="border-t border-neutral-100 pt-4">
-                                <div class="flex items-center gap-x-3">
-                                    <img src="{{ asset(caseStudy.quotePhoto) }}" alt="" loading="lazy" decoding="async" width="40" height="40" class="size-10 rounded-full object-cover">
-                                    <div class="text-sm">
-                                        <p class="font-semibold text-neutral-900">{{ caseStudy.quoteAuthor }}</p>
-                                        <p class="text-neutral-600">{{ caseStudy.origin }} → {{ caseStudy.district }}</p>
-                                    </div>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    </section>
+                    {% if caseStudy.quote %}
+                        {# Same boxed style as "Notre méthode" and the blog quick answer: title inside the grey frame #}
+                        <section aria-labelledby="case-study-testimonial" class="rounded-2xl bg-slate-100 p-2">
+                            <div class="px-6 py-3">
+                                <h2 id="case-study-testimonial" class="text-2xl font-semibold">{{ 'caseStudy.show.testimonial'|trans }}</h2>
+                            </div>
+                            <figure class="space-y-6 rounded-lg bg-white p-6 sm:p-8" data-testid="case-study-quote">
+                                <blockquote class="text-lg/8 text-pretty text-neutral-900">
+                                    <p class="relative before:absolute before:inline before:-translate-x-full before:content-['\201C'] after:inline after:content-['\201D']">{{ caseStudy.quote }}</p>
+                                </blockquote>
+                                <figcaption class="border-t border-neutral-100 pt-4 text-sm">
+                                    <p class="font-semibold text-neutral-900">{{ caseStudy.quoteAuthor }}</p>
+                                    <p class="text-neutral-600">{{ caseStudy.origin ? caseStudy.origin ~ ' → ' ~ caseStudy.district : caseStudy.district }}</p>
+                                </figcaption>
+                            </figure>
+                        </section>
+                    {% endif %}
                 </div>
             </section>
         </article>

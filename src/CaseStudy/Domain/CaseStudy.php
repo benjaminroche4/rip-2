@@ -31,10 +31,10 @@ final readonly class CaseStudy
         public string $district,
         /** Days between the kick-off and the signed lease. */
         public int $daysToSettle,
-        /** Adviser who handled the relocation. */
-        public string $agentName,
+        /** Adviser who handled the relocation (optional). */
+        public ?string $agentName,
         /** Adviser's small round photo: asset path or absolute URL. */
-        public string $agentPhoto,
+        public ?string $agentPhoto,
         /** Cover, 1200x800: asset path or absolute URL (CMS image). */
         public string $photo,
         /** Same cover, 600x400, for srcset. */
@@ -43,10 +43,10 @@ final readonly class CaseStudy
         public \DateTimeImmutable $publishedAt,
         /** Slug of the same case study in the other locale (hreflang, language switch); null until it is translated. */
         public ?string $alternateSlug,
-        /** People moving in. */
-        public int $householdSize,
-        /** Monthly rent, in euros. */
-        public int $budget,
+        /** People moving in (optional). */
+        public ?int $householdSize,
+        /** Monthly rent, in euros (optional). */
+        public ?int $budget,
         /** Short story of the project, under the title. */
         public string $summary,
         /** Why this area, above the map. */
@@ -62,14 +62,13 @@ final readonly class CaseStudy
         /** @var list<array{title: string, text: string, photos: list<array{src: string, alt: string}>}> */
         public array $visits,
         public string $securingText,
-        /** @var array{title: string, paragraphs: list<string>}|null Free text section, as in a blog article. */
-        public ?array $textBlock,
+        /** @var list<array<string, mixed>> Free blocks after the map, the same Sanity blocks as a blog article body. */
+        public array $body,
         /** @var array{title: string, caption: ?string, rows: list<list<string>>}|null First row = column headers, first column = row headers. */
         public ?array $table,
-        /** The client's own words, who said them, and their photo. */
+        /** The client's own words and who said them (first name, or role for a company). */
         public string $quote,
         public string $quoteAuthor,
-        public string $quotePhoto,
         /** The one case study shown as the big card at the top of the listing. */
         public bool $featured = false,
         /** Package the client chose, linked to the pricing page. */
@@ -85,6 +84,14 @@ final readonly class CaseStudy
     public function readingMinutes(): int
     {
         $texts = [$this->title, $this->summary, $this->locationText, $this->applicationText, $this->securingText, $this->quote];
+        foreach ($this->body as $block) {
+            $texts[] = (string) ($block['title'] ?? '');
+            foreach (is_array($block['content'] ?? null) ? $block['content'] : [] as $portableText) {
+                foreach (is_array($portableText['children'] ?? null) ? $portableText['children'] : [] as $span) {
+                    $texts[] = is_string($span['text'] ?? null) ? $span['text'] : '';
+                }
+            }
+        }
         foreach ($this->criteria as $criterion) {
             $texts[] = $criterion['title'].' '.$criterion['text'];
         }

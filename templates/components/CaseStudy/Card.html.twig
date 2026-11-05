@@ -17,29 +17,40 @@
         </div>
     </div>
     <div class="flex flex-1 flex-col p-3">
-        <div class="flex items-center gap-x-2 text-sm text-neutral-600">
-            <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
-            <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
-        </div>
-        <div class="mt-4 space-y-2">
+        {% if caseStudy.agentName %}
+            <div class="mb-4 flex items-center gap-x-2 text-sm text-neutral-600">
+                <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
+                <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
+            </div>
+        {% endif %}
+        <div class="space-y-2">
             <h{{ headingLevel }} id="case-study-{{ caseStudy.slug }}" class="line-clamp-2 text-xl font-medium break-words" title="{{ caseStudy.title }}">{{ caseStudy.title }}</h{{ headingLevel }}>
             <ul class="space-y-1.5 font-light text-neutral-600">
-                <li class="flex items-center gap-x-2">
-                    {{ ux_icon('lucide:user', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                    <span class="min-w-0 truncate">{{ caseStudy.clientProfile }} · {{ caseStudy.housingType }}</span>
-                </li>
-                <li class="flex items-center gap-x-2">
-                    {{ ux_icon('lucide:calendar', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                    <span class="min-w-0 truncate">{{ caseStudy.stayType }}</span>
-                </li>
+                {% set profile = [caseStudy.clientProfile, caseStudy.housingType]|filter(v => v)|join(' · ') %}
+                {% if profile %}
+                    <li class="flex items-center gap-x-2">
+                        {{ ux_icon('lucide:user', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                        <span class="min-w-0 truncate">{{ profile }}</span>
+                    </li>
+                {% endif %}
+                {% if caseStudy.stayType %}
+                    <li class="flex items-center gap-x-2">
+                        {{ ux_icon('lucide:calendar', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                        <span class="min-w-0 truncate">{{ caseStudy.stayType }}</span>
+                    </li>
+                {% endif %}
                 <li class="flex items-center gap-x-2">
                     {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                    <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': caseStudy.origin, '%to%': caseStudy.district}) }}</span>
-                    <span class="flex min-w-0 items-center gap-x-1.5" aria-hidden="true">
-                        <span class="truncate">{{ caseStudy.origin }}</span>
-                        {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }}
-                        <span class="shrink-0">{{ caseStudy.district }}</span>
-                    </span>
+                    {% if caseStudy.origin %}
+                        <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': caseStudy.origin, '%to%': caseStudy.district}) }}</span>
+                        <span class="flex min-w-0 items-center gap-x-1.5" aria-hidden="true">
+                            <span class="truncate">{{ caseStudy.origin }}</span>
+                            {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }}
+                            <span class="shrink-0">{{ caseStudy.district }}</span>
+                        </span>
+                    {% else %}
+                        <span class="min-w-0 truncate">{{ caseStudy.district }}</span>
+                    {% endif %}
                 </li>
             </ul>
         </div>

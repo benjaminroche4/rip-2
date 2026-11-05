@@ -48,7 +48,19 @@ final class SanityCaseStudyRepository implements CaseStudyRepositoryInterface, R
         process[]{title, text},
         criteria[]{title, text},
         locationText,
-        textBlock{title, content},
+        body[]{
+            ...,
+            _type == "wysiwygBlock" => {
+                ...,
+                content[]{
+                    ...,
+                    _type == "image" => {
+                        ...,
+                        "url": asset->url
+                    }
+                }
+            }
+        },
         applicationText,
         applicationDocuments,
         visits[]{title, text, "photos": photos[]{"url": asset->url, alt, hotspot, crop, "dims": asset->metadata.dimensions}},
@@ -56,7 +68,6 @@ final class SanityCaseStudyRepository implements CaseStudyRepositoryInterface, R
         figures{title, caption, table},
         quote,
         quoteAuthor,
-        "quotePhoto": quotePhoto{"url": asset->url, alt, hotspot, crop, "dims": asset->metadata.dimensions},
         "alternateSlug": *[_type == "translation.metadata" && references(^._id)][0].translations[_key != $locale][0].value->slug.current
     }';
 
@@ -96,7 +107,7 @@ final class SanityCaseStudyRepository implements CaseStudyRepositoryInterface, R
 
         $caseStudies = [];
         foreach ($rows as $row) {
-            $caseStudy = is_array($row) ? $this->mapper->fromGroqArray($row) : null;
+            $caseStudy = is_array($row) ? $this->mapper->fromGroqArray($row, $locale) : null;
             if (null !== $caseStudy) {
                 $caseStudies[] = $caseStudy;
             }

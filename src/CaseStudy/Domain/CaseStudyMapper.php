@@ -2,6 +2,8 @@
 
 namespace App\CaseStudy\Domain;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
+
 /**
  * Builds a CaseStudy from the GROQ projection of SanityCaseStudyRepository::FIELDS.
  * Returns null for a document that misses a field the pages cannot do without
@@ -14,24 +16,49 @@ final class CaseStudyMapper
     private const COVER_SMALL = [600, 400];
     private const AVATAR = [96, 96];
     private const VISIT = [450, 600];
-    /** The testimonial photo is shown as a 40 px round avatar (3x for sharp screens). */
-    private const QUOTE = [120, 120];
+
+    /** Values picked from a list in the Studio, stored as keys and translated here. */
+    private const PROFILES = ['family', 'couple', 'youngProfessional', 'student', 'executive', 'employee', 'entrepreneur', 'atypical', 'company'];
+    private const HOUSING = ['unfurnished', 'furnished', 'furnishedStudio'];
+
+    /** Blocks the site knows how to render (Section:ContentBlocks). */
+    private const BODY_BLOCKS = ['wysiwygBlock', 'faqBlock', 'ctaBlock', 'quickAnswerBlock', 'tableBlock'];
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
 
     /** @param array<string, mixed> $row */
-    public function fromGroqArray(array $row): ?CaseStudy
+    public function fromGroqArray(array $row, string $locale = 'fr'): ?CaseStudy
     {
         $segment = CaseStudySegment::tryFrom((string) ($row['segment'] ?? ''));
         $photo = is_array($row['mainPhoto'] ?? null) ? $row['mainPhoto'] : [];
         $publishedAt = self::date($row['publishedAt'] ?? null);
+        // The area sits at a spot of its own inside the arrondissement (stable per case study, same in
+        // FR and EN), unless the editor fine-tuned it on the map
         $lat = $row['location']['lat'] ?? null;
         $lng = $row['location']['lng'] ?? null;
+        if (!is_numeric($lat) || !is_numeric($lng)) {
+            $number = is_int($row['district'] ?? null) ? $row['district'] : ParisArrondissement::fromText((string) ($row['district'] ?? ''));
+            // Seed shared by the FR and EN documents, so both languages show the same spot
+            $seed = implode('|', [self::string($row, 'publishedAt'), (string) ($row['daysToSettle'] ?? ''), (string) ($row['budget'] ?? '')]);
+            [$lat, $lng] = null !== $number ? (ParisArrondissement::spotNear($number, $seed) ?? [null, null]) : [null, null];
+        }
 
-        foreach (['slug', 'title', 'seoTitle', 'shortDescription', 'district', 'agentName'] as $required) {
+        $district = $this->district($row['district'] ?? null, $locale);
+        if ('' === $district) {
+            return null;
+        }
+
+        // Only what a card, a page header and the SEO cannot do without; every other field may be empty
+        foreach (['slug', 'title', 'seoTitle', 'shortDescription', 'relocationType'] as $required) {
             if ('' === self::string($row, $required)) {
                 return null;
             }
         }
-        if (null === $segment || '' === self::string($photo, 'url') || null === $publishedAt || !is_numeric($lat) || !is_numeric($lng)) {
+        $days = is_int($row['daysToSettle'] ?? null) ? $row['daysToSettle'] : 0;
+        if (null === $segment || '' === self::string($photo, 'url') || null === $publishedAt || $days < 1 || !is_numeric($lat) || !is_numeric($lng)) {
             return null;
         }
 
@@ -42,21 +69,23 @@ final class CaseStudyMapper
             excerpt: self::string($row, 'shortDescription'),
             segment: $segment,
             relocationType: self::string($row, 'relocationType'),
-            clientProfile: self::string($row, 'clientProfile'),
-            housingType: self::string($row, 'housingType'),
+            clientProfile: $this->choice($row['clientProfile'] ?? null, self::PROFILES, 'caseStudy.profile.', $locale),
+            housingType: $this->choice($row['housingType'] ?? null, self::HOUSING, 'caseStudy.housing.', $locale),
             stayType: self::string($row, 'stayType'),
             origin: self::string($row, 'origin'),
-            district: self::string($row, 'district'),
-            daysToSettle: (int) ($row['daysToSettle'] ?? 0),
-            agentName: self::string($row, 'agentName'),
-            agentPhoto: self::imageUrl($row['agentPhoto'] ?? null, self::AVATAR) ?? 'medias/website/logo-rounded.webp',
+            district: $district,
+            daysToSettle: $days,
+            agentName: '' !== self::string($row, 'agentName') ? self::string($row, 'agentName') : null,
+            agentPhoto: '' !== self::string($row, 'agentName')
+                ? (self::imageUrl($row['agentPhoto'] ?? null, self::AVATAR) ?? 'medias/website/logo-rounded.webp')
+                : null,
             photo: (string) self::imageUrl($photo, self::COVER),
             photoSmall: (string) self::imageUrl($photo, self::COVER_SMALL),
             photoAlt: self::string($photo, 'alt'),
             publishedAt: $publishedAt,
             alternateSlug: '' !== self::string($row, 'alternateSlug') ? self::string($row, 'alternateSlug') : null,
-            householdSize: max(1, (int) ($row['householdSize'] ?? 1)),
-            budget: (int) ($row['budget'] ?? 0),
+            householdSize: is_int($row['householdSize'] ?? null) && $row['householdSize'] > 0 ? $row['householdSize'] : null,
+            budget: is_int($row['budget'] ?? null) && $row['budget'] > 0 ? $row['budget'] : null,
             summary: self::string($row, 'summary'),
             locationText: self::string($row, 'locationText'),
             latitude: (float) $lat,
@@ -66,11 +95,10 @@ final class CaseStudyMapper
             applicationDocuments: self::documents($row['applicationDocuments'] ?? null),
             visits: self::visits($row['visits'] ?? null),
             securingText: self::string($row, 'securingText'),
-            textBlock: self::textBlock($row['textBlock'] ?? null),
+            body: self::body($row['body'] ?? null),
             table: self::table($row['figures'] ?? null),
             quote: self::string($row, 'quote'),
             quoteAuthor: self::string($row, 'quoteAuthor'),
-            quotePhoto: self::imageUrl($row['quotePhoto'] ?? null, self::QUOTE) ?? (string) self::imageUrl($photo, self::QUOTE),
             featured: true === ($row['featured'] ?? null),
             offer: CaseStudyOffer::tryFrom((string) ($row['offer'] ?? '')),
             homesVisited: is_int($row['homesVisited'] ?? null) && $row['homesVisited'] > 0 ? $row['homesVisited'] : null,
@@ -196,30 +224,46 @@ final class CaseStudyMapper
     }
 
     /**
-     * Plain paragraphs out of Portable Text (the schema allows normal paragraphs only, no marks).
+     * A key picked from a Studio list, translated; an older free-text value is kept as written.
      *
-     * @return array{title: string, paragraphs: list<string>}|null
+     * @param list<string> $keys
      */
-    private static function textBlock(mixed $block): ?array
+    private function choice(mixed $value, array $keys, string $prefix, string $locale): string
     {
-        if (!is_array($block) || '' === self::string($block, 'title')) {
-            return null;
+        if (!is_string($value) || '' === trim($value)) {
+            return '';
         }
-        $paragraphs = [];
-        foreach (is_array($block['content'] ?? null) ? $block['content'] : [] as $portableText) {
-            if (!is_array($portableText) || 'block' !== ($portableText['_type'] ?? null)) {
-                continue;
-            }
-            $text = trim(implode('', array_map(
-                static fn (mixed $span): string => is_array($span) && is_string($span['text'] ?? null) ? $span['text'] : '',
-                is_array($portableText['children'] ?? null) ? $portableText['children'] : [],
-            )));
-            if ('' !== $text) {
-                $paragraphs[] = $text;
+
+        return \in_array($value, $keys, true) ? $this->translator->trans($prefix.$value, locale: $locale) : trim($value);
+    }
+
+    /** Arrondissement number (1-20) as "Paris 1er" / "Paris 16e" / "Paris 16th"; an older free-text value is kept. */
+    private function district(mixed $value, string $locale): string
+    {
+        if (is_int($value) && $value >= 1 && $value <= 20) {
+            $ordinal = (new \NumberFormatter($locale, \NumberFormatter::ORDINAL))->format($value);
+
+            return 'Paris '.(false !== $ordinal ? $ordinal : (string) $value);
+        }
+
+        return is_string($value) ? trim($value) : '';
+    }
+
+    /**
+     * Free blocks, kept as Sanity returns them (rendered by Section:ContentBlocks), unknown types dropped.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function body(mixed $blocks): array
+    {
+        $body = [];
+        foreach (is_array($blocks) ? $blocks : [] as $block) {
+            if (is_array($block) && \in_array($block['_type'] ?? null, self::BODY_BLOCKS, true)) {
+                $body[] = $block;
             }
         }
 
-        return [] === $paragraphs ? null : ['title' => self::string($block, 'title'), 'paragraphs' => $paragraphs];
+        return $body;
     }
 
     /** @return array{title: string, caption: ?string, rows: list<list<string>>}|null */

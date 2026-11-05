@@ -165,7 +165,7 @@ final class CaseStudyControllerTest extends WebTestCase
 
         self::assertSame(
             // The story in reading order: what the client wanted first, the generic method is gone
-            ['Notre méthode', 'La demande', 'Le quartier', 'Pourquoi Paris 16e ?', 'Le dossier locatif', 'Les visites', 'La sécurisation du logement', 'Le projet en chiffres', 'Projet livré', 'Ils nous recommandent'],
+            ['Notre méthode', 'La demande', 'Le quartier', 'Le dossier locatif', 'Les visites', 'La sécurisation du logement', 'Le projet en chiffres', 'Projet livré', 'Ils nous recommandent'],
             $crawler->filter('article section[aria-labelledby] h2, article section[id] > h2')->each(static fn ($h): string => trim($h->text())),
         );
         // Our generic method stays short
@@ -185,8 +185,15 @@ final class CaseStudyControllerTest extends WebTestCase
         self::assertSelectorTextContains('[data-testid="case-study-quote"] blockquote', 'Déménager à Paris avec des enfants');
         // Testimonial boxed like "Notre méthode": title inside the grey frame
         self::assertSelectorExists('section.bg-slate-100[aria-labelledby="case-study-testimonial"] h2#case-study-testimonial');
+        // Signature: who said it, then the route; no photo
+        self::assertSelectorNotExists('[data-testid="case-study-quote"] img');
+        self::assertSelectorTextContains('[data-testid="case-study-quote"] figcaption', 'Emma');
+        self::assertSelectorTextContains('[data-testid="case-study-quote"] figcaption', 'Londres → Paris 16e');
         // Free text and a table, the same blocks as in blog articles
-        self::assertCount(2, $crawler->filter('[data-testid="case-study-text"] p'));
+        // Free blocks from Sanity, rendered like a blog article body (here a text block)
+        $why = $crawler->filter('article h2')->reduce(static fn ($h): bool => 'Pourquoi Paris 16e ?' === trim($h->text()));
+        self::assertCount(1, $why);
+        self::assertStringContainsString('Le quartier a été choisi avec le client', $crawler->filter('article')->text());
         self::assertSelectorTextContains('[data-testid="case-study-table"] thead', 'Poste');
         self::assertSame(['Loyer', 'Dépôt de garantie', 'Délai'], $crawler->filter('[data-testid="case-study-table"] tbody th[scope="row"]')->each(static fn ($th): string => trim($th->text())));
         self::assertSelectorTextContains('[data-testid="case-study-table"] tbody', '1 mois de loyer');

@@ -101,6 +101,63 @@ final class CaseStudyPaginationTest extends WebTestCase
         );
     }
 
+    public function testACaseStudyWithOnlyTheRequiredFieldsRendersCleanly(): void
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+        $base = (new MockCaseStudyRepository())->findAll('fr')[0];
+        $minimal = new CaseStudy(...array_merge(get_object_vars($base), [
+            'agentName' => null, 'agentPhoto' => null, 'householdSize' => null, 'budget' => null,
+            'clientProfile' => '', 'housingType' => '', 'stayType' => '', 'origin' => '', 'summary' => '',
+            'locationText' => '', 'applicationText' => '', 'securingText' => '', 'quote' => '', 'quoteAuthor' => '',
+            'criteria' => [], 'applicationDocuments' => [], 'visits' => [], 'body' => [], 'process' => [],
+            'table' => null, 'offer' => null, 'homesVisited' => null, 'featured' => false,
+        ]));
+        static::getContainer()->set(CaseStudyRepositoryInterface::class, new class([$minimal]) implements CaseStudyRepositoryInterface {
+            /** @param list<CaseStudy> $items */
+            public function __construct(private readonly array $items)
+            {
+            }
+
+            public function findAll(string $locale): array
+            {
+                return $this->items;
+            }
+
+            public function findOneBySlug(string $slug, string $locale): ?CaseStudy
+            {
+                return $this->items[0]->slug === $slug ? $this->items[0] : null;
+            }
+        });
+
+        $crawler = $client->request('GET', '/fr/etudes-de-cas/'.$base->slug);
+        self::assertResponseIsSuccessful();
+        // Empty blocks are not rendered at all
+        foreach (['request', 'application', 'visits', 'securing', 'testimonial'] as $section) {
+            self::assertSelectorNotExists('section[aria-labelledby="case-study-'.$section.'"]', $section);
+        }
+        self::assertSelectorNotExists('[data-testid="case-study-summary"]');
+        self::assertSelectorNotExists('[data-testid="case-study-table"]');
+        // Always there: method (standard steps), area map, delivered card, key facts without empty rows
+        self::assertCount(3, $crawler->filter('section[aria-labelledby="case-study-process"] li'));
+        self::assertSelectorExists('[data-testid="case-study-map"]');
+        self::assertSelectorTextContains('[data-testid="case-study-delivered"]', '18');
+        $recap = preg_replace('/\s+/u', ' ', $crawler->filter('[data-testid="case-study-recap"]')->text());
+        self::assertStringContainsString('Service Relocation familiale', $recap);
+        self::assertStringContainsString('Trajet Paris 16e', $recap);
+        foreach (['Client', 'Foyer', 'Budget', 'Logement', 'Formule', 'Suivi par'] as $absent) {
+            self::assertStringNotContainsString($absent, $recap, $absent);
+        }
+        self::assertStringNotContainsString('→', $crawler->filter('article')->text());
+
+        // Its card on the listing: no adviser line, no empty facts, the district alone
+        $crawler = $client->request('GET', '/fr/etudes-de-cas');
+        $card = $crawler->filter('[data-testid="case-study-card"], [data-testid="case-study-featured"]')->first();
+        self::assertStringNotContainsString('Suivi par', $card->text());
+        self::assertCount(1, $card->filter('li'));
+        self::assertStringContainsString('Paris 16e', $card->filter('li')->text());
+    }
+
     /** The mock data set repeated with unique slugs, to get past one page. */
     private static function repositoryWith(int $count): CaseStudyRepositoryInterface
     {

@@ -32,7 +32,7 @@
                             <dt class="text-xs text-balance">{{ 'caseStudy.show.delivered.budget'|trans }}</dt>
                             <dd class="flex flex-wrap items-baseline justify-center gap-x-0.5 text-xl font-semibold sm:text-2xl">
                                 <span class="whitespace-nowrap">{{ budget|format_currency('EUR', {fraction_digit: 0}, locale=app.request.locale) }}</span>
-                                <span class="text-xs font-medium text-white/80 sm:text-sm">{{ 'caseStudy.show.delivered.perMonth'|trans }}</span>
+                                <span class="text-xs font-medium text-white sm:text-sm">{{ 'caseStudy.show.delivered.perMonth'|trans }}</span>
                             </dd>
                         </div>
                     {% endif %}

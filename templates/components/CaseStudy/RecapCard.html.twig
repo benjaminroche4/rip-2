@@ -21,13 +21,13 @@
                     {icon: 'lucide:calendar', label: 'caseStudy.show.recap.year', value: caseStudy.publishedAt|date('Y')},
                     {icon: 'lucide:user', label: 'caseStudy.show.recap.client', value: caseStudy.clientProfile},
                     {icon: 'lucide:briefcase', label: 'caseStudy.show.recap.service', value: caseStudy.relocationType, href: path(caseStudy.segment.serviceRoute)},
-                    {icon: 'lucide:users', label: 'caseStudy.show.recap.household', value: 'caseStudy.show.stats.household'|trans({'%count%': caseStudy.householdSize})},
-                    {icon: 'lucide:wallet', label: 'caseStudy.show.recap.budget', value: 'caseStudy.show.stats.budget'|trans({'%amount%': caseStudy.budget|format_number(locale=app.request.locale)})},
+                    {icon: 'lucide:users', label: 'caseStudy.show.recap.household', value: caseStudy.householdSize ? 'caseStudy.show.stats.household'|trans({'%count%': caseStudy.householdSize}) : ''},
+                    {icon: 'lucide:wallet', label: 'caseStudy.show.recap.budget', value: caseStudy.budget ? 'caseStudy.show.stats.budget'|trans({'%amount%': caseStudy.budget|format_number(locale=app.request.locale)}) : ''},
                     {icon: 'lucide:sofa', label: 'caseStudy.show.recap.housing', value: caseStudy.housingType},
-                    {icon: 'lucide:map-pin', label: 'caseStudy.show.recap.route', value: caseStudy.origin ~ ' → ' ~ caseStudy.district},
+                    {icon: 'lucide:map-pin', label: 'caseStudy.show.recap.route', value: caseStudy.origin ? caseStudy.origin ~ ' → ' ~ caseStudy.district : caseStudy.district},
                 ]|merge(caseStudy.offer ? [
                     {icon: 'lucide:badge-check', label: 'caseStudy.show.recap.offer', value: caseStudy.offer.labelKey|trans, href: path('app_pricing')},
-                ] : []) %}
+                ] : [])|filter(fact => fact.value) %}
                     <div class="flex items-start gap-x-3">
                         <dt class="flex w-[6.5rem] shrink-0 items-start gap-x-3 text-neutral-500">
                             {{ ux_icon(fact.icon, {'class': 'size-4 h-lh shrink-0 text-primary', 'aria-hidden': 'true'}) }}
@@ -47,14 +47,16 @@
                 {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}
                 {{ 'caseStudy.list.daysToSettle'|trans({'%count%': caseStudy.daysToSettle}) }}
             </p>
-            {{ divider }}
-            <div class="flex items-center gap-x-3">
-                <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="40" height="40" class="size-10 rounded-full border border-neutral-100 object-cover">
-                <div class="flex flex-col text-sm">
-                    <p class="font-semibold">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
-                    <p class="text-neutral-800/70">{{ 'caseStudy.show.recap.agentRole'|trans }}</p>
+            {% if caseStudy.agentName %}
+                {{ divider }}
+                <div class="flex items-center gap-x-3">
+                    <img src="{{ asset(caseStudy.agentPhoto) }}" alt="" loading="lazy" width="40" height="40" class="size-10 rounded-full border border-neutral-100 object-cover">
+                    <div class="flex flex-col text-sm">
+                        <p class="font-semibold">{{ 'caseStudy.list.handledBy'|trans({'%name%': caseStudy.agentName}) }}</p>
+                        <p class="text-neutral-800/70">{{ 'caseStudy.show.recap.agentRole'|trans }}</p>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -13,6 +13,13 @@ enum CaseStudyDocument: string
     case International = 'international';
     case Income = 'income';
     case Scholarship = 'scholarship';
+    case TransferLetter = 'transferLetter';
+    case ResidencePermit = 'residencePermit';
+    case LandlordReferences = 'landlordReferences';
+    case CompanyFile = 'companyFile';
+    case CorporateLease = 'corporateLease';
+    case HomeInsurance = 'homeInsurance';
+    case BankAccount = 'bankAccount';
 
     public function labelKey(): string
     {
@@ -33,6 +40,13 @@ enum CaseStudyDocument: string
             self::International => 'lucide:globe',
             self::Income => 'lucide:wallet',
             self::Scholarship => 'lucide:graduation-cap',
+            self::TransferLetter => 'lucide:file-signature',
+            self::ResidencePermit => 'lucide:id-card',
+            self::LandlordReferences => 'lucide:file-check',
+            self::CompanyFile => 'lucide:briefcase',
+            self::CorporateLease => 'lucide:scroll-text',
+            self::HomeInsurance => 'lucide:shield-check',
+            self::BankAccount => 'lucide:landmark',
         };
     }
 }

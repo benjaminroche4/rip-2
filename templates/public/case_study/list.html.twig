@@ -65,10 +65,12 @@
                     {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
                     {{ 'caseStudy.list.stats.averageDays'|trans({'%count%': stats.averageDays}) }}
                 </li>
-                <li class="flex items-center gap-x-2">
-                    {{ ux_icon('lucide:globe', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                    {{ 'caseStudy.list.stats.origins'|trans({'%count%': stats.origins}) }}
-                </li>
+                {% if stats.origins > 0 %}
+                    <li class="flex items-center gap-x-2">
+                        {{ ux_icon('lucide:globe', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
+                        {{ 'caseStudy.list.stats.origins'|trans({'%count%': stats.origins}) }}
+                    </li>
+                {% endif %}
                 <li class="flex items-center gap-x-2">
                     {{ ux_icon('lucide:users', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
                     {{ 'caseStudy.list.stats.audiences'|trans }}
@@ -86,18 +88,24 @@
                 <div class="grid grid-cols-1 rounded-2xl bg-white lg:grid-cols-5 lg:gap-4">
                     <div class="order-2 col-span-2 flex flex-col justify-between space-y-6 p-6 lg:order-1">
                         <div class="space-y-2">
-                            <div class="flex items-center gap-x-2 text-sm text-neutral-600">
-                                <img src="{{ asset(featured.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
-                                <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': featured.agentName}) }}</p>
-                            </div>
+                            {% if featured.agentName %}
+                                <div class="flex items-center gap-x-2 text-sm text-neutral-600">
+                                    <img src="{{ asset(featured.agentPhoto) }}" alt="" loading="lazy" width="24" height="24" class="size-6 shrink-0 rounded-full object-cover"/>
+                                    <p class="truncate">{{ 'caseStudy.list.handledBy'|trans({'%name%': featured.agentName}) }}</p>
+                                </div>
+                            {% endif %}
                             <h2 class="mt-4 text-xl font-semibold text-pretty lg:mt-8 lg:text-3xl">{{ featured.title }}</h2>
                             <p class="font-light text-neutral-600">{{ featured.excerpt }}</p>
                         </div>
                         <div class="mt-auto space-y-3 pt-5">
                             <p class="flex items-center gap-x-2 text-sm font-light text-neutral-600">
                                 {{ ux_icon('lucide:map-pin', {'class': 'size-4 shrink-0 text-primary', 'aria-hidden': 'true'}) }}
-                                <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': featured.origin, '%to%': featured.district}) }}</span>
-                                <span class="flex items-center gap-x-1.5" aria-hidden="true">{{ featured.origin }} {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }} {{ featured.district }}</span>
+                                {% if featured.origin %}
+                                    <span class="sr-only">{{ 'caseStudy.list.route'|trans({'%from%': featured.origin, '%to%': featured.district}) }}</span>
+                                    <span class="flex items-center gap-x-1.5" aria-hidden="true">{{ featured.origin }} {{ ux_icon('lucide:arrow-right', {'class': 'size-3.5 shrink-0'}) }} {{ featured.district }}</span>
+                                {% else %}
+                                    <span>{{ featured.district }}</span>
+                                {% endif %}
                             </p>
                             <p class="flex items-center gap-x-2 rounded-lg bg-primary-25 px-3 py-2.5 text-sm font-medium text-primary">
                                 {{ ux_icon('lucide:clock-check', {'class': 'size-4 shrink-0', 'aria-hidden': 'true'}) }}

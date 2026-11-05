@@ -116,7 +116,8 @@ final class CaseStudyController extends AbstractController
 
         return [
             'averageDays' => (int) round(array_sum(array_map(static fn (CaseStudy $c): int => $c->daysToSettle, $caseStudies)) / \count($caseStudies)),
-            'origins' => \count(array_unique(array_map(static fn (CaseStudy $c): string => mb_strtolower($c->origin), $caseStudies))),
+            // Home cities are optional: count the distinct ones that are filled in
+            'origins' => \count(array_unique(array_filter(array_map(static fn (CaseStudy $c): string => mb_strtolower(trim($c->origin)), $caseStudies)))),
         ];
     }
 

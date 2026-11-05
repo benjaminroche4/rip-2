@@ -194,18 +194,18 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
             'fr' => [
                 'summary' => "En 2026, une famille de quatre personnes mutée de Londres s'est installée dans le 16e arrondissement. Recherche près des écoles internationales, visites à distance et dossier préparé avec l'employeur : tout a été géré pour une arrivée sereine avant la rentrée.",
                 'quote' => "Déménager à Paris avec des enfants nous inquiétait, mais nous avons été accompagnés à chaque étape. L'équipe a compris nos besoins et nous nous sommes sentis chez nous dès le premier jour.",
-                'quoteAuthor' => 'Emma, venue de Londres',
+                'quoteAuthor' => 'Emma',
             ],
             'en' => [
                 'summary' => 'In 2026, a family of four transferred from London settled in the 16th arrondissement. A search near the international schools, remote viewings and an application prepared with the employer: everything was handled for a calm arrival before the school year.',
                 'quote' => 'Moving to Paris with children felt daunting at first, but we were supported at every step. The team understood our needs and made us feel at home from day one.',
-                'quoteAuthor' => 'Emma, moving from London',
+                'quoteAuthor' => 'Emma',
             ],
         ],
         [
             'offer' => 'confie', 'homes' => 9, 'featured' => false,
             'household' => 6, 'budget' => 1900, 'criteria' => ['office', 'furnished', 'metro', 'flexible'],
-            'documents' => [CaseStudyDocument::Employer, CaseStudyDocument::International, CaseStudyDocument::Income],
+            'documents' => [CaseStudyDocument::Employer, CaseStudyDocument::International, CaseStudyDocument::Income, CaseStudyDocument::CorporateLease, CaseStudyDocument::CompanyFile, CaseStudyDocument::ResidencePermit, CaseStudyDocument::BankAccount],
             'fr' => [
                 'summary' => "En 2026, un cabinet de conseil nous a confié le logement de six consultants pour une mission de 12 mois. Recherche groupée dans le 9e, baux meublés calés sur la mission et un seul interlocuteur pour les RH.",
                 'quote' => 'Nous avons envoyé un brief, et six collaborateurs étaient logés trois semaines plus tard.',
@@ -224,12 +224,12 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
             'fr' => [
                 'summary' => "En 2026, un jeune actif recruté par une start-up parisienne a signé son bail depuis New York. Visites en vidéo, dossier traduit en 48 heures et garantie locative : il est arrivé directement chez lui, dans le Marais.",
                 'quote' => "J'ai signé depuis New York et je suis arrivé directement chez moi.",
-                'quoteAuthor' => 'Daniel, venu de New York',
+                'quoteAuthor' => 'Daniel',
             ],
             'en' => [
                 'summary' => 'In 2026, a young professional hired by a Paris start-up signed a lease from New York. Video viewings, an application translated in 48 hours and a rent guarantee: straight from the airport to a new home in the Marais.',
                 'quote' => 'I signed from New York and went straight to my new home.',
-                'quoteAuthor' => 'Daniel, moving from New York',
+                'quoteAuthor' => 'Daniel',
             ],
         ],
         [
@@ -239,12 +239,12 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
             'fr' => [
                 'summary' => "En 2026, une étudiante venue de Berlin, sans garant ni revenus en France, a obtenu un studio meublé dans le 11e. Garantie locative, bourse mise en valeur et accompagnement en allemand ont fait la différence.",
                 'quote' => 'Sans garant en France, je pensais que ce serait impossible. Mon dossier a été accepté du premier coup.',
-                'quoteAuthor' => 'Lena, venue de Berlin',
+                'quoteAuthor' => 'Lena',
             ],
             'en' => [
                 'summary' => 'In 2026, a student from Berlin, with no guarantor and no income in France, secured a furnished studio in the 11th. A rent guarantee, a well-presented scholarship and support in German made the difference.',
                 'quote' => 'Without a guarantor in France, I thought it would be impossible. My application was accepted first time.',
-                'quoteAuthor' => 'Lena, moving from Berlin',
+                'quoteAuthor' => 'Lena',
             ],
         ],
         [
@@ -269,18 +269,18 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
             'fr' => [
                 'summary' => "En 2026, un couple de chercheurs venu de Madrid s'est installé à deux pas de son laboratoire, dans le 5e. Recherche ciblée sur le Quartier latin, budget tenu et accompagnement entièrement en espagnol.",
                 'quote' => "Tout s'est fait en espagnol, sans aucune mauvaise surprise.",
-                'quoteAuthor' => 'Lucía, venue de Madrid',
+                'quoteAuthor' => 'Lucía',
             ],
             'en' => [
                 'summary' => 'In 2026, a researcher couple from Madrid settled a short walk from their lab, in the 5th. A search focused on the Latin Quarter, a budget kept in check and support entirely in Spanish.',
                 'quote' => 'Everything was done in Spanish, with no bad surprises.',
-                'quoteAuthor' => 'Lucía, moving from Madrid',
+                'quoteAuthor' => 'Lucía',
             ],
         ],
         [
             'offer' => 'confie', 'homes' => 4, 'featured' => false,
             'household' => 4, 'budget' => 6000, 'criteria' => ['schools', 'space', 'quiet', 'metro'],
-            'documents' => [CaseStudyDocument::Employer, CaseStudyDocument::International, CaseStudyDocument::Income],
+            'documents' => [CaseStudyDocument::Employer, CaseStudyDocument::International, CaseStudyDocument::Income, CaseStudyDocument::CorporateLease, CaseStudyDocument::CompanyFile, CaseStudyDocument::ResidencePermit, CaseStudyDocument::BankAccount],
             'fr' => [
                 'summary' => "En 2026, un groupe industriel a muté son directeur financier de Singapour à Paris. Recherche dans le 7e, inscription des enfants à l'école et démarches administratives, coordonnées avec le service mobilité du groupe.",
                 'quote' => "Un seul interlocuteur pour le logement, l'école et l'administratif : exactement ce qu'il nous fallait.",
@@ -446,17 +446,25 @@ final class MockCaseStudyRepository implements CaseStudyRepositoryInterface
                         $shared['visits'],
                     ),
                     securingText: $shared['securing'],
-                    textBlock: [
+                    body: [[
+                        '_type' => 'wysiwygBlock',
+                        '_key' => 'why',
                         'title' => str_replace('%district%', $text['district'], $shared['text']['title']),
-                        'paragraphs' => array_map(
-                            static fn (string $paragraph): string => str_replace('%district%', $text['district'], $paragraph),
+                        'content' => array_map(
+                            static fn (string $paragraph, int $i): array => [
+                                '_type' => 'block',
+                                '_key' => 'p'.$i,
+                                'style' => 'normal',
+                                'markDefs' => [],
+                                'children' => [['_type' => 'span', '_key' => 's'.$i, 'text' => str_replace('%district%', $text['district'], $paragraph), 'marks' => []]],
+                            ],
                             $shared['text']['paragraphs'],
+                            array_keys($shared['text']['paragraphs']),
                         ),
-                    ],
+                    ]],
                     table: self::figures($shared['table'], $story['budget'], $item['days'], $locale, str_contains(strtolower($item['en']['housingType']), 'unfurnished')),
                     quote: $story[$locale]['quote'],
                     quoteAuthor: $story[$locale]['quoteAuthor'],
-                    quotePhoto: 'medias/case-studies/testimonial-1.webp',
                     featured: $story['featured'],
                     offer: CaseStudyOffer::from($story['offer']),
                     homesVisited: $story['homes'],
