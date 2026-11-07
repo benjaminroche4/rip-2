@@ -58,7 +58,7 @@ final class LegalController extends AbstractController
             'sitemap' => [
                 'priority' => 0.1,
                 'changefreq' => UrlConcrete::CHANGEFREQ_MONTHLY,
-                'lastmod' => new \DateTime('2026-07-09'),
+                'lastmod' => new \DateTime('2026-11-07'),
             ],
         ]
     )]
